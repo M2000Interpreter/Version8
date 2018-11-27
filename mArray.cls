@@ -29,7 +29,11 @@ Public myarrbase As Long
 Public common As Boolean
 Public IHaveClass As Boolean
 Public IHaveGui As Boolean
-Public GroupRef As Object   ' get a floating Group, maybe with groups inside....as floating group
+' get a floating Group, maybe with groups inside....as floating group
+' used also for other mHandler with t1 = 1 (Inventories)
+Public GroupRef As Object
+' only for check
+'Private mGroupRef As Object
 Public CodeName As String
 Private oldmaxitems As Long
 Public Arr As Boolean
@@ -827,27 +831,32 @@ Else
 item = actualdata(curitem)
 End If
 Exit Property
-Else
-''Stop
 End If
 Else
 If curitem = -2 Then
 Set item = GroupRef
 ElseIf curitem < 0 Then
-'If TypeOf GroupRef Is Group Then Set item = GroupRef: Exit Property
-If TypeOf GroupRef Is mHandler Then
+' used for test only
+'If TypeOf GroupRef Is mHandler Then
+'If GroupRef.t1 = 3 Then
+'If MyIsObject(GroupRef.objref.Value) Then
+'Set item = GroupRef.objref.Value
+'Else
+'item = GroupRef.objref.Value
+'End If
+'Else
 If GroupRef.objref.Done Then
-If GroupRef.objref.IsObj Then
-Set item = GroupRef.objref.ValueObj
+    If GroupRef.objref.IsObj Then
+        Set item = GroupRef.objref.ValueObj
+    Else
+        item = GroupRef.objref.Value
+    End If
 Else
-item = GroupRef.objref.Value
-End If
-Else
-Set item = GroupRef
+    Set item = GroupRef
 End If
 
 End If
-End If
+'End If
 End If
 there1:
 
@@ -1135,3 +1144,16 @@ End Function
 Function GetCopy() As Variant()
 GetCopy = actualdata
 End Function
+'' Only for test. Not mHandler with t1=3 can be in Groupref
+'Public Property Set GroupRef(RHS)
+'If Not RHS Is Nothing Then
+'If TypeOf RHS Is mHandler Then
+'If RHS.t1 = 3 Then Stop
+'End If
+'End If
+'Set mGroupRef = RHS
+'End Property
+'Public Property Get GroupRef() As Object
+'Set GroupRef = mGroupRef
+'End Property
+

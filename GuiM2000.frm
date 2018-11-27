@@ -584,9 +584,9 @@ End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
 If mModalid = Modalid And Modalid <> 0 Then
-    If Visible Then Hide: Quit = True
+    If Visible Then Hide:  Quit = byPassCallback
     If mModalid <> 0 Then Modalid = 0
-    Cancel = True
+    Cancel = Not byPassCallback
     novisible = False
 ElseIf mModalid <> 0 And Visible Then
     mModalid = mModalIdPrev

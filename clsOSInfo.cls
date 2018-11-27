@@ -1552,6 +1552,8 @@ Public Property Get CodepageOEM_File() As String
 End Property
 
 Public Property Get CodepageANSI() As String
+    CodepageANSI = ""
+    Exit Property
     CodepageANSI = CodepageANSI_
 End Property
 

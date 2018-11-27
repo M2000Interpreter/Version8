@@ -1,9 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.5  Revision 14 active-X
+Version 9.5  Revision 15 active-X
 
-Add encoder/decoder for URI, and  URL parser see Help String$(
-Fix also expression evaluator (break from Rev. 13)
+A lot of work, for a great language;
 
 
 From version 9.0 revision 50:

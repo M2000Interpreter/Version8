@@ -34,9 +34,21 @@ Else
 mstack.Add a, , 1
 End If
 End Sub
+Public Sub MakeTopItem(where As Long)
+'we pick an item and to the top
+Dim a As Variant
+On Error Resume Next
+If where > 1 Then
+a = mstack.item(where)
+mstack.Remove where
+If mstack.count = 0 Then
+mstack.Add a
+Else
+mstack.Add a, , 1
+End If
+End If
+End Sub
 Public Sub PushStr(ByRef a As String)
-
-
 If mstack.count = 0 Then
 mstack.Add CVar(a)
 Else
@@ -102,4 +114,13 @@ End If
 Next i
 mstack.Add aa, , , mstack.count
 End If
+End Sub
+Public Sub drop(ByVal items As Long)
+Dim num As Long
+On Error Resume Next
+If mstack.count < items Then: Set mstack = New Collection: Exit Sub
+For num = 1 To items
+    mstack.Remove 1
+Next num
+
 End Sub

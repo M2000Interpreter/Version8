@@ -196,7 +196,7 @@ End Sub
 Public Sub RemoveWithNoFind()
 If AllowSameKey Then Exit Sub
 Dim k As Long, k1 As Long, vvv As Variant, top1 As Long
-If toplim < 0 Then Exit Sub   ' previus stop
+If toplim < 0 Then Exit Sub
 top1 = toplim
 If Done Then
        If ParentIndex > -1 Then
@@ -270,7 +270,7 @@ End Sub
 Public Sub Remove(RHS)
 If AllowSameKey Then Exit Sub
 Dim k As Long, k1 As Long, vvv As Variant, top1 As Long, ndx As Long, Parndx As Long
-If toplim < 0 Then Exit Sub  ' previus stop
+If toplim < 0 Then Exit Sub
 top1 = toplim
 If Find2(RHS, Parndx, ndx) Then
         Done = True

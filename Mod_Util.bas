@@ -307,6 +307,128 @@ Private Declare Function GetAsyncKeyState Lib "user32" _
 Public TextEditLineHeight As Long
 Public LablelEditLineHeight As Long
 Private Const Utf8CodePage As Long = 65001
+Function CheckItemType(bstackstr As basetask, v As Variant, a$, r$, Optional ByVal wasarr As Boolean = False) As Boolean
+Dim useHandler As mHandler, fastcol As FastCollection, pppp As mArray, w1 As Long, p As Variant, s$
+CheckItemType = True
+againtype:
+        r$ = Typename(v)
+        If r$ = "mHandler" Then
+            Set useHandler = v
+            Select Case useHandler.t1
+            Case 1
+                Set fastcol = useHandler.objref
+                If FastSymbol(a$, ",") Then
+                    If IsExp(bstackstr, a$, p) Then
+                        If Not fastcol.Find(p) Then GoTo keynotexist
+                            If fastcol.IsObj Then
+                                Set v = fastcol.ValueObj
+                                GoTo againtype
+                            Else
+                                wasarr = True
+                                GoTo checkit
+                            End If
+                        ElseIf IsStrExp(bstackstr, a$, s$) Then
+                            If fastcol.IsObj Then
+                                Set v = fastcol.ValueObj
+                                GoTo againtype
+                            Else
+                            If fastcol.StructLen > 0 Then GoTo checkit
+                                r$ = Typename(fastcol.Value)
+                            End If
+                        Else
+                            MissParam a$
+                            CheckItemType = False
+                            Exit Function
+keynotexist:
+                            indexout a$
+                            CheckItemType = False
+                            Exit Function
+                    End If
+                Else
+                    ' new
+checkit:
+                    If fastcol.StructLen > 0 Then
+                                    Select Case fastcol.sValue
+                                    Case Is < 0
+                                        r$ = "String"
+                                    Case 1
+                                        r$ = "Byte"
+                                    Case 2
+                                        r$ = "Integer"
+                                    Case 4
+                                        r$ = "Long"
+                                    Case 8
+                                        r$ = "LongLong"  ' can be double or two longs or ...etc
+                                    Case Else
+                                        r$ = "Structure"
+                                    End Select
+                    ElseIf wasarr Then
+                    r$ = Typename(fastcol.Value)
+                    
+                    ElseIf FastSymbol(a$, "!") Then
+                        If fastcol.IsQueue Then
+                            r$ = "Queue"
+                        Else
+                            r$ = "List"
+                        End If
+                    Else
+                        r$ = "Inventory"
+                    End If
+                End If
+            Case 2
+                r$ = "Buffer"
+                
+                
+            Case 3
+                w1 = useHandler.indirect
+                If w1 > -1 And w1 <= var2used Then
+                                r$ = Typename(var(w1))
+                                If r$ = "mHandler" Then Set v = var(w1): GoTo againtype
+                    Else
+                            r$ = Typename(useHandler.objref)
+                                       If FastSymbol(a$, ",") Then
+                                        If r$ = "mArray" Then
+                                            Set pppp = useHandler.objref
+                                                If IsExp(bstackstr, a$, p) Then
+                                                   pppp.index = p
+                                                    If MyIsObject(pppp.Value) Then
+                                                         Set v = pppp.Value
+                                                         wasarr = False
+                                                         GoTo againtype
+                                                    Else
+                                                        r$ = Typename(pppp.Value)
+                                                    End If
+                                                Else
+                                                MissParam a$
+                                                CheckItemType = False
+                                                Exit Function
+                                            End If
+                                        Else
+                                                MyEr "Use STACKTYPE$() ", " ×ñçóéìïðïßçóå ôçí ÓÙÑÏÕÔÕÐÏÓ$()"
+                                                CheckItemType = False
+                                                Exit Function
+                                        End If
+                                        
+                                        End If
+                                        
+                                        End If
+                                    
+            Case 4
+                    r$ = useHandler.objref.EnumName
+            Case Else
+                r$ = Typename(v.objref)
+            End Select
+        ElseIf Typename(v) = "PropReference" Then
+            r$ = Typename$(v.Value)
+        End If
+        Set bstackstr.lastobj = Nothing
+        Set bstackstr.lastpointer = Nothing
+        While FastSymbol(a$, "!")
+        Wend
+        CheckItemType = FastSymbol(a$, ")")
+
+End Function
+
 Public Function Utf16toUtf8(s As String) As Byte()
     ' code from vbforum
     ' UTF-8 returned to VB6 as a byte array (zero based) because it's pretty useless to VB6 as anything else.
@@ -5862,6 +5984,7 @@ Exit Function
 there:
 If Not TaskMaster Is Nothing Then TaskMaster.RestEnd1
 End Function
+
 Public Function ContainsUTF16(ByRef Source() As Byte, Optional maxsearch As Long = -1) As Long
   Dim i As Long, lUBound As Long, lUBound2 As Long, lUBound3 As Long
   Dim CurByte As Byte, CurByte1 As Byte
@@ -8276,7 +8399,12 @@ resp = MyLet(ObjFromPtr(basestackLP), rest$, Lang)
 End Sub
 Function GetArrayReference(bstack As basetask, a$, v$, PP, Result As mArray, index As Long) As Boolean
 Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
-If Not Typename$(PP) = "mArray" Then Exit Function
+If PP Is Nothing Then Exit Function
+If Not TypeOf PP Is mArray Then
+If TypeOf PP Is mHandler Then If PP.t1 = 3 Then If Not PP.objref Is Nothing Then If TypeOf PP.objref Is mArray Then Set PP = PP.objref: GoTo cont
+Exit Function
+End If
+cont:
 Set pppp = PP
 
 If pppp.Arr Then
@@ -8895,7 +9023,7 @@ End If
 End Function
 
 Function GetRes(bstack As basetask, b$, Lang As Long, data$) As Boolean
-Dim w$, x1 As Long, label1$, usehandler As mHandler, par As Boolean, pppp As mArray, p As Variant
+Dim w$, x1 As Long, label1$, useHandler As mHandler, par As Boolean, pppp As mArray, p As Variant
 If IsLabelSymbolNew(b$, "ÙÓ", "AS", Lang) Then
             w$ = Funcweak(bstack, b$, x1, label1$)
             If LastErNum1 = -1 And x1 < 5 Then Exit Function
@@ -8910,20 +9038,20 @@ If IsLabelSymbolNew(b$, "ÙÓ", "AS", Lang) Then
             ElseIf x1 = 1 Then
 contvar1:
             x1 = globalvar(label1$, 0#)
-            Set usehandler = New mHandler
-                usehandler.t1 = 2
+            Set useHandler = New mHandler
+                useHandler.t1 = 2
         If FastSymbol(b$, ",") Then
         If IsExp(bstack, b$, p, , True) Then
-         Set usehandler.objref = Decode64toMemBloc(data$, par, CBool(p))
+         Set useHandler.objref = Decode64toMemBloc(data$, par, CBool(p))
         Else
         GetRes = True
         MissParam data$: Exit Function
         End If
         Else
-                Set usehandler.objref = Decode64toMemBloc(data$, par)
+                Set useHandler.objref = Decode64toMemBloc(data$, par)
                 End If
                 If par Then
-                    Set var(x1) = usehandler
+                    Set var(x1) = useHandler
                     GetRes = True
             
                 Else
@@ -8939,21 +9067,21 @@ contvar1:
             ElseIf x1 = 5 Then
                 If GetVar(bstack, label1$, x1) Then
                     If GetArrayReference(bstack, b$, label1$, var(x1), pppp, x1) Then
-                        Set usehandler = New mHandler
-                        usehandler.t1 = 2
+                        Set useHandler = New mHandler
+                        useHandler.t1 = 2
                         If Not par Then GoTo err1
                         If FastSymbol(b$, ",") Then
         If IsExp(bstack, b$, p, , True) Then
-         Set usehandler.objref = Decode64toMemBloc(data$, par, CBool(p))
+         Set useHandler.objref = Decode64toMemBloc(data$, par, CBool(p))
         Else
         GetRes = True
         MissParam data$: Exit Function
         End If
         Else
-                        Set usehandler.objref = Decode64toMemBloc(data$, par)
+                        Set useHandler.objref = Decode64toMemBloc(data$, par)
                         End If
                     
-                        Set pppp.item(x1) = usehandler
+                        Set pppp.item(x1) = useHandler
                         GetRes = True
                     End If
                     Exit Function
@@ -8982,12 +9110,12 @@ contstr1:
 
             If x1 = 1 Then
             If GetVar(bstack, label1$, x1) Then
-            Set usehandler = New mHandler
-                usehandler.t1 = 2
+            Set useHandler = New mHandler
+                useHandler.t1 = 2
         
-                Set usehandler.objref = Decode64toMemBloc(data$, par)
+                Set useHandler.objref = Decode64toMemBloc(data$, par)
                 If par Then
-                    Set var(x1) = usehandler
+                    Set var(x1) = useHandler
                     GetRes = True
             
                 Else
@@ -9010,11 +9138,11 @@ err1:
                 If GetVar(bstack, label1$, x1) Then
                       DropLeft "(", w$
                     If GetArrayReference(bstack, w$, label1$, var(x1), pppp, x1) Then
-                        Set usehandler = New mHandler
-                        usehandler.t1 = 2
-                        Set usehandler.objref = Decode64toMemBloc(data$, par)
+                        Set useHandler = New mHandler
+                        useHandler.t1 = 2
+                        Set useHandler.objref = Decode64toMemBloc(data$, par)
                         If Not par Then GoTo err1
-                        Set pppp.item(x1) = usehandler
+                        Set pppp.item(x1) = useHandler
                         GetRes = True
                     End If
                     Exit Function
@@ -10146,18 +10274,18 @@ nounder32 = AscW(c$) > 31 Or AscW(c$) < 0
 End Function
 
 Function GetImageX(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
-Dim w1 As Long, s$, w2 As Long, pppp As mArray, usehandler As mHandler
+Dim w1 As Long, s$, w2 As Long, pppp As mArray, useHandler As mHandler
 GetImageX = False
 If IsExp(bstack, a$, r) Then
       GetImageX = FastSymbol(a$, ")", True)
         If Not bstack.lastobj Is Nothing Then
            If TypeOf bstack.lastobj Is mHandler Then
-              Set usehandler = bstack.lastobj
+              Set useHandler = bstack.lastobj
               Set bstack.lastobj = Nothing
-              If usehandler.t1 = 2 Then
-                  If usehandler.objref.ReadImageSizeX(r) Then
+              If useHandler.t1 = 2 Then
+                  If useHandler.objref.ReadImageSizeX(r) Then
                   r = SG * bstack.Owner.ScaleX(r, 3, 1)
-                          Set usehandler = Nothing
+                          Set useHandler = Nothing
                       Exit Function
                   End If
               End If
@@ -10209,18 +10337,18 @@ End If
  
 End Function
 Function GetImageY(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
-Dim w1 As Long, s$, w2 As Long, pppp As mArray, usehandler As mHandler
+Dim w1 As Long, s$, w2 As Long, pppp As mArray, useHandler As mHandler
 GetImageY = False
 If IsExp(bstack, a$, r) Then
       GetImageY = FastSymbol(a$, ")", True)
         If Not bstack.lastobj Is Nothing Then
            If TypeOf bstack.lastobj Is mHandler Then
-              Set usehandler = bstack.lastobj
+              Set useHandler = bstack.lastobj
               Set bstack.lastobj = Nothing
-              If usehandler.t1 = 2 Then
-                  If usehandler.objref.ReadImageSizeY(r) Then
+              If useHandler.t1 = 2 Then
+                  If useHandler.objref.ReadImageSizeY(r) Then
                   r = SG * bstack.Owner.ScaleY(r, 3, 1)
-                          Set usehandler = Nothing
+                          Set useHandler = Nothing
                       Exit Function
                   End If
               End If
@@ -10272,18 +10400,18 @@ End If
  
 End Function
 Function GetImageXpixels(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
-Dim w1 As Long, s$, w2 As Long, pppp As mArray, usehandler As mHandler
+Dim w1 As Long, s$, w2 As Long, pppp As mArray, useHandler As mHandler
 GetImageXpixels = False
 If IsExp(bstack, a$, r) Then
       GetImageXpixels = FastSymbol(a$, ")", True)
         If Not bstack.lastobj Is Nothing Then
            If TypeOf bstack.lastobj Is mHandler Then
-              Set usehandler = bstack.lastobj
+              Set useHandler = bstack.lastobj
               Set bstack.lastobj = Nothing
-              If usehandler.t1 = 2 Then
-                  If usehandler.objref.ReadImageSizeX(r) Then
+              If useHandler.t1 = 2 Then
+                  If useHandler.objref.ReadImageSizeX(r) Then
                   r = SG * r
-                          Set usehandler = Nothing
+                          Set useHandler = Nothing
                       Exit Function
                   End If
               End If
@@ -10335,18 +10463,18 @@ End If
  
 End Function
 Function GetImageYpixels(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
-Dim w1 As Long, s$, w2 As Long, pppp As mArray, usehandler As mHandler
+Dim w1 As Long, s$, w2 As Long, pppp As mArray, useHandler As mHandler
 GetImageYpixels = False
 If IsExp(bstack, a$, r) Then
       GetImageYpixels = FastSymbol(a$, ")", True)
         If Not bstack.lastobj Is Nothing Then
            If TypeOf bstack.lastobj Is mHandler Then
-              Set usehandler = bstack.lastobj
+              Set useHandler = bstack.lastobj
               Set bstack.lastobj = Nothing
-              If usehandler.t1 = 2 Then
-                  If usehandler.objref.ReadImageSizeY(r) Then
+              If useHandler.t1 = 2 Then
+                  If useHandler.objref.ReadImageSizeY(r) Then
                   r = SG * r
-                          Set usehandler = Nothing
+                          Set useHandler = Nothing
                       Exit Function
                   End If
               End If
@@ -12187,7 +12315,7 @@ MyDoEvents1 Scr
 Set Scr = Nothing
 End Function
 Function Matrix(bstack As basetask, a$, Arr As Variant, res As Variant) As Boolean
-Dim Pad$, cut As Long, pppp As mArray, pppp1 As mArray, st1 As mStiva, anything As Object, w3 As Long, usehandler As mHandler, r As Variant, p As Variant
+Dim Pad$, cut As Long, pppp As mArray, pppp1 As mArray, st1 As mStiva, anything As Object, w3 As Long, useHandler As mHandler, r As Variant, p As Variant
 Dim cur As Long, w2 As Long, w4 As Long, retresonly As Boolean
 Dim multi As Boolean
 Set anything = Arr
@@ -12197,9 +12325,9 @@ cut = InStr(Pad$, "(")
 
 If cut <= 1 Then Exit Function
 Mid$(a$, 1, cut) = space$(cut)
-Set usehandler = anything
-If TypeOf usehandler.objref Is mArray Then
-Set pppp = usehandler.objref
+Set useHandler = anything
+If TypeOf useHandler.objref Is mArray Then
+Set pppp = useHandler.objref
 Do
 multi = False
 Select Case Left$(Pad$, cut - 1)
@@ -12303,10 +12431,10 @@ Set bstack.lastobj = pppp.item(w2)
 res = 0
 If Not bstack.lastobj Is Nothing Then
 If TypeOf bstack.lastobj Is mHandler Then
-Set usehandler = bstack.lastobj
-If usehandler.t1 = 3 Then
-If TypeOf usehandler.objref Is mArray Then
-Set pppp = usehandler.objref
+Set useHandler = bstack.lastobj
+If useHandler.t1 = 3 Then
+If TypeOf useHandler.objref Is mArray Then
+Set pppp = useHandler.objref
 multi = True
 End If
 End If
@@ -12351,10 +12479,10 @@ Set pppp = pppp1
 res = 0
 multi = True
 Matrix = True
-Set usehandler = New mHandler
-usehandler.t1 = 3
-Set usehandler.objref = pppp
-Set bstack.lastobj = usehandler
+Set useHandler = New mHandler
+useHandler.t1 = 3
+Set useHandler.objref = pppp
+Set bstack.lastobj = useHandler
 
 Case "MAP", "ÁÍÔ"
 againmap:
@@ -12392,10 +12520,10 @@ If FastSymbol(a$, ",") Then
 End If
 Matrix = True
 If Not retresonly Then
-Set usehandler = New mHandler
-usehandler.t1 = 3
-Set usehandler.objref = pppp
-Set bstack.lastobj = usehandler
+Set useHandler = New mHandler
+useHandler.t1 = 3
+Set useHandler.objref = pppp
+Set bstack.lastobj = useHandler
 End If
 multi = True
 
@@ -12420,10 +12548,10 @@ If FastSymbol(a$, ",") Then
         If IsExp(bstack, a$, p) Then
             If Not bstack.lastobj Is Nothing Then
             If TypeOf bstack.lastobj Is mHandler Then
-            Set usehandler = bstack.lastobj
-            If usehandler.t1 = 3 Then
-            If TypeOf usehandler.objref Is mArray Then
-                Set pppp = usehandler.objref
+            Set useHandler = bstack.lastobj
+            If useHandler.t1 = 3 Then
+            If TypeOf useHandler.objref Is mArray Then
+                Set pppp = useHandler.objref
                 GoTo again
            ' End If
             End If
@@ -12446,10 +12574,10 @@ If FastSymbol(a$, ",") Then
 End If
 Matrix = True
 If Not retresonly Then
-Set usehandler = New mHandler
-usehandler.t1 = 3
-Set usehandler.objref = pppp
-Set bstack.lastobj = usehandler
+Set useHandler = New mHandler
+useHandler.t1 = 3
+Set useHandler.objref = pppp
+Set bstack.lastobj = useHandler
 End If
 multi = True
 Case "POS", "ÈÅÓÇ"
@@ -12467,9 +12595,9 @@ dothis:
             Set anything = bstack.lastobj
             Set bstack.lastobj = Nothing
             If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
-            Set usehandler = anything
-            If Not TypeOf usehandler.objref Is mArray Then Exit Function
-            Set pppp1 = usehandler.objref
+            Set useHandler = anything
+            If Not TypeOf useHandler.objref Is mArray Then Exit Function
+            Set pppp1 = useHandler.objref
 
             sn() = pppp1.GetCopy()
             If pppp1.count > 0 Then
@@ -13228,21 +13356,21 @@ Function NewVarItem() As VarItem
     Trush.Remove 1
 End Function
 Function ExpMatrix(bstack As basetask, a$, r) As Boolean
-Dim usehandler As mHandler
+Dim useHandler As mHandler
  If Not bstack.lastobj Is Nothing Then
                                 If Typename(bstack.lastobj) = "mHandler" Then
-                                    Set usehandler = bstack.lastobj
+                                    Set useHandler = bstack.lastobj
                                     Set bstack.lastobj = Nothing
-                                    ExpMatrix = Matrix(bstack, a$, usehandler, r)
+                                    ExpMatrix = Matrix(bstack, a$, useHandler, r)
                                     If MyIsObject(r) Then r = CDbl(0)
                                    ' If SG < 0 Then r = -r
                                     Exit Function
                                 ElseIf Typename(bstack.lastobj) = "mArray" Then
-                                Set usehandler = New mHandler
-                                usehandler.t1 = 3
-                                Set usehandler.objref = bstack.lastobj
+                                Set useHandler = New mHandler
+                                useHandler.t1 = 3
+                                Set useHandler.objref = bstack.lastobj
                                 Set bstack.lastobj = Nothing
-                                    ExpMatrix = Matrix(bstack, a$, usehandler, r)
+                                    ExpMatrix = Matrix(bstack, a$, useHandler, r)
                                     If MyIsObject(r) Then r = CDbl(0)
                                    ' If SG < 0 Then r = -r
                                     Exit Function
@@ -13704,7 +13832,7 @@ Set bstack.lastobj = Nothing
 End Function
 
 Function IsEnumAs(bstack As basetask, b$, p) As Boolean
-Dim aaa As mHandler, usehandler As mHandler, ss$, i As Long, that
+Dim aaa As mHandler, useHandler As mHandler, ss$, i As Long, that
 If MaybeIsSymbol(b$, ".") Then
             If IsNumber(bstack, b$, that) Then
                 If bstack.lastobj Is Nothing Then
@@ -13726,13 +13854,13 @@ If MaybeIsSymbol(b$, ".") Then
                     Set aaa = var(i)
 conthere1001:
                     If aaa.t1 = 4 And aaa.IamEnum = False Then
-                        Set usehandler = New mHandler
-                        usehandler.t1 = 4
-                        Set usehandler.objref = aaa.objref
-                        usehandler.index_start = 0
-                        usehandler.index_cursor = aaa.objref.ZeroValue
-                        usehandler.sign = 1
-                        Set p = usehandler
+                        Set useHandler = New mHandler
+                        useHandler.t1 = 4
+                        Set useHandler.objref = aaa.objref
+                        useHandler.index_start = 0
+                        useHandler.index_cursor = aaa.objref.ZeroValue
+                        useHandler.sign = 1
+                        Set p = useHandler
                         
                         If FastSymbol(b$, "=") Then
                             If MaybeIsSymbol(b$, ".") Then
@@ -13752,10 +13880,10 @@ conthere1001:
                                         Set aaa = var(i)
 conthere1002:
                                         If aaa.t1 = 4 Then
-                                            If aaa.objref.EnumName = usehandler.objref.EnumName Then
-                                                usehandler.index_start = aaa.index_start
-                                                usehandler.index_cursor = aaa.index_cursor
-                                                usehandler.sign = 1
+                                            If aaa.objref.EnumName = useHandler.objref.EnumName Then
+                                                useHandler.index_start = aaa.index_start
+                                                useHandler.index_cursor = aaa.index_cursor
+                                                useHandler.sign = 1
                                             Else
                                                 GoTo aa2
                                             End If
@@ -13786,16 +13914,22 @@ aa2:
 End Function
 Function NewInventory(bstack As basetask, rest$, r, Queue As Boolean) As Boolean
             Dim serr As Boolean
-            If Not FastSymbol(rest$, ":=", True, 2) Then Exit Function
+            
                     MakeitObjectInventory r, Queue
-                       If Queue Then r.objref.AllowAnyKey
+                    If Queue Then r.objref.AllowAnyKey
+                    Set bstack.lastobj = r
+                    If FastSymbol(rest$, ":=", , 2) Then
+                    If AddInventory(bstack, rest$, serr) Then
                             Set bstack.lastobj = r
-                        If AddInventory(bstack, rest$, serr) Then
+                        r = 0
+                        NewInventory = True
+                    End If
+                    Else
                         Set bstack.lastobj = r
                         r = 0
                         NewInventory = True
-                        End If
-     
+                    End If
+                    
 End Function
 Function IsCdate(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
 Dim PP As Variant, par As Boolean, r2 As Variant, r3 As Variant, r4 As Variant
@@ -13856,12 +13990,12 @@ Dim s$
     
     
     Else
-     Dim usehandler As mHandler
-     Set usehandler = New mHandler
-     usehandler.t1 = 1
-     usehandler.ReadOnly = True
-     Set usehandler.objref = zones
-        Set bstack.lastobj = usehandler
+     Dim useHandler As mHandler
+     Set useHandler = New mHandler
+     useHandler.t1 = 1
+     useHandler.ReadOnly = True
+     Set useHandler.objref = zones
+        Set bstack.lastobj = useHandler
      r = r - r
     End If
 IsTimeVal = FastSymbol(a$, ")", True)
@@ -13916,4 +14050,129 @@ Function IsSymbolNoSpace(a$, c$, Optional l As Long = 1) As Boolean
         
         IsSymbolNoSpace = True
     End If
+End Function
+Function FindItem(bstackstr As basetask, v As Variant, a$, r$, w2 As Long, Optional ByVal wasarr As Boolean = False) As Boolean
+Dim useHandler As mHandler, fastcol As FastCollection, pppp As mArray, w1 As Long, p As Variant, s$
+'Dim prev As Variant
+'Set prev = v
+FindItem = True
+againtype:
+        r$ = Typename(v)
+        If r$ = "mHandler" Then
+            Set useHandler = v
+            Select Case useHandler.t1
+            Case 1
+                Set fastcol = useHandler.objref
+                If FastSymbol(a$, ")(", , 2) Or True Then
+                    If IsExp(bstackstr, a$, p) Then
+                        If Not fastcol.Find(p) Then GoTo keynotexist
+                        
+                            If fastcol.IsObj Then
+                                w2 = fastcol.index
+                               ' Set prev = v
+                            
+                                Set v = fastcol.ValueObj
+                                GoTo againtype
+                            Else
+                                wasarr = True
+                                GoTo checkit
+                            End If
+                        ElseIf IsStrExp(bstackstr, a$, s$) Then
+                            If fastcol.IsObj Then
+                                w2 = fastcol.index
+                               ' Set prev = v
+                                Set v = fastcol.ValueObj
+                                GoTo againtype
+                            Else
+                            If fastcol.StructLen > 0 Then GoTo checkit
+                                r$ = Typename(fastcol.Value)
+                            End If
+                        Else
+                            'MissParam a$
+                            FindItem = False
+                            Exit Function
+keynotexist:
+                            indexout a$
+                            FindItem = False
+                            Exit Function
+                    End If
+                Else
+                    ' new
+checkit:
+                    If fastcol.StructLen > 0 Then
+                    FindItem = False
+                    Exit Function
+                    ElseIf wasarr Then
+                    'r$ = Typename(fastcol.Value)
+                    FindItem = False
+                    Exit Function
+                    Else
+                    FindItem = False
+                    Exit Function
+                    End If
+                End If
+            Case 2
+                'r$ = "Buffer"
+                    FindItem = False
+                    Exit Function
+                
+            Case 3
+                w1 = useHandler.indirect
+                If w1 > -1 And w1 <= var2used Then
+                                r$ = Typename(var(w1))
+                                If r$ = "mHandler" Then Set v = var(w1): GoTo againtype
+                    Else
+                            r$ = Typename(useHandler.objref)
+                                       If FastSymbol(a$, ")(", , 2) Or True Then
+                                        If r$ = "mArray" Then
+                                            Set pppp = useHandler.objref
+                                                If IsExp(bstackstr, a$, p) Then
+                                                   pppp.index = p
+                                                    If MyIsObject(pppp.Value) Then
+                                                    w2 = p
+                                                   ' Set prev = v
+                                                         Set v = pppp.Value
+                                                         wasarr = False
+                                                         GoTo againtype
+                                                    Else
+                                                       ' r$ = Typename(pppp.Value)
+                                                    End If
+                                                Else
+
+                                                FindItem = False
+                                                Exit Function
+                                            End If
+                                        Else
+                                                FindItem = False
+                                                Exit Function
+                                        End If
+                                        
+                                        End If
+                                        
+                                        End If
+                                    
+            Case 4
+                    FindItem = False
+                    Exit Function
+            Case Else
+                r$ = Typename(v.objref)
+                
+            End Select
+        ElseIf Typename(v) = "PropReference" Then
+                    FindItem = False
+                    Exit Function
+        End If
+        Set bstackstr.lastobj = Nothing
+        Set bstackstr.lastpointer = Nothing
+        FindItem = FastSymbol(a$, ")")
+        If useHandler Is Nothing Then FindItem = False: Exit Function
+        If TypeOf useHandler.objref Is mArray Then
+            Set v = useHandler.objref
+        Else
+         Set pppp = New mArray
+            Set pppp.GroupRef = useHandler
+            pppp.Arr = False
+            w2 = -101
+            Set v = pppp
+        End If
 End Function

@@ -288,11 +288,17 @@ Public Function GetUrlPath(ByVal Address As String) As String
     scheme = GetUrlParts(Address)
     domain = GetDomainName(Address, True)
     exclude = GetUrlParts(Address, URL_PART_QUERY)
-    Address = UrlCanonicalize(Address)
+    If Len(domain) > 0 Then
+        Address = UrlCanonicalize(Address)
+    Else 'remove scheme only
+        If Left$(Address, Len(scheme)) = scheme Then Address = Mid$(Address, Len(scheme) + 2)
+    End If
     If domain <> vbNullString Then
     Address = Mid$(Address, Len(domain) + 1)
-    ElseIf Len(scheme) <> 0 Then
-    Address = Mid$(Address, Len(scheme) + 2)
+    ElseIf Not Address = vbNullString Then
+    If InStr(Address, "//") = 0 Then
+    If Left$(Address, Len(scheme)) = scheme Then Address = Mid$(Address, Len(scheme) + 2)
+    End If
     End If
   
     If Not Address = vbNullString Then

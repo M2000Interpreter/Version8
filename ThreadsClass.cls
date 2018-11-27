@@ -67,7 +67,7 @@ End Sub
 Public Sub RemoveWithNoFind()
 
 Dim k As Long, k1 As Long, vvv As Variant, top1 As Long
-If toplim < 0 Then Exit Sub  ' previus stop
+If toplim < 0 Then Exit Sub
 top1 = toplim
 If Done Then
        If ParentIndex > -1 Then
@@ -112,7 +112,7 @@ End Sub
 Public Sub Remove(RHS)
 Dim k As Long, k1 As Long, vvv As Variant, top1 As Long, ndx As Long, Parndx As Long
 
-If toplim < 0 Then Exit Sub  ' previus stop
+If toplim < 0 Then Exit Sub
 top1 = toplim
 If Find2(RHS, Parndx, ndx) Then
         Done = True
@@ -460,7 +460,7 @@ Private Function GetRefCount(ByRef vvv) As Long
     Dim obj As IUnknown
     Set obj = vvv
     If obj Is Nothing Then Exit Function
-    CopyMemory GetRefCount, ByVal (objptr(obj)) + 4, 4
+    CopyMemory GetRefCount, ByVal (ObjPtr(obj)) + 4, 4
     GetRefCount = GetRefCount - 2
     Set obj = Nothing
 End Function
