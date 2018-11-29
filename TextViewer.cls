@@ -408,12 +408,12 @@ a$ = Left$(CurrentParagraph, Charpos)
 i = ((Len(a$) - Len(LTrim$(a$))) \ 6) * 6
 j = SelStart
 If ss$ <> "" Then
-ss$ = Replace(ss$, vbCrLf, vbCrLf + Space$(6))
-RemoveUndo "{" + vbCrLf + Space$(i + 6) + ss$ + vbCrLf + Space$(i) + "}"
-InsertText = "{" + vbCrLf + Space$(i + 6) + ss$ + vbCrLf + Space$(i) + "}"
+ss$ = Replace(ss$, vbCrLf, vbCrLf + space$(6))
+RemoveUndo "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
+InsertText = "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
 Else
-RemoveUndo "{" + vbCrLf + Space$(i + 6) + vbCrLf + Space$(i) + "}"
-InsertText = "{" + vbCrLf + Space$(i + 6) + vbCrLf + Space$(i) + "}"
+RemoveUndo "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
+InsertText = "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
 End If
 SelStartSilent = j + i + 3 + 6
 Render
@@ -1946,15 +1946,7 @@ If kind > 0 Then
                                             GoTo again
                                         ElseIf ismine5(drop$) Then
                                         GoTo again500
-                                        ElseIf ismine3(drop$) Then
-                                        onetime = True
-                                        kind = -2
-                                        GoTo again500
                                         End If
-                                         ElseIf ismine3(drop$) Then
-                 'pos2 = k - Len(a$) + 1
-                       mDoc.Paracolordata(thispara) = col()
-                                                  Exit Sub
                                 End If
              
         
@@ -1976,19 +1968,13 @@ If kind > 0 Then
                                                   Exit Sub
                                         End If
                                 End If
-                                                
-                ElseIf ismine3(drop$) Then
-                 pos2 = k - Len(a$) + 1
-                       mDoc.Paracolordata(thispara) = col()
-                                                  Exit Sub
                 End If
     
-   Else
+                 Else
                 lastcol = 10
              If Len(a$) > 0 Then
              
               If AscW(a$) = 92 Then
-             ' If Not onetime Then FastSymbol a$, "\": If AscW(a$) <> 32 Then lastkind = 1: GoTo again2
              lastkind = 1
          
               End If
@@ -2695,7 +2681,7 @@ s$ = vbNullString
 End If
 If Right$(blockString, 1) = " " Then
 i = Len(blockString) - Len(RTrim(blockString))
-If i > 0 Then blockString = ReplaceStr(Chr$(10) + Space(i), Chr$(10), blockString)
+If i > 0 Then blockString = ReplaceStr(Chr$(10) + space(i), Chr$(10), blockString)
 End If
 
 End Function
@@ -3641,7 +3627,7 @@ If RHS <> "" Then
 
 If NumberOnly Then
 
-Pad$ = Space$(Len(RHS) + Len(glistN.list(0)))
+Pad$ = space$(Len(RHS) + Len(glistN.list(0)))
 Mid$(Pad$, 1, Charpos - 1) = Left$(glistN.list(0), Charpos - 1)
 Mid$(Pad$, Charpos, Len(RHS)) = RHS
 If Len(glistN.list(0)) > 0 Then
@@ -3908,11 +3894,11 @@ If Not skip Then c$ = Trim(c$)
 If e$ <> "" Then If val(e$) > val(c$) + 10 Then skip = False
 If (val(c$) Mod 10 = 0) And Not skip Then
 tr$ = String$(Len(Trim$(c$)), "0")
-a$ = Format((val(c$) + 10), tr$) + Space$(Len(CurrentParagraph) - Len(c$) - Len(NLtrim$(b$)))
+a$ = Format((val(c$) + 10), tr$) + space$(Len(CurrentParagraph) - Len(c$) - Len(NLtrim$(b$)))
 Else
 If e$ <> "" And Trim$(Str((val(c$) + 1))) = Trim$(e$) Then
 maxw = glistN.UserControlTextWidth(c$)
-a$ = Space$(Len(c$))
+a$ = space$(Len(c$))
 While glistN.UserControlTextWidth(a$) < maxw
 a$ = a$ + " "
 Wend
@@ -3920,15 +3906,15 @@ c$ = vbNullString
 
 Else
 tr$ = String$(Len(Trim$(c$)), "0")
-a$ = Format((val(c$) + 1), tr$) + Space$(Len(CurrentParagraph) - Len(Trim$(c$)) - Len(NLtrim$(b$)))
+a$ = Format((val(c$) + 1), tr$) + space$(Len(CurrentParagraph) - Len(Trim$(c$)) - Len(NLtrim$(b$)))
 End If
 End If
 Else
-a$ = Space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
+a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
 If Len(a$) > Charpos Then a$ = vbNullString
 End If
 Else
-a$ = Space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
+a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
 If Len(a$) > Charpos Then a$ = vbNullString
 
 End If

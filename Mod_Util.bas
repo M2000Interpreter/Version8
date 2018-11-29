@@ -203,7 +203,7 @@ Public Const Pi = 3.14159265358979
 Public Const PI2 = 6.28318530717958
 Public Result As Long
 Public mcd As String
-Public NOEXECUTION As Boolean
+Public NOEXECUTION As Boolean, RoundDouble As Boolean
 Public QRY As Boolean, GFQRY As Boolean
 Public nomore As Boolean
 
@@ -2364,9 +2364,9 @@ If ExtraWidth <> 0 Then
 SetTextCharacterExtra ddd.hDC, ExtraWidth
 End If
 Dim icx As Long, icy As Long, x As Long, y As Long, icH As Long
+
 If JUSTIFY < 0 Then degree = 0
 DEGR = (degree) * 180# / Pi
-
   F.lfItalic = Abs(basestack.myitalic)
   F.lfWeight = Abs(basestack.myBold) * 800
   F.lfEscapement = 0
@@ -5300,6 +5300,8 @@ If s$ <> "" Then
             If fornow Then
                 casesensitive = False
             End If
+            ElseIf d$ = "RDB" Then
+            RoundDouble = False
             ElseIf d$ = "EXT" Then
             wide = False
             ElseIf d$ = "SBL" Then
@@ -5436,6 +5438,8 @@ If IsLabel(basestack1, s$, d$) > 0 Then
                 If fornow Then
                      casesensitive = True
                 End If
+          ElseIf d$ = "RDB" Then
+            RoundDouble = True
             ElseIf d$ = "EXT" Then
             wide = True
            ElseIf d$ = "SBL" Then
@@ -5575,6 +5579,243 @@ End Select
 Next i
 If j = 0 Then pos = i: BlockParam3 = True
 End Function
+Public Sub aheadstatusANY(a$, pos As Long)
+Dim pos2 As Long, Level&, w$
+If a$ = vbNullString Then Exit Sub
+Dim v1 As Long
+If pos = 0 Then pos = 1
+Do While pos <= Len(a$)
+    w$ = Mid$(a$, pos, 1)
+    v1 = AscW(w$)
+    If Abs(v1) > 7 Then
+    If w$ = """" Then
+        pos = pos + 1
+        Do While pos <= Len(a$)
+        If Mid$(a$, pos, 1) = """" Then Exit Do
+        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        pos = pos + 1
+        Loop
+    ElseIf w$ = "(" Then
+        Level& = 0
+again22:
+      pos = pos + 1
+        If Not BlockParam2(a$, pos) Then Exit Do
+        If Mid$(a$, pos + 1, 1) = "#" Then
+        pos = pos + 1
+        GoTo conthere
+        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
+        pos = pos + 1: GoTo again22
+        End If
+    ElseIf w$ = "{" Then
+       If pos <= Len(a$) Then
+        If Not blockStringAhead(a$, pos) Then Exit Do
+        End If
+    Else
+        Select Case w$
+        Case ")", "}", Is < " ", "'", "\"
+        Exit Do
+        End Select
+        End If
+End If
+        pos = pos + 1
+        
+  
+conthere:
+  
+Loop
+
+End Sub
+Public Sub aheadstatusIF(a$, pos As Long, Lang As Long, w$)
+Dim pos2 As Long, Level&, what$
+
+If a$ = vbNullString Then Exit Sub
+Dim v1 As Long
+If pos = 0 Then pos = 1
+Do While pos <= Len(a$)
+    w$ = Mid$(a$, pos, 1)
+    v1 = AscW(w$)
+    If Abs(v1) > 7 Then
+    
+    If w$ = """" Then
+            If Len(what$) > 0 Then what$ = vbNullString
+        pos = pos + 1
+        Do While pos <= Len(a$)
+        If Mid$(a$, pos, 1) = """" Then Exit Do
+        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        pos = pos + 1
+        Loop
+    ElseIf w$ = "(" Then
+        If Len(what$) > 0 Then what$ = vbNullString
+        Level& = 0
+again22:
+      pos = pos + 1
+
+        If Not BlockParam2(a$, pos) Then Exit Do
+        If Mid$(a$, pos + 1, 1) = "#" Then
+        pos = pos + 1
+        GoTo conthere
+        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
+        pos = pos + 1: GoTo again22
+        End If
+    ElseIf w$ = "{" Then
+       If Len(what$) > 0 Then what$ = vbNullString
+       If pos <= Len(a$) Then
+        If Not blockStringAhead(a$, pos) Then Exit Do
+        End If
+    Else
+        Select Case w$
+        Case ",", ":"
+        Exit Do
+        Case "%", "$", "0" To "9"
+            If Len(what$) > 0 Then what$ = vbNullString
+        Case " ", ChrW(160)
+                If Len(what$) > 3 Then
+                    If Len(what$) > 0 Then
+                        what$ = myUcase(what$)
+                        If Lang = 0 Then
+                             If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
+                                w$ = what$
+                                Exit Sub
+                            End If
+                        Else
+                            If what$ = "THEN" Or what$ = "ELSE" Then
+                                w$ = what$
+                                Exit Sub
+                            End If
+                        End If
+                    End If
+                    End If
+                    what$ = vbNullString
+         
+        Case ")", "}", Is < " ", "'", "\"
+        Exit Do
+        Case Else
+        
+        what$ = what$ + w$
+        
+        
+        End Select
+        End If
+End If
+        pos = pos + 1
+        
+  
+conthere:
+  
+Loop
+w$ = vbNullString
+If Len(what$) > 0 Then
+      what$ = myUcase(what$)
+      If Lang = 0 Then
+         If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
+            w$ = what$
+        ElseIf what$ = "THEN" Or what$ = "ELSE" Then
+            w$ = what$
+        End If
+      End If
+        
+End If
+End Sub
+Public Sub aheadstatusELSE(a$, pos As Long, Lang As Long, w$)
+Dim pos2 As Long, Level&, what$
+
+If a$ = vbNullString Then Exit Sub
+Dim v1 As Long
+If pos = 0 Then pos = 1
+Do While pos <= Len(a$)
+    w$ = Mid$(a$, pos, 1)
+    v1 = AscW(w$)
+    If Abs(v1) > 7 Then
+    
+    If w$ = """" Then
+            If Len(what$) > 0 Then what$ = vbNullString
+        pos = pos + 1
+        Do While pos <= Len(a$)
+        If Mid$(a$, pos, 1) = """" Then Exit Do
+        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        pos = pos + 1
+        Loop
+    ElseIf w$ = "(" Then
+        If Len(what$) > 0 Then what$ = vbNullString
+        Level& = 0
+again22:
+      pos = pos + 1
+
+        If Not BlockParam2(a$, pos) Then Exit Do
+        If Mid$(a$, pos + 1, 1) = "#" Then
+        pos = pos + 1
+        GoTo conthere
+        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
+        pos = pos + 1: GoTo again22
+        End If
+    ElseIf w$ = "{" Then
+       If Len(what$) > 0 Then what$ = vbNullString
+       If pos <= Len(a$) Then
+        If Not blockStringAhead(a$, pos) Then Exit Do
+        End If
+    Else
+        Select Case w$
+        Case "%", "$", "0" To "9"
+            If Len(what$) > 0 Then what$ = vbNullString
+        Case " ", ChrW(160), "0" To "9"
+                If Len(what$) > 1 Then
+                    If Len(what$) > 0 Then
+                        what$ = myUcase(what$)
+                        If Lang = 0 Then
+                        If what$ = "¡Õ" Or what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Or what$ = "¡ÀÀ…Ÿ”.¡Õ" Then
+                            w$ = what$
+                                Exit Sub
+                            End If
+                        Else
+                            If what$ = "IF" Or what$ = "THEN" Or what$ = "ELSE" Or what$ = "ELSE.IF" Then
+                                w$ = what$
+                                Exit Sub
+                            End If
+                        End If
+                    End If
+                    End If
+                    what$ = vbNullString
+         
+        Case ")", "}", Is < " ", "'", "\"
+        Exit Do
+        Case Else
+        
+        what$ = what$ + w$
+        
+        
+        End Select
+        End If
+End If
+        pos = pos + 1
+        
+  
+conthere:
+  
+Loop
+w$ = vbNullString
+If Len(what$) > 1 Then
+      what$ = myUcase(what$)
+      If Lang = 0 Then
+                        If what$ = "¡Õ" Or what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Or what$ = "¡ÀÀ…Ÿ”.¡Õ" Then
+                            w$ = what$
+                                Exit Sub
+                            End If
+                        Else
+                            If what$ = "IF" Or what$ = "THEN" Or what$ = "ELSE" Or what$ = "ELSE.IF" Then
+                                w$ = what$
+                                Exit Sub
+                            End If
+                        End If
+        
+End If
+End Sub
+Sub test2(a$)
+Dim i As Long, j As Long, w$
+i = 1
+'aheadstatusELSE a$, i, j, w$
+aheadstatusELSE a$, i, j, w$
+Debug.Print i, w$
+End Sub
 Public Function aheadstatus(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
 Dim b$, part$, w$, pos2 As Long, Level&
 
@@ -7630,7 +7871,32 @@ Do
         End If
         x1 = 0
 End Function
+Function AssignTypeNumeric2(v, i As Long) As Boolean
+If VarType(v) = i Then AssignTypeNumeric2 = True: Exit Function
+On Error GoTo there
+If VarType(v) = vbString Then v = Format$(v)
+Select Case i
+Case vbBoolean
+v = CBool(v)
+Case vbCurrency
+v = CCur(v)
+Case vbDecimal
+v = CDec(v)
+Case vbLong
+v = CLng(v)
+Case vbSingle
+v = CSng(v)
+Case vbInteger
+v = CInt(v)
+Case Else
+v = CDbl(v)
+End Select
+AssignTypeNumeric2 = True
+Exit Function
+there:
+End Function
 Function AssignTypeNumeric(v, i As Long) As Boolean
+If VarType(v) = i Then AssignTypeNumeric = True: Exit Function
 On Error GoTo there
 If VarType(v) = vbString Then v = Format$(v)
 Select Case i
@@ -7653,6 +7919,7 @@ AssignTypeNumeric = True
 Exit Function
 there:
 If Err = 6 Then
+Err.Clear
 OverflowLong i = vbInteger
 Exit Function
 End If
@@ -8026,6 +8293,7 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If DimLikeBasic Then ss$ = ss$ + " +DIM" Else ss$ = ss$ + " -DIM"
         If ShowBooleanAsString Then ss$ = ss$ + " +SBL" Else ss$ = ss$ + " -SBL"
         If wide Then ss$ = ss$ + " +EXT" Else ss$ = ss$ + " -EXT"
+        If RoundDouble Then ss$ = ss$ + " +RDB" Else ss$ = ss$ + " -RDB"
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         wwPlain bstack, prive, "ƒÈ·Í¸ÙÂÚ " + ss$, bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, "–ÂÒﬂ ‰È·ÍÔÙ˛Ì: ˜ÒÁÛÈÏÔÔﬂÁÛÂ ÙÁÌ ÂÌÙÔÎﬁ ¬ÔﬁËÂÈ· ƒÈ·Í¸ÙÂÚ", bstack.Owner.Width, 1000, True
@@ -8062,6 +8330,7 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If DimLikeBasic Then ss$ = ss$ + " +DIM" Else ss$ = ss$ + " -DIM"
         If ShowBooleanAsString Then ss$ = ss$ + " +SBL" Else ss$ = ss$ + " -SBL"
           If wide Then ss$ = ss$ + " +EXT" Else ss$ = ss$ + " -EXT"
+          If RoundDouble Then ss$ = ss$ + " +RDB" Else ss$ = ss$ + " -RDB"
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         wwPlain bstack, prive, "Switches " + ss$, bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, "About Switches: use command Help Switches", bstack.Owner.Width, 1000, True
@@ -14176,3 +14445,435 @@ checkit:
             Set v = pppp
         End If
 End Function
+Public Function exeSelect(ExecuteLong, once, bstack As basetask, b$, v As Long, Lang As Long) As Boolean
+Dim ok As Boolean, x1 As Long, y1 As Long, sp As Variant, st As Variant, sw$, slct As Long, ss$
+Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
+        exeSelect = True
+        x1 = 0 ' mode numbers using p, sp and st
+                ' x1=2 using sw$ w$ ss$
+
+            If IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang) Then
+            
+                        If IsExp(bstack, b$, sp) Then
+                        x1 = 1
+                        ElseIf IsStrExp(bstack, b$, sw$) Then
+                        x1 = 2
+                        End If
+                    If x1 > 0 Then ' SELECT CASE NUMBER or STRING
+                        SetNextLine b$
+                    slct = 1
+                       If NocharsInLine(b$) Then
+                       ExpectedCaseorElseorEnd
+                        ExecuteLong = 0
+                            Exit Function
+                            End If
+                        Do
+                        If NocharsInLine(b$) Then
+               
+                            Exit Do
+                        End If
+                                If IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang) Then  ' WE HAVE CASE
+                                           If ok Then
+                                ExpectedEndSelect
+                                ExecuteLong = 0
+                                Exit Function
+                  
+                                    End If
+                                If slct > 0 Then         ' WE ARE IN SEARCH
+                                Do
+                                ' Â‰˛ ÍÔÈÙ‹ÏÂ Ù· CASE
+                                x2 = 0
+                                If x1 = 1 Then
+                                If IsExp(bstack, b$, p) Then x2 = 1
+                                Else
+                                If IsStrExp(bstack, b$, w$) Then x2 = 2
+                                End If
+                                       If x2 > 0 Then 'WE HAVE NUMBER OR STRING
+                                            If IsLabelSymbolNew(b$, "≈Ÿ”", "TO", Lang) Then   ' range ?
+                                            y1 = 0
+                                               If x1 = 1 Then
+                                                    If IsExp(bstack, b$, st) Then y1 = 1
+
+                                                Else
+                                                    If IsStrExp(bstack, b$, ss$) Then y1 = 2
+                                                End If
+                                                If y1 > 0 Then
+                                                y2 = 0
+                                                   If x1 = 1 Then
+                                                    If (sp >= p And sp <= st) Then y2 = 1
+
+                                                Else
+                                                    If sw$ >= w$ And sw$ <= ss$ Then y2 = 2
+                                                End If
+                                                    If y2 > 0 Or slct = -1 Then 'slct=-1 from break
+                                                   If slct = 1 Then slct = 0   ' slct=0 we found
+                                                   ' start ExecuteLong command or block
+
+                                            End If
+                                                Else
+                                                    MyEr "Wrong expression type in To clause in Case", "À‹ËÔÚ Ù˝ÔÚ ›ÍˆÒ·ÛÁÚ ÛÙÁÌ ∏˘Ú ÛÙÁÌ ÃÂ"
+                                                    ExecuteLong = 0
+                                                    Exit Function
+                                                End If
+                                            Else
+                                            ' NO WE HAVE ONE VALUE...X1 MASTER, X2 ONE VALUE  Y2 FOR LAST CHECK
+                                                y2 = 0
+                                                If x1 = 1 Then
+                                                    If sp = p Then y2 = 1
+                                                Else
+                                                    If w$ = sw$ Then y2 = 2
+                                                End If
+                                                If y2 > 0 Or slct = -1 Then ' ONE VALUE
+                                                     If slct = 1 Then slct = 0
+                                                End If
+                                            End If
+                                        Else
+                                            If x1 = 1 Then
+                                                b$ = Str$(sp) & " " & b$
+                                            Else
+                                                ' HERE............................IS A PROBLEM IF SW$ HAS <3 ASCII CODE
+                                                b$ = Sput(sw$) + b$
+                                            End If
+                                        If IsExp(bstack, b$, p) Then
+                                            If p <> 0 Or slct = -1 Then
+                                             If slct = 1 Then slct = 0
+                                             ' start ExecuteLong command or block
+                                             End If
+                                        Else
+                                        MyEr "Expected logic half expression in Case", "–ÂÒﬂÏÂÌ· ÎÔ„ÈÍﬁ ÏÈÛﬁ ›ÍˆÒ·ÛÁ ÛÙÁÌ ÃÂ"
+                                        ExecuteLong = 0
+                                        Exit Function
+                                        End If
+                                        End If
+                                        If slct = 0 Then
+                                            If Left$(b$, 4) = vbCrLf + vbCrLf Then
+                                                                ExpectedCaseorElseorEnd
+                                                                b$ = Mid$(b$, 3)
+                                                                v = Len(b$)
+                                                                
+                                                                ExecuteLong = 0: Exit Function
+                                                                End If
+                                                    SetNextLine b$
+                                                         v = Len(b$)
+                                                        If FastSymbol(b$, "{") Then  ' block
+                                                          v = Len(b$)
+                                                          ss$ = block(b$)
+                                                            DUM = False
+                                                            i = 1
+                                                            ' #3 call a block
+                                                            Call executeblock(i, bstack, ss$, False, DUM)
+                                                           
+                                                            
+                                                            'b$ = ss$ & b$
+                                                            If i = 1 Then
+                                                            FastSymbol b$, "}"
+                                                            If Not MaybeIsSymbol(b$, "'\") Then
+                                                            If Not Left$(b$, 2) = vbCrLf Then
+                                                                ExpectedCommentsOnly
+                                                                ExecuteLong = 0: Exit Function
+                                                            End If
+                                                            End If
+                                                            Else
+                                                            b$ = ss$ & b$
+                                                            If i = 0 Then
+                                                                ExecuteLong = 0: Exit Function
+                                                            ElseIf i = 2 Then
+                                                                If DUM = True And b$ <> "" Then
+                                                                slct = -1
+                                                                Else
+                                                                GoTo ContGoto
+                                                                End If
+                                                            ElseIf i = 3 Then
+                                                               If DUM = True And b$ <> "" Then slct = 0
+                                                            End If
+                                                            End If
+                                                        Else   ' or line
+                                                            DUM = True
+                                                        
+                                                            i = 1
+                                                            
+                                                            While IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang)
+                                                           SetNextLine b$
+                                                         v = Len(b$)
+                                                            Wend
+                                                            ' #4 call one command
+                                                            Call executeblock(i, bstack, b$, True, DUM)
+                                                            If i = 0 Or Left$(b$, 4) = vbCrLf + vbCrLf Then
+                                                             If Left$(b$, 4) = vbCrLf + vbCrLf Then ExpectedCaseorElseorEnd
+                                                                b$ = Mid$(b$, 3)
+                                                                v = Len(b$)
+                                                                
+                                                                ExecuteLong = 0: Exit Function
+                                                            ElseIf i = 1 And b$ = vbNullString Then 'this is an exit œ 3
+                                                           '' B$ = ss$
+                                                            ExecuteLong = 1
+                                                            Exit Function
+                                                            ElseIf i = 2 Then
+                                                                       
+                                                                          If DUM = True And b$ <> "" Then
+                                                                            slct = -1
+                                                                          ElseIf b$ <> "" Then
+                                                                            ExecuteLong = 2
+                                                                            once = False
+                                                                             Exit Function
+                                                                          Else
+                                                                        ExecuteLong = i
+                                                                         once = True
+                                                                            Exit Function
+                                                                        End If
+                                                            ElseIf i = 3 Then
+                                                           ''     If DUM = True And B$ <> "" Then slct = 0: B$ = GetNextLine(ss$) 'ok
+                                                                If DUM = True And b$ <> "" Then slct = 0  '': B$ = GetNextLine(ss$) 'ok
+                                                            End If
+                                                       'œ 
+                                                        End If
+                                                        Exit Do
+                                        End If
+                                    Loop While FastSymbol(b$, ",")
+                                    
+                                     End If
+                                SetNextLine b$
+                                                                     If Left$(b$, 2) = vbCrLf Then
+                                                                     ExpectedCaseorElseorEnd
+                                                                v = Len(b$)
+                                                                ExecuteLong = 0
+                                                                Exit Function
+                                                                End If
+                                ' drop case
+                                
+                                If IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang, , , True) Then
+         
+                                ElseIf IsLabelSymbolNew(b$, "¡ÀÀ…Ÿ”", "ELSE", Lang, , , True) Then
+       
+                                ElseIf IsLabelSymbolNew(b$, "‘≈Àœ”", "END", Lang, , , True) Then
+                             
+                                Else
+                                    v = Len(b$)
+                                    If FastSymbol(b$, "{") Then
+                                           If slct >= 0 Then
+                                                    ss$ = block(b$) + "}"
+                                                    b$ = NLtrim$(Mid$(b$, 2))
+                                            Else
+                                                    v = Len(b$)
+                                                    ss$ = block(b$)
+                                                    DUM = False
+                                                    i = 1
+                                                    ' #7 call block inside Case (Break) ok
+                                                            Call executeblock(i, bstack, ss$, False, DUM)
+                                                            If i = 1 Then
+                                                            FastSymbol b$, "}"
+                                                            If Not MaybeIsSymbol(b$, "'\") Then
+                                                            If Not Left$(b$, 2) = vbCrLf Then
+                                                                ExpectedCommentsOnly
+                                                                ExecuteLong = 0: Exit Function
+                                                            End If
+                                                            End If
+                                                                    Else
+                                                            b$ = ss$ & b$
+                                                            If i = 0 Then
+                                                               
+                                                                ExecuteLong = 0: Exit Function
+                                                            ElseIf i = 2 Then
+                                                                    If DUM = True And b$ <> "" Then
+                                                                    slct = -1
+                                                                    Else
+                                                                    GoTo ContGoto
+                                                                    End If
+                                                           
+                                                             ElseIf i = 3 Then
+                                                                    If DUM = True And b$ <> "" Then slct = 0
+        
+                                                             End If
+                                                            End If
+                                            End If
+                                     
+                                        SetNextLine b$
+                                      ElseIf slct < 0 Then
+                                                        DUM = True
+                                                   
+                                                            i = 1
+                                                            ' #8 call one command inside Case (Break) ok
+                                                            Call executeblock(i, bstack, b$, True, DUM)
+                        
+                                                            If i = 0 Then   ' where is exit
+                                                                b$ = space$(v)
+                                                                ExecuteLong = 0: Exit Function
+                                                            ElseIf i = 2 Then
+                                                                    
+                                                                          If DUM = True And b$ <> "" Then
+                                                                            slct = -1
+                                                                          ElseIf b$ <> "" Then
+                                                                            ExecuteLong = 2
+                                                                            once = False
+                                                                             Exit Function
+                                                                          Else
+                                                                            ExecuteLong = i
+                                                                            once = True
+                                                                            Exit Function
+                                                                        End If
+                                                            ElseIf i = 3 Then
+                                                                If DUM = True And b$ <> "" Then slct = 0: b$ = GetNextLine(ss$)
+                                                            End If
+        
+                                    SetNextLine b$
+                                    Else
+                                    SetNextLine b$
+                                
+                                        End If
+                                    
+                                End If
+                                
+                                ElseIf IsLabelSymbolNew(b$, "¡ÀÀ…Ÿ”", "ELSE", Lang) Then
+                                           If ok Then
+                                ExpectedEndSelect
+                                ExecuteLong = 0
+                                Exit Function
+                                Else
+                                    ok = True
+                                    End If
+                                    SetNextLine b$
+                                    v = Len(b$)
+                                    If FastSymbol(b$, "{") Then
+                                    v = Len(b$)
+                                        ss$ = block(b$)
+                                        b$ = NLtrim$(Mid$(b$, 2))
+                                        If slct > 0 Then
+                                                    v = Len(b$)
+                                                    DUM = False
+                                                    i = 1
+                                                    ' #9 call block inside Else
+                                                       Call executeblock(i, bstack, ss$, False, DUM)
+                                                       If i = 1 Then
+                                                            FastSymbol b$, "}"
+                                                            If Not MaybeIsSymbol(b$, "'\") Then
+                                                            If Not Left$(b$, 2) = vbCrLf Then
+                                                                ExpectedCommentsOnly
+                                                                ExecuteLong = 0: Exit Function
+                                                            End If
+                                                            End If
+                                                            Else
+                                                              b$ = ss$ & b$
+                                                                 If i = 0 Then
+                                                        
+                                                        ExecuteLong = 0: Exit Function
+                                                            ElseIf i = 2 Then
+                                                                          If DUM = True And b$ <> "" Then
+                                                                            slct = -1
+                                                                          ElseIf b$ <> "" Then
+                                                                        GoTo ContGoto
+                                                                          Else
+                                                                            once = True
+                                                                            Exit Function
+                                                                        End If
+                                                            ElseIf i = 3 Then
+                                                                If DUM = True And b$ <> "" Then slct = 0: b$ = GetNextLine(ss$)
+                                                            End If
+                                                            End If
+                                        End If
+                                    Else
+                                    If slct > 0 Then
+                                                                       DUM = True
+                                             
+                                                            i = 1
+                                                            ' #10 call one command inside ELSE
+                                                            Call executeblock(i, bstack, b$, True, DUM)
+                                                            If i = 0 Then
+                                                                b$ = space$(v)
+                                                                ExecuteLong = 0: Exit Function
+                                                            ElseIf i = 1 And b$ = vbNullString Then 'this is an exit
+                                             
+                                                            ExecuteLong = 1
+                                                            Exit Function
+                                                            ElseIf i = 2 Then
+                                                              
+                                                                          If DUM = True And b$ <> "" Then
+                                                                            slct = -1
+                                                                          ElseIf b$ <> "" Then
+                                                                            ExecuteLong = 2
+                                                                            once = False
+                                                                             Exit Function
+                                                                          Else
+                                                                          ExecuteLong = i
+                                                                            once = True
+                                                                            Exit Function
+                                                                        End If
+                                                            ElseIf i = 3 Then
+                                                    If DUM = True And b$ <> "" Then slct = 0
+                                              End If
+                                    End If
+                                End If
+                                SetNextLine b$
+                                slct = 0
+                        ElseIf IsLabelSymbolNew(b$, "‘≈Àœ”", "END", Lang) Then
+                            If IsLabelSymbolNew(b$, "≈–…Àœ√«”", "SELECT", Lang) Then
+                                slct = 0
+                                Exit Do
+                            Else
+                                ExpectedEndSelect
+                                ExecuteLong = 0
+                                Exit Function
+                            End If
+                        Else
+                           ' SetNextLine b$
+                            v = Len(b$)
+                             b$ = space$(v)
+                             If ok Then
+                             ExpectedEndSelect2
+                             Else
+                             ExpectedCaseorElseorEnd2
+                             End If
+                            ExecuteLong = 0
+                            Exit Function
+                        End If
+  
+                        Loop
+                        If slct > 0 Then
+                        b$ = space$(v)
+                        ExecuteLong = 0: Exit Function
+                        End If
+                        
+                    '-----------ENDIF ---------------
+                       Else
+                        ExecuteLong = 0
+                        Exit Function
+                    End If
+        Else
+           ExecuteLong = 0
+           Exit Function
+        End If
+     exeSelect = False
+     Exit Function
+ContGoto:
+        If myexit(bstack) Then ExecuteLong = 1: Exit Function
+        If MyTrim$(b$) = vbNullString Or FastSymbol(b$, ":") Then
+                ExecuteLong = 0
+                MissingLabel
+                Exit Function
+        Else
+        ' GET OUT FOR NEXT
+    
+        
+        i = Abs(IsLabelOnly(b$, w$))
+
+                If i = 1 Then
+                
+                once = False
+                b$ = w$
+                ExecuteLong = 2
+                Exit Function
+                ElseIf i = 0 Then
+                If IsNumberLabel(b$, w$) Then
+                      once = False
+                b$ = w$
+                ExecuteLong = 2
+                Exit Function
+                Else
+                 b$ = w$ & b$
+                End If
+                Else
+                b$ = w$ & b$
+                
+                End If
+              End If
+End Function
+

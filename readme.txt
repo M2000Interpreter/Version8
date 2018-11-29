@@ -1,9 +1,11 @@
 M2000 Interpreter and Environment
 
-Version 9.5  Revision 15 active-X
+Version 9.5  Revision 16 active-X
 
 A lot of work, for a great language;
-
+If then else.if else in one line without {}
+also works if then if then if then (and with else)
+for multine we use  blocks as usual.
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate
