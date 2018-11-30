@@ -80,7 +80,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 5
-Global Const Revision = 16
+Global Const Revision = 17
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -20816,7 +20816,7 @@ End Function
 Function globalvar(name$, q As Variant, Optional link As Boolean = False, Optional makeitglobal As Boolean = False, Optional ohere$ = vbNullString) As Long
 On Error GoTo 0
 Dim j As Long, m As Long
-
+Debug.Print name$
 If Not link Then
     If ohere$ <> vbNullString Then
         If varhash.Find2(ohere$ + "." + myUcase(name$), m, makeitglobal) And Not link Then
@@ -49100,15 +49100,19 @@ If Len(w$) > 3 Then
                     bb$ = vbNullString
                     If bstack.GetDotNew(bb$, 1) < 0 Then
                         If Len(bb$) = 0 Then CheckThis = -1: Exit Function
-                        w$ = Left$(bb$, Len(bb$) - 1) + Mid$(w$, 5)
+                        If Len(w$) = 4 Then
+                            If GetGlobalVar(Left$(bb$, Len(bb$) - 1), v) Then w$ = Left$(bb$, Len(bb$) - 1): GoTo found
+                        Else
+                            w$ = Left$(bb$, Len(bb$) - 1) + Mid$(w$, 5)
+                        End If
                         If GetGlobalVar(w$, v) Then GoTo found
                     End If
                 ElseIf Mid$(w$, 5, 1) = "." Then
                     If bstack.UseGroupname <> "" Then
                         bb$ = bstack.UseGroupname + Mid$(w$, 6)
-                        If varhash.Find(bb$, v) Then GoTo found
+                        If varhash.Find(bb$, v) Then SwapStrings w$, bb$: GoTo found
                         bb$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(w$, 6)
-                        If varhash.Find(bb$, v) Then GoTo found
+                        If varhash.Find(bb$, v) Then SwapStrings w$, bb$: GoTo found
                         
                     Else
                         bb$ = vbNullString
@@ -49125,22 +49129,21 @@ If Len(w$) > 3 Then
         If Left$(w$, 1) = "а" Then
             If Left$(w$, 4) = "ауто" Then
                 If Len(w$) = 4 Then
-                    bb$ = vbNullString
                     If bstack.GetDotNew(bb$, 1) < 0 Then
                         If Len(bb$) = 0 Then CheckThis = -1: Exit Function
                         If Len(w$) = 4 Then
-                        If GetGlobalVar(Left$(bb$, Len(bb$) - 1), v) Then GoTo found
+                            If GetGlobalVar(Left$(bb$, Len(bb$) - 1), v) Then w$ = Left$(bb$, Len(bb$) - 1): GoTo found
                         Else
-                        w$ = Left$(bb$, Len(bb$) - 1) + Mid$(w$, 5)
+                            w$ = Left$(bb$, Len(bb$) - 1) + Mid$(w$, 5)
                         End If
                         If GetGlobalVar(w$, v) Then GoTo found
                     End If
                 ElseIf Mid$(w$, 5, 1) = "." Then
                      If bstack.UseGroupname <> "" Then
                         bb$ = bstack.UseGroupname + Mid$(w$, 6)
-                        If varhash.Find(bb$, v) Then GoTo found
+                        If varhash.Find(bb$, v) Then SwapStrings w$, bb$: GoTo found
                         bb$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(w$, 6)
-                        If varhash.Find(bb$, v) Then GoTo found
+                        If varhash.Find(bb$, v) Then SwapStrings w$, bb$: GoTo found
                     Else
                         bb$ = vbNullString
                         If bstack.GetDotNew(bb$, 1) < 0 Then
