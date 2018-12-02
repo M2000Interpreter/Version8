@@ -15,7 +15,7 @@ Option Explicit
 Public mItem As Variant
 Public slot As Byte
 Public mTypeName As Byte
-Private Key As String * 12
+Private Key As String * 8
 Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 
@@ -72,6 +72,13 @@ Property Get NoValue() As Boolean
 If slot = 1 Then NoValue = mItem Is Nothing Else NoValue = slot = 0
 End Property
 
+Public Property Set ArrayRef(RHS As Object)
+    slot = 9
+    Set mItem = RHS
+End Property
+Public Property Get ArrayRef() As Object
+If slot = 9 Then Set ObjectRef = mItem
+End Property
 Public Property Set ObjectRef(RHS As Object)
     slot = 1
     Set mItem = RHS
@@ -93,5 +100,5 @@ If Trush.count = 0 Then Trush.Add Me, Key Else Trush.Add Me, Key
 End Sub
 
 Private Sub Class_Initialize()
-Key = Str$(ObjPtr(Me))
+Key = Hex$(ObjPtr(Me))
 End Sub

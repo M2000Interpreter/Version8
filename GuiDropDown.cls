@@ -423,7 +423,7 @@ End If
 If Callback.Controls(ctrlName).Height * gl < VirtualScreenHeight() * 2 / 5 Then
 
 Pad.Height = Callback.Controls(ctrlName).Height * gl
-Debug.Print Pad.Height
+'Debug.Print Pad.Height
 glistN.restrictLines = gl
 Else
 glistN.restrictLines = (VirtualScreenHeight() * 2 / 5) \ Callback.Controls(ctrlName).Height

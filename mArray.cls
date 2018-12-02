@@ -84,13 +84,17 @@ If MyIsNumeric(actualdata(v)) Then
                                 actualdata(v) = p
                                 Case "+"
                                 actualdata(v) = p + actualdata(v)
+                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "*"
                                  actualdata(v) = p * actualdata(v)
+                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "-"
                                 actualdata(v) = actualdata(v) - p
+                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "/"
                                 If p = 0 Then Exit Do
                                  actualdata(v) = actualdata(v) / p
+                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                   Case "~", "!!"
                                  actualdata(v) = -1 - (actualdata(v) <> 0)
                                  Case "++"
@@ -101,17 +105,20 @@ If MyIsNumeric(actualdata(v)) Then
                                 actualdata(v) = -actualdata(v)
                                 Case "+="
                                 actualdata(v) = p + actualdata(v)
+                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "*="
                                  actualdata(v) = p * actualdata(v)
+                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "-="
                                 actualdata(v) = actualdata(v) - p
+                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "/="
                                 If p = 0 Then Exit Do
                                  actualdata(v) = actualdata(v) / p
-                                 
+                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                   
                                  End Select
-                             If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+                             
                             
 End If
                            v = v + 1
@@ -131,13 +138,17 @@ If MyIsNumeric(actualdata(v)) Then
                                 actualdata(v) = p
                                 Case "+"
                                 actualdata(v) = p + actualdata(v)
+                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "*"
                                  actualdata(v) = p * actualdata(v)
+                                  If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "-"
                                 actualdata(v) = actualdata(v) - p
+                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "/"
                                 If p = 0 Then Exit Do
                                  actualdata(v) = actualdata(v) / p
+                                  If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                   Case "~", "!!"
                                  actualdata(v) = -1 - (actualdata(v) <> 0)
                                  Case "++"
@@ -148,7 +159,7 @@ If MyIsNumeric(actualdata(v)) Then
                                 actualdata(v) = -actualdata(v)
                                   
                                  End Select
-                          If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+                          
                             
 End If
                            v = v + 1
@@ -168,16 +179,19 @@ If MyIsNumeric(actualdata(v)) Then
                                 actualdata(v) = p
                                 Case "+="
                                 actualdata(v) = actualdata(v) + p
+                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "*="
                                  actualdata(v) = p * actualdata(v)
+                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "-="
                                 actualdata(v) = actualdata(v) - p
+                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                 Case "/="
-                                If p = 0 Then Exit Do
+                                If MyRound(p, 13) = 0 Then Exit Do
                                  actualdata(v) = actualdata(v) / p
-                                 
+                               If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
                                  End Select
-                                 If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+                               
                             
 End If
                            v = v + 1

@@ -315,7 +315,6 @@ Next num
 
 End Sub
 Public Sub Flush()
-
 Dim num As Long, aa As VarItem
 For num = 1 To mstack.count
 dec

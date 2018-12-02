@@ -5,7 +5,7 @@ Public Sub RGBToHLS( _
       ByVal r As Long, ByVal g As Long, ByVal b As Long, _
       h As Single, s As Single, l As Single _
    )
-Dim Max As Single
+Dim max As Single
 Dim Min As Single
 Dim delta As Single
 Dim rr As Single, rG As Single, rB As Single
@@ -15,14 +15,11 @@ If b < 0 Then b = 0 Else If b > 255 Then b = 255
 
    rr = r / 255: rG = g / 255: rB = b / 255
 
-'{Given: rgb each in [0,1].
-' Desired: h in [0,360] and s in [0,1], except if s=0, then h=UNDEFINED.}
-        Max = Maximum(rr, rG, rB)
+        max = Maximum(rr, rG, rB)
         Min = Minimum(rr, rG, rB)
-     l = (Max + Min) / 2    '{This is the lightness}
-        '{Next calculate saturation}
+     l = (max + Min) / 2    '{This is the lightness}
 
-        If Max = Min Then
+        If max = Min Then
             'begin {Acrhomatic case}
             s = 0
             h = 0
@@ -31,27 +28,20 @@ If b < 0 Then b = 0 Else If b > 255 Then b = 255
            'begin {Chromatic case}
                 '{First calculate the saturation.}
            If l <= 0.5 Then
-               s = (Max - Min) / (Max + Min)
+               s = (max - Min) / (max + Min)
            Else
-               s = (Max - Min) / (2 - Max - Min)
+               s = (max - Min) / (2 - max - Min)
             End If
             '{Next calculate the hue.}
-            delta = Max - Min
+            delta = max - Min
 
-           If rr = Max Then
+           If rr = max Then
                 h = (rG - rB) / delta    '{Resulting color is between yellow and magenta}
-           ElseIf rG = Max Then
+           ElseIf rG = max Then
                 h = 2 + (rB - rr) / delta '{Resulting color is between cyan and yellow}
-           ElseIf rB = Max Then
+           ElseIf rB = max Then
                 h = 4 + (rr - rG) / delta '{Resulting color is between magenta and cyan}
             End If
-
-            'Debug.Print h
-            'h = h * 60
-           'If h < 0# Then
-           '     h = h + 360            '{Make degrees be nonnegative}
-           'End If
-        'end {Chromatic Case}
       End If
 'end {RGB_to_HLS}
 End Sub
@@ -83,9 +73,9 @@ Dim ba$
 Dim hh As Single, ss As Single, LL As Single
 If VarType(hr) <> vbString Then ba$ = Hex$(hr) Else ba$ = hr
 ba$ = Right$("00000" & ba$, 6)
-mr = Val("&h" & Mid$(ba$, 1, 2))
-mg = Val("&h" & Mid$(ba$, 3, 2))
-mb = Val("&h" & Mid$(ba$, 5, 2))
+mr = val("&h" & Mid$(ba$, 1, 2))
+mg = val("&h" & Mid$(ba$, 3, 2))
+mb = val("&h" & Mid$(ba$, 5, 2))
 RGBToHLS mr, mg, mb, hh, ss, LL
 'Debug.Print hh, sS, ll
 hueconvSpecial = CLng(Int(hh * 60) Mod 360)
@@ -97,9 +87,9 @@ Dim ba$
 Dim hh As Single, ss As Single, LL As Single
 If VarType(hr) <> vbString Then ba$ = Hex$(hr) Else ba$ = hr
 ba$ = Right$("00000" & ba$, 6)
-mb = Val("&h" & Mid$(ba$, 1, 2))
-mg = Val("&h" & Mid$(ba$, 3, 2))
-mr = Val("&h" & Mid$(ba$, 5, 2))
+mb = val("&h" & Mid$(ba$, 1, 2))
+mg = val("&h" & Mid$(ba$, 3, 2))
+mr = val("&h" & Mid$(ba$, 5, 2))
 RGBToHLS mr, mg, mb, hh, ss, LL
 'Debug.Print hh, sS, ll
 
@@ -112,9 +102,9 @@ Dim ba$
 Dim hh As Single, ss As Single, LL As Single
 If VarType(hr) <> vbString Then ba$ = Hex$(hr) Else ba$ = hr
 ba$ = Right$("00000" & ba$, 6)
-mb = Val("&h" & Mid$(ba$, 1, 2))
-mg = Val("&h" & Mid$(ba$, 3, 2))
-mr = Val("&h" & Mid$(ba$, 5, 2))
+mb = val("&h" & Mid$(ba$, 1, 2))
+mg = val("&h" & Mid$(ba$, 3, 2))
+mr = val("&h" & Mid$(ba$, 5, 2))
 RGBToHLS mr, mg, mb, hh, ss, LL
 'Debug.Print hh, sS, ll
 lightconv = CLng(LL * 255)
@@ -126,9 +116,9 @@ Dim ba$
 Dim hh As Single, ss As Single, LL As Single
 If VarType(hr) <> vbString Then ba$ = Hex$(hr) Else ba$ = hr
 ba$ = Right$("00000" & ba$, 6)
-mb = Val("&h" & Mid$(ba$, 1, 2))
-mg = Val("&h" & Mid$(ba$, 3, 2))
-mr = Val("&h" & Mid$(ba$, 5, 2))
+mb = val("&h" & Mid$(ba$, 1, 2))
+mg = val("&h" & Mid$(ba$, 3, 2))
+mr = val("&h" & Mid$(ba$, 5, 2))
 RGBToHLS mr, mg, mb, hh, ss, LL
 'Debug.Print hh, sS, ll
 satconv = CLng(LL * 255)
@@ -139,7 +129,7 @@ Public Sub HLSToRGB( _
       r As Long, g As Long, b As Long _
    )
 Dim rr As Single, rG As Single, rB As Single
-Dim Min As Single, Max As Single
+Dim Min As Single, max As Single
 Dim Minl As Long, Maxl As Long, MidL As Long, dif As Single
 
    If s = 0 Then
@@ -158,35 +148,35 @@ Dim Minl As Long, Maxl As Long, MidL As Long, dif As Single
          Min = l - s * (1 - l)
       End If
       ' Get the Max value:
-      Max = 2 * l - Min
+      max = 2 * l - Min
       
       ' Now depending on sector we can evaluate the h,l,s:
       If (h < 1) Then
-         rr = Max
+         rr = max
          If (h < 0) Then
             rG = Min
-            rB = rG - h * (Max - Min)
+            rB = rG - h * (max - Min)
          Else
             rB = Min
-            rG = h * (Max - Min) + rB
+            rG = h * (max - Min) + rB
          End If
       ElseIf (h < 3) Then
-         rG = Max
+         rG = max
          If (h < 2) Then
             rB = Min
-            rr = rB - (h - 2) * (Max - Min)
+            rr = rB - (h - 2) * (max - Min)
          Else
             rr = Min
-            rB = (h - 2) * (Max - Min) + rr
+            rB = (h - 2) * (max - Min) + rr
          End If
       Else
-         rB = Max
+         rB = max
          If (h < 4) Then
             rr = Min
-            rG = rr - (h - 4) * (Max - Min)
+            rG = rr - (h - 4) * (max - Min)
          Else
             rG = Min
-            rr = (h - 4) * (Max - Min) + rG
+            rr = (h - 4) * (max - Min) + rG
          End If
          
       End If

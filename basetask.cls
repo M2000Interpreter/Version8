@@ -22,6 +22,7 @@ Public callohere As String
 Public addlen As Long, NoFuncError As Boolean, CallW As String, fHere$, strg As Boolean
 Public nokillvars As Boolean
 Public finalFlag As Boolean
+Public UseofIf As Integer
 Public IFCTRL As Boolean, jump As Boolean
 Public Vars As Long, ByName As Long
 Public usestack As Boolean
@@ -67,7 +68,7 @@ Public FuncValue As Variant
 Public LastValue As Variant
 Public LastState As Boolean
 Public LastEnum As Variant
-Private RetSoros As mStiva  ' for basic mimic functions- for education only
+Private RetSoros As mStiva2
 Public SubLevel As Long
 Public OriginalCode As Long
 Public StaticInUse$
@@ -506,8 +507,8 @@ RetStackTotal = RetSoros.Total
 End If
 End Property
 
-Public Property Get RetStack() As mStiva
-If RetSoros Is Nothing Then Set RetSoros = New mStiva
+Public Property Get RetStack() As mStiva2
+If RetSoros Is Nothing Then Set RetSoros = New mStiva2
 Set RetStack = RetSoros
 End Property
 Public Function SorosNothing() As Boolean
@@ -780,23 +781,24 @@ End If
 End Function
 Public Function IsInRetStackNumber(r As Variant) As Boolean
 If RetSoros Is Nothing Then Exit Function
-If RetSoros.LookNull Then
-r = RetSoros.PopVal
+Dim v As Variant
+v = RetSoros.LookTopVal
+If MyIsNumeric(v) Then
 IsInRetStackNumber = True
-ElseIf RetSoros.PopType = "N" Then
-r = RetSoros.PopVal
-IsInRetStackNumber = True
+SwapVariant r, v
+RetSoros.drop 1
 End If
 End Function
 Public Function IsInRetStackString(r As String) As Boolean
 If RetSoros Is Nothing Then Exit Function
-If RetSoros.LookNull Then
-r = RetSoros.PopStr
+Dim v As Variant
+v = RetSoros.LookTopVal
+If Not MyIsNumeric(v) Then
+r = v
 IsInRetStackString = True
-ElseIf RetSoros.PopType = "S" Then
-r = RetSoros.PopStr
-IsInRetStackString = True
+RetSoros.drop 1
 End If
+
 
 End Function
 Public Function IsInStackLong(l As Long) As Boolean

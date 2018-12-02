@@ -1,8 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.5  Revision 16 active-X
+Version 9.6 active-X
 
-Fix a problem with THIS (as the Group inside group), (version 9.4 was without this problem)
+1. More speed,
+2. Addition: IF/Else.If/Else/End If structure without blocks.
+3. Fix some bugs form previous revision (Utf8Enc was broken for a number)
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate

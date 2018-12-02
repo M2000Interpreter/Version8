@@ -27,6 +27,23 @@ For i = Total To 1 Step -1
 Copy.PushVariant mstack.item(i)
 Next i
 End Function
+Public Property Get LookTopVal() As Variant
+On Error Resume Next
+LookTopVal = mstack.item(1)
+
+End Property
+Public Property Get PopVal() As Variant
+On Error Resume Next
+PopVal = mstack.item(1)
+   mstack.Remove 1
+End Property
+Public Sub PushVal(a As Variant)
+If mstack.count = 0 Then
+mstack.Add a
+Else
+mstack.Add a, , 1
+End If
+End Sub
 Public Sub PushVariant(a As Variant)
 If mstack.count = 0 Then
 mstack.Add a
@@ -47,6 +64,12 @@ Else
 mstack.Add a, , 1
 End If
 End If
+End Sub
+Public Sub Flush()
+Dim num As Long
+For num = 1 To mstack.count
+   mstack.Remove 1
+Next num
 End Sub
 Public Sub PushStr(ByRef a As String)
 If mstack.count = 0 Then
