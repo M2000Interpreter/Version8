@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 1
+Global Const Revision = 2
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -36171,10 +36171,10 @@ checkconstant:
                         End Select
                     Else
                         If TypeOf var(i) Is Group Then
-                            If Not Fast2Varl(rest$, "олада", 5, "GROUP", 5, 5, F) Then
-                            If var(i).IamApointer And Not Fast2Varl(rest$, "деийтгс", 7, "POINTER", 7, 7, F) Then
-                                    MyRead = False: MissType: Exit Function
-                            End If
+                            If Fast2Varl(rest$, "олада", 5, "GROUP", 5, 5, F) Then
+                                If var(i).IamApointer And Not Fast2Varl(rest$, "деийтгс", 7, "POINTER", 7, 7, F) Then
+                                        MyRead = False: MissType: Exit Function
+                                End If
                             Else
                                     MyRead = False: MissType: Exit Function
                             

@@ -1,12 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 1 active-X
+Version 9.6 Revision 2 active-X
 
-Fix a bug for Event object (this fault insert in previous revision)
-Add more control on objects of type Group.
-We can add members (variables, arrays, functions and modules), but these additions holded if a group made in current module or function.
-Try { } now preserve stack for subs/if/next/gosub label
-
+Fix a bug for types for objects for passing by reference:
+Group alfa {x=10}
+Module AlfaInc (&a as Group) { Print a.x : a.x++}
+AlfaInc &alfa   ' 10
+AlfaInc &alfa   ' 11
+This bug not exist in 9.5 version of early revisions.
 
 
 From version 9.0 revision 50:
