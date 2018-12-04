@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 0
+Global Const Revision = 1
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1093,7 +1093,8 @@ Public Sub PushStage(basestack As basetask, dummy As Boolean)
                         .PushVal CDbl(sb2used)
                         .PushVal CDbl(var2used)
                         .PushVal -1
-End If
+                        basestack.ErrVars = var2used
+                End If
         End With
        
 End Sub
@@ -1103,6 +1104,7 @@ Public Sub PopStage(basestack As basetask)
         basestack.SubLevel = basestack.SubLevel - 1
            .drop 1
             var2used = CLng(.PopVal)
+            basestack.ErrVars = var2used
             sb2used = CLng(.PopVal)
             varhash.ReduceHash CLng(.PopVal), var()
             subHash.ReduceHash CLng(.PopVal), sbf()
@@ -16071,7 +16073,9 @@ ContTry:
             If linebyline Then
                 b$ = w$ + " " + b$
                 sw$ = here$
+                PushErrStage bstack
                 Execute = Execute(bstack, b$, once, False)
+                PopErrStage bstack
                 SwapStrings sw$, here$
                 bstack.nokillvars = False
                 Exit Do
@@ -16087,7 +16091,10 @@ ContTry:
                     b$ = NLtrim$(Mid$(b$, 2))
                     'On Error Resume Next
                     Execute = 1
+                    
+                    PushErrStage bstack
                     Call executeblock(Execute, bstack, ss$, once, ok)
+                    PopErrStage bstack
                     TraceRestore bstack, x1
                     bstack.nokillvars = False
                     once = False
@@ -16112,7 +16119,10 @@ ContTry:
                     ss$ = "{" & block(b$) & "}"
                     b$ = NLtrim$(Mid$(b$, 2))
                     LastErNum2 = 0
+                    PushErrStage bstack
                     Call executeblock(Execute, bstack, ss$, once, ok)
+                    PopErrStage bstack
+                    
                     var(v) = CDbl(Execute = 1)
                     MOUT = False
                     NOEXECUTION = False
@@ -17197,6 +17207,7 @@ mystack.strg = strg
 mystack.fHere = here$
 VName = varhash.count
 Vars = var2used
+
 If usesamestack Then
     Set mystack.Sorosref = basestack.soros
 Else
@@ -17302,6 +17313,11 @@ i = 1: FK$(13) = vbNullString
 
 Dim ok As Boolean, nokillvars As Boolean
 nokillvars = basestack.nokillvars: basestack.nokillvars = False
+If nokillvars Then
+    mystack.ErrVars = basestack.ErrVars
+Else
+    mystack.ErrVars = var2used
+End If
 
 If Mid$(sbf(x1).sb, i) = vbNullString Then
 GoFunc = True
@@ -19394,9 +19410,13 @@ On Error GoTo 0
 If here$ = vbNullString Or gl Then
 varhash.ItemCreator myUcase(name$), j, True, gl
 Else
-varhash.ItemCreator here$ & "." & myUcase(name$), j, gl
+varhash.ItemCreator here$ & "." & myUcase(name$), j, True, gl
 
 End If
+End Sub
+Sub GlobalVarRefLink2(name$, j As Long, Optional gl As Boolean = False)
+varhash.ItemCreator myUcase(name$), j, True, gl
+
 End Sub
 
 
@@ -23384,7 +23404,6 @@ Set var = aa
 End Sub
 Sub prepareGroup(bstack As basetask, ByVal ohere$, vvv As Long, Optional glob As Boolean = False, Optional isAstr As Boolean = False)
 Dim hv As Boolean
-'' ohere$ = myUcase(ohere$)
 If Not glob Then
 If here$ = vbNullString Then
     hv = GetVar(bstack, bstack.GroupName & ohere$, vvv, True)
@@ -23393,7 +23412,6 @@ Else
  End If
  End If
 If hv Then
-' so it is an object now
     If Not MyIsObject(var(vvv)) Then
         MakeitObject2 var(vvv)
     ElseIf Typename(var(vvv)) <> "Group" Then
@@ -23504,7 +23522,7 @@ If FastSymbol(rest$, "{") Then
             If FastSymbol(nm$, "(") Then
                 If varhash.Find(here$ + "." + Left$(ThisGroup.GroupName, Len(ThisGroup.GroupName) - 1) + "(", i) Then
                     MyEr "Array with same name", "Πίνακας με ίδιο όνομα"
-                    ExecuteGroupStruct = False
+                    ExecuteGroupStruct = 0
                     Exit Function
                 End If
                 frm$ = BlockParam(nm$)
@@ -23565,7 +23583,7 @@ If FastSymbol(rest$, "{") Then
              If FastSymbol(nm$, "(") Then
                 If varhash.Find(here$ + "." + Left$(ThisGroup.GroupName, Len(ThisGroup.GroupName) - 1) + "(", i) Then
                     MyEr "Array with same name", "Πίνακας με ίδιο όνομα"
-                    ExecuteGroupStruct = False
+                    ExecuteGroupStruct = 0
                     Exit Function
                 End If
                 frm$ = BlockParam(nm$)
@@ -23688,7 +23706,7 @@ final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟ", "FINAL", Lang)
 If FastSymbol(rest$, "(") Then
 If varhash.Find(here$ + "." + Left$(ThisGroup.GroupName, Len(ThisGroup.GroupName) - 1) + "(", i) Then
 MyEr "Array with same name", "Πίνακας με ίδιο όνομα"
-ExecuteGroupStruct = False
+ExecuteGroupStruct = 0
 Exit Function
 End If
 ss$ = BlockParam(rest$)
@@ -23722,7 +23740,7 @@ ElseIf FastSymbol(rest$, "(") Then
 contthere1:
 If varhash.Find(here$ + "." + Left$(ThisGroup.GroupName, Len(ThisGroup.GroupName) - 1) + "(", i) Then
 MyEr "Array with same name", "Πίνακας με ίδιο όνομα"
-ExecuteGroupStruct = False
+ExecuteGroupStruct = 0
 Exit Function
 End If
 ss$ = BlockParam(rest$)
@@ -23764,7 +23782,7 @@ Case "REMOVE", "ΔΙΑΓΡΑΦΗ"
 Case "OPERATOR", "ΤΕΛΕΣΤΗΣ"
 If prv Then
     MyEr "Private operator not allowed", "Ιδιωτικός τελεστής δεν επιτρέπεται"
-    ExecuteGroupStruct = False
+    ExecuteGroupStruct = 0
     Exit Function
 End If
 
@@ -23785,7 +23803,7 @@ ElseIf IsLabelSymbolNew(rest$, "ΜΟΝΑΔΙΑΙΟΣ", "UNARY", Lang) Then
 ElseIf Not ISSTRINGA(rest$, F$) Then
 error0001:
     MyEr "No Proper Symbol for operator, use string literal", "Δεν βρέθηκε σύμβολο χειριστή, χρησιμοποίησε αλφαριθμητικό με διπλά εισαγωγικά"
-    ExecuteGroupStruct = False
+    ExecuteGroupStruct = 0
     Exit Function
     End If
 End If
@@ -23814,7 +23832,7 @@ prv = True
 GoTo there100
 Case "DEF", "ΚΑΝΕ"
 MyEr "DEF can't used in a CLASS", "Η Κάνε δεν μπορεί να χρησιμοποιηθεί σε Κλάση"
-ExecuteGroupStruct = False
+ExecuteGroupStruct = 0
 Exit Function
 
 Case "PUBLIC", "ΔΗΜΟΣΙΟ"
@@ -23834,14 +23852,14 @@ NoRec = True
 GoTo there100
 ElseIf IsLabelSymbolNew(rest$, "ΓΕΝΙΚΗ", "GLOBAL", Lang) Then
 MyEr "GLOBAL can't used in a CLASS", "Η κλάση στην ομάδα δεν μπορεί να είναι γενική"
-ExecuteGroupStruct = False
+ExecuteGroupStruct = 0
 Exit Function
 End If
 x1 = IsLabelA("", rest$, w$)
  If x1 = 1 Or x1 = 3 Then
                      If IsLabelSymbolNew(rest$, "ΤΥΠΟΣ", "TYPE", Lang) Then
                      MyEr "Use here a Group not a Class", "Χρησιμοποίησε μια Ομάδα και όχι μια Κλάση"
-                    ExecuteGroupStruct = False
+                    ExecuteGroupStruct = 0
                     Exit Function
                     End If
                 If here$ = vbNullString Then
@@ -23895,14 +23913,14 @@ x1 = IsLabelA("", rest$, w$)
         Do While FastSymbol(rest$, ",")
          If IsLabelA("", rest$, nm$) <> 1 Then
             SyntaxError
-            ExecuteGroupStruct = False
+            ExecuteGroupStruct = 0
             Exit Function
          End If
              F$ = F$ + w$ + nm$ + vbCrLf
         Loop
             If IsLabelSymbolNew(rest$, "ΤΥΠΟΣ", "TYPE", Lang) Then
                  MyEr "Use here a Group not a Class", "Χρησιμοποίησε μια Ομάδα και όχι μια Κλάση"
-                ExecuteGroupStruct = False
+                ExecuteGroupStruct = 0
             Exit Function
             End If
             w$ = Trim$(w$)
@@ -23910,7 +23928,7 @@ x1 = IsLabelA("", rest$, w$)
         GoTo contVar
             Else
             SyntaxError
-            ExecuteGroupStruct = False
+            ExecuteGroupStruct = 0
             Exit Function
             
    End If
@@ -23919,7 +23937,7 @@ SetNextLine rest$: GoTo there100
 Case "FUNCTION", "ΣΥΝΑΡΤΗΣΗ"
 If IsLabelSymbolNew(rest$, "ΓΕΝΙΚΗ", "GLOBAL", Lang) Then
 MyEr "GLOBAL can't used in a Group", "Η συνάρτηση στην ομάδα δεν μπορεί να είναι γενική"
-ExecuteGroupStruct = False
+ExecuteGroupStruct = 0
 Exit Function
 End If
 final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΗ", "FINAL", Lang)
@@ -24014,7 +24032,7 @@ If x1 <> 0 Then
         End If
         nm$ = GetStrUntil(",", Mid$(b$, 12))
       GetSub nm$, i
-      FastSymbol "(", ss$
+      FastSymbol ss$, "("
       If hlp$ <> "" Then
       frm$ = BlockParam(rest)
       
@@ -24116,7 +24134,7 @@ Else
 Case "MODULE", "ΤΜΗΜΑ"
 If IsLabelSymbolNew(rest$, "ΓΕΝΙΚΗ", "GLOBAL", Lang) Then
 MyEr "GLOBAL can't used in a Group", "Η συνάρτηση στην ομάδα δεν μπορεί να είναι γενική"
-ExecuteGroupStruct = False
+ExecuteGroupStruct = 0
 Exit Function
 End If
 final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟ", "FINAL", Lang)
@@ -24213,7 +24231,7 @@ v = 123
         nm$ = GetStrUntil(",", Mid$(b$, 12))
       GetSub nm$, i
 abc123:
-      FastSymbol "(", ss$
+      FastSymbol ss$, "("
       If hlp$ <> "" Then
       frm$ = BlockParam(rest)
       
@@ -24334,7 +24352,7 @@ ThisGroup.RegisterEvent s$
             If s$ <> vbNullString Then ThisGroup.RegisterEvent s$
         Else
             MyEr "Expected a string literal for event name", "Περίμενα αλφαριθμητικό σε εισαγωγικά για όνομα γεγονότος"
-                    ExecuteGroupStruct = False
+                    ExecuteGroupStruct = 0
                     Exit Function
         End If
     Loop
@@ -24380,7 +24398,7 @@ If final Then
                          If IsLabelSymbolNew(rest$, "ΤΥΠΟΣ", "TYPE", Lang) Then
                                             If IsStrExp(bstack, rest$, ss$) Then
                                             frm$ = bstack.GroupName
-                                            prepareGroup bstack, w$, y1, glob, hlp <> ""
+                                            prepareGroup bstack, w$, y1, glob, Len(hlp) > 0
                                           
                                             LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
                                             
@@ -24397,7 +24415,7 @@ If final Then
                                     If FastSymbol(rest$, "{") Then
                       
                                           frm$ = bstack.GroupName
-                                          prepareGroup bstack, w$, y1, glob, hlp <> ""
+                                          prepareGroup bstack, w$, y1, glob, Len(hlp) > 0
                                         LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
                                         
                                         If Not Abs(ExecuteGroupStruct(bstack, bstack.GroupName & w$, y1, rest$, Lang, glob)) = 0 Then
@@ -24408,7 +24426,7 @@ If final Then
                                          bstack.GroupName = frm$
                                          If Typename(var(y1)) <> "Group" Then Set var(y1) = New Group
                                     Else
-                                      prepareGroup bstack, w$, y1, glob, hlp <> ""
+                                      prepareGroup bstack, w$, y1, glob, Len(hlp) > 0
                                         LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
                             End If
 
@@ -25136,8 +25154,6 @@ lcl = False
 End If
 ExecuteGroupStruct = 1
 Loop Until Trim(rest$) = vbNullString
-
-
 End Function
 
 Private Sub CallByObject(bstack As basetask, i As Long, ret As Boolean)
@@ -26550,13 +26566,7 @@ With myobject
 
                            If uni1 Then GoTo cont1010
                             
-                                     If here$ = vbNullString Then
-                                        ps2push = bstack.GroupName + s$
-                                        Else
-                                        ps2push = here$ + "." + bstack.GroupName + s$
-                                        End If
-              
-                            
+                           
                             .PeekItem x1 + 1, vvl  'here is the value
 
                                        If InStr(s$, ".") = 0 Then
@@ -26564,11 +26574,10 @@ With myobject
                             If Typename(vvl) = myArray Then
                                             s$ = Left$(s$, Len(s$) - 1)
                                             ss$ = vbNullString
-                                  '          If Not neoGetArrayLinkOnly(bstack, s$, j) Then   ''
                                                 j = -1
                                             If temp Then
-                                                    GlobalArr bstack, s$, ss$, 0, j  ''bstack.GroupName &
-                                                  Set var(j) = vvl 'PRESERVE POINTER
+                                                    GlobalArr bstack, s$, ss$, 0, j
+                                                  Set var(j) = vvl
                                                   Else
                                                     Set subgroup = vvl
                                                     GlobalArr bstack, s$, ss$, 0, j
@@ -26648,14 +26657,11 @@ conthere2:
                                                         Else
                                                                     var(v) = vvl
                                                         End If
-                                                ps.DataStr s$ + Str(v) 'ps2push + Str(V)
+                                                ps.DataStr s$ + Str(v)
                                             End If
-                                                        ' ss$ = String$(16, ".")
-                                                       ' Mid$(ss$, 1) = Str$(v)
-                                                  ''      frm$ = frm$ + ss$
                                                   
                             End If
-                            End If  ' rom instr
+                            End If
 cont1010:
                  Next x1
 
@@ -26787,13 +26793,7 @@ cont1010:
                  .FloatGroupName = myobject.FloatGroupName
               
               If myobject.HasStrValue Then
-               If here$ = vbNullString Then
-                                        ps2push = bstack.GroupName
-                                        Else
-                                        ps2push = here$ + "." + bstack.GroupName
-                                        End If
-                Mid$(ps2push, Len(ps2push), 1) = "$"
-                GlobalVarRefLink ps2push, i, True
+                GlobalVarRefLink2 here$ + "$", i, glob
              End If
                 .HasStrValue = myobject.HasStrValue
                 .HasValue = myobject.HasValue
@@ -26810,7 +26810,7 @@ cont1010:
              bstack.GroupName = oldgroupname$
 End Sub
 Sub UnFloatGroupReWriteVars(bstack As basetask, what$, i As Long, myobject As Object, Optional mergesuper As Boolean = False, Optional MakeNew As Boolean)
-Dim ThisGroup As Group, ohere$
+Dim ThisGroup As Group, ohere$, addon As Boolean
 Set ThisGroup = var(i)
 If myobject.IamApointer Then
 'If Not TypeOf myobject Is Group Then Exit Sub
@@ -26855,7 +26855,7 @@ If Trim$(what$) = vbNullString Then Exit Sub
 If (myobject Is Nothing) Then Exit Sub
 If Not TypeOf myobject Is Group Then Exit Sub
  Dim ps As mStiva2, v As Long, s$, frm$, vvl As Variant, x1 As Long, ss$, frmarr$, sss$, j As Long
- Dim grtype As Variant, ps2push As String, TT As Long, ff$, uni As Boolean
+ Dim grtype As Variant, ps2push As String, ff$, uni As Boolean, limit As Long   ' TT As Long
  Set ps = var(i).soros
  Dim subgroup As Object, pppp As mArray
  Dim oldgroupname$, glob As Boolean
@@ -26890,20 +26890,17 @@ If myobject Is Nothing Then GoTo exithere1
              GoTo exithere1
              End If
                 If .IamFloatGroup Then
-                 .PeekItem 0, grtype
+                 addon = bstack.ErrVars < i
+                
+                .PeekItem 0, grtype
                  
-                 .PeekItem 1, vvl
+                .PeekItem 1, vvl
+                
+                 
                     For x1 = 2 To 1 + vvl * 2 Step 2
                             .PeekItem x1, vvl    'here is the name
-                    
-                            
                             s$ = vvl
-                            
-                                   If here$ = vbNullString Then
-                                        ps2push = bstack.GroupName + s$
-                                        Else
-                                        ps2push = here$ + "." + bstack.GroupName + s$
-                                        End If
+                 
                             If uni Then
                             If Left$(s$, 1) = "@" Then
                             If mergesuper Then
@@ -26918,115 +26915,91 @@ If myobject Is Nothing Then GoTo exithere1
                             .PeekItem x1 + 1, vvl  'here is the value
 
                             If Typename(vvl) = myArray Then
-                                            s$ = Left$(s$, Len(s$) - 1)
-                                            ss$ = vbNullString
-                                            If here$ = vbNullString And bstack.UseGroupname <> vbNullString Then
-                                            If neoGetArrayLinkOnly(bstack, bstack.UseGroupname + s$, j) Then GoTo conthere1111
-                                            
-                                            End If
-                                            If Not neoGetArrayLinkOnly(bstack, s$, j) Then  ''
-                                            
-                                            j = -1
-                                                    Set subgroup = vvl
-                                                    GlobalArr bstack, s$, ss$, 0, j
-                                                    Set pppp = var(j)
-                                                    subgroup.CopyArray pppp
-                                                    Set subgroup = Nothing
-                                            Else
+                                s$ = Left$(s$, Len(s$) - 1)
+                                ss$ = vbNullString
+                                If here$ = vbNullString And bstack.UseGroupname <> vbNullString Then
+                                    If neoGetArrayLinkOnly(bstack, bstack.UseGroupname + s$, j) Then GoTo conthere1111
+                                End If
+                                If Not neoGetArrayLinkOnly(bstack, s$, j) Then  ''
+                                    j = -1
+                                    Set subgroup = vvl
+                                    GlobalArr bstack, s$, ss$, 0, j
+                                    Set pppp = var(j)
+                                    subgroup.CopyArray pppp
+                                    Set subgroup = Nothing
+                                Else
 conthere1111:
-                                                    Set subgroup = vvl
-                                                    Set pppp = var(j)
-                                                    subgroup.CopyArray pppp
-                                                    Set subgroup = Nothing
-                                            End If
-                                            TT = ps.Total
-                                          
-                                            ps.DataStrUn s$ + Str$(j)
-                                    
-                                            
+                                    Set subgroup = vvl
+                                    Set pppp = var(j)
+                                    subgroup.CopyArray pppp
+                                    Set subgroup = Nothing
+                                End If
+                                If addon Then ps.DataStrUn s$ + Str$(j)
                             ElseIf Typename(vvl) = "lambda" Then
-                          
-                             If GetVar1(bstack, bstack.GroupName & s$, v) And here$ = vbNullString Then
-                             ElseIf Not GetVar1(bstack, s$, v) Then
-                        
-                             v = globalvar(bstack.GroupName & s$, 0)
-                              If here$ = vbNullString Then
-                                                GlobalSub bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), bstack.GroupName
-                                            Else
-                                                GlobalSub here$ & "." & bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), here$ + "." + bstack.GroupName
-                                            End If
-                             End If
-                             Set var(v) = vvl
-                                
-                              TT = ps.Total
-                                 ps.DataStrUn s$ + Str(v)
-                             
-                            Else  ' is not array so...
+                                If GetVar1(bstack, bstack.GroupName & s$, v) And here$ = vbNullString Then
+                            ElseIf Not GetVar1(bstack, s$, v) Then
+                                v = globalvar(bstack.GroupName & s$, 0)
+                                If here$ = vbNullString Then
+                                    GlobalSub bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), bstack.GroupName
+                                Else
+                                    GlobalSub here$ & "." & bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), here$ + "." + bstack.GroupName
+                                End If
+                            End If
+                            Set var(v) = vvl
+                            If addon Then ps.DataStrUn s$ + Str(v)
+                        Else  ' is not array so...
                             '' drop *
                             If Asc(s$) = 42 Then s$ = Mid$(s$, 2)
-                                  If GetVar1(bstack, bstack.GroupName & s$, v) Then ' And here$ = VbNullString
-                                  ' this needed for "a<=b"  a copy to a global group
-                                                ElseIf GetVar1(bstack, ps2push, v) Then
-                                                ElseIf Not GetVar1(bstack, s$, v) Then
-                                                        v = globalvar(bstack.GroupName & s$, 0)
-                                            End If
-                                            If Typename(vvl) = "Group" Then
-                                                        Dim spare As Object
-                                                        Set spare = vvl
-                                                                    If Typename(var(v)) <> "Group" Then
-                                                                                UnFloatGroup bstack, s$, v, spare, here$ = vbNullString, , MakeNew
-                                                                    Else
-                                                                                UnFloatGroupReWriteVars bstack, s$, v, spare, , MakeNew
-                                                                    End If
-                                           
-                                                        Set spare = Nothing
-                                                                  TT = ps.Total
-                              
-                                                         ps.DataStrUn "*" + s$ + Str(v)  'ps2push + Str(v)
-                                            Else
-                                                        If MyIsObject(vvl) Then
-                                                        
-                                                                    
-                                                                    If Typename(vvl) = "mHandler" Then
-                                                                    Set vvl = CopyHandlerObj(vvl)
-                                                                    ElseIf Typename(vvl) = "mEvent" Then
-                                                                    
-                                                                    CopyEvent vvl, bstack
-                                                                    Set vvl = bstack.lastobj
-                                                                    Set bstack.lastobj = Nothing
-                                                                    If here$ = vbNullString Then
-                                                                           vvl.Upgrade bstack.GroupName
-                                                                    Else
-                                                                    vvl.Upgrade here$ + "." + bstack.GroupName
-                                                                    End If
-                                                                    End If
-                                                                    Set var(v) = vvl
-                                                                    
-                                                        Else
-                                                                    var(v) = vvl
-                                                        End If
-
-                                                         TT = ps.Total
-                                                             ps.DataStrUn s$ + Str(v)  'ps2push + Str(v)
-                                            End If
-                                    '                 If Not TT = ps.Total Then
-                                     '  End If
-
+                            ps2push = bstack.GroupName + s$
+                            If GetVar1(bstack, ps2push, v) Then
+                            ElseIf GetVar1(bstack, here$ + "." + ps2push, v) Then
+                            ElseIf Not GetVar1(bstack, s$, v) Then
+                                v = globalvar(ps2push, 0)
                             End If
+                            If Typename(vvl) = "Group" Then
+                                Dim spare As Object
+                                Set spare = vvl
+                                If Typename(var(v)) <> "Group" Then
+                                    UnFloatGroup bstack, s$, v, spare, here$ = vbNullString, , MakeNew
+                                Else
+                                    UnFloatGroupReWriteVars bstack, s$, v, spare, , MakeNew
+                                End If
+                                Set spare = Nothing
+                                If addon Then ps.DataStrUn "*" + s$ + Str(v)
+                            Else
+                                If MyIsObject(vvl) Then
+                                    If Typename(vvl) = "mHandler" Then
+                                        Set vvl = CopyHandlerObj(vvl)
+                                    ElseIf Typename(vvl) = "mEvent" Then
+                                        CopyEvent vvl, bstack
+                                        Set vvl = bstack.lastobj
+                                        Set bstack.lastobj = Nothing
+                                        If here$ = vbNullString Then
+                                            vvl.Upgrade bstack.GroupName
+                                        Else
+                                            vvl.Upgrade here$ + "." + bstack.GroupName
+                                        End If
+                                    End If
+                                    Set var(v) = vvl
+                                Else
+                                    var(v) = vvl
+                                End If
+                                If addon Then ps.DataStrUn s$ + Str(v)
+                            End If
+                        End If
 cont1010:
-                 Next x1
+                    Next x1
                 End If
                 If ohere$ = vbNullString Or glob Then
-                                here$ = vbNullString
-              Else
-                                 here$ = ohere$
-              End If
-              
-              .PeekItem x1, vvl
-              If Trim$(vvl) <> "" Then
-              s$ = CStr(vvl)
-                   ExecuteGroupStruct bstack, what$, (i), s$, 1
-              End If
+                    here$ = vbNullString
+                Else
+                    here$ = ohere$
+                End If
+                .PeekItem x1, vvl
+                If Trim$(vvl) <> "" Then
+                    s$ = CStr(vvl)
+                    ExecuteGroupStruct bstack, what$, (i), s$, 1
+                End If
                 .PeekItem x1 + 1, vvl
               
               If Trim$(vvl) <> "" Then
@@ -27034,16 +27007,12 @@ cont1010:
            
                 bstack.GroupName = vbNullString
               While s$ <> ""
-                 ' If ohere$ = VbNullString Or bstack.UseGroupname <> "" Or glob Then
                  If ohere$ = vbNullString Or glob Then
                here$ = oldgroupname$ + what$
               Else
-     here$ = ohere$ + "." + oldgroupname$ + what$
+                    here$ = ohere$ + "." + oldgroupname$ + what$
               End If
-              
-              ''Execute bstack, s$, (True)
-   
-        x1 = IsLabelA1("", s$, ss$)
+            x1 = IsLabelA1("", s$, ss$)
              If x1 <> 0 Then
                 sss$ = s$
                 If Len(ss$) > 6 Then
@@ -27070,7 +27039,8 @@ cont1010:
                      
                         If sbf(x1).sbgroup = here$ + "." Then
                         Else
-                                              ThisGroup.FuncList = Chr$(1) + Chr$(2) + ss$ + "()" + strX1 + Chr$(1) + ThisGroup.FuncList
+                        
+                                      If addon Then ThisGroup.FuncList = Chr$(1) + Chr$(2) + ss$ + "()" + strX1 + Chr$(1) + ThisGroup.FuncList
                                               sbf(x1).sbgroup = here$ + "."
                         End If
                                               
@@ -27092,7 +27062,7 @@ cont1010:
                         End If
                          If sbf(x1).sbgroup = here$ + "." Then
                          Else
-                              ThisGroup.FuncList = Chr$(1) + Chr$(2) + ss$ + strX1 + Chr$(1) + ThisGroup.FuncList
+                              If addon Then ThisGroup.FuncList = Chr$(1) + Chr$(2) + ss$ + strX1 + Chr$(1) + ThisGroup.FuncList
                               sbf(x1).sbgroup = here$ + "."
                          End If
                       Else
@@ -29876,6 +29846,7 @@ i = 1
         Set .Owner = .Parent.Owner
         .OriginalName$ = ohere$
         .Vars = var2used + basestack.ByName: VName = varhash.count + basestack.ByName
+        .ErrVars = .Vars
         basestack.ByName = 0
         .commnum = comhash.count
         .strfunnum = strfunid.count
@@ -32247,7 +32218,7 @@ aa.enabled = True
 ss$ = NLtrim$(block(rest$))
 rd$ = vbNullString
 While ss$ <> ""
-If FastSymbol(ss$, vbCrLf) Then
+If FastSymbol(ss$, vbCrLf, , 2) Then
 ss$ = NLtrim(ss$)
 ElseIf IsLabelSymbolNew(ss$, "ΔΙΑΒΑΣΕ", "READ", Lang) Then
 If Lang = 1 Then
@@ -33334,12 +33305,11 @@ End If
         If basestack.IamThread Then Set bs.Process = basestack.Process
         If Not TheSame(here$, ss$) Then Set bs.Sorosref = basestack.soros
         Set bs.Owner = basestack.Owner
-            ' bs.UseGroupname = sbf(x1).sbgroup
              bs.OriginalCode = x1
              If flag Then
              bs.UseGroupname = basestack.UseGroupname
              bs.GroupName = basestack.GroupName
-         
+            
              Call GoFunc(bs, ss$, rest$, vvl, , x1)
             
              Else
@@ -33489,6 +33459,7 @@ x1 = ModuleSub("A_()", ss$, Trim$(s$))
         Set bs.Owner = basestack.Owner
         bs.UseGroupname = sbf(x1).sbgroup
         bs.OriginalCode = x1
+
     If par Then
        Call GoFunc(bs, what$, rest$, vvl, , x1)
        Else
@@ -33598,12 +33569,12 @@ Else
         Set bs.Owner = basestack.Owner
         bs.UseGroupname = sbf(x1).sbgroup
         bs.OriginalCode = x1
+
         If LenB(here$) = 0 Then
             here$ = what$
             Call GoFunc(bs, what$, rest$, vvl, , x1)
             here$ = vbNullString
         ElseIf x1 >= 0 Then
-           ' Call GoFunc(bs, "", rest$, vvl, , x1)
             If flag Then
                 bs.UseGroupname = basestack.UseGroupname
                 bs.GroupName = basestack.GroupName
@@ -33682,8 +33653,9 @@ ElseIf i > 3 Then
         bs.IamAnEvent = basestack.IamAnEvent
         If basestack.IamThread Then Set bs.Process = basestack.Process
         If Not TheSame(here$, ss$) Then Set bs.Sorosref = basestack.soros
+
         Set bs.Owner = basestack.Owner
-            ' bs.UseGroupname = sbf(x1).sbgroup
+
              bs.OriginalCode = x1
              If flag Then
              bs.UseGroupname = basestack.UseGroupname
@@ -34143,9 +34115,9 @@ If Not it Then
         Set bs.Owner = basestack.Owner
         bs.UseGroupname = sbf(x1).sbgroup
         bs.OriginalCode = x1
+ 
         If here$ = vbNullString Then
             here$ = what$
-            
             Call GoFunc(bs, what$, rest$, vvl, , x1)
             
             here$ = vbNullString
@@ -34291,7 +34263,6 @@ GoTo again111
         If basestack.IamThread Then Set bs.Process = basestack.Process
         If Not TheSame(here$, ss$) Then Set bs.Sorosref = basestack.soros
         Set bs.Owner = basestack.Owner
-            ' bs.UseGroupname = sbf(x1).sbgroup
              bs.OriginalCode = x1
              If flag Then
              bs.UseGroupname = basestack.UseGroupname
@@ -34439,7 +34410,6 @@ jumphere:
             Call GoFunc(bs, what$, rest$, vvl, , x1)
             here$ = vbNullString
         ElseIf x1 >= 0 Then
-           ' Call GoFunc(bs, "", rest$, vvl, , x1)
                 bs.UseGroupname = sbf(x1).sbgroup
                 bs.StaticInUse = what$
                 Call GoFunc(bs, "", rest$, vvl, , x1)
@@ -36519,8 +36489,9 @@ Case 1
            GoTo contread123
         End If
        If GetVar3(bstack, what$, i, , , flag, s$, checktype, isAglobal, True, ok) Then
-        If isAglobal And Not allowglobals Then GoTo comehere
-        
+        If isAglobal And Not allowglobals Then
+        GoTo comehere
+        End If
 contread123:
                 If Typename$(myobject) = Typename(var(i)) Then
                     If Typename$(var(i)) = "Group" Then
@@ -36701,10 +36672,7 @@ checkpointer:
         End If
         
 comehere:
-            
-            
             i = globalvar(what$, 0)
-
             If Typename$(myobject) = "Group" Then
                  If Fast2VarNoTrim(rest$, "ΩΣ", 2, "AS", 2, 2, F) Then
                     If Fast2Varl(rest$, "ΔΕΙΚΤΗΣ", 7, "POINTER", 7, 7, F) Then
@@ -37230,7 +37198,6 @@ contstrhere:
             globalvar what$, s$
         ElseIf MyIsObject(var(i)) Then
                 If TypeOf var(i) Is Group Then
-                        
                         Set m = bstack.soros
                         Set bstack.Sorosref = New mStiva
                         bstack.soros.PushStr s$
@@ -43930,8 +43897,11 @@ Dim s$, x1 As Long, y1 As Long, what$, flag As Boolean, ss$, i As Long, par As B
 Dim p As Variant, HasStrName As Boolean, strName$
 ProcGroup = True
 
-If entrypoint = 1 Then flag = True
+
+
 Dim y3 As Long
+If entrypoint < 199 Then
+If entrypoint = 1 Then flag = True
 y3 = IsLabelSymbolNew(rest$, "ΜΕΓΕΓΟΝΟΤΑ", "WITHEVENTS", Lang)
 If IsLabelSymbolNew(rest$, "ΑΥΤΟ", "THIS", Lang) Then
     If basestack.UseGroupname <> "" Then
@@ -43953,6 +43923,58 @@ If IsLabelSymbolNew(rest$, "ΑΥΤΟ", "THIS", Lang) Then
     End If
 Else
     x1 = Abs(IsLabel(basestack, rest$, what$))
+End If
+
+Else
+what$ = rest$
+If Right$(what$, 1) = "$" Then
+HasStrName = True
+strName$ = what$
+what$ = Left$(what$, Len(what$) - 1)
+End If
+flag = entrypoint = 199
+If GetVar(basestack, basestack.GroupName & rest$, i, flag) Then
+If MyIsObject(var(i)) Then
+    If Not TypeOf var(i) Is Group Then
+        SyntaxError
+        Exit Function
+    End If
+Else
+  Set var(i) = New Group
+End If
+ElseIf Not GetVar(basestack, basestack.GroupName & what$, i, flag) Then
+  i = globalvar(basestack.GroupName & what$, CLng(0), False, flag)
+  Set var(i) = New Group
+Else
+If MyIsObject(var(i)) Then
+    If Not TypeOf var(i) Is Group Then
+        SyntaxError
+        Exit Function
+    End If
+Else
+  Set var(i) = New Group
+End If
+
+End If
+If entrypoint = 199 Then
+
+                                var(i).IamGlobal = True
+                                UnFloatGroupReWriteVars basestack, basestack.GroupName & what$, i, basestack.lastobj
+  
+
+                                Set basestack.lastobj = Nothing
+ElseIf entrypoint = 200 Then
+                          If basestack.lastobj.IamApointer Then
+                          If Not basestack.lastobj.link.IamFloatGroup Then
+                          CopyPointerRef basestack, basestack.lastobj
+                          End If
+                          End If
+                                UnFloatGroup basestack, basestack.GroupName & what$, i, basestack.lastobj, var(i).IamGlobal
+                            
+                                Set basestack.lastobj = Nothing
+End If
+ProcGroup = True
+Exit Function
 End If
 again:
 If x1 = 3 Then
@@ -44097,6 +44119,10 @@ contthere:
                                 Set basestack.lastobj = Nothing
                 Else
                              var(i).GroupName = what$ + "."
+                             If HasStrName Then
+                             
+                             GlobalVarRefLink what$ + "$", i, flag
+                             End If
                              If FastSymbol(rest$, ",") Then
                              x1 = Abs(IsLabel(basestack, rest$, what$))
                             If x1 = 1 Or x1 = 3 Then GoTo again
@@ -50966,7 +50992,7 @@ End Function
 'if ExecuteVar=8 then  goto exitfunc
 Public Function ExecuteVar(Exec1 As Long, ByVal jumpto As Long, bstack As basetask, w$, b$, v As Long, Lang As Long, VarStat As Boolean, NewStat As Boolean, nchr As Integer, ss$, sss As Long, temphere$) As Long
 Dim i As Long, p As Variant, myobject As Object, ok As Boolean, sw$, sp As Variant, usetype As Boolean
-Dim pppp As mArray, lasttype As Boolean, pppp1 As mArray
+Dim pppp As mArray, lasttype As Boolean, pppp1 As mArray, isglobal As Boolean
 ' VARSTAT MEANS GLOBAL FOR NEW VARIABLES
 
 On jumpto GoTo Case1, Case2, Case3, Case4, case5, Case6, Case7
@@ -51115,7 +51141,8 @@ If Left$(b$, 1) = "_" Then
 ElseIf MaybeIsSymbol(b$, "/*-+=~^&|<") Then
         If Mid$(b$, i, 2) = "<=" Then
         ' LOOK GLOBAL
-        If GetVar(bstack, w$, v, True, , , , usetype) Then
+        If GetVar(bstack, w$, v, True, , , , usetype, isglobal) Then
+       
         w$ = varhash.lastkey
             Mid$(b$, i, 2) = "  "
             
@@ -51194,7 +51221,7 @@ checkobject:
                                 If myobject.IamApointer Then
                                 Set var(v) = myobject
                                 Else
-                                 UnFloatGroup bstack, w$, v, myobject, VarStat, , Typename(var(v)) = "Empty" ' global??
+                                 UnFloatGroup bstack, w$, v, myobject, VarStat Or isglobal, , Typename(var(v)) = "Empty"    ' global??
                                  If Len(bstack.UseGroupname) <> 0 Then var(v).IamRef = True
                                  End If
                                 Set myobject = Nothing
@@ -52178,7 +52205,11 @@ If ss$ <> "" Then
     If ss$ = "=" Then
     If VarStat Then
             If IsStrExp(bstack, b$, ss$) Then
-                    globalvar w$, ss$, , VarStat, temphere$
+            globalvar w$, ss$, , VarStat, temphere$
+            GoTo cont184575
+            
+                    
+ 
             Else
                     NoValueForVar w$
                     Exec1 = 0: ExecuteVar = 8
@@ -52335,9 +52366,15 @@ cont184575:
                                             
                                         End If
             ElseIf Typename$(bstack.lastobj) = "Group" Then
+           ' If VarStat Then
+            '
+             '   i = globalvar(bstack.GroupName & w$, CLng(0), False, True, temphere$)
+              '  Set var(i) = New Group
+               ' var(i).IamGlobal = True
+                
+          '  End If
             
-            
-            If Not ProcGroup(100 + VarStat, bstack, w$, Lang) Then
+            If Not ProcGroup(200 + VarStat, bstack, w$, Lang) Then
             Exec1 = 0: ExecuteVar = 8
             Exit Function
             End If

@@ -1,10 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.6 active-X
+Version 9.6 Revision 1 active-X
 
-1. More speed,
-2. Addition: IF/Else.If/Else/End If structure without blocks.
-3. Fix some bugs form previous revision (Utf8Enc was broken for a number)
+Fix a bug for Event object (this fault insert in previous revision)
+Add more control on objects of type Group.
+We can add members (variables, arrays, functions and modules), but these additions holded if a group made in current module or function.
+Try { } now preserve stack for subs/if/next/gosub label
+
+
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate

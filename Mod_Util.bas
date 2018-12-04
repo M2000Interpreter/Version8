@@ -9788,6 +9788,7 @@ End If
 End Function
 Function FastSymbol(a$, c$, Optional mis As Boolean = False, Optional cl As Long = 1) As Boolean
 Dim i As Long, j As Long
+'If Len(c$) <> cl Then Stop  ; only for check
 j = Len(a$)
 If j = 0 Then Exit Function
 i = MyTrimL(a$)
@@ -17695,4 +17696,55 @@ interpret = b$ = vbNullString
 there1:
 bstack.LoadOnly = False
 End Function
+Public Sub PushErrStage(basestack As basetask)
+        With basestack.RetStack
+                        .PushVal subHash.count
+                        .PushVal varhash.count
+                        .PushVal sb2used
+                        .PushVal basestack.SubLevel
+                        .PushVal var2used
 
+                        .PushVal -4
+                         basestack.ErrVars = var2used
+        End With
+       
+End Sub
+Public Sub PopErrStage(basestack As basetask)
+Dim nok As Boolean
+        With basestack.RetStack
+        If .LookTopVal = -4 Then
+jumphere:
+           .drop 1
+           basestack.ErrVars = CLng(.PopVal)
+        If nok Then
+           basestack.SubLevel = CLng(.PopVal)
+            var2used = basestack.ErrVars
+            sb2used = CLng(.PopVal)
+            varhash.ReduceHash CLng(.PopVal), var()
+            subHash.ReduceHash CLng(.PopVal), sbf()
+            Else
+            .drop 4
+            End If
+        Else
+
+        While basestack.RetStackTotal > 0
+        Select Case .LookTopVal
+        Case -1
+            nok = True
+        .drop 7
+        Case -2
+            nok = True
+            .drop 5  ' never happen???
+        Case -3
+            .drop 3
+            basestack.UseofIf = basestack.UseofIf - 1
+        Case -4
+            GoTo jumphere
+        Case Else
+         .drop 2  ' string in topval (gosub to label)
+             nok = True
+        End Select
+        Wend
+        End If
+        End With
+End Sub

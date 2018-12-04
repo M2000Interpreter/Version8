@@ -25,6 +25,7 @@ Public finalFlag As Boolean
 Public UseofIf As Integer
 Public IFCTRL As Boolean, jump As Boolean
 Public Vars As Long, ByName As Long
+Public ErrVars As Long
 Public usestack As Boolean
 Public commnum As Long
 Public strnum As Long
