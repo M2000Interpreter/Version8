@@ -312,10 +312,17 @@ Private Const Utf8CodePage As Long = 65001
 Function CheckItemType(bstackstr As basetask, v As Variant, a$, r$, Optional ByVal wasarr As Boolean = False) As Boolean
 Dim useHandler As mHandler, fastcol As FastCollection, pppp As mArray, w1 As Long, p As Variant, s$
 CheckItemType = True
+Dim vv
+If MyIsObject(v) Then
+    Set vv = v
+Else
+   r$ = Typename(v)
+   Exit Function
+End If
 againtype:
-        r$ = Typename(v)
+        r$ = Typename(vv)
         If r$ = "mHandler" Then
-            Set useHandler = v
+            Set useHandler = vv
             Select Case useHandler.t1
             Case 1
                 Set fastcol = useHandler.objref
@@ -323,7 +330,7 @@ againtype:
                     If IsExp(bstackstr, a$, p) Then
                         If Not fastcol.Find(p) Then GoTo keynotexist
                             If fastcol.IsObj Then
-                                Set v = fastcol.ValueObj
+                                Set vv = fastcol.ValueObj
                                 GoTo againtype
                             Else
                                 wasarr = True
@@ -331,7 +338,7 @@ againtype:
                             End If
                         ElseIf IsStrExp(bstackstr, a$, s$) Then
                             If fastcol.IsObj Then
-                                Set v = fastcol.ValueObj
+                                Set vv = fastcol.ValueObj
                                 GoTo againtype
                             Else
                             If fastcol.StructLen > 0 Then GoTo checkit
@@ -385,7 +392,7 @@ checkit:
                 w1 = useHandler.indirect
                 If w1 > -1 And w1 <= var2used Then
                                 r$ = Typename(var(w1))
-                                If r$ = "mHandler" Then Set v = var(w1): GoTo againtype
+                                If r$ = "mHandler" Then Set vv = var(w1): GoTo againtype
                     Else
                             r$ = Typename(useHandler.objref)
                                        If FastSymbol(a$, ",") Then
@@ -394,7 +401,7 @@ checkit:
                                                 If IsExp(bstackstr, a$, p) Then
                                                    pppp.index = p
                                                     If MyIsObject(pppp.Value) Then
-                                                         Set v = pppp.Value
+                                                         Set vv = pppp.Value
                                                          wasarr = False
                                                          GoTo againtype
                                                     Else
@@ -418,10 +425,10 @@ checkit:
             Case 4
                     r$ = useHandler.objref.EnumName
             Case Else
-                r$ = Typename(v.objref)
+                r$ = Typename(vv.objref)
             End Select
-        ElseIf Typename(v) = "PropReference" Then
-            r$ = Typename$(v.Value)
+        ElseIf Typename(vv) = "PropReference" Then
+            r$ = Typename$(vv.Value)
         End If
         Set bstackstr.lastobj = Nothing
         Set bstackstr.lastpointer = Nothing
@@ -6277,9 +6284,7 @@ again22:
         Case ")", "}", Is < " ", "'", "\"
         
         Exit Do
-        Case "."
-            If Len(what$) > 0 Then what$ = what$ + w$ Else what$ = vbNullString
-        Case "A" To "Z", "a" To "z", Is >= "Á"
+         Case ".", "A" To "Z", "a" To "z", Is >= "Á"
         
         what$ = what$ + w$
         
@@ -6435,7 +6440,7 @@ again22:
         Case ")", "}", Is < " ", "'", "\"
         
         Exit Do
-        Case "A" To "Z", "a" To "z", Is >= "Á"
+        Case ".", "A" To "Z", "a" To "z", Is >= "Á"
         
         what$ = what$ + w$
         

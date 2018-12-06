@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 2
+Global Const Revision = 3
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -25310,11 +25310,12 @@ End Sub
 
 Public Sub ProcProperty(bstack As basetask, v(), vIndex As Long, FN$, rest$, language As Long, Optional hardlink As Boolean = False, Optional usethis As Long)
 Dim var1() As Variant, s$, r As Double, l As Long, newref As Long, many As Long, y1 As Boolean, x1 As Long, y2 As Boolean
-Dim var2() As String, ss$, sp As Variant, indirect As Boolean
+Dim var2() As String, ss$, sp As Variant, indirect As Boolean, s1$
 Dim vv As Object, useHandler As Boolean
 Dim oo As Object, myVar As Variant
 Set vv = v(vIndex)
 Dim pppp As mArray
+
 If TypeOf vv Is mHandler Then
 
 If vv.indirect >= 0 Then
@@ -25332,6 +25333,7 @@ End If
  indirect = True
 End If
 If TypeOf vv Is PropReference Then
+
 If IsObject(vv.Value) Then Set vv = vv.Value Else MyEr "No Object found", "Δεν βρήκα αντικείμενο": Exit Sub
 End If
 Do
@@ -25415,7 +25417,6 @@ If l <> -1 Then
 y1 = IsLabelSymbolNew(rest$, "ΓΕΝΙΚΟ", "GLOBAL", language)
 
 If Not y1 Then y2 = IsLabelSymbolNew(rest$, "ΝΕΟ", "NEW", language) Else y2 = False
-
 x1 = Abs(IsLabel(bstack, rest$, s$))
 
 If x1 < 5 Then
@@ -25426,18 +25427,24 @@ If x1 < 5 Then
     MakeitPropReference var(newref)
     GoTo jumpheretoo
     ElseIf Typename(var(newref)) <> "PropReference" Then
+    If Typename(var(newref)) = "mHandler" Then
+    GoTo contenum
+    Else
     MakeitPropReference var(newref)
+    End If
     GoTo jumpheretoo
     End If
 Else
 JUMPTHERE:
 ''GlobalVar s$, 0   'we push a zero..GlobalVar create
 ''GetlocalVar s$, newref
+
 If y1 Then
 newref = GlobalVarRefOnly(s$, y1)
 Else
 newref = GlobalVarRefOnly(bstack.GroupName & s$)
 End If
+contenum:
 If l = -4 Then
 ' get now object
 
@@ -25549,6 +25556,7 @@ End If
 
 End If
 End If
+
 ElseIf IsLabelSymbolNew(rest$, "ΘΕΣΕ", "SET", language) Then
 y1 = IsLabelSymbolNew(rest$, "ΓΕΝΙΚΟ", "GLOBAL", language)
 ' we make a new reference to that property
@@ -25566,7 +25574,6 @@ GoTo contindex
 End If
 Else
 contindex:
-Dim s1$
  If IsExp(bstack, rest$, sp) Then
   Err.Clear
         Set myVar = ReadOneIndexParameter(vv, l, s1$, sp, False)
@@ -25588,9 +25595,7 @@ Dim s1$
                             If Not FastSymbol(rest$, ")") Then GoTo there
                          If x1 > 4 Then s$ = Left$(s$, Len(s$) - 1)
 End If
-'
- '   If x1 < 5 Then
-        If GetlocalVar(s$, newref) Then
+      If GetlocalVar(s$, newref) Then
             'var(newref) = CDbl(myVar)
              If IsObject(myVar) Then
                 Set var(newref) = myVar
@@ -25605,9 +25610,7 @@ End If
             var(newref) = myVar
             End If
     End If
-'Else
 
-'End If
 End If
 End If
  If FastSymbol(rest$, ",") Then

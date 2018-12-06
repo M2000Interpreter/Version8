@@ -1,13 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 2 active-X
+Version 9.6 Revision 3 active-X
 
-Fix a bug for types for objects for passing by reference:
-Group alfa {x=10}
-Module AlfaInc (&a as Group) { Print a.x : a.x++}
-AlfaInc &alfa   ' 10
-AlfaInc &alfa   ' 11
-This bug not exist in 9.5 version of early revisions.
+Fix a bug in new If End If
+Fix a bug with iterators for Com objects when using _NewEnum
 
 
 From version 9.0 revision 50:
