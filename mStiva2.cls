@@ -28,14 +28,15 @@ Copy.PushVariant mstack.item(i)
 Next i
 End Function
 Public Property Get LookTopVal() As Variant
-On Error Resume Next
+If mstack.count > 0 Then
 LookTopVal = mstack.item(1)
-
+End If
 End Property
 Public Property Get PopVal() As Variant
-On Error Resume Next
+If mstack.count > 0 Then
 PopVal = mstack.item(1)
    mstack.Remove 1
+End If
 End Property
 Public Sub PushVal(a As Variant)
 If mstack.count = 0 Then
@@ -81,6 +82,28 @@ End Sub
 Public Property Get StackItem(where As Long) As Variant
 StackItem = mstack.item(where)
 End Property
+Public Property Get PopObj() As Object
+On Error Resume Next
+Set PopObj = mstack.item(1)
+mstack.Remove 1
+
+End Property
+Public Sub DataObj(RHS As Object)
+Dim aa
+Set aa = RHS
+If mstack.count = 0 Then
+mstack.Add aa
+Else
+mstack.Add aa, , , mstack.count
+End If
+End Sub
+Public Sub DataVal(a As Variant)
+If mstack.count = 0 Then
+mstack.Add a
+Else
+mstack.Add a, , , mstack.count
+End If
+End Sub
 Public Sub DataStr(ByRef a As String)
 Dim v As Variant
 v = vbNullString

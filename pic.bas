@@ -319,7 +319,7 @@ ttl = False
 If Not F Is Nothing Then
 If F.Visible Then F.SetFocus
 End If
-Err.Clear
+Err.clear
 End Sub
 Public Function StartJoypadk(Optional ByVal jn As Long = 0) As Boolean
     If joyGetDevCapsA(jn, MYJOYCAPS, 404) <> 0 Then 'Get Joypadk info
@@ -2699,7 +2699,7 @@ Private Function c_CreatePartialRegion(rgnRects() As RECT, ByVal lIndex As Long,
     End With
     ' call function to create region from our byte (RECT) array
     c_CreatePartialRegion = ExtCreateRegion(ByVal xFrmPtr, (rgnRects(lIndex - 2&).Right + 2&) * 16&, rgnRects(lIndex - 2&))
-    If Err Then Err.Clear
+    If Err Then Err.clear
 
 End Function
 
@@ -2812,7 +2812,7 @@ Case "NORMAL", "NOT", "NOTHING", "NOW", "NUMBER", "OFF", "OLE", "ON"
 Case "OPEN", "OPEN.FILE", "OPEN.IMAGE", "OPERATOR", "OPTIMIZATION", "OR", "ORDER", "ORDER(", "OSBIT", "OS$", "OUT", "OUTPUT"
 Case "OVER", "OVERWRITE", "PAGE", "PARAGRAPH$(", "PARAGRAPH(", "PARAGRAPH.INDEX(", "PARAM(", "PARAM$(", "PARAMETERS$", "PART", "PARENT", "PASSWORD"
 Case "PATH", "PATH$(", "PAUSE", "PEN", "PI", "PIECE$(", "PIPE", "PIPENAME$(", "PLATFORM$", "PLAY"
-Case "PLAYER", "PLAYSCORE", "POINT", "POINTER", "POINT(", "POLYGON", "POS", "POS(", "POS.X", "POS.Y", "PRINT"
+Case "PLAYER", "PLAYSCORE", "POINT", "POINTER", "POINTER(", "POINT(", "POLYGON", "POS", "POS(", "POS.X", "POS.Y", "PRINT"
 Case "PRINTER", "PRINTERNAME$", "PRINTING", "PRIVATE", "PROFILER", "PROPERTY", "PROPERTY(", "PROPERTY$(", "PROPERTIES", "PROPERTIES$", "PROTOTYPE", "PSET", "PUBLIC", "PUSH", "PUT", "QUEUE", "QUOTE$("
 Case "RANDOM", "RANDOM(", "READ", "READY(", "RECORDS(", "RECURSION.LIMIT", "REFER", "REFRESH", "RELEASE", "REM"
 Case "REMOVE", "REPEAT", "REPLACE$(", "REPORT", "REPORTLINES", "RESTART", "RETRIEVE", "RETURN", "REV(", "REVISION"
@@ -2841,7 +2841,7 @@ Case "аяис$(", "аяистеяолеяос$(", "аявеиа", "аявеио", "аявеио$(", "аявеиоу.лгйос
 Case "аукос$(", "аукоу", "ауноуса", "ауто", "ажаияесг", "ажгсе", "баке", "баке.адеиа$(", "басг"
 Case "басг(", "басг.паяовос", "басг.вягстгс", "баье", "бектистопоигсг", "бгла", "богхеиа", "цецомос", "цецомота", "целисе", "целисла"
 Case "цемийес", "цемийг", "цемийо", "циа", "цомийо", "цяалла", "цяалла$", "цяаллатосеияа", "цяаллатосеияа$", "цяаллесамажояас", "цяаллг"
-Case "цяажг$(", "цяаье", "цягцояа", "цымиа", "дапед(", "деийтг.лояжг", "деийтгс", "деийтгс.йол", "деийтгс.у", "деийтгс.в"
+Case "цяажг$(", "цяаье", "цягцояа", "цымиа", "дапед(", "деийтг.лояжг", "деийтгс", "деийтгс(", "деийтгс.йол", "деийтгс.у", "деийтгс.в"
 Case "деийтгса.у", "деийтгса.в", "деине", "дей(", "дейаен", "дейаен$(", "дем", "дениос", "дени$(", "денилеяос$(", "дес", "дглосио"
 Case "диа", "диабасе", "диацяажг", "диадовийо", "диайопг", "диайоптес", "диалесоу", "диаяхяысг", "диаяхяысг(", "диаяйеиа", "диастасг("
 Case "диастиво", "диажамеиа", "диажамеиа$", "диажамо", "диажуцг", "диейоье", "дийтуо$", "диояхысе"
@@ -2999,7 +2999,7 @@ Else
     lr = 1
     Else
     If SG < 0 Then ig$ = "-" & ig$
-    Err.Clear
+    Err.clear
     On Error Resume Next
     n$ = ig$ & DE$ & ex$
     sng = Len(ig$ & DE$ & ex$)
@@ -3040,20 +3040,20 @@ Select Case checktype
 Case vbLong
 On Error Resume Next
     v = CLng(v)
-    If Err.Number > 0 Then Err.Clear: r1 = False
+    If Err.Number > 0 Then Err.clear: r1 = False
 
 Case vbSingle
 On Error Resume Next
      v = CSng(v)
-    If Err.Number > 0 Then Err.Clear: r1 = False
+    If Err.Number > 0 Then Err.clear: r1 = False
 Case vbDecimal
 On Error Resume Next
     v = CDec(v)
-    If Err.Number > 0 Then Err.Clear: r1 = False
+    If Err.Number > 0 Then Err.clear: r1 = False
 Case vbCurrency
 On Error Resume Next
     v = CCur(v)
-    If Err.Number > 0 Then Err.Clear: r1 = False
+    If Err.Number > 0 Then Err.clear: r1 = False
 End Select
 
 
@@ -3211,7 +3211,7 @@ Else
          Else
             r = val(ig$ & DE$ & ex$)
              If Err.Number > 0 Then
-             Err.Clear
+             Err.clear
              IsNumberOnly = False
              End If
 
@@ -3376,7 +3376,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
 
 End Function
-Function IsLabelAnew(where$, a$, r$, lang As Long) As Long
+Function IsLabelAnew(where$, a$, r$, Lang As Long) As Long
 ' for left side...no &
 
 Dim rr&, one As Boolean, c$, gr As Boolean
@@ -3384,7 +3384,7 @@ r$ = vbNullString
 ' NEW FOR REV 156  - WE WANT TO RUN WITH GREEK COMMANDS IN ANY COMPUTER
 Dim i&, l As Long, p3 As Integer
 Dim p2 As Long, p1 As Integer, p4 As Long
-l = Len(a$): If l = 0 Then IsLabelAnew = 0: lang = 1: Exit Function
+l = Len(a$): If l = 0 Then IsLabelAnew = 0: Lang = 1: Exit Function
 
 p2 = StrPtr(a$): l = l - 1
   p4 = p2 + l * 2
@@ -3421,7 +3421,7 @@ p2 = StrPtr(a$): l = l - 1
     If i > p2 Then a$ = Mid$(a$, (i - 2 - p2) \ 2)
     End If
     
-    lang = 1
+    Lang = 1
     Exit Function
     Case 32, 160
     Case Else
@@ -3451,7 +3451,7 @@ p2 = StrPtr(a$): l = l - 1
         End If
         a$ = Mid$(a$, (i - p2) \ 2)
         IsLabelAnew = 1
-        lang = -1
+        Lang = -1
               
         Exit Function
 
@@ -3571,13 +3571,13 @@ i1233:
     Next i
   If i > p4 Then a$ = vbNullString Else If (i + 2 - p2) \ 2 > 1 Then a$ = Mid$(a$, (i + 2 - p2) \ 2)
        r$ = myUcase(r$, gr)
-       lang = 1 + CLng(gr)
+       Lang = 1 + CLng(gr)
 
     IsLabelAnew = rr&
 
 
 End Function
-Public Function IsLabelDotSub(where$, a$, rrr$, r$, lang As Long, Optional p1 As Integer = 0) As Long
+Public Function IsLabelDotSub(where$, a$, rrr$, r$, Lang As Long, Optional p1 As Integer = 0) As Long
 ' for left side...no &
 
 Dim rr&, one As Boolean, c$, firstdot$, gr As Boolean
@@ -3585,7 +3585,7 @@ rrr$ = vbNullString
 r$ = vbNullString
 Dim i&, l As Long, p3 As Integer
 Dim p2 As Long, p4 As Long  '', excludesp As Long
-  l = Len(a$): If l = 0 Then IsLabelDotSub = 0: lang = 1: Exit Function
+  l = Len(a$): If l = 0 Then IsLabelDotSub = 0: Lang = 1: Exit Function
 p2 = StrPtr(a$): l = l - 1
   p4 = p2 + l * 2
   For i = p2 To p4 Step 2
@@ -3622,7 +3622,7 @@ p2 = StrPtr(a$): l = l - 1
     If i > p2 Then a$ = Mid$(a$, (i - 2 - p2) \ 2)
     End If
     
-    lang = 1
+    Lang = 1
     Exit Function
     Case 0 To 7, 32, 160
     Case Else
@@ -3675,14 +3675,14 @@ p2 = StrPtr(a$): l = l - 1
         a$ = Mid$(a$, (i - p2) \ 2) ' mid$(a$, 2)
         IsLabelDotSub = 1
         
-        lang = -1
+        Lang = -1
       
         Exit Function
     
         ElseIf firstdot$ = vbNullString Then
         IsLabelDotSub = 1
-        lang = 1 + CLng(gr)
-        If lang = 1 Then
+        Lang = 1 + CLng(gr)
+        If Lang = 1 Then
         rrr$ = UCase(r$)
         Else
         rrr$ = myUcase(r$)
@@ -3811,7 +3811,7 @@ i123:
   If (i + 2 - p2) \ 2 > 1 Then a$ = Mid$(a$, (i + 2 - p2) \ 2)
   End If
        rrr$ = firstdot$ + myUcase(r$, gr)
-       lang = 1 + CLng(gr)
+       Lang = 1 + CLng(gr)
     IsLabelDotSub = rr&
    'a$ = LTrim(a$)
 
@@ -3914,7 +3914,7 @@ myfun() = Array("PARAM(", 1, "паяал(", 1, "STACKITEM(", 2, "тилгсыяоу(", 2, "SGN
 , "BINARY.ROTATE(", 81, "дуадийг.пеяистяожг(", 81, "SINT(", 82, "айеяаио.дуадийо(", 82, "USGN(", 83, "дуадийо(", 83, "UINT(", 84, "дуадийо.айеяаио(", 84, "ROUND(", 85, "стяоцц(", 85 _
 , "INT(", 86, "ай(", 86, "SEEK(", 87, "летахесг(", 87, "EOF(", 88, "текос(", 88, "RANDOM(", 89, "туваиос(", 89, "CHRCODE(", 90, "ваяйыд(", 90, "ASC(", 91, "йыд(", 91 _
 , "GROUP(", 92, "олада(", 92, "TEST(", 93, "дойилг(", 93, "CONS(", 94, "емысг(", 94, "CAR(", 95, "пяыто(", 95, "CDR(", 96, "еполема(", 96, "сыяос(", 24, "STACK(", 24, "READY(", 97, "етоило(", 97, "PROPERTY(", 98, "идиотгта(", 98, "IF(", 99, "ам(", 99, "ORDER(", 100, "танг(", 100, "BANK(", 101, "тяап(", 101, "CEIL(", 102, "ояож(", 102, "FLOOR(", 86, "дапед(", 86, "еийома(", _
-103, "IMAGE(", 103, "BUFFER(", 104, "диаяхяысг(", 104, "BINARY.NOT(", 105, "дуадийо.ови(", 105)
+103, "IMAGE(", 103, "BUFFER(", 104, "диаяхяысг(", 104, "BINARY.NOT(", 105, "дуадийо.ови(", 105, "POINTER(", 108, "деийтгс(", 108)
 If Not bhashbackup Is Nothing Then
 For i = 0 To UBound(myfun()) Step 2
     bhashbackup.ItemCreator CStr(myfun(i)), CLng(myfun(i + 1))

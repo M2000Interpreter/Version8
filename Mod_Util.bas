@@ -17774,11 +17774,12 @@ jumphere:
         End With
 End Sub
 Function expanddot(bstack As basetask, w$) As Boolean
-' count dots
 Dim i As Integer, j As Long
 For i = 1 To Len(w$)
 If Mid$(w$, i, 1) = "." Then
     j = j + 1
+Else
+    Exit For
 End If
 Next i
 w$ = Mid$(w$, j + 1)
@@ -17793,4 +17794,9 @@ End If
 expanddot = True
 End If
 
+End Function
+Public Function GetNextLineNoTrim(c$) As String
+Dim i, j$
+i = InStr(c$, vbCrLf)
+If i = 0 Then GetNextLineNoTrim = c$: c$ = vbNullString Else GetNextLineNoTrim = Left$(c$, i - 1): c$ = Mid$(c$, i)
 End Function

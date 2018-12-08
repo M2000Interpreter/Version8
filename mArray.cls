@@ -122,7 +122,7 @@ If MyIsNumeric(actualdata(v)) Then
                             
 End If
                            v = v + 1
-                           Err.Clear
+                           Err.clear
 Loop
 
 End Sub
@@ -163,7 +163,7 @@ If MyIsNumeric(actualdata(v)) Then
                             
 End If
                            v = v + 1
-                           Err.Clear
+                           Err.clear
 Loop
 
 End Sub
@@ -195,7 +195,7 @@ If MyIsNumeric(actualdata(v)) Then
                             
 End If
                            v = v + 1
-                           Err.Clear
+                           Err.clear
 Loop
 
 End Sub
@@ -219,7 +219,7 @@ If MyIsNumeric(actualdata(v)) Then
                                  End Select
 End If
                            v = v + 1
-                           Err.Clear
+                           Err.clear
 Loop
 
 End Sub
@@ -859,6 +859,7 @@ ElseIf curitem < 0 Then
 'item = GroupRef.objref.Value
 'End If
 'Else
+If GroupRef.t1 <> 1 Then Stop
 If GroupRef.objref.Done Then
     If GroupRef.objref.IsObj Then
         Set item = GroupRef.objref.ValueObj
@@ -1058,8 +1059,7 @@ Set aa = New Group
 Set var = aa
 End Sub
 Sub CopyGroupObj(myobject1 As Object, myobject2 As Object, Optional LinkToMe As Boolean = False)
-'Special Copy
- Dim ps As New mStiva, v As Long, s$, frm$, vvl As Variant, x1 As Long, ss$
+ Dim v As Long, s$, frm$, vvl As Variant, x1 As Long, ss$
 Dim subgroup As Object, sub2 As Object, myArray As mArray, mySecondArray As mArray
 
 Dim mygroup2 As New Group

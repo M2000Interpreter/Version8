@@ -12,23 +12,15 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-' strings and numbers goes to Collection
 Private mstack As New Collection
 Private mMany As Long
 Dim BeginFrom As Long
 ' interface for iteration
 Public index As Long
+' new idea to not include a VarItem
+' we place three items, the slot, the type (or subtype), the data.
+' so each item is a multiple of three
 
-' Generic is base 0 in Stack Item
-' Here we have base 1
-'Stiva.PushStr   string or reference
-'Stiva.DataStr
-'Stiva.PushVal
-'Stiva.DataVal
-'Stiva.PopType  (? ????f?)
-'Stiva.PopStr
-'Stiva.PopVal
-'Stiva.Flush
 Public Function IsEmpty() As Boolean
 IsEmpty = mstack.count = 0
 End Function
@@ -593,35 +585,6 @@ mstack.Add aa, , , mstack.count
 End If
 Inc
 End Sub
-Public Sub DataStrUn(a As String)
-Dim aa As VarItem
-Set aa = NewVarItem()
-Dim i As Long, b As String
-b = Split(a)(0)
-aa.Typename = "S"
-aa.ItemStr = a
-If mstack.count = 0 Then
-mstack.Add aa
-Else
-For i = 1 To Total
-If Split(StackItem(i))(0) = b Then
-
-mstack.Remove i
-If mstack.count = 0 Then
-mstack.Add aa
-ElseIf i = 1 Then
-mstack.Add aa, , 1
-Else
-mstack.Add aa, , , i - 1
-End If
-Exit Sub
-End If
-Next i
-mstack.Add aa, , , mstack.count
-End If
-Inc
-End Sub
-
 Public Sub DataObj(RHS As Object)
 Dim aa As VarItem
 If RHS Is Nothing Then
@@ -827,7 +790,7 @@ Private Sub Class_Terminate()
 Flush
 End Sub
 Sub CopyGroupObj(myobject1 As Object, myobject2 As Object)
- Dim ps As New mStiva, v As Long, s$, frm$, vvl As Variant, x1 As Long, ss$
+ Dim v As Long, s$, frm$, vvl As Variant, x1 As Long, ss$
 Dim subgroup As Object, sub2 As Object, myArray As mArray, mySecondArray As mArray
  Dim mygroup2 As New Group
   Dim myobject As Group

@@ -220,7 +220,7 @@ JetPrefix = JetPrefixUser
 JetPostfix = JetPostfixUser
 DBUser = extDBUser
 DBUserPassword = extDBUserPassword
-Err.Clear
+Err.clear
 End Sub
 Public Function inames(i As Long, Lang As Long) As String
 If (i And &H3) <> 1 Then
@@ -367,7 +367,7 @@ If CFname((base)) <> "" Then
 RemoveOneConn base
 If CheckMine(base) Then
 KillFile base
-Err.Clear
+Err.clear
 
 Else
 MyEr "Can 't delete the Base", "Δεν μπορώ να διαγράψω τη βάση"
@@ -381,7 +381,7 @@ End If
 End Sub
 
 Public Sub TABLENAMES(base As String, bstackstr As basetask, r$, Lang As Long)
-Dim tablename As String, scope As Long, cnt As Long, srl As Long, stac1 As New mStiva
+Dim tablename As String, scope As Long, cnt As Long, srl As Long, stac1 As New mStiva2
 Dim myBase  ' variant
 scope = 1
 
@@ -436,7 +436,7 @@ End If
                         End If
                     Loop
                     If srl = DriveSerial(Left$(base, 3)) Then
-                        Err.Clear
+                        Err.clear
                         If myBase = vbNullString Then myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF       'open the Connection
                     End If
                 End If
@@ -450,10 +450,10 @@ End If
                             Exit Sub
                         End If
                     Else
-                        Err.Clear
+                        Err.clear
                         myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
-                           Err.Clear
+                           Err.clear
                            myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
@@ -656,10 +656,10 @@ End If
                         Exit Sub
                     End If
                 Else
-                        Err.Clear
+                        Err.clear
                         myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
-                           Err.Clear
+                           Err.clear
                            myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
@@ -672,7 +672,7 @@ End If
                 End If
                 PushOne base, myBase
             End If
-           Err.Clear
+           Err.clear
          
          '  If Err.Number > 0 Then GoTo thh
            
@@ -681,7 +681,7 @@ End If
           Dim rec, LL$
           
            Set rec = CreateObject("ADODB.Recordset")
-            Err.Clear
+            Err.clear
            rec.Open Id$, myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
 
  If Err.Number <> 0 Then
@@ -691,7 +691,7 @@ RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
  myBase.Open = LL$
  PushOne base, myBase
- Err.Clear
+ Err.clear
 rec.Open Id$, myBase, 3, 4
 If Err.Number Then
 MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
@@ -702,7 +702,7 @@ End If
    
 If ED Then
 If gindex > 0 Then
-Err.Clear
+Err.clear
     rec.MoveLast
     rec.MoveFirst
     rec.AbsolutePosition = gindex '  - 1
@@ -732,7 +732,7 @@ End If
 
 i& = i& + 1
 Wend
-Err.Clear
+Err.clear
 rec.UpdateBatch  ' update be an updatebatch
 If Err.Number > 0 Then
 MyEr "Can't append " & Err.Description, "Αδυναμία προσθήκης:" & Err.Description
@@ -811,7 +811,7 @@ If Not IamHelpFile Then If Not CanKillFile(base) Then FilePathNotForUser: Exit S
 End If
 
 g05:
-Err.Clear
+Err.clear
    On Error Resume Next
 Dim Id$
    
@@ -854,7 +854,7 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
                 End If
             Loop
             If srl = DriveSerial(Left$(base, 3)) Then
-            Err.Clear
+            Err.clear
         If myBase = vbNullString Then myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF      'open the Connection
         
             End If
@@ -870,10 +870,10 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
  Exit Sub
  End If
  Else
-        Err.Clear
+        Err.clear
         myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
         If Err.Number = -2147467259 Then
-           Err.Clear
+           Err.clear
            myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
            If Err.Number = 0 Then
                JetPrefix = JetPrefixOld
@@ -896,7 +896,7 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
 
 Dim LL$
    Set rec = CreateObject("ADODB.Recordset")
- Err.Clear
+ Err.clear
  
   rec.Open Id$, myBase, 3, 4
 If Err.Number <> 0 Then
@@ -906,7 +906,7 @@ RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
  myBase.Open = LL$
  PushOne base, myBase
- Err.Clear
+ Err.clear
 rec.Open Id$, myBase, 3, 4
 If Err.Number Then
 MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
@@ -984,7 +984,7 @@ If ask("Το ερώτημα SQL δεν μπορεί να ολοκληρωθεί" & vbCrLf & table$, True) = vbR
 Else
 If ask("SQL can't complete" & vbCrLf & table$) = vbRetry Then GoTo g05
 End If
-Err.Clear
+Err.clear
 MyErMacro r$, "Can't read a database table :" & table$, "Δεν μπορώ να διαβάσω πίνακα :" & table$
 End If
 On Error Resume Next
@@ -1060,7 +1060,7 @@ End If
             End If
             Loop
             If srl = DriveSerial(Left$(base, 3)) Then
-            Err.Clear
+            Err.clear
    myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF   'open the Connection
                 
             End If
@@ -1074,10 +1074,10 @@ End If
  Exit Sub
  End If
  Else
-        Err.Clear
+        Err.clear
         myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
         If Err.Number = -2147467259 Then
-           Err.Clear
+           Err.clear
            myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
            If Err.Number = 0 Then
                JetPrefix = JetPrefixOld
@@ -1094,7 +1094,7 @@ On Error GoTo g101
       End If
  Dim LL$
    Set rec = CreateObject("ADODB.Recordset")
-    Err.Clear
+    Err.clear
      rec.Open Id$, myBase, 3, 4
       If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
@@ -1103,7 +1103,7 @@ RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
  myBase.Open = LL$
  PushOne base, myBase
- Err.Clear
+ Err.clear
 rec.Open Id$, myBase, 3, 4
 If Err.Number Then
 MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
@@ -1194,10 +1194,10 @@ Dim myBase
                         Exit Sub
                         End If
                     Else
-                        Err.Clear
+                        Err.clear
                         myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
-                           Err.Clear
+                           Err.clear
                            myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
@@ -1210,14 +1210,14 @@ Dim myBase
                 End If
                 PushOne base, myBase
     End If
-           Err.Clear
+           Err.clear
            If comTimeOut >= 10 Then myBase.CommandTimeout = CLng(comTimeOut)
-           If Err.Number > 0 Then Err.Clear: myBase.errors.Clear
+           If Err.Number > 0 Then Err.clear: myBase.errors.clear
             myBase.Execute com2execute
 
 If myBase.errors.count <> 0 Then
 MyEr "Can't execute command", "Δεν μπορώ εκτελέσω εντολή"
- myBase.errors.Clear
+ myBase.errors.clear
 End If
 
 ' we have response
@@ -1266,10 +1266,10 @@ End If
                         Exit Sub
                         End If
                     Else
-                        Err.Clear
+                        Err.clear
                         myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
-                           Err.Clear
+                           Err.clear
                            myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
@@ -1283,11 +1283,11 @@ End If
                 End If
                 PushOne base, myBase
             End If
-           Err.Clear
+           Err.clear
            Dim LL$, mcat, pIndex, mtable
            Dim okntable As Boolean
           
-            Err.Clear
+            Err.clear
             Set mcat = CreateObject("ADOX.Catalog")
             mcat.activeconnection = myBase
 
@@ -1300,7 +1300,7 @@ RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
  myBase.Open = LL$
  PushOne base, myBase
- Err.Clear
+ Err.clear
             Set mcat = CreateObject("ADOX.Catalog")
             mcat.activeconnection = myBase
             
@@ -1310,9 +1310,9 @@ MyEr Err.Description & " " & tablename, Err.Description & " " & tablename
 Exit Sub
 End If
 End If
-Err.Clear
+Err.clear
 mcat.TABLES(tablename).indexes("ndx").Remove
-Err.Clear
+Err.clear
 mcat.TABLES(tablename).indexes.Refresh
 
    If mcat.TABLES.count > 0 Then
@@ -1337,11 +1337,11 @@ If mtable Is Nothing Then
 Else
  mtable.indexes("ndx").Remove  ' remove the old index/
  End If
- Err.Clear
+ Err.clear
  If mcat.activeconnection.errors.count > 0 Then
- mcat.activeconnection.errors.Clear
+ mcat.activeconnection.errors.clear
  End If
- Err.Clear
+ Err.clear
    Set pIndex = CreateObject("ADOX.Index")
     pIndex.name = "ndx"  ' standard
     pIndex.indexnulls = 0 ' standrard
@@ -1370,7 +1370,7 @@ Else
          Exit Sub
         End If
 mcat.TABLES.Append mtable
-Err.Clear
+Err.clear
 mcat.TABLES.Refresh
 End If
     
@@ -1399,7 +1399,7 @@ End If
     Dim okndx As Boolean, okntable As Boolean, one_ok As Boolean
     ' Dim wrkDefault As Workspace
     Dim myBase ' As Database
-    Err.Clear
+    Err.clear
     On Error Resume Next
                    If Not getone(base, myBase) Then
            
@@ -1416,10 +1416,10 @@ End If
                     Exit Sub
                     End If
                 Else
-                    Err.Clear
+                    Err.clear
                     myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                     If Err.Number = -2147467259 Then
-                       Err.Clear
+                       Err.clear
                        myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                        If Err.Number = 0 Then
                            JetPrefix = JetPrefixOld
@@ -1432,7 +1432,7 @@ End If
                 End If
                 PushOne base, myBase
             End If
-           Err.Clear
+           Err.clear
 
     On Error Resume Next
    okntable = True
@@ -1448,7 +1448,7 @@ RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
  myBase.Open = LL$
  PushOne base, myBase
- Err.Clear
+ Err.clear
  Set cat.activeconnection = myBase
 If Err.Number Then
 MyEr Err.Description & " " & mtable, Err.Description & " " & mtable
@@ -1513,7 +1513,7 @@ End With
         cat.TABLES.Append mtable
         If Err.Number Then
         If Err.Number = -2147217859 Then
-        Err.Clear
+        Err.clear
         Else
          MyEr Err.Description, Err.Description
          Exit Sub
@@ -1601,7 +1601,7 @@ If realtype$ <> "" Then
  
       MyErMacro r$, "Can't compact databese " & ExtractName(base) & "." & " use a back up", "Πρόβλημα με την βάση " & ExtractName(base) & ".mdb χρησιμοποίησε ένα σωσμένο αρχείο"
       End If
-      Err.Clear
+      Err.clear
     End If
 End If
 End Sub
@@ -1724,10 +1724,10 @@ Dim myBase
                         DELfields = False: Exit Function
                         End If
                     Else
-                        Err.Clear
+                        Err.clear
                         myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
-                           Err.Clear
+                           Err.clear
                            myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
@@ -1740,7 +1740,7 @@ Dim myBase
                 End If
                 PushOne base, myBase
             End If
-           Err.Clear
+           Err.clear
 
     On Error Resume Next
 Dim rec
@@ -1752,7 +1752,7 @@ Dim rec
    DELfields = False
    Exit Function
    Else
-   myBase.errors.Clear
+   myBase.errors.clear
    myBase.Execute "DELETE * FROM [" & table$ & "] WHERE " & first$ & " = " & Second$
    If myBase.errors.count > 0 Then
    MyEr "Can't delete " & table$, "Δεν μπορώ να διαγράψω"
@@ -1774,7 +1774,7 @@ Dim Cnn1
  On Error Resume Next
  Cnn1.Open JetPrefix & DBFileName & ";Jet OLEDB:Database Password=;User Id=" & DBUser & ";Password=" & DBUserPassword & ";"  ' &  DBSecurityOFF 'open the Connection
  If Err Then
- Err.Clear
+ Err.clear
  Cnn1.Open JetPrefix & DBFileName & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF    'open the Connection
  If Err Then
  Else
@@ -1797,7 +1797,7 @@ On Error Resume Next
 If Not Init Then Exit Sub
 If conCollection.count > 0 Then
 Dim i As Long
-Err.Clear
+Err.clear
 For i = conCollection.count - 1 To 0 Step -1
 On Error Resume Next
 conCollection.index = i
@@ -1820,12 +1820,12 @@ End If
 End With
 End If
 conCollection.Remove conCollection.KeyToString
-Err.Clear
+Err.clear
 
 Next i
 Set conCollection = New FastCollection
 End If
-Err.Clear
+Err.clear
 End Sub
 Public Sub RemoveOneConn(conname)
 On Error Resume Next
@@ -1836,13 +1836,13 @@ If Not conCollection.ExistKey(conname) Then Exit Sub
 Set vv = conCollection.ValueObj
 If Typename$(vv) = "Empty" Then
 ' old code here
-Err.Clear
+Err.clear
     vv = conCollection(conname)
     If Not Err.Number <> 0 Then
         conCollection.Remove conname
         
 Else
-    Err.Clear
+    Err.clear
     conname = mylcasefILE(conname)
     If ExtractPath(conname) = vbNullString Then conname = mylcasefILE(mcd + conname)
     If ExtractType(CVar(conname)) = vbNullString Then conname = mylcasefILE(conname + ".mdb")
@@ -1852,13 +1852,13 @@ Else
     Exit Sub
 End If
 If Not Err.Number <> 0 Then
-Err.Clear
+Err.clear
 If vv.connectionstring <> "" Then
 If Err.Number = 0 Then If vv.activeconnection <> "" Then vv.Close
-Err.Clear
+Err.clear
 End If
 conCollection.Remove conname
-Err.Clear
+Err.clear
 End If
 End Sub
 Private Function getone(conname As String, this As Variant) As Boolean
