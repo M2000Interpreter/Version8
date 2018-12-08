@@ -1164,7 +1164,7 @@ End With
 End Sub
 Public Function LoadMyPicture(s1$, Optional useback As Boolean = False, Optional bcolor As Variant = 0&, Optional includeico As Boolean = False) As StdPicture
 Dim s As String
-Err.Clear
+Err.clear
    On Error Resume Next
                     If s1$ <> vbNullString Then
                         s$ = UCase(ExtractType(s1$))
@@ -1174,7 +1174,7 @@ Err.Clear
                         
                            Set LoadMyPicture = LoadPicture(s1$)
                            If Err.Number > 0 Then
-                           Err.Clear
+                           Err.clear
                            If useback Then
                               Set LoadMyPicture = LoadPictureGDIPlus(s1$, , , bcolor, True)
                            Else
@@ -1182,7 +1182,7 @@ Err.Clear
                             End If
                            End If
                            If Err.Number > 0 Then
-                           Err.Clear
+                           Err.clear
                            
                            Set LoadMyPicture = LoadPicture("")
                            End If
@@ -1193,7 +1193,7 @@ Err.Clear
                             If includeico And Not useback Then
                             Set LoadMyPicture = LoadPicture(s1$)
                                 If Err.Number > 0 Then
-                                    Err.Clear
+                                    Err.clear
                                     GoTo conthere
                                 End If
                             Else
@@ -1205,7 +1205,7 @@ conthere:
                             End If
                             End If
                             If Err.Number > 0 Then
-                           Err.Clear
+                           Err.clear
                           
                            Set LoadMyPicture = LoadPicture("")
                            End If
@@ -4127,7 +4127,7 @@ If bstack.Process Is Nothing Then
 If PP = 0 Then Exit Sub
 Else
 
-Err.Clear
+Err.clear
 p = bstack.Process.Done
 If Err.Number = 0 Then
 e = True
@@ -5976,12 +5976,12 @@ again22:
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
                         If Lang = 0 Then
-                        If what$ = "ам" Or what$ = "тоте" Or what$ = "аккиыс" Or what$ = "аккиыс.ам" Then
+                        If what$ = "ам" Or what$ = "аккиыс" Or what$ = "аккиыс.ам" Then 'Or what$ = "тоте"
                             w$ = what$
                                 Exit Sub
                             End If
                         Else
-                            If what$ = "IF" Or what$ = "THEN" Or what$ = "ELSE" Or what$ = "ELSE.IF" Then
+                            If what$ = "IF" Or what$ = "ELSE" Or what$ = "ELSE.IF" Then  'Or what$ = "THEN"
                                 w$ = what$
                                 Exit Sub
                             End If
@@ -5993,9 +5993,11 @@ again22:
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         Case Else
-        
+        If w$ = ":" Then
+        what$ = ""
+        Else
         what$ = what$ + w$
-        
+        End If
         
         End Select
         End If
@@ -8699,7 +8701,7 @@ AssignTypeNumeric = True
 Exit Function
 there:
 If Err = 6 Then
-Err.Clear
+Err.clear
 OverflowLong i = vbInteger
 Exit Function
 End If
@@ -8985,7 +8987,7 @@ End If
 'If Right$(a$, 1) <> "\" Then a$ = a$ & "\"
 GetCurDir = a$
 End Function
-Sub MakeGroupPointer(bstack As basetask, v)
+Sub MakeGroupPointer(bstack As basetask, v, Optional usethisname As String = "", Optional glob As Boolean)
 Dim varv As New Group
     With varv
         .IamGlobal = v.IamGlobal
@@ -8993,13 +8995,23 @@ Dim varv As New Group
         .BeginFloat 2
         Set .Sorosref = v.soros
         If Not v.IamFloatGroup Then
-       ' If bstack.UseGroupname <> "" Then
-       ' .lasthere = Mid$(bstack.UseGroupname, 1, Len(bstack.UseGroupname) - 1)
-       ' Else
+       If Len(usethisname) > 0 Then
+       If glob Then
+         .IamGlobal = True
+       Else
         .lasthere = here$
-       ' End If
+        
+        End If
+        .GroupName = usethisname
+       Else
+       If Not .IamGlobal Then
+       
+        .lasthere = here$
+        End If
+       
         If Len(v.GroupName) > 1 Then
             .GroupName = Mid$(v.GroupName, 1, Len(v.GroupName) - 1)
+        End If
         End If
         End If
     End With
@@ -10759,7 +10771,7 @@ Else
     lr = 1
     Else
     If SG < 0 Then ig$ = "-" & ig$
-    Err.Clear
+    Err.clear
     On Error Resume Next
     n$ = ig$ & DE$ & ex$
     sng = Len(ig$ & DE$ & ex$)
@@ -11007,7 +11019,7 @@ contfinal:
 End If
 er111:
     lr = sng - fr + 1
-    Err.Clear
+    Err.clear
 Exit Function
 
 End Function
@@ -11253,7 +11265,7 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CDec(ig$ & DE$)
                 If Err.Number = 6 Then
-                Err.Clear
+                Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                 r = val(ig$ & DE$)
                 End If
@@ -11262,7 +11274,7 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CCur(ig$ & DE$)
                 If Err.Number = 6 Then
-                Err.Clear
+                Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                 r = val(ig$ & DE$)
                 End If
@@ -11271,14 +11283,14 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CInt(ig$)
                 If Err.Number = 6 Then
-                Err.Clear
+                Err.clear
                 r = val(ig$)
                 End If
            Case 38
                 Mid$(a$, sng, 1) = " "
                 r = CLng(ig$)
                 If Err.Number = 6 Then
-                    Err.Clear
+                    Err.clear
                     r = val(ig$)
                 End If
             Case 126
@@ -11286,7 +11298,7 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CSng(ig$ & DE$)
                 If Err.Number = 6 Then
-                Err.Clear
+                Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                 r = val(ig$ & DE$)
                 End If
@@ -11303,7 +11315,7 @@ Else
                          If Len(ex$) > 2 Then
                              ex$ = Left$(ex$, Len(ex$) - 1)
                              sng = sng - 1
-                             Err.Clear
+                             Err.clear
                              If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                              r = val(ig$ & DE$ & ex$)
                              If Err.Number = 6 Then
@@ -12501,7 +12513,7 @@ Else
 contboolean:
 On Error Resume Next
  s$ = LTrim$(Str(p))
- If Err Then s$ = Typename$(p): Err.Clear
+ If Err Then s$ = Typename$(p): Err.clear
     If Left$(s$, 1) = "." Then
     s$ = "0" + s$
     ElseIf Left$(s$, 2) = "-." Then s$ = "-0" + Mid$(s$, 2)
@@ -14263,7 +14275,7 @@ If CheckIsmArray(anything) Then
     On Error Resume Next
     w = CLng(Fix(p)) + bs
     If Err Then
-        Err.Clear
+        Err.clear
         OutOfLimit
         Exit Function
     End If
@@ -14322,7 +14334,7 @@ If CheckStackObj(bstack, anything) Then
     On Error Resume Next
     w = CLng(Fix(p))
     If Err Then
-        Err.Clear
+        Err.clear
         OutOfLimit
         Exit Function
     End If
@@ -14405,7 +14417,15 @@ If UBound(s()) = 1 Then
         If Not pppp.Arr Then GoTo cont123
         If Not NeoGetArrayItem(pppp, bstack, s(0), w2, s(1)) Then GoTo cont123
         If MyIsObject(var(a.localvar)) Then
+        If TypeOf pppp.item(w2) Is Group Then
+        If pppp.item(w2).IamApointer Then
             Set pppp.item(w2) = var(a.localvar)
+        Else
+        Set pppp.item(w2) = CopyGroupObj(var(a.localvar), Not pppp.GroupRef Is Nothing)
+        End If
+        Else
+            Set pppp.item(w2) = var(a.localvar)
+            End If
         Else
             pppp.item(w2) = var(a.localvar)
         End If
@@ -15056,7 +15076,7 @@ Dim PP As Variant, par As Boolean, r2 As Variant, r3 As Variant, r4 As Variant
      If SG < 0 Then r = -r
               If Err.Number > 0 Then
     WrongArgument a$
-    Err.Clear
+    Err.clear
     Exit Function
     End If
     On Error GoTo 0
@@ -15082,7 +15102,7 @@ Dim s$
          If Err.Number > 0 Then
     
     WrongArgument a$
-    Err.Clear
+    Err.clear
     Exit Function
     End If
         On Error GoTo 0
@@ -15112,7 +15132,7 @@ Function IsDataVal(bstack As basetask, a$, r As Variant, SG As Variant) As Boole
      If Err.Number > 0 Then
     
     WrongArgument a$
-    Err.Clear
+    Err.clear
     Exit Function
     End If
     Else
@@ -15126,7 +15146,7 @@ Function IsDataVal(bstack As basetask, a$, r As Variant, SG As Variant) As Boole
      If Err.Number > 0 Then
     
     WrongArgument a$
-    Err.Clear
+    Err.clear
     Exit Function
     End If
     End If
@@ -17753,3 +17773,24 @@ jumphere:
         End If
         End With
 End Sub
+Function expanddot(bstack As basetask, w$) As Boolean
+' count dots
+Dim i As Integer, j As Long
+For i = 1 To Len(w$)
+If Mid$(w$, i, 1) = "." Then
+    j = j + 1
+End If
+Next i
+w$ = Mid$(w$, j + 1)
+If bstack.GetDotNew(w$, j) Then
+If Len(here$) > 0 Then
+If j = 1 Then
+If Len(w$) > Len(here$) Then
+    If Left$(w$, Len(here$) + 1) = here$ + "." Then w$ = Mid$(w$, Len(here$) + 2)
+End If
+End If
+End If
+expanddot = True
+End If
+
+End Function

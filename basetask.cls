@@ -217,7 +217,7 @@ End If
             If isLong Then
                 On Error Resume Next
                 .Value = CLng(MyRound(.Value, 0))
-                If Err.Number = 6 Then .Value = CDbl(MyRound(.Value, 0)): Err.Clear
+                If Err.Number = 6 Then .Value = CDbl(MyRound(.Value, 0)): Err.clear
             
             ElseIf inttype Then
             .Value = MyRound(.Value, 0)
@@ -309,7 +309,7 @@ End If
         End Select
     End If
 there:
-Err.Clear
+Err.clear
 MyRound = a
 If i < 0 Or i > 28 Then MyEr "Round Place exit range 0 to 28", "Η θέση στρογγυλοποίησης εκτός περιοχής από 0 έως 28"
 End Function
@@ -351,13 +351,12 @@ Public Sub MoveNameDot(a$)
 If a$ = vbNullString Then Exit Sub
 If curdotcol < dotcolmax Then
     curdotcol = curdotcol + 1
-    dotcol(curdotcol) = a$
-    
+     dotcol(curdotcol) = a$
 Else
     MyEr "Max count for dot names", "Μέγιστος αριθμός τελείας"
 End If
 End Sub
-Public Function GetDotNew(a$, dotnum&) As Boolean
+Public Function GetDotNew(a$, dotnum&, Optional clear As Boolean = False) As Boolean
 If Look2Parent Then GetDotNew = Parent.GetDotNew(a$, dotnum&): Exit Function
 
 If curdotcol = 0 Then
@@ -394,7 +393,12 @@ Else
     a$ = "THIS." + a$
     End If
   Else
+  If Left$(dotcol(dotnum), 1) = "*" And Not clear Then
+    a$ = Mid$(dotcol(dotnum), 2) + "." + a$
+  Else
     a$ = dotcol(dotnum) + "." + a$
+    End If
+    
 If Left$(a$, 1) = "." Then
 a$ = Me.UseGroupname + Mid$(a$, 2)
 GoTo aaa
@@ -532,7 +536,7 @@ Set Owner = myOwner
 End If
 
 On Error Resume Next
-Err.Clear
+Err.clear
 If Not Owner Is Nothing Then
 mitalic = Owner.Font.Italic
 mBold = Owner.Font.bold
@@ -541,7 +545,7 @@ myRun = True
 Else
 myRun = False
 End If
-Err.Clear
+Err.clear
 End Property
 Public Property Get IamThread() As Boolean
 IamThread = mprocessOk
@@ -604,7 +608,7 @@ If threadsnames Is Nothing Then Exit Function
 ' this is mandatory
 If TaskMaster Is Nothing Then Exit Function
 If TaskMaster.ThrowOne(Threadid) Then ThrowOne = True
-If Err.Number > 0 Then Err.Clear: Exit Function
+If Err.Number > 0 Then Err.clear: Exit Function
 ' maybe the task isn't on our list - because we send message from other thread!
 If threadsnames.Find(Threadid) Then
     Set aa = threadsnames.ValueObj
@@ -615,7 +619,7 @@ If threadsnames.Find(Threadid) Then
     ThrowOne = True
     Set aa.thread = Nothing
 Else
-    Err.Clear
+    Err.clear
     ThrowOne = Me.Parent.ThrowOne(Threadid)
 End If
 Set aa = Nothing

@@ -1,9 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 3 active-X
+Version 9.6 Revision 4 active-X
 
-Fix a bug in new If End If
-Fix a bug with iterators for Com objects when using _NewEnum
+some fixes on For object {}
 
 
 From version 9.0 revision 50:
