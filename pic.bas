@@ -2719,8 +2719,8 @@ Function ismine1(ByVal a$) As Boolean  '  START A BLOCK
 ismine1 = True
 a$ = myUcase(a$, True)
 Select Case a$
-Case "PART", "LIB", "PROTOTYPE"
-Case "леяос", "пяытотупо"
+Case "DO", "REPEAT", "PART", "LIB", "PROTOTYPE"
+Case "епамекабе", "епамакабе", "леяос", "пяытотупо"
 Case Else
 ismine1 = False
 End Select
@@ -2731,7 +2731,7 @@ a$ = myUcase(a$, True)
 Select Case a$
 Case "ABOUT", "AFTER", "BACK", "BACKGROUND", "CLASS", "COLOR", "DECLARE", "ELSE", "ENUM", "ENUMERATION", "EVENT", "EVERY", "GLOBAL", "FOR", "FKEY", "FUNCTION", "GROUP", "INVENTORY", "LAYER", "LOCAL", "MAIN.TASK", "MODULE", "OPERATOR", "PATH", "PEN", "PROPERTY", "PRINTER", "PRINTING", "REMOVE", "SET", "STACK", "START", "STRUCTURE", "TASK.MAIN", "THEN", "THREAD", "TRY", "WIDTH", "VALUE", "WHILE"
 Case "аявг", "аккиыс", "аниа", "аниа(", "апая", "апаяихлгсг", "цецомос", "цемийо", "цемийг", "цемийес", "циа", "дес", "диацяажг", "долг", "ейтупытгс", "ейтупысг", "емы", "епипедо", "хесе", "хесе(", "идиотгтес", "ивмос", "идиотгта", "йахе", "йатастасг", "йкасг", "йкеиди", "йуяио.еяцо", "лета", "мгла", "олада", "ояисе", "павос", "пема", "пеяи", "пеяихыяио", "сумаятгсг", "сыяос", "текестгс", "тлгла", "топийа", "топийг", "топийес", "тоте", "вяыла"
-Case "CONST", "стахеяг", "стахеяес", "SUPERCLASS", "упеяйкасг", "DO", "REPEAT", "епамекабе", "епамакабе"
+Case "CONST", "стахеяг", "стахеяес", "SUPERCLASS", "упеяйкасг"
 Case "->"
 Case Else
 ismine2 = False
@@ -2746,16 +2746,6 @@ Case Else
 ismine22 = False
 End Select
 End Function
-Function ismine33(ByVal a$) As Boolean  '
-ismine33 = True
-a$ = myUcase(a$, True)
-Select Case a$
-Case "CASE", "ле"
-Case Else
-ismine33 = False
-End Select
-End Function
-
 Function ismine5(ByVal a$) As Boolean  '  make
 ismine5 = True
 a$ = myUcase(a$, True)
