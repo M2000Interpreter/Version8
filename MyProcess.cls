@@ -161,7 +161,7 @@ End If
             look = True
 
 
-        Call executeblock(x, NowProcess, mybuf$, False, look, (Interrupted))
+        Call executeblock(x, NowProcess, mybuf$, False, look, (Interrupted), True)
         If Not (NowProcess Is Nothing) Then Set myOwner = NowProcess.Owner
         If Len(mybuf$) < 3 Then
         mybuf$ = vbNullString
@@ -180,7 +180,7 @@ End If
         
         If (x = 1 Or (x = 2 And mybuf$ = vbNullString)) And look = True Then
         
-            If NowProcess.Parent.Exist(myid, "_multi") Then
+            If NowProcess.Parent.exist(myid, "_multi") Then
               TaskMaster.RestEnd1
               TaskMaster.RestEnd
               
@@ -249,7 +249,7 @@ End If
             
 Set NowProcess.Owner = myOwner
 If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner))
- Call executeblock(x, NowProcess, mybuf$, False, look, Interrupted)
+ Call executeblock(x, NowProcess, mybuf$, False, look, Interrupted, True)
   If Not (NowProcess Is Nothing) Then Set myOwner = NowProcess.Owner
         If Len(mybuf$) < 3 Then
         mybuf$ = vbNullString
@@ -267,7 +267,7 @@ If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner))
         
         If (x = 1 Or (x = 2 And mybuf$ = vbNullString)) And look = True Then
         
-            If NowProcess.Parent.Exist(myid, "_multi") Then
+            If NowProcess.Parent.exist(myid, "_multi") Then
               TaskMaster.RestEnd1
               TaskMaster.RestEnd
               
