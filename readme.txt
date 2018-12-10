@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 5 active-X
+Version 9.6 Revision 6 active-X
 
-Many bug fixes from revision 2,3 and 4.
+Optimizations, Bug fixes, added While End While, Do Until (versions wihout blocks { })
+
 
 
 From version 9.0 revision 50:

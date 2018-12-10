@@ -1322,7 +1322,7 @@ Dim pp1 As String, pp2 As String
 pp1 = UndoDoc.textDoc
 
 If Not NoColor Then pp2 = SelHtmlText
-Clipboard.Clear  ' always
+Clipboard.clear  ' always
 
 blockKeyboard = True
 MyDoEvents
@@ -1968,8 +1968,37 @@ If kind > 0 Then
                                                   Exit Sub
                                         End If
                                 End If
+                ElseIf ismine33(drop$) Then
+                ' fix for case >100, =50...
+                pos2 = k - Len(a$) + 1
+                Do
+                lastcol = 14
+                
+                
+                addone pos2, 14
+                If FastSymbol(a$, "<") Then
+                    If Not FastSymbol(a$, "=") Then
+                        FastSymbol a$, ">"
+                    End If
+                ElseIf FastSymbol(a$, ">") Then
+                    FastSymbol a$, "="
+                ElseIf FastSymbol(a$, "=") Then
+                    FastSymbol a$, "="
+                ElseIf FastSymbol(a$, "~") Then
+                
                 End If
-    
+                
+                pos1 = 1
+                drop$ = aheadstatus(a$, False, pos1)
+                If pos1 > 0 Then
+                drop$ = Mid$(a$, 1, pos1 - 1)
+                    ColorizeExpressions drop$, k - Len(a$) + Len(drop$), pos2, feedthis
+                a$ = Mid$(a$, pos1)
+                End If
+                Loop Until Not FastSymbol(a$, ",")
+                onetime = True
+                GoTo again
+                End If
                  Else
                 lastcol = 10
              If Len(a$) > 0 Then
@@ -1991,7 +2020,7 @@ If kind > 0 Then
                  addone k - Len(a$) - Len(drop$) + 1, 10
                 
                  End If
-         
+             
   End If
   pos2 = k - Len(a$) + 1
   If kind > 3 Then
