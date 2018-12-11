@@ -2051,13 +2051,13 @@ fRegionFromBitmap = lSkinRgn
 
 End Function
 
-Public Function GetFrequency(Oct As Integer, No As Integer)
+Public Function GetFrequency(Oct As Integer, no As Integer)
 Dim lngNote As Long
-lngNote = ((Oct - 1) * 12 + No) - 37
+lngNote = ((Oct - 1) * 12 + no) - 37
 GetFrequency = 440 * (2 ^ (lngNote / 12))
 End Function
-Public Function GetNote(Oct As Integer, No As Integer) As Long
-GetNote = Oct * 12 + No
+Public Function GetNote(Oct As Integer, no As Integer) As Long
+GetNote = Oct * 12 + no
 End Function
 Public Sub PlayTune(ss$)
 Dim octave As Integer, i As Long, v$
@@ -3308,6 +3308,35 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   End Select
   Next i
  MyTrimR = l + 2
+End Function
+Sub test3()
+Dim a$, i As Long, j As Long
+a$ = "1234567@@@10"
+i = 6
+j = 11
+j = MyTrimRfrom(a$, i, j)
+Debug.Print Mid$(a$, i, j - i) + "*"
+End Sub
+Public Function MyTrimRfrom(s$, st As Long, ByVal en As Long) As Long
+Dim i&
+Dim p2 As Long, p1 As Integer, p4 As Long
+  If st > Len(s$) Then MyTrimRfrom = en: Exit Function
+  If en > Len(s$) Then MyTrimRfrom = en: Exit Function
+  If en <= st Then MyTrimRfrom = en: Exit Function
+  If st < 1 Then MyTrimRfrom = en: Exit Function
+  p2 = StrPtr(s) + (st - 1) * 2: en = en - 1
+  p4 = p2 + (en - st) * 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     ' MyTrimRfrom = en + 1
+     MyTrimRfrom = (i - p2) \ 2 + st + 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimRfrom = st
 End Function
 Public Function MyTrim(s$) As String
 Dim i&, l As Long

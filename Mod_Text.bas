@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 7
+Global Const Revision = 8
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -172,7 +172,7 @@ Public basestack1 As New basetask ' this is the global stack
 Public EventStaticCollection As New FastCollection
 Public sb2used As Long
 Public Type modfun
-    extern As Long
+    Extern As Long
     sb As String
     sbc As Long
     sbgroup As String
@@ -4062,14 +4062,17 @@ End If
 Loop
  Set park = Nothing
 End Function
-
-
 Function IsNumber(bstack As basetask, a$, r As Variant, Optional flatobject As Boolean = False) As Boolean
+    IsNumber = IsNumberNew(bstack, a$, r, flatobject)
+End Function
+
+'
+Function IsNumberNew(bstack As basetask, a$, r As Variant, Optional flatobject As Boolean = False) As Boolean
 Dim VR As Long, v$, v1&, w1 As Long, w2 As Long, p As Variant, s1$, dd As Long, dn As Long, w3 As Long
 Dim PP As Variant, pppp As mArray, nbstack As basetask, useHandler As mHandler, usebackup As Boolean
 Dim anything As Object, n$, useFast As FastCollection, userGroup As Group, useProp As PropReference
 r = 0#
-If a$ = vbNullString Then IsNumber = False: Exit Function
+If a$ = vbNullString Then IsNumberNew = False: Exit Function
 'On Error Resume Next
 Dim sng&, SG As Variant, ig$, DE$, sg1 As Boolean, ex$, s$
 Dim par As Boolean
@@ -4097,9 +4100,9 @@ Case "#"
    r = SG * -(CDbl(UNPACKLNG(Right$(s$, 2)) * 65536#) + CDbl(UNPACKLNG(Mid$(s$, 5, 2)) * 256#) + CDbl(UNPACKLNG(Mid$(s$, 3, 2))))
    If MaybeIsSymbolNoSpace(Mid$(a$, 1, 1), "[0-9]") Then
    MyEr "Too many digits", "–ÔÎÎ‹ ¯Áˆﬂ·"
-   IsNumber = False
+   IsNumberNew = False
    Else
-   IsNumber = True
+   IsNumberNew = True
    End If
    Exit Function
         End If
@@ -4175,7 +4178,7 @@ v1& = Abs(v1&)
  ElseIf v1& = 5 Or v1& = 7 Then
  GoTo LOOKFORSUBNUM
  Else
- IsNumber = False
+ IsNumberNew = False
   a$ = v$ + a$
     Exit Function
  End If
@@ -4192,19 +4195,19 @@ Else
 End If
 On w1 GoTo num1, num2, num3, num4, num5, num6, num7, num8, num9, num10, num11, num12, num13, num14, num15, num16, num17, num18, num19, num20, num21, num22, num23, num24, num25, num26, num27, num28, num29, num30, num31, num32, num33, num34, num35, num36, num37, num38, num39, num40, num41, num42, num43, num44, num45, num46, num47, num48, num49, num50, num51, num52, num53, num54, num55, num56, num57, num58, num59, num60, num61, num62, num63, num64, num65, num66, num67, num68, num69, num70, num71, num72, num73, num74, num75, num76, num77, num78, num79, num80, num81, num82, num83, num84, num85, num86, num87, num88, num89, num90, num91, num92, num93, num94, num95, num96, num97
 num82:
-IsNumber = 0
+IsNumberNew = 0
 InternalError
 Exit Function
 num93:
 Set bstack.lastobj = NewVarItem()
 bstack.lastobj.Typename = ">"
 r = 0
-IsNumber = True
+IsNumberNew = True
 FastSymbol a$, "?"
 Exit Function
 num90: ' "WINDOW","–¡—¡»’—œ"
 r = SG * FindFormSScreen(bstack.Owner)
-IsNumber = True
+IsNumberNew = True
 Exit Function
 num89: '"OSBIT"
 If Is64bit Then
@@ -4212,7 +4215,7 @@ r = SG * 64
 Else
 r = SG * 32
 End If
-IsNumber = True
+IsNumberNew = True
 Exit Function
 num88: ' "œ»œÕ«","SHOW"
     If Not Screen.ActiveForm Is Nothing Then
@@ -4224,20 +4227,20 @@ num88: ' "œ»œÕ«","SHOW"
     Else
     r = False
     End If
-IsNumber = True
+IsNumberNew = True
 Exit Function
 num87: ' "ISWINE"
 r = SG * IsWine
-IsNumber = True
+IsNumberNew = True
 Exit Function
 ' Select Case v$
 num1: ' "THIS", "¡’‘œ"   ' 1
-IsNumber = This1(bstack, v$, r)
+IsNumberNew = This1(bstack, v$, r)
 Exit Function
 
 num2: ' "RND", "‘’◊¡…œ”"
 r = SG * RndM(rndbase)
-IsNumber = True
+IsNumberNew = True
 Exit Function
 
 num3: ' "PEN", "–≈Õ¡"
@@ -4246,35 +4249,35 @@ With players(GetCode(bstack.Owner))
 For w1 = 0 To 15
 If QBColor(w1) = .mypen Then
 r = SG * w1
-IsNumber = True
+IsNumberNew = True
 Exit Function
 End If
 Next w1
 r = SG * -.mypen
-IsNumber = True
+IsNumberNew = True
 End With
 Exit Function
 num4: ' "HWND", "–¡—¡»’—œ"
 r = SG * myHwnd(bstack)
 
-IsNumber = True
+IsNumberNew = True
 Exit Function
 num5: ' Case "LOCALE", "‘œ–… œ"
 r = SG * cLid
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 
 num6: ' "CODEPAGE", " Ÿƒ… œ”≈À…ƒ¡"
 r = SG * UserCodePage
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num7: ' "SPEECH", "Àœ√œ”"
   r = SG * NumVoices
 
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num8: ' "ERROR", "À¡»œ”"
     If LastErNum2 <> 0 Then
@@ -4284,38 +4287,38 @@ num8: ' "ERROR", "À¡»œ”"
     End If
     LastErNum2 = 0
     LastErNum1 = 0  'reset when readed
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num9: ' "SCREEN.Y", "¡Õ¡À’”«.’"
   r = SG * ScrInfo(Console).Height
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num10: ' "SCREEN.X", "¡Õ¡À’”«.◊"
   r = SG * ScrInfo(Console).Width
      
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num11: ' "TWIPSY", "’ÿœ”.”«Ã≈…œ’"
   r = SG * Screen.TwipsPerPixelY
 
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num12: ' "TWIPSX", "–À¡‘œ”.”«Ã≈…œ’"
   r = SG * Screen.TwipsPerPixelX
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num13: ' "REPORTLINES", "√—¡ÃÃ≈”¡Õ¡÷œ—¡”"
   r = SG * players(GetCode(bstack.Owner)).LastReportLines
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num14: ' "LINESPACE", "ƒ…¡”‘…◊œ"
     r = SG * players(GetCode(bstack.Owner)).uMineLineSpace '' bstack.linespace
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num15: ' "MODE", "‘’–œ”"
 With players(GetCode(bstack.Owner))
@@ -4336,122 +4339,122 @@ If bstack.toprinter Then
     End If
     End With
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num16: ' "MEMORY", "ÃÕ«Ã«"
     r = SG * check_mem
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num17: ' "CHARSET", "◊¡—¡ ‘«—≈”"   ' charset of the object to display
   r = SG * players(GetCode(bstack.Owner)).charset
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num18: ' "ITALIC", "–À¡√…¡"  ' charset of the object to display
     
     r = SG * players(GetCode(bstack.Owner)).italics
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num19: ' "BOLD", "÷¡—ƒ…¡"  ' charset of the object to display
 
     r = SG * players(GetCode(bstack.Owner)).bold
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 
 num20: ' "COLORS", "◊—ŸÃ¡‘¡"
     r = SG * 2# ^ bitsPerPixel
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num21: ' "¡’Œœ’”¡", "ASCENDING"
     r = 0
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num22: ' "÷»…Õœ’”¡", "DESCENDING"
     r = SG
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 
 num23: ' "BOOLEAN", "Àœ√… œ”"
     r = SG * 1
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num24: ' "BYTE", "ÿ«÷…œ"
     r = SG * 2
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num25: ' "INTEGER", "¡ ≈—¡…œ”"
     r = SG * 3
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num26: ' "LONG", "Ã¡ —’”"
     r = SG * 4
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num27: ' "CURRENCY", "Àœ√…”‘… œ"
     r = SG * 5
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num28: ' "SINGLE", "¡–Àœ”"
     r = SG * 6
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num29: ' "DOUBLE", "ƒ…–Àœ”"
     r = SG * 7
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num30: ' "DATEFIELD", "«Ã≈—œÃ«Õ…¡"
     r = SG * 8
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num31: ' "BINARY", "ƒ’¡ƒ… œ"
     r = SG * 9
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num32: ' "TEXT", " ≈…Ã≈Õœ"
     r = SG * 10
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num33: ' "OLE"
     r = SG * 11
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num34: ' "MEMO", "’–œÃÕ«Ã¡"
     r = SG * 12
         
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num35: ' "REVISION", "¡Õ¡»≈Ÿ—«”«"
     r = SG * Revision
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num36: ' "BROWSER", "¡Õ¡Àœ√…œ"
         
         r = SG * (Trim(LCase(Form1.view1.LocationURL)) = "about:blank" Or Form1.view1.Visible = False)
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num37: ' "VERSION", "≈ ƒœ”«"
     r = SG * val(CStr(VerMajor) & "." & CStr(VerMinor))
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num38: ' "MOTION.X", " …Õ«”«.◊"
 With bstack
@@ -4462,7 +4465,7 @@ Else
     End If
     End With
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num39: ' Case "MOTION.Y", " …Õ«”«.’"
 With bstack
@@ -4474,24 +4477,24 @@ Else
     
     End With
     
-    IsNumber = True
+    IsNumberNew = True
 
     Exit Function
 num40: ' "MOTION.XW", " …Õ«”«.◊–", "MOTION.WX", " …Õ«”«.–◊"
     r = SG * Form1.Left
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num41: ' "MOTION.YW", " …Õ«”«.’–", "MOTION.WY", " …Õ«”«.–’"
     r = SG * Form1.Top
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num42: ' "FIELD", "–≈ƒ…œ"
     r = SG * Result
     
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num43: ' "MOUSE.KEY", "ƒ≈… ‘«”. œÃ"
   
@@ -4499,7 +4502,7 @@ num43: ' "MOUSE.KEY", "ƒ≈… ‘«”. œÃ"
 
 
        
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num44: ' "MOUSE", "ƒ≈… ‘«”"
 
@@ -4514,7 +4517,7 @@ End If
     
 
 
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num45: ' "MOUSE.X", "ƒ≈… ‘«”.◊"
 
@@ -4531,7 +4534,7 @@ r = MOUSEX(Form1.Left + bstack.Owner.Left)
 End If
 End With
       
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num46: ' "MOUSE.Y", "ƒ≈… ‘«”.’"
 With bstack
@@ -4547,40 +4550,40 @@ r = MOUSEY(Form1.Top + bstack.Owner.Top)
 End If
 End With
        
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num47: ' "MOUSEA.X", "ƒ≈… ‘«”¡.◊"
   
     r = SG * MOUSEX(Form1.Left)
     
       
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num48: ' "MOUSEA.Y", "ƒ≈… ‘«”¡.’"
  
     r = SG * MOUSEY(Form1.Top)
    
        
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 
 num49: ' "TRUE", "¡À«»≈”", "¡À«»«”"
     r = CDbl(SG * -1)
     'r = CBool(sg * -1)
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num50: ' "FALSE", "ÿ≈’ƒ≈”", "ÿ≈’ƒ«”"
     r = CBool(0)
     r = 0#
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num51: ' "STACK.SIZE", "Ã≈√≈»œ”.”Ÿ—œ’"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * bstack.soros.Total
     
     Exit Function
 num52: ' "ISNUM", "≈…Õ¡—"
-    IsNumber = True
+    IsNumberNew = True
       If bstack.soros.Total > 0 Then
     If bstack.soros.PopType = "N" Then r = SG * True Else r = 0
     Else
@@ -4592,7 +4595,7 @@ num53: ' "PI", "–…"
      r = BigPi
     If SG < 0 Then r = -r
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num54: ' "NOT", "œ◊…", "ƒ≈Õ"
    ' r = SG * -1
@@ -4601,7 +4604,7 @@ num54: ' "NOT", "œ◊…", "ƒ≈Õ"
    
         r = CBool(r = 0)
         If SG < 0 Then r = -r
-           IsNumber = FastSymbol(a$, ")")
+           IsNumberNew = FastSymbol(a$, ")")
            Exit Function
     Else
        NotAfter a$
@@ -4613,23 +4616,23 @@ num54: ' "NOT", "œ◊…", "ƒ≈Õ"
        NotAfter a$
     End If
     'a$ = "-" & a$
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 num55: ' "ISLET", "≈…Õ√—"
-    IsNumber = True
+    IsNumberNew = True
     If bstack.soros.Total > 0 Then
     If bstack.soros.PopType = "S" Then r = SG * True Else r = 0
     End If
     
     Exit Function
 num56: ' Case "WIDTH", "–À¡‘œ”"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * players(GetCode(bstack.Owner)).mx
     
     Exit Function
 num57: ' "POINT", "”«Ã≈…œ"
 '  dsprite ??
-    IsNumber = True
+    IsNumberNew = True
     
     With players(GetCode(bstack.Owner))
        r = SG * -(GetPixel(bstack.Owner.hDC, .XGRAPH \ dv15, .YGRAPH \ dv15) And &HFFFFFF)
@@ -4637,17 +4640,17 @@ num57: ' "POINT", "”«Ã≈…œ"
     
     Exit Function
 num58: ' "POS.X", "»≈”«.◊"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * players(GetCode(bstack.Owner)).XGRAPH
     
     Exit Function
 num59: ' "POS.Y", "»≈”«.’"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * players(GetCode(bstack.Owner)).YGRAPH
     
     Exit Function
 num60: ' "SCALE.X", " À…Ã¡Œ.◊", "◊.”«Ã≈…¡", "X.TWIPS"
-    IsNumber = True
+    IsNumberNew = True
     If bstack.toprinter Then
     r = SG * Form1.PrinterDocument1.ScaleWidth
     Else
@@ -4656,7 +4659,7 @@ num60: ' "SCALE.X", " À…Ã¡Œ.◊", "◊.”«Ã≈…¡", "X.TWIPS"
     
     Exit Function
 num61: ' "SCALE.Y", " À…Ã¡Œ.’", "’.”«Ã≈…¡", "Y.TWIPS"
-    IsNumber = True
+    IsNumberNew = True
     If bstack.toprinter Then
     r = SG * Form1.PrinterDocument1.ScaleHeight
     Else
@@ -4665,12 +4668,12 @@ num61: ' "SCALE.Y", " À…Ã¡Œ.’", "’.”«Ã≈…¡", "Y.TWIPS"
     
     Exit Function
 num62: ' "EMPTY", " ≈Õœ"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * (bstack.soros.Total = 0)
     
     Exit Function
 num63: ' "MOVIE.COUNTER", "MEDIA.COUNTER", "MUSIC.COUNTER", "‘¡…Õ…¡.Ã≈‘—«‘«”", "Ãœ’”… «.Ã≈‘—«‘«”"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * MediaPlayer1.getPositionInSec
     If MediaPlayer1.error > 0 Then
     r = SG * -1
@@ -4678,40 +4681,40 @@ num63: ' "MOVIE.COUNTER", "MEDIA.COUNTER", "MUSIC.COUNTER", "‘¡…Õ…¡.Ã≈‘—«‘«”", "
     
     Exit Function
 num64: ' "PLAYSCORE", "–¡…∆≈…÷ŸÕ«"
-    IsNumber = True
+    IsNumberNew = True
     
        r = SG * TaskMaster.PlayMusic
     
     Exit Function
 num65: ' "MOVIE", "MEDIA", "MUSIC", "‘¡…Õ…¡", "Ãœ’”… «"
-    IsNumber = True
+    IsNumberNew = True
     AVIRUN = MediaPlayer1.isMoviePlaying
     r = SG * AVIRUN
     
     Exit Function
 num66: ' "DURATION", "ƒ…¡— ≈…¡"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * MediaPlayer1.getLengthInMS / 1000
    
     
     Exit Function
 num67: ' "VOLUME", "≈Õ‘¡”«"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * CDbl(CLng(vol))
     
     Exit Function
 num68: ' "TAB", "”‘«À«"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * players(GetCode(bstack.Owner)).Column + 1  'CHANGED FROM Ver 7.1
     
     Exit Function
 num69: ' "HEIGHT", "’ÿœ”"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * players(GetCode(bstack.Owner)).My
     
     Exit Function
 num70: ' "POS", "»≈”«"
-    IsNumber = True
+    IsNumberNew = True
     
     
     
@@ -4719,18 +4722,18 @@ num70: ' "POS", "»≈”«"
     
     Exit Function
 num71: ' "ROW", "√—¡ÃÃ«"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * GetRealRow(bstack.Owner)
     
     Exit Function
 num72: ' "TIMECOUNT", "÷œ—‘œ”" ' ****************************
-  IsNumber = True
+  IsNumberNew = True
     r = SG * prof.MARKTWO
     
     Exit Function
 
 num73: ' "TICK", "‘… " ' ****************************
-  IsNumber = True
+  IsNumberNew = True
   If TaskMaster Is Nothing Then
   r = 0
   ElseIf TaskMaster.QueueCount = 0 Then
@@ -4741,27 +4744,27 @@ num73: ' "TICK", "‘… " ' ****************************
     
     Exit Function
 num74: ' "TODAY", "”«Ã≈—¡"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * CDbl(Date)
     
     Exit Function
 num75: ' "NOW", "‘Ÿ—¡"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * CDbl(CDate(Time))
     
      Exit Function
 num76: ' "MENU.VISIBLE", "≈–…Àœ√≈”.÷¡Õ≈—≈”"  ' NEW 6.5 REV 8
-    IsNumber = True
+    IsNumberNew = True
     r = SG * Form1.List1.Visible
     
     Exit Function
 num77: ' "MENUITEMS", "≈–…Àœ√≈”"
-    IsNumber = True
+    IsNumberNew = True
     r = SG * Form1.List1.listcount
     
     Exit Function
 num78: ' "MENU", "≈–…Àœ√«"
-    IsNumber = True
+    IsNumberNew = True
     r = 0
     With Form1.List1
     If .listcount > 0 Then
@@ -4779,7 +4782,7 @@ num85: ' "[]"
     '  Set bstack.Sorosref = New mStiva
     Set bstack.lastobj = useHandler
     r = 0
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 
 num84: ' "ARRAY", "–…Õ¡ ¡”"
@@ -4787,26 +4790,26 @@ If bstack.soros.Total = 0 Then
     
            EmptyStack a$
   
-        IsNumber = False: Exit Function
+        IsNumberNew = False: Exit Function
 
     ElseIf bstack.soros.StackItemTypeObjectType(1) = "*[mArray]" Then
         Set bstack.lastobj = bstack.soros.PopObj
         r = 0
         If FastSymbol(a$, "#") Then GoTo comehere
         
-        IsNumber = True
+        IsNumberNew = True
         Exit Function
     Else
    StackTopNotArray a$
   
-    IsNumber = False
+    IsNumberNew = False
     End If
 Exit Function
 num97:
-    IsNumber = NewInventory(bstack, a$, r, True)
+    IsNumberNew = NewInventory(bstack, a$, r, True)
     Exit Function
 num96:
-    IsNumber = NewInventory(bstack, a$, r, False)
+    IsNumberNew = NewInventory(bstack, a$, r, False)
     Exit Function
 num95:
 w1 = 1
@@ -4818,7 +4821,7 @@ If bstack.soros.Total = 0 Then
     
             EmptyStack a$
   
-        IsNumber = False: Exit Function
+        IsNumberNew = False: Exit Function
 
     ElseIf bstack.soros.StackItemType(1) = "*" Then
         Set bstack.lastobj = bstack.soros.PopObj
@@ -4826,7 +4829,7 @@ If bstack.soros.Total = 0 Then
             bstack.soros.PushObj bstack.lastobj
             Set bstack.lastobj = Nothing
             MyEr "No Proper Object", "À‹ËÔÚ ¡ÌÙÈÍÂﬂÏÂÌÔ"
-            IsNumber = False
+            IsNumberNew = False
             Exit Function
         End If
         If w1 = 1 Then
@@ -4837,13 +4840,13 @@ If bstack.soros.Total = 0 Then
             Set useHandler = Nothing
         End If
         r = 0
-        IsNumber = True
+        IsNumberNew = True
         Exit Function
     Else
     MyErMacro a$, "Stack top isn't " + v$, "« ÍÔÒıˆﬁ ÙÔı Û˘ÒÔ˝ ‰ÂÌ ÂﬂÌ·È " + v$
 
   
-    IsNumber = False
+    IsNumberNew = False
     End If
     Exit Function
 num83: ' "GROUP", "œÃ¡ƒ¡"
@@ -4851,17 +4854,17 @@ If bstack.soros.Total = 0 Then
     
             EmptyStack a$
   
-        IsNumber = False: Exit Function
+        IsNumberNew = False: Exit Function
 
     ElseIf bstack.soros.StackItemTypeObjectType(1) = "Group" Then
         Set bstack.lastobj = bstack.soros.PopObj
         r = 0
-        IsNumber = True
+        IsNumberNew = True
         Exit Function
     Else
     StackTopNotGroup a$
   
-    IsNumber = False
+    IsNumberNew = False
     End If
     Exit Function
 num79: ' "NUMBER", "¡—…»Ãœ”", "‘…Ã«"
@@ -4869,7 +4872,7 @@ num79: ' "NUMBER", "¡—…»Ãœ”", "‘…Ã«"
     
             EmptyStack a$
   
-        IsNumber = False: Exit Function
+        IsNumberNew = False: Exit Function
 
     ElseIf bstack.soros.PopType = "N" Then
     If SG = 1 Then
@@ -4878,53 +4881,53 @@ num79: ' "NUMBER", "¡—…»Ãœ”", "‘…Ã«"
     r = -bstack.soros.PopVal
     End If
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
     ElseIf bstack.soros.PopType = "L" Then
     r = SG * bstack.soros.PopVal
     
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
     Else
      
             StackTopNotNumber a$
   
-    IsNumber = False
+    IsNumberNew = False
     End If
     Exit Function
 num81: ' "À¡Ãƒ¡"
     Set bstack.lastobj = ProcLambda(bstack, a$, 0)
     r = 0
    If FastSymbol(a$, "(") Then
-    If Not CallLambdaASAP(bstack, a$, r) Then IsNumber = False: Exit Function
+    If Not CallLambdaASAP(bstack, a$, r) Then IsNumberNew = False: Exit Function
     If SG < 0 Then r = -r
-    IsNumber = True
+    IsNumberNew = True
     Else
-    IsNumber = Not bstack.lastobj Is Nothing
+    IsNumberNew = Not bstack.lastobj Is Nothing
     End If
 Exit Function
 num80: ' "LAMBDA"
     Set bstack.lastobj = ProcLambda(bstack, a$, 1)
     r = 0
     If FastSymbol(a$, "(") Then
-    If Not CallLambdaASAP(bstack, a$, r) Then IsNumber = False: Exit Function
+    If Not CallLambdaASAP(bstack, a$, r) Then IsNumberNew = False: Exit Function
     If SG < 0 Then r = -r
-    IsNumber = True
+    IsNumberNew = True
     Else
-    IsNumber = Not bstack.lastobj Is Nothing
+    IsNumberNew = Not bstack.lastobj Is Nothing
     End If
 Exit Function
 num86: ' Case "STACK", "”Ÿ—œ”"
-IsNumber = IsStackObj(v$, bstack, a$, r, SG)
+IsNumberNew = IsStackObj(v$, bstack, a$, r, SG)
     Exit Function
 num91: 'MONITOR.STACK - ≈À≈√◊œ”.”Ÿ—œ’
     r = SG * CurrentStackSize()
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 Exit Function
 num92: 'MONITOR.STACK.SIZE - ≈À≈√◊œ”.Ã≈√≈»œ”.”Ÿ—œ’
     r = SG * stacksize
-    IsNumber = True
+    IsNumberNew = True
     Exit Function
 Exit Function
 LOOKFORVARNUM:
@@ -4974,14 +4977,14 @@ foundprivate:
                          '       If Typename(bstack.lastobj) = "mHandler" Then
                           '          Set usehandler = bstack.lastobj
                            '         Set bstack.lastobj = Nothing
-                            '        IsNumber = Matrix(bstack, a$, usehandler, r)
+                            '        IsNumberNew = Matrix(bstack, a$, usehandler, r)
                              '       If MyIsObject(r) Then r = 0#
                               '      If SG < 0 Then r = -r
                                '     Exit Function
 '                                End If
  '                           End If
   '                              SyntaxError
-   '                             IsNumber = False
+   '                             IsNumberNew = False
     '                            Exit Function
                 Else
                        Set nbstack = Nothing
@@ -4989,9 +4992,9 @@ foundprivate:
                        r = p
                        If SG < 0 Then r = -r
                        End If
-                        IsNumber = True
+                        IsNumberNew = True
                     Else
-                        IsNumber = False
+                        IsNumberNew = False
                     End If
                 Else
                     If var(VR).HasStrValue Then
@@ -5003,7 +5006,7 @@ foundprivate:
                         s1$ = Left$(n$, w3) + ChrW(&HFFBF) + Mid$(n$, w3 + 1) + "." + ChrW(&H1FFF) + ";()"
                         If GetSub(s1$, v1&) Then GoTo foundprivate
                         InternalEror
-                        IsNumber = False
+                        IsNumberNew = False
                     End If
                 End If
             Else
@@ -5014,7 +5017,7 @@ foundprivate:
                 If var(VR).link.IamFloatGroup Then
                 Set pppp = BoxGroupVar(var(VR))
                 Mid$(a$, 1, 2) = "." + Chr(3)
-                IsNumber = SpeedGroup(bstack, pppp, "VAL", "", a$, (0)) = 1
+                IsNumberNew = SpeedGroup(bstack, pppp, "VAL", "", a$, (0)) = 1
                 r = bstack.LastValue
                 
                 If SG < 0 Then r = -r
@@ -5055,7 +5058,7 @@ foundprivate:
                         Set nbstack = Nothing  ' ???
                         If FastSymbol(a$, "#") Then
                             If Not useHandler.t1 = 3 Then WrongObject: Exit Function
-                            IsNumber = Matrix(bstack, a$, useHandler, r)
+                            IsNumberNew = Matrix(bstack, a$, useHandler, r)
                             If SG < 0 Then r = -r
                             If flatobject Then Set bstack.lastobj = Nothing
                         ElseIf flatobject Then
@@ -5077,7 +5080,7 @@ foundprivate:
                         If SG < 0 Then r = -r
               ElseIf FastSymbol(a$, "#") Then
                             Set nbstack = Nothing '???
-                            IsNumber = Matrix(bstack, a$, useHandler, r)
+                            IsNumberNew = Matrix(bstack, a$, useHandler, r)
                             If MyIsObject(r) Then r = 0#
                             If SG < 0 Then r = -r
                         Else
@@ -5110,7 +5113,7 @@ If IsNumeric(var(VR)) Then
     End If
 End If
 
-IsNumber = True
+IsNumberNew = True
 ElseIf VR = -1 Then
 
 r = ReadVarDouble(bstack, v$)
@@ -5120,7 +5123,7 @@ If bstack.lastobj.IamApointer Then
  If Left$(a$, 2) = "=>" Then
  Set pppp = BoxGroupVar(bstack.lastobj)
                 Mid$(a$, 1, 2) = "." + Chr(3)
-                IsNumber = SpeedGroup(bstack, pppp, "VAL", "", a$, (0)) = 1
+                IsNumberNew = SpeedGroup(bstack, pppp, "VAL", "", a$, (0)) = 1
                 r = bstack.LastValue
 End If
 
@@ -5129,7 +5132,7 @@ End If
 End If
 If SG < 0 Then r = -r
 
-IsNumber = True
+IsNumberNew = True
 Exit Function
 Else
 If Len(v$) > 5 Then
@@ -5139,12 +5142,12 @@ v1& = IsLabel(bstack, (v$), v$)
 If v$ <> "" Then GoTo removethis
 End If
 End If
-IsNumber = False  ''         " " + & String$(w2 - Len(a$), " ")
+IsNumberNew = False  ''         " " + & String$(w2 - Len(a$), " ")
 If IsObject(bstack.LastEnum) Then
   r = bstack.LastEnum.SearchSimple(v$, par)
   If par Then
   If SG < 0 Then r = -r
-  IsNumber = True
+  IsNumberNew = True
   Exit Function
   End If
  End If
@@ -5180,16 +5183,16 @@ r = var(VR)
 
 End If
 
-IsNumber = True
+IsNumberNew = True
 Else
 If VR = -1 Then
 If SG < 0 Then r = -r
 r = ReadVarInt(bstack, v$)
 
-IsNumber = True
+IsNumberNew = True
 Exit Function
 End If
-IsNumber = False
+IsNumberNew = False
     If w2 >= Len(a$) Then a$ = Left$(v$ + space$(Len(v$)), w2 - Len(a$)) + a$ Else
         If FindNameForGroup(bstack, v$) Then
             UnknownProperty1 a$, v$
@@ -5214,27 +5217,27 @@ End If
 
 
 On w1 GoTo fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8, fun9, fun10, fun11, fun12, fun13, fun14, fun15, fun16, fun17, fun18, fun19, fun20, fun21, fun22, fun23, fun24, fun25, fun26, fun27, fun28, fun29, fun30, fun31, fun32, fun33, fun34, fun35, fun36, fun37, fun38, fun39, fun40, fun41, fun42, fun43, fun44, fun45, fun46, fun47, fun48, fun49, fun50, fun51, fun52, fun53, fun54, fun55, fun56, fun57, fun58, fun59, fun60, fun61, fun62, fun63, fun64, fun65, fun66, fun67, fun68, fun69, fun70, fun71, fun72, fun73, fun74, fun75, fun76, fun77, fun78, fun79, fun80, fun81, fun82, fun83, fun84, fun85, fun86, fun87, fun88, fun89, fun90, fun91, fun92, fun93, fun94, fun95, fun96, fun97, fun98, fun99, fun100, fun101, fun102, fun103, fun104, fun105, fun106, fun107, fun108
-IsNumber = False
+IsNumberNew = False
 Exit Function
 fun108:
-IsNumber = GetPointer(bstack, a$)
+IsNumberNew = GetPointer(bstack, a$)
 Set bstack.lastobj = bstack.lastpointer
 Set bstack.lastpointer = Nothing
-If IsNumber Then IsNumber = FastSymbol(a$, ")")
+If IsNumberNew Then IsNumberNew = FastSymbol(a$, ")")
 Exit Function
 fun101: ' "BANK(", "‘—¡–("
-IsNumber = False
+IsNumberNew = False
 If IsExp(bstack, a$, r, , True) Then
     If FastSymbol(a$, ",") Then
         If IsExp(bstack, a$, p, , True) Then
             r = Round(r, CLng(p))
-            IsNumber = FastSymbol(a$, ")", True)
+            IsNumberNew = FastSymbol(a$, ")", True)
             Else
                 MissParam a$
         End If
     Else
     r = Round(r)
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
 End If
     Else
                     
@@ -5244,11 +5247,11 @@ End If
 Exit Function
 
 fun99: ' case "IF(","¡Õ("
-IsNumber = False
-If IsExp(bstack, a$, p) Then IsNumber = ProcessIf(p, bstack, a$, r)
+IsNumberNew = False
+If IsExp(bstack, a$, p) Then IsNumberNew = ProcessIf(p, bstack, a$, r)
 Exit Function
 fun97: ' "READY(", "≈‘œ…Ãœ("
-IsNumber = False
+IsNumberNew = False
     w1 = Abs(IsLabel(bstack, a$, s$))
         If w1 = 3 Then
             If GetVar(bstack, s$, w1) Then
@@ -5258,7 +5261,7 @@ IsNumber = False
                     r = SG * True
                 End If
                 
-                IsNumber = FastSymbol(a$, ")", True)
+                IsNumberNew = FastSymbol(a$, ")", True)
             Else
                     
                     MissFuncParameterStringVarMacro a$
@@ -5276,7 +5279,7 @@ IsNumber = False
                 
                 End If
                     
-                IsNumber = FastSymbol(a$, ")", True)
+                IsNumberNew = FastSymbol(a$, ")", True)
     Else
                     
                 MissParam a$
@@ -5288,7 +5291,7 @@ If IsStrExp(bstack, a$, s1$) Then
 If FastSymbol(a$, ",") Then
 If IsStrExp(bstack, a$, s$) Then
 If FastSymbol(a$, ")") Then
-IsNumber = True
+IsNumberNew = True
 r = SG * -compareStr4(s$, s1$)
 Exit Function
 Else
@@ -5299,7 +5302,7 @@ End If
 End If
 End If
 MissStringExpr
-IsNumber = False
+IsNumberNew = False
 Exit Function
 fun1: ' "PARAM(", "–¡—¡Ã("
 v$ = vbNullString
@@ -5410,27 +5413,27 @@ contparamhere:
             On Error GoTo 0
         End If
     End If
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
     a$ = Mid$(v$, 2) + a$
     Exit Function
 fun73: ' "EACH("
     If iter(bstack, a$, 1) Then
         r = 0
-        IsNumber = FastSymbol(a$, ")", True)
+        IsNumberNew = FastSymbol(a$, ")", True)
     Else
-        IsNumber = False
+        IsNumberNew = False
     End If
     Exit Function
 fun72: ' " ¡»≈("
     If iter(bstack, a$, 0) Then
         r = 0
-        IsNumber = FastSymbol(a$, ")", True)
+        IsNumberNew = FastSymbol(a$, ")", True)
     Else
-        IsNumber = False
+        IsNumberNew = False
     End If
     Exit Function
 fun2: ' "STACKITEM(", "‘…Ã«”Ÿ—œ’("
-    IsNumber = StackItem(bstack, a$, SG, r)
+    IsNumberNew = StackItem(bstack, a$, SG, r)
     If FastSymbol(a$, "#") Then GoTo comehere
     Exit Function
 fun3: ' "SGN(", "”«Ã("
@@ -5442,9 +5445,9 @@ r = Sgn(MyRound(p, 28))
 If SG < 0 Then r = -r
 
 
- IsNumber = FastSymbol(a$, ")", True)
+ IsNumberNew = FastSymbol(a$, ")", True)
  Else
- MissParam a$: IsNumber = False
+ MissParam a$: IsNumberNew = False
 End If
 Exit Function
 
@@ -5453,9 +5456,9 @@ If IsExp(bstack, a$, p) Then
 r = SG * MyRound(Abs(Abs(p) - Int(Abs(p))), 13)
 
 
- IsNumber = FastSymbol(a$, ")", True)
+ IsNumberNew = FastSymbol(a$, ")", True)
  Else
-: MissParam a$: IsNumber = False
+: MissParam a$: IsNumberNew = False
 End If
 Exit Function
 fun5: ' "MATCH(", "‘¡’‘…”«("
@@ -5463,7 +5466,7 @@ If IsStrExp(bstack, a$, s1$) Then
 If s1$ = vbNullString Then
 r = 0
 
-               IsNumber = FastSymbol(a$, ")", True)
+               IsNumberNew = FastSymbol(a$, ")", True)
 ElseIf VALIDATEmStiva(bstack, UCase$(s1$), s$) Then   ' Only S and N
                 If s$ = vbNullString Then
                     r = 0
@@ -5474,7 +5477,7 @@ ElseIf VALIDATEmStiva(bstack, UCase$(s1$), s$) Then   ' Only S and N
                r = 0
                End If
                
-               IsNumber = FastSymbol(a$, ")", True)
+               IsNumberNew = FastSymbol(a$, ")", True)
 Else
 MissParam a$
 End If
@@ -5485,14 +5488,14 @@ If FastSymbol(a$, ",") Then
 If IsExp(bstack, a$, p) Then
 r = SG * FoundSpecificLocaleId(s1$, CLng(Fix(p)))
 Else
-MissParam a$: IsNumber = False: Exit Function
+MissParam a$: IsNumberNew = False: Exit Function
 End If
 Else
 r = SG * FoundLocaleId(s1$)
 End If
    
 
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
 End If
 Exit Function
 fun7: ' "FILELEN(", "¡—◊≈…œ’.Ã« œ”("
@@ -5500,7 +5503,7 @@ If IsStrExp(bstack, a$, s1$) Then
 If s1$ = vbNullString Then
 r = 0
 
-               IsNumber = FastSymbol(a$, ")", True)
+               IsNumberNew = FastSymbol(a$, ")", True)
 Else
 If ExtractPath(s1$) = vbNullString Then
                 If CFname(s1$) <> "" Then
@@ -5511,7 +5514,7 @@ If ExtractPath(s1$) = vbNullString Then
 End If
        r = SG * FileLen(GetDosPath(s1$))
                
-               IsNumber = FastSymbol(a$, ")", True)
+               IsNumberNew = FastSymbol(a$, ")", True)
 End If
 Else
 : MissParam a$
@@ -5522,13 +5525,13 @@ If IsExp(bstack, a$, p) Then
 
 r = SG * p * (players(GetCode(bstack.Owner)).Column + 1)
    
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
 End If
 Exit Function
 fun9: ' "KEYPRESS(", "–¡‘«Ã≈Õœ("
 If Not IsExp(bstack, a$, p) Then
 MissNumExpr
-IsNumber = False
+IsNumberNew = False
 Exit Function
 Else
 r = SG * CLng(KeyPressed(CLng(Fix(p))))
@@ -5536,7 +5539,7 @@ r = SG * CLng(KeyPressed(CLng(Fix(p))))
 End If
  
 
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
     Exit Function
 fun10: ' "INKEY(", "≈Õ œÃ("
 
@@ -5597,7 +5600,7 @@ End If
 
 
 
-IsNumber = FastSymbol(a$, ")", True)
+IsNumberNew = FastSymbol(a$, ")", True)
 BLOCKkey = False
 Exit Function
 fun11: ' "‘Ã«Ã¡(", "MODULE("
@@ -5614,10 +5617,10 @@ fun11: ' "‘Ã«Ã¡(", "MODULE("
                 r = False
                 End If
         End If
-        IsNumber = True
+        IsNumberNew = True
     End If
 
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
 Exit Function
 fun12: ' "¬¡”«(", "MDB("
 If IsStrExp(bstack, a$, s$) Then
@@ -5629,27 +5632,27 @@ Else
 r = 0
 End If
    
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
 End If
 Exit Function
 fun13: ' "ASK(", "—Ÿ‘¡("
 If IsStrExp(bstack, a$, AskText$) Then
-If Not CallAsk(bstack, a$, v$) Then IsNumber = False: Exit Function
+If Not CallAsk(bstack, a$, v$) Then IsNumberNew = False: Exit Function
 
 r = SG * Form3.NeoASK(bstack)
 AskInput = False
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
 End If
 Exit Function
 fun14: ' "”’√ —œ’”«(", "COLLIDE("
-    IsNumber = IsCollide(bstack, a$, r, SG)
+    IsNumberNew = IsCollide(bstack, a$, r, SG)
     Exit Function
 fun15: ' "Ã≈√≈»œ”.’(", "SIZE.Y("
 
-    IsNumber = SizeY(bstack, SG, a$, s$, s1$, r)
+    IsNumberNew = SizeY(bstack, SG, a$, s$, s1$, r)
     Exit Function
 fun16: ' "Ã≈√≈»œ”.◊(", "SIZE.X("
-    IsNumber = SizeX(bstack, SG, a$, s$, s1$, r)
+    IsNumberNew = SizeX(bstack, SG, a$, s$, s1$, r)
     Exit Function
 fun17: ' "WRITABLE(", "≈√√—¡ÿ…Ãœ("  ' ·Ì ÏÔÒ˛ Ì· „Ò‹¯˘ ÛÙÔ ˆ‹ÍÂÎÔ
     If IsStrExp(bstack, a$, s$) Then
@@ -5657,10 +5660,10 @@ fun17: ' "WRITABLE(", "≈√√—¡ÿ…Ãœ("  ' ·Ì ÏÔÒ˛ Ì· „Ò‹¯˘ ÛÙÔ ˆ‹ÍÂÎÔ
    
     
     
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
     Exit Function
     End If
-    IsNumber = False
+    IsNumberNew = False
     Exit Function
 fun18: ' "COLOR(", "COLOUR(", "◊—ŸÃ¡("
     
@@ -5669,18 +5672,18 @@ fun18: ' "COLOR(", "COLOUR(", "◊—ŸÃ¡("
      
     r = SG * -r
 
-        IsNumber = FastSymbol(a$, ")", True)
+        IsNumberNew = FastSymbol(a$, ")", True)
         Exit Function
 fun19: ' "DIMENSION(", "ƒ…¡”‘¡”«("
-IsNumber = IsDimension(bstack, a$, r, SG)
+IsNumberNew = IsDimension(bstack, a$, r, SG)
 
     Exit Function
 fun20: ' "ARRAY(", "–…Õ¡ ¡”("
-    IsNumber = IsArrayFun(bstack, a$, r, SG)
+    IsNumberNew = IsArrayFun(bstack, a$, r, SG)
     If FastSymbol(a$, "#") Then GoTo comehere
     Exit Function
 fun21: ' "FUNCTION(", "”’Õ¡—‘«”«("
-IsNumber = False
+IsNumberNew = False
     If IsStrExp(bstack, a$, s$) Then
     If IsSymbolBracket(s$) Then
             PushStage bstack, False
@@ -5689,7 +5692,7 @@ IsNumber = False
             GlobalSub "A_()", s1$, Trim$(s$)
             IsSymbol3 a$, ","
               a$ = "A_(@" & a$
-            IsNumber = IsExp(bstack, a$, p)
+            IsNumberNew = IsExp(bstack, a$, p)
             r = SG * p
             PopStage bstack
 Else
@@ -5712,7 +5715,7 @@ End If
      Else
       a$ = s$ & "(@" & a$
       End If
-    IsNumber = IsExp(bstack, a$, p)
+    IsNumberNew = IsExp(bstack, a$, p)
     r = SG * p
   End If
     Else
@@ -5721,10 +5724,10 @@ End If
     End If
     Exit Function
 fun22: ' "DRIVE.SERIAL(", "”≈…—…¡ œ”.ƒ…” œ’("
-IsNumber = DriveSerial1(bstack, a$, r, SG)
+IsNumberNew = DriveSerial1(bstack, a$, r, SG)
 Exit Function
 fun23: ' "FILE.STAMP(", "¡—◊≈…œ’.”‘¡Ã–¡("
-IsNumber = False
+IsNumberNew = False
     If IsStrExp(bstack, a$, s$) Then
     PP = 1
     If IsSymbol(a$, ",") Then
@@ -5747,31 +5750,31 @@ IsNumber = False
      End If
      
     
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
     Else
  MissParam a$
     End If
     Exit Function
 fun25: ' "EXIST.DIR(", "’–¡—◊≈…. ¡‘¡Àœ√œ”("
-IsNumber = False
+IsNumberNew = False
     If IsStrExp(bstack, a$, s$) Then
     r = SG * isdir(s$)
      
     
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
     Else
 : MissParam a$
     End If
     Exit Function
 fun26: ' "EXIST(", "’–¡—◊≈…("
-IsNumber = False
+IsNumberNew = False
     If IsExp(bstack, a$, p) Then
     If Typename(bstack.lastobj) = "mHandler" Then
     Set anything = bstack.lastobj
     Set bstack.lastobj = Nothing
        If Not CheckLastHandler(anything) Then
         InternalError
-        IsNumber = False
+        IsNumberNew = False
         Exit Function
         End If
     With anything
@@ -5793,7 +5796,7 @@ IsNumber = False
                     r = 0
                 End Select
                 
-                IsNumber = FastSymbol(a$, ")", True)
+                IsNumberNew = FastSymbol(a$, ")", True)
                 
                 Set anything = Nothing
                 Exit Function
@@ -5806,7 +5809,7 @@ IsNumber = False
                 End If
                 
                 
-                IsNumber = FastSymbol(a$, ")", True)
+                IsNumberNew = FastSymbol(a$, ")", True)
                 
                 Set anything = Nothing
                 Exit Function
@@ -5830,14 +5833,14 @@ IsNumber = False
    
     
     
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
     Else
         MissParam a$
     End If
     Exit Function
     
 fun27: ' "JOYPAD(", "À¡¬«("
-  IsNumber = False
+  IsNumberNew = False
     If IsExp(bstack, a$, r) Then
         
     r = SG * Int(r)
@@ -5850,7 +5853,7 @@ fun27: ' "JOYPAD(", "À¡¬«("
     Exit Function
     End If
     If Not MYJOYSTAT(r).enabled Then
-    IsNumber = False
+    IsNumberNew = False
         joypader a$, r
     Exit Function
     End If
@@ -5864,15 +5867,15 @@ fun27: ' "JOYPAD(", "À¡¬«("
     End If
     End If
     r = SG * MYJOYSTAT(r).lngButton
-IsNumber = FastSymbol(a$, ")", True)
+IsNumberNew = FastSymbol(a$, ")", True)
        Else
-       IsNumber = False
+       IsNumberNew = False
   MissParam a$
-         ' IsNumber = FastSymbol(a$, ")")
+         ' IsNumberNew = FastSymbol(a$, ")")
   End If
   Exit Function
 fun28: ' "JOYPAD.DIRECTION(", "À¡¬«. ¡‘≈’»’Õ”«("
-  IsNumber = False
+  IsNumberNew = False
     If IsExp(bstack, a$, r) Then
     r = SG * Int(r)
     
@@ -5897,13 +5900,13 @@ fun28: ' "JOYPAD.DIRECTION(", "À¡¬«. ¡‘≈’»’Õ”«("
     End If
     End If
     r = SG * MYJOYSTAT(r).joyPaD
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
        Else
         MissParam a$
   End If
   Exit Function
 fun29: ' "JOYPAD.ANALOG.X(", "À¡¬«.¡Õ¡Àœ√… œ.◊("
-  IsNumber = False
+  IsNumberNew = False
     If IsExp(bstack, a$, r) Then
     r = SG * Int(r)
     
@@ -5925,13 +5928,13 @@ fun29: ' "JOYPAD.ANALOG.X(", "À¡¬«.¡Õ¡Àœ√… œ.◊("
     End If
     End If
     r = SG * MYJOYSTAT(r).AnalogX
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
        Else
         MissParam a$
   End If
   Exit Function
 fun30: ' "JOYPAD.ANALOG.Y(", "À¡¬«.¡Õ¡Àœ√… œ.’("
-  IsNumber = False
+  IsNumberNew = False
     If IsExp(bstack, a$, r) Then
     r = SG * Int(r)
     
@@ -5953,13 +5956,13 @@ fun30: ' "JOYPAD.ANALOG.Y(", "À¡¬«.¡Õ¡Àœ√… œ.’("
     End If
     End If
     r = SG * MYJOYSTAT(r).AnalogY
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
        Else
             MissParam a$
   End If
   Exit Function
 fun104: ' "BUFFER(", "ƒ…¡—»—Ÿ”«("
-IsNumber = False
+IsNumberNew = False
     If IsStrExp(bstack, a$, s$) Then
     If Not bstack.lastobj Is Nothing Then GoTo contbuf1
      w1 = Abs(Asc(v$) < 128)
@@ -5978,11 +5981,11 @@ IsNumber = False
             Set bstack.lastobj = useHandler
             
             
-            IsNumber = FastSymbol(a$, ")", True)
+            IsNumberNew = FastSymbol(a$, ")", True)
             Exit Function
         Else
             MyEr "Can't Decode String", "ƒÂÌ ÏÔÒ˛ Ì· ·ÔÍ˘‰ÈÍÔÔÈﬁÛ˘ ÙÔ ·Îˆ·ÒÈËÏÁÙÈÍ¸"
-            IsNumber = False
+            IsNumberNew = False
             Exit Function
         End If
     ElseIf CFname(s$) <> "" Then
@@ -6000,7 +6003,7 @@ IsNumber = False
             Set bstack.lastobj = useHandler
             
             
-            IsNumber = FastSymbol(a$, ")", True)
+            IsNumberNew = FastSymbol(a$, ")", True)
             Exit Function
         End If
         Else
@@ -6028,19 +6031,19 @@ contbuf1:
             
                  Set useHandler.objref = useHandler.objref.Copy(r, p)
                 Set bstack.lastobj = useHandler
-                IsNumber = FastSymbol(a$, ")", True)
+                IsNumberNew = FastSymbol(a$, ")", True)
             End If
             End If
             
             
         End If
     Else
-    IsNumber = FastSymbol(a$, ")", True)
+    IsNumberNew = FastSymbol(a$, ")", True)
     End If
     Set bstack.lastobj = Nothing
     Exit Function
 fun103: ' "IMAGE(", "≈… œÕ¡("
-IsNumber = False
+IsNumberNew = False
     If IsStrExp(bstack, a$, s$) Then
         If Left$(s$, 4) = "cDIB" And Len(s$) > 12 Then
             Set useHandler = New mHandler
@@ -6049,7 +6052,7 @@ IsNumber = False
             Set useHandler.objref = SaveStr2MemBlock(s$, r)
             If r = 0 Then
                 Set bstack.lastobj = useHandler
-                IsNumber = FastSymbol(a$, ")", True)
+                IsNumberNew = FastSymbol(a$, ")", True)
                 Exit Function
             End If
         Else
@@ -6058,7 +6061,7 @@ IsNumber = False
             
             
     ElseIf IsExp(bstack, a$, s$) Then
-      IsNumber = FastSymbol(a$, ")", True)
+      IsNumberNew = FastSymbol(a$, ")", True)
         If Not bstack.lastobj Is Nothing Then
            If TypeOf bstack.lastobj Is mHandler Then
               Set useHandler = bstack.lastobj
@@ -6073,7 +6076,7 @@ IsNumber = False
            End If
         End If
             noImageInBuffer a$
-            IsNumber = False
+            IsNumberNew = False
             r = 0#
     Else
         MissParam a$
@@ -6081,23 +6084,23 @@ IsNumber = False
     Exit Function
 
 fun31: ' "IMAGE.X(", "≈… œÕ¡.◊("
-IsNumber = GetImageX(bstack, a$, r, SG)
+IsNumberNew = GetImageX(bstack, a$, r, SG)
     Exit Function
 fun32: ' "IMAGE.Y(", "≈… œÕ¡.’("
-    IsNumber = GetImageY(bstack, a$, r, SG)
+    IsNumberNew = GetImageY(bstack, a$, r, SG)
    
     Exit Function
 fun33: ' "IMAGE.X.PIXELS(", "≈… œÕ¡.◊.”«Ã≈…¡("
-IsNumber = GetImageXpixels(bstack, a$, r, SG)
+IsNumberNew = GetImageXpixels(bstack, a$, r, SG)
     Exit Function
 fun34: ' "IMAGE.Y.PIXELS(", "≈… œÕ¡.’.”«Ã≈…¡("
-IsNumber = GetImageYpixels(bstack, a$, r, SG)
+IsNumberNew = GetImageYpixels(bstack, a$, r, SG)
 
     Exit Function
 fun35: ' "VALID(", "≈√ ’—œ("
 If FastSymbol(a$, "@") Then
     If IsLabel(bstack, a$, s$) Then
-    IsNumber = True
+    IsNumberNew = True
      If Right$(s$, 1) = "(" Then FastSymbol a$, ")"
     If GetVar(bstack, s$, VR) Then
     r = SG * True
@@ -6115,16 +6118,16 @@ End If
 Else
 
 MissVarName
-IsNumber = False
+IsNumberNew = False
 
 End If
 End If
-'   If Right$(s$, 1) = "(" Then IsNumber = FastSymbol(a$, ")")
+'   If Right$(s$, 1) = "(" Then IsNumberNew = FastSymbol(a$, ")")
     End If
     End If
-    IsNumber = FastSymbol(a$, ")")
+    IsNumberNew = FastSymbol(a$, ")")
 Else
-    IsNumber = True
+    IsNumberNew = True
     Dim OLD1$, OLD2$
     OLD1$ = LastErName
     OLD2$ = LastErNameGR
@@ -6169,7 +6172,7 @@ jumphere:
     LastErNameGR = vbNullString
     LastErName = vbNullString
     a$ = Mid$(a$, w1)
-      IsNumber = FastSymbol(a$, ")")
+      IsNumberNew = FastSymbol(a$, ")")
           r = 0
         End If
        If "" <> LastErName Then r = 0
@@ -6183,7 +6186,7 @@ jumphere:
     Exit Function
     
 fun36: ' "EVAL(", "≈ ÷—(", "≈ ÷—¡”«("
-    IsNumber = IsEval(v$, bstack, a$, r, SG)
+    IsNumberNew = IsEval(v$, bstack, a$, r, SG)
     If FastOperator(a$, "(", 1) Then
     If Not bstack.lastobj Is Nothing Then
      If Typename(bstack.lastobj) = "mHandler" Then
@@ -6209,202 +6212,202 @@ fun36: ' "EVAL(", "≈ ÷—(", "≈ ÷—¡”«("
     If FastSymbol(a$, "#") Then GoTo comehere
     Exit Function
 fun37: ' "POINT(", "”«Ã≈…œ("
-    IsNumber = IsPoint(bstack, a$, r, SG)
+    IsNumberNew = IsPoint(bstack, a$, r, SG)
     Exit Function
 fun38: ' "CTIME(", "’–Ÿ—¡("
-    IsNumber = IsCtime(bstack, a$, r, SG)
+    IsNumberNew = IsCtime(bstack, a$, r, SG)
     Exit Function
 fun39: ' "CDATE(", "’–Ã≈—("
-    IsNumber = IsCdate(bstack, a$, r, SG)
+    IsNumberNew = IsCdate(bstack, a$, r, SG)
     Exit Function
 fun40: ' "TIME(", "◊—œÕœ”("
-    IsNumber = IsTimeVal(bstack, a$, r, SG)
+    IsNumberNew = IsTimeVal(bstack, a$, r, SG)
     Exit Function
 fun41: ' "DATE(", "«Ã≈—¡("
-    IsNumber = IsDataVal(bstack, a$, r, SG)
+    IsNumberNew = IsDataVal(bstack, a$, r, SG)
     Exit Function
 fun42: ' "VAL(", "‘…Ã«(", "¡Œ…¡("
-    IsNumber = IsVal(bstack, a$, r, SG, Left$(v$, 1) = "V")
+    IsNumberNew = IsVal(bstack, a$, r, SG, Left$(v$, 1) = "V")
     If FastSymbol(a$, "#") Then GoTo comehere
     Exit Function
 fun43: ' "»≈”«ƒ≈Œ…¡("
-    IsNumber = IsRinstr(bstack, a$, r, SG, 0)
+    IsNumberNew = IsRinstr(bstack, a$, r, SG, 0)
     Exit Function
 fun107: ' "RINSTR("
-    IsNumber = IsRinstr(bstack, a$, r, SG, 1)
+    IsNumberNew = IsRinstr(bstack, a$, r, SG, 1)
     Exit Function
 fun44: ' "INSTR(", "»≈”«("
-    IsNumber = IsInstr(bstack, a$, r, SG, 0)
+    IsNumberNew = IsInstr(bstack, a$, r, SG, 0)
     Exit Function
 fun106:
-    IsNumber = IsInstr(bstack, a$, r, SG, 1)
+    IsNumberNew = IsInstr(bstack, a$, r, SG, 1)
     Exit Function
 fun45: ' "RECORDS(", "≈√√—¡÷≈”("
-    IsNumber = IsRecords(bstack, a$, r, SG)
+    IsNumberNew = IsRecords(bstack, a$, r, SG)
     Exit Function
 fun46: ' "GROUP.COUNT(", "œÃ¡ƒ¡.”’ÕœÀœ("
-    IsNumber = IsGroupCount(bstack, a$, r, SG)
+    IsNumberNew = IsGroupCount(bstack, a$, r, SG)
     Exit Function
 fun47: ' "PARAGRAPH(", "–¡—¡√—¡÷œ”("
-    IsNumber = IsParagr(bstack, a$, r, SG)
+    IsNumberNew = IsParagr(bstack, a$, r, SG)
     Exit Function
 fun48: ' "PARAGRAPH.INDEX(", "¡—…»Ãœ”.–¡—¡√—¡÷œ’("
- IsNumber = IsParIndex(bstack, a$, r, SG)
+ IsNumberNew = IsParIndex(bstack, a$, r, SG)
     Exit Function
 fun49: ' "BACKWARD(", "–…”Ÿ("
-    IsNumber = IsForwBack(1, bstack, a$, r, SG)
+    IsNumberNew = IsForwBack(1, bstack, a$, r, SG)
     Exit Function
 fun50: ' "FORWARD(", "Ã–—œ”‘¡("
-    IsNumber = IsForwBack(0, bstack, a$, r, SG)
+    IsNumberNew = IsForwBack(0, bstack, a$, r, SG)
     Exit Function
 fun51: ' "DOC.PAR(", "≈√√—¡÷œ’.–¡—("
-    IsNumber = IsDocPar(bstack, a$, r, SG)
+    IsNumberNew = IsDocPar(bstack, a$, r, SG)
     Exit Function
 fun52: ' "MAX.DATA(", "Ã≈√¡Àœ.”≈…—¡”("
-    IsNumber = IsMaxData(bstack, a$, r, SG)
+    IsNumberNew = IsMaxData(bstack, a$, r, SG)
     Exit Function
 fun53: ' "MIN.DATA(", "Ã… —œ.”≈…—¡”("
-    IsNumber = IsMinData(bstack, a$, r, SG)
+    IsNumberNew = IsMinData(bstack, a$, r, SG)
     Exit Function
 fun54: ' "MAX(", "Ã≈√¡Àœ("
-    IsNumber = IsCompMinMax(2, bstack, a$, r, SG)
+    IsNumberNew = IsCompMinMax(2, bstack, a$, r, SG)
     Exit Function
 fun55: ' "MIN(", "Ã… —œ("
-    IsNumber = IsCompMinMax(1, bstack, a$, r, SG)
+    IsNumberNew = IsCompMinMax(1, bstack, a$, r, SG)
     Exit Function
 fun56: ' "COMPARE(", "”’√ —…Õ≈("
-    IsNumber = IsCompMinMax(0, bstack, a$, r, SG)
+    IsNumberNew = IsCompMinMax(0, bstack, a$, r, SG)
     Exit Function
 fun57: ' "DOC.UNIQUE.WORDS(", "≈√√—¡÷œ’.ÃœÕ¡ƒ… ≈”.À≈Œ≈…”("
-    IsNumber = IsDocUniqueWords(bstack, a$, r, SG)
+    IsNumberNew = IsDocUniqueWords(bstack, a$, r, SG)
     Exit Function
 fun58: ' "DOC.WORDS(", "≈√√—¡÷œ’.À≈Œ≈…”("
-    IsNumber = IsDocWords(bstack, a$, r, SG)
+    IsNumberNew = IsDocWords(bstack, a$, r, SG)
     Exit Function
 fun59: ' "DOC.LEN(", "≈√√—¡÷œ’.Ã« œ”("
-    IsNumber = IsDocLen(bstack, a$, r, SG)
+    IsNumberNew = IsDocLen(bstack, a$, r, SG)
     Exit Function
 fun60: ' "LEN.DISP(", "Ã« œ”.≈Ã÷("
-    IsNumber = IsLenDisp(bstack, a$, r, SG)
+    IsNumberNew = IsLenDisp(bstack, a$, r, SG)
     Exit Function
 fun61: ' "LEN(", "Ã« œ”("
- IsNumber = IsLen(bstack, a$, r, SG)
+ IsNumberNew = IsLen(bstack, a$, r, SG)
     Exit Function
 fun62: ' "SQRT(", "—…∆¡("
-    IsNumber = IsSqrt(bstack, a$, r, SG)
+    IsNumberNew = IsSqrt(bstack, a$, r, SG)
     Exit Function
 fun63: ' "FREQUENCY(", "”’◊Õœ‘«‘¡("
-    IsNumber = IsFreq(bstack, a$, r, SG)
+    IsNumberNew = IsFreq(bstack, a$, r, SG)
     Exit Function
 fun64: ' "LOG(", "Àœ√("
-    IsNumber = IsLog(bstack, a$, r, SG)
+    IsNumberNew = IsLog(bstack, a$, r, SG)
     Exit Function
 fun65:  ' "LN(", "À÷("
-    IsNumber = IsLn(bstack, a$, r, SG)
+    IsNumberNew = IsLn(bstack, a$, r, SG)
     Exit Function
 fun66: ' "ATN(", "‘œŒ.≈÷("
-    IsNumber = IsAtan(bstack, a$, r, SG)
+    IsNumberNew = IsAtan(bstack, a$, r, SG)
     Exit Function
 fun67:  ' "TAN(", "≈÷¡–("
-  IsNumber = IsTan(bstack, a$, r, SG)
+  IsNumberNew = IsTan(bstack, a$, r, SG)
     Exit Function
 fun68:  ' "COS(", "”’Õ("
-    IsNumber = IsCos(bstack, a$, r, SG)
+    IsNumberNew = IsCos(bstack, a$, r, SG)
     Exit Function
 fun69:  ' "SIN(", "«Ã("
-    IsNumber = IsSin(bstack, a$, r, SG)
+    IsNumberNew = IsSin(bstack, a$, r, SG)
     Exit Function
 fun70:  ' "ABS(", "¡–œÀ("
-IsNumber = IsAbs(bstack, a$, r, SG)
+IsNumberNew = IsAbs(bstack, a$, r, SG)
 Exit Function
 fun71: ' "LOWORD(", "LOWWORD(", " ¡‘ŸÃ…”œ("
-    IsNumber = IsLOWORD(bstack, a$, r, SG)
+    IsNumberNew = IsLOWORD(bstack, a$, r, SG)
     Exit Function
 fun74: ' "HIWORD(", "HIGHWORD(", "–¡ÕŸÃ…”œ("
-   IsNumber = IsHIWORD(bstack, a$, r, SG)
+   IsNumberNew = IsHIWORD(bstack, a$, r, SG)
     Exit Function
 fun75: ' "BINARY.NEG(", "ƒ’¡ƒ… œ.¡Õ‘…(", "ƒ’¡ƒ… œ.¡Õ‘…”‘—œ÷œ("
-    IsNumber = IsBinaryNeg(bstack, a$, r, SG)
+    IsNumberNew = IsBinaryNeg(bstack, a$, r, SG)
     Exit Function
 fun76: ' "BINARY.OR(", "ƒ’¡ƒ… œ.«("
-    IsNumber = IsBinaryOr(bstack, a$, r, SG)
+    IsNumberNew = IsBinaryOr(bstack, a$, r, SG)
     Exit Function
 fun105: ' "BINARY.NOT(", "ƒ’¡ƒ… œ.œ◊…("
-    IsNumber = IsBinaryNot(bstack, a$, r, SG)
+    IsNumberNew = IsBinaryNot(bstack, a$, r, SG)
     Exit Function
 fun77: ' "BINARY.AND(", "ƒ’¡ƒ… œ. ¡…("
-    IsNumber = IsBinaryAnd(bstack, a$, r, SG)
+    IsNumberNew = IsBinaryAnd(bstack, a$, r, SG)
     Exit Function
 fun78: ' "BINARY.XOR(", "ƒ’¡ƒ… œ.¡–œ("
-    IsNumber = IsBinaryXor(bstack, a$, r, SG)
+    IsNumberNew = IsBinaryXor(bstack, a$, r, SG)
     Exit Function
 fun79: ' "HILOWWORD(", "ƒ’œÃ…”¡("
-    IsNumber = IsHILOWWORD(bstack, a$, r, SG)
+    IsNumberNew = IsHILOWWORD(bstack, a$, r, SG)
     Exit Function
 fun80: ' "BINARY.SHIFT(", "ƒ’¡ƒ… œ.œÀ…”»«”«("
-    IsNumber = IsBinaryShift(bstack, a$, r, SG)
+    IsNumberNew = IsBinaryShift(bstack, a$, r, SG)
     Exit Function
 fun81: ' "BINARY.ROTATE(", "ƒ’¡ƒ… «.–≈—…”‘—œ÷«("
-    IsNumber = IsBinaryRotate(bstack, a$, r, SG)
+    IsNumberNew = IsBinaryRotate(bstack, a$, r, SG)
     Exit Function
 fun82: ' "SINT(", "¡ ≈—¡…œ.ƒ’¡ƒ… œ("
 ' GET AN UNSIGN AND GIVES A SIGN...AS READING BITS
-    IsNumber = IsSint(bstack, a$, r, SG)
+    IsNumberNew = IsSint(bstack, a$, r, SG)
     Exit Function
 fun83: ' "USGN(", "ƒ’¡ƒ… œ("
-    IsNumber = IsUsgn(bstack, a$, r, SG)
+    IsNumberNew = IsUsgn(bstack, a$, r, SG)
     Exit Function
 fun84: ' "UINT(", "ƒ’¡ƒ… œ.¡ ≈—¡…œ("
 ' READING BITS OF A SIGN AND GIVE AN UNSIGN OF SAME BITS
-    IsNumber = IsUint(bstack, a$, r, SG)
+    IsNumberNew = IsUint(bstack, a$, r, SG)
     Exit Function
 fun102: ' "CEIL(","œ—œ÷("
-    IsNumber = IsCeil(bstack, a$, r, SG)
+    IsNumberNew = IsCeil(bstack, a$, r, SG)
     Exit Function
 fun85:  ' "ROUND(", "”‘—œ√√("
-    IsNumber = IsRound(bstack, a$, r, SG)
+    IsNumberNew = IsRound(bstack, a$, r, SG)
     Exit Function
 fun86:  ' "INT(", "¡ (", "FLOOR(","ƒ¡–≈ƒ("
-    IsNumber = IsInt(bstack, a$, r, SG)
+    IsNumberNew = IsInt(bstack, a$, r, SG)
     Exit Function
 fun87: ' "SEEK(", "Ã≈‘¡»≈”«("
-    IsNumber = IsSeek(bstack, a$, r, SG)
+    IsNumberNew = IsSeek(bstack, a$, r, SG)
     Exit Function
 fun88:  ' "EOF(", "‘≈Àœ”("
-    IsNumber = IsEof(bstack, a$, r, SG)
+    IsNumberNew = IsEof(bstack, a$, r, SG)
     Exit Function
 fun89: ' "RANDOM(", "‘’◊¡…œ”("
-    IsNumber = IsRandom(bstack, a$, r, SG)
+    IsNumberNew = IsRandom(bstack, a$, r, SG)
     Exit Function
 fun24: ' "STACK(", "”Ÿ—œ”("
-    IsNumber = IsStack(bstack, a$, r, SG)
+    IsNumberNew = IsStack(bstack, a$, r, SG)
     Exit Function
 fun92: ' "GROUP(", "œÃ¡ƒ¡("
-    IsNumber = IsGroup(bstack, a$, r)
+    IsNumberNew = IsGroup(bstack, a$, r)
     Exit Function
 fun98: ' "PROPERTY(", "…ƒ…œ‘«‘¡("
-    IsNumber = IsProperty(bstack, a$, r, SG)
+    IsNumberNew = IsProperty(bstack, a$, r, SG)
     Exit Function
 fun90: ' "CHRCODE(", "◊¡— Ÿƒ("
-    IsNumber = IsChrCode(bstack, a$, r, SG)
+    IsNumberNew = IsChrCode(bstack, a$, r, SG)
     Exit Function
 fun91: ' "ASC(", " Ÿƒ("
-    IsNumber = IsAsc(bstack, a$, r, SG)
+    IsNumberNew = IsAsc(bstack, a$, r, SG)
     Exit Function
 fun94: ' "CONS(", "≈ÕŸ”«("
-    IsNumber = IsCons(bstack, a$, r, SG)
+    IsNumberNew = IsCons(bstack, a$, r, SG)
     If FastSymbol(a$, "#") Then GoTo comehere
     Exit Function
 fun95: ' "CAR(", "–—Ÿ‘œ("
-    IsNumber = IsCar(bstack, a$, r)
+    IsNumberNew = IsCar(bstack, a$, r)
     If FastSymbol(a$, "#") Then GoTo comehere
     Exit Function
 fun96: ' "CDR(", "≈–œÃ≈Õ¡("
-    IsNumber = IsCdr(bstack, a$, r)
+    IsNumberNew = IsCdr(bstack, a$, r)
     If FastSymbol(a$, "#") Then GoTo comehere
     Exit Function
 fun93: ' "TEST(", "ƒœ …Ã«("
-    IsNumber = IsTest(bstack, a$, r, SG)
+    IsNumberNew = IsTest(bstack, a$, r, SG)
     Exit Function
 LOOKFORSUBNUM:
 ''On Error Resume Next
@@ -6527,10 +6530,10 @@ s1$ = Trim$(s1$)
     CallNext bstack, a$, par, p, v$
     If par Then
     r = SG * p
-        IsNumber = True
+        IsNumberNew = True
     Else
     r = 0
-        IsNumber = False
+        IsNumberNew = False
     End If
                 
             
@@ -6563,10 +6566,10 @@ Else
             End If
         End If
             
-            IsNumber = True
+            IsNumberNew = True
     Else
   ''
-     IsNumber = False
+     IsNumberNew = False
     End If
 End If
 Exit Function
@@ -6575,7 +6578,7 @@ ElseIf neoGetArray(bstack, v$, pppp) Then
 contAr2:
 
 If MaybeIsSymbol3(a$, ")", w3) Then
-    IsNumber = True
+    IsNumberNew = True
     If Not pppp.Arr Then
         If Typename(pppp.GroupRef) = "Group" Then
             If pppp.GroupRef.HasParameters Then
@@ -6645,43 +6648,43 @@ If dd < 0 Then
             End If
 p = 0
 PP = 0
-    IsNumber = True
+    IsNumberNew = True
     w2 = 0
                     Do While dn <= dd
                    ' pppp.SerialItem w3, dn, 6
                     pppp.GetDnum dn, w3, v1&
                         If IsExp(bstack, a$, p) Then
                         If dn < dd Then
-                            If Not FastSymbol(a$, ",") Then: MyErMacro a$, "need index for " & v$ & ")", "˜ÒÂÈ‹ÊÔÏ·È ‰ÂﬂÍÙÁ „È· ÙÔ ﬂÌ·Í· " & v$ & ")": IsNumber = False: Exit Function
+                            If Not FastSymbol(a$, ",") Then: MyErMacro a$, "need index for " & v$ & ")", "˜ÒÂÈ‹ÊÔÏ·È ‰ÂﬂÍÙÁ „È· ÙÔ ﬂÌ·Í· " & v$ & ")": IsNumberNew = False: Exit Function
                            
                             Else
                          If FastSymbol(a$, ",") Then
-                        IsNumber = False
+                        IsNumberNew = False
                         MyErMacro a$, "too many indexes for array " & v$ & ")", "ÔÎÎÔﬂ ‰ÂﬂÍÙÂÚ „È· ÙÔ ﬂÌ·Í· " & v$ & ")"
                         Exit Function
                          
                          End If
-                            If Not FastSymbol(a$, ")") Then: MissSymbol ")": IsNumber = False: Exit Function
+                            If Not FastSymbol(a$, ")") Then: MissSymbol ")": IsNumberNew = False: Exit Function
                             
                          
                         End If
                             On Error Resume Next
                             If p < -v1& Then
-                            IsNumber = False
+                            IsNumberNew = False
                               MyErMacro a$, "index too low for array " & v$ & ")", "·ÒÌÁÙÈÍ¸Ú ‰ÂﬂÍÙÁÚ ÛÙÔ ﬂÌ·Í· " & v$ & ")"
                             Exit Function
                             End If
                             
                         If Not pppp.PushOffset(w2, dn, CLng(Fix(p))) Then
-                                IsNumber = False
+                                IsNumberNew = False
                                 MyErMacro a$, "index too high for array " & v$ & ")", "‰ÂﬂÍÙÁÚ ı¯ÁÎ¸Ú „È· ÙÔ ﬂÌ·Í· " & v$ & ")"
-                                IsNumber = False
+                                IsNumberNew = False
                             Exit Function
                             End If
                             On Error GoTo 0
                         Else
                         
-                         IsNumber = False
+                         IsNumberNew = False
                         If LastErNum = -2 Then
                         Else
                         
@@ -6698,7 +6701,7 @@ contgroup00:
             If Left$(a$, 1) = "." Then
 contgroup:
                                
-                              IsNumber = SpeedGroup(bstack, pppp, "VAL", v$, a$, w2) = 1
+                              IsNumberNew = SpeedGroup(bstack, pppp, "VAL", v$, a$, w2) = 1
                                 If SG = 1 Then
                                  r = bstack.LastValue
                                  Else
@@ -6706,7 +6709,7 @@ contgroup:
                                  End If
             ElseIf Left$(a$, 1) = "(" Then
 contgroup3:
-                            IsNumber = SpeedGroup(bstack, pppp, "VAL", v$, a$, w2) = 1
+                            IsNumberNew = SpeedGroup(bstack, pppp, "VAL", v$, a$, w2) = 1
                                  If SG = 1 Then
                                  r = bstack.LastValue
                                  Else
@@ -6718,7 +6721,7 @@ contgroup3:
 contgroup2:
 
                          If pppp.item(w2).IamApointer Then
-                         IsNumber = True
+                         IsNumberNew = True
                          If Left$(a$, 2) = "=>" Then Mid$(a$, 1, 2) = "." + Chr(3): GoTo contgroup
                          
                          Set bstack.lastpointer = pppp.item(w2).link
@@ -6732,7 +6735,7 @@ contgroup2:
                         Set bstack.lastobj = pppp.item(w2)
                         Exit Function
                        Else
-                        IsNumber = SpeedGroup(bstack, pppp, "VAL", v$, "", w2) = 1
+                        IsNumberNew = SpeedGroup(bstack, pppp, "VAL", v$, "", w2) = 1
                                  If SG = 1 Then
                                  r = bstack.LastValue
                                  Else
@@ -6780,7 +6783,7 @@ contlambdahere:
                                     End If
 againlambda:
                                     a$ = "A_" + CStr(Abs(w2)) + "(" + a$
-                                 IsNumber = IsNumber(bstack, a$, p)
+                                 IsNumberNew = IsNumberNew(bstack, a$, p)
                                  If Not bstack.lastobj Is Nothing Then
                                  If TypeOf bstack.lastobj Is lambda Then
                                  If IsOperator(a$, "(") Then
@@ -6857,7 +6860,7 @@ againlambda:
                                  r = SG * p
                                  End If
                         PopStage bstack
-                        IsNumber = True
+                        IsNumberNew = True
                         Exit Function
                         
                 ElseIf Typename(pppp.item(w2)) = myArray Then
@@ -6899,7 +6902,7 @@ comehere:
                                 If Typename(bstack.lastobj) = "mHandler" Then
                                     Set useHandler = bstack.lastobj
                                     Set bstack.lastobj = Nothing
-                                    IsNumber = Matrix(bstack, a$, useHandler, r)
+                                    IsNumberNew = Matrix(bstack, a$, useHandler, r)
                                     If MyIsObject(r) Then r = 0#
                                     If SG < 0 Then r = -r
                                     Exit Function
@@ -6908,14 +6911,14 @@ comehere:
                                 useHandler.t1 = 3
                                 Set useHandler.objref = bstack.lastobj
                                 Set bstack.lastobj = Nothing
-                                    IsNumber = Matrix(bstack, a$, useHandler, r)
+                                    IsNumberNew = Matrix(bstack, a$, useHandler, r)
                                     If MyIsObject(r) Then r = 0#
                                     If SG < 0 Then r = -r
                                     Exit Function
                                 End If
                             End If
                                 SyntaxError
-                                IsNumber = False
+                                IsNumberNew = False
                                 Exit Function
                         ElseIf SG < 0 Then
                             r = -r
@@ -6988,7 +6991,7 @@ syntax1:
                 End If
                  End If
                  If .Status = 4 Then MyErMacro a$, "Buffer locked, wrong use of pointer", "« ƒÈ‹ÒËÒ˘ÛÁ ÍÎÂÈ‰˛ËÁÍÂ, Í·Íﬁ ˜ÒﬁÛÁ ‰ÂﬂÍÙÁ"
-                IsNumber = FastSymbol(a$, ")") And .Status = 0
+                IsNumberNew = FastSymbol(a$, ")") And .Status = 0
                     End With
                 Exit Function
                 ElseIf pppp.GroupRef.t1 = 3 Then
@@ -7036,7 +7039,7 @@ syntax1:
                         End If
                        .Done = True
                        '' what??? here here here
-                       IsNumber = FastSymbol(a$, ")")
+                       IsNumberNew = FastSymbol(a$, ")")
                        If Left$(a$, 1) = "." Then
                        If Fast2NoSpace(a$, ".¡Œ…¡", 5, ".VALUE", 6, 6) Then
                        w2 = -100
@@ -7101,7 +7104,7 @@ contlabel:
                 With useFast
                     If .StructLen > 0 Then s$ = myUcase(s$)
                     If .Find(s$) Then
-                        IsNumber = FastSymbol(a$, ")")
+                        IsNumberNew = FastSymbol(a$, ")")
                         If Left$(a$, 1) = "." Then
                             w2 = -.index - 100
                             GoTo contgroup
@@ -7145,14 +7148,14 @@ contlabel:
                                     If Typename(bstack.lastobj) = "mHandler" Then
                                         Set useHandler = bstack.lastobj
                                         Set bstack.lastobj = Nothing
-                                        IsNumber = Matrix(bstack, a$, useHandler, r)
+                                        IsNumberNew = Matrix(bstack, a$, useHandler, r)
                                         If MyIsObject(r) Then r = 0#
                                         If SG < 0 Then r = -r
                                         Exit Function
                                     End If
                                 End If
                                 SyntaxError
-                                IsNumber = False
+                                IsNumberNew = False
                                 Exit Function
                             ElseIf SG < 0 Then
                                 r = -r
@@ -7187,7 +7190,7 @@ conthere102030:
                 If Not nbstack.StaticCollection Is Nothing Then
                     bstack.Parent.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
                 End If
-                IsNumber = True
+                IsNumberNew = True
                 If IsOperator(a$, "(") Then
 contgrouppar:
                     Set pppp = New mArray
@@ -7231,9 +7234,9 @@ contgrouppar:
                 Set nbstack = Nothing
                 r = p
                 If SG < 0 Then r = -r
-                IsNumber = True
+                IsNumberNew = True
             Else
-                IsNumber = False
+                IsNumberNew = False
             End If
         Else
             If Typename(var(VR)) = "Group" Then
@@ -7244,12 +7247,12 @@ contgrouppar:
                 Else
                     r = 0
                     InternalEror
-                    IsNumber = False
+                    IsNumberNew = False
                 End If
             Else
                 r = 0
                 InternalEror
-                IsNumber = False
+                IsNumberNew = False
             End If
         End If
         Exit Function
@@ -7279,14 +7282,14 @@ finishnum:
         If SG < 0 Then r = -r
         End If
         
-        IsNumber = FastSymbol(a$, ")")
+        IsNumberNew = FastSymbol(a$, ")")
        
         End If
     
     Exit Function
     Else
 skiperror:
- IsNumber = False
+ IsNumberNew = False
          If FindNameForGroup(bstack, v$) Then
         UnknownMethod1 a$, v$
  Else
@@ -7301,7 +7304,7 @@ End If
 End Select
 '' Else
 '' THESE THREE STATEMENDS NOT USED ANY MORE
-     IsNumber = False
+     IsNumberNew = False
     a$ = v$ + a$
     Exit Function
 ''End Select
@@ -7310,7 +7313,7 @@ zerohere:
 'If val("0" & Mid$(a$, sng&, 1)) = 0 And Left(Mid$(a$, sng&, 1), sng&) <> "0" And Left(Mid$(a$, sng&, 1), sng&) <> "." Then
 If Not Mid$(a$, sng&, 1) Like "[0-9.]" Then
 
-IsNumber = False
+IsNumberNew = False
 Else
 
     If Mid$(a$, sng&, 1) = "." Then
@@ -7391,7 +7394,7 @@ Else
        If sg1 Then sng = sng - Len(ex$)
     End If
     If ig$ = vbNullString Then
-    IsNumber = False
+    IsNumberNew = False
     Else
   
     If Left$(DE$, 2) = "0x" Then
@@ -7402,7 +7405,7 @@ Else
    If Mid$(a$, sng&, 1) = "&" Then
    If Len(DE$) > 10 Then
     MyEr "Too many digits", "–ÔÎÎ‹ ¯Áˆﬂ·"
-   IsNumber = False
+   IsNumberNew = False
    Exit Function
    End If
    sng& = sng& + 1
@@ -7412,7 +7415,7 @@ Else
    sng& = sng& + 1
         If Len(DE$) > 6 Then
          MyEr "Too many digits", "–ÔÎÎ‹ ¯Áˆﬂ·"
-        IsNumber = False
+        IsNumberNew = False
         Exit Function
         End If
    Mid$(DE$, 1, 2) = "&H"
@@ -7420,7 +7423,7 @@ Else
    Else
    If Len(DE$) > 10 Then
     MyEr "Too many digits", "–ÔÎÎ‹ ¯Áˆﬂ·"
-   IsNumber = False
+   IsNumberNew = False
    Exit Function
    End If
    DE$ = Right$("00000000" & Mid$(DE$, 3), 8)
@@ -7449,7 +7452,7 @@ Else
                     sng = sng - Len(ex$)
                     ex$ = vbNullString
                     MyEr "Exponet Overflow", "’ÂÒ˜ÂﬂÎÈÛÁ ≈ÍË›ÙÁ)"
-                    IsNumber = False
+                    IsNumberNew = False
                     Exit Function
                     Else
                     sng = sng + Len(ex$)
@@ -7546,14 +7549,14 @@ Else
                 End If
                 
            ErrInExponet a$
-          IsNumber = False
+          IsNumberNew = False
             Exit Function
             End If
     On Error GoTo 0
   End If
   If sng& > 1 Then Mid$(a$, 1, sng& - 1) = space$(sng& - 1)
   
-    IsNumber = True
+    IsNumberNew = True
     End If
 End If
 End Function
@@ -8231,8 +8234,8 @@ again2134:
                                  End If
                                  rr& = 1
                                  If GetSub(r$ + ")", rr&) Then
-                                 If sbf(rr&).extern > 0 Then
-                                 r$ = "{CALL EXTERN" + Str$(sbf(rr&).extern) + "}" + sbf(rr&).sbgroup
+                                 If sbf(rr&).Extern > 0 Then
+                                 r$ = "{CALL EXTERN" + Str$(sbf(rr&).Extern) + "}" + sbf(rr&).sbgroup
                                  Else
                             r$ = "{" + sbf(rr&).sb + "}" + sbf(rr&).sbgroup
                             End If
@@ -15663,9 +15666,7 @@ contbasicfor:
                                             Loop
                                         End If
                                         If Execute = 1 And y1 Then
-                                            bstack.RetStack.drop 1
-                                            'b$ = Right$(b$, bstack.RetStack.PopVal)
-                                            ' now NEXT is responsible to get rid the stack (else stack is flushing with bstack)
+                                            bstack.RetStack.drop 2
                                         End If
                                         x2 = 0  ' need to erased - because reused
                                         y2 = 0
@@ -17829,7 +17830,7 @@ End If
 
 If Mid$(sbf(x1).sb, i) = vbNullString Then
 GoFunc = True
-If sbf(x1).extern = 0 Then GoTo emptyfunc
+If sbf(x1).Extern = 0 Then GoTo emptyfunc
 End If
    mystack.OriginalName$ = here$
 If usesamestack Then
@@ -17861,8 +17862,8 @@ Else
     End If
     frm$ = Mid$(sbf(x1).sb, i)
     If Len(frm$) = 0 Then
-    If sbf(x1).extern > 0 Then
-    If Not PrepareLambda(mystack, myl, sbf(x1).extern, frm$, c) Then
+    If sbf(x1).Extern > 0 Then
+    If Not PrepareLambda(mystack, myl, sbf(x1).Extern, frm$, c) Then
     GoTo fastexit
     
     End If
@@ -18059,7 +18060,7 @@ normalexit:
 fastexit:
    If Not myl Is Nothing Then
    myl.CopyFromVar mystack, var()
-   If c Is Nothing Then Set var(sbf(x1).extern) = myl
+   If c Is Nothing Then Set var(sbf(x1).Extern) = myl
    End If
    If Not basestack.CopyInOutCol Is Nothing Then CopyBack basestack
    
@@ -20608,11 +20609,11 @@ CopyArrayItemsNoFormated = -k
 End If
 End If
 End Function
-Function ModuleSubAsap(n$, q As String, Optional sbgroupname As String = vbNullString, Optional extern As Long) As Long
+Function ModuleSubAsap(n$, q As String, Optional sbgroupname As String = vbNullString, Optional Extern As Long) As Long
 Dim j As Long, where As Long
 j = AllocSub()
 With sbf(j)
-    .extern = extern
+    .Extern = Extern
     .sb = q
     .sbc = 0
     .sbgroup = sbgroupname
@@ -20629,7 +20630,7 @@ n$ = myUcase(name$, True)
 
 j = AllocSub()
 With sbf(j)
-    .extern = 0
+    .Extern = 0
     .sb = q
     .sbc = 0
     .sbgroup = sbgroupname
@@ -20640,13 +20641,13 @@ End With
 subHash.ItemCreator n$, j
 ModuleSub = j
 End Function
-Function GlobalSub(name$, q As String, Optional sbgroupname As String = vbNullString, Optional ByVal nameonly$ = vbNullString, Optional extern As Long = 0) As Long
+Function GlobalSub(name$, q As String, Optional sbgroupname As String = vbNullString, Optional ByVal nameonly$ = vbNullString, Optional Extern As Long = 0) As Long
 Dim j As Long, n$, where As Long
 n$ = myUcase(name$, True)
 
 j = AllocSub()
 With sbf(j)
-    .extern = extern
+    .Extern = Extern
     .sb = q
     .sbc = 0
     .sbgroup = sbgroupname
@@ -21987,8 +21988,8 @@ End If
 End Function
 Function blockString(s$, endstr As Long, Optional i As Long = 1) As String
 ' endstr 34 or 125
-Dim j As Long, c As Long, Start As Long
-Start = i
+Dim j As Long, c As Long, start As Long
+start = i
 Dim a1 As Boolean
 c = Len(s$)
 If c < 1 Then Exit Function
@@ -22010,7 +22011,7 @@ End Select
 i = i + 1
 Loop Until i > c
 If j = 1 Then
-blockString = Mid$(s$, Start, i - Start)
+blockString = Mid$(s$, start, i - start)
 s$ = Mid$(s$, i)
 Else
 blockString = "Error " & Chr(34) & "missing }" & Chr(34)
@@ -40439,7 +40440,7 @@ jump1:
                                                    
                                 
                                     If FastSymbol(rest$, "{") Then
-                                           If sbf(x1).locked Or sbf(x1).extern > 0 Then
+                                           If sbf(x1).locked Or sbf(x1).Extern > 0 Then
                                          what$ = block(rest$)
                                         bstack.IndexSub = x1
                                        FastSymbol rest$, "}", True

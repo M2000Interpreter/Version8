@@ -1,10 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 7 active-X
+Version 9.6 Revision 8 active-X
 
-Type$() now work. (broken in rev. 6)
-Added const for lambda functions, and final lambda for groups
-not finished work on local groups (to shadow same groups, we can do that if we make it from a Read New or using Local GroupName=a group Or a Class Function).
+Fixed For Next (changed in Rev 7, and missing a drop of a value from return stack)
 
 
 From version 9.0 revision 50:

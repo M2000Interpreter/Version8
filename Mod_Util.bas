@@ -5691,6 +5691,53 @@ End Select
 Next i
 If j = 0 Then pos = i: BlockParam3 = True
 End Function
+Public Sub GetCodePart(a$, pos As Long)
+Dim pos2 As Long, Level&, w$
+If a$ = vbNullString Then Exit Sub
+Dim v1 As Long
+If pos = 0 Then pos = 1
+Do While pos <= Len(a$)
+    w$ = Mid$(a$, pos, 1)
+    v1 = AscW(w$)
+    If Abs(v1) > 7 Then
+    If w$ = """" Then
+        pos = pos + 1
+        Do While pos <= Len(a$)
+        If Mid$(a$, pos, 1) = """" Then Exit Do
+        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        pos = pos + 1
+        Loop
+    ElseIf w$ = "(" Then
+        Level& = 0
+again22:
+      pos = pos + 1
+        If Not BlockParam2(a$, pos) Then Exit Do
+        If Mid$(a$, pos + 1, 1) = "#" Then
+        pos = pos + 1
+        GoTo conthere
+        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
+        pos = pos + 1: GoTo again22
+        End If
+    ElseIf w$ = "{" Then
+       If pos <= Len(a$) Then
+        If Not blockStringAhead(a$, pos) Then Exit Do
+        End If
+    Else
+        Select Case w$
+        Case ")", "}", Is < " ", "'", "\", vbLf
+        Exit Do
+        End Select
+        End If
+End If
+        pos = pos + 1
+        
+  
+conthere:
+  
+Loop
+
+End Sub
+
 Public Sub aheadstatusSkipParam(a$, pos As Long)
 Dim pos2 As Long, Level&, w$
 If a$ = vbNullString Then Exit Sub
@@ -5737,6 +5784,7 @@ conthere:
 Loop
 
 End Sub
+
 
 Public Sub aheadstatusNext(a$, pos As Long, Lang As Long, flag As Boolean)
 Dim pos2 As Long, Level&, what$, w$, lenA As Long, level2 As Integer
@@ -7076,8 +7124,51 @@ Loop
 pos = lenA + 2
 
 End Sub
+Sub dumpModule(no As Long)
+Dim a$, i As Long, guard As Long, oldi As Long, ok As Boolean, r As Long
+Dim part$, trimright
+a$ = sbf(no).sb
+guard = Len(a$)
+i = 1
+While i <= guard
+i = MyTrimLi(a$, i)
+While Mid$(a$, i, 2) = vbCrLf And i <= guard
+i = i + 2
+Wend
+While MaybeIsSymbol3lot(a$, "'\#", i)
+i = i + 1
+While Not Mid$(a$, i, 2) = vbCrLf And i <= guard
+i = i + 1
+Wend
+While Mid$(a$, i, 2) = vbCrLf And i <= guard
+i = i + 2
+Wend
+i = MyTrimLi(a$, i)
+Wend
 
-Sub test2(a$)
+If i <= guard Then
+    oldi = i
+ 
+    
+    GetCodePart a$, i
+    
+    trimright = MyTrimRfrom(a$, oldi, i)
+    If IsNumberLabel2(a$, part$, oldi, i) Then
+    Debug.Print "<<LABEL>> " & part$
+    oldi = MyTrimLi(a$, oldi)
+    End If
+   If oldi < trimright Then
+    Debug.Print "<<Part>>"
+    Debug.Print Mid$(a$, oldi, trimright - oldi)
+    
+    End If
+    
+    If Mid$(a$, i) = vbCr Then i = i + 2 Else i = i + 1
+End If
+Wend
+'Debug.Print a$
+End Sub
+Sub test2(Optional a$)
 Dim i As Long, j As Long, s$, ok As Boolean
 a$ = "a>15  {" + vbCrLf + " Print 1000 " + vbCrLf + "} 1 2 3"
 a$ = "nmn nmmn {asdsad}+{dsdfsf}>a${hjkh}"
@@ -7086,10 +7177,11 @@ a$ = "not {a}>{aa}+aaa$ and 10>len({3}) and {z}=basdas$ gghjh{asdas}"
 a$ = " 1>2 and  {alfa}={beta} and 1>2"
 a$ = "a$+b$ {}" ' + vbCr
 a$ = "              a$> b$"
+a$ = "list:=1,2,3,4 : Print 12"
 i = 1
-s$ = aheadstatus(a$, False, i)
+aheadstatusNew a$, i, ok
 Debug.Print Left$(a$, i), i
-Debug.Print s$
+Debug.Print ok
 End Sub
 '
 Public Sub aheadstatusNew(a$, pos As Long, flag As Boolean)
@@ -11457,6 +11549,23 @@ a$ = Mid$(a$, a1)
 IsNumberD = True
 Else
 IsNumberD = False
+End If
+End Function
+Function IsNumberLabel2(a$, Label$, a1 As Long, ByVal LI As Long) As Boolean
+Dim A2 As Long
+If LI > 0 Then
+A2 = a1
+If a1 > LI Then Exit Function
+If LI > 5 + A2 Then LI = 4 + A2
+If Mid$(a$, a1, 1) Like "[0-9]" Then
+Do While a1 <= LI
+a1 = a1 + 1
+If Not Mid$(a$, a1, 1) Like "[0-9]" Then Exit Do
+
+Loop
+Label$ = Mid$(a$, A2, a1 - A2)
+IsNumberLabel2 = True
+End If
 End If
 End Function
 Function IsNumberLabel(a$, Label$) As Boolean
