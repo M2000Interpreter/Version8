@@ -1,9 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 6 active-X
+Version 9.6 Revision 7 active-X
 
-Optimizations, Bug fixes, added While End While, Do Until (versions wihout blocks { })
-
+Type$() now work. (broken in rev. 6)
+Added const for lambda functions, and final lambda for groups
+not finished work on local groups (to shadow same groups, we can do that if we make it from a Read New or using Local GroupName=a group Or a Class Function).
 
 
 From version 9.0 revision 50:

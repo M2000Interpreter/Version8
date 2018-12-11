@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 6
+Global Const Revision = 7
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -172,6 +172,7 @@ Public basestack1 As New basetask ' this is the global stack
 Public EventStaticCollection As New FastCollection
 Public sb2used As Long
 Public Type modfun
+    extern As Long
     sb As String
     sbc As Long
     sbgroup As String
@@ -2308,7 +2309,7 @@ b$ = GetStrUntil("\", a$)
 Wend
 username = c$
 End Function
-Public Function ScanTarget(j() As target, ByVal x As Long, ByVal y As Long, ByVal MyL As Long) As Long
+Public Function ScanTarget(j() As target, ByVal x As Long, ByVal y As Long, ByVal myl As Long) As Long
 Dim iu&, Id&, i&, XX&, YY&
 
 iu& = LBound(j())
@@ -2316,7 +2317,7 @@ Id& = UBound(j())
 ScanTarget = -1
 For i& = iu& To Id&
 With j(i&)
-If .Enable And .layer = MyL Then
+If .Enable And .layer = myl Then
 XX& = x \ .Xt
 YY& = y \ .Yt
 If .Lx <= XX& And .tx >= XX& And .ly <= YY& And .ty >= YY& Then
@@ -2327,12 +2328,12 @@ End If
 End With
 Next i&
 End Function
-Public Sub DisableTargets(j() As target, ByVal MyL As Long)
+Public Sub DisableTargets(j() As target, ByVal myl As Long)
 Dim iu&, Id&, i&
 iu& = LBound(j())
 Id& = UBound(j())
 For i& = iu& To Id&
- If j(i&).layer = MyL Then j(i&).Enable = False
+ If j(i&).layer = myl Then j(i&).Enable = False
 Next i&
 End Sub
 
@@ -5085,7 +5086,14 @@ foundprivate:
                         End If
             End If
         ElseIf v$ = "Constant" Then
+            If var(VR).flag Then
+            If Typename(var(VR).Value) = "lambda" Then
+                CopyLambda var(VR).Value, bstack
+                r = 0
+            End If
+            Else
             r = var(VR)
+            End If
         Else
                 Set bstack.lastobj = MakeitObjectGeneric(VR)
                 r = 0
@@ -6766,9 +6774,9 @@ contlambdahere:
                          Set var(w1) = pppp.item(w2)
                          
                                     If here$ = vbNullString Then
-                                            GlobalSub "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+                                            GlobalSub "A_" + CStr(Abs(w2)) + "()", "", , , w1
                                         Else
-                                            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+                                            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "", , , w1
                                     End If
 againlambda:
                                     a$ = "A_" + CStr(Abs(w2)) + "(" + a$
@@ -8223,7 +8231,11 @@ again2134:
                                  End If
                                  rr& = 1
                                  If GetSub(r$ + ")", rr&) Then
+                                 If sbf(rr&).extern > 0 Then
+                                 r$ = "{CALL EXTERN" + Str$(sbf(rr&).extern) + "}" + sbf(rr&).sbgroup
+                                 Else
                             r$ = "{" + sbf(rr&).sb + "}" + sbf(rr&).sbgroup
+                            End If
                                  
                     rr& = 2
      
@@ -10169,6 +10181,7 @@ Dim anything As Object
 againpointer:
 Set bstackstr.lastobj = Nothing
 
+    
 w2 = Len(a$)
 Dim n$
 If Len(a$) < 129 Then
@@ -10348,9 +10361,10 @@ Case 5
             ' check again
 rvalObjectstring:
     If Left$(aheadstatus(q$ + Split(a$, Chr$(13))(0), False), 1) = "S" Then
+        
         If neoGetArray(bstackstr, q$, pppp) Then
 enterthis:
-            If NeoGetArrayItem(pppp, bstackstr, q$, w, a$) Then
+            If NeoGetArrayItem(pppp, bstackstr, q$, w, a$, , , True) Then
                
                 If Not pppp.Arr And FastSymbol(a$, ")") Then
                 ' need an object
@@ -10361,7 +10375,7 @@ enterthis:
                             Set bstackstr.lastobj = Nothing
                             w = -2
                             If FastSymbol(a$, "(") Then
-                                If NeoGetArrayItem(pppp, bstackstr, q$, w, a$) Then
+                                If NeoGetArrayItem(pppp, bstackstr, q$, w, a$, , , True) Then
                                 End If
                             End If
                         End If
@@ -10407,7 +10421,7 @@ enteragain:
                                     Set pppp.GroupRef = bstackstr.lastobj
                                     Set bstackstr.lastobj = Nothing
                                     pppp.Arr = False
-                                    w2 = -2
+                                    w = -2
                                     Set nbstack = Nothing
                                     GoTo contrightstrpar
                                 ElseIf Left$(a$, 1) = "." Then
@@ -10415,7 +10429,7 @@ enteragain:
                                      Set pppp.GroupRef = bstackstr.lastobj
                                      Set bstackstr.lastobj = Nothing
                                      pppp.Arr = False
-                                     w2 = -2
+                                     w = -2
                                      Set nbstack = Nothing
                                      GoTo groupstrvalue
                                 End If
@@ -10929,8 +10943,19 @@ foundprivate:
                         End If
                     ElseIf TypeOf var(w) Is Document Then
                         r$ = var(w)
+                    ElseIf TypeOf var(w) Is Constant Then
+                    If var(w).flag Then
+                    If Typename(var(w).Value) = "lambda" Then
+                    CopyLambda var(w).Value, bstackstr
+                    
+                    End If
                     Else
+                    GoTo there12001
+                    End If
+                    Else
+there12001:
                         On Error Resume Next
+                        
                         r$ = var(w).Value
                         If Err > 0 Then
                         Err.clear
@@ -13517,9 +13542,9 @@ contlambdastr:
      w1 = globalvar("A_" + CStr(Abs(w2)), 0#)
      Set var(w1) = anything
                 If here$ = vbNullString Then
-                        dd = ModuleSub("A_" + CStr(Abs(w2)) + "$()", "CALL EXTERN " & Str(w1))
+                        dd = ModuleSubAsap("A_" + CStr(Abs(w2)) + "$()", "", , w1)
                     Else
-                        dd = ModuleSub(here$ & "." & bstackstr.GroupName & "A_" + CStr(Abs(w2)) + "$()", "CALL EXTERN " & Str(w1))
+                        dd = ModuleSubAsap(here$ & "." & bstackstr.GroupName & "A_" + CStr(Abs(w2)) + "$()", "", , w1)
                 End If
              
                 a$ = "A_" + CStr(Abs(w2)) + "$(" + a$
@@ -14473,10 +14498,30 @@ Dim p As Variant, ii As Long, ss$, what As Long
             Exit Function
             End If
 conthere:
+            If Not bstack.lastobj Is Nothing Then
+makelambda:
+            If Typename(bstack.lastobj) = "lambda" Then
+            Set cv = New Constant
+            cv.DefineOnce bstack.lastobj
+            Set bstack.lastobj = Nothing
+            ii = globalvar(w$, p, , makeallglobal)
+            If makeallglobal Or here$ = vbNullString Then
+             GlobalSub w$ + "()", "", , , ii
+            Else
+            GlobalSub here$ + "." + w$ + "()", "", , , ii
+            End If
+            Else
+            Set bstack.lastobj = Nothing
+            Set cv = New Constant
+            ii = globalvar(w$, p, , makeallglobal)
+            cv.DefineOnce p
+            End If
+            Else
             Set bstack.lastobj = Nothing
             Set cv = New Constant
             If what = 4 Then cv.DefineOnce MyRound(p) Else cv.DefineOnce p
             ii = globalvar(w$, p, , makeallglobal)
+            End If
             Set var(ii) = cv
             ConstNew = True
     Case 3
@@ -14501,6 +14546,7 @@ conthere:
                 MyEr "No global const found", "Δεν βρέθηκε γενική σταθερή"
             Exit Function
             End If
+             If Not bstack.lastobj Is Nothing Then GoTo makelambda
             Set bstack.lastobj = Nothing
             Set cv = New Constant
             cv.DefineOnce ss$
@@ -17284,7 +17330,18 @@ ContGoto:
               End If
 Case "LOCAL", "ΤΟΠΙΚΑ", "ΤΟΠΙΚΗ", "ΤΟΠΙΚΕΣ"
 contNegLocal:
+            'If Not NewStat Then
+            
+                    If Not NewStat Then
+                    If IsLabelSymbolNew(b$, "ΟΜΑΔΑ", "GROUP", Lang) Then
+                    If Not ProcGroup(-1, bstack, b$, Lang) Then
+                    Execute = 0
+                    Exit Function
+                    End If
+                    GoTo loopcontinue
+                    End If
                     NewStat = True
+                    End If
                     sss = Len(b$)
                     LLL = sss
                 iscom = True
@@ -17315,7 +17372,7 @@ contNegLocal:
                   GoTo errstat
 Case "GLOBAL", "ΓΕΝΙΚΟ", "ΓΕΝΙΚΗ", "ΓΕΝΙΚΕΣ"
 contNegGlobal:
-                If NewStat Then LocaleAndGlobal: Execute = 0: Exit Function
+              '  If NewStat Then LocalAndGlobal: Execute = 0: Exit Function
                 If Not VarStat Then
                 If IsLabelSymbolNew(b$, "ΟΜΑΔΑ", "GROUP", Lang) Then
                     ' group can't used as variable because exist read only variable
@@ -17635,7 +17692,7 @@ Function GoFunc(mystack As basetask, what$, rest$, vl As Variant, Optional recur
 Dim p As Variant, i As Long, F As Long, it As Long, pa$
 Dim x1 As Long, frm$, par As Boolean, ohere$, w$, bb$, loopthis As Boolean, S3 As Long, ec$
 Dim Vars As Long, VName As Long, subs As Long, snames As Long, once As Boolean, RetStackSize As Long, subspoint As Boolean, subsfc As FastCollection
-Dim threads As Long, vvv As Variant
+Dim threads As Long, vvv As Variant, c As Constant, myl As lambda
 
 Dim basestack As basetask
 ' get a reference to Parent task
@@ -17772,7 +17829,7 @@ End If
 
 If Mid$(sbf(x1).sb, i) = vbNullString Then
 GoFunc = True
-GoTo emptyfunc
+If sbf(x1).extern = 0 Then GoTo emptyfunc
 End If
    mystack.OriginalName$ = here$
 If usesamestack Then
@@ -17803,16 +17860,21 @@ Else
     mystack.UseGroupname = sbf(x1).sbgroup
     End If
     frm$ = Mid$(sbf(x1).sb, i)
+    If Len(frm$) = 0 Then
+    If sbf(x1).extern > 0 Then
+    If Not PrepareLambda(mystack, myl, sbf(x1).extern, frm$, c) Then
+    GoTo fastexit
+    
+    End If
+       
+    End If
+    End If
+    
     it = 1
     RetStackSize = mystack.RetStackTotal
 againstream:
 
 
-
-
-' Call executeblock(it, mystack, frm$, False, ok)
-
-'ec$ = vbCrLf + frm$
   ec$ = frm$
         If Len(ec$) > 0 Then
                 it = 1
@@ -17995,13 +18057,25 @@ jump1234:
 breakexit:
 normalexit:
 fastexit:
+   If Not myl Is Nothing Then
+   myl.CopyFromVar mystack, var()
+   If c Is Nothing Then Set var(sbf(x1).extern) = myl
+   End If
    If Not basestack.CopyInOutCol Is Nothing Then CopyBack basestack
+   
     Select Case it ''Execute(mystack, frm$, False)
     Case 0
     Set mystack.lastobj = Nothing
 Set mystack.FuncObj = Nothing
         mystack.ThrowThreads  ' always throw threads
+
     If Not NERR Then   ' Nerr = true from command ERROR 0 means Fatal Error, shows a message and act as a crash!
+        If Not myl Is Nothing Then
+    
+            MyErMacro rest$, Chr(0) + "Problem in lambda", Chr(0) + "Πρόβλημα στη λάμδα"
+            FK$(13) = "EDIT " + sbf(myl.OriginalCode).goodname + ", " + CStr(-myl.lastlen - Len(rest$))
+              GoTo there1234
+    End If
             If mystack.UseGroupname <> "" Then
 If InStr(mystack.UseGroupname, ChrW(&H1FFF)) > 0 Then
 pa$ = GetNextLine((sbf(Abs(mystack.OriginalCode)).sb))
@@ -18014,7 +18088,6 @@ MyErMacro rest$, "Problem in class in function " + Replace(GetName(sbf(x1).goodn
 Else
 MyErMacro rest$, "Problem in class in module " + Replace(GetName(sbf(x1).goodname), ChrW(&HFFBF), ""), "Πρόβλημα στη κλάση στο τμήμα " + Replace(GetName(sbf(x1).goodname), ChrW(&HFFBF), "")
 End If
-GoFunc = True
 GoTo there1234
 End If
 
@@ -19206,7 +19279,15 @@ Case "ERROR", "ΛΑΘΟΣ"
 Identifier = MyError(basestack, rest$, Lang)
 Exit Function
 Case "SET", "ΘΕΣΕ"
-    Identifier = interpret(basestack, GetNextLine(rest$))
+    it = 1
+    aheadstatusANY rest$, it
+    s$ = Left$(rest$, it - 1)
+    If interpret(basestack, s$) Then
+        rest$ = Mid$(rest$, it)
+    Else
+        rest$ = s$ + Mid$(rest$, it)
+    End If
+    
     Exit Function
 Case "NEW", "ΝΕΟ"
     Identifier = MyNew(basestack, rest$, Lang)
@@ -19752,6 +19833,31 @@ End If
 ReboundVar = varhash.findRebound(ss$, q, var())
 
 End Function
+Function globalvarex(name$, q As Variant) As Long
+Dim makeitglobal As Boolean, ohere$
+On Error GoTo 0
+Dim j As Long
+
+    j = AllocVar()
+    If MyIsObject(q) Then
+        Set var(j) = q
+    Else
+        If Right$(name$, 1) = "%" Then
+            On Error Resume Next
+            q = MyRound(q)
+            If Err.Number = 6 Then q = 0
+            On Error GoTo 0
+        End If
+        var(j) = q
+    End If
+
+varhash.ItemCreator myUcase(name$), j, , , True
+globalvarex = j
+End Function
+Function globalvarEmpty(name$) As Long
+globalvarEmpty = AllocVar()
+varhash.ItemCreator (name$), globalvarEmpty, , , True
+End Function
 Function globalvar(name$, q As Variant, Optional link As Boolean = False, Optional makeitglobal As Boolean = False, Optional ohere$ = vbNullString) As Long
 On Error GoTo 0
 Dim j As Long, m As Long
@@ -19809,7 +19915,7 @@ varhash.ItemCreator here$ & "." & myUcase(name$), j, link, , True
 End If
 globalvar = j
 End Function
-Function globalvarstr(name$, q$, Optional link As Boolean = False, Optional makeitglobal As Boolean = False, Optional ohere$ = vbNullString) As Long
+Function globalvarStr(name$, q$, Optional link As Boolean = False, Optional makeitglobal As Boolean = False, Optional ohere$ = vbNullString) As Long
 On Error GoTo 0
 Dim j As Long, m As Long
 
@@ -19828,7 +19934,7 @@ If Not link Then
         End If
         ohere$ = vbNullString
         MoveStringToVariant q$, var(j)
-        globalvarstr = j
+        globalvarStr = j
         Exit Function
     End If
     j = AllocVar()
@@ -19845,7 +19951,7 @@ If here$ = vbNullString Or makeitglobal Then
 Else
     varhash.ItemCreator here$ & "." & myUcase(name$), j, link, , True
 End If
-globalvarstr = j
+globalvarStr = j
 End Function
 Function GlobalVarRefOnly(name$, Optional gl As Boolean = False) As Long
 On Error GoTo 0
@@ -19959,12 +20065,8 @@ Case "Group"
     End If
 Case "lambda"
     varhash.ItemCreator name$ + Split(aa$)(0), CLng(val(v)), True
-    ' If here$ = vbNullString Then
-      '  GlobalSub name$ + Split(aa$)(0) + "()", "CALL EXTERN " & Str(v), name$
-                                        '    Else
-                                 '               GlobalSub here$ & "." & bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), here$ + "." + bstack.GroupName
-                                           ' End If
-         GlobalSub name$ + Split(aa$)(0) + "()", "CALL EXTERN " & Str(v), name$
+
+         GlobalSub name$ + Split(aa$)(0) + "()", "", name$, , v
 Case Else
 
     varhash.ItemCreator name$ + Split(aa$)(0), CLng(val(v)), True
@@ -20236,7 +20338,7 @@ If bstack.UseGroupname <> "" Then
         n$ = Mid$(n$, 1, Len(n$) - 1)
         End If
         If varhash.Find3(n$, k, feedback) Then
-        GoTo conthandler
+        GoTo contHandler
         End If
         
         End If
@@ -20247,7 +20349,7 @@ Else
 n$ = Mid$(n$, 1, Len(n$) - 1)
 End If
 If varhash.Find3(n$, k, feedback) Then
-conthandler:
+contHandler:
     If TypeOf var(k) Is mHandler Then
         If var(k).t1 < 3 Then
             Set ga = New mArray
@@ -20506,12 +20608,28 @@ CopyArrayItemsNoFormated = -k
 End If
 End If
 End Function
+Function ModuleSubAsap(n$, q As String, Optional sbgroupname As String = vbNullString, Optional extern As Long) As Long
+Dim j As Long, where As Long
+j = AllocSub()
+With sbf(j)
+    .extern = extern
+    .sb = q
+    .sbc = 0
+    .sbgroup = sbgroupname
+    Set .subs = Nothing
+    .goodname = n$
+    .Changed = False
+End With
+subHash.ItemCreator n$, j
+ModuleSubAsap = j
+End Function
 Function ModuleSub(name$, q As String, Optional sbgroupname As String = vbNullString) As Long
 Dim j As Long, n$, where As Long
 n$ = myUcase(name$, True)
 
 j = AllocSub()
 With sbf(j)
+    .extern = 0
     .sb = q
     .sbc = 0
     .sbgroup = sbgroupname
@@ -20522,12 +20640,13 @@ End With
 subHash.ItemCreator n$, j
 ModuleSub = j
 End Function
-Function GlobalSub(name$, q As String, Optional sbgroupname As String = vbNullString, Optional ByVal nameonly$ = vbNullString) As Long
+Function GlobalSub(name$, q As String, Optional sbgroupname As String = vbNullString, Optional ByVal nameonly$ = vbNullString, Optional extern As Long = 0) As Long
 Dim j As Long, n$, where As Long
 n$ = myUcase(name$, True)
 
 j = AllocSub()
 With sbf(j)
+    .extern = extern
     .sb = q
     .sbc = 0
     .sbgroup = sbgroupname
@@ -22033,46 +22152,46 @@ End If
 PlaceBasket dd, players(GetCode(dd))
 End Sub
 
-Public Sub DropLeft(ByVal uStr As String, fromStr As String)
+Public Sub DropLeft(ByVal uStr As String, fromstr As String)
 Dim i As Long
-i = InStr(fromStr, uStr)
+i = InStr(fromstr, uStr)
 If i > 0 Then
-fromStr = Mid$(fromStr, i + Len(uStr))
+fromstr = Mid$(fromstr, i + Len(uStr))
 Else
-fromStr = vbNullString
+fromstr = vbNullString
 End If
 End Sub
-Public Function GetStrUntil(ByVal sStr As String, fromStr As String, Optional RemoveSstr As Boolean = True) As String
+Public Function GetStrUntil(ByVal sStr As String, fromstr As String, Optional RemoveSstr As Boolean = True) As String
 Dim i As Long
 
-If fromStr = vbNullString Then GetStrUntil = vbNullString: Exit Function
-i = InStr(fromStr, sStr)
+If fromstr = vbNullString Then GetStrUntil = vbNullString: Exit Function
+i = InStr(fromstr, sStr)
 If i < 2 Then
 GetStrUntil = vbNullString
-fromStr = vbNullString
+fromstr = vbNullString
 Else
-GetStrUntil = Left$(fromStr, i - 1)
+GetStrUntil = Left$(fromstr, i - 1)
 If RemoveSstr Then
-fromStr = Mid$(fromStr, Len(sStr) + i)
+fromstr = Mid$(fromstr, Len(sStr) + i)
 Else
-fromStr = Mid$(fromStr, i)
+fromstr = Mid$(fromstr, i)
 End If
 End If
 End Function
-Public Function GetStrUntilR(ByVal sStr As String, fromStr As String, Optional RemoveSstr As Boolean = True) As String
+Public Function GetStrUntilR(ByVal sStr As String, fromstr As String, Optional RemoveSstr As Boolean = True) As String
 Dim i As Long
 
-If fromStr = vbNullString Then GetStrUntilR = vbNullString: Exit Function
-i = InStrRev(fromStr, sStr)
+If fromstr = vbNullString Then GetStrUntilR = vbNullString: Exit Function
+i = InStrRev(fromstr, sStr)
 If i < 2 Then
 GetStrUntilR = vbNullString
-fromStr = vbNullString
+fromstr = vbNullString
 Else
-GetStrUntilR = Left$(fromStr, i - 1)
+GetStrUntilR = Left$(fromstr, i - 1)
 If RemoveSstr Then
-fromStr = Mid$(fromStr, Len(sStr) + i)
+fromstr = Mid$(fromstr, Len(sStr) + i)
 Else
-fromStr = Mid$(fromStr, i)
+fromstr = Mid$(fromstr, i)
 End If
 End If
 End Function
@@ -22306,8 +22425,8 @@ MyShell = 0
 ' its a document
 End Function
 
-Private Function ReplaceStr2(sStr As String, dStr As String, fromStr As String) As String
-  ReplaceStr2 = Replace$(fromStr, sStr, dStr, vbTextCompare)
+Private Function ReplaceStr2(sStr As String, dStr As String, fromstr As String) As String
+  ReplaceStr2 = Replace$(fromstr, sStr, dStr, vbTextCompare)
 End Function
 Function StarSTR(ByVal sStr As String) As String
 Dim l As Long, s As Long
@@ -22317,8 +22436,8 @@ s = l - Len(sStr)
 StarSTR = String$(l - s, "*") + String$(s, " ")
 
 End Function
-Function ReplaceStr(sStr As String, dStr As String, fromStr As String) As String
-  ReplaceStr = Replace$(fromStr, sStr, dStr)  ' changed
+Function ReplaceStr(sStr As String, dStr As String, fromstr As String) As String
+  ReplaceStr = Replace$(fromstr, sStr, dStr)  ' changed
 End Function
 
 Sub mylist(bstack As basetask, Optional tofile As Long = -1, Optional Lang As Long)
@@ -22505,11 +22624,15 @@ Wend
             Else
             
             If TypeOf var(h&) Is Constant Then
-                 If Len(var(h&)) > 3 * .mx Then
+            If var(h&).flag Then
+            hlp$ = "[" + Typename(var(h&).Value) + "$]"
+            Else
+                 If Len(CStr(var(h&))) > 3 * .mx Then
                     hlp$ = " = [" + Left$(CStr(var(h&)), 4) & "...]"
                 Else
                     hlp$ = " = [" + CStr(var(h&)) + "]"
                 End If
+            End If
             Else
             hlp$ = "[" + Typename(var(h&)) + "]"
             End If
@@ -22685,7 +22808,7 @@ End If
       End With
 End Sub
 
-Function NeoGetArrayItem(PP As mArray, bstack As basetask, v$, offset As Long, rst$, Optional noObject As Boolean = False, Optional closepar As Boolean = True) As Boolean
+Function NeoGetArrayItem(PP As mArray, bstack As basetask, v$, offset As Long, rst$, Optional noObject As Boolean = False, Optional closepar As Boolean = True, Optional fromstr As Boolean) As Boolean
 If PP Is Nothing Then
 MyEr "Internal Error: NeoGetArrayItem", "εσωτερικό λάθος: NeoGetArrayItem": Exit Function
 End If
@@ -22744,7 +22867,7 @@ contlabel1:
                 End With
              End If
     ElseIf TypeOf PP.GroupRef Is Group Then
-    
+         If Not fromstr Then
         If PP.GroupRef.HasParameters Then
         If Not PP.GroupRef.HasStrValue Then
         If Len(rst$) > 0 Then
@@ -22772,7 +22895,7 @@ contlabel1:
              Else
             Mid$(rst$, 1, 1) = ppp$
              End If
-        
+        End If
         End If
         End If
         End If
@@ -23809,15 +23932,43 @@ Set aa = CreateObject(THISOjBECT, CStr(cc))
 End If
 Set var = aa
 End Sub
+Function CheckVarGroup(basestack As basetask, var As Variant, s As String, Optional final As Boolean = False) As Long
+Dim d As Document, c As Constant
+                
+If Typename(var) = doc Then
+Set d = var
+d.FasttextDoc = s
+
+ElseIf Typename(var) = "lambda" Then
+If Not basestack.lastobj Is Nothing Then
+If TypeOf basestack.lastobj Is lambda Then
+    Set var = basestack.lastobj
+End If
+End If
+ElseIf Not basestack.lastobj Is Nothing Then
+If TypeOf basestack.lastobj Is lambda Then
+    Set var = basestack.lastobj
+    CheckVarGroup = 1
+    ' means make function for lambda for group
+End If
+Else
+MoveStringToVariant s, var
+End If
+
+If final Then
+    Set c = New Constant
+    c.DefineOnce var
+    Set var = c
+End If
+Set basestack.lastobj = Nothing
+End Function
 Sub CheckVar(var As Variant, s As String, Optional Append As Boolean)
 If Typename(var) = doc Then
 If var.IsEmpty Then
-var.textDoc = s
+var.FasttextDoc = s
 Else
 var.InsertDoc var.LastParagraph, var.TextParagraphLen(var.LastParagraph) + 1, s
 End If
-'ElseIf Typename(var) = "Document" Then
-'CantAssignValue
 ElseIf Append Then
 If LenB(var) = 0 Then
 MoveStringToVariant s, var
@@ -23965,14 +24116,17 @@ Dim aa As Object
 Set aa = New Group
 Set var = aa
 End Sub
-Sub prepareGroup(bstack As basetask, ByVal ohere$, vvv As Long, Optional glob As Boolean = False, Optional isAstr As Boolean = False)
+Sub prepareGroup(bstack As basetask, ByVal ohere$, vvv As Long, Optional glob As Boolean = False, Optional isAstr As Boolean = False, Optional aLocal As Boolean = False)
 Dim hv As Boolean
 If Not glob Then
+If aLocal Then
+Else
 If here$ = vbNullString Then
     hv = GetVar(bstack, bstack.GroupName & ohere$, vvv, True)
 Else
     hv = GetlocalVar(bstack.GroupName & ohere$, vvv)
  End If
+End If
  End If
 If hv Then
     If Not MyIsObject(var(vvv)) Then
@@ -24002,14 +24156,17 @@ End If
 var(vvv).edittag = vbNullString
 End Sub
 
-Function ExecuteGroupStruct(bstack As basetask, ohere$, vvv As Long, rest$, Lang As Long, Optional glob As Boolean = False) As Long
+Function ExecuteGroupStruct(bstack As basetask, ohere$, vvv As Long, rest$, Lang As Long, Optional glob As Boolean = False, Optional aLocal As Boolean = False) As Long
 Dim w$, w1$, p As Variant, v As Long, s$, ss$, b$, i As Long, lcl As Boolean, j As Long, nm$, x1 As Long, y1 As Long, frm$, skip As Boolean
 Dim uni As Boolean, prv As Boolean, stripstack1 As New basetask, hlp As String, vl As String, NoRec As Boolean, final As Boolean
-Dim highpriority As Boolean, ThisGroup As Group, RightAssociative As Boolean, removebypass As Boolean
+Dim highpriority As Boolean, ThisGroup As Group, RightAssociative As Boolean, removebypass As Boolean, c As Constant
 Dim useHandler As mHandler
 Const TT$ = "=-+*/<!,{" + vbCr
 If Trim(rest$) = vbNullString Then
+If Typename$(var(vvv)) = "Group" Then
+Else
     var(vvv) = CLng(0)
+    End If
     ExecuteGroupStruct = 1
     Exit Function
 End If
@@ -24510,7 +24667,7 @@ x1 = Abs(IsLabelF(rest$, F$))
 ''f$ = myUcase$(f$)
 funcoperator:
 If x1 <> 0 Then
-  If ThisGroup.FuncList <> "" Then  ' maybe we have it
+  If Len(ThisGroup.FuncList) = 0 And Not aLocal Then ' maybe we have it
   If InStr(ThisGroup.FuncList, Chr$(2) + F$ + "() ") > 0 Then
       If FastSymbol(rest$, "(") Then
         frm$ = BlockParam(rest$)
@@ -25153,10 +25310,14 @@ Case 1
                 If glob Then
                     v = globalvar(w$, p)
                 ElseIf here$ = vbNullString Then
-    
-       ' If Not GetVar(bstack, w$, v) Then v = globalvar(w$, p) ': GetVar bstack, W$, v
+    ''???? when???
+       
                     Else
-              If Not GetlocalVar(w$, v) Then v = globalvar(w$, p)  ': GetlocalVar W$, v
+              If aLocal Then
+              v = globalvar(w$, p)
+              ElseIf Not GetlocalVar(w$, v) Then
+              v = globalvar(w$, p)
+              End If
         Set var(v) = p
                 End If
                         GoTo continuehere
@@ -25187,10 +25348,14 @@ Case 1
     If glob Then
      v = globalvar(w$, p)
     ElseIf here$ = vbNullString Then
-    
+        
         If Not GetVar(bstack, w$, v) Then v = globalvar(w$, p) ': GetVar bstack, W$, v
     Else
+        If aLocal Then
+         v = globalvar(w$, p)
+        Else
         If Not GetlocalVar(w$, v) Then v = globalvar(w$, p)  ': GetlocalVar W$, v
+        End If
         If final Then
         If MyIsObject(var(v)) Then
         If Not TypeOf var(v) Is Constant Then MyEr "No Constant, it is an object", "Δεν έχω σταθερή, αλλά αντικείμενο": Exit Function
@@ -25206,22 +25371,40 @@ Case 1
          If IsExp(stripstack1, rest$, p) Then
        
             If Not stripstack1.lastobj Is Nothing Then
-            If final Then
-            NoObjectAssign
-            ExecuteGroupStruct = 0
-            Exit Function
-            End If
+
                 If TypeOf stripstack1.lastobj Is lambda Then
                     Set var(v) = stripstack1.lastobj
                     Set stripstack1.lastobj = Nothing
                     LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, False 'uni
+              
+  
                     If here$ = vbNullString Or glob Then
-                        GlobalSub w$ + "()", "CALL EXTERN " & Str(v), bstack.GroupName
+                        GlobalSub w$ + "()", "", bstack.GroupName, , v
                     Else
-                        GlobalSub here$ & "." & w$ + "()", "CALL EXTERN " & Str(v), here$ + "." + bstack.GroupName
+                        If Not aLocal Then
+                        If GetSub(here$ + "." + w$ + "()", i) Then
+                            If rinstr(sbf(i).sbgroup, bstack.GroupName) + Len(bstack.GroupName) - 1 = Len(sbf(i).sbgroup) Then
+                            GoTo conthere0001
+                            End If
+                        End If
+                        End If
+                        GlobalSub here$ + "." + w$ + "()", "", here$ + "." + bstack.GroupName, , v
+                        
                     End If
+                    If final Then
+                    Set c = New Constant
+                    c.DefineOnce var(v)
+                    Set var(v) = c
+                    End If
+                    
+conthere0001:
                     OvarnameLen = varhash.count + 1
                 ElseIf TypeOf stripstack1.lastobj Is Group Then
+                            If final Then
+                            NoObjectAssign
+                            ExecuteGroupStruct = 0
+                            Exit Function
+                            End If
                     Set myobject = stripstack1.lastobj
 againgroup:
                     LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
@@ -25278,11 +25461,22 @@ againgroup:
                     bstack.CopyStrip stripstack1
                     GoTo continuehere
                 ElseIf Typename$(stripstack1.lastobj) = myArray Then
+                        If final Then
+                        NoObjectAssign
+                        ExecuteGroupStruct = 0
+                        Exit Function
+                        End If
                     Set var(v) = New mHandler
                     var(v).t1 = 3
                     Set var(v).objref = stripstack1.lastobj
                     Set stripstack1.lastobj = Nothing
                 Else
+                        If final Then
+                        NoObjectAssign
+                        ExecuteGroupStruct = 0
+                        Exit Function
+                        End If
+
                     Set myobject = stripstack1.lastobj
                     If CheckStackObj(stripstack1, myobject) Then
                     Set var(v) = New mHandler
@@ -25364,40 +25558,52 @@ If ss$ <> "" Then
     
     If here$ = vbNullString Then
             If glob Then
-           If IsStrExp(stripstack1, rest$, ss$) Then v = globalvar(w$, ss$)
-                If final Then
-                    Set var(v) = New Constant
-                    var(v).DefineOnce ss$
-                End If
+           If IsStrExp(stripstack1, rest$, ss$) Then
+              v = globalvarEmpty(w$)
+          If CheckVarGroup(stripstack1, var(v), ss$, final) = 1 Then
+          GlobalSub w$ + "()", "", bstack.GroupName, , v
+        
+          End If
+ 
+             
+           End If
+              
            
           ElseIf GetVar(bstack, w$, v) Then
             
-                If IsStrExp(stripstack1, rest$, ss$) Then CheckVar var(v), ss$
+                If IsStrExp(stripstack1, rest$, ss$) Then CheckVarGroup stripstack1, var(v), ss$
                 
                 If final Then
                     Set var(v) = New Constant
                     var(v).DefineOnce ss$
                 End If
-            ElseIf IsStrExp(stripstack1, rest$, ss$) Then
-            
-                globalvar w$, ss$
-            
+            ElseIf IsStrExp(stripstack1, rest$, ss$) Then   ' when we do global a : set group a {k$="something"}
+
+                CheckVarGroup stripstack1, var(globalvarEmpty(w$)), ss$
+                
+                
             End If
     Else
-           If GetlocalVar(w$, v) Then
+           If aLocal Then
+                If IsStrExp(stripstack1, rest$, ss$) Then GoTo contstr1
+           ElseIf GetlocalVar(w$, v) Then
                 If IsStrExp(stripstack1, rest$, ss$) Then CheckVar var(v), ss$
             ElseIf IsStrExp(stripstack1, rest$, ss$) Then
+contstr1:
+            
             If Not stripstack1.lastobj Is Nothing Then
                                          If TypeOf stripstack1.lastobj Is lambda Then
-                                         v = globalvar(w$, Empty)
-                                Set var(v) = stripstack1.lastobj
-                                Set stripstack1.lastobj = Nothing
+                                         v = globalvarEmpty(w$)
+                                CheckVarGroup stripstack1, var(v), ss$, final
+                                '         v = globalvar(w$, Empty)
+                                'Set var(v) = stripstack1.lastobj
+                              '  Set stripstack1.lastobj = Nothing
                                 LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
                                  If here$ = vbNullString Or glob Then
-                                                GlobalSub w$ + "()", "CALL EXTERN " & Str(v), bstack.GroupName
+                                                GlobalSub w$ + "()", "", bstack.GroupName, , v
                                             Else
                                             
-                                                GlobalSub here$ & "." & w$ + "()", "CALL EXTERN " & Str(v), here$ + "." + bstack.GroupName
+                                                GlobalSub here$ & "." & w$ + "()", "", here$ + "." + bstack.GroupName, , v
                                             End If
 
                                              OvarnameLen = varhash.count + 1
@@ -25493,7 +25699,11 @@ If glob Then
 ElseIf here$ = vbNullString Then
 If Not GetVar(bstack, w$, v) Then v = globalvar(w$, p) '': GetVar bstack, W$, v
 Else
+If aLocal Then
+ v = globalvar(w$, p)
+Else
 If Not GetlocalVar(w$, v) Then v = globalvar(w$, p) '': GetlocalVar W$, v
+End If
         If final Then
         If MyIsObject(var(v)) Then
         If Not TypeOf var(v) Is Constant Then MyEr "No Constant, it is an object", "Δεν έχω σταθερή, αλλά αντικείμενο": Exit Function
@@ -27157,9 +27367,9 @@ With myobject
                             ElseIf Typename(vvl) = "lambda" Then
                             v = globalvar(bstack.GroupName & s$, 0)
                                                If here$ = vbNullString Then
-                                                GlobalSub bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), bstack.GroupName
+                                                GlobalSub bstack.GroupName & s$ + "()", "", bstack.GroupName, , v
                                             Else
-                                                GlobalSub here$ & "." & bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), here$ + "." + bstack.GroupName
+                                                GlobalSub here$ & "." & bstack.GroupName & s$ + "()", "", here$ + "." + bstack.GroupName, , v
                                             End If
                             GoTo conthere2
                             ElseIf Typename(vvl) = "mHandler" Then
@@ -27505,9 +27715,9 @@ conthere1111:
                             ElseIf Not GetVar1(bstack, s$, v) Then
                                 v = globalvar(bstack.GroupName & s$, 0)
                                 If here$ = vbNullString Then
-                                    GlobalSub bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), bstack.GroupName
+                                    GlobalSub bstack.GroupName & s$ + "()", "", bstack.GroupName, , v
                                 Else
-                                    GlobalSub here$ & "." & bstack.GroupName & s$ + "()", "CALL EXTERN " & Str(v), here$ + "." + bstack.GroupName
+                                    GlobalSub here$ & "." & bstack.GroupName & s$ + "()", "", here$ + "." + bstack.GroupName, , v
                                 End If
                             End If
                             Set var(v) = vvl
@@ -33010,7 +33220,7 @@ Set bstack.Sorosref = bb
             bb.Copy2TopNItems2FromStiva a.params, oldbstack
             PushStage bstack, False
             s1$ = Mid$(F$, 2, rinstr(F$, "}") - 2)
-            klm = ModuleSub("A_()", s1$, Trim$(Mid$(F$, Len(s1$) + 3)))
+            klm = ModuleSubAsap("A_()", s1$, Trim$(Mid$(F$, Len(s1$) + 3)))
             
             If Not ProcModuleEntry(bstack, "A_()", klm, "", , True) Then
                 PopStage bstack
@@ -33073,7 +33283,7 @@ Set bstack.Sorosref = bb
             bb.Copy2TopNItems2FromStiva a.params, oldbstack
             PushStage bstack, False
             s1$ = Mid$(F$, 2, rinstr(F$, "}") - 2)
-            klm = ModuleSub("A_()", s1$, Trim$(Mid$(F$, Len(s1$) + 3)))
+            klm = ModuleSubAsap("A_()", s1$, Trim$(Mid$(F$, Len(s1$) + 3)))
             
             If Not ProcModuleEntry(bstack, "A_()", klm, "", , True) Then
                 PopStage bstack
@@ -33935,6 +34145,7 @@ End Sub
 Sub NeoCall(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 Dim basestack As basetask, i As Long, p As Variant, par As Boolean, F As Long, op As Object, op1 As Object
 Dim flag As Boolean, it As Long, what$, s$, x1 As Long, ss$, bs As basetask, vvl As Variant, x As Double
+Dim c As Constant, myl As lambda
 Set basestack = ObjFromPtr(basestackLP)
 
  If IsLabelSymbolNew(rest$, "ΤΕΛΕΣΤΗ", "OPERATOR", Lang) Then
@@ -33993,56 +34204,67 @@ basestack.nokillvars = False
 If IsExp(basestack, rest$, p) Then
 i = CLng(p)
 If i >= 0 Or i <= p Then
+If Typename(var(i)) = "Constant" Then
+Set c = var(i)
+If Not c.flag Then
+InternalError
+resp = False
+Exit Sub
+End If
+Set myl = c.Value
+End If
 If Typename(var(i)) = "stdCallFunction" Then
 On Error Resume Next
  Err.clear
 CallByObject basestack, i, Not par
-
 Set basestack = Nothing
 If Err.Number <> 0 Then
 MyEr Err.Description, Err.Description
 End If
 Exit Sub
-ElseIf Typename(var(i)) = "lambda" Then
+ElseIf Typename(var(i)) = "lambda" Or Not myl Is Nothing Then
 ' call lamda
+        If myl Is Nothing Then Set myl = var(i)
             PushStage basestack, False
             flag = False
             it = 1
             rest$ = vbNullString
-            Dim aa As lambda
-            var(i).name = here$
+            myl.name = here$
             
-            var(i).CopyToVar basestack, here$ = vbNullString, var()
+            myl.CopyToVar basestack, here$ = vbNullString, var()
             'sbf(0).sb = var(i).code$
             basestack.OriginalCode = -i
             basestack.FuncRec = subHash.LastKnown
             Dim b$
-            b$ = var(i).code$
+            b$ = myl.code$
                Call executeblock(it, basestack, b$, False, flag, , True)
-               var(i).CopyFromVar basestack, var()
+               myl.CopyFromVar basestack, var()
           If it = 0 Then
                     Set basestack.lastobj = Nothing
                     Set basestack.FuncObj = Nothing
                     basestack.ThrowThreads
                     MyErMacro rest$, Chr(0) + "Problem in lambda", Chr(0) + "Πρόβλημα στη λάμδα"
                     FK$(13) = "EDIT " + sbf(var(i).OriginalCode).goodname + ", " + CStr(-var(i).lastlen - Len(b$))
-                     var(i).lastlen = Len(b$)
-                     
+                     myl.lastlen = Len(b$)
                     PopStage basestack
                     Set basestack = Nothing
                     resp = False
                     Exit Sub
              End If
+            If c Is Nothing Then Set var(i) = myl ' not allow change when running
             PopStage basestack
             Set basestack = Nothing
 
             Exit Sub
 Else
+InternalError
+
 ' INVALID FUNCTION HANDLE
 End If
 
 Else
 ' INVALID FUNCTION HANDLE
+InternalError
 End If
 Else
 'WRONG...
@@ -34165,7 +34387,7 @@ reenter2:
  ss$ = block(s$)
  If FastSymbol(s$, "}") And ss$ <> "" Then
 PushStage basestack, False
-x1 = ModuleSub("A_()", ss$, Trim$(s$))
+x1 = ModuleSubAsap("A_()", ss$, Trim$(s$))
  Set bs = New basetask
      bs.reflimit = varhash.count
         Set bs.Parent = basestack
@@ -35901,9 +36123,9 @@ Case 1
             ElseIf Typename$(myobject) = "lambda" Then
                 Set var(i) = myobject
                 If ohere$ = vbNullString Then
-                    GlobalSub what$ + "()", "CALL EXTERN " & Str(i)
+                    GlobalSub what$ + "()", "", , , i
                 Else
-                    GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "CALL EXTERN " & Str(i)
+                    GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "", , , i
                 End If
             ElseIf Typename$(myobject) = "mHandler" Then
             Set useHandler = myobject
@@ -36425,9 +36647,9 @@ checkconstant:
                 globalvar what$, i, True
                 If Typename(var(i)) = "lambda" Then
                     If ohere$ = vbNullString Then
-                        GlobalSub what$ + "()", "CALL EXTERN " & Str(i)
+                        GlobalSub what$ + "()", "", , , i
                     Else
-                        GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "CALL EXTERN " & Str(i)
+                        GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "", , , i
                     End If
                 End If
             End If
@@ -36542,9 +36764,9 @@ Case 3, 4
                If MyIsObject(var(i)) Then
                     If Typename(var(i)) = "lambda" Then
                         If ohere$ = vbNullString Then
-                            GlobalSub what$ + "()", "CALL EXTERN " & Str(i)
+                            GlobalSub what$ + "()", "", , , i
                         Else
-                            GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "CALL EXTERN " & Str(i)
+                            GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "", , , i
                         End If
                         globalvar what$, i, True
                     ElseIf Typename(var(i)) = "Group" Then
@@ -36584,9 +36806,9 @@ contherestr:
             If MyIsObject(var(i)) Then
                     If Typename(var(i)) = "lambda" Then
                          If ohere$ = vbNullString Then
-                             GlobalSub what$ + "()", "CALL EXTERN " & Str(i)
+                             GlobalSub what$ + "()", "", , , i
                          Else
-                             GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "CALL EXTERN " & Str(i)
+                             GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "", , , i
                          End If
                          globalvar what$, i, True
                     ElseIf Typename(var(i)) = "Group" Then
@@ -36938,9 +37160,9 @@ contpointer:
                 End If
                 Set var(i) = myobject
                 If ohere$ = vbNullString Then
-                    GlobalSub what$ + "()", "CALL EXTERN " & Str(i)
+                    GlobalSub what$ + "()", "", , , i
                 Else
-                    GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "CALL EXTERN " & Str(i)
+                    GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "", , , i
                 End If
             ElseIf Typename$(myobject) = "mHandler" Then
             If MyIsObject(var(i)) Then
@@ -37464,9 +37686,9 @@ contstrhere:
             End If
             Set var(i) = myobject
             If ohere$ = vbNullString Then
-                GlobalSub what$ + "()", "CALL EXTERN " & Str(i)
+                GlobalSub what$ + "()", "", , , i
             Else
-                GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "CALL EXTERN " & Str(i)
+                GlobalSub ohere$ & "." & bstack.GroupName & what$ + "()", "", , , i
             End If
             MyRead = True
         ElseIf Typename$(myobject) = "Group" Then
@@ -40217,7 +40439,7 @@ jump1:
                                                    
                                 
                                     If FastSymbol(rest$, "{") Then
-                                           If sbf(x1).locked Then
+                                           If sbf(x1).locked Or sbf(x1).extern > 0 Then
                                          what$ = block(rest$)
                                         bstack.IndexSub = x1
                                        FastSymbol rest$, "}", True
@@ -41148,9 +41370,9 @@ End If
 what$ = myUcase(what$, True)
 If Not subHash.Find(what$, where) Then
 If Lang = 1 Then
-where = ModuleSub(what$, "\\ End for Automatic list" + vbCrLf)
+where = ModuleSubAsap(what$, "\\ End for Automatic list" + vbCrLf)
 Else
-where = ModuleSub(what$, "\\ Τέλος Αυτόματης λίστα" + vbCrLf)
+where = ModuleSubAsap(what$, "\\ Τέλος Αυτόματης λίστα" + vbCrLf)
 End If
 End If
 usemodule = True
@@ -41742,7 +41964,6 @@ End If
     Set myobject = .StackItem(i)
     If Not myobject Is Nothing Then
     If TypeOf myobject Is mHandler Then
-    Dim aaa As mHandler
     If myobject.indirect > -1 Then
     If MyIsObject(var(myobject.indirect)) Then
     If myobject.indirect <= var2used Then
@@ -44136,12 +44357,13 @@ Locale:
 End Function
 Function ProcGroup(entrypoint As Long, basestack As basetask, rest$, Lang As Long) As Boolean
 Dim s$, x1 As Long, y1 As Long, what$, flag As Boolean, ss$, i As Long, par As Boolean
-Dim p As Variant, HasStrName As Boolean, strName$
+Dim p As Variant, HasStrName As Boolean, strName$, NewStat As Boolean
 ProcGroup = True
 
 
 
 Dim y3 As Long
+If entrypoint = -1 Then NewStat = True: entrypoint = 0
 If entrypoint < 199 Then
 If entrypoint = 1 Then flag = True
 y3 = IsLabelSymbolNew(rest$, "ΜΕΓΕΓΟΝΟΤΑ", "WITHEVENTS", Lang)
@@ -44242,13 +44464,13 @@ If x1 = 1 Then
             '' GROUP
                 s$ = basestack.GroupName
                 
-                prepareGroup basestack, what$, y1, flag, HasStrName
+                prepareGroup basestack, what$, y1, flag, HasStrName, NewStat
 
                 var(y1).IamGlobal = flag
                 
                 If flag Then ss$ = here$: here$ = vbNullString
                 
-                If ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, rest$, Lang, flag) = 0 Then
+                If ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, rest$, Lang, flag, NewStat) = 0 Then
                     If flag Then here$ = ss$
                     var(y1).edittag = "'11001EDIT " + here$ + ", " + CStr(Len(rest$))
                 End If
@@ -51517,7 +51739,7 @@ checkobject:
                                 If myobject.IamApointer Then
                                 Set var(v) = myobject
                                 Else
-                                 UnFloatGroup bstack, w$, v, myobject, VarStat Or isglobal, , Typename(var(v)) = "Empty"    ' global??
+                                 UnFloatGroup bstack, w$, v, myobject, VarStat Or isglobal, , Typename(var(v)) = "Empty"     ' global??
                                  If Len(bstack.UseGroupname) <> 0 Then var(v).IamRef = True
                                  End If
                                 Set myobject = Nothing
@@ -51558,9 +51780,9 @@ checkobject:
                                 Set bstack.lastobj = Nothing
                             ElseIf TypeOf myobject Is lambda Then
                                 If here$ = vbNullString Or VarStat Or NewStat Then
-                                        GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                                        GlobalSub w$ + "()", "", , , v
                                 Else
-                                        GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "CALL EXTERN " & Str(v)
+                                        GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "", , , v
                                 End If
                                 Set var(v) = myobject
                                 Set bstack.lastobj = Nothing
@@ -51856,7 +52078,7 @@ contwrong1:
           If bstack.lastobj Is Nothing Then
                 var(v).DefineOnce p
           Else
-                NoObjectAssign
+                CantAssignValue
                               MissNumExpr
                             Exec1 = 0: ExecuteVar = 8
                             Exit Function
@@ -51867,11 +52089,13 @@ contwrong1:
                             Exit Function
           End If
           Else
-                      If InStr(ss$, ".") = 0 Then
+                      If InStr(ss$, ".") = 0 Or var(v).flag Then
                       CantAssignValue
                       Else
                       NoOperatorForThatObject "="
                       End If
+                            Exec1 = 0: ExecuteVar = 8
+                            Exit Function
                         End If
                       ElseIf TypeOf var(v) Is mEvent Then
                       If IsExp(bstack, b$, p) Then
@@ -52368,7 +52592,13 @@ jumpiflocal:
             If GetlocalVar(w$, v) Then GoTo assignvalue
             Else
             v = globalvar(w$, p, , VarStat, temphere$)
+            If VarStat Then
             
+            If numid.Find(w$, i, bstack.numnum) Then
+            numid.ItemCreator w$, -1
+            End If
+
+            End If
             GoTo assignvalue
             End If
         ElseIf FastOperator(b$, "->", i, 2) Then ' MAKE A NEW ONE IF FOUND =
@@ -52502,7 +52732,7 @@ If ss$ <> "" Then
     If ss$ = "=" Then
     If VarStat Then
             If IsStrExp(bstack, b$, ss$) Then
-            globalvar w$, ss$, , VarStat, temphere$
+
             GoTo cont184575
             
                     
@@ -52538,9 +52768,9 @@ assignvaluestr1:
                                                 Set var(v) = bstack.lastobj
                                  Else
                                If here$ = vbNullString Or VarStat Or NewStat Then
-                                   GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                                   GlobalSub w$ + "()", "", , , v
                                Else
-                                     GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "CALL EXTERN " & Str(v)
+                                     GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "", , , v
                                 End If
                                                Set var(v) = bstack.lastobj
                                         End If
@@ -52624,68 +52854,69 @@ assignvaluestr1:
                                     End If
                                     Exec1 = 0: ExecuteVar = 8: Exit Function
                                   End If
-                End If
-                End If
-                ElseIf Not bstack.StaticCollection Is Nothing Then
-            If bstack.ExistVar(w$) Then
-           If IsStrExp(bstack, b$, ss$) Then bstack.SetVar w$, ss$ Else GoTo aproblem1
-            
-            ElseIf IsStrExp(bstack, b$, ss$) Then
-            GoTo cont184575
-            End If
-            ElseIf IsStrExp(bstack, b$, ss$) Then
-cont184575:
-            If bstack.lastobj Is Nothing Then
-   
-              globalvarstr w$, ss$, , VarStat, temphere$
-   
-            Else
-            If Typename$(bstack.lastobj) = "lambda" Then
-                  If NewStat Then
-                                            NoNewLambda
-                                            Exit Function
-                                        Else
-                                        i = 0
-                                            If Not GetVar(bstack, w$, i, True) Then i = globalvar(w$, p, , VarStat, temphere$)
-                                            If here$ = vbNullString Or VarStat Then
-                                                GlobalSub w$ + "()", "CALL EXTERN " & Str(i)
-                                            Else
-                                                GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "CALL EXTERN " & Str(i)
-                                            End If
-                                        End If
-                                        Set myobject = bstack.lastobj
-                                        Set bstack.lastobj = Nothing
-                                        If i <> 0 Then
-                                        
-                                          Set var(i) = myobject
-                                                Set myobject = Nothing
-                                           
-                                            
-                                        End If
-            ElseIf Typename$(bstack.lastobj) = "Group" Then
-           ' If VarStat Then
-            '
-             '   i = globalvar(bstack.GroupName & w$, CLng(0), False, True, temphere$)
-              '  Set var(i) = New Group
-               ' var(i).IamGlobal = True
+                            End If
+                        End If
+                    ElseIf Not bstack.StaticCollection Is Nothing Then
+                        If bstack.ExistVar(w$) Then
+                            If IsStrExp(bstack, b$, ss$) Then bstack.SetVar w$, ss$ Else GoTo aproblem1
                 
-          '  End If
-            
-            If Not ProcGroup(200 + VarStat, bstack, w$, Lang) Then
-            Exec1 = 0: ExecuteVar = 8
-            Exit Function
+                            ElseIf IsStrExp(bstack, b$, ss$) Then
+                                GoTo cont184575
+                            End If
+                    ElseIf IsStrExp(bstack, b$, ss$) Then
+cont184575:
+                        If bstack.lastobj Is Nothing Then
+       
+                            globalvarStr w$, ss$, , VarStat, temphere$
+       
+                        Else
+                            If Typename$(bstack.lastobj) = "lambda" Then
+                                If NewStat Then
+                                    NoNewLambda
+                                    Exit Function
+                                Else
+                                    i = 0
+                                    If VarStat Then
+                                        i = globalvar(w$, p, , VarStat, temphere$)
+                                    Else
+                                        If Not GetVar(bstack, w$, i, True) Then i = globalvar(w$, p, , , temphere$)
+                                    End If
+                                    If Typename(var(i)) = "Constant" Then
+                                    CantAssignValue
+                                    Exec1 = 0: ExecuteVar = 8
+                                    Exit Function
+                                    End If
+                                    If here$ = vbNullString Or VarStat Then
+                                            GlobalSub w$ + "()", "", , , i
+                                    Else
+                                            GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "", , , i
+                                    End If
+                                End If
+                                Set myobject = bstack.lastobj
+                                Set bstack.lastobj = Nothing
+                                If i <> 0 Then
+                                    Set var(i) = myobject
+                                    Set myobject = Nothing
+                                End If
+                            ElseIf Typename$(bstack.lastobj) = "Group" Then
+                                    If Not ProcGroup(200 + VarStat, bstack, w$, Lang) Then
+                                    Exec1 = 0: ExecuteVar = 8
+                                    Exit Function
+                            Else
+                                NoValueForVar w$
+                                Exec1 = 0: ExecuteVar = 8
+                                Exit Function
+                            End If
+                            
+                        End If
+                    End If
+                Else
+                    NoValueForVar w$
+                    Exec1 = 0: ExecuteVar = 8
+                    Exit Function
+                End If
             End If
-            
-           
-            End If
-            End If
-            Else
-                       NoValueForVar w$
-                        Exec1 = 0: ExecuteVar = 8
-                        Exit Function
-            End If
-            End If
-    End If
+        End If
     Else    ' g
 again12345:
           If GetVar(bstack, w$, v, ss$ = "g") Then
@@ -52706,13 +52937,13 @@ again12345:
                   If Typename(var(v).Value) = "Empty" Then
                   var(v).DefineOnce ss$
                   Else
-                     NoOperatorForThatObject sw$
+                      CantAssignValue
                   End If
                 
                    ElseIf Not bstack.lastobj Is Nothing Then
                             If TypeOf bstack.lastobj Is lambda Then
                              Set var(v) = bstack.lastobj
-                             GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                             GlobalSub w$ + "()", "", , , v
                              Set bstack.lastobj = Nothing
                    
                     Else
@@ -52843,7 +53074,7 @@ assignvalue100:
                             If Typename(var(v)) = "lambda" Then
                                  Set var(v) = bstack.lastobj
                             Else
-                                GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                                GlobalSub w$ + "()", "", , , v
                                 Set var(v) = bstack.lastobj
                             End If
                             Set bstack.lastobj = Nothing
@@ -52909,9 +53140,9 @@ abc2345:
                                             Exit Function
                                         Else
                                                If here$ = vbNullString Or VarStat Then
-                                                GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                                                GlobalSub w$ + "()", "", , , v
                                             Else
-                                                GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "CALL EXTERN " & Str(v)
+                                                GlobalSub here$ & "." & bstack.GroupName & w$ + "()", "", , , v
                                             End If
                                         End If
                                 Set var(v) = bstack.lastobj

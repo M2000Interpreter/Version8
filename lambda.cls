@@ -40,9 +40,9 @@ For i = 0 To used - 1
     If Typename(myVar(where).Value) = "lambda" Then
          
                         If glb Then
-                        GlobalSub nm$ + "()", "CALL EXTERN " & Str(myVar(where).there)
+                        GlobalSub nm$ + "()", "", , , myVar(where).there
                     Else
-                        GlobalSub here$ & "." & bstack.GroupName & nm$ + "()", "CALL EXTERN " & Str(myVar(where).there)
+                        GlobalSub here$ & "." & bstack.GroupName & nm$ + "()", "", , , myVar(where).there
                 End If
     Set v(myVar(where).there) = myVar(where).Value
     ElseIf Typename(myVar(where).Value) = "Group" Then
@@ -71,9 +71,9 @@ For i = 0 To used - 1
            If Typename(myVar(where).Value) = "lambda" Then
              globalvar nm$, there, True, glb
                         If glb Then
-                        GlobalSub nm$ + "()", "CALL EXTERN " & Str(myVar(where).there)
+                        GlobalSub nm$ + "()", "", , , there
                     Else
-                        GlobalSub here$ & "." & bstack.GroupName & nm$ + "()", "CALL EXTERN " & Str(there)
+                        GlobalSub here$ & "." & bstack.GroupName & nm$ + "()", "", , , there
                 End If
           ElseIf Typename(myVar(where).Value) = "Group" Then
           If myVar(where).Value.IamApointer Then

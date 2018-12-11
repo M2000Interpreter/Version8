@@ -317,6 +317,7 @@ If MyIsObject(v) Then
     Set vv = v
 Else
    r$ = Typename(v)
+   CheckItemType = FastSymbol(a$, ")")
    Exit Function
 End If
 againtype:
@@ -327,6 +328,7 @@ againtype:
             Case 1
                 Set fastcol = useHandler.objref
                 If FastSymbol(a$, ",") Then
+contHandler:
                     If IsExp(bstackstr, a$, p) Then
                         If Not fastcol.Find(p) Then GoTo keynotexist
                             If fastcol.IsObj Then
@@ -353,6 +355,9 @@ keynotexist:
                             CheckItemType = False
                             Exit Function
                     End If
+                ElseIf FastSymbol(a$, ")(", , 2) Then
+                    GoTo contHandler
+   
                 Else
                     ' new
 checkit:
@@ -396,7 +401,9 @@ checkit:
                     Else
                             r$ = Typename(useHandler.objref)
                                        If FastSymbol(a$, ",") Then
+contarr0:
                                         If r$ = "mArray" Then
+
                                             Set pppp = useHandler.objref
                                                 If IsExp(bstackstr, a$, p) Then
                                                    pppp.index = p
@@ -412,6 +419,9 @@ checkit:
                                                 CheckItemType = False
                                                 Exit Function
                                             End If
+                                        ElseIf FastSymbol(a$, ")(", , 2) Then
+                                        GoTo contarr0
+            
                                         Else
                                                 MyEr "Use STACKTYPE$() ", " Χρησιμοποίησε την ΣΩΡΟΥΤΥΠΟΣ$()"
                                                 CheckItemType = False
@@ -429,13 +439,106 @@ checkit:
             End Select
         ElseIf Typename(vv) = "PropReference" Then
             r$ = Typename$(vv.Value)
+        ElseIf Typename(vv) = "mArray" Then
+        
+         If FastSymbol(a$, ",") Then
+contarr1:
+            Set pppp = vv
+
+            If IsExp(bstackstr, a$, p) Then
+
+                pppp.index = p
+                If MyIsObject(pppp.Value) Then
+                     Set vv = pppp.Value
+                     wasarr = False
+                     GoTo againtype
+                Else
+                    r$ = Typename(pppp.Value)
+                End If
+                Else
+                MissParam a$
+                CheckItemType = False
+                Exit Function
+                End If
+            ElseIf FastSymbol(a$, ")(", , 2) Then
+          GoTo contarr1
+            Else
+            r$ = "mArray"
+            End If
+        ElseIf Typename(vv) = "lambda" Then
+        If FastSymbol(a$, ")(", , 2) Then
+            Set bstackstr.lastobj = vv
+            Set bstackstr.lastpointer = Nothing
+            s$ = BlockParam(a$)
+            If Len(s$) > 0 Then Mid$(a$, 1, Len(s$)) = space$(Len(s$))
+            s$ = s$ + ")"
+            If CallLambdaASAP(bstackstr, s$, p, False) Then
+                If bstackstr.lastobj Is Nothing Then
+                    r$ = Typename$(p)
+                Else
+                    Set vv = bstackstr.lastobj
+                    Set bstackstr.lastobj = Nothing
+                    GoTo againtype
+                End If
+            Else
+            Exit Function
+            End If
+            Else
+            r$ = "lambda"
+            End If
+        ElseIf Typename(vv) = "Group" Then
+        If FastSymbol(a$, ")(", , 2) Then
+            s$ = BlockParam(a$)
+            If Len(s$) > 0 Then Mid$(a$, 1, Len(s$)) = space$(Len(s$))
+            If FastSymbol(s$, "@") Then
+            s$ = NLtrim(s$)
+                    If Len(s$) > 0 Then
+                        Set pppp = New mArray
+                        pppp.Arr = False
+                        Set pppp.GroupRef = vv
+                        Set vv = bstackstr.soros
+                        Set bstackstr.Sorosref = New mStiva
+                        
+                        SpeedGroup bstackstr, pppp, "FOR", "", "{Push type$(" + String$(bstackstr.ForLevel + 1, ".") + s$ + ")}", -2
+                        If bstackstr.soros.IsEmpty Then
+                           Set bstackstr.Sorosref = vv
+                           Exit Function
+                        Else
+                           r$ = bstackstr.soros.PopStr
+                        End If
+                        Set bstackstr.Sorosref = vv
+                     Else
+                        SyntaxError
+                        Exit Function
+                End If
+                ' check member
+            ElseIf vv.IamApointer Then
+                Stop
+            ElseIf vv.HasStrValue Then
+                r$ = "String"
+            ElseIf vv.HasValue Then
+            Set pppp = New mArray
+            pppp.Arr = False
+            Set pppp.GroupRef = vv
+             If SpeedGroup(bstackstr, pppp, "VAL", "", s$ + ")", -2) = 1 Then
+                If bstackstr.lastobj Is Nothing Then
+                    r$ = Typename$(bstackstr.LastValue)
+                Else
+                    Set vv = bstackstr.lastobj
+                    Set bstackstr.lastobj = Nothing
+                    GoTo againtype
+                End If
+
+             End If
+
+            End If
+        End If
         End If
         Set bstackstr.lastobj = Nothing
         Set bstackstr.lastpointer = Nothing
         While FastSymbol(a$, "!")
         Wend
-        CheckItemType = FastSymbol(a$, ")")
-
+        CheckItemType = FastSymbol(a$, ")", True)
 End Function
 
 Public Function Utf16toUtf8(s As String) As Byte()
@@ -8815,7 +8918,7 @@ End Sub
 Public Sub ExpectedEndSelect2()
  MyEr "Expected Εnd Select, for two or more commands use {}", "Περίμενα Τέλος Επιλογής, για δυο ή περισσότερες εντολές χρησιμοποίησε { }"
 End Sub
-Public Sub LocaleAndGlobal()
+Public Sub LocalAndGlobal()
 MyEr "Global and local together;", "Γενική και τοπική μαζί!"
 End Sub
 Public Sub UnknownProperty(w$)
@@ -10120,7 +10223,15 @@ Sub NeoLinespace(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = procLineSpace(ObjFromPtr(basestackLP), rest$)
 End Sub
 Sub NeoSet(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = interpret(ObjFromPtr(basestackLP), GetNextLine(rest$))
+Dim i As Long, s$
+aheadstatusANY rest$, i
+s$ = Left$(rest$, i - 1)
+resp = interpret(ObjFromPtr(basestackLP), s$)
+If resp Then
+rest$ = Mid$(rest$, i)
+Else
+rest$ = s$ + Mid$(rest$, i)
+End If
 End Sub
 
 
@@ -14010,9 +14121,9 @@ w1 = globalvar("A_" + CStr(w2) + "$", 0#)
  Set var(w1) = bstack.lastobj
  Set bstack.lastobj = Nothing
   If here$ = vbNullString Then
-            GlobalSub "A_" + CStr(Abs(w2)) + "$()", "CALL EXTERN " & Str(w1)
+            GlobalSub "A_" + CStr(Abs(w2)) + "$()", "", , , w1
         Else
-            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "$()", "CALL EXTERN " & Str(w1)
+            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "$()", "", , , w1
     End If
  Set nbstack = New basetask
     nbstack.reflimit = varhash.count
@@ -14028,9 +14139,9 @@ w1 = globalvar("A_" + CStr(w2), 0#)
  Set var(w1) = bstack.lastobj
  Set bstack.lastobj = Nothing
   If here$ = vbNullString Then
-            GlobalSub "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub "A_" + CStr(Abs(w2)) + "()", "", , , w1
         Else
-            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "", , , w1
     End If
      Set nbstack = New basetask
     nbstack.reflimit = varhash.count
@@ -14679,9 +14790,9 @@ w1 = globalvar("A_" + CStr(w2), 0#)
  Set var(w1) = mylambda
  Set bstack.lastobj = Nothing
   If here$ = vbNullString Then
-            GlobalSub "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub "A_" + CStr(Abs(w2)) + "()", "", , w1
         Else
-            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "", , , w1
     End If
      Set nbstack = New basetask
     nbstack.reflimit = varhash.count
@@ -14735,9 +14846,9 @@ w1 = globalvar("A_" + CStr(w2), 0#)
  Set var(w1) = mylambda
  Set bstack.lastobj = Nothing
   If here$ = vbNullString Then
-            GlobalSub "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub "A_" + CStr(Abs(w2)) + "()", "", , , w1
         Else
-            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "", , , w1
     End If
      Set nbstack = New basetask
     nbstack.reflimit = varhash.count
@@ -14784,9 +14895,9 @@ w1 = globalvar("A_" + CStr(w2), 0#)
  Set var(w1) = mylambda
  Set bstack.lastobj = Nothing
   If here$ = vbNullString Then
-            GlobalSub "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub "A_" + CStr(Abs(w2)) + "()", "", , , w1
         Else
-            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "CALL EXTERN " & Str(w1)
+            GlobalSub here$ & "." & bstack.GroupName & "A_" + CStr(Abs(w2)) + "()", "", , , w1
     End If
      Set nbstack = New basetask
     nbstack.reflimit = varhash.count
@@ -16897,7 +17008,7 @@ checkobject:
                                 Set bstack.lastobj = Nothing
                             ElseIf TypeOf myobject Is lambda Then
                                 
-                                        GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                                        GlobalSub w$ + "()", "", , , v
                                    Set var(v) = myobject
                                 Set bstack.lastobj = Nothing
                             ElseIf TypeOf myobject Is mEvent Then
@@ -17736,7 +17847,7 @@ If ss$ <> "" Then
                 sw$ = ss$
                     If IsStrExp(bstack, b$, ss$) Then
                     If Typename$(bstack.lastobj) = "lambda" Then
-                                  GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                                  GlobalSub w$ + "()", "", , , v
                                                Set var(v) = bstack.lastobj
                                                 Set bstack.lastobj = Nothing
                     ElseIf Typename$(var(v)) = "Group" Then
@@ -17782,7 +17893,7 @@ aproblem1:
             Else
             If Typename$(bstack.lastobj) = "lambda" Then
                        If Not GetVar(bstack, w$, x1, True) Then x1 = globalvar(w$, p, , True)
-                             GlobalSub w$ + "()", "CALL EXTERN " & Str(x1)
+                             GlobalSub w$ + "()", "", , , x1
                                         Set myobject = bstack.lastobj
                                         Set bstack.lastobj = Nothing
                                         If x1 <> 0 Then
@@ -17850,7 +17961,7 @@ If FastSymbol(b$, "=") Then '................................
                                                 Set var(v) = bstack.lastobj
 
                                                 Else
-                                    GlobalSub w$ + "()", "CALL EXTERN " & Str(v)
+                                    GlobalSub w$ + "()", "", , , v
                                                Set var(v) = bstack.lastobj
                                                 
                                         End If
@@ -17880,7 +17991,7 @@ If FastSymbol(b$, "=") Then '................................
                 If Typename$(bstack.lastobj) = "lambda" Then
                     
                        If Not GetVar(bstack, w$, x1, True) Then x1 = globalvar(w$, p, , True)
-                             GlobalSub w$ + "()", "CALL EXTERN " & Str(x1)
+                             GlobalSub w$ + "()", "", , , x1
                                         Set myobject = bstack.lastobj
                                         Set bstack.lastobj = Nothing
                                         If x1 <> 0 Then
@@ -18656,3 +18767,26 @@ Dim i, j$
 i = InStr(c$, vbCrLf)
 If i = 0 Then GetNextLineNoTrim = c$: c$ = vbNullString Else GetNextLineNoTrim = Left$(c$, i - 1): c$ = Mid$(c$, i)
 End Function
+Function PrepareLambda(basestask As basetask, myl As lambda, v As Long, frm$, c As Constant) As Boolean
+If Typename(var(v)) = "Constant" Then
+    Set c = var(v)
+    If Not c.flag Then
+    InternalError
+    PrepareLambda = False
+    Exit Function
+    End If
+    Set myl = c.Value
+Else
+    Set myl = var(v)
+End If
+         myl.name = here$
+            
+            myl.CopyToVar basestask, here$ = vbNullString, var()
+            'sbf(0).sb = var(i).code$
+            basestask.OriginalCode = -v
+            basestask.FuncRec = subHash.LastKnown
+
+            frm$ = myl.code$
+PrepareLambda = True
+End Function
+

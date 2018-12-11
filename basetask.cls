@@ -94,6 +94,9 @@ Public Sub SetVar(ByVal name$, var As Variant)
     End If
    StaticCollection.Value = var
 End Sub
+Public Property Get ForLevel() As Long
+ForLevel = curdotcol
+End Property
 Public Sub SetVarobJ(ByVal name$, var As Variant)
     If StaticCollection Is Nothing Then
     Set StaticCollection = New FastCollection

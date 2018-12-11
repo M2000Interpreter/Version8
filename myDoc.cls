@@ -604,6 +604,29 @@ MarkParagraphID = 0
 WrapAgain
 busy = False
 End Property
+Property Let FasttextDoc(norawtext As String)
+    EmptyDoc
+    busy = True
+    Dim where As Long, ok
+    Dim a() As String
+    where = 1
+    If InStr(norawtext, vbLf) = 0 Then
+    a() = Split(norawtext, vbCr)
+    Else
+    a() = Split(norawtext, vbCrLf)
+    End If
+    norawtext = Join(a(), vbLf)
+        If InStr(norawtext, vbLf) = 0 Then
+        AppendParagraph norawtext
+        Else
+      a() = Split(norawtext, vbLf)
+      For where = LBound(a()) To UBound(a())
+      AppendParagraph a(where)
+      Next where
+    End If
+    MarkParagraphID = 0
+    busy = False
+End Property
 Property Let textDocColor(norawtext As String)
     Dim where As Long
     Dim a() As String
