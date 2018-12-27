@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 10 active-X
+Version 9.6 Revision 11 active-X
 
-New third optional parameter for Exist(), when using for inventories of type queue. Read help using Help Exist
+A fix from revision 10, for Stack$() function.
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate

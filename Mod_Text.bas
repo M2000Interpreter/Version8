@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 10
+Global Const Revision = 11
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -47389,7 +47389,7 @@ FindPrevOriginal = curparent.OriginalCode
 End Function
 Function iter(bstack As basetask, rest$, Lang As Long) As Boolean
 ' each( array or inventory, start: 1 by default, or -1 for end of list,  end: -1 to end (optional), or we can set it)
-    Dim pppp As mArray, w1 As Long, s$, Num As Long, st As Variant, en As Variant
+    Dim pppp As mArray, w1 As Long, s$, num As Long, st As Variant, en As Variant
     
     w1 = Abs(IsLabel(bstack, rest$, s$))
     If w1 > 4 Then

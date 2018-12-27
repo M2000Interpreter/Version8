@@ -11953,10 +11953,10 @@ If IsNumberOnly(a$, 1, d, a1, noendtypes, exceptspecial) Then
 a$ = Mid$(a$, a1)
 
 IsNumberD2 = True
-ElseIf Fast3NoSpace(a$, "акгхес", 6, "акгхгс", 6, "TRUE", 4, 6) Then
+ElseIf Fast3Label(a$, "акгхес", 6, "акгхгс", 6, "TRUE", 4, 6) Then
 d = True
 IsNumberD2 = True
-ElseIf Fast3NoSpace(a$, "ьеудес", 6, "ьеудгс", 6, "FALSE", 5, 5) Then
+ElseIf Fast3Label(a$, "ьеудес", 6, "ьеудгс", 6, "FALSE", 5, 5) Then
 d = False
 IsNumberD2 = True
 Else
