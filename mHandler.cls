@@ -19,7 +19,7 @@ Public ReadOnly As Boolean
 Public index_start As Variant ' 1 for start
 Public index_End As Variant  ' -1 for end
 Public index_cursor As Variant
-Public Sign As Variant
+Public sign As Variant
 Public UseIterator As Boolean
 Public oEnum As Variant
 Public IamEnum As Boolean
@@ -28,7 +28,7 @@ indirect = -1
 index_start = 0
 index_End = -1
 UseIterator = False
-Sign = 1
+sign = 1
 End Sub
 
 ''Public Par1 As Variant
@@ -41,12 +41,13 @@ Set a = New mHandler
 a.t1 = t1
 ''A.Par1 = Par1   ' key or index ???
 ' no copy for reference
+If t1 = 1 Then a.ReadOnly = ReadOnly
 a.indirect = indirect
 a.index_start = index_start
 a.index_End = index_End
 a.index_cursor = index_cursor
 a.UseIterator = UseIterator
-a.Sign = Sign
+a.sign = sign
 Set a.objref = objref
 End Sub
 Public Function Iterate()

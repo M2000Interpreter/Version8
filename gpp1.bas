@@ -1,7 +1,8 @@
 Attribute VB_Name = "gpp1"
 Option Explicit
 Public pw As Long, ph As Long, psw As Long, psh As Long, pwox As Long, phoy As Long, mydpi As Long, prFactor As Single, szFactor As Single
-
+Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
+Private Declare Sub PutMem2 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As Integer)
       Private Type DOCINFO
           cbSize As Long
           lpszDocName As String
@@ -389,8 +390,25 @@ Else
 uintnew = a
 End If
 End Function
-
-Function UINT(ByVal a As Long) As Long 'δίνει έναν integer σαν unsign integer σε long
+Function HexToUnsigned(s$) As Double
+Dim a As Double
+a = CLng("&h" + s$)
+If a < 0 Then
+HexToUnsigned = 4294967296# + a
+Else
+HexToUnsigned = a
+End If
+End Function
+Function uintnew2(a As Double) As Double
+If a > 2147483647# Then a = 2147483647#
+If a < -2147483648# Then a = -2147483648#
+If a < 0 Then
+uintnew2 = 4294967296# + a
+Else
+uintnew2 = a
+End If
+End Function
+Function UINT(ByVal a As Long) As Long 'δίνει έναν integer σαν Unsigned integer σε long
  Dim b As Long
  b = a And &HFFFF
  If b < 0 Then
@@ -411,7 +429,7 @@ cUbyte = c
 End If
 
 End Function
-Function cUint(ByVal a As Long) As Long ' πέρνει έναν unsign integer και τον κάνει νορμάλ χωρίς αλλαγή των bits
+Function cUint(ByVal a As Long) As Long ' πέρνει έναν Unsigned integer και τον κάνει νορμάλ χωρίς αλλαγή των bits
 Dim c As Long
 
 c = Abs(a) And &HFFFF&
@@ -423,21 +441,32 @@ End If
 
 End Function
 Function LowWord(a As Long) As Long
-Const bb = 65535
-LowWord = cUint(CLng(bb And a))
+LowWord = a
+PutMem2 VarPtr(LowWord) + 2, 0
 End Function
 Function HighLow(h As Long, l As Long) As Long
-Const bb = 65536
-HighLow = h * bb + l
+Dim a As Integer
+HighLow = l
+GetMem2 VarPtr(h), a
+PutMem2 VarPtr(HighLow) + 2, a
 End Function
 Function HighWord(a As Long) As Long
-Dim b As Double
-b = a
-Const bb = 65536
-HighWord = Int(b / bb)
+Dim h As Integer
+GetMem2 VarPtr(a) + 2, h
+PutMem2 VarPtr(HighWord), h
 End Function
-
-Function cUlng(ByVal a As Currency) As Long ' πέρνει έναν unsign long και τον κάνει νορμάλ χωρίς αλλαγή των bits
+Function cUlng2(a As Double) As Long ' for packlng, get a double as unsigned 32bit and return sign 32bit
+a = Int(a)
+If a > 4294967296# Then a = 4294967296#
+If a < 0 Then a = 0
+If a > 2147483647# Then
+cUlng2 = a - 4294967296#
+Else
+cUlng2 = CLng(a)
+End If
+Exit Function
+End Function
+Function cUlng(ByVal a As Currency) As Long ' πέρνει έναν unsigned long και τον κάνει νορμάλ χωρίς αλλαγή των bits
 On Error GoTo cu1
 a = Abs(Int(a))
 If a > 2147483647@ Then
@@ -450,47 +479,44 @@ cu1:
 cUlng = 0
 End Function
 Function Sput(ByVal Sl As String) As String
-' πακετάρισμα με φύλακα το 2, και μετά το μέγεθος σε Unsign Hex
-Sput = Chr(2) + Right$("00000000" & Hex$(cUlng(CDbl(Len(Sl)))), 8) + Sl
+' change to signed
+Sput = Chr(2) + Right$("00000000" & Hex$(Len(Sl)), 8) + Sl
 End Function
+Function PACKLNGUnsign$(a As Variant)
+PACKLNGUnsign$ = Right$("00000000" & Hex$(cUlng2(CDbl(a))), 8)
 
-Function PACKLNG$(ByVal a As Double)
-PACKLNG$ = Right$("00000000" & Hex$(cUlng(a)), 8)
 End Function
-Function PACKLNG2$(ByVal a As Currency)  ' with error return..
+Function PACKLNG$(ByVal a As Double) ' change to get negative values
+If a > 2147483647# Then a = 2147483647#
+If a < -2147483648# Then a = -2147483648#
+PACKLNG$ = Right$("00000000" & Hex$(CLng(a)), 8)
+End Function
+Function PACKLNG2$(ByVal a As Double)  ' with error return..for revision print, change for Write to file, to cutoff excess
 ' this if only for print
-On Error GoTo cu22
 Dim internal As Long
 a = Int(a)
-If a > 4294967296@ Then
+If a > 4294967296# Then
 PACKLNG2$ = "???+"
 ElseIf a < 0 Then
 ' error
 PACKLNG2$ = "???-"
 Else
-    If a > 2147483647@ Then
-    internal = a - 4294967296@
+    If a > 2147483647# Then
+    internal = CLng(a - 4294967296#)
     Else
     internal = CLng(a)
     End If
 
-If internal <= 65535 And internal >= 0 Then
+If internal <= 65535# And internal >= 0# Then
 PACKLNG2$ = "0x" + Right$("0000" & Hex$(internal), 4)
 Else
 PACKLNG2$ = "0x" + Right$("00000000" & Hex$(internal), 8)
 End If
 End If
 Exit Function
-cu22:
-PACKLNG2$ = "?????"
 End Function
 Function UNPACKLNG(ByVal s$) As Long
-If Len(s$) < 8 Then s$ = Right$("00000000" & s$, 8)
-If Left$(s$, 4) = "0000" Then
-UNPACKLNG = UINT(val("&H" & s$))
-Else
-UNPACKLNG = cUlng(val("&H" & s$))
-End If
+UNPACKLNG = CLng("&H" & s$)
 End Function
 
 Function ORGAN(a As Long) As String

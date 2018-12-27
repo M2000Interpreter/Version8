@@ -172,7 +172,7 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   "http:///"
+      Location        =   ""
    End
    Begin VB.PictureBox DIS 
       Appearance      =   0  'Flat
@@ -1264,7 +1264,7 @@ BreakMe = True
 If MsgBoxN("Break Key - Hard Reset" + vbCrLf + "Μ2000 - Execution Stop / Τερματισμός Εκτέλεσης", vbYesNo, MesTitle$) <> vbNo Then
 
 MOUT = i
-
+extreme = False
 If AVIRUN Then AVI.GETLOST
 On Error Resume Next
 noentrance = True
@@ -2212,13 +2212,13 @@ If TEXT1.SelText <> "" Then
     a$ = vbCrLf + TEXT1.SelText & "*"
     If shift <> 0 Then  ' βγάλε
         a$ = Replace(a$, vbCrLf + String$(6 + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod 6, ChrW(160)), vbCrLf)
-        a$ = Replace(a$, vbCrLf + Space$(6 + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod 6), vbCrLf)
+        a$ = Replace(a$, vbCrLf + space$(6 + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod 6), vbCrLf)
         TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
          TEXT1.SelStartSilent = ii
          TEXT1.SelLengthSilent = Len(a$) - 3
          
     Else
-        a$ = Replace(a$, vbCrLf, vbCrLf + Space$(6))
+        a$ = Replace(a$, vbCrLf, vbCrLf + space$(6))
         TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
         TEXT1.SelStartSilent = where + 6
         TEXT1.SelLengthSilent = Len(a$) - 3 - (where + 6 - ii)
@@ -2228,7 +2228,7 @@ If TEXT1.SelText <> "" Then
 Else
 If shift <> 0 Then
 
-    If Mid$(TEXT1.CurrentParagraph, 1, 6) = Space$(6) Or Mid$(TEXT1.CurrentParagraph, 1, 6) = String$(6, ChrW(160)) Then
+    If Mid$(TEXT1.CurrentParagraph, 1, 6) = space$(6) Or Mid$(TEXT1.CurrentParagraph, 1, 6) = String$(6, ChrW(160)) Then
 
             TEXT1.SelStartSilent = ii
             TEXT1.SelLengthSilent = 6
@@ -2242,8 +2242,8 @@ If shift <> 0 Then
     End If
     Else
         TEXT1.SelStartSilent = JJ
-        TEXT1.RemoveUndo Space(6)
-        TEXT1.InsertText = Space(6)
+        TEXT1.RemoveUndo space(6)
+        TEXT1.InsertText = space(6)
         
         TEXT1.SelStartSilent = where + 6
     End If
@@ -2284,7 +2284,7 @@ End If
 End Sub
 
 
-Private Sub view1_BeforeNavigate2(ByVal pDisp As Object, URL As Variant, flags As Variant, TargetFrameName As Variant, PostData As Variant, Headers As Variant, Cancel As Boolean)
+Private Sub view1_BeforeNavigate2(ByVal pDisp As Object, Url As Variant, flags As Variant, TargetFrameName As Variant, PostData As Variant, Headers As Variant, Cancel As Boolean)
 If look1 Then
 look1 = False:  lookfirst = False
 
@@ -2297,12 +2297,12 @@ If lookfirst Then look1 = True: view1.Silent = True
 End Sub
 
 
-Private Sub view1_DocumentComplete(ByVal pDisp As Object, URL As Variant)
+Private Sub view1_DocumentComplete(ByVal pDisp As Object, Url As Variant)
    Set HTML = view1.Document
 
 End Sub
 
-Private Sub view1_NavigateComplete2(ByVal pDisp As Object, URL As Variant)
+Private Sub view1_NavigateComplete2(ByVal pDisp As Object, Url As Variant)
 '
 On Error Resume Next
 If look1 Then
@@ -2593,12 +2593,12 @@ MYFONT = defFontname
             MYFONT = Form1.FontName
             
             FFONT = MYFONT
-            Err.Clear
+            Err.clear
             DIS.FontName = MYFONT
             DIS.Font.Italic = False
             DIS.FontName = MYFONT
             If Err.Number > 0 Then
-            Err.Clear
+            Err.clear
             MYFONT = defFontname
             End If
             If TEXT1.Font.charset <> 161 Then
@@ -2709,12 +2709,12 @@ Else
        
         End If
 FFONT = MYFONT
-Err.Clear
+Err.clear
 DIS.FontName = MYFONT
 DIS.Font.Italic = False
 DIS.FontName = MYFONT
 If Err.Number > 0 Then
-Err.Clear
+Err.clear
 MYFONT = defFontname
 End If
     cc.ValueKey = "BOLD"

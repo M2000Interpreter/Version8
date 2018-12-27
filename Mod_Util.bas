@@ -627,10 +627,10 @@ Public Sub NoStackObjectToMerge()
     MyEr "Not stack object to merge", "Δεν βρήκα αντικείμενο σωρού να ενώσω"
 End Sub
 Public Sub Unsignlongnegative(a$)
-    MyErMacro a$, "Unsign long can't be negative", "Ο ακέραιος χωρίς προσημο δεν μπορεί να είναι αρνητικός"
+    MyErMacro a$, "Unsigned long can't be negative", "Ο ακέραιος χωρίς προσημο δεν μπορεί να είναι αρνητικός"
 End Sub
 Public Sub Unsignlongfailed(a$)
-MyErMacro a$, "Unsign long to sign failed", "Η μετατροπή ακέραιου χωρίς πρόσημο σε ακέραιο με πρόσημο, απέτυχε"
+MyErMacro a$, "Unsigned long to sign failed", "Η μετατροπή ακέραιου χωρίς πρόσημο σε ακέραιο με πρόσημο, απέτυχε"
 End Sub
 Public Sub NoProperObject()
 MyEr "This object not supported", "Αυτό το αντικείμενο δεν υποστηρίζεται"
@@ -5847,7 +5847,7 @@ again22:
                             aheadstatusSkipParam a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
                                 aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                 level2 = level2 + 1
                                 Do
                                     pos = pos + 1
@@ -5875,7 +5875,7 @@ again22:
                             aheadstatusSkipParam a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
                                 aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                 level2 = level2 + 1
             
                                 Do
@@ -6000,7 +6000,7 @@ again22:
                             'aheadstatusSkipParam a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
                                 aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                 level2 = level2 + 1
                             Else 'skip line
                                 Do
@@ -6031,7 +6031,7 @@ again22:
                             'aheadstatusSkipParam a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
                                 aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                 level2 = level2 + 1
                             Else 'skip line
                                 Do
@@ -6237,7 +6237,7 @@ again22:
                         If Lang = 0 Then
                              If what$ = "ΤΟΤΕ" Or what$ = "ΑΛΛΙΩΣ" Then
                              pos2 = pos
-                                    If MaybeIsSymbol3(a$, vbCr, pos2) Then
+                                    If MaybeIsSymbol3lot(a$, b123, pos2) Then
                                        
                                         w$ = what$
                                         Exit Sub
@@ -6249,7 +6249,7 @@ again22:
                         Else
                             If what$ = "THEN" Or what$ = "ELSE" Then
                                     pos2 = pos
-                                    If MaybeIsSymbol3(a$, vbCr, pos2) Then
+                                    If MaybeIsSymbol3lot(a$, b123, pos2) Then
                                        
                                         w$ = what$
                                         Exit Sub
@@ -6695,7 +6695,7 @@ again22:
                                     If MaybeIsSymbol3(a$, "{", pos) Then
                                     aheadstatusSTRUCT a$, pos
                                     
-                                    ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
@@ -6746,7 +6746,7 @@ again22:
                                     If MaybeIsSymbol3(a$, "{", pos) Then
                                     aheadstatusSTRUCT a$, pos
                                     
-                                    ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
@@ -6871,7 +6871,7 @@ again22:
                                   If MaybeIsSymbol3(a$, "{", pos) Then
                                     aheadstatusSTRUCT a$, pos
                                     
-                                    ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
@@ -6908,7 +6908,7 @@ again22:
                                     If MaybeIsSymbol3(a$, "{", pos) Then
                                     aheadstatusSTRUCT a$, pos
                                     
-                                    ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
@@ -7038,7 +7038,7 @@ again22:
                                 Loop While flag And MaybeIsSymbol3(a$, ",", pos)
                                 If MaybeIsSymbol3(a$, "{", pos) Then
                                     aheadstatusSTRUCT a$, pos
-                                ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                                ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                     level2 = level2 + 1
                                     pos = pos + 1
                                 End If
@@ -7071,7 +7071,7 @@ again22:
                                     
                                     If MaybeIsSymbol3(a$, "{", pos) Then
                                         aheadstatusSTRUCT a$, pos
-                                    ElseIf MaybeIsSymbol3(a$, vbCr, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
                                         level2 = level2 + 1
                                         pos = pos + 1
                                     End If
@@ -7125,28 +7125,28 @@ pos = lenA + 2
 
 End Sub
 Sub dumpModule(no As Long)
-Dim a$, i As Long, guard As Long, oldi As Long, ok As Boolean, r As Long
+Dim a$, i As Long, GUARD As Long, oldi As Long, ok As Boolean, r As Long
 Dim part$, trimright
 a$ = sbf(no).sb
-guard = Len(a$)
+GUARD = Len(a$)
 i = 1
-While i <= guard
+While i <= GUARD
 i = MyTrimLi(a$, i)
-While Mid$(a$, i, 2) = vbCrLf And i <= guard
+While Mid$(a$, i, 2) = vbCrLf And i <= GUARD
 i = i + 2
 Wend
 While MaybeIsSymbol3lot(a$, "'\#", i)
 i = i + 1
-While Not Mid$(a$, i, 2) = vbCrLf And i <= guard
+While Not Mid$(a$, i, 2) = vbCrLf And i <= GUARD
 i = i + 1
 Wend
-While Mid$(a$, i, 2) = vbCrLf And i <= guard
+While Mid$(a$, i, 2) = vbCrLf And i <= GUARD
 i = i + 2
 Wend
 i = MyTrimLi(a$, i)
 Wend
 
-If i <= guard Then
+If i <= GUARD Then
     oldi = i
  
     
@@ -7500,8 +7500,7 @@ Do While pos <= Len(a$)
         b$ = b$ & part$
         End If
         part$ = "S"
-        '  UNPACKLNG(Mid$(a$, pos+1, 8)+10
-        pos = pos + UNPACKLNG(Mid$(a$, pos + 1, 8)) + 8
+        pos = pos + CLng("&H" & Mid$(a$, pos + 1, 8)) + 8
         w$ = """"
    
     
@@ -11654,22 +11653,13 @@ Else
         Else
         DE$ = DE$ & Mid$(a$, sng, 1)
         End If
-        Case "E", "e" ' ************check it
+        Case "E", "e", "Ε", "ε" ' ************check it
              If ex$ = vbNullString Then
                sg1 = True
         ex$ = "E"
         Else
         Exit Do
         End If
-   
-               Case "Ε", "ε" ' ************check it
-                         If ex$ = vbNullString Then
-               sg1 = True
-        ex$ = "E"
-        Else
-        Exit Do
-        End If
-        
         
         Case "+", "-"
         If sg1 And Len(ex$) = 1 Then
@@ -11826,16 +11816,9 @@ Else
         Else
         DE$ = DE$ & Mid$(a$, sng, 1)
         End If
-        Case "E", "e" ' ************check it
+        Case "E", "e", "Ε", "ε"  ' ************check it
             If ex$ = vbNullString Then
                sg1 = True
-                ex$ = "E"
-            Else
-                Exit Do
-            End If
-        Case "Ε", "ε" ' ************check it
-            If ex$ = vbNullString Then
-                sg1 = True
                 ex$ = "E"
             Else
                 Exit Do
@@ -12001,6 +11984,12 @@ Next a1
 If a1 > Len(a$) Then a1 = Len(a$) + 1
 If IsNumberOnly(a$, fr, d, a1) Then
 IsNumberD3 = True
+ElseIf Fast3NoSpaceCheck(fr, a$, "ΑΛΗΘΕΣ", 6, "ΑΛΗΘΗΣ", 6, "TRUE", 4, 6) Then
+d = True
+IsNumberD3 = True
+ElseIf Fast3NoSpaceCheck(fr, a$, "ΨΕΥΔΕΣ", 6, "ΨΕΥΔΗΣ", 6, "FALSE", 5, 5) Then
+d = False
+IsNumberD3 = True
 Else
 a1 = fr
 IsNumberD3 = False
@@ -12121,13 +12110,12 @@ Else
         End If
         End If
         Case "Ε", "ε"
-                         If ex$ = vbNullString Then
-               sg1 = True
+ If ex$ = vbNullString Then
+          sg1 = True
         ex$ = "E"
         Else
         Exit Do
         End If
-        ex$ = "E"
         
         Case "+", "-"
         If sg1 And Len(ex$) = 1 Then
@@ -15521,8 +15509,9 @@ If VALIDATEpart(rest$, s$) Then
 Do While s$ <> ""
     If ISSTRINGA(s$, pa$) Then
         basestack.soros.DataStr pa$
-    ElseIf IsNumberD(s$, x) Then
+    ElseIf IsNumberD2(s$, x) Then
         basestack.soros.DataVal x
+        x = vbEmpty
     Else
         Exit Do
     End If
@@ -18899,3 +18888,126 @@ End If
 PrepareLambda = True
 End Function
 
+Sub BackPort(a$)
+If Len(a$) = 0 Then a$ = Chr(8) Else Mid$(a$, 1, 1) = Chr(8)
+End Sub
+Function ExistNum(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
+Dim p As Variant, dd As Long, dn As Long, x As Variant, anything As Object, s$
+ExistNum = False
+    If IsExp(bstack, a$, p) Then
+    If Typename(bstack.lastobj) = "mHandler" Then
+    Set anything = bstack.lastobj
+    Set bstack.lastobj = Nothing
+       If Not CheckLastHandler(anything) Then
+        InternalError
+        ExistNum = False
+        Exit Function
+        End If
+    With anything
+        If anything.indirect >= 0 Then
+                dd = anything.indirect
+                dn = 0
+                Do While (TypeOf var(dd) Is mHandler) And dn < 20
+                    If var(dd).indirect >= 0 Then dd = var(dd).indirect Else Exit Do
+                    dn = dn + 1
+                Loop
+                If dn = 20 Then
+                InternalError
+                Exit Function
+                End If
+                Select Case dd
+                Case 1 To var2used
+                    r = SG * MyIsObject(var(dd))
+                Case Else
+                    r = 0
+                End Select
+                
+                ExistNum = FastSymbol(a$, ")", True)
+                
+                Set anything = Nothing
+                Exit Function
+        ElseIf TypeOf .objref Is FastCollection Then
+            If FastSymbol(a$, ",") Then
+                If IsExp(bstack, a$, p) Then
+                    If FastSymbol(a$, ",") Then
+                        If IsExp(bstack, a$, x) Then
+                        x = Int(x)
+                        If x = 0 Then
+                                r = .objref.FindOne(p, x)
+                                r = SG * x
+                        ElseIf x > 0 Then
+                            dn = x
+                            x = 0
+                            r = .objref.FindOne(p, x)
+                            x = -x + dn - 1
+                            r = SG * .objref.FindOne(p, x)
+                            Else
+                                r = SG * .objref.FindOne(p, x)
+                            End If
+                        Else
+                            MissParam a$
+                            Set anything = Nothing
+                            Exit Function
+                        End If
+                    Else
+                    r = SG * .objref.Find(p)
+                    End If
+                ElseIf IsStrExp(bstack, a$, s$) Then
+                    If FastSymbol(a$, ",") Then
+                        If IsExp(bstack, a$, x) Then
+                            x = Int(x)
+                            If x = 0 Then
+                                r = .objref.FindOne(s$, x)
+                                r = SG * x
+                        ElseIf x > 0 Then
+                            dn = x
+                            x = 0
+                            r = .objref.FindOne(s$, x)
+                            x = -x + dn - 1
+                            r = SG * .objref.FindOne(s$, x)
+                            Else
+                                r = SG * .objref.FindOne(s$, x)
+                            End If
+                        Else
+                            MissParam a$
+                            Set anything = Nothing
+                            Exit Function
+                        End If
+                    Else
+                        r = SG * .objref.Find(s$)
+                        
+                    End If
+                End If
+                
+                
+                ExistNum = FastSymbol(a$, ")", True)
+                
+                Set anything = Nothing
+                Exit Function
+            End If
+        End If
+    End With
+      
+    End If
+    Set anything = Nothing
+    
+    MissParam a$
+    Set bstack.lastobj = Nothing
+    ElseIf IsStrExp(bstack, a$, s$) Then
+    s$ = CFname(s$)
+    If s$ <> "" Then
+      r = SG * (InStr(s$, "*") = 0 And InStr(s$, "?") = 0)
+      Else
+  
+    r = 0
+    End If
+   
+    
+    
+    ExistNum = FastSymbol(a$, ")", True)
+    Else
+        MissParam a$
+    End If
+
+    
+End Function

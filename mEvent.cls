@@ -321,7 +321,7 @@ Dim i&, p2 As Long, p1 As Integer, p4 As Long, k As Long, p3 As Long
   Next i
  
 End Function
-Private Function UINT(ByVal a As Integer) As Long 'δίνει έναν integer σαν unsign integer σε long
+Private Function UINT(ByVal a As Integer) As Long 'δίνει έναν integer σαν Unsigned integer σε long
  Dim b As Integer
  b = a And &HFFFF
  If b < 0 Then

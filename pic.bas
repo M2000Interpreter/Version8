@@ -2966,22 +2966,14 @@ Else
         Else
         DE$ = DE$ & Mid$(a$, sng, 1)
         End If
-        Case "E", "e" ' ************check it
+        Case "E", "e", "Å", "å" ' ************check it
              If ex$ = vbNullString Then
                sg1 = True
         ex$ = "E"
         Else
         Exit Do
         End If
-   
-               Case "Å", "å" ' ************check it
-                         If ex$ = vbNullString Then
-               sg1 = True
-        ex$ = "E"
-        Else
-        Exit Do
-        End If
-        
+       
         
         Case "+", "-"
         If sg1 And Len(ex$) = 1 Then
@@ -3168,7 +3160,7 @@ Else
         Else
         DE$ = DE$ & Mid$(a$, sng, 1)
         End If
-        Case "E", "e" ' ************check it
+        Case "E", "e", "Å", "å"  ' ************check it
         If skipdecimals Then Exit Do
              If ex$ = vbNullString Then
                sg1 = True
@@ -3176,15 +3168,7 @@ Else
         Else
         Exit Do
         End If
-   
-               Case "Å", "å" ' ************check it
-               If skipdecimals Then Exit Do
-                         If ex$ = vbNullString Then
-               sg1 = True
-        ex$ = "E"
-        Else
-        Exit Do
-        End If
+
         
         
         Case "+", "-"

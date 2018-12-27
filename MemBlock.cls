@@ -157,15 +157,15 @@ End If
 End Property
 Public Function ValidArea(ByVal ThisStart As Long, ByVal ThisWidth As Double) As Boolean
 Dim a As Double
-' ThisStart is a sign long which hold same bits with unsign address
+' ThisStart is a sign long which hold same bits with Unsigned address
 If ErrorMes = 0 And mItems > 0 Then
-a = uintnew(CDbl(mPtr))  ' make mptr an unsign as double
+a = uintnew(CDbl(mPtr))  ' make mptr an Unsigned as double
 If ThisStart = 0 Then
     ThisStart = a
 Else
     ThisStart = uintnew(CDbl(ThisStart))
 End If
-' we have to make both unsign and then check them
+' we have to make both Unsigned and then check them
 If ThisStart - a >= 0 Then
 If mExecBloc Then
 If ThisStart + ThisWidth <= a + BlockSize(mPtr) Then ValidArea = True
@@ -177,7 +177,7 @@ End If
 
 End Function
 Public Function ValidArea2(ByVal ThisOffsetU As Double, ByVal ThisWidth As Double) As Boolean
-' ThisOffsetU is unsign
+' ThisOffsetU is Unsigned
 If ErrorMes = 0 And mItems > 0 Then
 If ThisOffsetU >= 0 Then
 If mExecBloc Then

@@ -654,7 +654,44 @@ End If
 End If
 
 End Function
+Function FindOne(RHS, Num) As Boolean
+Dim k As Long, Key As String, k1 As Long
+Key = Normalize(RHS)
+If Len(Key) = 0 Then Key = Chr$(0) + Chr$(0) + Chr$(0) + Chr$(0)
+ParentIndex = -1
+Done = False
+k = Hash(HashFunc(Key)) - 1
+k1 = -2
+If k >= 0 Then
+Do
+    If PriveSpace(k).Key = Key Then
+        Num = Num + 1
+        If Num = 0 Then FindOne = True: lastfind = Key: index = k: Done = True: Exit Function
+    End If
+     ParentIndex = k
+     k1 = k
+     k = PriveSpace(k).Pleft - 1
+Loop Until k < 0 Or k1 = k
+If k1 = k Then
+ReHash
+k = Hash(HashFunc(Key)) - 1
+k1 = -2
+ParentIndex = -1
+If k >= 0 Then
+Do
+    If PriveSpace(k).Key = Key Then
+      Num = Num + 1
+        If Num = 0 Then FindOne = True: lastfind = Key: index = k: Done = True: Exit Function
+    End If
+     ParentIndex = k
+     k1 = k
+     k = PriveSpace(k).Pleft - 1
+Loop Until k < 0 Or k = k1
+End If
+End If
+End If
 
+End Function
 Private Function Find2(RHS, Parndx As Long, ndx As Long) As Boolean
 Dim k As Long, Key As String, k1 As Long
 Key = Normalize(RHS)

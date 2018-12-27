@@ -4191,16 +4191,6 @@ Do While pos <= Len(a$)
    
         pos = pos + 1
         Loop
-    ElseIf w$ = Chr$(2) Then  ' packet string
-        If part$ <> "" Then
-        b$ = b$ & part$
-        End If
-        part$ = "S"
-        '  UNPACKLNG(Mid$(a$, pos+1, 8)+10
-        pos = pos + UNPACKLNG(Mid$(a$, pos + 1, 8)) + 8
-        w$ = Chr(34)
-   
-    
     ElseIf w$ = "(" Then
         Level& = 0
         If part$ <> "" Then
