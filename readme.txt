@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 12 active-X
+Version 9.6 Revision 13 active-X
 
-A fix in display code when run in Control Form (opened with Test statement)
+Fix "if then else.if then else.if then else" inside a if then/end if
+Split if/else.if/else now works if not inside an if then/end if
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate

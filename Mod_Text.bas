@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 12
+Global Const Revision = 13
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -16741,6 +16741,12 @@ contThenElseIf:
                                             End If
                                             If Execute = 1 Then
                                                 SetNextLine b$
+                                                If bstack.RetStackTotal > 0 Then
+                                                    If bstack.RetStack.LookTopVal = -3 Then
+                                                        jump = False
+                                                        IFCTRL = 0
+                                                    End If
+                                                End If
                                             Else
                                                 b$ = ss$
                                                 once = False
@@ -16753,6 +16759,7 @@ contThenElseIf:
                                     Else
                                         IFCTRL = 2
                                     End If
+                                    
                                 End If
                             Case "ELSE", "¡ÀÀ…Ÿ”"
                                     While FastOperator(b$, vbCrLf, i, 2)
@@ -16932,9 +16939,15 @@ contif:
                                         lbl = True
                                         End If
                                 End If
-                         
-                                jump = ok
-                                IFCTRL = 1
+                                If bstack.RetStackTotal = 0 Then
+                                        jump = ok
+                                        IFCTRL = 1
+                                Else
+                                    If Not bstack.RetStack.LookTopVal = -3 Then
+                                        jump = ok
+                                        IFCTRL = 1
+                                    End If
+                                End If
                     Else
                         
                     If MaybeIsSymbol(b$, b123) Then
