@@ -79,6 +79,13 @@ Else
 mstack.Add CVar(a), , 1
 End If
 End Sub
+Public Property Get StackItem2(where As Long, maxvalue As Long) As Variant
+If where > mstack.count Then
+StackItem2 = maxvalue + 1
+Else
+StackItem2 = mstack.item(where)
+End If
+End Property
 Public Property Get StackItem(where As Long) As Variant
 StackItem = mstack.item(where)
 End Property

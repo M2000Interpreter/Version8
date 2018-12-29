@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 11 active-X
+Version 9.6 Revision 12 active-X
 
-A fix from revision 10, for Stack$() function.
+A fix in display code when run in Control Form (opened with Test statement)
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate

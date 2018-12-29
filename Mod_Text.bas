@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 11
+Global Const Revision = 12
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -27905,37 +27905,26 @@ End Function
 
 Function GetFunctionList(ByVal s$) As String
 Dim c$, F$, k$(), qq$, final As Long, tmp$, oldl As Long, mtrim As Long
+Dim final2 As Long
 While s$ <> ""
 If ISSTRINGA(s$, c$) Then
 k$() = Split(c$, " ")
 final = val(k$(1))
-qq$ = sbf(Abs(final)).sb
-If Left$(qq$, 10) = "'11001EDIT" Then
-tmp$ = GetNextLine(qq$)
-mtrim = MyTrimR(qq$)
-oldl = Len(qq$)
-If oldl > mtrim Then
-qq$ = tmp$ + "-" + CStr(oldl - mtrim) + vbCrLf + MyTrim(qq$)
-Else
-qq$ = tmp$ + vbCrLf + NLtrim(qq$)
+If Not Right$(sbf(Abs(final)).sb, 2) = vbCrLf Then
+qq$ = vbCrLf
 End If
-End If
-final = final < 0
-'If qq$ <> "" Then
-  '  If Right$(qq$, 2) <> vbCrLf Then qq$ = qq$ + vbCrLf
-'End If
+final2 = final < 0
 If Right$(k$(0), 1) = ")" Then
-
-If final Then
-F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + qq$ + vbCrLf + "};" + F$
+If final2 Then
+F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "};" + F$
 Else
-F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + qq$ + vbCrLf + "}" + F$
+F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "}" + F$
 End If
 Else
-If final Then
-F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + qq$ + vbCrLf + "};" + F$
+If final2 Then
+F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(final)).sb + qq$ + "};" + F$
 Else
-F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + qq$ + vbCrLf + "}" + F$
+F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(final)).sb + qq$ + "}" + F$
 End If
 End If
 End If
