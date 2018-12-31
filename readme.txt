@@ -1,9 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 13 active-X
+Version 9.6 Revision 14 active-X
 
-Fix "if then else.if then else.if then else" inside a if then/end if
-Split if/else.if/else now works if not inside an if then/end if
+A lot of work;
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate

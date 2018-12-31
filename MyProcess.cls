@@ -20,8 +20,8 @@ Private mybuf$
 Private myPriority As PriorityLevel
 Private myOwner As Object
 Private myDone As Boolean
-Private m_duration As Double
-Private mYspace As Double
+Private m_duration As Currency
+Private mYspace As Currency
 Private myHere$
 Private myid As Long
 Private mycode As String
@@ -35,6 +35,7 @@ Private Declare Function timeGetTime Lib "winmm.dll" () As Long
 Private myProcess As basetask  ' myprocess.process.id is the handler
 Private myProcessPureParent As basetask
 Private mNostretch As Boolean
+Private mStep As Boolean
 
 
 Private Property Get TaskInterface_Process() As basetask
@@ -83,6 +84,7 @@ End Sub
 Private Property Let TaskInterface_interval(ByVal RHS As Double)
 mYspace = RHS
 m_duration = 0
+mStep = False
 If mYspace = 0 Then
 
 Else
@@ -229,7 +231,6 @@ On Error Resume Next
  Set NowProcess = myProcess
 
 If MyMode = 0 Then
-' λάθος δεν έχει ετοιμαστεί η σύνδεση!
 myDone = True
 End If
 If NowProcess Is Nothing Then
@@ -238,8 +239,8 @@ End If
          
  If myDone Then GoTo there
 
- If m_duration <= uintnew(CDbl(timeGetTime)) Then
-        m_duration = uintnew(CDbl(timeGetTime)) + mYspace
+ If m_duration <= uintnew(CDbl(timeGetTime)) Or mStep Then
+        If Not mStep Then m_duration = uintnew(CDbl(timeGetTime)) + mYspace
 
             If mybuf$ = vbNullString Then mybuf$ = mycode: NowProcess.IFCTRL = 0: NowProcess.jump = False
             ohere$ = here$
@@ -248,18 +249,18 @@ End If
             look = True
             
 Set NowProcess.Owner = myOwner
-If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner))
+If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner)): mStep = True
  Call executeblock(x, NowProcess, mybuf$, False, look, Interrupted, True)
   If Not (NowProcess Is Nothing) Then Set myOwner = NowProcess.Owner
         If Len(mybuf$) < 3 Then
-        mybuf$ = vbNullString
+            mybuf$ = vbNullString
+            mStep = False
         Else
       
-     If Interrupted Then m_duration = 0           ' do it in past;;
-     
     If Not look Then GoTo conthere
      End If
        If LastErNum <> 0 Or x = 0 Then
+       mStep = False
        myDone = True
        End If
         If x = 3 Then x = 1: look = False
@@ -268,6 +269,7 @@ If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner))
         If (x = 1 Or (x = 2 And mybuf$ = vbNullString)) And look = True Then
         
             If NowProcess.Parent.exist(myid, "_multi") Then
+                mStep = False
               TaskMaster.RestEnd1
               TaskMaster.RestEnd
               
