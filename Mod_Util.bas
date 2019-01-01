@@ -11949,21 +11949,24 @@ Exit For
 End Select
 Next a1
 If a1 > Len(a$) Then a1 = Len(a$) + 1
-If IsNumberOnly(a$, 1, d, a1, noendtypes, exceptspecial) Then
-a$ = Mid$(a$, a1)
-
-IsNumberD2 = True
-ElseIf Fast3Label(a$, "¡À«»≈”", 6, "¡À«»«”", 6, "TRUE", 4, 6) Then
-d = True
-IsNumberD2 = True
-ElseIf Fast3Label(a$, "ÿ≈’ƒ≈”", 6, "ÿ≈’ƒ«”", 6, "FALSE", 5, 5) Then
-d = False
-IsNumberD2 = True
+    If IsNumberOnly(a$, 1, d, a1, noendtypes, exceptspecial) Then
+        a$ = Mid$(a$, a1)
+        IsNumberD2 = True
+    ElseIf MaybeIsSymbol(a$, "¡·ÿ¯TtFf") Then
+        If Fast3NoSpace(a$, "¡À«»≈”", 6, "¡À«»«”", 6, "TRUE", 4, 6) Then
+            d = True
+            IsNumberD2 = True
+        ElseIf Fast3NoSpace(a$, "ÿ≈’ƒ≈”", 6, "ÿ≈’ƒ«”", 6, "FALSE", 5, 5) Then
+            d = False
+            IsNumberD2 = True
+        Else
+            IsNumberD2 = False
+        End If
+    Else
+    IsNumberD2 = False
+    End If
 Else
-IsNumberD2 = False
-End If
-Else
-IsNumberD2 = False
+    IsNumberD2 = False
 End If
 
 End Function
@@ -16234,7 +16237,7 @@ Public Function exeSelect(ExecuteLong, once, bstack As basetask, b$, v As Long, 
 Dim ok As Boolean, x1 As Long, y1 As Long, sp As Variant, st As Variant, sw$, slct As Long, ss$
 Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
         exeSelect = True
-        x1 = 0 ' mode numbers using p, sp and st
+                x1 = 0 ' mode numbers using p, sp and st
                 ' x1=2 using sw$ w$ ss$
 
             If IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang) Then
