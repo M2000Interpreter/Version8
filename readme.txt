@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 15 active-X
+Version 9.6 Revision 16 active-X
 
-Fix some minor bugs.
+Work on Control Form to display better the code as it runs. Some fixes for Exit/Continue/Restart/Break/Loop for code blocks, in new If Structure (without inner Blocks)
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate

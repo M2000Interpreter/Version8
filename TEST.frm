@@ -213,7 +213,8 @@ Private Declare Function CopyFromLParamToRect Lib "user32" Alias "CopyRect" (lpD
 Dim EXECUTED As Boolean
 Dim stolemodalid As Variant
 Public Property Set Process(mBtask As basetask)
-Set MyBaseTask = mBtask
+Set MyBaseTask = New basetask
+mBtask.CopyStrip2 MyBaseTask
 End Property
 
 Private Sub Command1_Click()
@@ -421,7 +422,7 @@ End If
 Label(1).Prompt = "Εντολή: "
 Label(2).Prompt = "Επόμενο: "
 oldindex = gList4.ListIndex
-gList4.Clear
+gList4.clear
 gList4.additemFast "Επόμενο Βήμα"
 gList4.additemFast "Αργή Ροή"
 gList4.additemFast "Διακοπή"
@@ -442,7 +443,7 @@ If Compute.Prompt = ">" Then
 Label(1).Prompt = "Id: "
 Label(2).Prompt = "Next: "
 oldindex = gList4.ListIndex
-gList4.Clear
+gList4.clear
 gList4.additemFast "Next Step"
 gList4.additemFast "Slow Flow"
 gList4.additemFast "Stop"
@@ -460,12 +461,6 @@ Set MyBaseTask = Nothing
 trace = False
 STq = True
 End Sub
-
-
-
-
-
-
 
 Private Sub gList1_CheckGotFocus()
 gList1.backcolor = &H606060
@@ -486,6 +481,7 @@ monitor = FindFormSScreen(Form1)
 Else
 monitor = FindFormSScreen(Form4)
 End If
+abt = False
 sHelp gList2.HeadLine, testpad.Text, (ScrInfo(monitor).Width - 1) * 3 / 5, (ScrInfo(monitor).Height - 1) * 4 / 7
 vHelp Not Form4.Visible
 If TestShowCode Then

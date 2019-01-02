@@ -87,6 +87,21 @@ Set .Sorosref = soros
 End With
 
 End Sub
+Public Sub CopyStrip2(bst As basetask)
+Dim i As Long
+With bst
+.StaticInUse = StaticInUse
+.OriginalCode = OriginalCode
+Set .StaticCollection = StaticCollection
+Set .Sorosref = soros
+.DropNdot 20
+For i = 1 To curdotcol
+.MoveNameDot dotcol(i)
+Next i
+End With
+Set RetSoros = Nothing
+
+End Sub
 Public Sub SetVar(ByVal name$, var As Variant)
 
     If Not StaticCollection.Find(name$) Then

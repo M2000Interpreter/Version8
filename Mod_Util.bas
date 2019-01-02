@@ -16235,7 +16235,7 @@ checkit:
 End Function
 Public Function exeSelect(ExecuteLong, once, bstack As basetask, b$, v As Long, Lang As Long) As Boolean
 Dim ok As Boolean, x1 As Long, y1 As Long, sp As Variant, st As Variant, sw$, slct As Long, ss$
-Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
+Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
         exeSelect = True
                 x1 = 0 ' mode numbers using p, sp and st
                 ' x1=2 using sw$ w$ ss$
@@ -16249,6 +16249,9 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                         End If
                     If x1 > 0 Then ' SELECT CASE NUMBER or STRING
                         SetNextLine b$
+                        While MaybeIsSymbol(b$, "'\")
+                        SetNextLine b$
+                        Wend
                     slct = 1
                        If NocharsInLine(b$) Then
                        ExpectedCaseorElseorEnd
@@ -16261,7 +16264,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                             Exit Do
                         End If
                                 If IsLabelSymbolNew(b$, "ле", "CASE", Lang) Then  ' WE HAVE CASE
-                                           If ok Then
+                                If ok Then
                                 ExpectedEndSelect
                                 ExecuteLong = 0
                                 Exit Function
@@ -16343,16 +16346,18 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                                 End If
                                                     SetNextLine b$
                                                          v = Len(b$)
+conthere:
                                                         If FastSymbol(b$, "{") Then  ' block
                                                           v = Len(b$)
                                                           ss$ = block(b$)
                                                             DUM = False
                                                             i = 1
                                                             ' #3 call a block
+                                                            TraceStore bstack, nd&, b$, 0
                                                             Call executeblock(i, bstack, ss$, False, DUM, , True)
-                                                           
+                                                           TraceRestore bstack, nd&
                                                             
-                                                            'b$ = ss$ & b$
+                                                            
                                                             If i = 1 Then
                                                             FastSymbol b$, "}"
                                                             If Not MaybeIsSymbol(b$, "'\") Then
@@ -16362,16 +16367,19 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                             End If
                                                             End If
                                                             Else
-                                                            b$ = ss$ & b$
+                                                            
                                                             If i = 0 Then
+                                                                b$ = ss$ & b$
                                                                 ExecuteLong = 0: Exit Function
                                                             ElseIf i = 2 Then
+                                                                If Len(ss$) > 0 Then b$ = ss$
                                                                 If DUM = True And b$ <> "" Then
                                                                 slct = -1
                                                                 Else
                                                                 GoTo ContGoto
                                                                 End If
                                                             ElseIf i = 3 Then
+                                                                If Len(ss$) > 0 Then b$ = ss$
                                                                If DUM = True And b$ <> "" Then slct = 0
                                                             End If
                                                             End If
@@ -16382,9 +16390,13 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                             
                                                             While IsLabelSymbolNew(b$, "ле", "CASE", Lang)
                                                            SetNextLine b$
+                                                           
                                                          v = Len(b$)
                                                             Wend
                                                             ' #4 call one command
+                                                            If MaybeIsSymbol(b$, "{") Then
+                                                            GoTo conthere
+                                                            End If
                                                             Call executeblock(i, bstack, b$, True, DUM, , True)
                                                             If i = 0 Or Left$(b$, 4) = vbCrLf + vbCrLf Then
                                                              If Left$(b$, 4) = vbCrLf + vbCrLf Then ExpectedCaseorElseorEnd
@@ -16410,8 +16422,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                                             Exit Function
                                                                         End If
                                                             ElseIf i = 3 Then
-                                                           ''     If DUM = True And B$ <> "" Then slct = 0: B$ = GetNextLine(ss$) 'ok
-                                                                If DUM = True And b$ <> "" Then slct = 0  '': B$ = GetNextLine(ss$) 'ok
+                                                                If DUM = True And b$ <> "" Then slct = 0
                                                             End If
                                                        'ой
                                                         End If
@@ -16447,7 +16458,9 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                     DUM = False
                                                     i = 1
                                                     ' #7 call block inside Case (Break) ok
+                                                    TraceStore bstack, nd&, b$, 0
                                                             Call executeblock(i, bstack, ss$, False, DUM, , True)
+                                                            TraceRestore bstack, nd&
                                                             If i = 1 Then
                                                             FastSymbol b$, "}"
                                                             If Not MaybeIsSymbol(b$, "'\") Then
@@ -16457,11 +16470,12 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                             End If
                                                             End If
                                                                     Else
-                                                            b$ = ss$ & b$
+                                                            
                                                             If i = 0 Then
-                                                               
+                                                               b$ = ss$ & b$
                                                                 ExecuteLong = 0: Exit Function
                                                             ElseIf i = 2 Then
+                                                                    If Len(ss$) > 0 Then b$ = ss$
                                                                     If DUM = True And b$ <> "" Then
                                                                     slct = -1
                                                                     Else
@@ -16469,6 +16483,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                                     End If
                                                            
                                                              ElseIf i = 3 Then
+                                                                    If Len(ss$) > 0 Then b$ = ss$
                                                                     If DUM = True And b$ <> "" Then slct = 0
         
                                                              End If
@@ -16482,7 +16497,6 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                             i = 1
                                                             ' #8 call one command inside Case (Break) ok
                                                             Call executeblock(i, bstack, b$, True, DUM, , True)
-                        
                                                             If i = 0 Then   ' where is exit
                                                                 b$ = space$(v)
                                                                 ExecuteLong = 0: Exit Function
@@ -16525,13 +16539,14 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                     If FastSymbol(b$, "{") Then
                                     v = Len(b$)
                                         ss$ = block(b$)
-                                        b$ = NLtrim$(Mid$(b$, 2))
-                                        If slct > 0 Then
+                                    If slct > 0 Then
                                                     v = Len(b$)
                                                     DUM = False
                                                     i = 1
                                                     ' #9 call block inside Else
+                                                    TraceStore bstack, nd&, b$, 0
                                                        Call executeblock(i, bstack, ss$, False, DUM, , True)
+                                                       TraceRestore bstack, nd&
                                                        If i = 1 Then
                                                             FastSymbol b$, "}"
                                                             If Not MaybeIsSymbol(b$, "'\") Then
@@ -16541,11 +16556,12 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                             End If
                                                             End If
                                                             Else
-                                                              b$ = ss$ & b$
-                                                                 If i = 0 Then
-                                                        
-                                                        ExecuteLong = 0: Exit Function
+                                                              
+                                                            If i = 0 Then
+                                                                b$ = ss$ & b$
+                                                                ExecuteLong = 0: Exit Function
                                                             ElseIf i = 2 Then
+                                                                        If Len(ss$) > 0 Then b$ = ss$
                                                                           If DUM = True And b$ <> "" Then
                                                                             slct = -1
                                                                           ElseIf b$ <> "" Then
@@ -16555,9 +16571,12 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long
                                                                             Exit Function
                                                                         End If
                                                             ElseIf i = 3 Then
+                                                            If Len(ss$) > 0 Then b$ = ss$
                                                                 If DUM = True And b$ <> "" Then slct = 0: b$ = GetNextLine(ss$)
                                                             End If
                                                             End If
+                                        Else
+                                        b$ = NLtrim$(Mid$(b$, 2))
                                         End If
                                     Else
                                     If slct > 0 Then
