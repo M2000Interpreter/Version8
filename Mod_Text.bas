@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 16
+Global Const Revision = 17
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -14602,7 +14602,9 @@ Do While Len(b$) <> LLL
     If trace Or SLOW Then
         WaitShow = 0
         refreshGui
-        If trace And Not bypasstrace Then
+        If IsWine Then
+            MyDoEvents1 di
+        ElseIf trace And Not bypasstrace Then
             MyDoEvents0new di   ' change from simple to version 2\ change to mydoevents0
         Else
             MyDoEvents1 di
@@ -35691,7 +35693,7 @@ Set Scr = Nothing
 
 End Function
 Function ProcDrawWidth(bstack As basetask, rest$) As Boolean
-Dim x As Double, p As Variant, it As Long, ss$, i As Long, x1 As Long
+Dim x As Double, p As Variant, it As Long, ss$, i As Long, x1 As Long, nd&
 ProcDrawWidth = True
 Dim Scr As Object
 Set Scr = bstack.Owner
@@ -35715,9 +35717,11 @@ If IsExp(bstack, rest$, p) Then
    
     If FastSymbol(rest$, "{") Then
         ss$ = block(rest$)
+         TraceStore bstack, nd&, rest$, 0
         If FastSymbol(rest$, "}") Then
             Call executeblock(it, bstack, ss$, False, False, , True)
         End If
+        bstack.addlen = nd&
     End If
 End If
 Scr.DrawWidth = i
@@ -42019,9 +42023,6 @@ ProcStack = True
    If IsLabelSymbolNew(rest$, "ΝΕΟΣ", "NEW", Lang) Then
    If FastSymbol(rest$, "{") Then
 ss$ = block(rest$)
-'frm$ = rest$
-
-'If FastSymbol(rest$, "}") Then
 Set ps = bstack.soros
 Set bstack.Sorosref = New mStiva
 TraceStore bstack, nd&, rest$, 0
@@ -42257,14 +42258,14 @@ isAnobject:
             If Not TypeOf myobject Is mStiva Then MyEr "Not a stack", "Δεν είναι σωρός": Exit Function
             If FastSymbol(rest$, "{") Then
                 ss$ = block(rest$)
-                frm$ = rest$
+                TraceStore bstack, nd&, rest$, 0
                 If FastSymbol(rest$, "}") Then
                     Set ps = bstack.soros
                     Set bstack.Sorosref = myobject
                     
-                    TraceStore bstack, nd&, rest$, 1
-                    Call executeblock(it, bstack, ss$, False, once, , True)
-                    bstack.addlen = nd&
+                    
+                    Call executeblock(it, bstack, ss$, False, once, , True, True)
+                    
                     Set bstack.Sorosref = ps
                     Set ps = Nothing
                     If it = 2 Then
@@ -42278,6 +42279,7 @@ isAnobject:
                     If it <> 1 Then ProcStack = False: rest$ = ss$ + rest$
             
                 End If
+                bstack.addlen = nd&
             Else
             bstack.soros.MergeBottom myobject
                 'MyEr "No Block {}", "Δεν υπάρχει μπλοκ εντολών { }"
@@ -42573,7 +42575,7 @@ ProcDesktop = True
 End Function
 Function ProcPath(bstack As basetask, rest$, Lang As Long) As Boolean
 Dim F As Boolean, p As Variant, col As Long, it As Long, ss$, x As Double, par As Boolean, prive As Long
-Dim oldGDIlines As Boolean, region As Boolean, oldpathcolor As Long, oldpathfillstyle As Integer
+Dim oldGDIlines As Boolean, region As Boolean, oldpathcolor As Long, oldpathfillstyle As Integer, nd&
 ProcPath = True
 prive = GetCode(bstack.Owner)
 F = IsLabelSymbolNew(rest$, "ΠΑΝΩ", "OVER", Lang)
@@ -42587,74 +42589,79 @@ If IsExp(bstack, rest$, p) Then
            x = vbSolid
            End If
         If FastSymbol(rest$, "{") Then
-            'ss$ = "{" & block(rest$) & "}"
-            ss$ = block(rest$) '& vbCr
+
+            ss$ = block(rest$)
+            TraceStore bstack, nd&, rest$, 0
             If FastSymbol(rest$, "}") Then
             
-                        players(prive).pathgdi = players(prive).pathgdi + 1
-                        oldpathfillstyle = players(prive).pathfillstyle
-                        oldpathcolor = players(prive).pathcolor
+                players(prive).pathgdi = players(prive).pathgdi + 1
+                oldpathfillstyle = players(prive).pathfillstyle
+                oldpathcolor = players(prive).pathcolor
+                
+                players(prive).pathcolor = mycolor(col)
+                players(prive).pathfillstyle = Int(x) Mod 8
+                
+                BeginPath bstack.Owner.hDC
+                If (par Or F) And GDILines Then oldGDIlines = True: players(prive).NoGDI = True
+                Call executeblock(it, bstack, ss$, False, False, , True)
+
+                If oldGDIlines = True Then players(prive).NoGDI = False
+                players(prive).pathgdi = players(prive).pathgdi - 1
+                If players(prive).pathgdi > 0 Then
+                    players(prive).pathcolor = oldpathcolor
+                    players(prive).pathfillstyle = oldpathfillstyle
+                End If
                         
-                        players(prive).pathcolor = mycolor(col)
-                        players(prive).pathfillstyle = Int(x) Mod 8
-                        
-                        BeginPath bstack.Owner.hDC
-                        If (par Or F) And GDILines Then oldGDIlines = True: players(prive).NoGDI = True
-                        Call executeblock(it, bstack, ss$, False, False, , True)
-                        
-                        If oldGDIlines = True Then players(prive).NoGDI = False
-                        players(prive).pathgdi = players(prive).pathgdi - 1
-                        If players(prive).pathgdi > 0 Then
-                        players(prive).pathcolor = oldpathcolor
-                        players(prive).pathfillstyle = oldpathfillstyle
-                        End If
-                        
-                        ' what for 2 and 3 values
-                        EndPath bstack.Owner.hDC
+                ' what for 2 and 3 values
+                EndPath bstack.Owner.hDC
         
-                        bstack.Owner.fillstyle = Int(x) Mod 8
-                        bstack.Owner.FillColor = mycolor(col)
-                        col = p ' from  6.3 change
-                        If par Then bstack.Owner.DrawMode = 7
-                        If F Then  ' from 8 rev 83
-                              If bstack.Owner.fillstyle = 1 Then
-                                   StrokeAndFillPath bstack.Owner.hDC
-                                Else
-                                    FillPath bstack.Owner.hDC
-                                  End If
+                bstack.Owner.fillstyle = Int(x) Mod 8
+                bstack.Owner.FillColor = mycolor(col)
+                col = p ' from  6.3 change
+                If par Then bstack.Owner.DrawMode = 7
+                If F Then  ' from 8 rev 83
+                      If bstack.Owner.fillstyle = 1 Then
+                           StrokeAndFillPath bstack.Owner.hDC
                         Else
-                             StrokeAndFillPath bstack.Owner.hDC         ' stroke and fill path
-                        End If
-                        If par Then bstack.Owner.DrawMode = 13
-                        bstack.Owner.fillstyle = vbSolid
-          
-                If Trim(ss$) = vbNullString Then ss$ = " "
+                            FillPath bstack.Owner.hDC
+                          End If
+                Else
+                     StrokeAndFillPath bstack.Owner.hDC         ' stroke and fill path
+                End If
+                If par Then bstack.Owner.DrawMode = 13
+                bstack.Owner.fillstyle = vbSolid
+      
                 If it = 2 Then
                     If ss$ = "" Then
-                    rest$ = ": Break"
+                        rest$ = ": Break"
                     Else
-                    rest$ = ": Goto " + ss$
+                        rest$ = ": Goto " + ss$
                     End If
                     it = 1
-                    End If
-                  If it <> 1 Then ProcPath = False: rest$ = ss$ + rest$
-              End If
+                End If
+                If it <> 1 Then ProcPath = False: rest$ = ss$ + rest$
             Else
-       MissPar
-ProcPath = False
+                MissPar
+                ProcPath = False
+            End If
+            bstack.addlen = nd&
+
+        Else
+            MissPar
+            ProcPath = False
         End If
-        Exit Function
+    Exit Function
     Else
         If FastSymbol(rest$, "{") Then
             ss$ = block(rest$)
-            If Trim(ss$) = vbNullString Then
-             ProcPath = FastSymbol(rest$, "}")
-            If FastSymbol(rest$, ";") Then
-  
-                SelectClipRgn bstack.Owner.hDC, 0&
-            
-            End If
-            Exit Function
+            TraceStore bstack, nd&, rest$, 0
+            If MyTrim(ss$) = vbNullString Then
+            ProcPath = FastSymbol(rest$, "}")
+              If FastSymbol(rest$, ";") Then
+                  SelectClipRgn bstack.Owner.hDC, 0&
+              End If
+              bstack.addlen = nd&
+              Exit Function
             End If
         
             If FastSymbol(rest$, "}") Then
@@ -42666,20 +42673,20 @@ ProcPath = False
                 players(prive).pathfillstyle = Int(x) Mod 8
                 BeginPath bstack.Owner.hDC
                 If (par Or region) And GDILines Then oldGDIlines = True: players(prive).NoGDI = True
-                Call executeblock(it, bstack, ss$, False, False)
+                Call executeblock(it, bstack, ss$, False, False, , , True)
                 If oldGDIlines = True Then players(prive).NoGDI = False
                 EndPath bstack.Owner.hDC
                 players(prive).pathgdi = players(prive).pathgdi - 1
-                 If players(prive).pathgdi > 0 Then
-                        players(prive).pathcolor = oldpathcolor
-                        players(prive).pathfillstyle = oldpathfillstyle
-                        End If
+                If players(prive).pathgdi > 0 Then
+                    players(prive).pathcolor = oldpathcolor
+                    players(prive).pathfillstyle = oldpathfillstyle
+                End If
                 bstack.Owner.fillstyle = vbSolid
                 If region Then            ' path { block of commands };
-                If F Then
-                SelectClipPath bstack.Owner.hDC, 2
-                Else
-                    SelectClipPath bstack.Owner.hDC, RGN_COPY  ' make a clip path
+                    If F Then
+                        SelectClipPath bstack.Owner.hDC, 2
+                    Else
+                        SelectClipPath bstack.Owner.hDC, RGN_COPY  ' make a clip path
                     End If
                 Else
                     If par Then bstack.Owner.DrawMode = 7
@@ -42693,15 +42700,18 @@ ProcPath = False
                     rest$ = ": Goto " + ss$
                     End If
                     it = 1
-                    End If
-                  If it <> 1 Then ProcPath = False: rest$ = ss$ + rest$
-
-        End If
+                End If
+                If it <> 1 Then ProcPath = False: rest$ = ss$ + rest$
+            Else
+                MissPar
+                ProcPath = False
+            End If
+            bstack.addlen = nd&
     Else
-MissPar
-ProcPath = False
+        MissPar
+        ProcPath = False
     End If
-    
+
 End If
 
 End Function

@@ -98,8 +98,9 @@ Set .Sorosref = soros
 For i = 1 To curdotcol
 .MoveNameDot dotcol(i)
 Next i
+.DropRetStack
 End With
-Set RetSoros = Nothing
+
 
 End Sub
 Public Sub SetVar(ByVal name$, var As Variant)
@@ -537,6 +538,10 @@ End Property
 Public Function SorosNothing() As Boolean
 SorosNothing = parentSoros Is Nothing
 End Function
+Public Sub DropRetStack()
+Set RetSoros = Nothing
+End Sub
+
 Public Property Get soros() As mStiva
 If parentSoros Is Nothing Then
 Set parentSoros = New mStiva
