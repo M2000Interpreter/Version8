@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 17
+Global Const Revision = 18
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -23945,7 +23945,11 @@ ElseIf SLOW Or IsWine Then
 Sleep 1
 End If
 TaskMaster.rest
+If IsWine Then
+DoEvents
+Else
 SleepWaitEdit bstack, 1
+End If
 TaskMaster.RestEnd
 Exit Sub
 procbliah:
@@ -23955,7 +23959,7 @@ End Sub
 Sub ProcTask2(bstack As basetask)
 On Error GoTo procbliah2
 If TaskMaster Is Nothing Then
-If SLOW Then
+If SLOW Or IsWine Then
 Sleep 1
 End If
 DoEvents
@@ -23968,8 +23972,11 @@ ElseIf SLOW Or IsWine Then
 Sleep 1
 End If
 TaskMaster.rest
-
+If IsWine Then
+DoEvents
+Else
 SleepWaitEdit2 1
+End If
 TaskMaster.RestEnd
 End If
 Exit Sub
@@ -48180,11 +48187,13 @@ Public Function TraceThis(bstack As basetask, di As Object, b$, w$, SBB$) As Boo
         If Not TaskMaster Is Nothing Then
             If TaskMaster.QueueCount > 0 And TaskMaster.Processing Then TaskMaster.StopProcess
         End If
+      
         Do
             BLOCKkey = False
-            If di.Visible Then di.Refresh
+            If Not IsWine Then If di.Visible Then di.Refresh
             ProcTask2 bstack
         Loop Until STbyST Or STq Or STEXIT Or bypassST Or NOEXECUTION Or myexit(bstack) Or Not Form2.Visible
+
         If Not TaskMaster Is Nothing Then
            If TaskMaster.QueueCount > 0 And Not TaskMaster.Processing Then TaskMaster.StartProcess
         End If

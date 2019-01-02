@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 17 active-X
+Version 9.6 Revision 18 active-X
 
-Removed a serious bag in Test Form (from a mistake clear the return stack for subs)
+A fix for running in Wine - now Control Form works nice.
 
 
 From version 9.0 revision 50:

@@ -8,7 +8,7 @@ Private Declare Function LoadLibrary Lib "KERNEL32" Alias "LoadLibraryW" (ByVal 
 Private Declare Function FreeLibrary Lib "KERNEL32" (ByVal hLibModule As Long) As Long
 Private Declare Function lstrlenA Lib "KERNEL32" (ByVal lpString As Long) As Long
 Private Declare Function lstrlenW Lib "KERNEL32" (ByVal lpString As Long) As Long
-Private Declare Sub RtlMoveMemory Lib "KERNEL32" (dst As Any, src As Any, ByVal BLen As Long)
+Private Declare Sub RtlMoveMemory Lib "KERNEL32" (Dst As Any, Src As Any, ByVal BLen As Long)
 Private Declare Function SysStringLen Lib "oleaut32" (ByVal bstr As Long) As Long
 
 Private Enum CALLINGCONVENTION_ENUM
@@ -170,23 +170,23 @@ lfunc = val(Mid$(sFunc, 2))
   If GetFuncPtrOrd = 0 Then MyEr "EntryPoint not found: " & sFunc & " in: " & sLib, "EntryPoint not found: " & sFunc & " στο: " & sLib
 End Function
 Public Function GetBStrFromBstrPtr(lpSrc As Long) As String
-Dim SLen As Long
+Dim slen As Long
   If lpSrc = 0 Then Exit Function
-  SLen = SysStringLen(lpSrc)
-  If SLen Then GetBStrFromBstrPtr = Space$(SLen) Else Exit Function
+  slen = SysStringLen(lpSrc)
+  If slen Then GetBStrFromBstrPtr = space$(slen) Else Exit Function
 
-  RtlMoveMemory ByVal StrPtr(GetBStrFromBstrPtr), ByVal lpSrc, SLen * 2
+  RtlMoveMemory ByVal StrPtr(GetBStrFromBstrPtr), ByVal lpSrc, slen * 2
 
 End Function
 Public Function GetBStrFromPtr(lpSrc As Long, Optional ByVal ANSI As Boolean) As String
-Dim SLen As Long
+Dim slen As Long
   If lpSrc = 0 Then Exit Function
-  If ANSI Then SLen = lstrlenA(lpSrc) Else SLen = lstrlenW(lpSrc)
-  If SLen Then GetBStrFromPtr = Space$(SLen) Else Exit Function
+  If ANSI Then slen = lstrlenA(lpSrc) Else slen = lstrlenW(lpSrc)
+  If slen Then GetBStrFromPtr = space$(slen) Else Exit Function
       
   Select Case ANSI
-    Case True: RtlMoveMemory ByVal GetBStrFromPtr, ByVal lpSrc, SLen
-    Case Else: RtlMoveMemory ByVal StrPtr(GetBStrFromPtr), ByVal lpSrc, SLen * 2
+    Case True: RtlMoveMemory ByVal GetBStrFromPtr, ByVal lpSrc, slen
+    Case Else: RtlMoveMemory ByVal StrPtr(GetBStrFromPtr), ByVal lpSrc, slen * 2
   End Select
 End Function
 Public Sub CleanupLibHandles() 'not really needed - but callable (usually at process-shutdown) to clear things up
@@ -203,7 +203,7 @@ Function IsWine()
 Static www As Boolean, wwb As Boolean
 If www Then
 Else
-Err.Clear
+Err.clear
 Dim hLib As Long, ntdll As String
 On Error Resume Next
 ntdll = "ntdll"

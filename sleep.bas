@@ -618,7 +618,9 @@ TaskMaster.Interval = 5
 Else
 TaskMaster.rest
 End If
-
+If IsWine Then
+    lNumberOf10ThmiliSeconds = 30
+End If
     Dim ft As FILETIME
     Dim lBusy As Long
     Dim lRet As Long
