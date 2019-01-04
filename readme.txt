@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 18 active-X
+Version 9.6 Revision 19 active-X
 
-A fix for running in Wine - now Control Form works nice.
+A lot of work.
 
 
 From version 9.0 revision 50:

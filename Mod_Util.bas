@@ -2,6 +2,7 @@ Attribute VB_Name = "Module2"
 Option Explicit
 Public Trush As New Collection
 Const b123 = vbCr + "'\"
+Const b1234 = vbCr + "'\:"
 Public k1 As Long, Kform As Boolean
 Private Const doc = "Document"
 Public stackshowonly As Boolean, NoBackFormFirstUse As Boolean
@@ -513,7 +514,7 @@ contarr1:
                 End If
                 ' check member
             ElseIf vv.IamApointer Then
-                Stop
+                r$ = "Group"   ' not decide yet
             ElseIf vv.HasStrValue Then
                 r$ = "String"
             ElseIf vv.HasValue Then
@@ -5720,7 +5721,9 @@ again22:
         End If
     ElseIf w$ = "{" Then
        If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -5737,7 +5740,72 @@ conthere:
 Loop
 
 End Sub
+Function blockLen2(s$, pos) As Long
+Dim i As Long, j As Long, c As Long
+Dim a1 As Boolean
+Dim jump As Boolean
+If Trim(s$) = vbNullString Then Exit Function
+c = Len(s$)
+a1 = True
+i = pos
+Do
+Select Case AscW(Mid$(s$, i, 1))
+Case 32
+' nothing
+Case 34
+Do While i < c
+i = i + 1
+If AscW(Mid$(s$, i, 1)) = 34 Then Exit Do
+Loop
+Case 39, 92
+Do While i < c
+i = i + 1
+If Mid$(s$, i, 2) = vbCrLf Then Exit Do
+Loop
+Case 61
+jump = True
+Case 123
+If jump Then
+jump = False
+Dim target As Long
+target = j
+    Do
+    Select Case AscW(Mid$(s$, i, 1))
+    Case 34
+    Do While i < c
+    i = i + 1
+    If AscW(Mid$(s$, i, 1)) = 34 Then Exit Do
+    Loop
+    Case 123
+    j = j - 1
+    Case 125
+    j = j + 1: If j = target Then Exit Do
+    End Select
+    i = i + 1
+    Loop Until i > c
+    If j <> target Then Exit Do
+    Else
+j = j - 1
+End If
 
+
+Case 125
+j = j + 1: If j = 1 Then Exit Do
+Case Else
+jump = False
+
+End Select
+i = i + 1
+Loop Until i > c
+If j = 1 Then
+blockLen2 = i
+Else
+blockLen2 = 0
+End If
+
+
+
+End Function
 Public Sub aheadstatusSkipParam(a$, pos As Long)
 Dim pos2 As Long, Level&, w$
 If a$ = vbNullString Then Exit Sub
@@ -5767,7 +5835,9 @@ again22:
         End If
     ElseIf w$ = "{" Then
        If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -5784,7 +5854,49 @@ conthere:
 Loop
 
 End Sub
+Public Sub aheadstatusSkipParam2(a$, pos As Long)
+' no block  ' for for next
+Dim pos2 As Long, Level&, w$
+If a$ = vbNullString Then Exit Sub
+Dim v1 As Long
+If pos = 0 Then pos = 1
+Do While pos <= Len(a$)
+    w$ = Mid$(a$, pos, 1)
+    v1 = AscW(w$)
+    If Abs(v1) > 7 Then
+    If w$ = """" Then
+        pos = pos + 1
+        Do While pos <= Len(a$)
+        If Mid$(a$, pos, 1) = """" Then Exit Do
+        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        pos = pos + 1
+        Loop
+    ElseIf w$ = "(" Then
+        Level& = 0
+again22:
+      pos = pos + 1
+        If Not BlockParam2(a$, pos) Then Exit Do
+        If Mid$(a$, pos + 1, 1) = "#" Then
+        pos = pos + 1
+        GoTo conthere
+        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
+        pos = pos + 1: GoTo again22
+        End If
+    Else
+        Select Case w$
+        Case ":", ")", "{", "}", Is < " ", "'", "\", vbLf
+        Exit Do
+        End Select
+        End If
+End If
+        pos = pos + 1
+        
+  
+conthere:
+  
+Loop
 
+End Sub
 
 Public Sub aheadstatusNext(a$, pos As Long, Lang As Long, flag As Boolean)
 Dim pos2 As Long, Level&, what$, w$, lenA As Long, level2 As Integer
@@ -5824,7 +5936,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= lenA Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -5844,15 +5958,12 @@ again22:
                                     level2 = level2 - 1
                                 End If
                         ElseIf what$ = second1$ Then
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam2 a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
-                                aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                pos = blockLen2(a$, pos + 1)
+                                If pos = 0 Then pos = Len(a$): Exit Sub
+                            ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
                                 level2 = level2 + 1
-                                Do
-                                    pos = pos + 1
-    
-                                Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
                             End If
                         Else
                             aheadstatusSkipParam a$, pos
@@ -5872,16 +5983,14 @@ again22:
                                 level2 = level2 - 1
                             End If
                         ElseIf what$ = second2$ Then
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam2 a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
-                                aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                pos = blockLen2(a$, pos + 1)
+                                If pos = 0 Then pos = Len(a$): Exit Sub
+                            ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
                                 level2 = level2 + 1
             
-                                Do
-                                    pos = pos + 1
-    
-                                Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+                              
                             End If
                         Else
                             aheadstatusSkipParam a$, pos
@@ -5974,7 +6083,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= lenA Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+                pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -5997,16 +6108,11 @@ again22:
                                     level2 = level2 - 1
                                 End If
                         ElseIf what$ = second1$ Or what$ = second11$ Then
-                            'aheadstatusSkipParam a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
                                 aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                            'ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
+                            Else
                                 level2 = level2 + 1
-                            Else 'skip line
-                                Do
-                                    pos = pos + 1
-    
-                                Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
                             End If
                         Else
                             aheadstatusSkipParam a$, pos
@@ -6028,16 +6134,11 @@ again22:
                                 level2 = level2 - 1
                             End If
                         ElseIf what$ = second2$ Or what$ = second22$ Then
-                            'aheadstatusSkipParam a$, pos
                             If MaybeIsSymbol3(a$, "{", pos) Then
                                 aheadstatusSTRUCT a$, pos
-                            ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                          '  ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
+                          Else
                                 level2 = level2 + 1
-                            Else 'skip line
-                                Do
-                                    pos = pos + 1
-    
-                                Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
                             End If
                         Else
                             aheadstatusSkipParam a$, pos
@@ -6117,7 +6218,9 @@ again22:
         End If
     ElseIf w$ = "{" Then
        If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -6164,7 +6267,9 @@ again22:
         End If
     ElseIf w$ = "{" Then
        If pos <= lenA Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = lenA: Exit Do
         If MaybeIsSymbol3(a$, ":", pos) Then pos = pos + 1: Exit Do
         End If
     Else
@@ -6222,7 +6327,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -6338,7 +6445,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -6438,7 +6547,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -6542,7 +6653,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -6647,7 +6760,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= lenA Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -6845,7 +6960,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= lenA Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -7009,7 +7126,9 @@ again22:
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
        If pos <= lenA Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
+        'If Not blockStringAhead(a$, pos) Then Exit Do
+        pos = blockLen2(a$, pos + 1)
+        If pos = 0 Then pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -7038,7 +7157,7 @@ again22:
                                 Loop While flag And MaybeIsSymbol3(a$, ",", pos)
                                 If MaybeIsSymbol3(a$, "{", pos) Then
                                     aheadstatusSTRUCT a$, pos
-                                ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
                                     level2 = level2 + 1
                                     pos = pos + 1
                                 End If
@@ -7071,7 +7190,7 @@ again22:
                                     
                                     If MaybeIsSymbol3(a$, "{", pos) Then
                                         aheadstatusSTRUCT a$, pos
-                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
                                         level2 = level2 + 1
                                         pos = pos + 1
                                     End If
@@ -7162,7 +7281,7 @@ If i <= GUARD Then
     Debug.Print Mid$(a$, oldi, trimright - oldi)
     
     End If
-    
+    If i = 0 Then Exit Sub
     If Mid$(a$, i) = vbCr Then i = i + 2 Else i = i + 1
 End If
 Wend
@@ -8968,6 +9087,20 @@ End Sub
 Public Sub MissingBlock()  ' this is for identifier or execute part
 MyEr "missing block {} or string expression", "λείπει κώδικας σε {} η αλφαριθμητική έκφραση"
 End Sub
+Public Sub MissingBlockCode()
+MyEr "missing block {}", "λείπει κώδικας σε μπλοκ {}"
+End Sub
+Public Sub OnlyOneLineAllowed()
+MyEr "Use block {} in starting line only", "Χρησιμοποίησε μπλοκ {} στην αρχική γραμμή"
+End Sub
+Public Function CheckBlock(once As Boolean) As Long
+                                    If once Then
+                                        OnlyOneLineAllowed
+                                    Else
+                                        MissingBlockCode
+                                    End If
+End Function
+
 Public Sub MissingEnumBlock()
 MyEr "missing block {} for enumeration constants", "λείπει μπλοκ {} για σταθερές απαρίθμησης "
 End Sub
@@ -16233,7 +16366,7 @@ checkit:
             Set v = pppp
         End If
 End Function
-Public Function exeSelect(ExecuteLong, once, bstack As basetask, b$, v As Long, Lang As Long) As Boolean
+Public Function exeSelect(ExecuteLong, once As Boolean, bstack As basetask, b$, v As Long, Lang As Long) As Boolean
 Dim ok As Boolean, x1 As Long, y1 As Long, sp As Variant, st As Variant, sw$, slct As Long, ss$
 Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
         exeSelect = True
@@ -16340,15 +16473,12 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
                                             If Left$(b$, 4) = vbCrLf + vbCrLf Then
                                                                 ExpectedCaseorElseorEnd
                                                                 b$ = Mid$(b$, 3)
-                                                                v = Len(b$)
-                                                                
                                                                 ExecuteLong = 0: Exit Function
                                                                 End If
                                                     SetNextLine b$
-                                                         v = Len(b$)
+                                                     '    v = Len(b$)
 conthere:
                                                         If FastSymbol(b$, "{") Then  ' block
-                                                          v = Len(b$)
                                                           ss$ = block(b$)
                                                             DUM = False
                                                             i = 1
@@ -16390,41 +16520,50 @@ conthere:
                                                             
                                                             While IsLabelSymbolNew(b$, "ΜΕ", "CASE", Lang)
                                                            SetNextLine b$
-                                                           
-                                                         v = Len(b$)
                                                             Wend
                                                             ' #4 call one command
                                                             If MaybeIsSymbol(b$, "{") Then
                                                             GoTo conthere
                                                             End If
-                                                            Call executeblock(i, bstack, b$, True, DUM, , True)
-                                                            If i = 0 Or Left$(b$, 4) = vbCrLf + vbCrLf Then
-                                                             If Left$(b$, 4) = vbCrLf + vbCrLf Then ExpectedCaseorElseorEnd
-                                                                b$ = Mid$(b$, 3)
-                                                                v = Len(b$)
-                                                                
+                                                            once = True
+                                                            
+                                                            ss$ = GetNextLine(b$) + vbCrLf + "'"
+                                                           
+                                                            TraceStore bstack, nd&, b$, 3
+                                                            Call executeblock(i, bstack, ss$, once, DUM, True, True)
+                                                            bstack.addlen = nd&
+
+                                                            If i = 0 Then
                                                                 ExecuteLong = 0: Exit Function
-                                                            ElseIf i = 1 And b$ = vbNullString Then 'this is an exit ΟΚ3
-                                                           '' B$ = ss$
-                                                            ExecuteLong = 1
-                                                            Exit Function
+                                                            ElseIf i = 1 And ss$ = vbNullString Then 'this is an exit ΟΚ3
+                                                                b$ = vbNullString
+                                                                ExecuteLong = 1
+                                                                Exit Function
                                                             ElseIf i = 2 Then
-                                                                       
-                                                                          If DUM = True And b$ <> "" Then
-                                                                            slct = -1
-                                                                          ElseIf b$ <> "" Then
-                                                                            ExecuteLong = 2
-                                                                            once = False
-                                                                             Exit Function
-                                                                          Else
-                                                                        ExecuteLong = i
-                                                                         once = True
-                                                                            Exit Function
-                                                                        End If
+                                                                If DUM = True And Len(ss$) > 0 Then
+                                                                    slct = -1
+                                                                ElseIf Len(ss$) > 0 Then
+                                                                    b$ = ss$
+                                                                    ExecuteLong = 2
+                                                                    once = False
+                                                                    Exit Function
+                                                                Else
+                                                                    ExecuteLong = i
+                                                                    b$ = ss$
+                                                                    exeSelect = DUM
+                                                                End If
                                                             ElseIf i = 3 Then
-                                                                If DUM = True And b$ <> "" Then slct = 0
+                                                                If DUM = True And ss$ <> "" Then
+                                                                    slct = 0
+                                                                Else
+                                                                    i = 2
+                                                                    b$ = vbNullString
+                                                                    exeSelect = True
+                                                                End If
+                                                            ElseIf i = 5 Then
+                                                                ExecuteLong = 2
+                                                                exeSelect = False
                                                             End If
-                                                       'ΟΚ
                                                         End If
                                                         Exit Do
                                         End If
@@ -16434,7 +16573,6 @@ conthere:
                                 SetNextLine b$
                                                                      If Left$(b$, 2) = vbCrLf Then
                                                                      ExpectedCaseorElseorEnd
-                                                                v = Len(b$)
                                                                 ExecuteLong = 0
                                                                 Exit Function
                                                                 End If
@@ -16447,13 +16585,11 @@ conthere:
                                 ElseIf IsLabelSymbolNew(b$, "ΤΕΛΟΣ", "END", Lang, , , True) Then
                              
                                 Else
-                                    v = Len(b$)
                                     If FastSymbol(b$, "{") Then
                                            If slct >= 0 Then
                                                     ss$ = block(b$) + "}"
                                                     b$ = NLtrim$(Mid$(b$, 2))
                                             Else
-                                                    v = Len(b$)
                                                     ss$ = block(b$)
                                                     DUM = False
                                                     i = 1
@@ -16496,26 +16632,45 @@ conthere:
                                                    
                                                             i = 1
                                                             ' #8 call one command inside Case (Break) ok
-                                                            Call executeblock(i, bstack, b$, True, DUM, , True)
-                                                            If i = 0 Then   ' where is exit
-                                                                b$ = space$(v)
+                                                            once = True
+                                                            
+                                                            ss$ = GetNextLine(b$) + vbCrLf + "'"
+                                                           
+                                                            TraceStore bstack, nd&, b$, 3
+                                                            Call executeblock(i, bstack, ss$, once, DUM, True, True)
+                                                            bstack.addlen = nd&
+                                                            If i = 0 Then
                                                                 ExecuteLong = 0: Exit Function
+                                                            ElseIf i = 1 And ss$ = vbNullString Then 'this is an exit ΟΚ3
+                                                                b$ = vbNullString
+                                                                ExecuteLong = 1
+                                                                Exit Function
                                                             ElseIf i = 2 Then
-                                                                    
-                                                                          If DUM = True And b$ <> "" Then
-                                                                            slct = -1
-                                                                          ElseIf b$ <> "" Then
-                                                                            ExecuteLong = 2
-                                                                            once = False
-                                                                             Exit Function
-                                                                          Else
-                                                                            ExecuteLong = i
-                                                                            once = True
-                                                                            Exit Function
-                                                                        End If
+                                                                If DUM = True And Len(ss$) > 0 Then
+                                                                    slct = -1
+                                                                ElseIf Len(ss$) > 0 Then
+                                                                    b$ = ss$
+                                                                    ExecuteLong = 2
+                                                                    once = False
+                                                                    Exit Function
+                                                                Else
+                                                                    ExecuteLong = i
+                                                                    b$ = ss$
+                                                                    exeSelect = DUM
+                                                                End If
                                                             ElseIf i = 3 Then
-                                                                If DUM = True And b$ <> "" Then slct = 0: b$ = GetNextLine(ss$)
+                                                                If DUM = True And ss$ <> "" Then
+                                                                    slct = 0
+                                                                Else
+                                                                    i = 2
+                                                                    b$ = vbNullString
+                                                                    exeSelect = True
+                                                                End If
+                                                            ElseIf i = 5 Then
+                                                                ExecuteLong = 2
+                                                                exeSelect = False
                                                             End If
+  
         
                                     SetNextLine b$
                                     Else
@@ -16535,12 +16690,9 @@ conthere:
                                     ok = True
                                     End If
                                     SetNextLine b$
-                                    v = Len(b$)
                                     If FastSymbol(b$, "{") Then
-                                    v = Len(b$)
                                         ss$ = block(b$)
                                     If slct > 0 Then
-                                                    v = Len(b$)
                                                     DUM = False
                                                     i = 1
                                                     ' #9 call block inside Else
@@ -16584,10 +16736,12 @@ conthere:
                                              
                                                             i = 1
                                                             ' #10 call one command inside ELSE
-                                                            Call executeblock(i, bstack, b$, True, DUM, , True)
+                                                            once = True
+                                                            'TraceStore bstack, nd&, b$, 0
+                                                            Call executeblock(i, bstack, b$, once, DUM, , True)
+                                                            'TraceRestore bstack, nd&
                                                             If i = 0 Then
-                                                                b$ = space$(v)
-                                                                ExecuteLong = 0: Exit Function
+                                                                    ExecuteLong = 0: Exit Function
                                                             ElseIf i = 1 And b$ = vbNullString Then 'this is an exit
                                              
                                                             ExecuteLong = 1
@@ -16602,11 +16756,14 @@ conthere:
                                                                              Exit Function
                                                                           Else
                                                                           ExecuteLong = i
-                                                                            once = True
+                                                                          exeSelect = Not once
                                                                             Exit Function
                                                                         End If
                                                             ElseIf i = 3 Then
                                                     If DUM = True And b$ <> "" Then slct = 0
+                                                   ElseIf i = 5 Then
+                                                            ExecuteLong = 2
+                                                            exeSelect = False
                                               End If
                                     End If
                                 End If
@@ -16622,9 +16779,6 @@ conthere:
                                 Exit Function
                             End If
                         Else
-                           ' SetNextLine b$
-                            v = Len(b$)
-                             b$ = space$(v)
                              If ok Then
                              ExpectedEndSelect2
                              Else
@@ -16636,7 +16790,6 @@ conthere:
   
                         Loop
                         If slct > 0 Then
-                        b$ = space$(v)
                         ExecuteLong = 0: Exit Function
                         End If
                         
@@ -19033,3 +19186,4 @@ ExistNum = False
 
     
 End Function
+

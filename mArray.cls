@@ -850,7 +850,7 @@ Else
 If curitem = -2 Then
 Set item = GroupRef
 ElseIf curitem < 0 Then
-' used for test only
+' used for test only - no mHandler here
 'If TypeOf GroupRef Is mHandler Then
 'If GroupRef.t1 = 3 Then
 'If MyIsObject(GroupRef.objref.Value) Then
