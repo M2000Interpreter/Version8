@@ -90,6 +90,7 @@ End Sub
 Public Sub CopyStrip2(bst As basetask)
 Dim i As Long
 With bst
+Set .Owner = Owner
 .StaticInUse = StaticInUse
 .OriginalCode = OriginalCode
 Set .StaticCollection = StaticCollection

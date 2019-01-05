@@ -2,7 +2,7 @@ M2000 Interpreter and Environment
 
 Version 9.6 Revision 19 active-X
 
-A lot of work.
+Fix after ELSE the goto number label without GOTO
 
 
 From version 9.0 revision 50:
