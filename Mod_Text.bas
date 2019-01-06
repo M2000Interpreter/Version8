@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 21
+Global Const Revision = 22
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -50176,35 +50176,35 @@ Dim s$, w1 As Long, w2 As Long, s1$, dd As Long, w3 As Long, pppp As mArray, ppp
                         Exit Function
                     End If
             ElseIf w3 = 5 Or w3 = 7 Then
-                    If neoGetArray(bstack, s1$, pppp) Then
-                        If Not NeoGetArrayItem(pppp, bstack, s1$, w2, a$) Then Exit Function
+                    If neoGetArray(bstack, s1$, pppp1) Then
+                        If Not NeoGetArrayItem(pppp1, bstack, s1$, w2, a$) Then Exit Function
                     Select Case dn
                     Case 1
-                        If pppp.itemnumeric(w1) < pppp.itemnumeric(w2) Then
+                        If pppp.itemnumeric(w1) < pppp1.itemnumeric(w2) Then
                             r = pppp.itemnumeric(w1)
                             If SG < 0 Then r = -r
                         Else
-                            r = pppp.itemnumeric(w2)
+                            r = pppp1.itemnumeric(w2)
                             If SG < 0 Then r = -r
                         End If
                     Case 2
-                        If pppp.itemnumeric(w1) > var(w2) Then
+                        If pppp.itemnumeric(w1) > pppp1.itemnumeric(w2) Then
                             r = pppp.itemnumeric(w1)
                             If SG < 0 Then r = -r
                         Else
-                            r = pppp.itemnumeric(w2)
+                            r = pppp1.itemnumeric(w2)
                             If SG < 0 Then r = -r
                         End If
                     Case Else
                         If pppp.itemnumeric(w1) = 0 Then
-                            If pppp.itemnumeric(w2) = 0 Then
+                            If pppp1.itemnumeric(w2) = 0 Then
                             r = 0
                             Else
-                            r = Sgn(0 - MyRound(pppp.itemnumeric(w2), 10))
+                            r = Sgn(0 - MyRound(pppp1.itemnumeric(w2), 10))
                             If SG < 0 Then r = -r
                             End If
                     Else
-                            r = Sgn(MyRound(((pppp.itemnumeric(w1) - pppp.itemnumeric(w2)) / pppp.itemnumeric(w1)), 10))
+                            r = Sgn(MyRound(((pppp.itemnumeric(w1) - pppp1.itemnumeric(w2)) / pppp.itemnumeric(w1)), 10))
                             If SG < 0 Then r = -r
                     End If
                     End Select

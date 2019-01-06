@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 21 active-X
+Version 9.6 Revision 22 active-X
 
-Fix unary - for literals numbers
+Fix min()/max() for arrays (faster than min.data(), max.data() which use expressions)
+Print min(a(10), b(3))  get only two arguments, and have to be variables or arrays
 
 
 From version 9.0 revision 50:
