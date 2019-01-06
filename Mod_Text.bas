@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 20
+Global Const Revision = 21
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -4374,6 +4374,7 @@ conthere:
             r = val(ig$ & DE$)
             End If
             End If
+            If SG < 0 Then r = -r
             If Err.Number = 6 Then
                 If Len(ex$) > 2 Then
                     ex$ = Left$(ex$, Len(ex$) - 1)
