@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 19 active-X
+Version 9.6 Revision 21 active-X
 
-Fix after ELSE the goto number label without GOTO
+Fix unary - for literals numbers
 
 
 From version 9.0 revision 50:
