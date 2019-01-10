@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 22
+Global Const Revision = 23
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2208,7 +2208,15 @@ cont2020:
          End If
          
          Else
+         If Left$(b$, 2) = Chr$(3) + "(" Then
+         If var(y1).HasStrValue Then
+         b$ = vbCrLf + w$ + "$" + b$ ' Mid$(b$, 2)
+         Else
+         b$ = vbCrLf + w$ + b$ ' Mid$(b$, 2)
+         End If
+         Else
         b$ = vbCrLf + w$ + "." + b$
+        End If
         End If
         SpeedGroup = Execute(bstack, b$, True)
         
@@ -18039,13 +18047,45 @@ If Len(b$) > 1 Then
            
            Select Case nchr
            Case 40
-            w$ = .lasthere + "." + .GroupName
-             
+            If .link.HasStrValue Then
+           If here$ = .lasthere Then
+
+            w$ = .GroupName + "$("
+
+           Else
+            w$ = .lasthere + "." + .GroupName + "$("
+            End If
+            Mid$(b$, 1, 1) = " "
+            x1 = 6
+            sss = Len(b$)
+            GoTo contcase6
+            
+            
+            
+            
+            Else
+           If here$ = .lasthere Then
+
+            w$ = .GroupName + "("
+
+           Else
+            w$ = .lasthere + "." + .GroupName + "("
+            End If
+            Mid$(b$, 1, 1) = " "
             x1 = 5
             sss = Len(b$)
             GoTo contcase5
-            Case 61, 60
+             End If
+            Case 60
             w$ = .lasthere + "." + .GroupName
+            x1 = 1
+            Case 61
+            If here$ = .lasthere Then
+            w$ = .GroupName
+            Else
+            w$ = .lasthere + "." + .GroupName
+            
+            End If
             x1 = 1
            
             End Select
@@ -20782,7 +20822,10 @@ Else
             Else
             n$ = Mid$(n$, 1, Len(n$) - 1)
             End If
+' check group or handler
+
         If varhash.Find3(n$, k, feedback) Then
+checkforglobal:
             If TypeOf var(k) Is mHandler Then
                 If var(k).t1 < 3 Then
                         Set ga = New mArray
@@ -20796,6 +20839,7 @@ Else
                     End If
             Else
                 If Typename(var(k)) = "Group" Then
+checkgrouphere:
                     If var(k).HasParametersSet Then
                     ' process parameters
                     Set ga = New mArray
@@ -20819,8 +20863,16 @@ Else
                 k = -1
                 n$ = bstack.GroupName + nm$
                 ' not a mhandler
-            
-           
+                    
+        Else
+        n$ = nm$
+          If n$ Like "*[$%](" Then
+            n$ = Mid$(n$, 1, Len(n$) - 2)
+            Else
+            n$ = Mid$(n$, 1, Len(n$) - 1)
+            End If
+        If varhash.Find3(n$, k, feedback) Then GoTo checkforglobal
+      
         End If
 
 End If
@@ -32046,12 +32098,6 @@ from123:
                     i = Len(ec$) - CLng(p) + 1
                     PopStage bstack
                     If loopthis Or stepbystep Then
-                        
-                        If stepbystep Then
-                        Stop
-                     '   b$ = Mid$(ec$, i)
-                      '  Exit Do
-                        End If
                         bb$ = Mid$(ec$, i)
                         GoTo fromfirst0
                     Else
@@ -48670,7 +48716,7 @@ GETarrayFROMstr.t1 = 3
 Set GETarrayFROMstr.objref = pppp
 
 End Function
-Function CheckThis(bstack As basetask, w$, b$, v As Long, Lang As Long, i As Long) As Long
+Function CheckThis(bstack As basetask, w$, b$, v As Long, Lang As Long) As Long
 Dim bb$
 If Len(w$) > 3 Then
     If Lang = 1 Then
@@ -52122,7 +52168,7 @@ Dim pppp As mArray, lasttype As Boolean, pppp1 As mArray, isglobal As Boolean
 On jumpto GoTo Case1, Case2, Case3, Case4, case5, Case6, Case7
 Exit Function
 Case1:
-    Select Case CheckThis(bstack, w$, b$, v, Lang, i)
+    Select Case CheckThis(bstack, w$, b$, v, Lang)
     Case 0
     Case 1
     GoTo assignvalue
@@ -52542,17 +52588,20 @@ noexpression:
                         If Left$(b$, 1) = ">" Then
 noexpression1:
                         If var(v).IamApointer Then
+                            If i <> 1 Then
+                            MyEr "no space allowed", "δεν επιτρέπεται κενό"
+                            Exec1 = 0: ExecuteVar = 8
+                            Exit Function
+                            End If
                             If var(v).link.IamFloatGroup Then
                             ExecuteVar = 10
-                            
-                            Mid$(b$, 1, i) = String$(i, ChrW(3)) + ChrW(7)
+
+                            Mid$(b$, 1, 1) = ChrW(3)
                             Else
-                            
-                            
-                            
-                            ' a=>x++   -
+
                             ExecuteVar = 9
-                            Mid$(b$, 1, i) = Chr$(0) + String$(i - 1, ChrW(7))  '
+                            Mid$(b$, 1, 1) = Chr$(0)
+
                             End If
                             Set bstack.lastpointer = var(v)
                             
@@ -53266,7 +53315,7 @@ If AscW(w$) = 46 Then
                 Exec1 = 0: ExecuteVar = 8: Exit Function
                End If
 Else
-Select Case CheckThis(bstack, w$, b$, v, Lang, i)
+Select Case CheckThis(bstack, w$, b$, v, Lang)
 Case 0
 Case 1
 GoTo assignvaluestr1
@@ -53626,7 +53675,7 @@ If AscW(w$) = 46 Then
                 Exec1 = 0: ExecuteVar = 8: Exit Function
                End If
 Else
-Select Case CheckThis(bstack, w$, b$, v, Lang, i)
+Select Case CheckThis(bstack, w$, b$, v, Lang)
 Case 1
 GoTo assignvalue100
 Case -1
@@ -53938,6 +53987,10 @@ End If
 
 If neoGetArray(bstack, w$, pppp, , , , True) Then
 againarray:
+If pppp Is Nothing Then
+    Exec1 = 0: ExecuteVar = 8
+    Exit Function
+End If
 If Not pppp.Arr Then
 If Not NeoGetArrayItem(pppp, bstack, w$, v, b$, , , , True) Then GoTo errorarr
 ElseIf FastSymbol(b$, ")") Then

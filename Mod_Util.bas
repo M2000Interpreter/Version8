@@ -5230,7 +5230,7 @@ End Function
 
 Function myLcase(ByVal a$) As String
 If a$ = vbNullString Then Exit Function
-a$ = Trim$(LCase(a$))
+a$ = LCase(a$)
 If a$ = vbNullString Then Exit Function
  If AscW(a$) > 255 Then
 a$ = a$ & Chr(0)
@@ -5322,7 +5322,6 @@ cc.ClassKey = HKEY_CURRENT_USER
     cc.SectionKey = basickey
 Dim d$, w$, p As Long, b As Long
 If s$ <> "" Then
-'s$ = mylcasefILE(s$)
     Do While FastSymbol(s$, "-")
             If IsLabel(basestack1, s$, d$) > 0 Then
             d$ = UCase(d$)
@@ -8764,7 +8763,7 @@ Next i
 If UBound(a()) > 0 Then
 Tcase = Join(a(), " ")
 Else
-Tcase = a(0) ' myUcase(Left$(s$, 1), True) + Mid$(myLcase(s$), 2)
+Tcase = a(0)
 End If
 End Function
 Public Sub choosenext()
