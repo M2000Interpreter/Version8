@@ -4547,7 +4547,8 @@ End Function
 Function QUERY(bstack As basetask, Prompt$, s$, m&, Optional USELIST As Boolean = True, Optional endchars As String = vbCr, Optional excludechars As String = vbNullString, Optional checknumber As Boolean = False) As String
 'NoAction = True
 On Error Resume Next
-Dim dX As Long, dY As Long, safe$
+Dim dX As Long, dY As Long, safe$, oldREFRESHRATE As Double
+oldREFRESHRATE = REFRESHRATE
 
 If excludechars = vbNullString Then excludechars = Chr$(0)
 If QUERYLIST = vbNullString Then QUERYLIST = Chr$(13): LASTQUERYLIST = 1
@@ -4936,6 +4937,10 @@ LASTQUERYLIST = 2
 End If
 End With
 contqueryhere:
+If Not bstack.IamThread Then
+MyDoEvents1 Form1, , True
+End If
+REFRESHRATE = oldREFRESHRATE
 If TaskMaster Is Nothing Then Exit Function
 If TaskMaster.QueueCount > 0 Then TaskMaster.RestEnd
 players(GetCode(dq)) = prive

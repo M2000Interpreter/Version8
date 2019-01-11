@@ -286,17 +286,17 @@ procbliah3:
 DoEvents
 End Sub
 
-Public Sub MyDoEvents1(some As Object, Optional DOeVONLY As Boolean = False, Optional RefreshNow As Boolean)
-
+Public Sub MyDoEvents1(some As Object, Optional DOeVONLY As Boolean = False, Optional ResetK1 As Boolean)
 Static once As Boolean
 If some Is Nothing Then
 If TaskMaster Is Nothing Then
 If DOeVONLY Then
             DoEvents
             Else
-    If uintnew(timeGetTime) > k1 Or RefreshNow Then RRCOUNTER = 0
-            
+    If uintnew(timeGetTime) > k1 Then RRCOUNTER = 0
+            If REFRESHRATE <> 25 And ResetK1 Then RRCOUNTER = 0
             If RRCOUNTER = 0 Then
+            If ResetK1 Then REFRESHRATE = 25
             k1 = uintnew(timeGetTime + REFRESHRATE): RRCOUNTER = 1
             End If
             End If
@@ -317,10 +317,12 @@ Else
         End If
     Else
     
-    If uintnew(timeGetTime) > k1 Or RefreshNow Then RRCOUNTER = 0
+    If uintnew(timeGetTime) > k1 Then RRCOUNTER = 0
     
             
+            If REFRESHRATE <> 25 And ResetK1 Then RRCOUNTER = 0
             If RRCOUNTER = 0 Then
+            If ResetK1 Then REFRESHRATE = 25
             k1 = uintnew(timeGetTime + REFRESHRATE): RRCOUNTER = 1
             TaskMaster.Dispose
          If Not once Then
@@ -349,17 +351,17 @@ End If
 
 On Error Resume Next
 If some Is Nothing Then Set some = Form1
-
 With Prefresh(GetCode(some))
-
 If TaskMaster Is Nothing Then
 If DOeVONLY Then
             DoEvents
             Else
     
-    If uintnew(timeGetTime) > .k1 Or RefreshNow Then .RRCOUNTER = 0
+    If uintnew(timeGetTime) > .k1 Then .RRCOUNTER = 0
             
+            If REFRESHRATE <> 25 And ResetK1 Then .RRCOUNTER = 0
             If .RRCOUNTER = 0 Then
+            If ResetK1 Then REFRESHRATE = 25
             .k1 = uintnew(timeGetTime + REFRESHRATE): .RRCOUNTER = 1
             If byPassCallback Then Exit Sub
             If some.Visible Then
@@ -389,8 +391,11 @@ Else
          DoEvents
         End If
     Else
-      If uintnew(timeGetTime) > .k1 Or RefreshNow Then .RRCOUNTER = 0
-             If .RRCOUNTER = 0 Then
+      If uintnew(timeGetTime) > .k1 Then .RRCOUNTER = 0
+      
+            If REFRESHRATE <> 25 And ResetK1 Then .RRCOUNTER = 0
+            If .RRCOUNTER = 0 Then
+            If ResetK1 Then REFRESHRATE = 25
             .k1 = uintnew(timeGetTime) + REFRESHRATE: .RRCOUNTER = 1
          If byPassCallback Then Exit Sub
          If some.Visible Then
@@ -423,6 +428,7 @@ TaskMaster.RestEnd
 End If
 End With
 End Sub
+
 Public Sub MyDoEvents2(Optional obj As Object)
 On Error GoTo endevents
 If k1 = 0 Then k1 = uintnew(timeGetTime): RRCOUNTER = 1

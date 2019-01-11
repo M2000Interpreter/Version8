@@ -1,9 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 26 active-X
+Version 9.6 Revision 27 active-X
 
-Fix Refresh for input when Refresh has highg value for graphics
-Sqrt(0) now return 0 and not error.
+Fix Refresh for Wine (rev 26 had a problem in Wine - Linux)
 
 
 From version 9.0 revision 50:
