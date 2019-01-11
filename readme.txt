@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 23 active-X
+Version 9.6 Revision 26 active-X
 
-Fix lcase$()  (exclude a trim function). Removed a forgotten Stop statement.
+Fix Refresh for input when Refresh has highg value for graphics
+Sqrt(0) now return 0 and not error.
 
 
 From version 9.0 revision 50:

@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 23
+Global Const Revision = 26
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1358,7 +1358,8 @@ conthere0001:
                  
                     'Set safegroup.LinkRef = CopyGroupObj(var(y1))
                    CopyGroup1 var(y1), safegroup.link
-                  If v <> -100 Then
+                  'If v <> -100 Then
+                  If v >= 0 Then
                   Set bstack.lastpointer = safegroup
                   Set bstack.lastobj = safegroup.link
                   End If
@@ -11287,13 +11288,14 @@ If TypeOf bstackstr.lastobj Is Group Then
             If MaybeIsSymbol(a$, ",") Then
                 Mid$(a$, 1, 1) = Chr(1)
                 If IsStr1(bstackstr, a$, r$) Then
-                  IsStr1 = True
+                  IsStr1 = True  '??? something wrong??
                     
                     Exit Function
                 End If
             ElseIf IsStr1(bstackstr, Chr$(0) + "$'", r$) Then
             
-                IsStr1 = True 'FastSymbol(a$, ")", True)
+               ' IsStr1 = True 'FastSymbol(a$, ")", True)
+               IsStr1 = FastSymbol(a$, ")", True)
                 Set anything = Nothing
                 Exit Function
             End If
@@ -26019,11 +26021,11 @@ againgroup:
                         ss$ = "="
                         Mid$(rest$, i, 1) = " "
                         Else
-                        Mid$(rest$, i, 2) = "  "
+                        If Len(rest$) >= 2 Then Mid$(rest$, i, 2) = "  "
                         End If
                     Else
                         ss$ = Mid$(rest$, i, 1)
-                        Mid$(rest$, i, 1) = " "
+                        If Len(rest$) > 0 Then Mid$(rest$, i, 1) = " "
                     End If
                 If ss$ <> "" Then
                     NoThatOperator ss$
@@ -53557,13 +53559,12 @@ cont184575:
                                     If Not ProcGroup(200 + VarStat, bstack, w$, Lang) Then
                                     Exec1 = 0: ExecuteVar = 8
                                     Exit Function
+                                    End If
                             Else
                                 NoValueForVar w$
                                 Exec1 = 0: ExecuteVar = 8
                                 Exit Function
                             End If
-                            
-                        End If
                     End If
                 Else
                     NoValueForVar w$
