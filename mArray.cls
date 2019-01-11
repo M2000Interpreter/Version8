@@ -898,11 +898,8 @@ Else
 itemnumeric = 0
 End If
 Else
-If VarType(actualdata(curitem)) = 8 Then
-itemnumeric = val(actualdata(curitem))
-Else
+
 itemnumeric = actualdata(curitem)
-End If
 End If
 Exit Property
 Else

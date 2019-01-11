@@ -4628,7 +4628,7 @@ If Not bstack.IamThread Then
  Form1.Visible = True
  If Form3.Visible Then Form3.skiptimer = True: Form3.WindowState = 0
  End If
- k1 = 0: MyDoEvents1 Form1, , True
+ k1 = 0: MyDoEvents1 Form1
  End If
 If LastErNum <> 0 Then
       LCTCB dq, prive, -1: DestroyCaret
@@ -4717,7 +4717,7 @@ LCTbasket dq, prive, .currow, .curpos
   End If
 If Not bstack.IamThread Then
 
-MyDoEvents1 Form1, , True
+MyDoEvents1 Form1  'SleepWait 1
 End If
 
  If Screen.ActiveForm Is Nothing Then
@@ -5039,17 +5039,12 @@ Sub Gradient(TheObject As Object, ByVal F&, ByVal t&, ByVal xx1&, ByVal xx2&, By
     
 End Sub
 Function mycolor(q)
-If Abs(q) > 2147483392# Then
-If q < 0 Then
-mycolor = GetSysColor(q And &HFF) And &HFFFFFF
-Else
-mycolor = GetSysColor((q - 4294967296#) And &HFF) And &HFFFFFF
-End If
+If (cUlng(q) And &HFF000000) = &H80000000 Then
+mycolor = GetSysColor(cUlng(q) And &HFF) And &HFFFFFF
 Exit Function
 End If
-If q = 0 Then
-mycolor = 0
-ElseIf q < 0 Or q > 15 Then
+
+If q < 0 Or q > 15 Then
 
  mycolor = Abs(q) And &HFFFFFF
 Else
@@ -7967,7 +7962,7 @@ Sub wrongweakref(a$)
 MyErMacro a$, "Wrong weak reference", "λάθος ισχνής αναφοράς"
 End Sub
 Sub negsqrt(a$)
-MyErMacro a$, "negative number for root", "αρνητικός σε ρίζα"
+MyErMacro a$, "negative or zero number", "αρνητικός ή μηδέν σε ρίζα"
 End Sub
 Sub expecteddecimal(a$)
 MyErMacro a$, "Expected decimal separator char", "Περίμενα χαρακτήρα διαχωρισμού δεκαδικών"
@@ -11648,7 +11643,7 @@ End Function
 Function IsSqrt(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
     If IsExp(bstack, a$, r, , True) Then
     
-    If r < 0 Then
+    If r <= 0 Then
     negsqrt a$
     Exit Function
    

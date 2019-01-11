@@ -286,7 +286,7 @@ procbliah3:
 DoEvents
 End Sub
 
-Public Sub MyDoEvents1(some As Object, Optional DOeVONLY As Boolean = False, Optional RefreshNow As Boolean)
+Public Sub MyDoEvents1(some As Object, Optional DOeVONLY As Boolean = False, Optional ResetK1 As Boolean)
 Static once As Boolean
 If some Is Nothing Then
 If TaskMaster Is Nothing Then
@@ -354,7 +354,7 @@ If DOeVONLY Then
             DoEvents
             Else
     
-    If uintnew(timeGetTime) > .k1 Or RefreshNow Then .RRCOUNTER = 0
+    If uintnew(timeGetTime) > .k1 Then .RRCOUNTER = 0
             
             If .RRCOUNTER = 0 Then
             .k1 = uintnew(timeGetTime + REFRESHRATE): .RRCOUNTER = 1
@@ -386,7 +386,7 @@ Else
          DoEvents
         End If
     Else
-      If uintnew(timeGetTime) > .k1 Or RefreshNow Then .RRCOUNTER = 0
+      If uintnew(timeGetTime) > .k1 Then .RRCOUNTER = 0
              If .RRCOUNTER = 0 Then
             .k1 = uintnew(timeGetTime) + REFRESHRATE: .RRCOUNTER = 1
          If byPassCallback Then Exit Sub
