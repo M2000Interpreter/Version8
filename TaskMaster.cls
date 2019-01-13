@@ -426,6 +426,7 @@ End If
 End Sub
 Public Sub TimerTickNow()
 Dim this As TaskInterface
+If myTimerHandle = 0 Then Exit Sub
   If myMasterList.count = 0 Then Exit Sub
   
   Do
@@ -550,7 +551,7 @@ tickdrop = tickdrop - 1
 If tickdrop <= 0 Then tickdrop = 0: holdtasks = False
 ''If tickdrop > 0 Then If QueueCount = 0 Then tickdrop = 0:: holdtasks = False
 End Sub
-Public Sub Rest1()
+Public Sub rest1()
 '
 
 tickdrop = tickdrop + 1

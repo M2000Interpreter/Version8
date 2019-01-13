@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 27
+Global Const Revision = 28
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1658,12 +1658,8 @@ If pppp.refgroup Is Nothing Then
         y1 = globalvar(w$, dd)
         UnFloatGroup bstack, w$, y1, pppp.item(v), , True
         globalvar w$, y1, True, True
-        pppp.item(v).LastOpen = w$
-      '  If GetPointer(bstack, w$) Then
-       ' Set pppp.item(v) = bstack.lastpointer
-        'Set bstack.lastpointer = Nothing
-        'Set bstack.lastobj = Nothing
-        'End If
+        Set safegroup = pppp.item(v)
+        safegroup.LastOpen = w$
         End If
         
 If Err.Number > 0 Then
@@ -1710,7 +1706,7 @@ y1 = 0
 
 
 
-If i = 5 Then
+If i > 4 Then
 w$ = myUcase(w$)
                     If neoGetArray(bstack, w$, pppp) Then
 
@@ -1739,6 +1735,7 @@ contheretoo:
                                              Set safegroup = pppp.item(v)
                                              
                                              Set pppp = BoxGroupObj(pppp.item(v).link)
+                                             ' pppp.refgroup is pppp.GroupRef  ???
                                              Set pppp.refgroup = safegroup
                                              
                                              v = 0
@@ -1748,7 +1745,9 @@ contheretoo:
                                                          GoTo conthere3
                                              End If
                                              End If
-                                             If Not safegroup Is Nothing Then
+                                             If safegroup Is Nothing Then
+                                             Set safegroup = pppp.item(v)
+                                             End If
                                              If safegroup.LastOpen <> vbNullString Then
                                                 
                                              If GetVar(bstack, safegroup.LastOpen, y1, , , True) Then
@@ -1759,7 +1758,7 @@ contheretoo:
                                                  safegroup.LastOpen = vbNullString
                                              End If
                                              End If
-                                             End If
+                                             
                                                 Set dd = New Group
                                                  y1 = globalvar(w$, dd)
                                                  
@@ -1767,6 +1766,7 @@ contheretoo:
                                                         ' check for iamglobal ??
                                                 UnFloatGroup bstack, w$, y1, pppp.item(v), , True
                                                 globalvar w$, y1, True, True
+                                                safegroup.LastOpen = w$
 cont1010:
                                                 bstack.MoveNameDot myUcase(w$)
                                                 depth = depth + 1
@@ -2130,8 +2130,7 @@ If v >= 0 Then w$ = pppp.CodeName + CStr(v) Else w$ = pppp.CodeName + "_" + CStr
 
 
 
-        Set dd = New Group
-         y1 = globalvar(w$, dd)
+       
         
        ' check for iamglobal ??
               Set safegroup = pppp.item(v)
@@ -2143,11 +2142,19 @@ If v >= 0 Then w$ = pppp.CodeName + CStr(v) Else w$ = pppp.CodeName + "_" + CStr
           
                 v = 0
                 Else
-                bstack.MoveNameDot safegroup.lasthere + "." + safegroup.GroupName
-                v = 0
-                GoTo contheretoo1
+
+                If Left$(Prefix$, 1) = "@" Then
+                w$ = safegroup.lasthere + "." + safegroup.GroupName
+                    GoTo cont2020
+                Else
+                   bstack.MoveNameDot safegroup.lasthere + "." + safegroup.GroupName
+                    v = 0
+               GoTo contheretoo1
+               End If
                 End If
-        
+        Else
+        Set dd = New Group
+         y1 = globalvar(w$, dd)
         End If
         If safegroup.LastOpen <> vbNullString Then
         If GetVar(bstack, (safegroup.LastOpen), y1, True) Then
@@ -2211,12 +2218,28 @@ cont2020:
          Else
          If Left$(b$, 2) = Chr$(3) + "(" Then
          If var(y1).HasStrValue Then
-         b$ = vbCrLf + w$ + "$" + b$ ' Mid$(b$, 2)
+         'b$ = vbCrLf + w$ + "$" + b$ ' Mid$(b$, 2)
+         bstack.tmpstr = w$ + "$( "
+            Mid$(b$, 1, 2) = "  "
+            BackPort b$
+         
          Else
-         b$ = vbCrLf + w$ + b$ ' Mid$(b$, 2)
+         ' b$ = vbCrLf + w$ + b$ ' Mid$(b$, 2)
+            bstack.tmpstr = w$ + "( " ''+ Left$(b$, 1)
+            Mid$(b$, 1, 2) = "  "
+            BackPort b$
          End If
          Else
-        b$ = vbCrLf + w$ + "." + b$
+         If Left$(b$, 1) = Chr$(3) Then Mid$(b$, 1, 1) = " "
+         If MaybeIsSymbol(b$, "/*-+=~^&|<>") Then
+         
+           bstack.tmpstr = w$ + Left$(b$, 1)
+            BackPort b$
+         Else
+            
+            bstack.tmpstr = w$ + "." + Left$(b$, 1)
+            BackPort b$
+        End If
         End If
         End If
         SpeedGroup = Execute(bstack, b$, True)
@@ -2228,11 +2251,13 @@ If FK$(13) = vbNullString Then FK$(13) = GetNextLine((sbf(Abs(bstack.OriginalCod
     End If
 If safegroup.IamApointer Then
                     If safegroup.LastOpen = vbNullString Then
+                    If Len(safegroup.lasthere) = 0 Then
                     Set tempRef = pppp.GroupRef
                     Set safegroup.LinkRef = CopyGroupObj(var(y1))
                     Set safegroup.link.LinkRef = pppp.GroupRef
                     End If
-Else
+                    End If
+ElseIf Vars < y1 Then
                        Set safegroup.LinkRef = Nothing
                         Set tempRef = pppp.GroupRef
                         Set pppp.item(v) = CopyGroupObj(var(y1))
@@ -14925,9 +14950,18 @@ ContScan:
                             Else
                                 ss$ = FK$(FKey)
                                 FKey = 0
+                                If TaskMaster Is Nothing Then
                                 If Not interpret(basestack1, ss$) Then
                                     Execute = 0
                                     Exit Function
+                                End If
+                                Else
+                                TaskMaster.StopProcess
+                                If Not interpret(basestack1, ss$) Then
+                                    Execute = 0
+                                End If
+                                TaskMaster.StartProcess
+                                If Execute = 0 Then Exit Function
                                 End If
                             End If
                         End If
@@ -17611,8 +17645,14 @@ bstack.RetStack.drop bstack.RetStackTotal
 Exit Function
  
 End If
+If Len(bstack.tmpstr) = 0 Then
         i = Abs(IsLabelOnly(b$, w$))
+Else
+        i = Abs(IsLabelOnly(bstack.tmpstr, w$))
+        bstack.tmpstr = vbNullString
+End If
 contHereFromOn:
+
                 If i = 5 Then
                 once = False
                 
@@ -17648,6 +17688,37 @@ contHereFromOn:
 
                 Execute = 2
                 Exit Function
+                ElseIf i = 3 Then
+                If Not MaybeIsSymbol(b$, "+") Then
+                
+                bstack.tmpstr = w$
+                BackPort b$
+                
+                If IsStr1(bstack, b$, w$) Then
+                    b$ = w$ + b$
+                    GoTo autogosub
+                End If
+                Else
+                b$ = w$ + b$
+                If IsStrExp(bstack, b$, w$) Then
+                    b$ = w$ + b$
+                    GoTo autogosub
+                End If
+                End If
+                ElseIf i = 6 Then
+                If Not MaybeIsSymbol(b$, "+") Then
+                b$ = w$ + b$
+                If IsStr1(bstack, b$, w$) Then
+                    b$ = w$ + b$
+                    GoTo autogosub
+                End If
+                Else
+                b$ = w$ + b$
+                If IsStrExp(bstack, b$, w$) Then
+                    b$ = w$ + b$
+                    GoTo autogosub
+                End If
+                End If
                 ElseIf i = 0 Then
                 
                 If IsNumberLabel(b$, w$) Then
@@ -17954,6 +18025,49 @@ On ExecuteVar(Execute, 6, bstack, w$, b$, v, Lang, VarStat, NewStat, nchr, ss$, 
 Case 7
 contcase7:
 On ExecuteVar(Execute, 7, bstack, w$, b$, v, Lang, VarStat, NewStat, nchr, ss$, sss, temphere$) GoTo exitdo, autogosub, loopagain, contVarNew, again3, parsecommand, loopcontinue, exitfunc, forpointers, forfloatpointers
+Case 8:
+If Len(bstack.tmpstr) > 0 And Len(b$) > 0 Then
+    w$ = bstack.tmpstr
+    Mid$(b$, 1, 1) = Right$(w$, 1)
+    w$ = Left$(w$, Len(w$) - 1)
+        
+        b$ = NLtrim$(b$)
+        If Right$(w$, 1) = "." Then
+         x1 = IsLabelDotSub(temphere$, b$, sw$, ss$, Lang, nchr)
+         w$ = w$ + sw$
+         
+        ' sss = Len(b$)
+        'LLL = sss
+        one = True
+        
+        nchr = AscW(w$)
+        Else
+        'sss = Len(b$)
+        'LLL = sss
+        SwapStrings sw$, w$
+        x1 = IsLabelDotSub(temphere$, sw$, w$, ss$, Lang, nchr)
+        one = True
+        If Len(Trim(sw$)) > 0 Then
+        If nchr = 40 Then
+        nchr = AscW(w$)
+        b$ = sw$ + b$
+        Else
+        nchr = AscW(sw$)
+        End If
+        Else
+        nchr = AscW(w$)
+        End If
+        
+        End If
+        
+        bstack.tmpstr = vbNullString
+        GoTo again4
+    
+Else
+    MyEr "Internal Error 2", "Εσωτερικό λάθος 2"
+    Execute = 0
+    Exit Function
+End If
 Case Else
 If MaybeIsSymbol(b$, ".") Then
 b$ = NLtrim$(b$)
@@ -18040,58 +18154,47 @@ forpointers:
 
 If Len(b$) > 1 Then
 
-        If Not bstack.lastpointer Is Nothing Then
-          '  Mid$(b$, 1, 1) = " "
-            nchr = 0
-            x1 = IsLabelDotSub(temphere$, b$, w$, ss$, Lang, nchr)
-            With bstack.lastpointer
+    If Not bstack.lastpointer Is Nothing Then
+        '  Mid$(b$, 1, 1) = " "
+        nchr = 0
+        x1 = IsLabelDotSub(temphere$, b$, w$, ss$, Lang, nchr)
+        With bstack.lastpointer
            If x1 = 0 Then
-           
-           Select Case nchr
-           Case 40
-            If .link.HasStrValue Then
-           If here$ = .lasthere Then
-
-            w$ = .GroupName + "$("
-
-           Else
-            w$ = .lasthere + "." + .GroupName + "$("
-            End If
-            Mid$(b$, 1, 1) = " "
-            x1 = 6
-            sss = Len(b$)
-            GoTo contcase6
+                Select Case nchr
+                Case 40
+                    If .link.HasStrValue Then
+                        If here$ = .lasthere Then
+                            w$ = .GroupName + "$("
+                        Else
+                            w$ = .lasthere + "." + .GroupName + "$("
+                        End If
+                        Mid$(b$, 1, 1) = " "
+                        x1 = 6
+                        sss = Len(b$)
+                        GoTo contcase6
+                    Else
+                        If here$ = .lasthere Then
+                            w$ = .GroupName + "("
+                        Else
+                            w$ = .lasthere + "." + .GroupName + "("
+                        End If
+                        Mid$(b$, 1, 1) = " "
+                        x1 = 5
+                        sss = Len(b$)
+                        GoTo contcase5
+                    End If
+                Case 60
+                    w$ = .lasthere + "." + .GroupName
+                Case Else
+                    If here$ = .lasthere Then
+                        w$ = .GroupName
+                    Else
+                        w$ = .lasthere + "." + .GroupName
+                    End If
+                End Select
+                x1 = 1
             
-            
-            
-            
-            Else
-           If here$ = .lasthere Then
-
-            w$ = .GroupName + "("
-
-           Else
-            w$ = .lasthere + "." + .GroupName + "("
-            End If
-            Mid$(b$, 1, 1) = " "
-            x1 = 5
-            sss = Len(b$)
-            GoTo contcase5
-             End If
-            Case 60
-            w$ = .lasthere + "." + .GroupName
-            x1 = 1
-            Case 61
-            If here$ = .lasthere Then
-            w$ = .GroupName
-            Else
-            w$ = .lasthere + "." + .GroupName
-            
-            End If
-            x1 = 1
-           
-            End Select
-             GoTo VarOnly
+                GoTo VarOnly
             Else
             If .lasthere = vbNullString Then
                 w$ = .GroupName + "." + w$
@@ -18241,6 +18344,7 @@ If here$ <> ohere$ Or mystack.IamChild Or basestack.IamAnEvent Then      ' so no
 'VName = varhash.count
 'Vars = var2used
 subs = sb2used: snames = subHash.count
+If Not mystack.CallLocalLast Then
 With mystack
      .commnum = comhash.count
         .strfunnum = strfunid.count
@@ -18248,6 +18352,7 @@ With mystack
         .strnum = strid.count
         .numnum = numid.count
         End With
+End If
 i = 1: FK$(13) = vbNullString
 
 
@@ -18596,6 +18701,7 @@ there1234:
     GoFunc = False
      If Not basestack.CopyInOutCol Is Nothing Then CopyBack basestack
     here$ = ohere$
+    If Not mystack.CallLocalLast Then
     With mystack
      If .commnum <> comhash.count Then comhash.ReduceHash .commnum, sbf()
     If .numfunnum <> funid.count Then funid.ReduceHash .numfunnum
@@ -18603,7 +18709,7 @@ there1234:
     If .numnum <> numid.count Then numid.ReduceHash .numnum
     If .strnum <> strid.count Then strid.ReduceHash .strnum
     End With
-    
+    End If
     var2used = Vars
          varhash.ReduceHash VName, var()
 If UBound(var()) / 3 >= var2used And UBound(var()) > 2999 Then
@@ -18648,6 +18754,7 @@ Set mystack.FuncObj = Nothing
     End If
 
     here$ = ohere$
+    If Not mystack.CallLocalLast Then
     With mystack
         If .commnum <> comhash.count Then comhash.ReduceHash .commnum, sbf()
         If .numfunnum <> funid.count Then funid.ReduceHash .numfunnum
@@ -18655,6 +18762,7 @@ Set mystack.FuncObj = Nothing
         If .numnum <> numid.count Then numid.ReduceHash .numnum
         If .strnum <> strid.count Then strid.ReduceHash .strnum
     End With
+    End If
     If Not nokillvars Then
         var2used = Vars
         varhash.ReduceHash VName, var()
@@ -20868,13 +20976,15 @@ checkgrouphere:
                     
         Else
         n$ = nm$
+        If Not varhash.Find3(n$, k, feedback) Then
           If n$ Like "*[$%](" Then
             n$ = Mid$(n$, 1, Len(n$) - 2)
             Else
             n$ = Mid$(n$, 1, Len(n$) - 1)
             End If
         If varhash.Find3(n$, k, feedback) Then GoTo checkforglobal
-      
+      n$ = nm$
+      End If
         End If
 
 End If
@@ -24236,20 +24346,10 @@ If Not extreme Then
                         End If
              End If
 End If
-'If counter = 0 Then Sleep 0: counter = 5001
-'counter = counter - 1
-If bstack Is Nothing Then
-myexit = True: Exit Function
-End If
-If TaskMaster.OnlyMusic Then
-TaskMaster.TimerTick
-End If
-If bstack.IamThread Then
-
-myexit = bstack.Process.Done
-Else
-myexit = False
-End If
+If bstack Is Nothing Then myexit = True: Exit Function
+If TaskMaster Is Nothing Then Exit Function
+If TaskMaster.OnlyMusic Then TaskMaster.TimerTick
+If bstack.IamThread Then myexit = bstack.Process.Done Else myexit = False
 End Function
 
 Sub closeAll()
@@ -35248,7 +35348,13 @@ GoTo again111
              If flag Then
              bs.UseGroupname = basestack.UseGroupname
              bs.GroupName = basestack.GroupName
-             
+             bs.CallLocalLast = True
+             bs.strfunnum = basestack.strfunnum
+             bs.strnum = basestack.strnum
+             bs.numnum = basestack.numnum
+             bs.numfunnum = basestack.numfunnum
+             bs.commnum = basestack.commnum
+
              Call GoFunc(bs, ss$, rest$, vvl, , x1)
              
              Else
@@ -46366,7 +46472,7 @@ End If
 
 End Function
 Function ProcDef(basestack As basetask, rest$, Lang As Long) As Boolean
-Dim i As Long, what$, y1 As Long, ss$, s$, p, ps$
+Dim i As Long, what$, y1 As Long, ss$, s$, p, ps$, first
 ProcDef = True
 y1 = IsLabel(basestack, rest$, what$)
 If y1 >= 5 Then
@@ -46392,6 +46498,7 @@ Exit Function
 End If
 End If
 ElseIf y1 > 0 Then
+first = 0#
 'MyEr "Need name for function with parenthesis", "Θέλω όνομα συνάρτησης με παρενθέσεις"
 If LenB(here$) = 0 Or basestack.IamThread Then MyEr "Def make Variables only in Modules and Functions", "Η Κάνε φτιάχνει μεταβλητές μόνο σε Τμήματα και Συναρτήσεις": ProcDef = False: Exit Function
 Dim that As Variant, oldthat As Variant, ByPass As Boolean, lcl As Boolean, notdef As Boolean, notdefone As Boolean
@@ -46422,6 +46529,7 @@ If y1 < 5 Then
     that = 0#
     GoTo jumpnow
     End If
+    first = that
     ByPass = True
     notdefone = True
     notdef = True
@@ -46473,6 +46581,15 @@ jumpnow:
     
     If Not lcl Then If GetlocalVar(what$, i) Then MyEr "Variable " + what$ + " already defined", "Υπάρχει ήδη η μεταβλητή " + what$: ProcDef = False: Exit Function
     i = AllocVar()
+    If y1 = 3 Then
+    If strid.Find(what$, (i), (i)) Then
+        strid.ItemCreator what$, -2
+    End If
+    ElseIf y1 = 1 Then
+    If numid.Find(what$, (i), (i)) Then
+        numid.ItemCreator what$, -2
+    End If
+    End If
     varhash.ItemCreator here$ + "." + what$, i, , , True
     If MyIsObject(that) Then
     Set p = that
@@ -46480,7 +46597,7 @@ jumpnow:
     p = that
     End If
     If Not MyIsNumeric(that) Then
-    that = vbEmpty
+    that = first
     End If
 
     If FastSymbol(rest$, "=") Then
@@ -52166,7 +52283,13 @@ Public Function ExecuteVar(Exec1 As Long, ByVal jumpto As Long, bstack As baseta
 Dim i As Long, p As Variant, myobject As Object, ok As Boolean, sw$, sp As Variant, usetype As Boolean
 Dim pppp As mArray, lasttype As Boolean, pppp1 As mArray, isglobal As Boolean
 ' VARSTAT MEANS GLOBAL FOR NEW VARIABLES
-
+If Not TaskMaster Is Nothing Then
+If TaskMaster.PlayMusic Then
+                    TaskMaster.OnlyMusic = True
+                        TaskMaster.TimerTick
+                        TaskMaster.OnlyMusic = False
+End If
+End If
 On jumpto GoTo Case1, Case2, Case3, Case4, case5, Case6, Case7
 Exit Function
 Case1:
@@ -52433,6 +52556,9 @@ checkobject:
                                 
                                 Set bstack.lastobj = Nothing
                             ElseIf TypeOf myobject Is lambda Then
+                                If funid.Find(w$ + "(", (i)) Then
+                                funid.ItemCreator w$ + "(", -2
+                                End If
                                 If here$ = vbNullString Or VarStat Or NewStat Then
                                         GlobalSub w$ + "()", "", , , v
                                 Else
@@ -53252,7 +53378,7 @@ jumpiflocal:
             If VarStat Then
             
             If numid.Find(w$, i, bstack.numnum) Then
-            numid.ItemCreator w$, -1
+            numid.ItemCreator w$, -2
             End If
 
             End If
@@ -53338,23 +53464,37 @@ End If
         ElseIf FastSymbol(b$, ".") Then
         If GetVar(bstack, w$, v) Then  'GetlocalVar(w$, V) Then
              If MaybeIsSymbol(b$, "-+*/<~") Then
-             b$ = var(v) + b$
+            If Right$(var(v), 1) = ")" Then
+              b$ = var(v) + b$
+              Else
+             bstack.tmpstr = var(v) + Left$(b$, 1)
+               BackPort b$
+             End If
              ElseIf MaybeIsSymbol(b$, "=") Then
              If Right$(var(v), 1) = ")" Then
               b$ = var(v) + b$
+              sss = Len(b$)
              Else
-              b$ = var(v) + "<" + b$
+              bstack.tmpstr = var(v) + "=_"
+              BackPort b$
               End If
              Else
-             ' maybe is a
-             b$ = var(v) + "." + b$
+
              IsLabelDot temphere$, b$, w$
               If MaybeIsSymbol(b$, "=") Then
-              b$ = w$ + "<" + b$
+             w$ = var(v) + "." + w$
+              bstack.tmpstr = w$ + "=_"
+              BackPort b$
               ElseIf MaybeIsSymbol(b$, "-+*/<~") Then
-               b$ = w$ + b$
+               bstack.tmpstr = var(v) + "." + w$ + Left$(b$, 1)
+               BackPort b$
+              ElseIf Len(w$) = 0 Then
+               bstack.tmpstr = var(v) + " " + Left$(b$, 1)
+               BackPort b$
               Else
-               b$ = w$ + " " + b$
+               bstack.tmpstr = var(v) + "." + w$ + " " + Left$(b$, 1)
+               BackPort b$
+               
               End If
              End If
               ExecuteVar = 5: Exit Function
@@ -53533,6 +53673,9 @@ cont184575:
                                     Exit Function
                                 Else
                                     i = 0
+                                If strfunid.Find(w$ + "(", (i)) Then
+                                strfunid.ItemCreator w$ + "(", -2
+                                End If
                                     If VarStat Then
                                         i = globalvar(w$, p, , VarStat, temphere$)
                                     Else
@@ -54330,7 +54473,7 @@ again12568:
                 End If
             Exec1 = SpeedGroup(bstack, pppp, "@READ2", "", b$, v)
 
-
+If Exec1 = 0 Then ExecuteVar = 8: Exit Function
     ExecuteVar = 7: Exit Function
     
     End If
@@ -54547,7 +54690,8 @@ Else
 If LastErNum <> 0 Then Exec1 = 0: ExecuteVar = 8: Exit Function
 If GetSub(w$ + ")", i) Then
 Else
-b$ = ss$ + b$
+bstack.tmpstr = ss$
+'b$ = ss$ + b$
 ExecuteVar = 2  ' GoTo autogosub
 Exit Function
     

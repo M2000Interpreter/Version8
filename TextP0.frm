@@ -172,7 +172,7 @@ Begin VB.Form Form1
       NoFolders       =   0   'False
       Transparent     =   0   'False
       ViewID          =   "{0057D0E0-3573-11CF-AE69-08002B2E1262}"
-      Location        =   "http:///"
+      Location        =   ""
    End
    Begin VB.PictureBox DIS 
       Appearance      =   0  'Flat
@@ -980,8 +980,16 @@ If Button = 1 Then
     If sel& >= 0 Then
         Select Case q(sel&).Id Mod 100
         Case Is < 10
+        If TaskMaster Is Nothing Then
+        
         If Not interpret(DisStack, (q(sel&).Comm)) Then Beep
         MyEr "", ""
+        Else
+        TaskMaster.StopProcess
+        If Not interpret(DisStack, (q(sel&).Comm)) Then Beep
+        MyEr "", ""
+        TaskMaster.StartProcess
+        End If
         Case Else
         INK$ = q(sel&).Comm
         End Select

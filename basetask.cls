@@ -78,6 +78,7 @@ Private mIamAnEvent As Boolean
 Public NoError As Boolean, lastpointer As Object
 Public tmpstr As String
 Public CopyInOutCol As Collection
+Public CallLocalLast As Boolean
 Public Sub CopyStrip(bst As basetask)
 With bst
 .StaticInUse = StaticInUse
@@ -451,7 +452,7 @@ For i& = st& + 1 To Len(a$)
 If Mid$(a$, i&, 1) <> "." Then i& = i& + 1: Exit For
 Next i&
 i& = i& - 2
-a$ = Left$(a$, st& - 1) + dotcol(i& - st& + 1) + Mid$(a$, i&)
+If st& > 1 Then a$ = Left$(a$, st& - 1) + dotcol(i& - st& + 1) + Mid$(a$, i&) Else Exit Function
 If Not Err Then GetDot = True
 End Function
 

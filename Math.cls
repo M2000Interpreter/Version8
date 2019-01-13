@@ -1305,5 +1305,50 @@ Else
 End Function
 
 Property Get Version() As Variant
-Version = 1.1
+Version = 1.2
 End Property
+Public Function ArcCos(x As Variant) As Variant
+
+    Select Case x
+        Case -1
+            ArcCos = 4 * Atn(1)
+             
+        Case 0:
+            ArcCos = 2 * Atn(1)
+             
+        Case 1:
+            ArcCos = 0#
+             
+        Case Else:
+            ArcCos = Atn(-x / Sqr(-x * x + 1)) + 2 * Atn(1)
+    End Select
+End Function
+
+Public Function ArcSin(x As Variant) As Variant
+
+    Select Case x
+        Case -1
+            ArcSin = 6 * Atn(1)
+             
+        Case 0:
+            ArcSin = 0#
+             
+        Case 1:
+            ArcSin = 2 * Atn(1)
+             
+        Case Else:
+            ArcSin = Atn(x / Sqr(-x * x + 1))
+    End Select
+End Function
+Public Function Cos(x As Double) As Double
+        Cos = VBA.Cos(x)
+End Function
+Public Function Sin(x As Double) As Double
+        Sin = VBA.Sin(x)
+End Function
+Public Function Atn(x As Double) As Double
+        Atn = VBA.Atn(x)
+End Function
+Public Function Exp(x As Double) As Double
+        Exp = VBA.Exp(x)
+End Function

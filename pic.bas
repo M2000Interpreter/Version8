@@ -3648,6 +3648,9 @@ p2 = StrPtr(a$): l = l - 1
     Lang = 1
     Exit Function
     Case 0 To 7, 32, 160
+    Case 8
+    IsLabelDotSub = 8: Exit Function
+   ' End If
     Case Else
      ''excludesp = (i - p2) \ 2
    Exit For

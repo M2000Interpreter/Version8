@@ -648,7 +648,7 @@ LastErNum1 = 0
 LastErName = vbNullString
 LastErNameGR = vbNullString
 Else
- er$ = Split(er$, ChrW(&H1FFF))(0)
+er$ = Split(er$, ChrW(&H1FFF))(0)
 ergr$ = Split(ergr$, ChrW(&H1FFF))(0)
 If rinstr(er$, " ") = 0 Then
 LastErNum = 1001
@@ -2819,7 +2819,8 @@ End Sub
 
 Function gf$(bstack As basetask, ByVal y&, ByVal x&, ByVal a$, c&, F&, Optional STAR As Boolean = False)
 On Error Resume Next
-Dim cLast&, b$, cc$, dq As Object, ownLinespace
+Dim cLast&, b$, cc$, dq As Object, ownLinespace, oldrefresh As Double
+oldrefresh = REFRESHRATE
 Dim mybasket As basket, addpixels As Long
 GFQRY = True
 Set dq = bstack.Owner
@@ -2883,7 +2884,7 @@ b$ = a$
 LCTCB dq, mybasket, ins&
 
 Do
-MyDoEvents1 Form1
+MyDoEvents1 Form1, , True
 If bstack.IamThread Then If myexit(bstack) Then GoTo contgfhere
 If Not TaskMaster Is Nothing Then
 If TaskMaster.QueueCount > 0 Then
@@ -3166,6 +3167,7 @@ SetTextBasketBack dq, mybasket
 Loop
 
 GFEND:
+REFRESHRATE = oldrefresh
 LCTbasket dq, mybasket, y&, x& + 1
 If x& < .mx And Not XX& > .mx Then
 If STAR Then
@@ -3387,7 +3389,8 @@ Set im = d.Image
 
 If TypeOf d Is GuiM2000 Then
 If .mysplit = 0 Then
-    d.backcolor = c1
+    If Not d.backcolor = c1 Then d.backcolor = c1
+    d.Cls
 Else
     d.Line (0, spl)-(d.ScaleWidth - dv15, d.ScaleHeight - dv15), .Paper, BF
     End If
@@ -13518,7 +13521,8 @@ work = True
     pn& = pn& + opn&
   opn& = 0
   rest$ = NLtrim$(rest$)
-  final = True
+   '  final = True   ERROR - WHEN myobject is an array/inventory to iterate
+    final = myobject Is Nothing
     Else
 If par Then
 ihavecoma = True ' 'rest$ = "," & rest$
@@ -14136,7 +14140,7 @@ ElseIf par Then
 End If
 RevisionPrint = True
 If par Or F < 0 Then players(basketcode) = prive
-If myexit(basestack) Then Exit Function
+
 End With
 
 exit2:
@@ -14155,6 +14159,7 @@ If Len(rest$) > 0 Then
 Else
     rest1$ = Mid$(rest1$, where)
 End If
+If SLOW Then Call myexit(basestack)
 End Function
 Function RetM2000array(var As Variant) As Variant
 Dim ar As New mArray, v(), manydim As Long, probe As Long, probelow As Long

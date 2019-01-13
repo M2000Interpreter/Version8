@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 27 active-X
+Version 9.6 Revision 28 active-X
 
-Fix Refresh for Wine (rev 26 had a problem in Wine - Linux)
+Inprove Interpreter.
 
 
 From version 9.0 revision 50:
