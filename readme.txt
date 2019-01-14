@@ -1,8 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 28 active-X
+Version 9.6 Revision 29 active-X
 
-Inprove Interpreter.
+Fix a bug in evaluator (for rev>6 ver 9.6).
+m=(1,2) : Print valid(m^)=false ' bug return valid(m^)=true
+z=each(m): Print Valid(z^)=true
 
 
 From version 9.0 revision 50:

@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 28
+Global Const Revision = 29
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -4131,6 +4131,7 @@ Function IsNumber(bstack As basetask, a$, r As Variant, Optional flatobject As B
 Dim sng&, SG As Variant, ex$, ig$, DE$, i As Long, sg1 As Boolean
 
 If MaybeIsSymbol(a$, "(") Then IsNumber = False: Exit Function
+If Len(a$) = 0 Then IsNumber = False: Exit Function
 SG = CLng(1)
 If MaybeIsSymbol2(a$, "#+-", sng&) Then
 sng& = sng& - 1
@@ -15405,7 +15406,7 @@ eos:
                                                     If sX = MyRound(sX) Then
                                                         sp = sp - MyRound(st / 2)
                                                     ElseIf st < 1 Then
-                                                        sp = sp - 1 / EXP(18 - (Log(st + Abs(sp - p))) / Log(10))
+                                                        sp = sp - 1 / Exp(18 - (Log(st + Abs(sp - p))) / Log(10))
                                                     Else
                                                        sp = p - Fix(sX) * st - st / 2
                                                     End If
@@ -15416,7 +15417,7 @@ eos:
                                                     If sX = MyRound(sX) Then
                                                         sp = sp + MyRound(st / 2)
                                                     ElseIf st < 1 Then
-                                                        sp = sp + 1 / EXP(18 - (Log(st + Abs(sp - p))) / Log(10))
+                                                        sp = sp + 1 / Exp(18 - (Log(st + Abs(sp - p))) / Log(10))
                                                     Else
                                                         sp = p + Fix(sX) * st + st / 2
                                                     End If
