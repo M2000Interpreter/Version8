@@ -81,7 +81,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 6
-Global Const Revision = 29
+Global Const Revision = 30
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2125,64 +2125,57 @@ normalexit:
                 bstack.DropNdot depth + 1
 Else
 
-i = w$ = "."
-If v >= 0 Then w$ = pppp.CodeName + CStr(v) Else w$ = pppp.CodeName + "_" + CStr(Abs(v))
-
-
-
-       
-        
+    i = w$ = "."
+    If v >= 0 Then w$ = pppp.CodeName + CStr(v) Else w$ = pppp.CodeName + "_" + CStr(Abs(v))
        ' check for iamglobal ??
-              Set safegroup = pppp.item(v)
-              If safegroup Is Nothing Then GoTo fastexit
-        If safegroup.IamApointer Then
-
-                If safegroup.link.IamFloatGroup Then
-                Set pppp = BoxGroupVar(safegroup.link)
-          
-                v = 0
-                Else
-
-                If Left$(Prefix$, 1) = "@" Then
-                w$ = safegroup.lasthere + "." + safegroup.GroupName
-                    GoTo cont2020
-                Else
-                   bstack.MoveNameDot safegroup.lasthere + "." + safegroup.GroupName
-                    v = 0
-               GoTo contheretoo1
-               End If
-                End If
+    Set safegroup = pppp.item(v)
+    If safegroup Is Nothing Then GoTo fastexit
+    If safegroup.IamApointer Then
+        If safegroup.link.IamFloatGroup Then
+            Set pppp = BoxGroupVar(safegroup.link)
+            v = 0
         Else
-        Set dd = New Group
-         y1 = globalvar(w$, dd)
+            If Left$(Prefix$, 1) = "@" Then
+                    w$ = safegroup.lasthere + "." + safegroup.GroupName
+                    GoTo cont2020
+            Else
+                    bstack.MoveNameDot safegroup.lasthere + "." + safegroup.GroupName
+                    v = 0
+                    GoTo contheretoo1
+            End If
         End If
-        If safegroup.LastOpen <> vbNullString Then
+    Else
+        Set dd = New Group
+        y1 = globalvar(w$, dd)
+    End If
+    If safegroup.LastOpen <> vbNullString Then
         If GetVar(bstack, (safegroup.LastOpen), y1, True) Then
             If safegroup.lasthere$ = here$ Then
                 w$ = safegroup.LastOpen
             Else
-                 If safegroup.lasthere$ = vbNullString Then
-        w$ = safegroup.LastOpen
-        Else
-        w$ = safegroup.lasthere$ + "." + safegroup.LastOpen
-        End If
+                If safegroup.lasthere$ = vbNullString Then
+                    w$ = safegroup.LastOpen
+                Else
+                    w$ = safegroup.lasthere$ + "." + safegroup.LastOpen
+                End If
             End If
             GoTo cont2020
         Else
-        If safegroup.link.IamFloatGroup Then
+            If safegroup.link.IamFloatGroup Then
                 safegroup.LastOpen = vbNullString
                 safegroup.lasthere$ = vbNullString
-                End If
+            End If
         End If
-        Else
-'                safegroup.LastOpen = w$
- '               safegroup.lasthere$ = here$
-        End If
-        
         UnFloatGroup bstack, w$, y1, pppp.item(v), , True
-        'Set bstack.lastpointer = Nothing
-
-  globalvar w$, y1, True, True
+        globalvar w$, y1, True, True
+    Else
+        If y1 = 0 Then y1 = globalvar(w$, y1)
+        UnFloatGroup bstack, w$, y1, pppp.item(v), , True
+        'If y1 = 0 Then , False
+        globalvar w$, y1, True, True
+    End If
+      
+        
 cont2020:
         If Prefix <> "" Then
         If Prefix = "@READ2" Then
@@ -18374,6 +18367,10 @@ If usesamestack Then
 GoFunc = True
 ElseIf FastSymbol(rest$, ")") Then
 GoFunc = True
+ElseIf GoFunc Then
+MyEr "Missing )", "λείπει )"
+GoFunc = False
+Exit Function
 End If
     If FastSymbol(rest$, "<<", , 2) Then
      F = 1

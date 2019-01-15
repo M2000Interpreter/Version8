@@ -19055,6 +19055,7 @@ i = InStr(c$, vbCrLf)
 If i = 0 Then GetNextLineNoTrim = c$: c$ = vbNullString Else GetNextLineNoTrim = Left$(c$, i - 1): c$ = Mid$(c$, i)
 End Function
 Function PrepareLambda(basestask As basetask, myl As lambda, v As Long, frm$, c As Constant) As Boolean
+On Error GoTo 1234
 If Typename(var(v)) = "Constant" Then
     Set c = var(v)
     If Not c.flag Then
@@ -19075,6 +19076,11 @@ End If
 
             frm$ = myl.code$
 PrepareLambda = True
+Exit Function
+1234
+InternalError
+PrepareLambda = False
+
 End Function
 
 Sub BackPort(a$)
