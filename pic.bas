@@ -3233,7 +3233,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   For i = p2 To p4 Step 2
   GetMem2 i, p1
   Select Case p1
-    Case 32, 160
+    Case 32, 160, 9
     Case Else
      MyTrimLi = (i - p2) \ 2 + 1 + l
    Exit Function
@@ -3263,12 +3263,11 @@ Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
   l = Len(s): If l = 0 Then MyTrimL = 1: Exit Function
   p2 = StrPtr(s): l = l - 1
-  
   p4 = p2 + l * 2
   For i = p2 To p4 Step 2
   GetMem2 i, p1
   Select Case p1
-    Case 32, 160, 7
+    Case 32, 160, 7, 9
     Case Else
      MyTrimL = (i - p2) \ 2 + 1
    Exit Function
@@ -3285,7 +3284,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   For i = p4 To p2 Step -2
   GetMem2 i, p1
   Select Case p1
-    Case 32, 160, 13, 10
+    Case 32, 160, 13, 10, 9
     Case Else
      MyTrimR = (i - p2) \ 2 + 1
    Exit Function
@@ -3293,6 +3292,24 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimR = l + 2
 End Function
+Public Function MyTrimRNoCr(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimRNoCr = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160, 9
+    Case Else
+     MyTrimRNoCr = (i - p2) \ 2 + 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimRNoCr = l + 2
+End Function
+
 Sub test3()
 Dim a$, i As Long, j As Long
 a$ = "1234567@@@10"
@@ -3313,7 +3330,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   For i = p4 To p2 Step -2
   GetMem2 i, p1
   Select Case p1
-    Case 32, 160
+    Case 32, 160, 9
     Case Else
      ' MyTrimRfrom = en + 1
      MyTrimRfrom = (i - p2) \ 2 + st + 1
@@ -3391,7 +3408,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   For i = p2 To p4 Step 2
   GetMem2 i, p1
   Select Case p1
-    Case 32, 160
+    Case 32, 160, 9
     Case Else
      excludespace = (i - p2) \ 2
    Exit Function
@@ -3446,7 +3463,7 @@ p2 = StrPtr(a$): l = l - 1
     
     Lang = 1
     Exit Function
-    Case 32, 160
+    Case 32, 160, 9
     Case Else
 
    Exit For
@@ -3626,9 +3643,7 @@ p2 = StrPtr(a$): l = l - 1
     Do While i < p4
 
     GetMem2 i, p1
-    If p1 = 32 Or p1 = 160 Then
-    i = i + 2
-    ElseIf p1 = 160 Then
+    If p1 = 32 Or p1 = 160 Or p1 = 9 Then
     i = i + 2
     Else
     GetMem2 i + 2, p3
@@ -3647,7 +3662,7 @@ p2 = StrPtr(a$): l = l - 1
     
     Lang = 1
     Exit Function
-    Case 0 To 7, 32, 160
+    Case 0 To 7, 32, 160, 9
     Case 8
     IsLabelDotSub = 8: Exit Function
    ' End If
@@ -3845,6 +3860,9 @@ End Function
 
 Public Function NLtrim$(a$)
 If Len(a$) > 0 Then NLtrim$ = Mid$(a$, MyTrimL(a$))
+End Function
+Public Function NLtrim2$(a$)
+If Len(a$) > 0 Then NLtrim2$ = Mid$(a$, MyTrimL2(a$))
 End Function
 Public Function StringId(aHash As idHash, bHash As idHash, Optional ahashbackup As idHash, Optional bhashbackup As idHash) As Boolean
 Dim myid(), i As Long

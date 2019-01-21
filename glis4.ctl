@@ -83,9 +83,10 @@ Private Type Myshape
     Width As Long
     Height As Long
 End Type
-Private mynum$, dragslow As Long
+Private mynum$, dragslow As Long, lastshift As Integer
 Public BlinkON As Boolean
 Private mBlinkTime
+Public UseTab As Boolean
 Public InternalCursor As Boolean
 Public OverrideShow As Boolean
 Public HideCaretOnexit As Boolean
@@ -120,6 +121,7 @@ Private Declare Function CreateCaret Lib "user32" (ByVal hWND As Long, ByVal hBi
 Private Declare Function ShowCaret Lib "user32" (ByVal hWND As Long) As Long
 Private Declare Function SetCaretPos Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
 Private Declare Function HideCaret Lib "user32" (ByVal hWND As Long) As Long
+Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
 Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
 Private Declare Function FillRect Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
 Private Declare Function FrameRect Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
@@ -186,7 +188,9 @@ Dim m_showbar As Boolean
 Dim mList() As itemlist
 Dim topitem As Long
 Dim itemcount As Long
-Dim Mselecteditem As Long
+Dim Mselecteditem As Long, dragfocus As Boolean
+Event RealCurReplace(a$)
+Event DragOverCursor(ok As Boolean)
 Event OnResize()
 Event selected(item As Long)
 Event SelectedMultiAdd(item As Long)
@@ -360,6 +364,21 @@ Public dropkey As Boolean
 Public MenuGroup As String
 Private mTabStop As Boolean
 Private oldpointer As Integer
+Private himc As Long
+Private Const VK_PROCESSKEY = &HE5
+Private Const GCS_COMPREADSTR = &H1
+Private Const GCS_RESULTSTR = &H800
+Private Const GCS_COMPSTR = &H8
+Private leave As Long
+Private Type DRAWTEXTPARAMS
+     cbSize As Long
+     iTabLength As Long
+     iLeftMargin As Long
+     iRightMargin As Long
+     uiLengthDrawn As Long
+End Type
+Dim tParam As DRAWTEXTPARAMS
+
 Public Function GetLastKeyPressed() As Long
 Dim Message As Msg
 If mynum$ <> "" Then
@@ -458,7 +477,7 @@ Public Property Get hWND() As Long
 hWND = UserControl.hWND
 End Property
 Public Property Let Text(ByVal new_text As String)
-Clear True
+clear True
 If new_text <> "" Then
 If Right$(new_text, 2) <> vbCrLf And new_text <> "" Then
 new_text = new_text + vbCrLf
@@ -479,7 +498,7 @@ End If
 PropertyChanged "Text"
 End Property
 Public Property Let ListText(ByVal new_text As String)
-Clear True
+clear True
 If Right$(new_text, 2) <> vbCrLf And new_text <> "" Then
 new_text = new_text + vbCrLf
 End If
@@ -507,17 +526,17 @@ End Property
 Public Property Get Text() As String
 Attribute Text.VB_UserMemId = 0
 Dim i As Long, Pad$
-Text = Space$(500)
+Text = space$(500)
 RaiseEvent PureListOn
 
 Dim thiscur, l As Long
-Text = Space$(5)
+Text = space$(5)
 thiscur = 1
 
 For i = 0 To listcount - 1
 Pad$ = list(i) + vbCrLf
 l = Len(Pad)
-If Len(Text) < thiscur + l Then Text = Text + Space$((thiscur + l) + 100)
+If Len(Text) < thiscur + l Then Text = Text + space$((thiscur + l) + 100)
 Mid$(Text, thiscur, l) = Pad$
 thiscur = thiscur + l
 Next i
@@ -561,7 +580,7 @@ On Error GoTo calcend
 state = True
 
    On Error Resume Next
-            Err.Clear
+            Err.clear
     If Not Spinner Then
             If listcount - 1 - lines < 1 Then
             max = 1
@@ -870,7 +889,7 @@ End Sub
 Private Sub UserControl_GotFocus()
 RaiseEvent CheckGotFocus
 havefocus = True
-
+dragfocus = False
 SoftEnterFocus
 If Not NoWheel Then RaiseEvent RegisterGlist(Me)
 End Sub
@@ -903,22 +922,31 @@ Else
         If myEnabled Then
         If maxchar = 0 Or (maxchar > Len(list(SELECTEDITEM - 1)) Or MultiLineEditBox) Then
          RaiseEvent SyncKeyboard(KeyAscii)
-         If KeyAscii > 31 And SELECTEDITEM > 0 Then
-            If EditFlag Then
-            bb = enabled
-            enabled = False
-            RaiseEvent HaveMark(b1)
-            RaiseEvent PushUndoIfMarked
-            RaiseEvent MarkDelete(False)
-            enabled = bb
-            End If
-            If EditFlag And KeyAscii > 32 And KeyAscii <> 127 Then
-            If UKEY$ <> "" Then
-            kk$ = UKEY$
-            UKEY$ = vbNullString
-            Else
-  kk$ = GetKeY(KeyAscii)
-  End If
+         If KeyAscii = 9 And UseTab Then
+         
+         If Len(UKEY$) = 0 Then
+         KeyAscii = 0
+         Else
+         RaiseEvent KeyDown(KeyAscii, lastshift)
+         End If
+         If KeyAscii = 0 Then Exit Sub
+         End If
+        If ((KeyAscii = 9 And UseTab) Or (KeyAscii > 31) And SELECTEDITEM > 0) Then
+                    If EditFlag Then
+                    bb = enabled
+                    enabled = False
+                    RaiseEvent HaveMark(b1)
+                    RaiseEvent PushUndoIfMarked
+                    RaiseEvent MarkDelete(False)
+                    enabled = bb
+                    End If
+                    If EditFlag And ((KeyAscii > 32 And KeyAscii <> 127) Or (KeyAscii = 9 And UseTab)) Then
+                    If UKEY$ <> "" Then
+                    kk$ = UKEY$
+                    UKEY$ = vbNullString
+                    Else
+          kk$ = GetKeY(KeyAscii)
+          End If
   RaiseEvent getpair(kk$, pair$)
              '
              
@@ -934,16 +962,11 @@ Else
             Else
             kk$ = kk$ + pair$
             End If
-          ' mSelstart = mSelstart + 1
-           
-          ' mSelstart = mSelstart - 1
-          ' Else
-           '     RaiseEvent RemoveOne(kk$)
            End If
            RaiseEvent RemoveOne(kk$)
             SelStartEventAlways = SelStart + 1
             RaiseEvent PureListOn
-                list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
+               list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
                 
         
             RaiseEvent PureListOff
@@ -1004,7 +1027,7 @@ Timer1.Interval = 100
 End If
 state = True
  On Error Resume Next
- Err.Clear
+ Err.clear
 
     If SELECTEDITEM >= listcount Then
  Value = listcount - 1
@@ -1089,6 +1112,8 @@ End Sub
 
 
 Private Sub UserControl_Initialize()
+tParam.cbSize = LenB(tParam)
+tParam.iTabLength = 4
 mTabStop = True
 Buffer = 100
 Set m_font = UserControl.Font
@@ -1099,7 +1124,7 @@ DrawWidth = 1
 DrawStyle = 0
 NoPanLeft = True
 NoPanRight = True
-Clear
+clear
 maxchar = 50
 WordCharLeft = " ,."
 WordCharRight = " ,."
@@ -1108,7 +1133,9 @@ Shape1.hatchType = 1
 mLx = -1000
 mLy = -1000
 End Sub
-
+Property Let TabWidthChar(RHS As Long)
+    tParam.iTabLength = Abs(RHS)
+End Property
 Private Sub UserControl_InitProperties()
  backcolor = m_def_BackColor
    ForeColor = m_def_ForeColor
@@ -1431,6 +1458,9 @@ End Sub
 
 Private Sub UserControl_KeyUp(KeyCode As Integer, shift As Integer)
 Dim i As Long
+
+lastshift = shift
+
 If KeyCode = 18 Then
 RaiseEvent Maybelanguage
 ElseIf KeyCode = 112 And (shift And 2) = 2 Then
@@ -1961,6 +1991,7 @@ End Sub
 
 
 Private Sub UserControl_OLECompleteDrag(Effect As Long)
+dragfocus = False
 If Effect = 0 Then
 ' CANCEL...
 If marvel Then
@@ -2092,6 +2123,7 @@ ElseIf (y - mHeadlineHeightTwips) < myt / 2 And (topitem + YYT > 0) Then
              '  If marvel Then
              
                 If Not Timer1.enabled Then
+                If Not havefocus Then RaiseEvent DragOverCursor(dragfocus)
                 HideCaretOnexit = False: MovePos x, y
                 If CBool(shift And 1) Then ShowMe
                 
@@ -2114,6 +2146,7 @@ ElseIf (y - mHeadlineHeightTwips) < myt / 2 And (topitem + YYT > 0) Then
             End If
 ElseIf state = vbLeave Then
 Dim ok As Boolean
+dragfocus = False
 missMouseClick = True
 If Not marvel And Effect = 0 Then RaiseEvent DragOverDone(ok)
 If Not ok Then
@@ -2128,12 +2161,14 @@ If Not ok Then
 ElseIf state = vbEnter Then
 ok = False
 If Not marvel Then RaiseEvent DragOverNow(ok)
- If Not ok Then
- If Not Timer1.enabled Then
- HideCaretOnexit = False
- MovePos x, y
- If CBool(shift And 1) Then ShowMe
- End If
+If Not ok Then
+    If Not Timer1.enabled Then
+        HideCaretOnexit = False
+        MovePos x, y
+        If CBool(shift And 1) Then ShowMe
+    Else
+        dragfocus = False
+    End If
 End If
 
                                
@@ -2693,7 +2728,7 @@ Public Sub RepaintScrollBar()
 If m_showbar Or StickBar Or AutoHide Or Shape1.Visible Or Spinner Then Redraw
 If Not BarVisible Then Refresh
 End Sub
-Public Sub Clear(Optional ByVal interface As Boolean = False)
+Public Sub clear(Optional ByVal interface As Boolean = False)
 SELECTEDITEM = -1
 LastSelected = -2
 itemcount = 0
@@ -2809,7 +2844,7 @@ itemcount = itemcount - 1
 
 If listcount < 0 Then
 itemcount = 0
-Clear
+clear
 Exit Sub
 End If
 If itemcount < Buffer \ 2 And Buffer > 100 Then
@@ -2937,7 +2972,7 @@ topitem = 0
     End If
         state = True
             On Error Resume Next
-            Err.Clear
+            Err.clear
     If Not Spinner Then
             If listcount - 1 - lines < 1 Then
             max = 1
@@ -2958,7 +2993,7 @@ topitem = 0
 Else
     state = True
         On Error Resume Next
-        Err.Clear
+        Err.clear
         If Not Spinner Then
         max = listcount - 1
         If Err.Number > 0 Then
@@ -2985,7 +3020,7 @@ If j >= listcount Then j = listcount - 1
   DrawStyle = vbSolid
   fg = Me.ForeColor
   
-  If havefocus Then
+  If havefocus Or dragfocus Then
   caretCreated = False
   DestroyCaret
  
@@ -3069,7 +3104,7 @@ nr.Bottom = nr.Top + mytPixels + 1
                                    REALX = UserControlTextWidth(Mid$(list(SELECTEDITEM - 1), 1, SelStart - 1)) + LeftMarginPixels * scrTwips
                                     REALX2 = scrollme + REALX
                                    End If
-                                   If InternalCursor Then
+                                   If InternalCursor Or dragfocus Then
                                    ' not used
                                               If Noflashingcaret Or Not havefocus Then
                                                     Line (scrollme + REALX, (SELECTEDITEM - topitem - 1) * myt + myt1 + mHeadlineHeightTwips)-(REALX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips), ForeColor
@@ -3195,7 +3230,7 @@ Else
 
  DrawStyle = vbSolid
 
-  If havefocus Then
+  If havefocus Or dragfocus Then
   caretCreated = False
   DestroyCaret
   End If
@@ -3297,7 +3332,7 @@ If SELECTEDITEM > 0 Then
                            
                                   If Noflashingcaret Or Not havefocus Then
                                  
-                            If InternalCursor Then Line (scrollme + REALX, (SELECTEDITEM - topitem - 1) * myt + myt1 + mHeadlineHeightTwips)-(REALX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips), ForeColor
+                            If InternalCursor Or dragfocus Then Line (scrollme + REALX, (SELECTEDITEM - topitem - 1) * myt + myt1 + mHeadlineHeightTwips)-(REALX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips), ForeColor
                       
                                 Else
                                    ShowMyCaretInTwips REALX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips
@@ -3522,20 +3557,20 @@ th1:
 UserControl.Cls
 End If
 End Sub
-Private Function GetStrUntilB(pos As Long, ByVal sStr As String, fromStr As String, Optional RemoveSstr As Boolean = True) As String
+Private Function GetStrUntilB(pos As Long, ByVal sStr As String, fromstr As String, Optional RemoveSstr As Boolean = True) As String
 Dim i As Long
-If fromStr = vbNullString Then GetStrUntilB = vbNullString: Exit Function
+If fromstr = vbNullString Then GetStrUntilB = vbNullString: Exit Function
 If pos <= 0 Then pos = 1
-If pos > Len(fromStr) Then
+If pos > Len(fromstr) Then
     GetStrUntilB = vbNullString
 Exit Function
 End If
-i = InStr(pos, fromStr, sStr)
+i = InStr(pos, fromstr, sStr)
 If (i < 1 + pos) And Not ((i > 0) And RemoveSstr) Then
     GetStrUntilB = vbNullString
-    pos = Len(fromStr) + 1
+    pos = Len(fromstr) + 1
 Else
-    GetStrUntilB = Mid$(fromStr, pos, i - pos)
+    GetStrUntilB = Mid$(fromstr, pos, i - pos)
     If RemoveSstr Then
         pos = i + Len(sStr)
     Else
@@ -3591,38 +3626,37 @@ UserControlTextHeight = overrideTextHeight
 
 End Function
 
-Private Sub PrintLineControlSingle(mHdc As Long, c As String, r As RECT)
+Private Sub PrintLineControlSingle(mHdc As Long, ByVal c As String, r As RECT)
 ' this is our basic print routine
 Dim that As Long, cc As String, fg As Long
 If CenterText Then that = DT_CENTER
 If VerticalCenterText Then that = that Or DT_VCENTER
 If WrapText Then
-DrawText mHdc, StrPtr(c), -1, r, DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or that
+DrawTextEx mHdc, StrPtr(c), -1, r, DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or DT_PATH_ELLIPSIS Or that, VarPtr(tParam)
 Else
 If LastLinePart <> "" Then
     If FadeLastLinePart > 0 Then
     cc = c + LastLinePart
     fg = Me.ForeColor
     Me.ForeColor = FadeLastLinePart
-   DrawText mHdc, StrPtr(cc), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that
+   DrawText mHdc, StrPtr(cc), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that Or DT_EXPANDTABS
    Me.ForeColor = fg
-   DrawText mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that
+   DrawTextEx mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that Or DT_EXPANDTABS, VarPtr(tParam)
     
     Else
     cc = c + LastLinePart
-   DrawText mHdc, StrPtr(cc), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that
+   DrawTextEx mHdc, StrPtr(cc), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that Or DT_EXPANDTABS, VarPtr(tParam)
    End If
 Else
 
-    DrawText mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that
+    DrawTextEx mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
     End If
     End If
     
     End Sub
 Private Sub PrintLineControlHeader(mHdc As Long, c As String, r As RECT, Optional that As Long = 0)
 ' this is our basic print routine
-
-DrawText mHdc, StrPtr(c), -1, r, DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or that
+DrawTextEx mHdc, StrPtr(c), -1, r, DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or that Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 
     
     End Sub
@@ -3630,18 +3664,17 @@ DrawText mHdc, StrPtr(c), -1, r, DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING 
 r.Top = 0
 r.Left = 0
 If r.Right = 0 Then r.Right = UserControl.Width / scrTwips
-DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or that
+DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or DT_EXPANDTABS Or DT_TABSTOP Or that, VarPtr(tParam)
 End Sub
 Private Sub PrintLineControl(mHdc As Long, c As String, r As RECT)
-
-    DrawText mHdc, StrPtr(c), -1, r, DT_NOPREFIX Or DT_NOCLIP
+    DrawTextEx mHdc, StrPtr(c), -1, r, DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS, VarPtr(tParam)
 
 End Sub
 Private Sub PrintLinePixels(dd As Object, c As String)
 Dim r As RECT    ' print to a picturebox as label
 r.Right = dd.ScaleWidth
 r.Bottom = dd.ScaleHeight
-DrawText dd.hDC, StrPtr(c), -1, r, DT_NOPREFIX Or DT_WORDBREAK
+DrawTextEx dd.hDC, StrPtr(c), -1, r, DT_NOPREFIX Or DT_WORDBREAK Or DT_EXPANDTABS, VarPtr(tParam)
 End Sub
 Private Sub CalcRect(mHdc As Long, c As String, r As RECT)
 r.Top = 0
@@ -3651,9 +3684,9 @@ If CenterText Then that = DT_CENTER
 If VerticalCenterText Then that = that Or DT_VCENTER
 If WrapText Then
     If r.Right = 0 Then r.Right = UserControl.Width / scrTwips
-    DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or that
+    DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_WORDBREAK Or DT_NOPREFIX Or DT_MODIFYSTRING Or that Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 Else
-    DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that
+    DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or that Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 End If
 
 End Sub
@@ -3664,13 +3697,12 @@ r.Left = 0
 If WrapText Then
 If r.Right = 0 Then r.Right = UserControl.Width / scrTwips - LeftMarginPixels
 
-DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_WORDBREAK Or DT_NOPREFIX
+DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_WORDBREAK Or DT_NOPREFIX Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 Else
-    DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP
+    DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
     End If
 
 End Sub
-
 Public Function SpellUnicode(a$)
 ' use spellunicode to get numbers
 ' and make a ListenUnicode...with numbers for input text
@@ -4088,6 +4120,7 @@ mpercent = RHS
 PropertyChanged "Percent"
 End Property
 Private Sub UserControl_KeyDown(KeyCode As Integer, shift As Integer)
+lastshift = shift
 If KeyCode = 27 And NoEscapeKey Then
 KeyCode = 0
 Exit Sub
@@ -4140,7 +4173,9 @@ End If
 
 mynum$ = vbNullString
 If shift <> 0 And KeyCode = 0 Then Exit Sub
+
 RaiseEvent KeyDown(KeyCode, shift)
+
 If (KeyCode = 0) Or Not (enabled Or state) Then Exit Sub
 If SELECTEDITEM < 0 Then
 SELECTEDITEM = topitem + 1: ShowMe2
@@ -4181,12 +4216,9 @@ Case vbKeyPageDown
 Value = Value + largechange
 End Select
 End If
-
 i = GetLastKeyPressed
  If i <> -1 And i <> 94 Then
  UKEY$ = ChrW(i)
- Else
-
  End If
 End Sub
 Public Property Get Vertical() As Boolean
@@ -4516,9 +4548,8 @@ Public Sub REALCUR(ByVal s$, ByVal probeX As Single, realpos As Long, usedCharLe
 ' and how match is the length of S$ in the left side of that position
 
 Dim n As Long, st As Long, st1 As Long, st0 As Long
-'probeX = probeX - scrollme
-'If Not notextonly Then probeX = probeX - UserControlTextWidth("W") ' Else' probeX = probeX + 2 * scrTwips
 
+RaiseEvent RealCurReplace(s$)
 n = UserControlTextWidth(s$)
 
 If CenterText Then
@@ -4624,6 +4655,7 @@ Public Sub REALCURb(ByVal s$, ByVal probeX As Single, realpos As Long, usedCharL
 Dim n As Long, st As Long, st1 As Long, st0 As Long
 
 If Not notextonly Then probeX = probeX - UserControlTextWidth("W") ' Else' probeX = probeX + 2 * scrTwips
+RaiseEvent RealCurReplace(s$)
 n = UserControlTextWidth(s$)
 
 probeX = probeX - 2 * LeftMarginPixels * scrTwips - 2 * scrTwips
@@ -5135,7 +5167,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   For i = p2 To p4 Step 2
   GetMem2 i, p1
   Select Case p1
-    Case 32, 160
+    Case 32, 160, 9
     Case Else
      MyTrimL = (i - p2) \ 2 + 1
    Exit Function

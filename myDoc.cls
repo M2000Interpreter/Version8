@@ -58,6 +58,7 @@ Dim Buffer() As Byte, bufOffset As Long, bufsize As Long, SeekBuf As Long
 Public busy As Boolean
 Private mSortstyle As VbCompareMethod
 Public ColorEvent As Boolean, ForEditBox As Boolean
+Public Switchon As Boolean
 Function IsLast(ByVal ParaNum As Long) As Boolean
 ' for MarkParagraphID
 IsLast = (DocParaNext(ParaNum) = 0)
@@ -176,7 +177,7 @@ lenfinal = Len(final$)
 If lenfinal = 0 Then final$ = ";": lenfinal = 1
     If mNum = 0 Then Exit Sub
     data$ = TextParagraph(mNum)
-    If Trim(data$) = vbNullString Then
+    If Trim(data$) = vbNullString And Switchon Then
         lookthis = DocParaBack(mNum)
         If lookthis > 0 Then
                     If para(lookthis).startfrom > 0 And UBound(para(lookthis).colordata()) = 2 Then
@@ -186,8 +187,6 @@ If lenfinal = 0 Then final$ = ";": lenfinal = 1
                                     If para(mNum).startfrom <> mNum Then
                                             para(mNum).startfrom = para(lookthis).startfrom
                                     End If
-                   ' Else
-                              '  para(mNum).startfrom = 0
                     End If
         End If
         GoTo finish
@@ -331,7 +330,7 @@ Dim mNum1 As Long, laststart As Long
 If count = 0 Then laststart = para(mNum).startfrom
 If ColorEvent Then
 mNum1 = mNum
-ColorThis1 mNum, count
+ColorThis1 mNum, count, True
 If Not mNum1 = mNum Then
 If laststart <> para(mNum).startfrom Then
 If count = 0 Then
@@ -340,7 +339,7 @@ mNum1 = DocParaNext(mNum)
 Do While mNum1 <> 0
 If para(mNum1).startfrom = laststart Then
 para(mNum1).startfrom = 0
-ColorThis1 mNum1, (0)
+ColorThis1 mNum1, (0), True
 mNum1 = DocParaNext(mNum1)
 Else
 Exit Do
@@ -357,7 +356,7 @@ End If
 mNum = DocParaNext(mNum)
 
 End Sub
-Private Sub ColorThis1(mNum As Long, count As Long)
+Private Sub ColorThis1(mNum As Long, count As Long, Optional ByPass As Boolean = False)
 Dim lookthis As Long, data$, mNum1 As Long
 If para(mNum).startfrom <> 0 Then
 
@@ -372,7 +371,11 @@ If lookthis = 0 Then
 lookthis = para(mNum).startfrom
 mNum1 = mNum
 Do While mNum1 <> 0
-    If para(mNum1).startfrom = lookthis Then ReDim para(mNum1).colordata(1) Else Exit Do
+    If para(mNum1).startfrom = lookthis Then
+    ReDim para(mNum1).colordata(1)
+    Else
+    If Switchon Then Exit Do   ' maybe is wrong
+    End If
     
      para(mNum1).startfrom = 0
     mNum1 = DocParaNext(mNum1)
@@ -383,7 +386,7 @@ End If
 count = -1
 Else
 
-If lookthis = 0 Then
+If lookthis = 0 And (Switchon Or ByPass) Then
 lookthis = para(mNum1).startfrom
 mNum1 = DocParaNext(mNum1)
 Do While mNum1 <> 0
@@ -578,9 +581,12 @@ Property Let textDocFast(norawtext As String)
 End Property
 Property Let textDoc(norawtext As String)
     busy = True
+    If Len(norawtext) = 0 Then
+    AppendParagraph norawtext
+    Else
     Dim where As Long, ok
     Dim a() As String
-    where = 1
+    
     If InStr(norawtext, vbLf) = 0 Then
     a() = Split(norawtext, vbCr)
     Else
@@ -596,6 +602,29 @@ Property Let textDoc(norawtext As String)
       RaiseEvent MayQuit(ok)
       If ok Then busy = False: Exit Property
       AppendParagraph a(where)
+      Next where
+    End If
+    
+    End If
+    ' colorize at a second stage...(new)
+MarkParagraphID = 0
+WrapAgain
+busy = False
+End Property
+Property Let textDoc2(norawtext As String)
+    busy = True
+
+    
+    If Len(norawtext) = 0 Then
+    AppendParagraph norawtext
+    Else
+    Dim where As Long, ok
+    Dim a() As String
+      a() = Split(norawtext, vbCrLf)
+      For where = LBound(a()) To UBound(a())
+      RaiseEvent MayQuit(ok)
+      If ok Then busy = False: Exit Property
+      AppendParagraph a(where)
       
       Next where
     End If
@@ -604,48 +633,54 @@ MarkParagraphID = 0
 WrapAgain
 busy = False
 End Property
+
 Property Let FasttextDoc(norawtext As String)
     EmptyDoc
     busy = True
-    Dim where As Long, ok
-    Dim a() As String
-    where = 1
-    If InStr(norawtext, vbLf) = 0 Then
-    a() = Split(norawtext, vbCr)
+
+    If Len(norawtext) = 0 Then
+    AppendParagraph norawtext
     Else
-    a() = Split(norawtext, vbCrLf)
-    End If
-    norawtext = Join(a(), vbLf)
+        Dim where As Long
+        Dim a() As String
         If InStr(norawtext, vbLf) = 0 Then
-        AppendParagraph norawtext
+        a() = Split(norawtext, vbCr)
         Else
-      a() = Split(norawtext, vbLf)
-      For where = LBound(a()) To UBound(a())
-      AppendParagraph a(where)
-      Next where
+        a() = Split(norawtext, vbCrLf)
+        End If
+        norawtext = Join(a(), vbLf)
+            If InStr(norawtext, vbLf) = 0 Then
+            AppendParagraph norawtext
+            Else
+          a() = Split(norawtext, vbLf)
+          For where = LBound(a()) To UBound(a())
+          AppendParagraph a(where)
+          Next where
+        End If
     End If
     MarkParagraphID = 0
     busy = False
 End Property
 Property Let textDocColor(norawtext As String)
+
+    'where = 1
+   ' If InStr(norawtext, vbLf) = 0 Then
+    'a() = Split(norawtext, vbCr)
+    'Else
+    'a() = Split(norawtext, vbCrLf)
+    'End If
+     '   norawtext = Join(a(), vbLf)
+        
+        If InStr(norawtext, vbCrLf) = 0 Then
+            ColorThis AppendParagraph(norawtext)
+        Else
     Dim where As Long
     Dim a() As String
-    where = 1
-    If InStr(norawtext, vbLf) = 0 Then
-    a() = Split(norawtext, vbCr)
-    Else
-    a() = Split(norawtext, vbCrLf)
-    End If
-        norawtext = Join(a(), vbLf)
-        
-        If InStr(norawtext, vbLf) = 0 Then
-        ColorThis AppendParagraph(norawtext)
-        Else
-      a() = Split(norawtext, vbLf)
-      For where = LBound(a()) To UBound(a())
-     ColorThis AppendParagraph(a(where))
-      Next where
-    End If
+            a() = Split(norawtext, vbCrLf)
+            For where = LBound(a()) To UBound(a())
+                ColorThis AppendParagraph(a(where))
+            Next where
+        End If
     ' colorize at a second stage...(new)
 WrapAgain
 End Property
@@ -738,7 +773,7 @@ End If
 End Sub
 Function textHtmlDoc(colortable() As Variant) As String
 Dim mlines As Long, NeoData As String
- Dim mycur As Long, thiscur, l As Long, a$, i As Long, mColor() As Variant, qu$
+ Dim mycur As Long, thiscur, l As Long, a$, mColor() As Variant, qu$
  qu$ = """"
 mycur = DocParaNext(0)
 textHtmlDoc = space$(500)
@@ -751,11 +786,11 @@ If NeoData = vbNullString Then
 If thiscur <> 0 Then NeoData = "<p>" Else thiscur = 1
 Else
 ' put color here
-a$ = ReplaceStr("</", Chr$(1) + Chr$(2), NeoData)
-a$ = ReplaceStr("<", Chr$(3), a$)
-a$ = ReplaceStr(">", Chr$(4), a$)
-a$ = ReplaceStr("  ", Chr$(7) + Chr$(7), a$)
-a$ = ReplaceStr(Chr$(7) + " ", Chr$(7) + Chr$(7), a$)
+a$ = ReplaceStr("</", ChrW$(1) + ChrW$(2), NeoData)
+a$ = ReplaceStr("<", ChrW$(3), a$)
+a$ = ReplaceStr(">", ChrW$(4), a$)
+a$ = ReplaceStr("  ", ChrW$(7) + ChrW$(7), a$)
+a$ = ReplaceStr(ChrW$(7) + " ", ChrW$(7) + ChrW$(7), a$)
 If UBound(para(mycur).colordata()) > 1 Then
 mColor() = para(mycur).colordata()
 NeoData = vbNullString
@@ -765,9 +800,9 @@ Do
 If l > 3 Then
 If mColor(l - 3) <> 15 And mColor(l - 3) <> 7 Then
 If mColor(l) - mColor(l - 2) < 1 Then
-If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2)), Chr$(7), " ") + "</font>"
+If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2)), ChrW$(7), " ") + "</font>"
 Else
-If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)), Chr$(7), " ") + "</font>"
+If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)), ChrW$(7), " ") + "</font>"
 End If
 Else
 If l > 1 Then
@@ -793,7 +828,7 @@ NeoData = NeoData + "<font color=" + qu$ + "#" + colortable(mColor(l - 1)) + qu$
 Loop Until l > UBound(mColor())
 If mColor(l - 2) > 0 Then
 If mColor(l - 3) <> 15 And mColor(l - 3) <> 7 Then
-a$ = NeoData + Replace(Mid$(a$, mColor(l - 2)), Chr$(7), " ") + "</font>"
+a$ = NeoData + Replace(Mid$(a$, mColor(l - 2)), ChrW$(7), " ") + "</font>"
 Else
 a$ = NeoData + Mid$(a$, mColor(l - 2)) + "</font>"
 End If
@@ -803,10 +838,10 @@ End If
 
 End If
 
-a$ = ReplaceStr(Chr$(1) + Chr$(2), "&lt;/", a$)
-a$ = ReplaceStr(Chr$(3), "&lt;", a$)
-a$ = ReplaceStr(Chr$(4), "&gt;", a$)
-a$ = ReplaceStr(Chr$(7), "&nbsp;", a$)
+a$ = ReplaceStr(ChrW$(1) + ChrW$(2), "&lt;/", a$)
+a$ = ReplaceStr(ChrW$(3), "&lt;", a$)
+a$ = ReplaceStr(ChrW$(4), "&gt;", a$)
+a$ = ReplaceStr(ChrW$(7), "&nbsp;", a$)
 If thiscur <> 0 Then NeoData = "<br>" + a$ Else thiscur = 1: NeoData = a$
 
 End If
@@ -819,7 +854,12 @@ Loop
 If Typename(thiscur) = "Empty" Then
 
 Else
+If InStr(textHtmlDoc, vbTab) > 0 Then
+' preserve tabs
+textHtmlDoc = "<pre>" + Left$(textHtmlDoc, thiscur - 1) + vbCrLf + "</pre>"
+Else
 textHtmlDoc = Left$(textHtmlDoc, thiscur - 1) + vbCrLf
+End If
 End If
 End Function
 Property Get textDoc1LINE() As String  ' MORE SPEED IF WE KNOW THAT WE DON'T USE LINE BREAK
@@ -852,7 +892,7 @@ Mid$(b$, cur, Len(NeoData)) = NeoData
 cur = cur + Len(NeoData)
 End Sub
 
-Public Sub InsertDoc(ByVal ParaNum As Long, fromPos As Long, norawtext As String, Optional tabwidth As Long = 0, Optional gotonextfree As Boolean = False)
+Public Sub InsertDoc(ByVal ParaNum As Long, fromPos As Long, norawtext As String, Optional TabWidth As Long = 0, Optional gotonextfree As Boolean = False)
     Dim t_text As String, once As Boolean
     Dim a() As String, t() As String
     Dim b$
@@ -868,7 +908,7 @@ Dim i As Long, k As Long, j As Long, ii As Long
     Do
     If i > UBound(a()) Then Exit Do
     
-    If tabwidth > 0 Then
+    If TabWidth > 0 Then
     t() = Split(a(i), Chr(9))
     k = LBound(t())
     j = UBound(t())
@@ -878,11 +918,11 @@ Dim i As Long, k As Long, j As Long, ii As Long
         t_text = vbNullString
         For ii = k To j
         If Len(t(ii)) = 0 Then
-        t_text = t_text + space(tabwidth)
-        ElseIf Len(t_text) Mod tabwidth = 0 Then
+        t_text = t_text + space(TabWidth)
+        ElseIf Len(t_text) Mod TabWidth = 0 Then
         t_text = t_text + t(ii)
         Else
-            t_text = t_text + space(tabwidth - (Len(t_text) Mod tabwidth)) + t(ii)
+            t_text = t_text + space(TabWidth - (Len(t_text) Mod TabWidth)) + t(ii)
             End If
         Next ii
       
@@ -1206,7 +1246,7 @@ End If
     Next mlines
     If showspaces Then
         TextLine2 = Replace(Replace(para(mycur).content(lineno - mlinesold), " ", ChrW(&HB7)), ChrW(&H2007), ChrW(&H2423))
-    
+    TextLine2 = Replace(TextLine2, vbTab, ChrW(&H21E5))
     Else
     TextLine2 = para(mycur).content(lineno - mlinesold)
         End If
@@ -1551,6 +1591,7 @@ Function TextParagraphLine2(ByVal lineno As Long, thistext As String, ParaNum As
       If showpar Then
       thistext = Replace(para(mycur).content(lineno - mlinesold), " ", ChrW(&HB7))
       thistext = Replace(thistext, ChrW(&H2007), ChrW(&H2423))
+      thistext = Replace(thistext, vbTab, ChrW(&H21E5))
       Else
       thistext = para(mycur).content(lineno - mlinesold)
       End If
@@ -1747,6 +1788,7 @@ End Sub
 Private Sub Class_Initialize()
 ' from this version paramax= docmax
 'paramax = 20 ' 20 parapraphs ...content
+Switchon = True  ' check this please
 mSortstyle = vbTextCompare
 docmax = 20  ' 20 paragraphs..links only
 ReDim para(1 To docmax)
@@ -2903,8 +2945,14 @@ End Property
 Public Property Let lcid(ByVal RHS As Long)
 mlcid = RHS
 End Property
+
+Function RangeUnsignInteger(mValue As Integer, ByVal mFrom As Long, ByVal mTo As Long) As Boolean
+Dim acc As Long
+PutMem2 VarPtr(acc), mValue
+RangeUnsignInteger = acc >= Abs(mFrom) And acc <= Abs(mTo)
+End Function
 Function FindWord(Find$, Direction As Boolean, there As Long, cur As Long) As Boolean
-Dim oncemore As Boolean, Result As Boolean, res$
+Dim oncemore As Boolean, Result As Boolean, res$, code As Integer
 again:
 If Direction Then
  Result = FindStrDown(Find$, there, cur)
@@ -2914,16 +2962,22 @@ If Direction Then
 If Result Then
 res$ = TextParagraph(there)
 If cur > 1 Then
-    Select Case AscW(Mid$(res$, cur - 1, 1))
-    Case 39, 65 To 90, 97 To 122, Is > 127
-    If Direction Then cur = cur + 1 Else cur = cur - 1
-    GoTo again
-    Case Else
-    End Select
+    code = AscW(Mid$(res$, cur - 1, 1))
+    If Not RangeUnsignInteger(code, &H2000&, &H206F&) Then
+        Select Case code
+        Case 39, 65 To 90, 97 To 122, Is > 127
+        If Direction Then cur = cur + 1 Else cur = cur - 1
+        GoTo again
+        Case Else
+        End Select
+    End If
 End If
 If (Len(res$) - cur + 1) > Len(Find$) Then
-    Select Case AscW(Mid$(res$, cur + Len(Find$), 1))
+    code = AscW(Mid$(res$, cur + Len(Find$), 1))
+    If Not RangeUnsignInteger(code, &H2000&, &H206F&) Then
+    Select Case code
     Case 39, 65 To 90, 97 To 122, Is > 127
+    
     If Direction Then
     cur = cur + 1
     Else
@@ -2942,6 +2996,7 @@ If (Len(res$) - cur + 1) > Len(Find$) Then
     GoTo again
     Case Else
     End Select
+    End If
 End If
 ''
 FindWord = True

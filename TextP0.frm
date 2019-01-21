@@ -254,7 +254,7 @@ End Type
     pt As POINTAPI
 End Type
 Public Point2Me As Object
-
+Public TabControl As Long
 Private Declare Function GetCommandLineW Lib "KERNEL32" () As Long
 
 Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal Ptr As Long, ByVal Value As Long)
@@ -1453,6 +1453,7 @@ End Sub
 
 
 Private Sub Form_Load()
+TabControl = 6
 Set DisStack = New basetask
 Set MeStack = New basetask
 Debug.Assert (InIDECheck = True)
@@ -1461,18 +1462,19 @@ Set fonttest = Form1.dSprite(0)
 Set TEXT1 = New TextViewer
 
 Set TEXT1.Container = gList1
-
-TEXT1.glistN.DragEnabled = False ' only drop - we can change this from popup menu
-TEXT1.glistN.enabled = False
-TEXT1.FileName = vbNullString
-TEXT1.glistN.addpixels = 0
-TEXT1.showparagraph = False
-TEXT1.EditDoc = True
-
-TEXT1.glistN.LeftMarginPixels = 10
 With TEXT1.glistN
-.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@")
-.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^")
+.DragEnabled = False ' only drop - we can change this from popup menu
+.enabled = False
+TEXT1.FileName = vbNullString
+.addpixels = 0
+TEXT1.showparagraph = False
+
+TEXT1.EditDoc = True
+TEXT1.TabWidth = 4
+
+.LeftMarginPixels = 10
+.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9))
+.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9))
 .WordCharRightButIncluded = "("
 
 End With
@@ -1977,6 +1979,7 @@ End Sub
 
 Private Sub gList1_KeyDown(KeyCode As Integer, shift As Integer)
 Static ctrl As Boolean, noentrance As Boolean, where As Long
+
 Dim aa$, a$, JJ As Long, ii As Long, gothere As Long
 If KeyCode = vbKeyEscape Then
 KeyCode = 0
@@ -2216,44 +2219,83 @@ End If
 
 
 If TEXT1.SelText <> "" Then
-
     a$ = vbCrLf + TEXT1.SelText & "*"
-    If shift <> 0 Then  ' тумых
-        a$ = Replace(a$, vbCrLf + String$(6 + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod 6, ChrW(160)), vbCrLf)
-        a$ = Replace(a$, vbCrLf + space$(6 + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod 6), vbCrLf)
+    If gList1.UseTab Then
+    If shift <> 0 Then
+        If InStr(a$, vbCrLf + vbTab) = 0 Then
+        a$ = Replace(a$, vbCrLf + String$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl, ChrW(160)), vbCrLf)
+        a$ = Replace(a$, vbCrLf + space$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl), vbCrLf)
+        Else
+        a$ = Replace(a$, vbCrLf + vbTab, vbCrLf)
+        
+        End If
         TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
          TEXT1.SelStartSilent = ii
          TEXT1.SelLengthSilent = Len(a$) - 3
          
     Else
-        a$ = Replace(a$, vbCrLf, vbCrLf + space$(6))
+        If InStr(a$, vbCrLf + " ") > 0 Or InStr(a$, vbCrLf + ChrW(160)) > 0 Then
+        a$ = Replace(a$, vbCrLf, vbCrLf + space$(TabControl))
         TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
-        TEXT1.SelStartSilent = where + 6
-        TEXT1.SelLengthSilent = Len(a$) - 3 - (where + 6 - ii)
+        TEXT1.SelStartSilent = where + TabControl
+        TEXT1.SelLengthSilent = Len(a$) - 3 - (where + TabControl - ii)
+        Else
+        a$ = Replace(a$, vbCrLf, vbCrLf + vbTab)
+        
+        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+        TEXT1.SelStartSilent = where + 1
+        TEXT1.SelLengthSilent = Len(a$) - 3 - (where + 1 - ii)
+       End If
+    End If
+    Else
+    If shift <> 0 Then
+        a$ = Replace(a$, vbCrLf + String$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl, ChrW(160)), vbCrLf)
+        a$ = Replace(a$, vbCrLf + space$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl), vbCrLf)
+        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+         TEXT1.SelStartSilent = ii
+         TEXT1.SelLengthSilent = Len(a$) - 3
+         
+    Else
+        a$ = Replace(a$, vbCrLf, vbCrLf + space$(TabControl))
+        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+        TEXT1.SelStartSilent = where + TabControl
+        TEXT1.SelLengthSilent = Len(a$) - 3 - (where + TabControl - ii)
        
     End If
-  
+    End If
 Else
 If shift <> 0 Then
 
-    If Mid$(TEXT1.CurrentParagraph, 1, 6) = space$(6) Or Mid$(TEXT1.CurrentParagraph, 1, 6) = String$(6, ChrW(160)) Then
+    If Mid$(TEXT1.CurrentParagraph, 1, TabControl) = space$(TabControl) Or Mid$(TEXT1.CurrentParagraph, 1, TabControl) = String$(TabControl, ChrW(160)) Then
 
             TEXT1.SelStartSilent = ii
-            TEXT1.SelLengthSilent = 6
+            TEXT1.SelLengthSilent = TabControl
+            TEXT1.InsertTextNoRender = vbNullString
+            TEXT1.SelStartSilent = ii
+    ElseIf Left$(TEXT1.CurrentParagraph, 1) = vbTab Then
+            TEXT1.SelStartSilent = ii
+            TEXT1.SelLengthSilent = 1
             TEXT1.InsertTextNoRender = vbNullString
             TEXT1.SelStartSilent = ii
     Else
             TEXT1.SelStartSilent = ii
-            TEXT1.SelLengthSilent = Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))
+            TEXT1.SelLengthSilent = Len(TEXT1.CurrentParagraph) - Len(NLtrim(TEXT1.CurrentParagraph))
             TEXT1.InsertTextNoRender = vbNullString
             TEXT1.SelStartSilent = ii
     End If
     Else
+        If gList1.UseTab Then
         TEXT1.SelStartSilent = JJ
-        TEXT1.RemoveUndo space(6)
-        TEXT1.InsertText = space(6)
+        TEXT1.RemoveUndo vbTab
+        TEXT1.InsertText = vbTab
+        TEXT1.SelStartSilent = JJ + 1
+        Else
+        TEXT1.SelStartSilent = JJ
+        TEXT1.RemoveUndo space(TabControl)
+        TEXT1.InsertText = space(TabControl)
         
-        TEXT1.SelStartSilent = where + 6
+        TEXT1.SelStartSilent = where + TabControl
+        End If
     End If
 End If
 gList1.enabled = True
@@ -2262,6 +2304,8 @@ TEXT1.glistN.Noflashingcaret = False
 TEXT1.Render
 
 nochange = False
+KeyCode = 0
+shift = 0
 'gList1_MarkOut
 Case Else
 

@@ -204,6 +204,7 @@ Public avifile As String
 Public BigPi As Variant
 Public Const Pi = 3.14159265358979
 Public Const PI2 = 6.28318530717958
+Public EditTabWidth As Long
 Public Result As Long
 Public mcd As String
 Public NOEXECUTION As Boolean, RoundDouble As Boolean
@@ -1332,11 +1333,11 @@ End Sub
 Public Sub CalcRect(mHdc As Long, c As String, r As RECT)
 r.Top = 0
 r.Left = 0
-DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP
+DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP Or DT_EXPANDTABS
 End Sub
 
 Public Sub PrintLineControlSingle(mHdc As Long, c As String, r As RECT)
-    DrawText mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP
+    DrawText mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS
     End Sub
 '
 Public Sub MyPrintNew(ddd As Object, UAddTwipsTop, s$, Optional cr As Boolean = False, Optional fake As Boolean = False)
@@ -1888,11 +1889,11 @@ st = DXP
 MinDispl = (TextWidth(dd, "A") \ 2) \ st
 If MinDispl <= 1 Then MinDispl = 3
 MinDispl = st * MinDispl
-INTD = TextWidth(dd, space$(Len(wh$) - Len(NLtrim$(wh$))))
+INTD = TextWidth(dd, space$(Len(wh$) - Len(NLtrim2$(wh$))))
 dd.CurrentX = dd.CurrentX + INTD
 
 wi = wi - INTD
-wh$ = NLtrim$(wh$)
+wh$ = NLtrim2$(wh$)
 INTD = wi + dd.CurrentX
 
 whNoSpace$ = ReplaceStr(" ", "", wh$)
@@ -1951,10 +1952,10 @@ Dim whNoSpace$, Displ As Long, DisplLeft As Long, i As Long, whSpace$, INTD As L
 MinDispl = (TextWidth(dd, "A") \ 2) \ DXP
 If MinDispl <= 1 Then MinDispl = 3
 MinDispl = DXP * MinDispl
-If whr = 3 Or whr = 0 Then INTD = TextWidth(dd, space$(Len(wh$) - Len(NLtrim$(wh$))))
+If whr = 3 Or whr = 0 Then INTD = TextWidth(dd, space$(Len(wh$) - Len(NLtrim2$(wh$))))
 dd.CurrentX = dd.CurrentX + INTD
 wi = wi - INTD
-wh$ = NLtrim$(wh$)
+wh$ = NLtrim2$(wh$)
 INTD = wi + dd.CurrentX
 whNoSpace$ = ReplaceStr(" ", "", wh$)
 If whr = 2 Then
@@ -2121,7 +2122,7 @@ If bstack.IamThread Then nopage = True
 For ttt = 1 To Len(what)
 If NOEXECUTION Then Exit For
 b$ = Mid$(what, ttt, 1)
-If paragr Then INTD = Len(buf$ & b$) - Len(NLtrim$(buf$ & b$))
+If paragr Then INTD = Len(buf$ & b$) - Len(NLtrim2$(buf$ & b$))
 If b$ = Chr$(0) Or b$ = vbLf Then
 ElseIf Not b$ = vbCr Then
 spcc = (Len(buf$ & b$) - Len(ReplaceStr(" ", "", Trim$(buf$ & b$))))
@@ -3438,20 +3439,30 @@ wi& = wi& + x&
 Hi& = Hi& + y&
 Form1.EditTextWord = True
 wh& = -1
-If n <= 0 Then Form1.TEXT1.Title = aTitle$ + " ": wh& = Abs(n - 1)
-If NumberOnly Then
-Form1.TEXT1.NumberOnly = True
-Form1.TEXT1.NumberIntOnly = UseIntOnly
-OLDV$ = v$
-ScreenEdit bb, v$, x&, y&, wi& - 1, Hi&, wh&, , n, shiftlittle
-If Result = 99 Then v$ = OLDV$
-Form1.TEXT1.NumberIntOnly = False
-Form1.TEXT1.NumberOnly = False
-Else
-OLDV$ = v$
-ScreenEdit bb, v$, x&, y&, wi& - 1, Hi&, wh&, , n, shiftlittle
-If Result = 99 And Hi& = wi& Then v$ = OLDV$
-End If
+Dim oldshow As Boolean
+With Form1.TEXT1
+     oldshow = .showparagraph
+    .showparagraph = False
+    
+    If n <= 0 Then .Title = aTitle$ + " ": wh& = Abs(n - 1)
+    If NumberOnly Then
+     .glistN.UseTab = False
+        .NumberOnly = True
+        .NumberIntOnly = UseIntOnly
+        OLDV$ = v$
+        ScreenEdit bb, v$, x&, y&, wi& - 1, Hi&, wh&, , n, shiftlittle
+        If Result = 99 Then v$ = OLDV$
+        .NumberIntOnly = False
+        .NumberOnly = False
+    Else
+    .glistN.UseTab = True
+        OLDV$ = v$
+        ScreenEdit bb, v$, x&, y&, wi& - 1, Hi&, wh&, , n, shiftlittle
+        If Result = 99 And Hi& = wi& Then v$ = OLDV$
+    End If
+    .showparagraph = oldshow
+    .glistN.UseTab = UseTabInForm1Text1
+End With
 iText = v$
 End With
 End Function
@@ -3489,7 +3500,7 @@ TextEditLineHeight = y1& - y& + 1
 With Form1.TEXT1
 'MyDoEvents
 ProcTask2 bstack
-
+.glistN.UseTab = True
 Hook Form1.hWND, Nothing '.glistN
 .AutoNumber = Not Form1.EditTextWord
 
@@ -3630,7 +3641,7 @@ Set aaa = back
 back.LastSelStart = i
 End If
 Set Form1.TEXT1.mDoc = New Document
-
+Form1.TEXT1.glistN.UseTab = UseTabInForm1Text1
 Form1.TEXT1.glistN.BackStyle = 0
 Set Form1.Point2Me = Nothing
 UnHook Form1.hWND
@@ -3641,7 +3652,7 @@ escok = oldesc
 Set d = Nothing
 End With
 End Sub
-Sub ScreenEdit(bstack As basetask, a$, x&, y&, x1&, y1&, Optional l As Long = 0, Optional changelinefeeds As Long = 0, Optional maxchar As Long = 0, Optional ExcludeThisLeft As Long = 0)
+Sub ScreenEdit(bstack As basetask, a$, x&, y&, x1&, y1&, Optional l As Long = 0, Optional changelinefeeds As Long = 0, Optional maxchar As Long = 0, Optional ExcludeThisLeft As Long = 0, Optional internal As Boolean = False)
 On Error Resume Next
 ' allways a$ enter with crlf,but exit with crlf or cr or lf depents from changelinefeeds
 Dim oldesc As Boolean, d As Object
@@ -3710,14 +3721,15 @@ TextEditLineHeight = y1& - y& + 1
 .glistN.maxchar = 0
 
 End If
+
 If Form1.EditTextWord Then
 .glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", """", " ", "+", "-", "/", "*", "^", "$", "%", "_", "@")
 .glistN.WordCharRight = ConCat(".", ":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", """", " ", "+", "-", "/", "*", "^", "$", "%", "_")
 .glistN.WordCharRightButIncluded = vbNullString
 
 Else
-.glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@")
-.glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^")
+.glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9))
+.glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9))
 .glistN.WordCharRightButIncluded = "(" ' so aaa(sdd) give aaa( as word
 End If
 
@@ -3777,17 +3789,22 @@ End If
 End If
 If a$ <> "" Then
 If .Text <> a$ Then .LastSelStart = 0
+If internal Then
+.Text2 = a$
+Else
 .Text = a$
+End If
 Else
 .Text = vbNullString
 .LastSelStart = 0
 End If
 '.glistN.NoFreeMoveUpDown = True
-With Form1.TEXT1
+
+'With Form1.TEXT1
 .Form1mn1Enabled = False
 .Form1mn2Enabled = False
 .Form1mn3Enabled = Clipboard.GetFormat(13) Or Clipboard.GetFormat(1)
-End With
+'End With
 
 Form1.KeyPreview = False
 
@@ -3881,7 +3898,7 @@ If maxchar > 0 Then Form1.TEXT1.glistN.DragEnabled = ot
 
 UnHook Form1.hWND
 INK$ = vbNullString
-
+Form1.TEXT1.glistN.UseTab = False
 escok = oldesc
 Set d = Nothing
 End Sub
@@ -3903,7 +3920,7 @@ Select Case AscW(Mid$(s$, i, 1))
 Case 13
 
 If Len(s$) > i + 1 Then countlines = countlines + 1
-Case 32, 160
+Case 32, 160, 9
 ' nothing
 Case 34
 oldi = i
@@ -5429,6 +5446,8 @@ If s$ <> "" Then
             RoundDouble = False
             ElseIf d$ = "EXT" Then
             wide = False
+            ElseIf d$ = "TAB" Then
+            UseTabInForm1Text1 = False
             ElseIf d$ = "SBL" Then
             ShowBooleanAsString = False
             ElseIf d$ = "DIM" Then
@@ -5567,6 +5586,8 @@ If IsLabel(basestack1, s$, d$) > 0 Then
             RoundDouble = True
             ElseIf d$ = "EXT" Then
             wide = True
+           ElseIf d$ = "TAB" Then
+            UseTabInForm1Text1 = True
            ElseIf d$ = "SBL" Then
             ShowBooleanAsString = True
          ElseIf d$ = "DIM" Then
@@ -5712,7 +5733,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     If w$ = """" Then
         pos = pos + 1
         Do While pos <= Len(a$)
@@ -5826,7 +5847,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     If w$ = """" Then
         pos = pos + 1
         Do While pos <= Len(a$)
@@ -5875,7 +5896,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     If w$ = """" Then
         pos = pos + 1
         Do While pos <= Len(a$)
@@ -5922,7 +5943,7 @@ lenA = Len(a$)
 Do While pos <= lenA
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6020,7 +6041,7 @@ again22:
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160)
+        Case " ", Chr$(160), vbTab
             pos = pos + 1
         End Select
         Loop Until pos2 > pos
@@ -6069,7 +6090,7 @@ lenA = Len(a$)
 Do While pos <= lenA
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6166,7 +6187,7 @@ again22:
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160), vbCr, vbLf
+        Case " ", Chr$(160), vbCr, vbLf, vbTab
             pos = pos + 1
         End Select
         Loop Until pos2 > pos
@@ -6209,7 +6230,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     If w$ = """" Then
         pos = pos + 1
         Do While pos <= Len(a$)
@@ -6258,7 +6279,7 @@ If pos = 0 Then pos = 1
 Do While pos <= lenA
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     If w$ = """" Then
         pos = pos + 1
         Do While pos <= lenA
@@ -6313,7 +6334,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6386,7 +6407,7 @@ again22:
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160)
+        Case " ", Chr$(160), vbTab
             pos = pos + 1
         End Select
         Loop Until pos2 > pos
@@ -6431,7 +6452,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6489,7 +6510,7 @@ again22:
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160)
+        Case " ", Chr$(160), vbTab
             pos = pos + 1
         End Select
         Loop Until pos2 > pos
@@ -6533,7 +6554,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6589,7 +6610,7 @@ again22:
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160)
+        Case " ", Chr$(160), vbTab
             pos = pos + 1
         End Select
         Loop Until pos2 > pos
@@ -6639,7 +6660,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6695,7 +6716,7 @@ again22:
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160)
+        Case " ", Chr$(160), vbTab
             pos = pos + 1
         End Select
         Loop Until pos2 > pos
@@ -6746,7 +6767,7 @@ lenA = Len(a$)
 Do While pos <= lenA
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6898,7 +6919,7 @@ again22:
         Do
         pos3 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160), vbCr, vbLf
+        Case " ", Chr$(160), vbCr, vbLf, vbTab
             pos = pos + 1
         End Select
         Loop Until pos3 > pos
@@ -6946,7 +6967,7 @@ lenA = Len(a$)
 Do While pos <= lenA
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7066,7 +7087,7 @@ again22:
                         Do
                         pos2 = pos + 1
                         Select Case Mid$(a$, pos, 1)
-                        Case " ", Chr$(160)
+                        Case " ", Chr$(160), vbTab
                             pos = pos + 1
                         End Select
                         Loop Until pos2 > pos
@@ -7112,7 +7133,7 @@ lenA = Len(a$)
 Do While pos <= lenA
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7222,7 +7243,7 @@ again22:
                             Do
                             pos2 = pos + 1
                             Select Case Mid$(a$, pos, 1)
-                            Case " ", Chr$(160)
+                            Case " ", Chr$(160), vbTab
                                 pos = pos + 1
                             End Select
                             Loop Until pos2 > pos
@@ -7325,7 +7346,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     If part$ = vbNullString And w$ = "0" Then
         If pos + 2 <= Len(a$) Then
             If LCase(Mid$(a$, pos, 2)) Like "0[xχ]" Then
@@ -7476,7 +7497,7 @@ Select Case Left$(Right$(b$, 2), 1)
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
-        Case " ", Chr$(160)
+        Case " ", Chr$(160), vbTab
             pos = pos + 1
         End Select
         Loop Until pos2 > pos
@@ -7593,7 +7614,7 @@ If pos = 0 Then pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 7 Then
+    If Abs(v1) > 9 Then
     If part$ = vbNullString And w$ = "0" Then
         If pos + 2 <= Len(a$) Then
             If LCase(Mid$(a$, pos, 2)) Like "0[xχ]" Then
@@ -10132,6 +10153,7 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If wide Then ss$ = ss$ + " +EXT" Else ss$ = ss$ + " -EXT"
         If RoundDouble Then ss$ = ss$ + " +RDB" Else ss$ = ss$ + " -RDB"
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
+        If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
         wwPlain bstack, prive, "Διακόπτες " + ss$, bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, "Περί διακοπτών: χρησιμοποίησε την εντολή Βοήθεια Διακόπτες", bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, "Οθόνες:" + Str$(DisplayMonitorCount()) + "  η βασική :" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
@@ -10166,9 +10188,10 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If ForLikeBasic Then ss$ = ss$ + " +FOR" Else ss$ = ss$ + " -FOR"
         If DimLikeBasic Then ss$ = ss$ + " +DIM" Else ss$ = ss$ + " -DIM"
         If ShowBooleanAsString Then ss$ = ss$ + " +SBL" Else ss$ = ss$ + " -SBL"
-          If wide Then ss$ = ss$ + " +EXT" Else ss$ = ss$ + " -EXT"
-          If RoundDouble Then ss$ = ss$ + " +RDB" Else ss$ = ss$ + " -RDB"
+        If wide Then ss$ = ss$ + " +EXT" Else ss$ = ss$ + " -EXT"
+        If RoundDouble Then ss$ = ss$ + " +RDB" Else ss$ = ss$ + " -RDB"
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
+        If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
         wwPlain bstack, prive, "Switches " + ss$, bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, "About Switches: use command Help Switches", bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, "Screens:" + Str$(DisplayMonitorCount()) + "  Primary is:" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
@@ -10661,7 +10684,7 @@ For i = 1 To Len(a$)
 Select Case AscW(Mid$(a$, i, 1))
 Case 13
 ReplaceCRLFSPACE = True
-Case 32, 10, 160
+Case 32, 10, 160, 9
 Case Else
 Exit For
 End Select
@@ -10874,6 +10897,18 @@ a$ = Mid$(a$, MyTrimLi(a$, i + cl))
 FastSymbol = True
 ElseIf mis Then
 MyEr "missing " & c$, "λείπει " & c$
+End If
+End Function
+Function FastSymbolNoTrimAfter(a$, c$) As Boolean
+Dim i As Long, j As Long
+j = Len(a$)
+If j = 0 Then Exit Function
+i = MyTrimL(a$)
+If i > j Then Exit Function  ' this is not good
+If j - i < 0 Then Exit Function
+If c$ = Mid$(a$, i, 1) Then
+a$ = Mid$(a$, i + 1)
+FastSymbolNoTrimAfter = True
 End If
 End Function
 Function FastSymbolAt(i As Long, a$, c$, Optional cl As Long = 1) As Boolean
@@ -11715,15 +11750,11 @@ End Function
 Function IsNumberLabel(a$, Label$) As Boolean
 Dim a1 As Long, LI As Long, A2 As Long
 LI = Len(a$)
-' No zero number.
-' First 1....9
-' second ...to fifth (0 to 9) 99999 is the maximum
-'
+
 If LI > 0 Then
-'a1 = 1
-a1 = MyTrimL2(a$)
-'While Mid$(a$, a1, 1) = " ": a1 = a1 + 1: Wend
-' we start from a1
+
+a1 = MyTrimL(a$)
+
 A2 = a1
 If a1 > LI Then a$ = vbNullString: Exit Function
 If LI > 5 + A2 Then LI = 4 + A2
@@ -14427,7 +14458,7 @@ FastSymbol rest$, ","
 If s$ <> "" Then
 
 If FastSymbol(rest$, "+") Then pa$ = vbNullString Else pa$ = "new"
-If FastSymbol(rest$, "{") Then frm$ = NLtrim$(blockString(rest$, 125))
+If FastSymbol(rest$, "{") Then frm$ = NLtrim2$(blockString(rest$, 125))
 If frm$ <> "" Then
 If isHtml Then
 If ExtractType(s$) = vbNullString Then s$ = s$ & ".html"

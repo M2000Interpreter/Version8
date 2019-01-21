@@ -1,8 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.6 Revision 30 active-X
+Version 9.7 active-X
 
-minor fixes
+Tab character allowed in M2000 files.
+We can set the tab width for tab character in edit:
+edit! 4  ' set 4 characters
+We can use tabs for indentation. Using swithes "-TAB" we can use spaces for indentation, or if a block of lines have a space as indentation, automatic indentation change to space for those lines.
+For EditBox we can define the width for tabs.
+Report statement (rendering text with justification in a layer) can use tabs too, but with 8 character width as standard.
 
 
 From version 9.0 revision 50:

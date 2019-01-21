@@ -64,6 +64,7 @@ Public UseEsc As Boolean
 Public NowDec$, NowThou$, DefaultDec$
 Public ShowBooleanAsString As Boolean, DefBooleanString As String
 Public ForLikeBasic As Boolean, DimLikeBasic As Boolean, SecureNames As Boolean, wide As Boolean
+Public UseTabInForm1Text1 As Boolean
 Public priorityOr As Boolean, NoUseDec As Boolean, mNoUseDec As Boolean, UseIntDiv As Boolean
 Public mTextCompare As Boolean
 Public csvsep$, csvDec$, csvuseescape As Boolean, cleanstrings As Boolean
@@ -80,8 +81,8 @@ Public UKEY$
 Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, WaitShow As Long
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
-Global Const VerMinor = 6
-Global Const Revision = 30
+Global Const VerMinor = 7
+Global Const Revision = 0
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2540,6 +2541,7 @@ Public Sub NeoSubMain()
 ' need to read registry form sub main
 On Error Resume Next
 '' From 9.6 by default we have no round to 13d for double
+EditTabWidth = 6
 RoundDouble = False
 SetUp64 ' for Encoder64/Decoder64
 AskCancelGR = "ΑΚΥΡΟ"
@@ -2570,6 +2572,7 @@ RandomizeIt rndbase, 0
 Set ObjectCatalog = New FastCollection
 SetLibHdls
 LCID_DEF = LCID_def1()
+UseTabInForm1Text1 = True
 ShowBooleanAsString = True
 DefBooleanString = ";T\r\u\e;F\a\l\s\e"
 If dv15 <> 0 Then
@@ -2918,7 +2921,7 @@ Do
 Loop
 End Function
 Function IsExpA(bstack As basetask, aa$, rr As Variant, parenthesis As Long, Optional ByVal noand As Boolean = True, Optional Comp As Boolean = True) As Boolean
-Dim r As Variant, ac As Variant, po As Variant, MUL As Long, r1 As Variant, ut$
+Dim r As Variant, ac As Variant, po As Variant, MUL As Long, r1 As Variant, ut$, back As Variant
 Dim logic As Boolean, l As Boolean, park As Object, objlist As mStiva, rightlevel As Long
 On Error Resume Next
 IsExpA = False
@@ -3610,9 +3613,13 @@ Do
                     IsExpA = False
                     Exit Function
                 ElseIf MUL = 5 Then
-                         po = r1 - Fix(r1 / po) * po
+                         back = r1 - Fix(r1 / po) * po
+                         If Abs(back) >= Abs(po) Then back = back - back
+                         po = back
                 Else
-                        po = Abs(r1 - Abs(po) * Int(r1 / Abs(po)))
+                        back = Abs(r1 - Abs(po) * Int(r1 / Abs(po)))
+                        If Abs(back) >= Abs(po) Then back = back - back
+                        po = back
                   End If
             Case 50 ' Old version use switches "+DIV"
               If Round(po, 13) = 0 Then
@@ -3623,7 +3630,9 @@ Do
                     Exit Function
                 Else
                    ' po = Sgn(r1) * (Int(Abs(r1)) - Int(Int(Abs(r1) / Abs(Int(po))) * Abs(Int(po))))
-                   po = r1 - Int(r1 / po) * po
+                   back = r1 - Int(r1 / po) * po
+                   If Abs(back) >= Abs(po) Then back = back - back
+                   po = back
                 End If
             End Select
             r1 = 1
@@ -9573,7 +9582,7 @@ LB = 1
      c$ = Mid$(a$, LB, 1)
     If AscW(c$) < 256 Then
         Select Case AscW(c$)
-        Case 32, 160
+        Case 32, 160, 9
         If LB - mb > 1 Then
         LB = LB - 1
         Exit Do
@@ -9622,7 +9631,7 @@ LB = 1
      c$ = Mid$(a$, LB, 1)
     If AscW(c$) < 256 Then
         Select Case AscW(c$)
-        Case 32, 160
+        Case 32, 160, 9
         If LB - mb > 1 Then
         LB = LB - 1
         Exit Do
@@ -22574,6 +22583,10 @@ If endstr = 125 Then
 If Right$(blockString, 1) = " " Then
 i = Len(blockString) - Len(RTrim(blockString))
 If i > 0 Then blockString = ReplaceStr(Chr$(10) + space(i), Chr$(10), blockString)
+ElseIf Right$(blockString, 1) = vbTab Then
+i = Len(blockString) - MyTrimRNoCr(blockString)
+If i > 0 Then blockString = ReplaceStr(Chr$(10) + String$(i, vbTab), Chr$(10), blockString)
+
 End If
 End If
 
@@ -31006,11 +31019,21 @@ Function ProcEdit(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim s$, x1 As Long, y1 As Long, o As Long, frm$, i As Long, par As Boolean, p As Variant
 Dim Scr As Object, ss$
 ProcEdit = True
+If FastSymbol(rest$, "!") Then
+If IsExp(basestack, rest$, p) Then
+EditTabWidth = Abs(p)
+
+If Not FastSymbol(rest$, ",") Then Exit Function
+End If
+ProcEdit = False
+Exit Function
+End If
 If Not (basestack.IamChild Or basestack.IamAnEvent) Then abt = False: mHelp = False: lastAboutHTitle = vbNullString
 Set Scr = basestack.Owner
 If Typename(Scr) Like "Gui*" Then oxiforforms: Exit Function
 Form1.EditTextWord = False ' edit code
-
+Form1.TEXT1.TabWidth = EditTabWidth
+Form1.TabControl = EditTabWidth
 s$ = aheadstatus(rest$, False, y1)
 If y1 > 2 And Left$(s$, 1) = "S" Then
 If Mid$(rest$, y1 - 1, 1) = "(" Or Mid$(rest$, y1 - 2, 2) = "()" Then s$ = "ok"
@@ -31077,6 +31100,7 @@ If Left$(s$, 1) = "S" Then
                 Form1.TEXT1.Title = ExtractName(s$) + " "
             If x1 = 0 Then x1 = -5
             Form1.ResetMarks
+            Form1.TEXT1.glistN.UseTab = UseTabInForm1Text1
             If o < 1 Then o = 0
             If o > Len(frm$) Then o = Len(frm$) + 1
             With players(GetCode(basestack.Owner))
@@ -31164,9 +31188,10 @@ jump1:
             End If
             If sbf(x1).sbc = 0 Then sbf(x1).sbc = -1
         MakeMyTitle s$, Lang
+        Form1.TEXT1.glistN.UseTab = UseTabInForm1Text1
         Set sbf(x1).subs = Nothing
         With players(GetCode(basestack.Owner))
-            ScreenEdit basestack, sbf(x1).sb, 0, .mysplit, .mx - 1, .My - 1, sbf(x1).sbc
+            ScreenEdit basestack, sbf(x1).sb, 0, .mysplit, .mx - 1, .My - 1, sbf(x1).sbc, , , , True
             End With
             FK$(13) = "@EDIT " & s$ & "," & CStr(i)
         Else
@@ -31182,10 +31207,10 @@ jump1:
              End If
             End If
             i = -1
-          
            MakeMyTitle s$, Lang
+           Form1.TEXT1.glistN.UseTab = UseTabInForm1Text1
            With players(GetCode(basestack.Owner))
-            ScreenEdit basestack, frm$, 0, .mysplit, .mx - 1, .My - 1, i
+            ScreenEdit basestack, frm$, 0, .mysplit, .mx - 1, .My - 1, i ', , , , Len(frm$) = 0
             End With
             If frm$ <> "" Then
             MakeThisSub basestack, s$
@@ -31201,6 +31226,7 @@ jump1:
             End If
         End If
     ElseIf Not (basestack.IamChild Or basestack.IamAnEvent) Then
+        Form1.TEXT1.glistN.UseTab = False
         frm$ = Mid$(ReplaceStr(vbCr, vbCrLf, QUERYLIST), 3)
         Form1.ShadowMarks = True
         If UserCodePage = 1253 Then
@@ -40945,7 +40971,7 @@ MyFunction = True
                             x1 = 4
                         End If
                         what$ = what$ & "()"
-                        If FastSymbol(rest$, "{") Then
+                        If FastSymbolNoTrimAfter(rest$, "{") Then
                                 ss$ = block(rest$)
                                 i = Len(rest$)
                                 If Not FastSymbol(rest$, "}") Then
@@ -41001,7 +41027,7 @@ operators:
                                     
                                     frm$ = Trim$(frm$)
                                     End If
-                                If FastSymbol(rest$, "{") Then
+                                If FastSymbolNoTrimAfter(rest$, "{") Then
                                         ss$ = block(rest$)
                                         i = Len(rest$)
                                         If Not FastSymbol(rest$, "}") Then
@@ -41045,7 +41071,7 @@ operators:
                                 End If
                                 frm$ = Trim$(frm$)
                                 End If
-                                If FastSymbol(rest$, "{") Then
+                                If FastSymbolNoTrimAfter(rest$, "{") Then
                                         what$ = block(rest$)
                                             If Len(frm$) <> 0 Then
                                                     If Lang = 1 Then
@@ -41091,7 +41117,7 @@ jump1:
                                     
                                 End If
 
-                                If FastSymbol(rest$, "{") Then
+                                If FastSymbolNoTrimAfter(rest$, "{") Then
                                 
                                             what$ = block(rest$) + " "
                                                 If Len(frm$) <> 0 Then
@@ -41127,7 +41153,7 @@ jump1:
                                 End If
                                                    
                                 
-                                    If FastSymbol(rest$, "{") Then
+                                    If FastSymbolNoTrimAfter(rest$, "{") Then
                                            If sbf(x1).locked Or sbf(x1).Extern > 0 Then
                                          what$ = block(rest$)
                                         bstack.IndexSub = x1
@@ -41185,8 +41211,8 @@ jump1:
                             If Not FastSymbol(rest$, ")") Then
                             End If
                             frm$ = Trim$(frm$)
-                            If FastSymbol(rest$, "{") Then GoTo jumpheretoo
-                        ElseIf FastSymbol(rest$, "{") Then
+                            If FastSymbolNoTrimAfter(rest$, "{") Then GoTo jumpheretoo
+                        ElseIf FastSymbolNoTrimAfter(rest$, "{") Then
 jumpheretoo:
                         
                                     If here$ = vbNullString Then
@@ -42275,6 +42301,8 @@ conteditdoc2:
                                     x1 = sX
                                 End If
                                    Form1.TEXT1.Title = frm$ + " "
+                                    Form1.TEXT1.TabWidth = 8
+                                    Form1.TabControl = 8
                                   ScreenEditDOC bstack, var(i), 0, .mysplit, .mx - 1, .My - 1, x1, DUM, col
                                     var(i).LastSelStart = x1
                                     var(i).ColorEvent = False
@@ -42297,6 +42325,8 @@ conteditdoc2:
                                     x1 = sX
                                 End If
                                     Form1.TEXT1.Title = frm$ + " "
+                                    Form1.TEXT1.TabWidth = 8
+                                    Form1.TabControl = 8
                                   ScreenEditDOC bstack, pppp.item(i), 0, .mysplit, .mx - 1, .My - 1, x1, DUM, col
                                     pppp.item(i).LastSelStart = x1
                                      pppp.item(i).ColorEvent = False
@@ -45397,7 +45427,7 @@ BYPASS1:
 
                         End If
                         
-                If FastSymbol(rest$, "{") Then
+                If FastSymbolNoTrimAfter(rest$, "{") Then
                 ss$ = block(rest$)
                 
                 i = Len(rest$)
@@ -45451,7 +45481,7 @@ JUMP0:
                                 rest$ = vbNullString
                                 MyModule = False: Exit Function
                         End If
-                        If FastSymbol(rest$, "{") Then
+                        If FastSymbolNoTrimAfter(rest$, "{") Then
                             what$ = block(rest$)
                         If Right$(what$, 2) <> vbCrLf Then what$ = what$ + vbCrLf
                                    If Not FastSymbol(rest$, "}") Then
@@ -45481,7 +45511,7 @@ JUMP0:
                            frm$ = Trim$(frm$)
 
                         End If
-                        If FastSymbol(rest$, "{") Then
+                        If FastSymbolNoTrimAfter(rest$, "{") Then
                        ' If basestack.OriginalCode > x1 Then
                         ' we have collision so we need a new one
                         'If sbf(Abs(basestack.OriginalCode)).sbgroup <> sbf(x1).sbgroup Then
@@ -45538,8 +45568,8 @@ JUMP0:
                             If Not FastSymbol(rest$, ")") Then
                             End If
                             frm$ = Trim$(frm$)
-                            If FastSymbol(rest$, "{") Then GoTo jumpheretoo
-                ElseIf FastSymbol(rest$, "{") Then
+                            If FastSymbolNoTrimAfter(rest$, "{") Then GoTo jumpheretoo
+                ElseIf FastSymbolNoTrimAfter(rest$, "{") Then
 jumpheretoo:
                         If here$ = vbNullString Then
                                 pa$ = block(rest$)
@@ -46580,6 +46610,7 @@ jumpnow:
     If Not lcl Then If GetlocalVar(what$, i) Then MyEr "Variable " + what$ + " already defined", "Υπάρχει ήδη η μεταβλητή " + what$: ProcDef = False: Exit Function
     i = AllocVar()
     If y1 = 3 Then
+    that = vbNullString
     If strid.Find(what$, (i), (i)) Then
         strid.ItemCreator what$, -2
     End If
@@ -46753,7 +46784,8 @@ Do While MaybeIsSymbol(ss$, "\'[*")
 SetNextLine ss$
 par = True
 Loop
-ss$ = Replace(ss$, Chr$(9), "      ")
+' no more exclude tab
+'ss$ = Replace(ss$, Chr$(9), "      ")
 
 If ss$ <> "" Then
 If par Then GoTo skipme

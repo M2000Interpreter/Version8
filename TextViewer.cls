@@ -14,8 +14,9 @@ Attribute VB_Exposed = False
 ' M2000 ver 1.
 Option Explicit
 ' chr(34) is """" maybe somewhere in a module as public
-Const mway As Long = DT_NOPREFIX Or DT_NOCLIP
+Const mway As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP
 Private mysp As Boolean, col() As Variant, lastdata As String, thispara As Long
+Private TextPixelOffset As Long
 Public ColorSet As Long
 Public NumberOnly As Boolean
 Public NumberIntOnly As Boolean
@@ -116,6 +117,20 @@ Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not
 Private Const DWL_ANYTHREAD& = 0&
 Const LOCALE_ILANGUAGE = 1&
 Private OldPar As Long, dragCharpos As Long
+Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
+Private Type DRAWTEXTPARAMS
+     cbSize As Long
+     iTabLength As Long
+     iLeftMargin As Long
+     iRightMargin As Long
+     uiLengthDrawn As Long
+End Type
+Dim tParam As DRAWTEXTPARAMS
+Private Declare Sub PutMem2 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As Integer)
+Private Declare Function CreateRectRgnIndirect Lib "gdi32" (ByRef lpRect As RECT) As Long
+Private Declare Function SelectClipRgn Lib "gdi32" (ByVal hDC As Long, ByVal hRgn As Long) As Long
+Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
+Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
 Public Property Set Container(glistNN As gList)
 Set glistN = glistNN
 glistN.DropEnabled = True
@@ -313,10 +328,16 @@ Public Sub ResetSelColors()
 SelectionTextColor = &HFFFFFF
 SelectionColor = &H666666
 End Sub
-
+Property Let TabWidth(RHS As Long)
+    tParam.iTabLength = Abs(RHS)
+    glistN.TabWidthChar = Abs(RHS)
+End Property
 
 
 Private Sub Class_Initialize()
+tParam.cbSize = LenB(tParam)
+tParam.iTabLength = 4
+
 Set mDoc = New Document
 Set mDoc1 = New Document
 ResetSelColors
@@ -404,18 +425,33 @@ glistN_MarkDelete False
 ss$ = undotext
 End If
 Dim a$
-a$ = Left$(CurrentParagraph, Charpos)
-i = ((Len(a$) - Len(LTrim$(a$))) \ 6) * 6
-j = SelStart
-If ss$ <> "" Then
-ss$ = Replace(ss$, vbCrLf, vbCrLf + space$(6))
-RemoveUndo "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
-InsertText = "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
-Else
-RemoveUndo "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
-InsertText = "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
-End If
-SelStartSilent = j + i + 3 + 6
+    
+    a$ = Left$(CurrentParagraph, Charpos)
+    If glistN.UseTab Then
+    i = ((Len(a$) - Len(NLtrim$(a$))))
+    j = SelStart
+    If ss$ <> "" Then
+        ss$ = Replace(ss$, vbCrLf, vbCrLf + vbTab)
+        RemoveUndo "{" + vbCrLf + String$(i + 1, vbTab) + ss$ + vbCrLf + String$(i, vbTab) + "}"
+        InsertText = "{" + vbCrLf + String$(i + 1, vbTab) + ss$ + vbCrLf + String$(i, vbTab) + "}"
+    Else
+        RemoveUndo "{" + vbCrLf + String$(i + 1, vbTab) + vbCrLf + String$(i, vbTab) + "}"
+        InsertText = "{" + vbCrLf + String$(i + 1, vbTab) + vbCrLf + String$(i, vbTab) + "}"
+    End If
+    SelStartSilent = j + i + 4
+    Else
+    i = ((Len(a$) - Len(LTrim$(a$))) \ 6) * 6
+    j = SelStart
+    If ss$ <> "" Then
+        ss$ = Replace(ss$, vbCrLf, vbCrLf + space$(6))
+        RemoveUndo "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
+        InsertText = "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
+    Else
+        RemoveUndo "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
+        InsertText = "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
+    End If
+    SelStartSilent = j + i + 3 + 6
+    End If
 Render
 
 
@@ -447,6 +483,10 @@ End Sub
 
 Private Sub glistN_CtrlPlusF1()
 RaiseEvent CtrlPlusF1
+End Sub
+
+Private Sub glistN_DragOverCursor(ok As Boolean)
+ok = True
 End Sub
 
 Private Sub glistN_getpair(a As String, b As String)
@@ -502,6 +542,12 @@ End Sub
 
 Private Sub glistN_PushUndoIfMarked()
 If HaveMarkedText Then PushUndo
+End Sub
+
+Private Sub glistN_RealCurReplace(a As String)
+If showparagraph Then
+a = Replace(a, vbTab, ChrW(&H21E5))
+End If
 End Sub
 
 Private Sub glistN_RegisterGlist(this As gList)
@@ -691,11 +737,10 @@ End Sub
 Private Sub glistN_ExposeListcount(cListCount As Long)
 cListCount = all
 End Sub
-
 Private Sub gListN_ExposeRect(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
-Dim a As RECT, b As RECT, i As Long, pastchars As Long
+Dim a As RECT, b As RECT, i As Long, pastchars As Long, hRgn As Long
 Dim final$, fbypass As Boolean
-Dim oldcolor As Long
+Dim OldColor As Long
 Dim what$, ThatPara As Long
 CopyFromLParamToRect a, thisrect
 CopyFromLParamToRect b, thisrect
@@ -703,7 +748,198 @@ If UsedAsTextBox Then
 b.Bottom = a.Bottom - 2
 End If
 Dim skipcolor As Boolean
-oldcolor = glistN.ForeColor
+OldColor = glistN.ForeColor
+If item < 0 Then  ' this is a headline
+FillBack thisHDC, b, glistN.CapColor
+  mDoc1.TextParagraphLine2 1, what$, ThatPara, False
+  showparagraphonce = False
+   glistN.HeadlineHeight = mDoc1.DocLines * onelineheight
+
+  For i = 1 To mDoc1.DocLines
+  
+    PrintItem2 thisHDC, mDoc1.TextLine2(i, False, True), a
+    a.Top = a.Top + onelineheight
+  Next i
+  RaiseEvent ExposeRect(item, thisrect, thisHDC, skip)
+  skip = True
+   Exit Sub
+   
+Else
+showparagraphWork = showparagraph
+  ' a.Left = a.Left + 1
+    a.Top = a.Top + glistN.addpixels \ 2
+    pastchars = mDoc.TextParagraphLine2(item + 1, what$, ThatPara, showparagraph)
+    
+        If MarkedTextAny Then
+        showparagraphWork = True
+    If item > BlockTopline And item < BlockBottomline Then
+        FillBack thisHDC, b, SelectionColor
+         SetTextColor thisHDC, SelectionTextColor
+         skipcolor = True
+    ElseIf item = BlockTopline And item <> BlockBottomline Then
+
+        
+             If BlockEndline < BlockStartLine Then
+                 If BlockEndCursor > 1 Then  ' if not leave it as is
+                 b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1))
+                 PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                final$ = Mid$(glistN.list(item), BlockEndCursor)
+                fbypass = True
+                 End If
+             Else
+                  If BlockStartCursor > 1 Then  ' if not leave it as is
+                 b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1))
+                 PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+              
+                 final$ = Mid$(glistN.list(item), BlockStartCursor)
+                 fbypass = True
+                 End If
+             End If
+     
+             FillBack thisHDC, b, SelectionColor
+             'a.Left = b.Left + 1
+             
+         SetTextColor thisHDC, SelectionTextColor
+         skipcolor = True
+     ElseIf item = BlockBottomline And item <> BlockTopline Then
+      
+             If BlockBottomline = BlockEndline Then
+                 If BlockEndCursor <= Len(glistN.list(item)) Then
+                 If BlockEndCursor > 1 Then ' if not leave it as is
+                 b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+                 PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
+             fbypass = False
+                 Else
+                   If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, OldColor
+                  GoTo conthere
+                 End If
+                 End If
+                 
+             Else
+                  If BlockStartCursor <= Len(glistN.list(item)) Then  ' if not leave it as is
+               If BlockStartCursor > 1 Then
+               b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+                 PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                final$ = Mid$(glistN.list(item), 1, BlockStartCursor - 1)
+               fbypass = False
+                     Else
+                       If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, OldColor
+                      GoTo conthere
+                 End If
+                 End If
+                 
+             End If
+     
+             FillBack thisHDC, b, SelectionColor
+             a.Right = b.Right + 1
+             
+         SetTextColor thisHDC, SelectionTextColor
+         skipcolor = True
+    ElseIf BlockBottomline = item Then ' in one line only
+     skipcolor = False
+        If BlockEndCursor > BlockStartCursor Then
+         If BlockStartCursor > 1 Then b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1))
+          If BlockEndCursor > 1 Then b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+          If BlockStartCursor = 0 Then
+     final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
+          Else
+           skipcolor = False
+ final$ = Mid$(glistN.list(item), BlockStartCursor, BlockEndCursor - BlockStartCursor)
+ End If
+
+ PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+          FillBack thisHDC, b, SelectionColor
+             a.Right = b.Right + 1
+             'a.Left = b.Left + 1
+         SetTextColor thisHDC, SelectionTextColor
+        ElseIf BlockEndCursor < BlockStartCursor Then
+        If BlockEndCursor > 1 Then b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1))
+        If BlockStartCursor > 1 Then b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+ If BlockEndCursor > 0 Then
+ final$ = Mid$(glistN.list(item), BlockEndCursor, BlockStartCursor - BlockEndCursor)
+ Else
+ final$ = Mid$(glistN.list(item), 1, BlockStartCursor - 1)
+ End If
+ 
+ PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                 FillBack thisHDC, b, SelectionColor
+             a.Right = b.Right + 1
+             'a.Left = b.Left + 1
+         SetTextColor thisHDC, SelectionTextColor
+        End If
+       fbypass = False
+    End If
+ ''  skipcolor = True
+End If
+    If ThatPara = mDoc.MarkParagraphID Then
+            If EditDoc Then
+                        ' old patch -- removed here
+                      If mNoWrap And (glistN.ListIndex = item) Then
+                      glistN.ExternalCursor glistN.SelStart, what$, OldColor
+                       ElseIf (Not skipcolor) And (glistN.ListIndex = item) Then
+                      glistN.ExternalCursor glistN.SelStart, what$, OldColor
+                       End If
+            ElseIf Not NoMark Then
+            
+                    FillBack thisHDC, b, 0
+                     SetTextColor thisHDC, SelectionTextColor
+                 
+                     
+            End If
+    
+    Else
+         
+    If Not skipcolor Then SetTextColor thisHDC, glistN.ForeColor
+ 
+
+    End If
+    If final$ <> "" Or fbypass Then
+
+   If Not fbypass Then
+ 
+   'PrintItem thisHDC, final$, a
+   hRgn = CreateRectRgnIndirect(b)
+    SelectClipRgn thisHDC, hRgn
+   PrintItem thisHDC, mDoc.TextLine2(item + 1, showparagraph, False), a
+   SelectClipRgn thisHDC, &H0
+   DeleteObject hRgn
+   Else
+'   PrintItem1 thisHDC, final$, a
+hRgn = CreateRectRgnIndirect(b)
+    SelectClipRgn thisHDC, hRgn
+   PrintItem1 thisHDC, mDoc.TextLine2(item + 1, showparagraph, False), a
+   SelectClipRgn thisHDC, &H0
+   DeleteObject hRgn
+   End If
+   showparagraphWork = False
+    Else
+conthere:
+If skipcolor Or NoColor Then
+ PrintItem1 thisHDC, mDoc.TextLine2(item + 1, showparagraph, False), a
+Else
+  PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+End If
+  End If
+End If
+SetTextColor thisHDC, OldColor
+ showparagraphonce = False
+
+skip = True
+End Sub
+
+Private Sub gListN_ExposeRectOLD(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
+Dim a As RECT, b As RECT, i As Long, pastchars As Long
+Dim final$, fbypass As Boolean
+Dim OldColor As Long
+Dim what$, ThatPara As Long
+CopyFromLParamToRect a, thisrect
+CopyFromLParamToRect b, thisrect
+If UsedAsTextBox Then
+b.Bottom = a.Bottom - 2
+End If
+Dim skipcolor As Boolean
+OldColor = glistN.ForeColor
 If item < 0 Then  ' this is a headline
 FillBack thisHDC, b, glistN.CapColor
   mDoc1.TextParagraphLine2 1, what$, ThatPara, False
@@ -765,7 +1001,7 @@ Else
                 final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
              fbypass = False
                  Else
-                   If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, oldcolor
+                   If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, OldColor
                   GoTo conthere
                  End If
                  End If
@@ -778,7 +1014,7 @@ Else
                 final$ = Mid$(glistN.list(item), 1, BlockStartCursor - 1)
                fbypass = False
                      Else
-                       If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, oldcolor
+                       If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, OldColor
                       GoTo conthere
                  End If
                  End If
@@ -830,9 +1066,9 @@ End If
             If EditDoc Then
                         ' old patch -- removed here
                       If mNoWrap And (glistN.ListIndex = item) Then
-                      glistN.ExternalCursor glistN.SelStart, what$, oldcolor
+                      glistN.ExternalCursor glistN.SelStart, what$, OldColor
                        ElseIf (Not skipcolor) And (glistN.ListIndex = item) Then
-                            glistN.ExternalCursor glistN.SelStart, what$, oldcolor
+                            glistN.ExternalCursor glistN.SelStart, what$, OldColor
                        End If
             ElseIf Not NoMark Then
             
@@ -864,7 +1100,7 @@ Else
 End If
   End If
 End If
-SetTextColor thisHDC, oldcolor
+SetTextColor thisHDC, OldColor
  showparagraphonce = False
 
 skip = True
@@ -903,11 +1139,11 @@ End Sub
 
 Private Sub glistN_KeyDown(KeyCode As Integer, shift As Integer)
 If KeyCode = vbKeyTab Then
-If shift = 2 Then
-        choosenext
+If shift = 2 Then choosenext
+        
     KeyCode = 0
     Exit Sub
-    End If
+    
 
 End If
 
@@ -1797,6 +2033,7 @@ End Sub
 Private Sub ColorizeInnerStatements(a$, k As Long, pos2 As Long, feedback As Long, Optional jump As Boolean = False)
 Dim drop$, pos1 As Long, onetime As Boolean, kind As Long, lastkind As Long, feedthis As Long, counter As Long
 Dim lastcol As Long
+a$ = Replace(a$, vbTab, " ")
 If jump Then
 kind = IsLabelOnly((a$), drop$)
 If kind = 0 Then
@@ -1997,7 +2234,8 @@ If kind > 0 Then
                 End If
                 Loop Until Not FastSymbol(a$, ",")
                 onetime = True
-                GoTo again
+                
+                GoTo here1
                 End If
                  Else
                 lastcol = 10
@@ -3244,30 +3482,31 @@ my_brush = CreateSolidBrush(bgcolor)
 FillRect thathDC, there, my_brush
 DeleteObject my_brush
 End Sub
- Private Sub PrintItem1(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_NOPREFIX Or DT_NOCLIP)
- Dim cc As String
- If showparagraphonce Then
-         cc = c & "�"
-  DrawText mHdc, StrPtr(cc), -1, r, way
- Else
-  DrawText mHdc, StrPtr(c), -1, r, way
-   
-    End If
-    End Sub
- Private Sub PrintItem(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP)
+Private Sub PrintItem1(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP)
+Dim cc As String
+'r.Top = r.Top + TextPixelOffset
+If showparagraphonce Then
+    cc = c & "�"
+    DrawTextEx mHdc, StrPtr(cc), -1, r, way, VarPtr(tParam)
+Else
 
-  DrawText mHdc, StrPtr(c), -1, r, way
-
-    End Sub
-     Private Sub PrintItem2(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP)
- Dim that As Long
- that = way
- r.Left = r.Left + 4
-If glistN.VerticalCenterText Then that = that Or DT_VCENTER
-
-    DrawText mHdc, StrPtr(c), -1, r, that
-
-    End Sub
+    DrawTextEx mHdc, StrPtr(c), -1, r, way, VarPtr(tParam)
+End If
+'r.Top = r.Top - TextPixelOffset
+End Sub
+Private Sub PrintItem(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP)
+    'r.Top = r.Top + TextPixelOffset
+    DrawTextEx mHdc, StrPtr(c), -1, r, way, VarPtr(tParam)
+    'r.Top = r.Top - TextPixelOffset
+End Sub
+Private Sub PrintItem2(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP)
+    Dim that As Long
+    that = way
+    r.Left = r.Left + 4
+    If glistN.VerticalCenterText Then that = that Or DT_VCENTER Or DT_EXPANDTABS Or DT_TABSTOP
+    DrawTextEx mHdc, StrPtr(c), -1, r, that, VarPtr(tParam)
+End Sub
+    
 Public Property Get EditDoc() As Boolean
 EditDoc = mEditDoc
 End Property
@@ -3398,6 +3637,36 @@ glistN.enabled = False
 Set mDoc = New Document
 mDoc.ColorEvent = Not NoColor
 mDoc.textDoc = RHS
+all = mDoc.DocLines
+BlockStartPara = 0
+BlockStartPos = 0
+BlockStartLine = 0
+BlockTopline = 0
+BlockStartCursor = 0
+BlockEndCursor = 0
+BlockEndPara = 0
+BlockEndPos = 0
+BlockEndline = 0
+BlockBottomline = 0
+ClearRedo
+ClearUndo
+glistN.enabled = oldenabled
+Dim what$, ThatPara As Long, pastchars
+   pastchars = mDoc.TextParagraphLine(1, what$, ThatPara)
+mDoc.MarkParagraphID = ThatPara
+End Property
+Public Property Let Text2(RHS As String)
+Dim oldenabled As Boolean
+If Me.HaveMarkedText Then
+BlockStartPara = BlockEndPara
+BlockStartPos = BlockEndPos
+glistN.MarkNext = 0
+End If
+oldenabled = glistN.enabled
+glistN.enabled = False
+Set mDoc = New Document
+mDoc.ColorEvent = Not NoColor
+mDoc.textDoc2 = RHS
 all = mDoc.DocLines
 BlockStartPara = 0
 BlockStartPos = 0
@@ -3923,7 +4192,11 @@ If Not skip Then c$ = Trim(c$)
 If e$ <> "" Then If val(e$) > val(c$) + 10 Then skip = False
 If (val(c$) Mod 10 = 0) And Not skip Then
 tr$ = String$(Len(Trim$(c$)), "0")
+If glistN.UseTab Then
+a$ = Format((val(c$) + 10), tr$) + vbTab
+Else
 a$ = Format((val(c$) + 10), tr$) + space$(Len(CurrentParagraph) - Len(c$) - Len(NLtrim$(b$)))
+End If
 Else
 If e$ <> "" And Trim$(Str((val(c$) + 1))) = Trim$(e$) Then
 maxw = glistN.UserControlTextWidth(c$)
@@ -3935,15 +4208,27 @@ c$ = vbNullString
 
 Else
 tr$ = String$(Len(Trim$(c$)), "0")
+If glistN.UseTab Then
+a$ = Format((val(c$) + 1), tr$) + vbTab
+Else
 a$ = Format((val(c$) + 1), tr$) + space$(Len(CurrentParagraph) - Len(Trim$(c$)) - Len(NLtrim$(b$)))
 End If
 End If
+End If
+Else
+If glistN.UseTab And Not Left$(CurrentParagraph, 1) = " " Then
+a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbTab)
 Else
 a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
+End If
 If Len(a$) > Charpos Then a$ = vbNullString
 End If
 Else
+If glistN.UseTab And Not Left$(CurrentParagraph, 1) = " " Then
+a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbTab)
+Else
 a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
+End If
 If Len(a$) > Charpos Then a$ = vbNullString
 
 End If
@@ -3995,40 +4280,148 @@ glistN.ShowMe
 End Property
 Private Sub PrintItem1X(mHdc As Long, ByVal c As String, r As RECT, col() As Variant)
 On Error Resume Next
-    Dim cc As String, all As Long, CM As String, offset As Long, addthis As Long
-      
-    Dim ww$(), items&, i, rleft
-    If UBound(col()) <= 1 Then
+    Dim cc As String, all As Long, CM As String, offset As Long, addthis As Long, hRgn As Long
+    Dim b As RECT
+    Dim ww$(), items&, i, rleft, cuts()
+    If UBound(col()) <= 1 Or NoColor Then
         PrintItem1 mHdc, c, r
         Exit Sub
     End If
     rleft = r.Left
     all = rleft + glistN.UserControlTextWidthPixels(c)
     r.Left = all
-    ww$() = SplitStringUsingArray(c, col(), items&)
+    If InStr(c, vbTab) > 0 Then
+    ReDim cuts(UBound(col()))
+    ww$() = SplitStringUsingArray(c, col(), items&, cuts())
     If showparagraphonce Then
         cc = "�"
-        DrawText mHdc, StrPtr(cc), -1, r, mway
+        DrawTextEx mHdc, StrPtr(cc), -1, r, mway, VarPtr(tParam)
+    End If
+    cc = vbNullString
+    
+    
+    For i = items& To 0 Step -1
+        CM = ww$(i)
+        r.Left = offset + rleft + addthis
+        r.Top = r.Top + TextPixelOffset
+        b = r
+        If i > 0 Then
+        
+            b.Left = rleft + glistN.UserControlTextWidthPixels(Left$(c, cuts(i - 1))) + 1
+          If b.Left < 0 Then b.Left = 0
+          
+        
+        End If
+
+        If Not NoColor Then SetTextColor mHdc, M2000(col(i * 2))
+         hRgn = CreateRectRgnIndirect(b)
+    SelectClipRgn mHdc, hRgn
+        DrawTextEx mHdc, StrPtr(CM), -1, r, mway, VarPtr(tParam)
+          SelectClipRgn mHdc, &H0
+   DeleteObject hRgn
+           r.Top = r.Top - TextPixelOffset
+   
+    Next i
+Else
+    ww$() = SplitStringUsingArrayNoTab(c, col(), items&)
+    If showparagraphonce Then
+        cc = "�"
+        DrawTextEx mHdc, StrPtr(cc), -1, r, mway, VarPtr(tParam)
     End If
     cc = vbNullString
     CM = c
     For i = items& To 0 Step -1
         c = ww$(i)
-        If Len(CM) - Len(ww$(i)) >= 0 Then
         CM = Left$(CM, Len(CM) - Len(ww$(i)))
-        Else
-        'CM = CM + Mid$(ww$(i), Len(CM) + 1)
-        
-       Exit For
-        End If
         offset = glistN.UserControlTextWidthPixels(CM)
         ' for Kenring
         addthis = glistN.UserControlTextWidthPixels(CM + c) - offset - glistN.UserControlTextWidthPixels(c)
         r.Left = offset + rleft + addthis
+        r.Top = r.Top + TextPixelOffset
+        
         If Not NoColor Then SetTextColor mHdc, M2000(col(i * 2))
-        DrawText mHdc, StrPtr(c), -1, r, mway
+    
+        DrawTextEx mHdc, StrPtr(c), -1, r, mway, VarPtr(tParam)
+        r.Top = r.Top - TextPixelOffset
         If r.Left < 0 Then Exit For
     Next i
+
+End If
+    r.Left = rleft
+    End Sub
+
+    
+
+
+Private Sub PrintItem1XOLD(mHdc As Long, ByVal c As String, r As RECT, col() As Variant)
+On Error Resume Next
+    Dim cc As String, all As Long, CM As String, offset As Long, addthis As Long, hRgn As Long
+    Dim b As RECT
+    Dim ww$(), items&, i, rleft, cuts()
+    If UBound(col()) <= 1 Or NoColor Then
+        PrintItem1 mHdc, c, r
+        Exit Sub
+    End If
+    rleft = r.Left
+    all = rleft + glistN.UserControlTextWidthPixels(c)
+    r.Left = all
+    If InStr(c, vbTab) > 0 Then
+    ReDim cuts(UBound(col()))
+    ww$() = SplitStringUsingArray(c, col(), items&, cuts())
+    If showparagraphonce Then
+        cc = "�"
+        DrawTextEx mHdc, StrPtr(cc), -1, r, mway, VarPtr(tParam)
+    End If
+    cc = vbNullString
+    
+    
+    For i = items& To 0 Step -1
+        CM = ww$(i)
+        r.Left = offset + rleft + addthis
+        r.Top = r.Top + TextPixelOffset
+        b = r
+        If i > 0 Then
+        
+            b.Left = rleft + glistN.UserControlTextWidthPixels(Left$(c, cuts(i - 1))) + 1
+          If b.Left < 0 Then b.Left = 0
+          
+        
+        End If
+
+        If Not NoColor Then SetTextColor mHdc, M2000(col(i * 2))
+         hRgn = CreateRectRgnIndirect(b)
+    SelectClipRgn mHdc, hRgn
+        DrawTextEx mHdc, StrPtr(CM), -1, r, mway, VarPtr(tParam)
+          SelectClipRgn mHdc, &H0
+   DeleteObject hRgn
+           r.Top = r.Top - TextPixelOffset
+   
+    Next i
+Else
+    ww$() = SplitStringUsingArrayNoTab(c, col(), items&)
+    If showparagraphonce Then
+        cc = "�"
+        DrawTextEx mHdc, StrPtr(cc), -1, r, mway, VarPtr(tParam)
+    End If
+    cc = vbNullString
+    CM = c
+    For i = items& To 0 Step -1
+        c = ww$(i)
+        CM = Left$(CM, Len(CM) - Len(ww$(i)))
+        offset = glistN.UserControlTextWidthPixels(CM)
+        ' for Kenring
+        addthis = glistN.UserControlTextWidthPixels(CM + c) - offset - glistN.UserControlTextWidthPixels(c)
+        r.Left = offset + rleft + addthis
+        r.Top = r.Top + TextPixelOffset
+        
+        If Not NoColor Then SetTextColor mHdc, M2000(col(i * 2))
+    
+        DrawTextEx mHdc, StrPtr(c), -1, r, mway, VarPtr(tParam)
+        r.Top = r.Top - TextPixelOffset
+        If r.Left < 0 Then Exit For
+    Next i
+
+End If
     r.Left = rleft
     End Sub
 
@@ -4056,7 +4449,47 @@ Next st&
 checkme = bb(st& - 3)
 End If
 End Function
-Function SplitStringUsingArray(c$, bb() As Variant, wc&) As String()
+Function SplitStringUsingArray(ByVal c$, bb() As Variant, wc&, cuts() As Variant) As String()
+Dim cc$()
+ReDim cc$((UBound(bb()) + 1) / 2)
+Dim st&, ste&, w&
+wc& = 0
+ste& = UBound(bb())
+For w& = 1 To ste& - 2 Step 2
+On Error Resume Next
+If bb(w& + 2) - bb(w&) < 1 Then
+cc$(wc&) = Mid$(c$, 1, bb(w&))
+cuts(wc&) = bb(w& + 2)
+Else
+If wc& > 0 Then
+cc$(wc&) = cc$(wc& - 1) + Mid$(c$, bb(w&), bb(w& + 2) - bb(w&))
+Else
+cc$(wc&) = Mid$(c$, bb(w&), bb(w& + 2) - bb(w&))
+End If
+cuts(wc&) = Len(cc$(wc&))
+
+End If
+If bb(w& + 2) - bb(w&) = 0 Then
+wc& = wc& - 1
+SplitStringUsingArray = cc$()
+Exit Function
+End If
+wc& = wc& + 1
+Next w&
+If bb(w&) > 0 Then
+If Trim(Mid$(c$, bb(w&))) <> vbNullString Then
+
+cc$(wc&) = c$
+cuts(wc&) = Len(c$)
+Else
+ wc& = wc& - 1
+End If
+End If
+
+SplitStringUsingArray = cc$()
+End Function
+
+Function SplitStringUsingArrayNoTab(c$, bb() As Variant, wc&) As String()
 Dim cc$()
 ReDim cc$((UBound(bb()) + 1) / 2)
 Dim st&, ste&, w&
@@ -4071,7 +4504,7 @@ cc$(wc&) = Mid$(c$, bb(w&), bb(w& + 2) - bb(w&))
 End If
 If cc$(wc&) = vbNullString Then
 wc& = wc& - 1
-SplitStringUsingArray = cc$()
+SplitStringUsingArrayNoTab = cc$()
 Exit Function
 End If
 wc& = wc& + 1
@@ -4080,8 +4513,9 @@ If bb(w&) > 0 Then
 cc$(wc&) = Mid$(c$, bb(w&))
 End If
 If cc$(wc&) = vbNullString Then wc& = wc& - 1
-SplitStringUsingArray = cc$()
+SplitStringUsingArrayNoTab = cc$()
 End Function
+
 Function M2000(ch As Variant) As Long
 Dim b As Integer
 
