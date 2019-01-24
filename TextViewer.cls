@@ -15,7 +15,7 @@ Attribute VB_Exposed = False
 Option Explicit
 ' chr(34) is """" maybe somewhere in a module as public
 Const mway As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP
-Private mysp As Boolean, col() As Variant, lastdata As String, thispara As Long
+Private col() As Variant, lastdata As String, thispara As Long
 Private TextPixelOffset As Long
 Public ColorSet As Long
 Public NumberOnly As Boolean
@@ -2715,12 +2715,6 @@ If a$ = vbNullString Then
 If feedthis = 0 Then
 If lastpar > 0 Then
 feedthis = lastpar
-'ElseIf lastcol = 11 Then
-'feedthis = 11
-'ElseIf lastcol = 10 Then
-'feedthis = 10
-'ElseIf lastcol = 0 Then
-'feedthis = 14
 End If
 End If
 Exit Sub

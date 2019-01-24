@@ -1,6 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 active-X
+Version 9.7 Revision 1 active-X
+
+Added tab width for Report statement (Report!4 set 4 char. width)
 
 Tab character allowed in M2000 files.
 We can set the tab width for tab character in edit:

@@ -3084,9 +3084,6 @@ nr.Bottom = nr.Top + mytPixels + 1
  ForeColor = fg
     Next i
   
- ''''''''' PrintLineControl UserControl.HDC, g$, nr
-    'Print g$
-'#  DrawStyle = vbInvisible
  DrawMode = vbInvert
 
  myt1 = myt - scrTwips

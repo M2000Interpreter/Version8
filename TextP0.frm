@@ -736,7 +736,7 @@ TEXT1.mDoc.WrapAgain
 TEXT1.Render
 End Sub
 
-Public Sub rthissub()
+Public Sub rthissub(Optional anystr As Boolean = False)
 If TEXT1.mDoc.busy Then Exit Sub
 Dim l As Long, w As Long, s$, TempLcid As Long, OldLcid As Long
 Dim el As Long, eW As Long, safety As Long, TT$, w1 As Long, i1 As Long
@@ -745,7 +745,7 @@ w = TEXT1.mDoc.MarkParagraphID
 eW = w
 TEXT1.SelStartSilent = TEXT1.SelStart  'MOVE CHARPOS TO SELSTART
 el = TEXT1.Charpos  ' charpos maybe is in the start or the end of block
-s$ = Trim$(TEXT1.SelText)
+s$ = TEXT1.SelText
 TEXT1.SelStartSilent = TEXT1.SelStart
 el = TEXT1.Charpos  ' charpos maybe is in the start or the end of block
 
@@ -754,7 +754,7 @@ neo$ = InputBoxN("Αλλαγή Λέξης (Shift για σταμάτημα)", "Συγγραφή Κειμένου", s$)
 Else
 neo$ = InputBoxN("Replace Word (use Shift for Stop)", "Text Editor", s$)
 End If
-If neo$ = vbNullString Then Exit Sub
+'If neo$ = vbNullString Then Exit Sub
 OldLcid = TEXT1.mDoc.lcid
 TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then TEXT1.mDoc.lcid = TempLcid
@@ -764,8 +764,12 @@ If Len(neo$) >= Len(s$) Then
     w1 = 0
     i1 = 0
     
-    If EditTextWord Then
+    If EditTextWord Or anystr Then
+        If anystr Then
+        If mDoc10.FindStrDown(s$, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
+        Else
         If mDoc10.FindWord(s$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
+        End If
     Else
         If mDoc10.FindIdentifier(s$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
     End If
@@ -775,10 +779,16 @@ End If
 i1 = el
 l = i1 + addthat
 w1 = w
-If EditTextWord Then
+If EditTextWord Or anystr Then
 TEXT1.glistN.dropkey = True
+Dim ok1 As Boolean
 Do
-If TEXT1.mDoc.FindWord(s$, True, w, l) Then
+If anystr Then
+ok1 = TEXT1.mDoc.FindStrDown(s$, w, l)
+Else
+ok1 = TEXT1.mDoc.FindWord(s$, True, w, l)
+End If
+If ok1 Then
 If safety And w = w1 Then
 If w2 > 0 Then If w2 <> w Then TEXT1.mDoc.WrapAgainBlock w2, w2:  TEXT1.mDoc.ColorThis w2
 w2 = w
@@ -2140,7 +2150,7 @@ Case vbKeyF4
 If TEXT1.SelText <> "" Then mscatsub
 KeyCode = 0
 Case vbKeyF5
-If TEXT1.SelText <> "" Then rthissub
+If TEXT1.SelText <> "" Then rthissub shift Mod 2 = 1
 KeyCode = 0
 Case vbKeyF6  ' Set/Show/Reset Para1
 MarkSoftButton para1, PosPara1
@@ -3117,4 +3127,6 @@ End Select
 TEXT1.mDoc.ColorEvent = Not TEXT1.NoColor
 
 End Sub
+
+
 

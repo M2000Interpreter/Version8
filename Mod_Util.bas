@@ -63,6 +63,7 @@ Public Type basket
     LastIcon As Integer  ' 1..   / 99 loaded
     LastIconPic As StdPicture
     HideIcon As Boolean
+    ReportTab As Long
 End Type
 Private stopwatch As Long
 Private Const myArray = "mArray"
@@ -204,7 +205,7 @@ Public avifile As String
 Public BigPi As Variant
 Public Const Pi = 3.14159265358979
 Public Const PI2 = 6.28318530717958
-Public EditTabWidth As Long
+Public EditTabWidth As Long, ReportTabWidth As Long
 Public Result As Long
 Public mcd As String
 Public NOEXECUTION As Boolean, RoundDouble As Boolean
@@ -299,6 +300,7 @@ Private Declare Function DrawEdge Lib "user32" (ByVal hDC As Long, qrc As RECT, 
 Private Declare Function DrawFocusRect Lib "user32" (ByVal hDC As Long, lpRect As RECT) As Long
 Private Declare Function DrawFrameControl Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
 Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
+Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
 Private Declare Function SetRect Lib "user32" (lpRect As RECT, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
 Private Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal x As Long, ByVal y As Long) As Long
 ''API declarations
@@ -311,6 +313,14 @@ Private Declare Function GetAsyncKeyState Lib "user32" _
 Public TextEditLineHeight As Long
 Public LablelEditLineHeight As Long
 Private Const Utf8CodePage As Long = 65001
+Public Type DRAWTEXTPARAMS
+     cbSize As Long
+     iTabLength As Long
+     iLeftMargin As Long
+     iRightMargin As Long
+     uiLengthDrawn As Long
+End Type
+Public tParam As DRAWTEXTPARAMS
 Function CheckItemType(bstackstr As basetask, v As Variant, a$, r$, Optional ByVal wasarr As Boolean = False) As Boolean
 Dim useHandler As mHandler, fastcol As FastCollection, pppp As mArray, w1 As Long, p As Variant, s$
 CheckItemType = True
@@ -1327,17 +1337,15 @@ Public Function GetTextWidth(dd As Object, c As String, r As RECT) As Long
 
 
 End Function
-Public Sub PrintLineControl(mHdc As Long, c As String, r As RECT)
-    DrawText mHdc, StrPtr(c), -1, r, 0
-End Sub
+
 Public Sub CalcRect(mHdc As Long, c As String, r As RECT)
 r.Top = 0
 r.Left = 0
-DrawText mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP Or DT_EXPANDTABS
+DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 End Sub
 
 Public Sub PrintLineControlSingle(mHdc As Long, c As String, r As RECT)
-    DrawText mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS
+    DrawTextEx mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
     End Sub
 '
 Public Sub MyPrintNew(ddd As Object, UAddTwipsTop, s$, Optional cr As Boolean = False, Optional fake As Boolean = False)
@@ -1379,55 +1387,6 @@ End If
 End If
 
 End Sub
-Public Sub MyPrintOLD(ddd As Object, mb As basket, s$, Optional cr As Boolean = False, Optional fake As Boolean = False, Optional lastpart As Boolean = False)
-
-Dim nr As RECT, nl As Long
-With mb
-If s$ = vbNullString Then
-
-nr.Left = 0: nr.Right = 0: nr.Top = 0: nr.Bottom = 0
-CalcRect ddd.hDC, " ", nr
-nr.Left = ddd.CurrentX / dv15
-nr.Right = nr.Right + nr.Left
-nr.Top = ddd.CurrentY / dv15
-nr.Bottom = nr.Top + nr.Bottom
-nl = (nr.Bottom + 1) * dv15
-If cr Then
-ddd.CurrentY = (nr.Bottom + 1) * dv15 + .uMineLineSpace
-ddd.CurrentX = 0
-Else
-ddd.CurrentX = nr.Right * dv15
-End If
-Else
-nr.Left = 0: nr.Right = 0: nr.Top = 0: nr.Bottom = 0
-CalcRect ddd.hDC, s$, nr
-nr.Left = ddd.CurrentX / dv15
-nr.Right = nr.Right + nr.Left
-nr.Top = ddd.CurrentY / dv15
-nr.Bottom = nr.Top + nr.Bottom
-nl = (nr.Bottom + 1) * dv15
-If Not fake Then
-If nr.Left * dv15 < ddd.Width Then PrintLineControlSingle ddd.hDC, s$, nr
-End If
-If cr Then
-ddd.CurrentY = nl + .uMineLineSpace
-ddd.CurrentX = 0
-Else
-If lastpart Then
-If Trim$(s$) = vbNullString Then
-ddd.CurrentX = ((nr.Right * dv15 + .Xt \ 2) \ .Xt) * .Xt
-Else
-ddd.CurrentX = ((nr.Right * dv15 + .Xt \ 1.2) \ .Xt) * .Xt
-End If
-Else
-ddd.CurrentX = nr.Right * dv15
-End If
-End If
-End If
-
-End With
-End Sub
-
 Public Sub MyPrint(ddd As Object, s$)
 Dim nr As RECT, nl As Long
 If s$ = vbNullString Then
@@ -1453,6 +1412,7 @@ ddd.CurrentY = nl
 ddd.CurrentX = 0
 End If
 End Sub
+
 Public Function TextWidth(ddd As Object, a$) As Long
 Dim nr As RECT
 CalcRect ddd.hDC, a$, nr
@@ -2014,8 +1974,10 @@ End Sub
 Public Sub wPlain(ddd As Object, mb As basket, ByVal what As String, ByVal wi&, ByVal Hi&, Optional nocr As Boolean = False)
 Dim PX As Long, PY As Long, ttt As Long, ruller&
 Dim buf$, b$, npy As Long ', npx As long
+
 With mb
 PlaceBasket ddd, mb
+tParam.iTabLength = .ReportTab
 If what = vbNullString Then Exit Sub
 PX = .curpos
 PY = .currow
@@ -2050,9 +2012,7 @@ End With
 End Sub
 Public Sub wwPlain(bstack As basetask, mybasket As basket, ByVal what As String, ByVal wi As Long, ByVal Hi As Long, Optional scrollme As Boolean = False, Optional nosettext As Boolean = False, Optional frmt As Long = 0, Optional ByVal skip As Long = 0, Optional res As Long, Optional isAcolumn As Boolean = False, Optional collectit As Boolean = False, Optional nonewline As Boolean)
 Dim ddd As Object, mDoc As Object
-    If collectit Then
-                Set mDoc = New Document
-                 End If
+If collectit Then Set mDoc = New Document
 Set ddd = bstack.Owner
 Dim PX As Long, PY As Long, ttt As Long, ruller&, last As Boolean, INTD As Long, nowait As Boolean
 Dim nopage As Boolean
@@ -2062,6 +2022,7 @@ Dim dv2x15 As Long
 dv2x15 = dv15 * 2
 If what = vbNullString Then Exit Sub
 With mybasket
+tParam.iTabLength = .ReportTab
 If Not nosettext Then
 PX = .curpos
 PY = .currow

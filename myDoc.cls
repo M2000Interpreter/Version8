@@ -3037,6 +3037,7 @@ If cur > 1 Then
     Case Else
     End Select
 End If
+If Find$ = "" Then Exit Function
 Select Case AscW(Right$(Find$, 1))
 Case 36, 37, 40
 Case Else
