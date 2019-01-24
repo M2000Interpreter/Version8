@@ -16381,7 +16381,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
 
             If IsLabelSymbolNew(b$, "ΜΕ", "CASE", Lang) Then
             
-                        If IsExp(bstack, b$, sp) Then
+                        If IsExp(bstack, b$, sp, , True) Then
                         x1 = 1
                         ElseIf IsStrExp(bstack, b$, sw$) Then
                         x1 = 2
@@ -16414,7 +16414,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
                                 ' εδώ κοιτάμε τα CASE
                                 x2 = 0
                                 If x1 = 1 Then
-                                If IsExp(bstack, b$, p) Then x2 = 1
+                                If IsExp(bstack, b$, p, , True) Then x2 = 1
                                 Else
                                 If IsStrExp(bstack, b$, w$) Then x2 = 2
                                 End If
@@ -16422,7 +16422,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
                                             If IsLabelSymbolNew(b$, "ΕΩΣ", "TO", Lang) Then   ' range ?
                                             y1 = 0
                                                If x1 = 1 Then
-                                                    If IsExp(bstack, b$, st) Then y1 = 1
+                                                    If IsExp(bstack, b$, st, , True) Then y1 = 1
 
                                                 Else
                                                     If IsStrExp(bstack, b$, ss$) Then y1 = 2
@@ -16464,7 +16464,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
                                                 ' HERE............................IS A PROBLEM IF SW$ HAS <3 ASCII CODE
                                                 b$ = Sput(sw$) + b$
                                             End If
-                                        If IsExp(bstack, b$, p) Then
+                                        If IsExp(bstack, b$, p, , True) Then
                                             If p <> 0 Or slct = -1 Then
                                              If slct = 1 Then slct = 0
                                              ' start ExecuteLong command or block

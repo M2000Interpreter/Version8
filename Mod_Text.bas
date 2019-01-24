@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 1
+Global Const Revision = 2
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -14944,7 +14944,7 @@ ContScan:
                 ClearJoyAll
                 PollJoypadk
                 If GetForegroundWindow <> Form1.hWND Or Not Targets Then
-                    If IsExp(bstack, b$, p) Then
+                    If IsExp(bstack, b$, p, , True) Then
                     End If
                     MyDoEvents0 di
                     If FKey > 0 Then
@@ -14977,7 +14977,7 @@ ContScan:
                     If di.Visible = False Then di.Visible = True
                         NoAction = False
                         nomore = True
-                        If IsExp(bstack, b$, p) Then
+                        If IsExp(bstack, b$, p, , True) Then
                         y = Timer + p
                         x1 = Form1.lockme
                         If x1 Then UnHook Form1.hWND
@@ -15017,7 +15017,7 @@ ContScan:
 contRefr:
                 If IsLabelSymbolNew(b$, "дойилг", "TEST", Lang) Then
                     MyDoEvents1 di
-                ElseIf IsExp(bstack, b$, p) Then
+                ElseIf IsExp(bstack, b$, p, , True) Then
                     With Prefresh(GetCode(di))
                         If p = 0# Then
                             .k1 = uintnew(timeGetTime + REFRESHRATE)
@@ -15063,7 +15063,7 @@ dothesame:
                     bstack.Process.busy = False
                     b$ = vbNullString
                 ElseIf IsLabelSymbolNewExp(b$, "йахе", "INTERVAL", Lang, Us$) Then
-                    If IsExp(bstack, b$, p) Then
+                    If IsExp(bstack, b$, p, , True) Then
                         If p < 2 Then p = 2
                             bstack.Process.Interval = p
                         Else
@@ -16086,12 +16086,38 @@ contdo:
                                 w$ = b$
                                 If IsExp(bstack, b$, p) Then
                                 With bstack
-                                    If Not .lastobj Is Nothing Then
+  If Not .lastobj Is Nothing Then
                                         If TypeOf .lastobj Is mHandler Then
-                                            p = .lastobj.index_start = .lastobj.index_End
+                                            If .lastobj.UseIterator Then
+                                                i = .lastobj.indirect
+                                                If i < 0 Then
+                                                    Set myobject = .lastobj.objref
+                                                    If TypeOf myobject Is mHandler Then
+                                                        Set myobject = myobject.objref
+                                                    End If
+                                                Else
+                                                    InternalEror
+                                                    b$ = vbNullString
+                                                    Exit Function
+                                                End If
+                                                p = .lastobj.index_End <> -1 And Not myobject.IsEmpty
+                                                If p Then
+                                                    If .lastobj.index_start <= .lastobj.index_End Then v = 1 Else v = -1
+                                                    If v >= 0 Then
+                                                        p = .lastobj.index_cursor < .lastobj.index_End
+                                                    Else
+                                                        p = .lastobj.index_cursor > .lastobj.index_End
+                                                    End If
+                                                    If p Then myobject.index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
+                                                End If
+                                                p = Not p
+                                            ElseIf .lastobj.IamEnum Then
+                                                p = .lastobj.Iterate()
+                                                p = Not p
+                                            End If
                                         End If
                                     End If
-                                End With
+                                    End With
                                 w$ = Left$(w$, Len(w$) - Len(b$))
                                 If Not p Then
                                     bb$ = w$
@@ -16119,6 +16145,39 @@ contdo:
                                         If Execute = 3 Then ok = False
                                         If ok Or MOUT Then Exit Do
                                         IsExp bstack, w$, p
+                                    With bstack
+                                    If Not .lastobj Is Nothing Then
+                                        If TypeOf .lastobj Is mHandler Then
+                                            If .lastobj.UseIterator Then
+                                                i = .lastobj.indirect
+                                                If i < 0 Then
+                                                    Set myobject = .lastobj.objref
+                                                    If TypeOf myobject Is mHandler Then
+                                                        Set myobject = myobject.objref
+                                                    End If
+                                                Else
+                                                    InternalEror
+                                                    b$ = vbNullString
+                                                    Exit Function
+                                                End If
+                                                p = .lastobj.index_End <> -1 And Not myobject.IsEmpty
+                                                If p Then
+                                                    If .lastobj.index_start <= .lastobj.index_End Then v = 1 Else v = -1
+                                                    If v >= 0 Then
+                                                        p = .lastobj.index_cursor < .lastobj.index_End
+                                                    Else
+                                                        p = .lastobj.index_cursor > .lastobj.index_End
+                                                    End If
+                                                    If p Then myobject.index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
+                                                End If
+                                                p = Not p
+                                            ElseIf .lastobj.IamEnum Then
+                                                p = .lastobj.Iterate()
+                                                p = Not p
+                                            End If
+                                        End If
+                                    End If
+                                End With
                                     Loop Until p
                                     SwapStrings sw$, here$
                                 End If
@@ -16773,7 +16832,7 @@ contElseIf:
                             lbl = True
                         Else
                         ' so we have to check expression
-                            If IsExp(bstack, Left$(b$, x1), p) Then
+                            If IsExp(bstack, Left$(b$, x1), p, , True) Then
                                 i = 1
                                 ok = (p = 0#)
                                 ' drop old save new
@@ -16881,7 +16940,7 @@ contThenElseIf:
                     End If
               
                 Else   ' ONLY FOR NOT JUMP
-                    If IsExp(bstack, b$, p) Then
+                    If IsExp(bstack, b$, p, , True) Then
                         IFCTRL = 1
                         jump = (p = 0#)
                         i = 1
@@ -17198,7 +17257,7 @@ contif:
        
        jump = 0
        IFCTRL = 0
-        If IsExp(bstack, b$, p) Then
+        If IsExp(bstack, b$, p, , True) Then
             x1 = 1           ' NEED THEN OR ELSE OR ELSE.IF
             ok = (p = 0#)                    ' JUMP TRUE GOTO ELSE
             i = 1
@@ -17511,7 +17570,7 @@ contSelect:
                  sss = Len(b$)
 Case "апо", "ON"                 '************************************* ON NUMBER GOTO LABELS
 ContOn:
-        If IsExp(bstack, b$, p) Then
+        If IsExp(bstack, b$, p, , True) Then
         y1 = IsLabelSymbolNew(b$, "пяос", "GOTO", Lang)
         y2 = False
         If Not y1 Then
@@ -48788,6 +48847,8 @@ flag = Int(Abs(flag > 0) * (flag - 1) - (flag <= 0) * (flag + 1) + 1)
 Else
 If TypeOf bstack.lastobj Is mHandler Then
 If bstack.lastobj.t1 = 4 Then
+Set bstack.lastobj = Nothing
+flag = Int(Abs(flag > 0) * (flag - 1) - (flag <= 0) * (flag + 1) + 1)
 End If
 Else
 flag = 1
@@ -48832,6 +48893,7 @@ Function ProcessIfStr(ByVal flag As Double, bstack As basetask, rest$, ss As Str
 Dim mode As Boolean
 mode = flag < 1
 flag = Int(Abs(flag > 0) * (flag - 1) - (flag <= 0) * (flag + 1) + 1)
+Set bstack.lastobj = Nothing
 Dim nowpos As Double, w1 As Long, s$
 nowpos = 1
 ProcessIfStr = True
