@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 3 active-X
+Version 9.7 Revision 4 active-X
 
-fix enum variables in evaluator so adding two enums return double, not enum
+fix lambda string functions in groups to be copied to new groups (break from Version 9.6 rev 7)
 
 
 From version 9.0 revision 50:

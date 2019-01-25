@@ -4637,12 +4637,26 @@ Do While pos <= Len(a$)
         part$ = vbNullString
         
     ElseIf w$ = "{" Then
-
+If word$ <> "" Then
+  Select Case myUcase(word$, True)
+  Case "THEN", "ELSE", "тоте"
+  pos = pos - 4
+  Exit Do
+  Case "ELSE.IF"
+  pos = pos - 7
+  Exit Do
+  Case "аккиыс"
+  pos = pos - 6
+  Exit Do
+  Case "аккиыс.ам"
+  pos = pos - 9
+  Exit Do
+  End Select
+  End If
     
 
-    If part$ <> "" Then
-        b$ = b$ & part$
-        ElseIf LenB(b$) = 0 Then
+    If part$ <> "" Then b$ = b$ & part$
+        If LenB(b$) = 0 Then
         ElseIf Right(b$, 1) <> "l" Then
         Exit Do
         End If

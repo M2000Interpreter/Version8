@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 3
+Global Const Revision = 4
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -24612,6 +24612,7 @@ End If
 ElseIf Not basestack.lastobj Is Nothing Then
 If TypeOf basestack.lastobj Is lambda Then
     Set var = basestack.lastobj
+    Set basestack.lastobj = Nothing
     CheckVarGroup = 1
     ' means make function for lambda for group
 End If
@@ -26275,12 +26276,16 @@ contstr1:
             
             If Not stripstack1.lastobj Is Nothing Then
                                          If TypeOf stripstack1.lastobj Is lambda Then
+                                         If glob Then
                                          v = globalvarEmpty(w$)
+                                         Else
+                                         v = globalvarEmpty(here$ + "." + w$)
+                                         End If
                                 CheckVarGroup stripstack1, var(v), ss$, final
                                 '         v = globalvar(w$, Empty)
                                 'Set var(v) = stripstack1.lastobj
                               '  Set stripstack1.lastobj = Nothing
-                                LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
+                               LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
                                  If here$ = vbNullString Or glob Then
                                                 GlobalSub w$ + "()", "", bstack.GroupName, , v
                                             Else

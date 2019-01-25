@@ -6318,20 +6318,13 @@ again22:
         ElseIf Mid$(a$, pos + 1, 1) = "(" Then
         pos = pos + 1: GoTo again22
         End If
-    ElseIf w$ = "{" Then
-       If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= Len(a$) Then
-        'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = Len(a$): Exit Do
-        End If
     Else
         Select Case w$
         Case ",", ":"
         Exit Do
         Case "%", "$", "0" To "9"
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), vbCr
+        Case " ", ChrW(160), vbCr, "{"
                 If Len(what$) > 3 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
@@ -6364,6 +6357,12 @@ again22:
                     End If
                     If w$ = vbCr Then Exit Do
                     what$ = vbNullString
+            If w$ = "{" Then
+                     If pos <= Len(a$) Then
+                    pos = blockLen2(a$, pos + 1)
+                    If pos = 0 Then pos = Len(a$): Exit Do
+                    End If
+            Else
             pos = pos + 1
         Do
         pos2 = pos + 1
@@ -6373,7 +6372,7 @@ again22:
         End Select
         Loop Until pos2 > pos
         pos = pos - 1
-
+        End If
          
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
@@ -6436,20 +6435,13 @@ again22:
         ElseIf Mid$(a$, pos + 1, 1) = "(" Then
         pos = pos + 1: GoTo again22
         End If
-    ElseIf w$ = "{" Then
-       If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= Len(a$) Then
-        'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = Len(a$): Exit Do
-        End If
     Else
         Select Case w$
         Case ",", ":"
         Exit Do
         Case "%", "$", "0" To "9"
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), "{"
                 If Len(what$) > 3 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
@@ -6467,6 +6459,12 @@ again22:
                     End If
                     End If
                     what$ = vbNullString
+                    If w$ = "{" Then
+                     If pos <= Len(a$) Then
+                    pos = blockLen2(a$, pos + 1)
+                    If pos = 0 Then pos = Len(a$): Exit Do
+                    End If
+                    Else
                  pos = pos + 1
         Do
         pos2 = pos + 1
@@ -6476,7 +6474,7 @@ again22:
         End Select
         Loop Until pos2 > pos
         pos = pos - 1
-
+        End If
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         Case Else
@@ -6538,18 +6536,11 @@ again22:
         ElseIf Mid$(a$, pos + 1, 1) = "(" Then
         pos = pos + 1: GoTo again22
         End If
-    ElseIf w$ = "{" Then
-       If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= Len(a$) Then
-        'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = Len(a$): Exit Do
-        End If
     Else
         Select Case w$
         Case "%", "$", "0" To "9"
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), "0" To "9"
+        Case " ", ChrW(160), "0" To "9", "{"
                 If Len(what$) > 1 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
@@ -6567,7 +6558,14 @@ again22:
                     End If
                     End If
                     what$ = vbNullString
-                 pos = pos + 1
+       
+                 If w$ = "{" Then
+                     If pos <= Len(a$) Then
+                    pos = blockLen2(a$, pos + 1)
+                    If pos = 0 Then pos = Len(a$): Exit Do
+                    End If
+                 Else
+                pos = pos + 1
         Do
         pos2 = pos + 1
         Select Case Mid$(a$, pos, 1)
@@ -6576,7 +6574,7 @@ again22:
         End Select
         Loop Until pos2 > pos
         pos = pos - 1
-
+        End If
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         Case Else
