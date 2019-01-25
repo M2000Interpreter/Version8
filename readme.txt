@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 4 active-X
+Version 9.7 Revision 5 active-X
 
-fix lambda string functions in groups to be copied to new groups (break from Version 9.6 rev 7)
+fix a bug in syntax color for M2000 programs in an editbox.
 
 
 From version 9.0 revision 50:
