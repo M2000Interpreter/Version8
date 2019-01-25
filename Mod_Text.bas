@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 2
+Global Const Revision = 3
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2955,7 +2955,7 @@ again2:
         If TypeOf bstack.lastobj Is mHandler Then
         If bstack.lastobj.t1 = 4 Then
         r = bstack.lastobj.index_cursor * bstack.lastobj.sign: Set bstack.LastEnum = bstack.lastobj.objref
-        If po < 0 Then r = -r: po = -po
+        If po < 0 Then r = -r: po = -po: bstack.lastobj.sign = -bstack.lastobj.sign
         
         End If
          '   GoTo LeaveIt
@@ -3532,6 +3532,7 @@ MUL = 0
 secodlooplogic:
 Do
   If Fast2Symbol(aa$, "**", 2, "^", 1) Then
+            Set bstack.lastobj = Nothing
             ' get from right number or expression
             If IsNumber(bstack, aa$, r, True) Then ' êïéôÜìå áí åßíáé áñéèìüò Þ ìåôáâëçôÞ
             Set bstack.lastobj = Nothing
@@ -3554,6 +3555,7 @@ Do
     
     ElseIf MUL > 0 Then
             ' do it before we find next / or *
+            Set bstack.lastobj = Nothing
             Select Case MUL
             Case 500
             bstack.soros.DataVal r1
@@ -3822,6 +3824,7 @@ Do
         End If
 ElseIf MaybeIsSymbol(aa$, "AÁXÊÇOáaxêçoÞ¹") And noand Then
 If Fast2Label(aa$, "XOR", 3, "ÁÐÏ", 3, 4) Then
+    Set bstack.lastobj = Nothing
 '  good
   MUL = 3
     If priorityOr Then
@@ -3846,6 +3849,7 @@ If Fast2Label(aa$, "XOR", 3, "ÁÐÏ", 3, 4) Then
     End If
 
 ElseIf Fast2Label(aa$, "OR", 2, "Ç", 1, 2) Then
+Set bstack.lastobj = Nothing
 '  good
   MUL = 3
 If priorityOr Then
@@ -3870,6 +3874,7 @@ Else
 End If
 
 ElseIf Fast2Label(aa$, "AND", 3, "ÊÁÉ", 3, 3) Then
+Set bstack.lastobj = Nothing
 '  good
   MUL = 3
   If IsExp(bstack, aa$, r, False, True) Then
@@ -3905,6 +3910,7 @@ ElseIf MaybeIsTwoSymbol(aa$, "->", 2) Then
 logic = True
 Exit Do
 ElseIf FastSymbol(aa$, "-") Then
+Set bstack.lastobj = Nothing
   ' second parameter push old value to ac
   ' get new one to r
   ' check if we have string logical
@@ -3945,6 +3951,7 @@ If logical(bstack, aa$, r, , True) Then
     Exit Function
   End If
 ElseIf FastSymbol(aa$, "+") Then
+Set bstack.lastobj = Nothing
 If logical(bstack, aa$, r, , True) Then
     MUL = 1 ' from 3
     
@@ -3985,6 +3992,7 @@ Else
 End If
 
 ElseIf FastSymbol(aa$, "<<", , 2) Then
+Set bstack.lastobj = Nothing
 If logical(bstack, aa$, r) Then
                 MUL = 500
                
@@ -4007,6 +4015,7 @@ If logical(bstack, aa$, r) Then
             
 '**********************************************************************
 ElseIf Comp And MaybeIsSymbol(aa$, "<=>") Then
+Set bstack.lastobj = Nothing
 If FastSymbol(aa$, "=") Then
     MUL = 3
     If Left$(aa$, 1) = "=" Then

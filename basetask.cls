@@ -859,6 +859,7 @@ Private Sub Class_Terminate()
 ' debug.print "basestack terminate"
 Me.ThrowThreads
 If IamChild Then Set MyParent.lastobj = lastobj
+Set LastEnum = Nothing
 Set lastobj = Nothing
 Set myOwner = Nothing
 Set mprocess = Nothing

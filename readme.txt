@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 2 active-X
+Version 9.7 Revision 3 active-X
 
-fix enum variables for use in if(), if$(), if, do (or repeat)
+fix enum variables in evaluator so adding two enums return double, not enum
 
 
 From version 9.0 revision 50:
