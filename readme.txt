@@ -1,8 +1,16 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 5 active-X
+Version 9.7 Revision 6 active-X
 
-fix a bug in syntax color for M2000 programs in an editbox.
+fix a bug when we have same name a global array and a local variable
+Example (now k(i)-100 executed normal):
+k=2
+global k(k)
+for i=0 to k-1 {
+   k(i)=100
+}
+Print k()
+
 
 
 From version 9.0 revision 50:

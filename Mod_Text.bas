@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 5
+Global Const Revision = 6
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -21044,6 +21044,9 @@ checkgrouphere:
                     Exit Function
                 Else
                    ' MyEr "Group has no parameters", "Η ομάδα δεν έχει παραμέτρους"
+                   If varhash.Find(nm$, k) Then
+                   GoTo conthere
+                   End If
                     Exit Function
                     End If
             End If
@@ -21064,9 +21067,9 @@ checkgrouphere:
       n$ = nm$
       End If
         End If
-
 End If
 End If
+conthere:
 If k <= 0 Then
 
             If searchonly Then Exit Function
@@ -38785,6 +38788,8 @@ Case 5, 7
     Else
         If neoGetArray(bstack, what$, pppp) And Not flag2 Then
             If Not NeoGetArrayItem(pppp, bs, what$, it, rest$) Then Exit Do
+'        ElseIf neoGetArray(bstack, what$, pppp, , True) And Not flag2 Then
+ '           If Not NeoGetArrayItem(pppp, bs, what$, it, rest$) Then Exit Do
         Else
             Exit Do
         End If
