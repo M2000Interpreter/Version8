@@ -1,11 +1,21 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 7 active-X
+Version 9.7 Revision 8 active-X
 
-1. Some additions to #pos() to support search for enum values.
-Enum any {a,b,c,d}
-Print (a,b,c)#pos(b,c)=1, (a,b,c)#pos(a)=0, (a,b,c)#pos(d)=-1
-2. Faster Interpreter - refactoring evaluator.
+Fix a bug in Select case when call a sub inside a Case without use a block of code
+if true then
+      select case "any"
+      Case "Sequence"
+            T()    ' here works before in a block {T()}
+      End select
+      Print "done"
+End if
+
+Sub T()
+Print "ok"
+End Sub
+
+
 
 
 From version 9.0 revision 50:

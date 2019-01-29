@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 7
+Global Const Revision = 8
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -31471,6 +31471,8 @@ End If
 If myexit(bs) Then
 ProcModuleEntry = False: Exit Function
 End If
+Dim exitnow As Boolean
+
  Do
   frm$ = Mid$(sbf(x1).sb, i)
 
@@ -31478,7 +31480,8 @@ againmod:
        If LastErNum = -1 Then
        GoTo myerror1
        End If
-        Select Case Execute(bs, frm$, False, False, loopthis)
+        exitnow = False
+        Select Case Execute(bs, frm$, exitnow, False, loopthis)
 
         Case 0
         
@@ -31565,7 +31568,7 @@ thh:
     If LastErNum <> 0 Then
                    rest$ = vbNullString
                     End If
-                    If bs.UseofIf > 0 Then MissENDIF: ProcModuleEntry = False
+               If Not exitnow Then If bs.UseofIf > 0 Then MissENDIF: ProcModuleEntry = False
 thh1:
                     On Error Resume Next
                     If Not basestack.CopyInOutCol Is Nothing Then CopyBack basestack

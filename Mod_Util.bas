@@ -14589,7 +14589,7 @@ If w4 <> 0 And par Then
         End If
 
 End If
-EXITNOW:
+exitnow:
 If basestack.IamThread Then
 ' let thread do the refresh
 ElseIf par Or F < 0 Then
@@ -17039,7 +17039,8 @@ conthere:
 
                                                             If i = 0 Then
                                                                 ExecuteLong = 0: Exit Function
-                                                            ElseIf i = 1 And ss$ = vbNullString Then 'this is an exit ой3
+                                                            ElseIf i = 1 And ss$ = vbNullString And once Then 'this is an exit ой3
+                                                                
                                                                 b$ = vbNullString
                                                                 ExecuteLong = 1
                                                                 Exit Function
