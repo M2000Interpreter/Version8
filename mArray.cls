@@ -1123,6 +1123,25 @@ End Sub
 Property Get IsEmpty() As Variant
 IsEmpty = dnum = 0
 End Property
+Function IsObj() As Boolean
+If index >= 0 And index <= maxitems1 Then
+If IsObject(actualdata(index)) Then
+    IsObj = True
+End If
+End If
+End Function
+Function IsEnum(p As Variant) As Boolean
+Dim obj As mHandler
+If index >= 0 And index <= maxitems1 Then
+If IsObject(actualdata(index)) Then
+If Typename(actualdata(index)) = "mHandler" Then
+    Set obj = actualdata(index)
+    IsEnum = obj.t1 = 4
+    If IsEnum Then p = obj.index_cursor * obj.sign
+End If
+End If
+End If
+End Function
 Private Sub Class_Initialize()
 dnum = 0 ' no actions
 maxitems = 1

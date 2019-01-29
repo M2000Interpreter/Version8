@@ -1556,7 +1556,7 @@ End With
 End Sub
 
 
-Public Sub PlainBaSket(ddd As Object, mybasket As basket, ByVal what As String, Optional ONELINE As Boolean = False, Optional nocr As Boolean = False, Optional plusone As Long = 2, Optional clearline As Boolean = False)
+Public Sub PlainBaSket(ddd As Object, mybasket As basket, ByVal what As String, Optional ONELINE As Boolean = False, Optional nocr As Boolean = False, Optional plusone As Long = 2, Optional clearline As Boolean = False, Optional processcr As Boolean = False)
 Dim PX As Long, PY As Long, r As Long, p$, c$, LEAVEME As Boolean, nr As RECT, nr2 As RECT
 Dim p2 As Long, mUAddPixelsTop As Long
 Dim pixX As Long, pixY As Long
@@ -1565,6 +1565,10 @@ Dim lenw&, realR&, realstop&, r1 As Long, WHAT1$
 
 Dim a() As Byte, a1() As Byte
 '' LEAVEME = False -  NOT NEEDED
+again:
+nr.Left = 0
+realR& = 0
+
 With mybasket
     mUAddPixelsTop = mybasket.uMineLineSpace \ dv15  ' for now
     PX = .curpos
@@ -1602,7 +1606,7 @@ With mybasket
         If ddd.FontTransparent = False Then FillBack ddd.hDC, nr2, .Paper
         ddd.CurrentX = PX * .Xt
         ddd.CurrentY = PY * .Yt + .uMineLineSpace
-     r1 = .mx - PX - 1 + r
+        r1 = .mx - PX - 1 + r
         If ddd.CurrentX = 0 And clearline Then ddd.Line (0&, PY * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (PY) * .Yt + .Yt - 1 * DYP), .Paper, BF
             Do
            '  If ddd.CurrentX = 0 And clearline Then ddd.Line (0&, PY * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (PY) * .Yt + .Yt - 1 * DYP), .Paper, BF
@@ -1610,29 +1614,96 @@ With mybasket
             If ONELINE And nocr And PX > .mx Then what = vbNullString: Exit Do
             c$ = Mid$(WHAT1$, r + 1, 1)
       
-            If nounder32(c$) Then
+                If nounder32(c$) Then
             
-               If Not skip Then
-              If a(r * 2 + 2) = 0 And a(r * 2 + 3) <> 0 And a1(r * 2 + 2) < 8 Then
+                If Not skip Then
+                    If a(r * 2 + 2) = 0 And a(r * 2 + 3) <> 0 And a1(r * 2 + 2) < 8 Then
                           Do
-                p$ = Mid$(WHAT1$, r + 2, 1)
-                If ideographs(p$) Then Exit Do
-                If Not nounder32(p$) Then Mid$(WHAT1$, r + 2, 1) = " ": Exit Do
-                c$ = c$ + p$
-                             r = r + 1
-                    If r >= r1 Then Exit Do
+                                p$ = Mid$(WHAT1$, r + 2, 1)
+                                If ideographs(p$) Then Exit Do
+                                If Not nounder32(p$) Then Mid$(WHAT1$, r + 2, 1) = " ": Exit Do
+                                c$ = c$ + p$
+                                r = r + 1
+                                If r >= r1 Then Exit Do
+                         Loop Until a(r * 2 + 2) <> 0 Or a(r * 2 + 3) = 0
+                     End If
+                 End If
+                 DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
+              Else
+              
+            If c$ = Chr$(7) Then Beep: r = r + 1: realR = realR - 1: GoTo cont0
+
+        If processcr Then
+            realR& = realR + 1
+            If c$ = ChrW(9) Then
+            
+            what$ = space$(.Column - (PX + realR - 1) Mod (.Column + 1)) + Mid$(WHAT1$, r + 2)
+            r = 0
+            .curpos = PX + realR
+            If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+            GoTo again
+            ElseIf c$ = ChrW(13) Then
+               If Mid$(WHAT1$, r + 2, 1) = ChrW(10) Then
+                            r = r + 1
+               End If
+              .curpos = 0
+                If PY + 1 = .My Then
+                    If ddd.name = "PrinterDocument1" Then
+                        getnextpage
+                         With nr
+                         .Top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .Top + pixY - p2
+                         End With
+                        PY = 1
+                        Else
+                        
+                        ScrollUpNew ddd, mybasket
+                        End If
+                Else
+                .currow = PY + 1
+                End If
+                what$ = Mid$(WHAT1$, r + 2)
+               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+               r = 0
+                    GoTo again
+        
+            ElseIf c$ = ChrW(10) Then
+                .curpos = 0
+                If PY + 1 = .My Then
+                    If ddd.name = "PrinterDocument1" Then
+                        getnextpage
+                         With nr
+                         .Top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .Top + pixY - p2
+                         End With
+                        PY = 1
+                        Else
+                        
+                        ScrollUpNew ddd, mybasket
+                        End If
                     
-                     Loop Until a(r * 2 + 2) <> 0 Or a(r * 2 + 3) = 0
-                 End If
-         
-                 End If
-                      DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
+                    
+                Else
+                .currow = PY + 1
+                End If
+                what$ = Mid$(WHAT1$, r + 2)
+               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+               r = 0
+                   GoTo again
+            End If
+        
+        End If
+  
+              
+              
+              
             End If
            r = r + 1
             With nr
             .Left = .Right
             .Right = .Left + pixX
             End With
+cont0:
            ddd.CurrentX = (PX + realR) * .Xt
         realR = realR + 1
      
@@ -1641,7 +1712,7 @@ With mybasket
         lenw& = lenw& - 1
         Exit Do
         End If
-        If realR > .mx + PX - 1 Then Exit Do
+        If realR > .mx - PX - 1 Then Exit Do
     
          Loop
         .curpos = PX + realR
@@ -1729,15 +1800,78 @@ r1 = Len(what$) - 1
                
       ddd.CurrentX = ddd.CurrentX + .Xt
         
-      Else
-        If c$ = Chr$(7) Then Beep
+    Else
+        If c$ = Chr$(7) Then Beep: GoTo cont1
+        If processcr Then
+            realR& = realR + 1
+            If c$ = ChrW(9) Then
+            
+            what$ = space$(.Column - (PX + realR - 1) Mod (.Column + 1)) + Mid$(WHAT1$, r + 2)
+            r = 0
+            .curpos = PX + realR
+            If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+            GoTo again
+            ElseIf c$ = ChrW(13) Then
+               If Mid$(WHAT1$, r + 2, 1) = ChrW(10) Then
+                    r = r + 1
+                End If
+                    .curpos = 0
+                If PY + 1 = .My Then
+                    If ddd.name = "PrinterDocument1" Then
+                        getnextpage
+                         With nr
+                         .Top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .Top + pixY - p2
+                         End With
+                        PY = 1
+                        Else
+                        
+                        ScrollUpNew ddd, mybasket
+                        End If
+                Else
+                .currow = PY + 1
+                End If
+                what$ = Mid$(WHAT1$, r + 2)
+               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+               r = 0
+                    
+                    GoTo again
+                
+            ElseIf c$ = ChrW(10) Then
+                .curpos = 0
+                If PY + 1 = .My Then
+                    If ddd.name = "PrinterDocument1" Then
+                        getnextpage
+                         With nr
+                         .Top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .Top + pixY - p2
+                         End With
+                        PY = 1
+                        Else
+                        
+                        ScrollUpNew ddd, mybasket
+                        End If
+                    
+                    
+                Else
+                .currow = PY + 1
+                End If
+                what$ = Mid$(WHAT1$, r + 2)
+               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+               r = 0
+                GoTo again
+            End If
+        
         End If
-        PrintUnicodeStandardWidthAddXT ddd, c$, nr
-        realR& = realR + 1
-         With nr
-           .Left = .Right
-           .Right = .Left + pixX
-        End With
+    End If
+        
+    DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
+    realR& = realR + 1
+    With nr
+       .Left = .Right
+       .Right = .Left + pixX
+    End With
+cont1:
     Next r
      .curpos = PX + realR
      .currow = PY
@@ -5687,7 +5821,7 @@ Next i
 If j = 0 Then pos = i: BlockParam3 = True
 End Function
 Public Sub GetCodePart(a$, pos As Long)
-Dim pos2 As Long, Level&, w$
+Dim pos2 As Long, w$
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
 If pos = 0 Then pos = 1
@@ -5703,7 +5837,6 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
-        Level& = 0
 again22:
       pos = pos + 1
         If Not BlockParam2(a$, pos) Then Exit Do
@@ -5801,7 +5934,7 @@ End If
 
 End Function
 Public Sub aheadstatusSkipParam(a$, pos As Long)
-Dim pos2 As Long, Level&, w$
+Dim pos2 As Long, w$
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
 If pos = 0 Then pos = 1
@@ -5817,7 +5950,6 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
-        Level& = 0
 again22:
       pos = pos + 1
         If Not BlockParam2(a$, pos) Then Exit Do
@@ -5850,7 +5982,7 @@ Loop
 End Sub
 Public Sub aheadstatusSkipParam2(a$, pos As Long)
 ' no block  ' for for next
-Dim pos2 As Long, Level&, w$
+Dim pos2 As Long, w$
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
 If pos = 0 Then pos = 1
@@ -5866,7 +5998,6 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
-        Level& = 0
 again22:
       pos = pos + 1
         If Not BlockParam2(a$, pos) Then Exit Do
@@ -5893,7 +6024,7 @@ Loop
 End Sub
 
 Public Sub aheadstatusNext(a$, pos As Long, Lang As Long, flag As Boolean)
-Dim pos2 As Long, Level&, what$, w$, lenA As Long, level2 As Integer
+Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 Const second1$ = "циа", len1 = 3
 Const second2$ = "FOR", len2 = 3
 flag = False
@@ -5916,7 +6047,6 @@ Do While pos <= lenA
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -6038,7 +6168,7 @@ pos = lenA + 2
 End Sub
 
 Public Sub aheadstatusDO(a$, pos As Long, Lang As Long, flag As Boolean)
-Dim pos2 As Long, Level&, what$, w$, lenA As Long, level2 As Integer
+Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 Const second1$ = "епамекабе", len1 = 9
 Const second11$ = "епамакабе", len11 = 9
 Const second2$ = "DO", len2 = 2
@@ -6063,7 +6193,6 @@ Do While pos <= lenA
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -6184,7 +6313,7 @@ pos = lenA + 2
 
 End Sub
 Public Sub aheadstatusANY(a$, pos As Long)
-Dim pos2 As Long, Level&, w$
+Dim pos2 As Long, w$
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
 If pos = 0 Then pos = 1
@@ -6200,7 +6329,6 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
-        Level& = 0
 again22:
       pos = pos + 1
         If Not BlockParam2(a$, pos) Then Exit Do
@@ -6232,7 +6360,7 @@ Loop
 
 End Sub
 Public Sub aheadstatusSTRUCT(a$, pos As Long)
-Dim pos2 As Long, Level&, w$, lenA As Long
+Dim pos2 As Long, w$, lenA As Long
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
 lenA = Len(a$)
@@ -6249,7 +6377,6 @@ Do While pos <= lenA
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
-        Level& = 0
 again22:
       pos = pos + 1
         If Not BlockParam2(a$, pos) Then Exit Do
@@ -6287,7 +6414,7 @@ Loop
 
 End Sub
 Public Sub aheadstatusIFthen(a$, pos As Long, Lang As Long, w$)
-Dim pos2 As Long, Level&, what$
+Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
@@ -6307,7 +6434,6 @@ Do While pos <= Len(a$)
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -6404,7 +6530,7 @@ If Len(what$) > 0 Then
 End If
 End Sub
 Public Sub aheadstatusIF(a$, pos As Long, Lang As Long, w$)
-Dim pos2 As Long, Level&, what$
+Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
@@ -6424,7 +6550,6 @@ Do While pos <= Len(a$)
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -6505,7 +6630,7 @@ If Len(what$) > 0 Then
 End If
 End Sub
 Public Sub aheadstatusELSE(a$, pos As Long, Lang As Long, w$)
-Dim pos2 As Long, Level&, what$
+Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
@@ -6525,7 +6650,6 @@ Do While pos <= Len(a$)
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -6611,7 +6735,7 @@ If Len(what$) > 1 Then
 End If
 End Sub
 Public Sub aheadstatusThen(a$, pos As Long, Lang As Long, w$)
-Dim pos2 As Long, Level&, what$
+Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
@@ -6631,7 +6755,6 @@ Do While pos <= Len(a$)
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -6715,7 +6838,7 @@ If Len(what$) > 1 Then
 End If
 End Sub
 Public Sub aheadstatusELSEIF(a$, pos As Long, Lang As Long, jump As Boolean, IFCTRL As Long, flag As Boolean)
-Dim Level&, what$, w$, lenA As Long, level2 As Integer, pos3 As Long
+Dim what$, w$, lenA As Long, level2 As Integer, pos3 As Long
 Const second1$ = "ам", len1 = 2
 Const second2$ = "IF", len2 = 2
 flag = True
@@ -6738,7 +6861,6 @@ Do While pos <= lenA
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -6915,7 +7037,7 @@ End Sub
 
 '
 Public Sub aheadstatusENDIF(a$, pos As Long, Lang As Long, flag As Boolean)
-Dim pos2 As Long, Level&, what$, w$, lenA As Long, level2 As Integer
+Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 Const second1$ = "ам", len1 = 2
 Const second2$ = "IF", len2 = 2
 flag = True
@@ -6938,7 +7060,6 @@ Do While pos <= lenA
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -7083,7 +7204,7 @@ End Sub
 
 
 Public Sub aheadstatusEND(a$, pos As Long, Lang As Long, second1$, len1 As Long, second2$, len2 As Long, flag As Boolean, v1 As Long)
-Dim pos2 As Long, Level&, what$, w$, lenA As Long, level2 As Integer
+Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 flag = False
 
 If a$ = vbNullString Then Exit Sub
@@ -7104,7 +7225,6 @@ Do While pos <= lenA
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
-        Level& = 0
 again22:
       pos = pos + 1
 
@@ -7296,7 +7416,7 @@ Debug.Print ok
 End Sub
 '
 Public Sub aheadstatusNew(a$, pos As Long, flag As Boolean)
-Dim b$, part$, w$, pos2 As Long, Level&
+Dim b$, part$, w$, pos2 As Long
 flag = False
 If a$ = vbNullString Then Exit Sub
 
@@ -7338,11 +7458,10 @@ Do While pos <= Len(a$)
         Loop
 
     ElseIf w$ = "(" Then
-        Level& = 0
 again:
         If part$ <> "" Then
             ' after
-            If part$ = "S" And Level& = 0 Then
+            If part$ = "S" Then
             '
              If Mid$(a$, pos + 1, 1) = ")" Then pos = pos + 2: GoTo conthere
              
@@ -7564,16 +7683,25 @@ End Sub
 
 
 
-Public Function aheadstatus(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
-Dim b$, part$, w$, pos2 As Long, Level&
+Public Function aheadstatusFast(a$) As String 'ok
+Dim b$, part$, w$, pos2 As Long, pos As Long
 
 If a$ = vbNullString Then Exit Function
-Dim v1 As Long
-If pos = 0 Then pos = 1
+Dim v1 As Integer
+pos = 1
 Do While pos <= Len(a$)
     w$ = Mid$(a$, pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If v1 = 2 Then
+        If part$ <> "" Then
+        b$ = b$ & part$
+        End If
+        part$ = "S"
+        pos = pos + CLng("&H" & Mid$(a$, pos + 1, 8)) + 8
+        w$ = """"
+   
+    
+    ElseIf Abs(v1) > 9 Then
     If part$ = vbNullString And w$ = "0" Then
         If pos + 2 <= Len(a$) Then
             If LCase(Mid$(a$, pos, 2)) Like "0[xВ]" Then
@@ -7606,7 +7734,233 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Loop
 
-    ElseIf w$ = Chr$(2) Then  ' packet string
+    ElseIf w$ = "(" Then
+again:
+        If part$ <> "" Then
+            ' after
+            If part$ = "S" Then
+            '
+             If Mid$(a$, pos + 1, 1) = ")" Then pos = pos + 2: GoTo conthere
+             
+            End If
+            ElseIf Right$(b$, 1) = "a" Then
+            b$ = Left$(b$, Len(b$) - 1)
+            part$ = vbNullString
+            Else
+            part$ = "N"
+              
+        End If
+again22:
+      pos = pos + 1
+
+        If Not BlockParam2(a$, pos) Then Exit Do
+        If Mid$(a$, pos + 1, 1) = "#" Then
+        b$ = vbNullString
+        part$ = "N"
+        pos = pos + 1
+        GoTo conthere
+        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
+        pos = pos + 1: GoTo again22
+        End If
+       If Mid$(a$, pos + 1, 1) <> "." And Mid$(a$, pos + 1, 2) <> "=>" Then
+       b$ = b$ & part$
+       End If
+        part$ = vbNullString
+        
+    ElseIf w$ = "{" Then
+Select Case Left$(Right$(b$, 2), 1)
+    Case "l"
+       Exit Do
+    Case "o"
+    If Right$(b$, 1) = "N" Then Exit Do
+    Case "S"
+    If Right$(b$, 1) = "a" Then
+    Select Case Left$(Right$(b$, 3), 1)
+    Case "l"
+        Exit Do
+    Case "o"
+    Exit Do
+
+    End Select
+    
+       If Left$(Right$(b$, 3), 1) = "l" Then Exit Do
+    End If
+    End Select
+         
+    If part$ <> "" Then
+        b$ = b$ & part$
+        End If
+        part$ = "S"
+        
+If pos <= Len(a$) Then
+            pos2 = pos
+        If Not blockStringAhead(a$, pos) Then Exit Do
+        If Right$(b$, 1) = "N" Then
+        If Not MaybeIsSymbol3lot(a$, "+<>=~", (pos + 1)) Then
+        pos = pos2
+        Exit Do
+        End If
+        End If
+        End If
+      
+
+    Else
+        Select Case w$
+        Case ","  ' bye bye
+        Exit Do
+        Case "%"
+            If part$ = vbNullString Then
+            End If
+        Case "$"
+            If part$ = vbNullString Then
+                If b$ = vbNullString Then
+                    part$ = "N"
+                ElseIf Right$(b$, 1) = "o" Then
+                    part$ = "N"
+                Else
+                    aheadstatusFast = b$
+                    Exit Function
+                End If
+            ElseIf part$ = "N" Then
+                    b$ = b$ & "Sa"
+                    If Mid$(a$, pos + 1, 1) = "." Then pos = pos + 1
+                    part$ = vbNullString
+            End If
+        Case "+", "-", "|"
+                    b$ = b$ & part$
+                    If b$ = vbNullString Then
+                    Else
+                    
+                part$ = "o"
+                End If
+        Case "*", "/", "^"
+            If part$ <> "o" Then
+            b$ = b$ & part$
+            End If
+            part$ = "o"
+        Case " ", ChrW(160)
+            If part$ <> "" Then
+            b$ = b$ & part$
+            part$ = vbNullString
+            Else
+            'skip
+            End If
+        
+        Case "0" To "9", "."
+            If part$ = "N" Then
+            If Len(a$) < pos Then
+                If Mid$(a$, pos + 1, 1) Like "[&@#%~]" Then pos = pos + 1
+            End If
+            
+            ElseIf part$ = "S" Then
+            
+            Else
+            
+            b$ = b$ & part$
+            part$ = "N"
+            End If
+        Case "&"
+        If part$ = vbNullString Then
+        part$ = "S"
+        ElseIf part$ = "N" Then
+        b$ = b$ + part$
+        part$ = vbNullString
+        Else
+        b$ = part$
+        part$ = "S"
+        End If
+        Case "e", "E", "Е", "е"
+            If part$ = "N" Then
+
+            ElseIf part$ = "S" Then
+            
+            
+            Else
+            b$ = b$ & part$
+            part$ = "N"
+            End If
+         Case ">", "<", "~"
+            If Len(a$) >= pos + 1 Then
+            If Mid$(a$, pos, 2) = Mid$(a$, pos, 1) Then
+                b$ = b$ & part$
+                If b$ = vbNullString Then
+                        Else
+                        
+                    part$ = "o"
+                    pos = pos + 1
+                    End If
+                ElseIf w$ = ">" And pos > 1 Then
+                    If Mid$(a$, pos - 1, 2) = "->" Then ' "->"
+                   If Right$(b$, 1) = "S" Then
+                    b$ = b$ + part$
+                    part$ = "N"
+                    Else
+                      '  part$ = vbNullString
+                    End If
+                        
+                    End If
+                End If
+            End If
+            GoTo there1
+         Case "="
+            If Mid$(a$, pos + 1, 1) = ">" Then
+                pos = pos + 2
+                GoTo conthere
+                End If
+there1:
+                If b$ & part$ <> "" Then
+               
+               b$ = Replace(b$ & part$, "a", "")
+                part$ = vbNullString
+               
+                If Left$(b$, Len(b$) - 1) <> "l" Then part$ = "l": Exit Do
+                
+                Else
+                Exit Do
+                End If
+
+        Case ")", "}", Is < " ", ":", ";", "'", "\"
+        Exit Do
+        Case Else
+        If part$ = "N" Then
+        ElseIf part$ = "S" Then
+        Else
+        
+     b$ = b$ & part$
+     part$ = "N"
+
+            End If
+        End Select
+        End If
+End If
+        pos = pos + 1
+        
+conthere:
+  
+Loop
+ 
+   
+   
+
+
+    aheadstatusFast = b$ & part$
+
+
+
+
+End Function
+
+
+Public Function aheadstatus(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
+Dim b$, part$, w$, pos2 As Long
+
+If a$ = vbNullString Then Exit Function
+Dim v1 As Long
+If pos = 0 Then pos = 1
+Do While pos <= Len(a$)
+    w$ = Mid$(a$, pos, 1)
+    v1 = AscW(w$)
+    If v1 = 2 Then
         If part$ <> "" Then
         b$ = b$ & part$
         End If
@@ -7615,12 +7969,44 @@ Do While pos <= Len(a$)
         w$ = """"
    
     
+    ElseIf Abs(v1) > 9 Then
+    If part$ = vbNullString And w$ = "0" Then
+        If pos + 2 <= Len(a$) Then
+            If LCase(Mid$(a$, pos, 2)) Like "0[xВ]" Then
+            'hexadecimal literal number....
+                pos = pos + 2
+                Do While pos <= Len(a$)
+                If Not Mid$(a$, pos, 1) Like "[0-9a-fA-F]" Then Exit Do
+                pos = pos + 1
+                Loop
+                b$ = b$ & "N"
+                If pos <= Len(a$) Then
+                    w$ = Mid$(a$, pos, 1)
+                Else
+                    Exit Do
+                End If
+            End If
+        End If
+    End If
+
+    If w$ = """" Then
+        If part$ <> "" Then
+        b$ = b$ & part$
+        End If
+        part$ = "S"
+        pos = pos + 1
+        Do While pos <= Len(a$)
+        If Mid$(a$, pos, 1) = """" Then Exit Do
+    If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+   
+        pos = pos + 1
+        Loop
+
     ElseIf w$ = "(" Then
-        Level& = 0
 again:
         If part$ <> "" Then
             ' after
-            If part$ = "S" And Level& = 0 Then
+            If part$ = "S" Then
             '
              If Mid$(a$, pos + 1, 1) = ")" Then pos = pos + 2: GoTo conthere
              
@@ -7883,7 +8269,85 @@ End If
 
 End Function
 
+Public Function aheadstatusStr(a$) As Long 'ok
+Dim w$, pos2 As Long, pos As Long
+If a$ = vbNullString Then Exit Function
+Dim v1 As Integer
+ pos = 1
+Do While pos <= Len(a$)
+    w$ = Mid$(a$, pos, 1)
+    v1 = AscW(w$)
+    
+    If v1 = 2 Then
+    If pos2 = 0 Then aheadstatusStr = True
+    Exit Function
+    
+    ElseIf Abs(v1) > 9 Then
+    
+    If v1 = 34 Then
+        If pos2 = 0 Then aheadstatusStr = True
+        Exit Function
 
+    ElseIf w$ = "(" Then
+        
+again22:
+        pos = pos + 1
+
+        If Not BlockParam2(a$, pos) Then Exit Do
+        If Mid$(a$, pos + 1, 1) = "#" Then
+        pos = pos + 1
+        GoTo conthere
+        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
+        pos = pos + 1: GoTo again22
+        End If
+       If Mid$(a$, pos + 1, 1) <> "." And Mid$(a$, pos + 1, 2) <> "=>" Then
+       
+       End If
+       
+        
+    ElseIf w$ = "{" Then
+         
+        aheadstatusStr = True
+        Exit Function
+    Else
+        Select Case w$
+        Case " ", ChrW(160)
+        If pos2 > 0 Then Exit Function
+        Case "%"
+            If Not Mid$(a$, pos + 1, 1) = "(" Then Exit Function
+        Case "$"
+            aheadstatusStr = True
+            Exit Function
+        Case "="
+            If Not Mid$(a$, pos + 1, 1) = ">" Then Exit Function
+            pos = pos + 1
+        Case "-"
+            If Not Mid$(a$, pos + 1, 1) = ">" Then Exit Function
+            pos = pos + 1
+        Case "."
+         pos2 = pos2 + 1
+        Case "0" To "9"
+        If pos2 = 0 Then Exit Function
+        Case "&"
+        If pos2 = 0 Then aheadstatusStr = True: Exit Function
+       
+         Case Is < " ", ")", "}", ":", ";", "'", "\", "<", "~", ",", ">", "+", "*", "/", "'", "~", "|"
+         Exit Function
+        Exit Do
+        Case Else
+        pos2 = pos2 + 1
+        End Select
+        End If
+End If
+        pos = pos + 1
+        
+conthere:
+  
+Loop
+
+
+
+End Function
 
 Function blockStringAhead(s$, pos1 As Long) As Long
 Dim i As Long, j As Long, c As Long
@@ -12412,12 +12876,10 @@ Sub test(a$)
 
 Dim pos1 As Long
 pos1 = 1
-'Debug.Print BlockParam3(a$, pos1)
+
+Debug.Print aheadstatus(a$, False)
 'Debug.Print pos1
-'pos1 = 1
-Debug.Print aheadstatus(a$, True, pos1)
-Debug.Print pos1
-Debug.Print Left$(a$, pos1)
+'Debug.Print Left$(a$, pos1)
 End Sub
 Public Function ideographs(c$) As Boolean
 Dim code As Long
@@ -13287,8 +13749,13 @@ Else
         GoTo isAstring
     Else
             If Not IsNumeric(myobject.Value) Then
-                If MyIsObject(myobject.Value) Then
+                If myobject.IsObj Then
+                    If myobject.IsEnum(p) Then
+                    counter = counter + countDir
+                    GoTo isanumber
+                    Else
                     s$ = " "
+                    End If
                 Else
                     s$ = myobject.Value
                 End If
@@ -13297,7 +13764,9 @@ Else
                 counter = counter + countDir
                 GoTo isAstring
             Else
+                If Not myobject.IsEnum(p) Then
                 p = myobject.Value
+                End If
                 counter = counter + countDir
                 GoTo isanumber
             End If
@@ -13413,7 +13882,7 @@ isanumber:
             RevisionPrint = LastErNum = -2
             Set Scr = Nothing
             GoTo exit2
-    ElseIf IsStrExp(basestack, rest$, s$) Then
+    ElseIf IsStrExp(basestack, rest$, s$, Len(basestack.tmpstr) = 0) Then
     ' special not good for every day...is 255 char in greek codepage
    '   If InStr(s$, ChrW(&HFFFFF8FB)) > 0 Then s$ = Replace(s$, ChrW(&HFFFFF8FB), ChrW(&H2007))
      If Not basestack.lastobj Is Nothing Then
@@ -13891,7 +14360,7 @@ End If
         End If
         Else
               If F < 0 Then
-            PlainBaSket Scr, prive, s$
+            PlainBaSket Scr, prive, s$, , , , , True
         ElseIf uni(F) Then
             putUniString F, s$
             Else
@@ -14123,7 +14592,7 @@ End If
 EXITNOW:
 If basestack.IamThread Then
 ' let thread do the refresh
-ElseIf par Then
+ElseIf par Or F < 0 Then
     If Not extreme Then
     PrintRefresh basestack, Scr
     End If
@@ -14631,6 +15100,8 @@ Else
 res = pppp.item(w2)
 End If
 End If
+Case "EXIST", "упаявеи"
+
 Case "FOLD", "пай", "FOLD$", "пай$"
 If IsExp(bstack, a$, p) Then
     If Not bstack.lastobj Is Nothing Then
@@ -14772,6 +15243,7 @@ res = -1
 cur = 0
 Dim st() As String, sn() As Variant
 If IsExp(bstack, a$, p) Then
+again1:
     If FastSymbol(a$, "->", , 2) Then
         If IsExp(bstack, a$, r) Then
         If bstack.lastobj Is Nothing Then
@@ -14783,7 +15255,10 @@ dothis:
             Set bstack.lastobj = Nothing
             If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
             Set useHandler = anything
-            If Not TypeOf useHandler.objref Is mArray Then Exit Function
+            If Not TypeOf useHandler.objref Is mArray Then
+            If useHandler.t1 = 4 Then Set useHandler = Nothing: Set anything = Nothing: GoTo again1
+            Exit Function
+            End If
             Set pppp1 = useHandler.objref
 
             sn() = pppp1.GetCopy()
@@ -14849,19 +15324,37 @@ inside:
 
     Else
     For w3 = p To pppp.count - 1
-    If pppp.MyIsNumeric(pppp.item(w3)) Then If pppp.item(w3) = r Then res = w3: Exit For
+    If pppp.MyIsNumeric(pppp.item(w3)) Then
+    If pppp.item(w3) = r Then res = w3: Exit For
+    Else
+    If Typename(pppp.item(w3)) = "mHandler" Then
+    Set useHandler = pppp.item(w3)
+    If useHandler.t1 = 4 Then
+    
+    If useHandler.index_cursor * useHandler.sign = r Then res = w3: Exit For
+    End If
+    End If
+    End If
     Next w3
     Do While FastSymbol(a$, ",")
     If cur = UBound(sn()) Then ReDim Preserve sn(0 To cur * 2 - 1) As Variant
     cur = cur + 1
-    If IsExp(bstack, a$, sn(cur)) Then
+    If IsExp(bstack, a$, sn(cur), , True) Then
         
         If res > -1 Then
             w3 = w3 + 1
             If w3 < pppp.count Then
                 If pppp.MyIsNumeric(pppp.item(w3)) Then
                     If pppp.item(w3) <> sn(cur) Then res = -1
+                ElseIf Typename(pppp.item(w3)) = "mHandler" Then
+                    Set useHandler = pppp.item(w3)
+                    If useHandler.t1 = 4 Then
+                        If useHandler.index_cursor * useHandler.sign <> sn(cur) Then res = -1
+                    Else
+                    res = -1
+                    End If
                 Else
+                
                     res = -1
                 End If
             Else
@@ -14883,6 +15376,13 @@ inside:
                 If w4 < pppp.count Then
                     If pppp.MyIsNumeric(pppp.itemnumeric(w4)) Then
                         If pppp.item(w4) <> sn(w2) Then res = -1: Exit For
+                    ElseIf Typename(pppp.item(w4)) = "mHandler" Then
+                    Set useHandler = pppp.item(w4)
+                    If useHandler.t1 = 4 Then
+                        If useHandler.index_cursor * useHandler.sign <> sn(w2) Then res = -1
+                    Else
+                    res = -1
+                    End If
                     Else
                         res = -1
                     End If
@@ -19113,9 +19613,9 @@ ExistNum = False
                 Exit Function
         ElseIf TypeOf .objref Is FastCollection Then
             If FastSymbol(a$, ",") Then
-                If IsExp(bstack, a$, p) Then
+                If IsExp(bstack, a$, p, , True) Then
                     If FastSymbol(a$, ",") Then
-                        If IsExp(bstack, a$, x) Then
+                        If IsExp(bstack, a$, x, , True) Then
                         x = Int(x)
                         If x = 0 Then
                                 r = .objref.FindOne(p, x)
@@ -19138,6 +19638,7 @@ ExistNum = False
                     r = SG * .objref.Find(p)
                     End If
                 ElseIf IsStrExp(bstack, a$, s$) Then
+                    Set bstack.lastobj = Nothing
                     If FastSymbol(a$, ",") Then
                         If IsExp(bstack, a$, x) Then
                             x = Int(x)

@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 6
+Global Const Revision = 7
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2762,7 +2762,9 @@ firstexp:
 End If
 Do While MaybeIsSymbol(b$, ",)")
 IsSymbol b$, ","
-If IsStrExp(bstack, b$, s$) Then
+If MaybeIsSymbol(b$, ")") Then
+pppp.SerialItem 0, x1, 9: Exit Do
+ElseIf IsStrExp(bstack, b$, s$) Then
             pppp.SerialItem 0, x1, 9
             If bstack.lastobj Is Nothing Then
                 pppp.item(x1 - 1) = s$
@@ -2780,8 +2782,8 @@ ElseIf IsExp(bstack, b$, p) Then
                 Set bstack.lastobj = Nothing
             End If
             x1 = x1 + 1
-ElseIf MaybeIsSymbol(b$, ")") Then pppp.SerialItem 0, x1, 9: Exit Do
 End If
+
 Loop
 p = 0
 Set bstack.lastobj = New mHandler
@@ -2790,6 +2792,29 @@ Set bstack.lastobj.objref = pppp
 If FastSymbol(b$, ")#", , 2) Then
 
 GetArr = ExpMatrix(bstack, b$, p)
+If GetArr Then
+If bstack.lastobj Is Nothing Then
+            If Typename(p) = "String" Then
+            s$ = p
+            bstack.soros.PushStr s$
+            bstack.tmpstr = "@LETTER$ " + Left$(b$, 1)
+            Else
+            bstack.soros.PushVal p
+            bstack.tmpstr = "@NUMBER " + Left$(b$, 1)
+            End If
+            BackPort b$
+ElseIf TypeOf bstack.lastobj Is mHandler Then
+If bstack.lastobj.t1 <> 3 Then
+            bstack.soros.PushObj bstack.lastobj
+            Set bstack.lastobj = Nothing
+            bstack.tmpstr = "@STACKITEM() " + Left$(b$, 1)
+            BackPort b$
+
+
+End If
+End If
+End If
+
 Else
 GetArr = FastSymbol(b$, ")")
 End If
@@ -2800,6 +2825,7 @@ Dim par As Long, parin As Long
 If LastErNum = -2 Then LastErNum = 0
 If a$ = vbNullString Or a$ = vbCrLf Then Exit Function
 parin = par
+
 IsExp = IsExpA(basestack, a$, r, par, noand1, Comp)
 
 again:
@@ -2808,7 +2834,13 @@ If MaybeIsSymbol(a$, ",") Then
 parin = par
 IsExp = GetArr(basestack, a$, r, "", 1)
 If LastErNum = -2 Then IsExp = False Else
-If IsExp Then par = par - 1: If par > 0 Then GoTo again
+
+If IsExp Then
+par = par - 1: If par > 0 Then GoTo again
+If basestack.lastobj Is Nothing Then
+IsExp = IsExpA(basestack, a$, r, par, noand1, Comp, True)
+End If
+End If
 End If
 End If
 If Not IsExp Then
@@ -2923,7 +2955,7 @@ Do
         End If
 Loop
 End Function
-Function IsExpA(bstack As basetask, aa$, rr As Variant, parenthesis As Long, Optional ByVal noand As Boolean = True, Optional Comp As Boolean = True) As Boolean
+Function IsExpA(bstack As basetask, aa$, rr As Variant, parenthesis As Long, Optional ByVal noand As Boolean = True, Optional Comp As Boolean = True, Optional ByPass As Boolean = False) As Boolean
 Dim r As Variant, ac As Variant, po As Variant, MUL As Long, r1 As Variant, ut$, back As Variant
 Dim logic As Boolean, l As Boolean, park As Object, objlist As mStiva, rightlevel As Long
 On Error Resume Next
@@ -2949,7 +2981,7 @@ Do
         End If
     Loop
 again:
-    If logical(bstack, aa$, r, parenthesis) Then
+    If logical(bstack, aa$, r, parenthesis, , ByPass) Then
 again2:
       If Not bstack.lastobj Is Nothing Then
         If TypeOf bstack.lastobj Is mHandler Then
@@ -2958,10 +2990,7 @@ again2:
         If po < 0 Then r = -r: po = -po: bstack.lastobj.sign = -bstack.lastobj.sign
         
         End If
-         '   GoTo LeaveIt
-       ' Else
            GoTo cont111333
-       ' End If
         ElseIf MaybeIsSymbol(aa$, "/*-+=~^&|<>?") Then
         
                 '' get operator
@@ -4554,7 +4583,9 @@ Exit Function
 num88: ' "ΟΘΟΝΗ","SHOW"
     If Not Screen.ActiveForm Is Nothing Then
     If bstack.Owner Is Form1.DIS Then
-    r = SG * Form1.hWND = Screen.ActiveForm.hWND
+    r = SG * (Form1.hWND = Screen.ActiveForm.hWND And bstack.Owner.Visible)
+    ElseIf Typename(bstack.Owner) = "PictureBox" Then
+    r = SG * bstack.Owner.Visible
     Else
     r = SG * bstack.Owner.hWND = Screen.ActiveForm.hWND
     End If
@@ -7912,11 +7943,14 @@ a$ = NLtrim$(a$)
      If Len(r$) > 0 Then Exit Do
      a$ = Mid$(a$, 2)
      ' get a name from bstack tempstr
-     nocommand = True
+     
      a$ = bstack.tmpstr + a$
      fixlen = True
      bstack.tmpstr = vbNullString
-         
+     nocommand = Left$(a$, 1) <> "@"
+      
+      
+      'End If
     Case 2 To 7
         a$ = Mid$(a$, 2)
         Case 1
@@ -10059,9 +10093,18 @@ a$ = NLtrim$(a$)
    'a$ = LTrim(a$)
 
 End Function
-Function IsStrExp(basestack As basetask, aa$, rr$) As Boolean
-If Left$(aheadstatus(aa$, False), 1) <> "S" Then IsStrExp = False: Exit Function
+Function IsStrExp(basestack As basetask, aa$, rr$, Optional check As Boolean = True) As Boolean
+If check Then
+If Not aheadstatusStr(aa$) Then
+'If Left$(aheadstatus(aa$, False), 1) = "S" Then Stop
+ IsStrExp = False: Exit Function
+End If
+End If
+'If check Then If Left$(aheadstatus(aa$, False), 1) <> "S" Then IsStrExp = False: Exit Function
 If LastErNum = -2 Then LastErNum = 0 ': LastErNum1 = 0
+If MaybeIsSymbol(aa$, "(") Then
+IsExp basestack, aa$, (0), , True, False
+End If
 Dim ac$, fault As Boolean
 ' uink$ = VbNullString 'MINK$
 again:
@@ -22154,11 +22197,15 @@ If i > 1 Then PosLabel = i + 1 '' Else PosLabel = 1
 End If
 End Function
 
-Function logical(basestack As basetask, s$, d As Variant, Optional par As Long = 0, Optional flatobject As Boolean = False) As Boolean
+Function logical(basestack As basetask, s$, d As Variant, Optional par As Long = 0, Optional flatobject As Boolean = False, Optional ByPass As Boolean = False) As Boolean
 Dim b$, s2$, S3$ ' , OSTAC$
 Dim ah As String
-
-ah = aheadstatus(s$, False)    '
+If ByPass Then
+ah = aheadstatusFast(basestack.tmpstr)
+ 
+Else
+    ah = aheadstatusFast(s$)
+End If
 If InStr(ah, "l") = 0 Then
 If InStr(ah, "N") > 0 Then
 
@@ -22172,6 +22219,16 @@ If par > 0 Then
 If Not GetArr(basestack, s$, d, s2$, 0) Then
     Set basestack.lastobj = Nothing
 Else
+    If Len(s$) > 0 Then
+    If AscW(s$) = 8 Then
+    par = par - 1
+    If ah = "S" Then Exit Function
+    IsStr1 basestack, s$, b$
+    s2$ = s$
+
+   GoTo conthere
+   End If
+    End If
     logical = True
 End If
 
@@ -22193,6 +22250,7 @@ s2$ = s$
 
 If Left$(ah, 1) <> "N" Then
  IsStrExp basestack, s$, b$
+conthere:
 logical = False
 If Not mTextCompare Then
 If FastSymbol(s$, "=") Then
@@ -27235,7 +27293,7 @@ If FastSymbol(rest$, ",") Then
         If UBound(var2()) < items Then ReDim Preserve var2(items + 1)
         GoTo again
 End If
-s$ = aheadstatus(rest$, True) + " "
+s$ = aheadstatus(rest$) + " "
 Select Case Left$(s$, 1)
 Case "S"
 If (trap Mod 2 = 0) And namedargument > 0 Then Exit Do  ' is a fault
@@ -42173,7 +42231,7 @@ prive = GetCode(basestack.Owner)
 If Lang = 1 Then
 PlainBaSket basestack.Owner, players(prive), "George Karras (C), Preveza, Greece 1999-2018"
 Else
-PlainBaSket basestack.Owner, players(prive), "Γιώργος Καρράς (C), Πρέβεζα, Ελλάδα 1999-2018"
+PlainBaSket basestack.Owner, players(prive), ListenUnicode(915, 953, 974, 961, 947, 959, 962, 32, 922, 945, 961, 961, 940, 962, 32, 40, 67, 41, 44, 32, 928, 961, 941, 946, 949, 950, 945, 44, 32, 917, 955, 955, 940, 948, 945, 32, 49, 57, 57, 57, 45, 50, 48, 49, 56)
 End If
 crNew basestack, players(prive)
 ProcWriter = True

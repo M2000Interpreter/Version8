@@ -5539,7 +5539,7 @@ End Select
 
 End Function
 Private Function aheadstatus2000(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
-Dim b$, part$, w$, Level&, pos2 As Long, word$
+Dim b$, part$, w$, pos2 As Long, word$
 
 If a$ = vbNullString Then Exit Function
 If pos = 0 Then pos = 1
@@ -5579,7 +5579,6 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
-        Level& = 0
         If part$ <> "" Then
             ' after
             ElseIf Right$(b$, 1) = "a" Then
@@ -5846,7 +5845,7 @@ End If
 End Function
 
 Private Function aheadstatus(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
-Dim b$, part$, w$, Level&, pos2 As Long, word$
+Dim b$, part$, w$, pos2 As Long, word$
 
 If a$ = vbNullString Then Exit Function
 If pos = 0 Then pos = 1
@@ -5887,18 +5886,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Loop
 
-    ElseIf w$ = Chr$(2) Then  ' packet string
-        If part$ <> "" Then
-        b$ = b$ & part$
-        End If
-        part$ = "S"
-        '  UNPACKLNG(Mid$(a$, pos+1, 8)+10
-        pos = pos + CLng("&H" & Mid$(a$, pos + 1, 8)) + 8
-        w$ = Chr(34)
-   
-    
     ElseIf w$ = "(" Then
-        Level& = 0
         If part$ <> "" Then
             ' after
             ElseIf Right$(b$, 1) = "a" Then

@@ -855,6 +855,28 @@ If index >= 0 And index < mMany Then
     End If
 End If
 End Property
+Function IsObj() As Boolean
+Dim aa As VarItem
+If index >= 0 And index < mMany Then
+    Set aa = mstack.item(index + 1)
+    If aa.slot = 1 Then
+        IsObj = True
+    End If
+End If
+End Function
+Function IsEnum(p As Variant) As Boolean
+Dim aa As VarItem, obj As mHandler
+If index >= 0 And index < mMany Then
+    Set aa = mstack.item(index + 1)
+    If aa.slot = 1 Then
+    If Typename(aa.mItem) = "mHandler" Then
+        Set obj = aa.mItem
+        IsEnum = obj.t1 = 4
+        If IsEnum Then p = obj.index_cursor * obj.sign
+        End If
+    End If
+End If
+End Function
 Sub SplitStackTop(fromstiva As Object, item As Long)
 Dim aa As VarItem, i As Long
 Dim thisstiva As mStiva

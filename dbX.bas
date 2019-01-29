@@ -381,7 +381,7 @@ End If
 End Sub
 
 Public Sub TABLENAMES(base As String, bstackstr As basetask, r$, Lang As Long)
-Dim tablename As String, scope As Long, cnt As Long, srl As Long, stac1 As New mStiva2
+Dim tablename As String, scope As Long, cnt As Long, srl As Long, stac1 As New mStiva
 Dim myBase  ' variant
 scope = 1
 

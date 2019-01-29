@@ -621,6 +621,17 @@ Else
 IsObj = IsObject(PriveSpace(index).iValue)
 End If
 End Function
+Function IsEnum(p As Variant) As Boolean
+Dim obj As mHandler
+If index = -1 Then
+ElseIf IsObject(PriveSpace(index).iValue) Then
+If Typename(PriveSpace(index).iValue) = "mHandler" Then
+    Set obj = PriveSpace(index).iValue
+    IsEnum = obj.t1 = 4
+    If IsEnum Then p = obj.index_cursor * obj.sign
+End If
+End If
+End Function
 
 Function Find(RHS) As Boolean
 Dim k As Long, Key As String, k1 As Long
@@ -654,7 +665,7 @@ End If
 End If
 
 End Function
-Function FindOne(RHS, Num) As Boolean
+Function FindOne(RHS, num) As Boolean
 Dim k As Long, Key As String, k1 As Long
 Key = Normalize(RHS)
 If Len(Key) = 0 Then Key = Chr$(0) + Chr$(0) + Chr$(0) + Chr$(0)
@@ -665,8 +676,8 @@ k1 = -2
 If k >= 0 Then
 Do
     If PriveSpace(k).Key = Key Then
-        Num = Num + 1
-        If Num = 0 Then FindOne = True: lastfind = Key: index = k: Done = True: Exit Function
+        num = num + 1
+        If num = 0 Then FindOne = True: lastfind = Key: index = k: Done = True: Exit Function
     End If
      ParentIndex = k
      k1 = k
@@ -680,8 +691,8 @@ ParentIndex = -1
 If k >= 0 Then
 Do
     If PriveSpace(k).Key = Key Then
-      Num = Num + 1
-        If Num = 0 Then FindOne = True: lastfind = Key: index = k: Done = True: Exit Function
+      num = num + 1
+        If num = 0 Then FindOne = True: lastfind = Key: index = k: Done = True: Exit Function
     End If
      ParentIndex = k
      k1 = k
