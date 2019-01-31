@@ -454,9 +454,9 @@ End Sub
 Private Sub glistN_SpinnerValue(ThatValue As Long)
 ''' RaiseEvent SpinnerValue(ThatValue)
    If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".SpinnerValue(" + Str(mIndex) + "," + LTrim(Str(ThatValue)) + ")"
+   Callback.Callback mesCtrlName + ".SpinnerValue(" + Str(mIndex) + "," + LTrim$(Str(ThatValue)) + ")"
    Else
-      Callback.Callback mesCtrlName + ".SpinnerValue(" + LTrim(Str(ThatValue)) + ")"
+      Callback.Callback mesCtrlName + ".SpinnerValue(" + LTrim$(Str(ThatValue)) + ")"
       End If
      '' vartext = str(ThatValue)
 End Sub
@@ -699,9 +699,9 @@ End Property
 Public Property Get Drag()
 Drag = glistN.DragEnabled
 End Property
-Public Property Let Drop(RHS)
+Public Property Let drop(RHS)
 glistN.DropEnabled = RHS
 End Property
-Public Property Get Drop()
-Drop = glistN.DropEnabled
+Public Property Get drop()
+drop = glistN.DropEnabled
 End Property

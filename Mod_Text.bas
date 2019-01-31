@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 8
+Global Const Revision = 9
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -8498,7 +8498,7 @@ cont123:
     IsLabelBig = rr&
     End If
     nocommand = IsLabelBig And (Len(r$) = 1 Or nocommand)
- '' a$ = LTrim(a$)
+ '' a$ = LTrim$(a$)
 
 End Function
 Function IsLabelFileName(bstack As basetask, a$, rrr$, Optional nocommand As Boolean, Optional r$, Optional noconvert As Boolean = False) As Long
@@ -8828,7 +8828,7 @@ Case Is < 0, Is > 64 ' >=A and negative
    
     IsLabelFileName = rr&
     nocommand = IsLabelFileName And (Len(r$) = 1 Or nocommand)
- '' a$ = LTrim(a$)
+ '' a$ = LTrim$(a$)
 
 End Function
 Function IsLabel(bstack As basetask, a$, rrr$, Optional skipdot As Boolean) As Long
@@ -9161,7 +9161,7 @@ Case Is < 0, Is > 64 ' >=A and negative
    
     innerIsLabel = rr&
 
- '' a$ = LTrim(a$)
+ '' a$ = LTrim$(a$)
 
 End Function
 Function IsLabelDIM(bstack As basetask, a$, r$) As Long
@@ -9954,7 +9954,7 @@ a$ = NLtrim$(a$)
 r$ = myUcase(r$, gr)
 
     IsLabelA1 = rr&
-   'a$ = LTrim(a$)
+   'a$ = LTrim$(a$)
 
 End Function
 
@@ -10090,7 +10090,7 @@ a$ = NLtrim$(a$)
     Loop
        r$ = firstdot$ + myUcase(r$, gr)
     IsLabelDot = rr&
-   'a$ = LTrim(a$)
+   'a$ = LTrim$(a$)
 
 End Function
 Function IsStrExp(basestack As basetask, aa$, rr$, Optional check As Boolean = True) As Boolean
@@ -10165,7 +10165,7 @@ End Function
 Function IsString(bstackstr As basetask, a$, r$) As Boolean
 r$ = vbNullString
 Dim i As Long, q
-i = MyTrimL(a$)
+i = MyTrimL(a$)   ' MyTrimL("   ") return 3 no 0. but never happen to be "   "
 q = AscW(Mid$(a$, i, 1))
 Select Case q
 Case 123
@@ -11053,7 +11053,7 @@ Case 6
         If Not strfunid.Find(q$, w2, bstackstr.strfunnum) Then GoTo itisarrayorfunction
         If w2 < 0 Then GoTo itisarrayorfunction
     End If
-    On w2 GoTo fstr1, fstr2, fstr3, fstr4, fstr5, fstr6, fstr7, fstr8, fstr9, fstr10, fstr11, fstr12, fstr13, fstr14, fstr15, fstr16, fstr17, fstr18, fstr19, fstr20, fstr21, fstr22, fstr23, fstr24, fstr25, fstr26, fstr27, fstr28, fstr29, fstr30, fstr31, fstr32, fstr33, fstr34, fstr35, fstr36, fstr37, fstr38, fstr39, fstr40, fstr41, fstr42, fstr43, fstr44, fstr45, fstr46, fstr47, fstr48, fstr49, fstr50, fstr51, fstr52, fstr53, fstr54, fstr55, fstr56, fstr57, fstr58, fstr59, fstr60, fstr61, fstr62, fstr63, fstr64, fstr65, fstr66, fstr67, fstr68
+    On w2 GoTo fstr1, fstr2, fstr3, fstr4, fstr5, fstr6, fstr7, fstr8, fstr9, fstr10, fstr11, fstr12, fstr13, fstr14, fstr15, fstr16, fstr17, fstr18, fstr19, fstr20, fstr21, fstr22, fstr23, fstr24, fstr25, fstr26, fstr27, fstr28, fstr29, fstr30, fstr31, fstr32, fstr33, fstr34, fstr35, fstr36, fstr37, fstr38, fstr39, fstr40, fstr41, fstr42, fstr43, fstr44, fstr45, fstr46, fstr47, fstr48, fstr49, fstr50, fstr51, fstr52, fstr53, fstr54, fstr55, fstr56, fstr57, fstr58, fstr59, fstr60, fstr61, fstr62, fstr63, fstr64, fstr65, fstr66, fstr67, fstr68, fstr69, fstr70
 fstr68: ' "¡Õ¡–$(","STRREV$("
 If IsStrExp(bstackstr, a$, q$) Then
     r$ = StrReverse(q$)
@@ -12096,7 +12096,7 @@ fstr30: ' "ARRAY$(", "–…Õ¡ ¡”$("
         If bstackstr.lastobj Is Nothing Then
             If Right$("!!" & s$, 2) = "()" Then
                 Mid$(s$, Len(s$), 1) = " "
-                s$ = RTrim(s$)
+                s$ = RTrim$(s$)
             Else
                 w = InStr("!" & s$, "(") - 1
                 If w > 0 And w <= Len(s$) Then
@@ -12998,6 +12998,50 @@ fstr50: '"JPG$(", "÷Ÿ‘œ$("
         IsStr1 = False
     Exit Function
     End If
+fstr69: '"RTRIM$(", "¡–œ .ƒ≈$("
+    dd = 2 + (AscW(q$) < 128)
+    If IsStrExp(bstackstr, a$, q$) Then
+        If IsLabelSymbolNew(a$, "Ÿ”", "AS", dd, , , , False) Then
+        If IsLabelSymbolNew(a$, "ÿ«÷…œ", "BYTE", dd, , , , False) Then
+           r$ = MyTrimRB$(q$)
+        Else
+           SyntaxError
+            Exit Function
+        End If
+    Else
+        r$ = MyTrimRW$(q$)
+    End If
+        If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
+        IsStr1 = True
+        Exit Function
+    Else
+
+        IsStr1 = False
+    Exit Function
+    End If
+
+fstr70: '"LTRIM$(", "¡–œ .¡—$("
+    dd = 2 + (AscW(q$) < 128)
+    If IsStrExp(bstackstr, a$, q$) Then
+        If IsLabelSymbolNew(a$, "Ÿ”", "AS", dd, , , , False) Then
+        If IsLabelSymbolNew(a$, "ÿ«÷…œ", "BYTE", dd, , , , False) Then
+           r$ = MyTrimLB$(q$)
+        Else
+           SyntaxError
+            Exit Function
+        End If
+    Else
+        r$ = MyTrimLW$(q$)
+    End If
+        If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
+        IsStr1 = True
+        Exit Function
+    Else
+
+        IsStr1 = False
+    Exit Function
+    End If
+
 fstr51: '"TRIM$(", "¡–œ $("
     dd = 2 + (AscW(q$) < 128)
     If IsStrExp(bstackstr, a$, q$) Then
@@ -13027,7 +13071,7 @@ If IsStrExp(bstackstr, a$, q$) Then
 ' make q$ as json string
  r$ = r$ & q1$ & Chr(34) + q$ + Chr(34)
 ElseIf IsExp(bstackstr, a$, p) Then
-        r$ = r$ & q1$ & Trim(Str$(p))
+        r$ = r$ & q1$ & Trim$(Str$(p))
         Else
         IsStr1 = False: Exit Function
         End If
@@ -13194,7 +13238,7 @@ fstr58: '"TIME$(", "◊—œÕœ”$("
        End If
     Else
         IsStr1 = True
-        r$ = Trim(GetTimeZoneInfo)
+        r$ = Trim$(GetTimeZoneInfo)
     End If
     If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
     Exit Function
@@ -13273,7 +13317,7 @@ fstr60: '"STR$(", "√—¡÷«$("
                 r$ = Format$(p, DefBooleanString)
                 End If
                 Else
-                r$ = LTrim(Str$(p))
+                r$ = LTrim$(Str$(p))
                 If Left$(r$, 1) = "." Then
                     r$ = "0" + r$
                 ElseIf Left$(r$, 2) = "-." Then
@@ -14897,7 +14941,7 @@ again4:
                     End If
                 End If
             End If
-            If Trim(w$) = vbNullString Then
+            If Trim$(w$) = vbNullString Then
                 Execute = 1
                 Exit Function
             End If
@@ -18740,7 +18784,7 @@ pa$ = GetNextLine((sbf(Abs(mystack.OriginalCode)).sb))
 If InStr(pa$, ",") = 0 Then
 pa$ = "'11001EDIT " + GetModuleName(mystack, here$) + "," + Mid$(pa$, 11)
 End If
-FK$(13) = Mid$(pa$, 7) + "-" + LTrim(Str(Len(NLtrim$(frm$))))
+FK$(13) = Mid$(pa$, 7) + "-" + LTrim$(Str(Len(NLtrim$(frm$))))
 If Right$(GetName(sbf(x1).goodname), 2) = "()" Then
 MyErMacro rest$, "Problem in class in function " + Replace(GetName(sbf(x1).goodname), ChrW(&HFFBF), ""), "–Ò¸‚ÎÁÏ· ÛÙÁ ÍÎ‹ÛÁ ÛÙÁ ÛıÌ‹ÒÙÁÛÁ " + Replace(GetName(sbf(x1).goodname), ChrW(&HFFBF), "")
 Else
@@ -18808,7 +18852,7 @@ End If
                     DropLeft ",", FK$(13)
                     If FK$(13) <> "" Then FK$(13) = "+" & FK$(13)
                               
-                    FK$(13) = pa$ & "-" & LTrim(Str(Len(frm$))) + FK$(13)
+                    FK$(13) = pa$ & "-" & LTrim$(Str(Len(frm$))) + FK$(13)
                     
                    
                     End If
@@ -18941,17 +18985,17 @@ Function MyCStr(p) As String
             Case vbBoolean
             MyCStr = Format$(p, ";\T\r\u\e;\F\a\l\s\e")
         Case vbLong
-        MyCStr = LTrim(Str(p)) & "&"
+        MyCStr = LTrim$(Str(p)) & "&"
         Case vbInteger
-        MyCStr = LTrim(Str(p)) & "%"
+        MyCStr = LTrim$(Str(p)) & "%"
         Case vbDecimal
-        MyCStr = LTrim(Str(p)) & "@"
+        MyCStr = LTrim$(Str(p)) & "@"
         Case vbSingle
-        MyCStr = LTrim(Str(p)) & "~"
+        MyCStr = LTrim$(Str(p)) & "~"
         Case vbCurrency
-        MyCStr = LTrim(Str(p)) & "#"
+        MyCStr = LTrim$(Str(p)) & "#"
         Case Else
-    MyCStr = LTrim(Str(p))
+    MyCStr = LTrim$(Str(p))
     
         End Select
 End Function
@@ -22470,7 +22514,7 @@ Function block(s$) As String
 Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
 Dim jump As Boolean
-If Trim(s$) = vbNullString Then Exit Function
+If Trim$(s$) = vbNullString Then Exit Function
 c = Len(s$)
 a1 = True
 i = 1
@@ -22541,7 +22585,7 @@ Function blockLen(s$) As Long
 Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
 Dim jump As Boolean
-If Trim(s$) = vbNullString Then Exit Function
+If Trim$(s$) = vbNullString Then Exit Function
 c = Len(s$)
 a1 = True
 i = 1
@@ -22613,7 +22657,7 @@ Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
 Dim jump As Boolean
 Dim alter As Boolean
-If Trim(s$) = vbNullString Then Exit Function
+If Trim$(s$) = vbNullString Then Exit Function
 
 c = Len(s$)
 a1 = True
@@ -22713,7 +22757,7 @@ blockString = "Error " & Chr(34) & "missing }" & Chr(34)
 End If
 If endstr = 125 Then
 If Right$(blockString, 1) = " " Then
-i = Len(blockString) - Len(RTrim(blockString))
+i = Len(blockString) - MyTrimRStr(blockString)
 If i > 0 Then blockString = ReplaceStr(Chr$(10) + space(i), Chr$(10), blockString)
 ElseIf Right$(blockString, 1) = vbTab Then
 i = Len(blockString) - MyTrimRNoCr(blockString)
@@ -22745,7 +22789,7 @@ If i = 0 Then GetNextLine = NLtrim$(c$): c$ = vbNullString Else GetNextLine$ = N
 End Function
 Sub NoLines(c$)
 Dim i
-c$ = Trim(c$)
+c$ = Trim$(c$)
 Do While Left$(c$, 2) = vbCrLf
 c$ = Trim$(Mid$(c$, 3))
 Loop
@@ -23131,7 +23175,7 @@ End Function
 Function StarSTR(ByVal sStr As String) As String
 Dim l As Long, s As Long
 l = Len(sStr)
-sStr = RTrim(sStr)
+sStr = RTrim$(sStr)
 s = l - Len(sStr)
 StarSTR = String$(l - s, "*") + String$(s, " ")
 
@@ -23406,7 +23450,7 @@ End If
 End If
 Else
 On Error Resume Next
-s$ = s$ & " = " & LTrim(Str(var(h&)))
+s$ = s$ & " = " & LTrim$(Str(var(h&)))
 If Err Then
 s$ = s$ & " = " & Chr(34) & var(h&) & Chr(34)
 Err.clear
@@ -23478,7 +23522,7 @@ s$ = s$ + mList.KeyToString + " [" + Typename(mList.ValueObj) + "]"
 End If
 Else
 If IsNumeric(mList.Value) Then
-s$ = s$ + mList.KeyToString + " = " + LTrim(Str$(mList.Value))
+s$ = s$ + mList.KeyToString + " = " + LTrim$(Str$(mList.Value))
 Else
 If Len(var(h&)) > 3 * .mx Then
  s$ = s$ + mList.KeyToString + " = " & Chr(34) + Left$(mList.Value, 4) & "..." & Chr(34)
@@ -24888,7 +24932,7 @@ Dim uni As Boolean, prv As Boolean, stripstack1 As New basetask, hlp As String, 
 Dim highpriority As Boolean, ThisGroup As Group, RightAssociative As Boolean, removebypass As Boolean, c As Constant
 Dim useHandler As mHandler
 Const TT$ = "=-+*/<!,{" + vbCr
-If Trim(rest$) = vbNullString Then
+If Trim$(rest$) = vbNullString Then
 If Typename$(var(vvv)) = "Group" Then
 Else
     var(vvv) = CLng(0)
@@ -26675,7 +26719,7 @@ SetNextLine rest$
 lcl = False
 End If
 ExecuteGroupStruct = 1
-Loop Until Trim(rest$) = vbNullString
+Loop Until Trim$(rest$) = vbNullString
 End Function
 
 Private Sub CallByObject(bstack As basetask, i As Long, ret As Boolean)
@@ -29198,9 +29242,9 @@ m = 1
  If Asc(LTrim(Left$(rest$, m))) < 32 Then Exit Do
  STq = True
  If s$ <> "" Then
- s$ = s$ + ", " + LTrim(Left$(rest$, m - 1))
+ s$ = s$ + ", " + LTrim$(Left$(rest$, m - 1))
  Else
-s$ = s$ + LTrim(Left$(rest$, m - 1))
+s$ = s$ + LTrim$(Left$(rest$, m - 1))
 End If
 Mid$(rest$, 1, m - 1) = space$(m - 1)
 STbyST = False
@@ -33892,7 +33936,7 @@ pf = pf + 1
 If FastSymbol(ss$, "{") Then
 s$ = "{" + rd$ + vbCrLf + block(ss$) + "}" + here$ + "." + bstack.GroupName
 If Not FastSymbol(ss$, "}") Then ProcEvent = False: Exit Function
-aa.GenItemCreator LTrim(Str(pf * 123)), s$
+aa.GenItemCreator LTrim$(Str(pf * 123)), s$
 While ss$ <> ""
 If FastSymbol(ss$, vbCrLf, , 2) Then
     ss$ = NLtrim(ss$)
@@ -33902,7 +33946,7 @@ ElseIf IsLabelSymbolNew(ss$, "”’Õ¡—‘«”«", "FUNCTION", Lang) Then
             If Not FastSymbol(ss$, "}") Then ProcEvent = False: Exit Function
             ' ‚‹ÎÂ ›Ì· key
             pf = pf + 1
-            aa.GenItemCreator LTrim(Str(pf * 123)), s$
+            aa.GenItemCreator LTrim$(Str(pf * 123)), s$
         Else
             ProcEvent = False: Exit Function
         End If
@@ -34350,7 +34394,7 @@ what$ = Left$(what$, Len(what$) - 1)
                                 With aaa
                                  .MyName = what$
                                  .modulename = h$
-                                 .Title = what$ + "(" + LTrim(Str$(i)) + ")"
+                                 .Title = what$ + "(" + LTrim$(Str$(i)) + ")"
                                  .index = i
                                 End With
                                 Set aaa = Nothing
@@ -34363,7 +34407,7 @@ Case "GuiButton"
                                 With aVar
                                 .ConstructArray aaa1.GetCallBack, what$, i
                                 .Move 0, 2000, 6000, 600
-                                .Caption = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Caption = what$ + "(" + LTrim$(Str$(i)) + ")"
                                 .SetUp
                                 End With
 Case "GuiTextBox"
@@ -34375,7 +34419,7 @@ Case "GuiTextBox"
                                 .ConstructArray aaa2.GetCallBack, what$, i
                                 .Move 0, 2000, 6000, 600
                                 .SetUp
-                                .Text = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Text = what$ + "(" + LTrim$(Str$(i)) + ")"
                                  End With
                                 
 Case "GuiCheckBox"
@@ -34386,7 +34430,7 @@ Case "GuiCheckBox"
                                 With aVar
                                 .ConstructArray aaa3.GetCallBack, what$, i
                                 .Move 0, 2000, 6000, 600
-                                .Caption = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Caption = what$ + "(" + LTrim$(Str$(i)) + ")"
                                 .SetUp
                                  End With
                                
@@ -34406,7 +34450,7 @@ Case "GuiEditBox"
                                     .Linespace = players(0).uMineLineSpace
                                 End If
                                 .SetUp
-                                .Text = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Text = what$ + "(" + LTrim$(Str$(i)) + ")"
                                  End With
                                  Set aaa = Nothing
                               
@@ -34424,7 +34468,7 @@ Case "GuiListBox"
                                 Else
                                     .Linespace = players(0).uMineLineSpace
                                 End If
-                                .ListText = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .ListText = what$ + "(" + LTrim$(Str$(i)) + ")"
                                 .SetUp
                                  End With
 Case "GuiDropDown"
@@ -34441,7 +34485,7 @@ Case "GuiDropDown"
                                 'Else
                                  '   .Linespace = players(0).uMineLineSpace
                                 'End If
-                                '.ListText = what$ + "(" + LTrim(Str$(i)) + ")"
+                                '.ListText = what$ + "(" + LTrim$(Str$(i)) + ")"
                                 .SetUp
                                  End With
 
@@ -34509,7 +34553,7 @@ Dim pppp As mArray, mmmm As mEvent
                                     .VarIndex = i * 1000 + varhash.count
                                     .enabled = True
                                     .ParamBlock "Read msg$, &obj", 2
-                                    .GenItemCreator LTrim(Str(i * 456)), "{ Module " + here$ + vbCrLf + "try { Call local " + here$ + "." + bstack.GroupName + what$ + "() } }" + here$ + "." + bstack.GroupName
+                                    .GenItemCreator LTrim$(Str(i * 456)), "{ Module " + here$ + vbCrLf + "try { Call local " + here$ + "." + bstack.GroupName + what$ + "() } }" + here$ + "." + bstack.GroupName
                                  End With
                                   alfa.MyName = what$
                                   alfa.index = -1
@@ -34529,7 +34573,7 @@ contEvArray:
                                     .VarIndex = i * 1000 + varhash.count
                                     .enabled = True
                                     .ParamBlock "Read Index, msg$, &obj", 3
-                                    .GenItemCreator LTrim(Str(i * 3456)), "{ Module " + here$ + vbCrLf + "try { call local " + here$ + "." + bstack.GroupName + what$ + "() } }" + here$ + "." + bstack.GroupName
+                                    .GenItemCreator LTrim$(Str(i * 3456)), "{ Module " + here$ + vbCrLf + "try { call local " + here$ + "." + bstack.GroupName + what$ + "() } }" + here$ + "." + bstack.GroupName
                                  End With
                                  End If
                                 For i = 0 To ar - 1
@@ -34543,7 +34587,7 @@ contEvArray:
                                  .MyName = what$
                                  .modulename = here$
                                  .ByPass = bp
-                                 .Title = what$ + "(" + LTrim(Str$(i)) + ")"
+                                 .Title = what$ + "(" + LTrim$(Str$(i)) + ")"
                                  .index = i
                                 End With
                                 Next i
@@ -34585,7 +34629,7 @@ contEvArray:
                             With aVar
                                 .ConstructArray alfa, what$, i
                                 .Move 0, 2000, 6000, 600
-                                .Caption = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Caption = what$ + "(" + LTrim$(Str$(i)) + ")"
                                 .SetUp
                             End With
                         Next i
@@ -34627,7 +34671,7 @@ ElseIf IsLabelSymbolNew(rest$, "≈…”¡√Ÿ√«", "TEXTBOX", Lang) Then
                                 .ConstructArray alfa, what$, i
                                 .Move 0, 2000, 6000, 600
                                 .SetUp
-                                .Text = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Text = what$ + "(" + LTrim$(Str$(i)) + ")"
                             End With
                         Next i
                         pppp.IHaveGui = True
@@ -34667,7 +34711,7 @@ ElseIf IsLabelSymbolNew(rest$, "≈…”¡√Ÿ√«", "TEXTBOX", Lang) Then
                             With aVar
                                 .ConstructArray alfa, what$, i
                                 .Move 0, 2000, 6000, 600
-                                .Caption = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Caption = what$ + "(" + LTrim$(Str$(i)) + ")"
                                 .SetUp
                             End With
                         Next i
@@ -34719,7 +34763,7 @@ ElseIf IsLabelSymbolNew(rest$, "≈…”¡√Ÿ√«", "TEXTBOX", Lang) Then
                                     .Linespace = players(0).uMineLineSpace
                                 End If
                                 .SetUp
-                                .Text = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .Text = what$ + "(" + LTrim$(Str$(i)) + ")"
                             End With
                         Next i
                         pppp.IHaveGui = True
@@ -34769,7 +34813,7 @@ ElseIf IsLabelSymbolNew(rest$, "≈…”¡√Ÿ√«", "TEXTBOX", Lang) Then
                                 Else
                                     .Linespace = players(0).uMineLineSpace
                                 End If
-                                .ListText = what$ + "(" + LTrim(Str$(i)) + ")"
+                                .ListText = what$ + "(" + LTrim$(Str$(i)) + ")"
                                 .SetUp
                             End With
                         Next i
@@ -39443,7 +39487,7 @@ goNothing:
                 Exit Function
          Else
          
-         GlobalArr bstack, w$ + "(", LTrim(Str(ML)) + ")", i, y1
+         GlobalArr bstack, w$ + "(", LTrim$(Str(ML)) + ")", i, y1
         If DeclareGUI(bstack, what$, rest$, MyDeclare, Lang, i, ML, w$, y1) Then
         Exit Function
         End If
@@ -39937,9 +39981,9 @@ If FastSymbol(rest$, "!") Then
                     If y < 1 And x1 = 0 Then y = 1
                      If GetVar(bstack, what$, i) Then
                      
-                     s$ = LTrim(Str(var(i)))
+                     s$ = LTrim$(Str(var(i)))
                      If VarType(var(i)) = vbLong Or VarType(var(i)) = vbInteger Then F = 4
-                     If VarType(var(i)) = vbBoolean Then F = 4: x1 = 1: s$ = LTrim(Str(Abs(CLng(var(i)))))
+                     If VarType(var(i)) = vbBoolean Then F = 4: x1 = 1: s$ = LTrim$(Str(Abs(CLng(var(i)))))
                        If Not NoUseDec Then
                                 If OverideDec Then
                                     s$ = Replace(s$, ".", NowDec$)
@@ -39986,10 +40030,10 @@ If FastSymbol(rest$, "!") Then
                      Else
                      If i = -1 Then
                      If F = 4 Then
-                      s$ = LTrim(Str(ReadVarInt(bstack, what$)))
+                      s$ = LTrim$(Str(ReadVarInt(bstack, what$)))
                      Else
                      
-                      s$ = LTrim(Str(ReadVarDouble(bstack, what$)))
+                      s$ = LTrim$(Str(ReadVarDouble(bstack, what$)))
                       End If
                       p = ReadVarDouble(bstack, what$)
                       If VarType(p) = vbLong Or VarType(p) = vbInteger Then F = 4
@@ -40114,10 +40158,10 @@ If FastSymbol(rest$, "!") Then
 
             
             
-       s$ = LTrim(Str(pppp.itemnumeric(it)))
+       s$ = LTrim$(Str(pppp.itemnumeric(it)))
        p = pppp.itemnumeric(it)
        If VarType(p) = vbLong Or VarType(p) = vbInteger Then F = 7
-       If VarType(var(i)) = vbBoolean Then F = 7: x1 = 1: s$ = LTrim(Str(Abs(CLng(pppp.itemnumeric(it)))))
+       If VarType(var(i)) = vbBoolean Then F = 7: x1 = 1: s$ = LTrim$(Str(Abs(CLng(pppp.itemnumeric(it)))))
                       Do
                      s$ = iText(bstack, s$, (x), (y), "", x1, True, F = 7)
                      Loop Until ValidNum(s$, True, F = 7, VarType(p))
@@ -40200,7 +40244,7 @@ If FastSymbol(rest$, "!") Then
                     Form1.TEXT1.TabWidth = 8
                      Form1.TabControl = 8
                 If y < 1 And x1 = 0 Then y = 1
-                s$ = iText(bstack, LTrim(Str(pppp.item(it))), (x), (y), frm$, x1)
+                s$ = iText(bstack, LTrim$(Str(pppp.item(it))), (x), (y), frm$, x1)
                 Form1.ShadowMarks = False
                 If Typename(pppp.item(it)) = doc Then
                         Set pppp.item(it) = New Document
@@ -40259,7 +40303,7 @@ Do
                         
                         w$ = QUERY(bstack, frm$, s$, 256, False, IIf(MaybeIsSymbol(rest$, ","), "," + vbCr, vbCr), "+*/!@#$|\{}[]'~`%^&()=_:;", True)
                         
-                        ' If Trim(s$) <> "," And Trim(s$) <> "" Then ErrNum: MyInput = False:  FKey = 0: Exit Function
+                        ' If Trim$(s$) <> "," And Trim$(s$) <> "" Then ErrNum: MyInput = False:  FKey = 0: Exit Function
                          If LenB(Trim(s$)) = 0 Then ErrNum: MyInput = False:    FKey = 0: Exit Function
                        
                 End If
@@ -40432,7 +40476,7 @@ Do
                 End If
                         w$ = QUERY(bstack, frm$, s$, 256, False, IIf(MaybeIsSymbol(rest$, ","), "," + vbCr, vbCr), "+*/!.@#$|\{}[]'~`%^&()=_:;", True)
                       '' If Not IsNumber(bstack, s$, p) Then ErrNum: MyInput = False: FKey = 0: Exit Function
-                       ''If Trim(s$) <> "," And Trim(s$) <> "" Then ErrNum: MyInput = False:  FKey = 0: Exit Function
+                       ''If Trim$(s$) <> "," And Trim$(s$) <> "" Then ErrNum: MyInput = False:  FKey = 0: Exit Function
                      If LenB(Trim(s$)) = 0 Then ErrNum: MyInput = False:    FKey = 0: Exit Function
                 End If
                 If GetVar(bstack, what$, i) Then
@@ -46014,7 +46058,7 @@ If FastSymbol(rest$, "#") Then
         Do While FastSymbol(rest$, ",")
 
             If IsExp(basestack, rest$, p, , True) Then
-            s$ = LTrim(Str$(p))
+            s$ = LTrim$(Str$(p))
             If it Then
             Else
              If Left$(s$, 1) = "." Then

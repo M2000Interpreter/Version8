@@ -177,7 +177,7 @@ lenfinal = Len(final$)
 If lenfinal = 0 Then final$ = ";": lenfinal = 1
     If mNum = 0 Then Exit Sub
     data$ = TextParagraph(mNum)
-    If Trim(data$) = vbNullString And Switchon Then
+    If Trim$(data$) = vbNullString And Switchon Then
         lookthis = DocParaBack(mNum)
         If lookthis > 0 Then
                     If para(lookthis).startfrom > 0 And UBound(para(lookthis).colordata()) = 2 Then

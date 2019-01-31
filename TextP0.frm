@@ -553,14 +553,14 @@ End Sub
 
 Public Sub helpmeSub()
 If Not EditTextWord Then
-If Trim(TEXT1.SelText) <> "" Then
+If Trim$(TEXT1.SelText) <> "" Then
 ffhelp myUcase(Trim(TEXT1.SelText), True)
 Else
 vHelp
 End If
 Else
 If abt Then
-feedback$ = Trim(TEXT1.SelText)
+feedback$ = Trim$(TEXT1.SelText)
 feednow$ = FeedbackExec$
 CallGlobal feednow$
 Else

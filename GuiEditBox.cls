@@ -2517,10 +2517,6 @@ Else
 blockString = s$
 s$ = vbNullString
 End If
-If Right$(blockString, 1) = " " Then
-i = Len(blockString) - Len(RTrim(blockString))
-If i > 0 Then blockString = ReplaceStr(Chr$(10) + space(i), Chr$(10), blockString)
-End If
 End If
 End Function
 Private Function IsLabelDot(where$, a$, r$) As Long ' ok
@@ -2623,7 +2619,7 @@ a$ = NLtrim$(a$)
     Loop
        r$ = firstdot$ + myUcase(r$, gr)
     IsLabelDot = rr&
-   'a$ = LTrim(a$)
+   'a$ = LTrim$(a$)
 
 End Function
 Function IsLabelDot2000(where$, a$, r$) As Long 'ok
@@ -2775,7 +2771,7 @@ a$ = NLtrim$(a$)
     Loop
        r$ = firstdot$ + myUcase(r$, gr)
     IsLabelDot2000 = rr&
-   'a$ = LTrim(a$)
+   'a$ = LTrim$(a$)
 
 End Function
 
@@ -2923,6 +2919,7 @@ checkexp:
                                 
                     GoTo checkexp
                   End If
+                  MaybeIsSymbolNoSpace a$, "&", True
                 IsLabelOnly = 100
                 Exit Function
             End If
@@ -3194,6 +3191,7 @@ checkexp:
                                 
                     GoTo checkexp
                   End If
+                  MaybeIsSymbolNoSpace a$, "&", True
                 IsLabelOnly2000 = 100
                 Exit Function
             End If
@@ -3874,14 +3872,21 @@ nextline:
              End If
 If counter = 0 Then
 If UBound(col()) > 1 Then
+            
             col(3) = pos1
+            If col(3) = col(1) Then
+            pos1 = pos1 + 1
+            col(3) = pos1
+            col(2) = 14
+            End If
             Else
             col(1) = pos1
             End If
-            'addone2000 pos1, 15
-'k = Len(a$)
+If Myleft(a$, 1) = "}" Then
+Else
 a$ = Mid$(a$, pos1 + 1)
 pos2 = k - Len(a$) + 1
+End If
 feedback = 0 'lastcol
 feedthis = 0
  
@@ -5222,7 +5227,7 @@ b$ = CurrentParagraph
 If AutoNumber Then
 If IsNumberLabel(b$, c$) Then
 d$ = NextParagraph: If d$ <> "" Then If IsNumberLabel(d$, e$) Then skip = True
-If Not skip Then c$ = Trim(c$)
+If Not skip Then c$ = Trim$(c$)
 If e$ <> "" Then If val(e$) > val(c$) + 10 Then skip = False
 If (val(c$) Mod 10 = 0) And Not skip Then
 tr$ = String$(Len(Trim$(c$)), "0")
@@ -5425,7 +5430,7 @@ End If
 wc& = wc& + 1
 Next w&
 If bb(w&) > 0 Then
-If Trim(Mid$(c$, bb(w&))) <> vbNullString Then
+If Trim$(Mid$(c$, bb(w&))) <> vbNullString Then
 
 cc$(wc&) = c$ 'Mid$(c$,  bb(w&))
 cuts(wc&) = Len(c$)
@@ -6526,9 +6531,9 @@ mDoc.lcid = OldLcid
 End Sub
 Public Sub helpmeSub()
       If mIndex >= 0 Then
-       Callback.Callback mesCtrlName + ".Help(" + Str(mIndex) + ",{" + Trim(SelText) + "})"
+       Callback.Callback mesCtrlName + ".Help(" + Str(mIndex) + ",{" + Trim$(SelText) + "})"
        Else
-          Callback.Callback mesCtrlName + ".Help({" + Trim(SelText) + "})"
+          Callback.Callback mesCtrlName + ".Help({" + Trim$(SelText) + "})"
           End If
 End Sub
 Public Sub supsub()

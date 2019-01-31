@@ -1,19 +1,33 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 8 active-X
+Version 9.7 Revision 9 active-X
 
-Fix a bug in Select case when call a sub inside a Case without use a block of code
-if true then
-      select case "any"
-      Case "Sequence"
-            T()    ' here works before in a block {T()}
-      End select
-      Print "done"
-End if
+Fix a bug in trim$(). Added functions ltrim$() and rtrim$()
+trim for chars 32 and 160 (nbsp) for the unicode version
+and for char 32 the ansi version  (as byte)
+also there are variants for ansi strings:
+Locale 1033 ' we can set this for proper ansi conversion
+k$=Str$("      12345    ")
+\\ a length of 7.5 means 15 bytes
+print len(k$)*2=15 ' words so x2 =  bytes
+m$=rtrim$(k$ as byte)
+print len(m$)*2=11, "*"+chr$(m$)+"*" ' convert to utf16
+z$=ltrim$(k$ as byte)
+print len(z$)*2=9, "*"+chr$(z$) +"*"
+x$=trim$(k$ as byte)
+print len(x$)*2=5, "*"+chr$(x$)+"*"
 
-Sub T()
-Print "ok"
-End Sub
+\\ Test for string only from spaces
+j$=str$("       ")
+
+print len(rtrim$(j$ as byte))=0
+print len(ltrim$(j$ as byte))=0
+print len(trim$(j$ as byte))=0
+
+print len(rtrim$("    "))=0
+print len(ltrim$("    "))=0
+print len(trim$("    "))=0
+
 
 
 

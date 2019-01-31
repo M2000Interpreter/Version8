@@ -1562,7 +1562,7 @@ End If
 realtype$ = mylcasefILE(Trim$(ExtractType(base)))
 If realtype$ <> "" Then
     base = ExtractPath(base, True) + ExtractNameOnly(base)
-    If BASE2 = vbNullString Then BASE2 = strTemp & LTrim(Str(Timer)) & "_0." + realtype$ Else BASE2 = ExtractPath(BASE2) + LTrim(Str(Timer)) + "_0." + realtype$
+    If BASE2 = vbNullString Then BASE2 = strTemp & LTrim$(Str(Timer)) & "_0." + realtype$ Else BASE2 = ExtractPath(BASE2) + LTrim$(Str(Timer)) + "_0." + realtype$
     Set conn = CreateObject("JRO.JetEngine")
     base = base & "." + realtype$
 

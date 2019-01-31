@@ -1180,7 +1180,7 @@ Dim oldenable As Boolean
 oldenable = gList2.enabled
 gList2.enabled = True
 gList2.HeadLine = vbNullString
-If Trim(vNewValue) = vbNullString Then vNewValue = " "
+If Trim$(vNewValue) = vbNullString Then vNewValue = " "
 gList2.HeadLine = vNewValue
 gList2.HeadlineHeight = gList2.HeightPixels
 gList2.ShowMe
@@ -1200,7 +1200,7 @@ MyForm3.CaptionW = gList2.HeadLine
 MyForm3.Visible = True
 MyForm3.Refresh
 If Err Then
-Err.Clear
+Err.clear
 Sleep 10
 MyForm3.Visible = True
 
@@ -1927,7 +1927,7 @@ Sub MakeInfo(ByVal RHS As Long)
  On Error Resume Next
  Set glistN = Pad.Controls(1)
 If EnableStandardInfo Then
-    glistN.Clear
+    glistN.clear
    
     EnableStandardInfo = False
 End If

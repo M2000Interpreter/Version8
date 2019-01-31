@@ -510,7 +510,7 @@ End Function
 Public Function checkError() As String
     'A very useful function for getting any errors
     'associated with the mci device
-    checkError = Space$(255)
+    checkError = space$(255)
     mciGetErrorString error, checkError, Len(checkError)
 End Function
 Public Function getDeviceName() As String
@@ -651,22 +651,22 @@ Private Function getThisTime(ByVal timein As Long) As String
     remTime = remTime Mod 60
     conS = remTime
     If conH > 0 Then
-        strRetTime = LTrim(Str(conH)) & ":"
+        strRetTime = LTrim$(Str(conH)) & ":"
     Else
         strRetTime = vbNullString
     End If
     If conM >= 10 Then
-        strRetTime = strRetTime & LTrim(Str(conM))
+        strRetTime = strRetTime & LTrim$(Str(conM))
     ElseIf conM > 0 Then
-        strRetTime = strRetTime & LTrim(Str(conM))
+        strRetTime = strRetTime & LTrim$(Str(conM))
     Else
         strRetTime = strRetTime & "0"
     End If
     strRetTime = strRetTime & ":"
     If conS >= 10 Then
-        strRetTime = strRetTime & LTrim(Str(conS))
+        strRetTime = strRetTime & LTrim$(Str(conS))
     ElseIf conS > 0 Then
-        strRetTime = strRetTime & "0" & LTrim(Str(conS))
+        strRetTime = strRetTime & "0" & LTrim$(Str(conS))
     Else
         strRetTime = strRetTime & "00"
     End If

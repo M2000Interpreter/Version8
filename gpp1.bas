@@ -159,7 +159,7 @@ End Sub
          If (InStr(OriginalStr, Chr(0)) > 0) Then
             OriginalStr = Left(OriginalStr, InStr(OriginalStr, Chr(0)) - 1)
          End If
-         StripNulls = Trim(OriginalStr)
+         StripNulls = Trim$(OriginalStr)
       End Function
 
       Function ByteToString(ByteArray() As Byte) As String

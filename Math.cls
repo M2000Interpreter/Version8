@@ -1268,7 +1268,7 @@ mcheck = RHS
 End Property
 Private Function MyFrm(w As Double, frm$) As String
 If frm$ = vbNullString Then
-    MyFrm = LTrim(Str$(w))
+    MyFrm = LTrim$(Str$(w))
             If Left$(MyFrm, 1) = "." Then
                     MyFrm = "0" + MyFrm
             ElseIf Left$(MyFrm, 2) = "-." Then

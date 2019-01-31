@@ -2287,9 +2287,9 @@ checkthistoo:
 If RTrim$(a$) = vbNullString Then
 If pos2 > 0 Then
 If feedthis <> 15 Then
-'If col((UBound(col()) \ 2) * 2) <> 11 Then
+
   If col((UBound(col()) \ 2) * 2) <> lastcol And pos2 < pos1 Then addone pos2, lastcol
- ' End If
+
   End If
   Else
   makebase 14
@@ -2320,8 +2320,6 @@ End If
   addone pos2, 14
     pos2 = k - Len(a$) + 1
   pos1 = 1
- ' drop$ = aheadstatus(a$, False, pos1)
-'GoTo marvel2
 
   End If
 ElseIf kind > 4 And onetime Then
@@ -2335,12 +2333,11 @@ If FastSymbol(a$, ",") Then
   End If
 
     If FastSymbol(a$, ")") Then
-    '' here
   addone pos2, lastcol
     pos2 = k - Len(a$) + 1
   End If
   End If
-'' or here for again4
+
 
 here3:
 If kind > 0 Then
@@ -2489,14 +2486,21 @@ nextline:
              End If
 If counter = 0 Then
 If UBound(col()) > 1 Then
+            
             col(3) = pos1
+            If col(3) = col(1) Then
+            pos1 = pos1 + 1
+            col(3) = pos1
+            col(2) = 14
+            End If
             Else
             col(1) = pos1
             End If
-            'addone pos1, 15
-'k = Len(a$)
+If Left(a$, 1) = "}" Then
+Else
 a$ = Mid$(a$, pos1 + 1)
 pos2 = k - Len(a$) + 1
+End If
 feedback = 0 'lastcol
 feedthis = 0
  
@@ -2912,40 +2916,7 @@ If pos2 > 0 Then addone pos2, 14
 
 
 End Sub
-Private Function blockString(s$) As String
-If s$ = vbNullString Then Exit Function
-Dim i As Long, j As Long, c As Long
-c = Len(s$)
-i = 1
-Do
-Select Case Asc(Mid$(s$, i, 1))
-Case 34
-Do While i < c
-i = i + 1
 
-If Asc(Mid$(s$, i, 1)) = 34 Then If Asc(Mid$(s$, i - 1, 1)) <> 92 Then Exit Do
-Loop
-Case 123
-j = j - 1
-Case 125
-j = j + 1: If j = 1 Then Exit Do
-End Select
-i = i + 1
-Loop Until i > c
-If j = 1 Then
-blockString = Left$(s$, i - 1)
-s$ = Mid$(s$, i)
-Else
-'' blockString = "Error " & chr(34) & "missing }" & chr(34)
-blockString = s$
-s$ = vbNullString
-End If
-If Right$(blockString, 1) = " " Then
-i = Len(blockString) - Len(RTrim(blockString))
-If i > 0 Then blockString = ReplaceStr(Chr$(10) + space(i), Chr$(10), blockString)
-End If
-
-End Function
 
 Private Sub mDoc_ColorDataEvent(thispara1 As Long, data As String, feedback As Long)
 
@@ -3126,7 +3097,7 @@ a$ = NLtrim$(a$)
     Loop
        r$ = firstdot$ + myUcase(r$, gr)
     IsLabelDot = rr&
-   'a$ = LTrim(a$)
+   'a$ = LTrim$(a$)
 
 End Function
 Function IsLabelOnly(a$, r$) As Long 'ok
@@ -3296,6 +3267,9 @@ checkexp:
                                 
                     GoTo checkexp
                   End If
+                  MaybeIsSymbolNoSpace a$, "&", True
+                  
+                  
                 IsLabelOnly = 100
                 Exit Function
             End If
@@ -4182,7 +4156,7 @@ On Error Resume Next
 If AutoNumber And Not mDoc.IsPart(mDoc.MarkParagraphID) Then
 If IsNumberLabel(b$, c$) Then
 d$ = NextParagraph: If d$ <> "" Then If IsNumberLabel(d$, e$) Then skip = True
-If Not skip Then c$ = Trim(c$)
+If Not skip Then c$ = Trim$(c$)
 If e$ <> "" Then If val(e$) > val(c$) + 10 Then skip = False
 If (val(c$) Mod 10 = 0) And Not skip Then
 tr$ = String$(Len(Trim$(c$)), "0")
@@ -4471,7 +4445,7 @@ End If
 wc& = wc& + 1
 Next w&
 If bb(w&) > 0 Then
-If Trim(Mid$(c$, bb(w&))) <> vbNullString Then
+If Trim$(Mid$(c$, bb(w&))) <> vbNullString Then
 
 cc$(wc&) = c$
 cuts(wc&) = Len(c$)

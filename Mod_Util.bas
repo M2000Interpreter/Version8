@@ -671,8 +671,8 @@ If LastErNum = 0 Then LastErNum = -1 ': Debug.Print er$, ergr$: Stop
 LastErNum1 = LastErNum
 
 If InStr("*" + LastErName, NLtrim$(er$)) = 0 Then
-LastErName = RTrim(LastErName) & " " & NLtrim$(er$)
-LastErNameGR = RTrim(LastErNameGR) & " " & NLtrim$(ergr$)
+LastErName = RTrim$(LastErName) & " " & NLtrim$(er$)
+LastErNameGR = RTrim$(LastErNameGR) & " " & NLtrim$(ergr$)
 End If
 End If
 End Sub
@@ -1983,7 +1983,7 @@ st = DXP
 MinDispl = (TextWidth(dd, "A") \ 2) \ st
 If MinDispl <= 1 Then MinDispl = 3
 MinDispl = st * MinDispl
-INTD = TextWidth(dd, space$(Len(wh$) - Len(NLtrim2$(wh$))))
+INTD = TextWidth(dd, space$(MyTrimL3Len(wh$)))
 dd.CurrentX = dd.CurrentX + INTD
 
 wi = wi - INTD
@@ -2046,14 +2046,14 @@ Dim whNoSpace$, Displ As Long, DisplLeft As Long, i As Long, whSpace$, INTD As L
 MinDispl = (TextWidth(dd, "A") \ 2) \ DXP
 If MinDispl <= 1 Then MinDispl = 3
 MinDispl = DXP * MinDispl
-If whr = 3 Or whr = 0 Then INTD = TextWidth(dd, space$(Len(wh$) - Len(NLtrim2$(wh$))))
+If whr = 3 Or whr = 0 Then INTD = TextWidth(dd, space$(MyTrimL3Len(wh$)))
 dd.CurrentX = dd.CurrentX + INTD
 wi = wi - INTD
 wh$ = NLtrim2$(wh$)
 INTD = wi + dd.CurrentX
 whNoSpace$ = ReplaceStr(" ", "", wh$)
 If whr = 2 Then
-wh$ = Trim(wh$)
+wh$ = Trim$(wh$)
 whNoSpace$ = ReplaceStr(" ", "", wh$)
 dd.CurrentX = dd.CurrentX + ((wi - TextWidth(dd, whNoSpace) - (Len(wh$) - Len(whNoSpace)) * MinDispl)) / 2
 ElseIf whr = 1 Then
@@ -2217,7 +2217,7 @@ If bstack.IamThread Then nopage = True
 For ttt = 1 To Len(what)
 If NOEXECUTION Then Exit For
 b$ = Mid$(what, ttt, 1)
-If paragr Then INTD = Len(buf$ & b$) - Len(NLtrim2$(buf$ & b$))
+If paragr Then INTD = MyTrimL3Len(buf$ & b$)
 If b$ = Chr$(0) Or b$ = vbLf Then
 ElseIf Not b$ = vbCr Then
 spcc = (Len(buf$ & b$) - Len(ReplaceStr(" ", "", Trim$(buf$ & b$))))
@@ -2369,10 +2369,10 @@ If last Then
                  End If
 Else
 If frmt > 0 Then
-If Not nopr Then fullPlainWhere ddd, mybasket, RTrim(buf$), w2, frmt, nowait, nonewline 'rtrim
+If Not nopr Then fullPlainWhere ddd, mybasket, RTrim$(buf$), w2, frmt, nowait, nonewline 'rtrim
 Else
 
-If Not nopr Then fullPlainWhere ddd, mybasket, RTrim(buf$), w2, 3, nowait, nonewline ' rtrim
+If Not nopr Then fullPlainWhere ddd, mybasket, RTrim$(buf$), w2, 3, nowait, nonewline ' rtrim
 End If
     If collectit Then
                  mDoc.AppendParagraphOneLine RTrim$(buf$)
@@ -2450,7 +2450,7 @@ If Hi >= 0 And buf$ <> "" Then
  skip = skip - 1
         If skip < 0 Then
 If frmt = 2 Then
-If Not nopr Then fullPlainWhere ddd, mybasket, RTrim(buf$), w2, frmt, nowait, nonewline
+If Not nopr Then fullPlainWhere ddd, mybasket, RTrim$(buf$), w2, frmt, nowait, nonewline
             If collectit Then
                  mDoc.AppendParagraphOneLine RTrim$(buf$)
                  End If
@@ -2475,7 +2475,7 @@ End If
 Exit Sub
 Else
 If Not nopr Then
-fullPlainWhere ddd, mybasket, RTrim(buf$), w2, frmt, nowait, nonewline
+fullPlainWhere ddd, mybasket, RTrim$(buf$), w2, frmt, nowait, nonewline
 End If
     If collectit Then
                  mDoc.AppendParagraphOneLine buf$
@@ -4006,7 +4006,7 @@ countlines = 1
 Lang = Not Lang
 Dim a1 As Boolean
 Dim jump As Boolean
-If Trim(s$) = vbNullString Then Exit Function
+If Trim$(s$) = vbNullString Then Exit Function
 c = Len(s$)
 a1 = True
 i = 1
@@ -5871,7 +5871,7 @@ Function blockLen2(s$, pos) As Long
 Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
 Dim jump As Boolean
-If Trim(s$) = vbNullString Then Exit Function
+If Trim$(s$) = vbNullString Then Exit Function
 c = Len(s$)
 a1 = True
 i = pos
@@ -13191,7 +13191,7 @@ again1:
         If p1 > 13 Then p1 = 13
       p = MyRound(p, p1)
       End If
-      pd$ = LTrim(Str(p))
+      pd$ = LTrim$(Str(p))
       
       If InStr(pd$, "E") > 0 Or InStr(pd$, "e") > 0 Then '' we can change e to greek å
       pd$ = Format$(p, "0." + String$(p1, "0") + "E+####")
@@ -13242,7 +13242,7 @@ again1:
         If NoUseDec Then
             final$ = Replace$(final$, pat$, CStr(p))
         Else
-        pd$ = LTrim(Str$(p))
+        pd$ = LTrim$(Str$(p))
          If Left$(pd$, 1) = "." Then
         pd$ = "0" + pd$
         ElseIf Left$(pd$, 2) = "-." Then pd$ = "-0" + Mid$(pd$, 2)
@@ -18297,7 +18297,7 @@ Else
           '**********************************************************
 PROCESSCOMMAND:
        
-            If Trim(w$) <> "" Then
+            If Trim$(w$) <> "" Then
       
             Select Case w$
         Dim y1 As Long

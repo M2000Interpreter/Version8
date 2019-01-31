@@ -57,8 +57,8 @@ Public Sub ConstructArray(there As Form, name$, i As Long)
  Set Callback = there
  On Error Resume Next
 
-  'Set glistN = there.Controls.Add("m2000.glist", name$ + "_" + LTrim(Str$(i)))
-'CtrlName = name$ + "_" + LTrim(Str$(i))
+  'Set glistN = there.Controls.Add("m2000.glist", name$ + "_" + LTrim$(Str$(i)))
+'CtrlName = name$ + "_" + LTrim$(Str$(i))
  ' If Err.Number > 0 Then
  ctrlName = GetTag$
  Set glistN = there.Controls.Add("m2000.glist", ctrlName)
@@ -101,7 +101,7 @@ ff.Size = .CtrlFontSize
 ff.bold = .CtrlFontBold
 End With
 With glistN
-glistN.Clear
+glistN.clear
 .additem "  " + mCaptext
 .NoCaretShow = True
 .NoPanRight = False

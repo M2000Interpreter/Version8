@@ -2811,7 +2811,7 @@ Case "JOYPAD", "JOYPAD(", "JOYPAD.ANALOG.X(", "JOYPAD.ANALOG.Y(", "JOYPAD.DIRECT
 Case "KEYPRESS(", "LAMBDA", "LAMBDA(", "LAMBDA$", "LAMBDA$(", "LAN$", "LATIN", "LAYER", "LAZY$(", "LCASE$(", "LEFT$(", "LEFTPART$(", "LEGEND", "LEN"
 Case "LEN(", "LEN.DISP(", "LET", "LETTER$", "LIB", "LICENCE", "LINE", "LINESPACE", "LINK", "LIST", "LN("
 Case "LOAD", "LOAD.DOC", "LOCAL", "LOCALE", "LOCALE$(", "LOCALE(", "LOG(", "LONG", "LOOP"
-Case "LOWORD(", "LOWWORD(", "MAIN.TASK", "MAP(", "MARK", "MASTER", "MATCH(", "MAX(", "MAX$(", "MAX.DATA$("
+Case "LOWORD(", "LOWWORD(", "LTRIM$(", "MAIN.TASK", "MAP(", "MARK", "MASTER", "MATCH(", "MAX(", "MAX$(", "MAX.DATA$("
 Case "MAX.DATA(", "MDB(", "MEDIA", "MEDIA.COUNTER", "MEMBER$(", "MEMBER.TYPE$(", "MEMO", "MEMORY", "MENU"
 Case "MENU$(", "MENU.VISIBLE", "MENUITEMS", "MERGE.DOC", "METHOD", "MID$(", "MIN(", "MIN$(", "MIN.DATA$(", "MIN.DATA("
 Case "MOD", "MODE", "MODULE", "MODULE$", "MODULE(", "MODULES", "MODULE.NAME$", "MONITOR", "MONITOR.STACK", "MONITOR.STACK.SIZE", "MOTION", "MOTION.W", "MOTION.WX"
@@ -2826,7 +2826,7 @@ Case "PLAYER", "PLAYSCORE", "POINT", "POINTER", "POINTER(", "POINT(", "POLYGON",
 Case "PRINTER", "PRINTERNAME$", "PRINTING", "PRIVATE", "PROFILER", "PROPERTY", "PROPERTY(", "PROPERTY$(", "PROPERTIES", "PROPERTIES$", "PROTOTYPE", "PSET", "PUBLIC", "PUSH", "PUT", "QUEUE", "QUOTE$("
 Case "RANDOM", "RANDOM(", "READ", "READY(", "RECORDS(", "RECURSION.LIMIT", "REFER", "REFRESH", "RELEASE", "REM"
 Case "REMOVE", "REPEAT", "REPLACE$(", "REPORT", "REPORTLINES", "RESTART", "RETRIEVE", "RETURN", "REV(", "REVISION"
-Case "RIGHT", "RIGHT$(", "RIGHTPART$(", "RINSTR(", "RND", "ROUND(", "ROW", "SAVE", "SAVE.AS", "SAVE.DOC", "SCALE.X"
+Case "RIGHT", "RIGHT$(", "RIGHTPART$(", "RINSTR(", "RND", "ROUND(", "ROW", "RTRIM$(", "SAVE", "SAVE.AS", "SAVE.DOC", "SCALE.X"
 Case "SCALE.Y", "SCAN", "SCORE", "SCREEN.PIXELS", "SCREEN.X", "SCREEN.Y", "SCRIPT", "SCROLL", "SEARCH"
 Case "SEEK", "SEEK(", "SELECT", "SEQUENTIAL", "SET", "SETTINGS", "SGN(", "SHIFT", "SHIFTBACK", "SHORTDIR$("
 Case "SHOW", "SHOW$(", "SIN(", "SINGLE", "SINT(", "SIZE", "SIZE.X(", "SIZE.Y(", "SLOW", "SMOOTH"
@@ -2841,7 +2841,7 @@ Case "TWIPSY", "TYPE", "TYPE$(", "UCASE$(", "UINT(", "UNARY", "UNDER", "UNICODE"
 Case "UP", "UPDATABLE", "UPDATE", "USE", "USER", "USERS", "USER.NAME$", "USGN("
 Case "VAL(", "VAL$(", "VALID(", "VALUE", "VALUE(", "VALUE$", "VERSION", "VIEW", "VOID", "VOLUME"
 Case "WAIT", "WCHAR", "WEAK", "WEAK$(", "WHILE", "WIDE", "WIDTH", "WIN", "WINDOW"
-Case "WITH", "WITHEVENTS", "WORDS", "WRITABLE(", "WRITE", "WRITER", "X.TWIPS", "XOR", "Y.TWIPS", "адеиас"
+Case "WITH", "WITHEVENTS", "WORDS", "WRITABLE(", "WRITE", "WRITER", "X.TWIPS", "XOR", "Y.TWIPS", "адеиас", "апой.ая$(", "апой.де$("
 Case "адеиасе", "ахя(", "ай(", "айеяаио.дуадийо(", "айеяаио", "айеяаиос", "акт", "акгхес", "акгхгс", "аккацг", "аккацг$("
 Case "аккане", "аккиыс", "аккиыс.ам", "ам", "ам(", "амап(", "амап$(", "амт(", "ам$(", "ама", "амафгтгсг", "амахеыягсг", "амайтгсг", "амакоцио"
 Case "амакоцио$", "амакусг.охомгс", "амакусг.у", "амакусг.в", "амакутгс", "амаломг", "амамеысг", "амажояа", "амаье"
@@ -3241,6 +3241,23 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimLi = Len(s) + 1
 End Function
+Public Function MyTrimL3Len(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimL3Len = 0: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160, 7
+    Case Else
+     
+   Exit For
+  End Select
+  Next i
+ MyTrimL3Len = (i - p2) \ 2
+End Function
 Public Function MyTrimL2(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
@@ -3284,7 +3301,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   For i = p4 To p2 Step -2
   GetMem2 i, p1
   Select Case p1
-    Case 32, 160, 13, 10, 9
+    Case 32, 160
     Case Else
      MyTrimR = (i - p2) \ 2 + 1
    Exit Function
@@ -3309,7 +3326,23 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimRNoCr = l + 2
 End Function
-
+Public Function MyTrimRStr(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimRStr = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32
+    Case Else
+     MyTrimRStr = (i - p2) \ 2 + 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimRStr = l + 2
+End Function
 Sub test3()
 Dim a$, i As Long, j As Long
 a$ = "1234567@@@10"
@@ -3339,7 +3372,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimRfrom = st
 End Function
-Public Function MyTrim(s$) As String
+Public Function MyTrimCR(s$) As String
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long, p22 As Long
 l = Len(s): If l = 0 Then Exit Function
@@ -3352,21 +3385,135 @@ l = Len(s): If l = 0 Then Exit Function
   Select Case p1
     Case 32, 160, 10, 13
     Case Else
-  p4 = i
-   Exit For
+     Exit For
   End Select
   Next i
+  p4 = i
   For i = p2 To p4 Step 2
   GetMem2 i, p1
   Select Case p1
     Case 32, 160, 10, 13
     Case Else
-     'MyTrimL = (i - p2) \ 2 + 1
-     p2 = i
+     
    Exit For
   End Select
   Next i
+  p2 = i
+  If p2 > p4 Then MyTrimCR = vbNullString Else MyTrimCR = Mid$(s$, (p2 - p22) \ 2 + 1, (p4 - p2) \ 2 + 1)
+ 
+End Function
+
+Public Function MyTrim(s$) As String
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long, p22 As Long
+l = Len(s): If l = 0 Then Exit Function
+
+  p2 = StrPtr(s): l = l - 1
+  p22 = p2
+  p4 = p2 + l * 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     Exit For
+  End Select
+  Next i
+  p4 = i
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     
+   Exit For
+  End Select
+  Next i
+  p2 = i
   If p2 > p4 Then MyTrim = vbNullString Else MyTrim = Mid$(s$, (p2 - p22) \ 2 + 1, (p4 - p2) \ 2 + 1)
+ 
+End Function
+Public Function MyTrimLW(s$) As String
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long, p22 As Long
+l = Len(s): If l = 0 Then Exit Function
+
+  p2 = StrPtr(s): l = l - 1
+  p22 = p2
+  p4 = p2 + l * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     
+   Exit For
+  End Select
+  Next i
+  p2 = i
+  If p2 > p4 Then MyTrimLW = vbNullString Else MyTrimLW = Mid$(s$, (p2 - p22) \ 2 + 1, (p4 - p2) \ 2 + 1)
+ 
+End Function
+Public Function MyTrimRW(s$) As String
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long, p22 As Long
+l = Len(s): If l = 0 Then Exit Function
+
+  p2 = StrPtr(s): l = l - 1
+  p22 = p2
+  p4 = p2 + l * 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     Exit For
+  End Select
+  Next i
+  p4 = i
+   If p2 > p4 Then MyTrimRW = vbNullString Else MyTrimRW = Mid$(s$, (p2 - p22) \ 2 + 1, (p4 - p2) \ 2 + 1)
+ 
+End Function
+
+Public Function MyTrimRB(s$) As String
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long, p22 As Long
+l = LenB(s): If l = 0 Then Exit Function
+
+  p2 = StrPtr(s): l = l - 1
+  p22 = p2
+  p4 = p2 + l
+  For i = p4 To p2 Step -1
+  GetMem1 i, p1
+  Select Case p1
+    Case 32
+    Case Else
+   Exit For
+  End Select
+  Next i
+  p4 = i
+  If p2 > p4 Then MyTrimRB = vbNullString Else MyTrimRB = MidB$(s$, (p2 - p22) + 1, (p4 - p2) + 1)
+ 
+End Function
+Public Function MyTrimLB(s$) As String
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long, p22 As Long
+l = LenB(s): If l = 0 Then Exit Function
+
+  p2 = StrPtr(s): l = l - 1
+  p22 = p2
+  p4 = p2 + l
+  For i = p2 To p4 Step 1
+  GetMem1 i, p1
+  Select Case p1
+    Case 32
+    Case Else
+  
+   Exit For
+  End Select
+    Next i
+    p2 = i
+  If p2 > p4 Then MyTrimLB = vbNullString Else MyTrimLB = MidB$(s$, (p2 - p22) + 1, (p4 - p2) + 1)
  
 End Function
 Public Function MyTrimB(s$) As String
@@ -3380,41 +3527,25 @@ l = LenB(s): If l = 0 Then Exit Function
   For i = p4 To p2 Step -1
   GetMem1 i, p1
   Select Case p1
-    Case 32, 160, 10, 13
+    Case 32
     Case Else
-  p4 = i
+  
    Exit For
   End Select
   Next i
+  p4 = i
   For i = p2 To p4 Step 1
   GetMem1 i, p1
   Select Case p1
-    Case 32, 160, 10, 13
+    Case 32
     Case Else
-     
-     p2 = i
+
    Exit For
   End Select
   Next i
+  p2 = i
   If p2 > p4 Then MyTrimB = vbNullString Else MyTrimB = MidB$(s$, (p2 - p22) + 1, (p4 - p2) + 1)
  
-End Function
-Public Function excludespace(s$) As Long
-Dim i&, l As Long
-Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(s): If l = 0 Then Exit Function
-  p2 = StrPtr(s): l = l - 1
-  p4 = p2 + l * 2
-  For i = p2 To p4 Step 2
-  GetMem2 i, p1
-  Select Case p1
-    Case 32, 160, 9
-    Case Else
-     excludespace = (i - p2) \ 2
-   Exit Function
-  End Select
-  Next i
-
 End Function
 Function IsLabelAnew(where$, a$, r$, Lang As Long) As Long
 ' for left side...no &
@@ -3854,7 +3985,7 @@ i123:
        rrr$ = firstdot$ + myUcase(r$, gr)
        Lang = 1 + CLng(gr)
     IsLabelDotSub = rr&
-   'a$ = LTrim(a$)
+   'a$ = LTrim$(a$)
 
 End Function
 
@@ -3899,7 +4030,10 @@ myfun() = Array("FORMAT$(", 1, "лояжг$(", 1, "EVAL$(", 2, "ейжя$(", 2, "ейжяасг$
 , "TRIM$(", 51, "апой$(", 51, "QUOTE$(", 52, "паяахесг$(", 52, "сыяос$(", 53, "STACK$(", 53, "ADD.LICENCE$(", 54, "баке.адеиа$(", 54 _
 , "ENVELOPE$(", 55, "жайекос$(", 55, "FIELD$(", 56, "педио$(", 56, "DRW$(", 57, "свд$(", 57, "TIME$(", 58, "вяомос$(", 58, "DATE$(", 59, "глеяа$(", 59 _
 , "STR$(", 60, "цяажг$(", 60, "CHRCODE$(", 61, "ваяйыд$(", 61, "CHR$(", 62, "вая$(", 62, "GROUP$(", 63, "олада$(", 63, "PROPERTY$(", 64, "идиотгта$(", 64, "TITLE$(", 65, "титкос$(", 65, "IF$(", 66, "ам$(", 66, "леяос$(", 67, "PIECE$(", 67, "STRREV$(", 68, "амап$(", 68 _
-, "STACKITEM(", 1, "тилгсыяоу(", 1, "ARRAY(", 2, "пимайас(", 2, "CONS(", 3, "емысг(", 3, "CAR(", 4, "пяыто(", 4, "CDR(", 5, "еполема(", 5, "VAL(", 6, "тилг(", 6, "аниа(", 6, "EVAL(", 7, "ейжя(", 7, "ейжяасг(", 7)
+, "RTRIM$(", 69, "апой.де$(", 69, "LTRIM$(", 70, "апой.ая$(", 70, "STACKITEM(", 1, "тилгсыяоу(", 1, "ARRAY(", 2, "пимайас(", 2, "CONS(", 3, "емысг(", 3, "CAR(", 4, "пяыто(", 4, "CDR(", 5, "еполема(", 5, "VAL(", 6, "тилг(", 6, "аниа(", 6, "EVAL(", 7 _
+, "ейжя(", 7, "ейжяасг(", 7)
+
+
 If Not bhashbackup Is Nothing Then
 For i = 0 To UBound(myfun()) Step 2
     bhashbackup.ItemCreator CStr(myfun(i)), CLng(myfun(i + 1))
