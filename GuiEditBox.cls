@@ -43,6 +43,8 @@ Public ColorCollection2 As String
 Public ColorCollection3 As String
 Public ColorCollection4 As String
 Private M2000code As Boolean
+Public AllowInsertBrackets As Boolean
+Public EnablePairs As Boolean
 Public EditTextWord As Boolean
 Public ColorSet As Long
 Public NumberOnly As Boolean
@@ -391,13 +393,13 @@ PosPara2 = 0
 Para3 = 0
 PosPara3 = 0
 BlockStartPara = 0
-BlockStartPos = 0
+BlockStartPos = 1
 BlockStartLine = 0
 BlockTopline = 0
 BlockStartCursor = 0
 BlockEndCursor = 0
 BlockEndPara = 0
-BlockEndPos = 0
+BlockEndPos = 1
 BlockEndline = 0
 BlockBottomline = 0
 Dim i As Long
@@ -641,6 +643,21 @@ Private Sub glistN_CorrectCursorAfterDrag()
 End Sub
 Private Sub glistN_DragOverCursor(ok As Boolean)
 ok = True
+End Sub
+
+Private Sub glistN_getpair(a As String, b As String)
+If EnablePairs Then
+Select Case a
+Case Chr$(34)
+b = Chr$(34)
+Case "("
+b = ")"
+Case "{"
+b = "}"
+Case "["
+b = "]"
+End Select
+End If
 End Sub
 
 Private Sub glistN_HaveMark(Yes As Boolean)
@@ -1143,14 +1160,17 @@ ElseIf Title <> glistN.HeadLine And Not TitleStay Then
 ReplaceTitle = vbNullString
 End If
 End If
-'If KeyCode = vbKeyTab Then
-'If shift = 2 Then
- '       choosenext
-  '  KeyCode = 0
-   ' Exit Sub
-    'End If
+Dim VR(2)
+VR(0) = KeyCode
+VR(1) = shift
+If mIndex > -1 Then
+    Callback.CallbackNow mesCtrlName + ".KeyDown(" + CStr(index) + ")", VR()
+Else
+    Callback.CallbackNow mesCtrlName + ".KeyDown()", VR()
+End If
+shift = VR(1)
+KeyCode = VR(0)
 
-'End If
 Dim selstart2 As Long, b As Boolean, Pad$, cc As Long
 Dim l1 As Long, c1 As Long
 If KeyCode = 18 Then
@@ -1386,6 +1406,7 @@ End If
 conthere:
 If NoMark And EditDoc = False Then glistN.ShowMe2: Exit Sub
 If KeyCode <> 0 Or shift <> 0 Then PressKey_A KeyCode, shift
+
 
 End Sub
 
@@ -3375,6 +3396,9 @@ Public Property Let SetM2000(RHS)
     M2000code = CBool(RHS)
     mDoc.ForEditBox = Not CBool(RHS)
     If M2000code Then
+    EnablePairs = True
+    AutoNumber = True
+    AllowInsertBrackets = True
     glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9))
     glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9))
     glistN.WordCharRightButIncluded = "(" ' so aaa(sdd) give aaa( as word
@@ -4720,13 +4744,13 @@ PosPara2 = 0
 Para3 = 0
 PosPara3 = 0
 BlockStartPara = 0
-BlockStartPos = 0
+BlockStartPos = 1
 BlockStartLine = 0
 BlockTopline = 0
 BlockStartCursor = 0
 BlockEndCursor = 0
 BlockEndPara = 0
-BlockEndPos = 0
+BlockEndPos = 1
 BlockEndline = 0
 BlockBottomline = 0
 Charpos = 0
@@ -5230,8 +5254,8 @@ d$ = NextParagraph: If d$ <> "" Then If IsNumberLabel(d$, e$) Then skip = True
 If Not skip Then c$ = Trim$(c$)
 If e$ <> "" Then If val(e$) > val(c$) + 10 Then skip = False
 If (val(c$) Mod 10 = 0) And Not skip Then
-tr$ = String$(Len(Trim$(c$)), "0")
-a$ = Format((val(c$) + 10), tr$) + space$(Len(CurrentParagraph) - Len(c$) - Len(NLtrim$(b$)))
+tr$ = String$(Len(NLTrim2(c$)), "0")
+a$ = Format((val(c$) + 10), tr$) + Mid$(CurrentParagraph, 1, MyTrimL(CurrentParagraph) - 1) + Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph), MyTrimL(Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph))) - 1)
 Else
 If e$ <> "" And Trim$(Str((val(c$) + 1))) = Trim$(e$) Then
 maxw = glistN.UserControlTextWidth(c$)
@@ -5242,15 +5266,15 @@ Wend
 c$ = vbNullString
 
 Else
-tr$ = String$(Len(Trim$(c$)), "0")
-a$ = Format((val(c$) + 1), tr$) + space$(Len(CurrentParagraph) - Len(Trim$(c$)) - Len(NLtrim$(b$)))
+tr$ = String$(Len(NLTrim2(c$)), "0")
+a$ = Format((val(c$) + 1), tr$) + Mid$(CurrentParagraph, 1, MyTrimL(CurrentParagraph) - 1) + Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph), MyTrimL(Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph))) - 1)
 End If
 End If
 Else
 a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
 End If
 Else
-If UseTab And Not Myleft$(CurrentParagraph, 1) = " " Then
+If UseTab And (TabControl = 0 Or Myleft$(CurrentParagraph, 1) = ChrW$(9)) Then
 a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbKeyTab)
 Else
 a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
@@ -5269,8 +5293,44 @@ End Function
 Public Property Get Length() As Long
 Length = mDoc.SizeCRLF
 End Property
-
-
+Public Sub insertbrackets()
+Dim i As Long, j As Long, ss$
+If SelLength > 0 Then
+ClearRedo
+PushUndo
+glistN_MarkDelete False
+ss$ = undotext
+End If
+Dim a$
+    
+    a$ = Myleft(CurrentParagraph, Charpos)
+    If TabControl = 0 Then
+    i = ((Len(a$) - Len(NLtrim$(a$))))
+    j = SelStart
+    If ss$ <> "" Then
+        ss$ = Replace(ss$, vbCrLf, vbCrLf + vbTab)
+        RemoveUndo "{" + vbCrLf + String$(i + 1, vbTab) + ss$ + vbCrLf + String$(i, vbTab) + "}"
+        InsertText = "{" + vbCrLf + String$(i + 1, vbTab) + ss$ + vbCrLf + String$(i, vbTab) + "}"
+    Else
+        RemoveUndo "{" + vbCrLf + String$(i + 1, vbTab) + vbCrLf + String$(i, vbTab) + "}"
+        InsertText = "{" + vbCrLf + String$(i + 1, vbTab) + vbCrLf + String$(i, vbTab) + "}"
+    End If
+    SelStartSilent = j + i + 4
+    Else
+    i = ((Len(a$) - Len(LTrim$(a$))) \ 6) * 6
+    j = SelStart
+    If ss$ <> "" Then
+        ss$ = Replace(ss$, vbCrLf, vbCrLf + space$(6))
+        RemoveUndo "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
+        InsertText = "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
+    Else
+        RemoveUndo "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
+        InsertText = "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
+    End If
+    SelStartSilent = j + i + 3 + 6
+    End If
+Render
+End Sub
 Function GetLCIDFromKeyboard() As Long
     Dim Buffer As String, ret&, r&
     Buffer = String$(514, 0)
@@ -6196,8 +6256,11 @@ With Callback.Control(1)
 .PressKey 13, 0
 End With
 End If
+ElseIf (shift And 2) = 2 And AllowInsertBrackets Then
+KeyCode = 0
+shift = 0
+insertbrackets
 ElseIf AutoIntNewLine Then
-
 KeyCode = 0
 Else
 
@@ -6291,7 +6354,7 @@ mDoc.WrapAgain
 Render
 End If
 KeyCode = 0
-
+ManualInform
 Case vbKeyF11
 fState = fState + 1
 SetME
@@ -6300,18 +6363,26 @@ ManualInform
 glistN.ShowMe
 KeyCode = 0
 Case vbKeyTab
-If UseTab And Not BlockStartPos <> BlockEndPos Then
+If UseTab And Not BlockStartPos <> BlockEndPos And (TabControl = 0 Or MyTrimLNoTab(Mid$(CurrentParagraph, 1, Charpos)) < Charpos) Then
     shift = shift And &H1
     ctrl = False
+    JJ = SelStart
     If shift = 0 Then
     If showparagraph Then
     showparagraph = False
-    InsertTextNoRender = ChrW(9)
-    showparagraph = True
+    'SelStartSilent = JJ
+    RemoveUndo ChrW(9)
+    InsertText2 = ChrW(9)
+     showparagraph = True
+     SelStart = JJ + 1
     Else
-        InsertTextNoRender = ChrW(9)
+    SelStartSilent = JJ
+        RemoveUndo ChrW(9)
+        InsertText = ChrW(9)
+         
+          SelStart = JJ + 1
         End If
-        SelStart = SelStart + 1
+       
          KeyCode = 0
     ElseIf NLtrim(Mid$(CurrentParagraph, Charpos, 1)) = vbNullString Then
         SelStart = SelStart + 1
@@ -6367,7 +6438,8 @@ conttab:
     Else
     If shift <> 0 Then
     
-        If Mid$(CurrentParagraph, 1, TabControl) = space$(TabControl) Or Mid$(CurrentParagraph, 1, TabControl) = String(TabControl, ChrW(160)) Then
+      
+        If MyTrimL2(Mid$(CurrentParagraph, 1, TabControl)) = 0 Then
     
                 SelStartSilent = ii
                 SelLengthSilent = TabControl
@@ -7164,6 +7236,57 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   End Select
   Next i
  MyTrimL = l + 2
+End Function
+Private Function MyTrimLNoTab(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimLNoTab = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     MyTrimLNoTab = (i - p2) \ 2 + 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimLNoTab = l + 2
+End Function
+Private Function MyTrimL2(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimL2 = 0: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     MyTrimL2 = (i - p2) \ 2 '+ 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimL2 = 0
+End Function
+Private Function NLTrim2(s$) As String
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then NLTrim2 = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     NLTrim2 = Mid$(s$, (i - p2) \ 2 + 1)
+   Exit Function
+  End Select
+  Next i
+ NLTrim2 = vbNullString
 End Function
 Private Function NLtrim$(a$)
 If Len(a$) > 0 Then NLtrim$ = Mid$(a$, MyTrimL(a$))

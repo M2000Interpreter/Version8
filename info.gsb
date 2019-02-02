@@ -1,0 +1,4624 @@
+﻿MODULE GLOBAL A {Superclass alfa {
+      Unique:
+            counter=1
+      Public:
+            Value {
+                  For SuperClass {
+                        =.counter
+                        .counter++
+                  }
+            }
+            Module Reset (x){
+                  For SuperClass {
+                        .counter<=x
+                  }                  
+            }
+}
+a=alfa
+b=alfa
+Print a=1, b=2, a=3, a=4, b=5 ' true true true true true
+\\ we have to use group(a) to get the group not the value
+\\ we use ( ) to get a copy
+z->(group(a))
+Print eval(z)=6, a=7, b=8, eval(z)=9 ' true true true true
+z=>Reset 100
+Print eval(z)=100, a=101, b=102, eval(z)=103 ' true true true true
+For z {
+      .Reset 10
+}
+Print eval(z)=10, a=11, b=12, eval(z)=13 ' true true true true
+}
+MODULE GLOBAL B {\\ m is an auto array (a tuple)
+\\ z is an iterator of m
+m=(1,2) : Print valid(m^)=false ' bug return valid(m^)=true
+z=each(m): Print Valid(z^)=true
+}
+MODULE GLOBAL C {dim a(), b()
+a()=(1,2,3)
+b()=(3,2,1)
+for i=0 to 2
+print max(a(i), b(i)), max(b(i), a(i))
+print min(a(i),b(i)), min(b(i), a(i))
+print compare(a(i), b(i)), a(i), b(i)
+next i
+
+
+dim a()
+a()=(1,2,3)
+for i=0 to 2
+print max(a(2-i), a(i)), max(a(2-i), a(i))
+print min(a(2-i),a(i)), min(a(2-i), a(i))
+print compare(a(i), a(2-i)), a(2-i), a(i)
+next i
+}
+MODULE GLOBAL D {
+
+Τμήμα Λατινικοί_Αριθμοί {
+      Άδειασε
+      Διαμέσου Αρχικοποίηση
+      Έγγραφο Εγγ$
+      Ενώ όχι κενό {
+            Διάβασε λατ$
+            Τύπωσε λατ$;"=";ΤιμήΛατινικού$(λατ$)
+            Εγγ$=λατ$+"="+ΤιμήΛατινικού$(λατ$)+{
+            }
+      }
+      Πρόχειρο Εγγ$
+      Τέλος
+Αρχικοποίηση:
+      Συνάρτηση ΤιμήΛατινικού$(λατ$) {
+            Άδειασε
+            Βάλε "CM", 900,"MD","CD", 400,"MD", "XC", 90,"DL", "XL", 40,"X", "IX",9,"V", "IV",4,"I"
+            διπλό_λατινικό=[]
+            απλό_λατινικό=Σωρός:="M", 1000, "D", 500, "C",100, "L",50,"X", 10, "V", 5, "I",1
+            ="άκυρο"
+            σύνολο=0
+            μια_τιμή=0
+            μετρητής=0
+            Σωρός διπλό_λατινικό {
+                  Αν κενό Τότε Έξοδος
+                  Διάβασε μη_έγγυροι_χαρακτήρες$, μια_τιμή, χαρακτ$
+                  i=Θέση(λατ$,χαρακτ$)
+                  Αν i >0 Τότε {
+                        προσωρινή_τιμή$=Μεσ$(λατ$,i+2)
+                        L=Μήκος(προσωρινή_τιμή$)
+                        Αν L>0 Τότε Αν Μήκος(Φίλτρο$(προσωρινή_τιμή$, μη_έγγυροι_χαρακτήρες$))<>L Τότε λατ$="A": Διέκοψε
+                        Αν Θέση(λατ$,Μεσ$(λατ$,i,1))<i Τότε λατ$="A": Διέκοψε
+                        Παρεμβολή i, 2 λατ$="" : σύνολο+=μια_τιμή
+                  }
+                  Κυκλικά
+            }
+            Σωρός απλό_λατινικό {
+                  Αν κενό Τότε Έξοδος
+                  Διάβασε χαρακτ$, μια_τιμή
+                  μετρητής=0
+                  Ενώ Αρισ$(λατ$,1)=χαρακτ$ {
+                         Παρεμβολή 1, 1 λατ$=""
+                         μετρητής++
+                         σύνολο+=μια_τιμή
+                  }
+                  Αν μετρητής>3 Τότε Διέκοψε
+                  Κυκλικά
+            }
+            Αν Μήκος(λατ$)>0 Τότε Έξοδος
+            =Str$(σύνολο,1033)
+      }
+      Σειρά "MMMCMXCIX", "LXXIIX", "MMXVII", "LXXIX", "CXCIX","MCMXCIX","MMMDCCCLXXXVIII"
+      Σειρά "CMXI","M","MCDXLIV","CCCC","IXV", "XLIXL","LXXIIX","XXXIX", "XXXX", "XIXX","IVI", "XLIX"
+      Επιστροφή
+}
+Λατινικοί_Αριθμοί
+}
+MODULE GLOBAL DD {class beta {
+      structure alfa1 {
+            a as long*4
+            b as long*4
+      }
+      structure alfa {
+            a as long*4
+            b as long*4
+            c as alfa1*3
+      }
+      buffer delta as alfa*3
+}
+beta=beta()
+Print beta.alfa("b")
+list
+}
+MODULE GLOBAL DD1 {local group alfa {
+      x=10, y%=50, z$="asdasda"
+      dim M(4)=10
+      event alfa {read b}
+      document a$="100"
+      class allo {
+            q=4
+      }
+      Group M {
+            k=10
+      }
+      function delta {
+           
+      }
+      module kappa {
+           
+      }
+}
+local group alfa {
+      x=10, y%=50,z$="asdasda"
+      dim M(4)=10
+      event alfa {read b}
+      document a$="100"
+      class allo {
+            q=4
+      }
+      Group M {
+            k=10
+      }
+      function delta {
+           
+      }
+      module kappa {
+           
+      }
+}
+
+List
+Modules ?
+
+}
+MODULE GLOBAL DD2 {const b=lambda->100
+const b%=lambda->100
+const b$=lambda$->"hello"
+Print b%()
+Print b$()
+Try {
+      b=lambda->500
+}
+Print b()
+}
+MODULE GLOBAL DD3 {\\ this is in a global module A
+group alfa {
+      x=100
+      b=lambda->{
+            =.x
+            .x++
+      }
+}
+\\ get a copy to alfa
+beta=alfa
+\\ try to change function with a fake one
+function alfa.b {
+      =500
+}
+\\ references for functions are strings with code
+\\ we get  {CALL EXTERN 3}A.ALFA. (but is not the actual hard link.
+\\ actual code is in lambda object. 3 is the actual "slot" where the object exist.
+Print &alfa.b()
+\\ we can make a link to f() (only for new identifiers)
+Link  alfa.b() to f()
+Print f()
+\\ this function can be changed because has no "hard link" with lambda
+\\ all functions except final in groups can be changed
+function f {
+      =500
+}
+Print f()=500
+Print alfa.b()
+Print  beta.b()
+\\ we can test pointers
+\\ there is two type of pointers
+\\ 1. pointers to float groups (holded in containers or by pointers)
+\\ 2. pointer to named groups (using a weak reference)
+\\ this type has no use when referenced group get out of scope
+\\ but as all pointers can change value later
+\\ pointers can be null, using p->0 but they hold just an empty group
+\\ so never a pointer in M2000 has a real null value, but an "empty" one.
+
+\\ p->(beta) is the same as this:
+p=pointer((beta)) ' a copy of beta
+Print p=>b(), p=>b()
+Print beta.b()
+\\ p->beta is same as this
+p=pointer(beta) ' as reference to beta
+Print p=>b(), p=>b()
+}
+MODULE GLOBAL DD4 {n=lambda ->500
+a=lambda n (x)->{
+      if x<=0 then=0 : exit
+      =lambda(x-1)+x+n()
+}
+Print a(3)=1506
+Print a(10)=5055
+n=lambda->100
+\\ closures are copies, and are like globals for lambda
+Print a(3)=1506
+\\ closures can be change only from inside
+\\ if they are value types (lambda is a value type)
+m=lambda->100
+a=lambda n, m (x)->{
+      if x>5 then n=lambda ->500
+      if x<=0 then=0 : n=m : exit
+      =lambda(x-1)+x+n()
+}
+
+Print a(3)=306
+Print a(10)=1055
+\\ touple is an array, can have zero items (,)
+\\ or one ore more, and it is a reference type
+z=(m,)
+Link z to Z()
+Print Z(0)()=100
+a=lambda z (x) -> {
+      if x<=0 then=0 : exit
+      link z to z()
+      =lambda(x-1)+x+z(0)()
+}
+\\ now we change value in z(0), which is the z
+Print a(10)=1055
+z(0)=lambda->300
+\\ so now lambda change because hold a closure to a reference
+Print a(10)=3055
+Print eval(z)(0)()=300
+\\ without using link we can get the first element in 0 posiiton, and ask for function
+\\ this function has a life for the moment of call
+\\ interpreter just open the lambda object, invoke, and close again.
+a=lambda z (x) -> {
+      if x<=0 then=0 : exit
+      =lambda(x-1)+x+Eval(z)(0)()
+}
+Print a(10)=3055
+}
+MODULE GLOBAL DD5 {class a {
+      counter as long
+}
+b=lambda k=pointer(a()) (x)-> {
+      k=>counter+=x
+      \\ we can return pointers from groups (if they are float type)
+      ->k
+}
+m=b(30)
+Print m=>counter=30
+\\ get a pointer and convert it to a named group, and then return  a float group (as is, without pointer)
+def copy(x as group)=x
+group k=b(300)
+z=b(300)
+Print z=>counter=630
+Print m=>counter=630
+Print z is m ' false
+z->b(300)
+Print z is m 'true
+Print z=>counter=930
+Print k.counter=330 ' old value
+}
+MODULE GLOBAL DD6 {group beta {
+      x$="1000mm"
+      m=100
+}
+\\  beta copied here
+inventory alfa=1:=(list:=1,2,300:=(1,2,3,3,5,beta), 500:="ok")
+
+dim g()
+\\  beta copied here
+g()=(100,beta,(1, (list:=1:=beta,2,"z":=(1,200,3,alfa), "s":="string"), "Hello there"), 500@, "ok")
+g(1).m*=100
+Print g(1).m=10000
+link g() to g$()
+Print type$(g(2), 1)="Inventory"
+Print type$(g(2), 1!)="List"   ' show type of inventory (list or queue)
+Print type$(g(2), 2)="String", g(2)#val$(2)="Hello there"
+Print g$(2)(2)="Hello there"    ' using g$() a reference to g()
+Print g$(2)(1)("s")="string"
+Print g$(2)(1)("z")(3)(1)(500)="ok"
+\\ new this also
+Print  g(2)(1)("z")(3)(1)(300)(5).m=100 ' multiple object opening until a group object
+\\ new this also. we can get a pointer from inner group
+n->g(2)(1)("z")(3)(1)(300)(5)
+Print n=>m=100
+n=>m++ ' increment one
+Print g(2)(1)("z")(3)(1)(300)(5).m=101
+Print g(2)(1)("z")(3)(1)(300)(5).x$="1000mm"
+n=>x$="2000mm"
+Print g(2)(1)("z")(3)(1)(300)(5).x$="2000mm"
+m=g() ' we get a pointer to array ' these are not the same as the group's pointers
+\\ stacks, inventories and arrays (not those we make with Dim) are pointers
+\\ we can use IS operator to check two of them if show same object
+z=list:=100, 150:=m, 200
+Print z(150)(2)(1)("z")(3)(1)(300)(5).m=101
+\\ using g() we pass a copy
+\\ but anything which is a pointer (like a list, or a pointer to array) only pointer copied
+\\ groups may have or may haven't pointers. Those with no pointers copied when we get an array copy.
+\\ Only arrays with names with parenthesis copied. So here we get a copy of g().
+z=list:=100, 150:=g(), 200
+g(1).m+=100
+Print g(1).m=10100
+Print z(150)(2)(1)("z")(3)(1)(300)(5).m=101 ' group has a pointer/ also list is the same
+Print z(150)(1).m=10000 ' group copied
+n=>m++
+Print z(150)(2)(1)("z")(3)(1)(300)(5).m=102
+Print g(2)(1)("z")(3)(1)(300)(5).m=102
+}
+MODULE GLOBAL DD7 {module Checkit {
+      Stack New {
+            Data "foo://example.com:8042/over/there?name=ferret#nose", "urn:example:animal:ferret:nose"
+            Data "jdbc:mysql://test_user:ouupppssss@localhost:3306/sakila?profileSQL=true", "ftp://ftp.is.co.za/rfc/rfc1808.txt"
+            Data "http://www.ietf.org/rfc/rfc2396.txt#header1", "ldap://[2001:db8::7]/c=GB?objectClass=one&objectClass=two"
+            Data "mailto:John.Doe@example.com", "news:comp.infosystems.www.servers.unix", "tel:+1-816-555-1212"
+            Data "telnet://192.0.2.16:80/", "urn:oasis:names:specification:docbook:dtd:xml:4.1.2", "ssh://alice@example.com"
+            Data "https://bob:pass@example.com/place", "http://example.com/?a=1&b=2+2&c=3&c=4&d=%65%6e%63%6F%64%65%64"
+            a=Array([])
+      }
+      function prechar$(a$, b$) {
+            if a$<>"" then {=quote$(b$+a$)} else ={""}
+      }
+      z=each(a)
+      document s$="["+{
+      }
+      While z {
+            a$=array$(z)
+            s1$={           "uri": }+quote$(a$)+{,
+                  "authority": }+ quote$(string$(a$ as URLAuthority))+{,
+                  "userInfo": }+ quote$(string$(a$ as URLUserInfo))+{,
+                  "scheme": }+quote$(string$(a$ as URLScheme))+{,
+                  "hostname": }+quote$(string$(a$ as UrlHost))+{,
+                  "Port": }+quote$(string$(a$ as UrlPort))+{,
+                  "pathname": }+quote$(string$(a$ as UrlPath))+{,
+                  "search": }+prechar$(string$(a$ as URLpart 6),"?")+{,
+                  "hash": }+prechar$(string$(a$ as UrlFragment),"#")+{
+            }
+            s$="     {"+{
+            }+s1$+"     }"
+            \\ z^ is the iteraror's counter (z is an iterator of a, a touple - array in M2000)
+            if z^<len(a)-1 then s$=" ,"   ' append to document
+            s$={
+            }
+      }
+      s$="]"
+      Print "Press any keyboard key or mouse key to continue scrolling"
+      Report s$   
+      Clipboard s$
+}
+Checkit
+}
+MODULE GLOBAL DD8 {Module Pairs {
+      \\ written in version 9.5 rev. 13
+      \\ use Gdi+ antialiasing (not work with Wine in Linux, but we get no error)
+      smooth on
+      Const center=2, right=3, left=1, blue=1, angle=0, dotline=3
+      Const size9pt=9, size11pt=11
+      Cls ,0 ' use current background color, set split screen from line 0
+      Cursor 0,3
+      Report center, "Coordinate pairs"
+      x = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+      y = (2.7, 2.8, 31.4, 38.1, 58.0, 76.2, 100.5, 130.0, 149.3, 180.0)
+      dx=scale.x/2/len(x)
+      dy=dx 'ratio 1:1
+      graH=dy*len(x)
+      Basex=scale.x/4
+      Basey=(scale.y+graH)/2
+      Move Basex, Basey
+      \\ draw use relative coordinates
+      Draw 0,-graH
+      \\ Step just move graphic cursor
+      Step 0, graH
+      Draw scale.x/2
+      Step -scale.x/2
+      \\ scX is 1, not used
+      max=Y#max()
+      \\ Auto scale for Y, using 0 for start of axis Y
+      scY=-graH/((max+5^log(max) ) div 100)/100
+      \\ make vertical axis using dots with numbers center per dx
+      j=1
+      For i=basex+dx to basex+dx*x#max() Step dx
+            Move i, basey
+            Step 0, twipsy*10
+            Legend format$("{0}",array(x,j)), "courier", size9pt, angle, center
+            Width 1, dotline { draw 0, -graH-twipsy*10,7}
+            j++
+      Next i
+      \\ the same for horizontal axis
+      HalfTextHeight=Size.y("1","courier", size9pt)/2
+      For i=basey-dy to basey-dy*x#max() Step dy
+            Move basex, i
+            Step -twipsx*10
+            Width 1, dotline { draw scale.x/2+twipsx*10,,7}
+            Move basex-100, i+HalfTextHeight
+            Legend format$("{0}",(i-basey)/scY), "courier", size9pt, angle, left
+      Next i
+      ex=each(x) : ey=each(y)
+     \\ start from first point. We use Draw to for absolute coordinates
+      Move array(x,0)*dx+Basex, array(y,0)*scy+Basey
+      While ex, ey {
+            Width 2 {
+                  Draw to array(ex)*dx+Basex, array(ey)*scy+Basey, blue
+            }
+      }
+      \\ second pass for marks and labels
+      ex=each(x) : ey=each(y)
+      While ex, ey {
+            Move array(ex)*dx+Basex, array(ey)*scy+Basey
+            Step -75, -75
+            Pen 12 {draw 150: draw 0,150 : draw -150 : draw 0,-150}
+            Pen 13 {
+                  Step 200, -200
+                  Legend format$("({0}-{1})",array(ex),array(ey) ), "courier bold", size11pt, angle, right
+            }
+      }
+      \\ screenshot to clipboard
+      Screenshot$=""
+      Move 0,0
+      Copy scale.x, scale.y to Screenshot$
+      Clipboard Screenshot$
+      a$=key$
+}
+Pairs
+}
+MODULE GLOBAL DD9 {a=10
+Module Checkit {
+      if random(10)=1 then Clear ' erase all statics and variables from this level
+      Module Checkit {
+            flush
+            module Checkit {
+                  static k=(Queue:=1,2)
+                  Try {
+                        Read ? k as queue
+                  }
+                  Print type$(k)
+                  Print k
+            }
+            group alfa {
+                  x=10
+            }
+            z->(alfa)
+            Checkit
+            Checkit z
+            Checkit (Queue:=1,2,3,1,2,3)
+            Checkit (List:=1,2,3)
+      }
+      Checkit
+}
+Checkit
+Print a ' a exist always
+}
+MODULE GLOBAL F1 {Group alfa {
+      private:
+            x=10
+      public:
+      \\ we can use Print as module name
+      Module Print {
+            Print .x
+      }
+      Module IncX {
+            .x++
+      }
+}
+alfa.print    ' print 10
+Print valid(alfa.x)=false
+alfa.incX
+alfa.print   ' print 11
+}
+MODULE GLOBAL F2 {module checkit {
+      def long counter=0
+      class b1 {
+            x=10
+      }
+      \\ b is a pointer to a new group from b1()
+      b->b1()
+      Try {
+            beta()
+      }
+      Print Error$ ' z not found in scope, we can't use it as pointer
+      \\ z is a pointer to a new group from b1()
+      z->b1()
+      \\ now z exist
+      alfa() ' 11 - use of internal pointer to group
+      beta() ' 11
+      Print b=>x=10 ' true
+      alfa(z) ' 12
+      alfa(z) '13
+      beta() ' 14
+      alfa() ' 11  - use of internal pointer to group
+      Print b=>x=10 ' true
+      alfa(b) '11
+      alfa(b) '12
+      Print b=>x=12 ' true
+      Print z=>x=14
+      beta() ' 15
+      Print z=>x=15
+      Print counter
+
+      Sub alfa()
+            \\ we make a local variable b
+            \\ we assign a fresh group
+            \\ then we read optional a pointer
+            local b : b->b1() : Read ? b as pointer
+            \\ now we make a second local variable
+            \\ we assign a pointer
+            local z : z->b
+            beta()
+      End Sub
+      Sub beta()
+            \\ increment member x
+            z=>x++
+            Print z=>x
+            \\ subs have same scope as the module from where called
+            counter++
+      End Sub
+}
+Checkit
+}
+MODULE GLOBAL F3 {Module Checkit {
+      group alfa {
+      x=10
+      }
+      b->alfa
+      checkme(b)
+      Print b=>x=10
+      Print alfa.x=10
+      checkme2(b)
+      Print b=>x=11
+      Print alfa.x=11
+      checkme3(&b)
+      Print b=>x=12
+      Print alfa.x=12
+    
+      \\ sub is like End if execution find it
+      sub checkme(a as group)
+            print type$(a)
+            a.x++
+            Print a.x
+      End sub
+      sub checkme2(a as pointer)
+            print type$(a)
+            a=>x++
+            Print a=>x
+      End sub
+      sub checkme3(&a as pointer)
+            print type$(a)
+            a=>x++
+            Print a=>x
+      End sub
+}
+Checkit
+}
+MODULE GLOBAL F4 {gosub modules
+group alfa {
+x=10
+}
+b->alfa
+checkme b
+Print b=>x=10
+Print alfa.x=10
+checkme2 b
+Print b=>x=11
+Print alfa.x=11
+checkme3 &b
+Print b=>x=12
+Print alfa.x=12
+End
+modules:
+module checkme {
+            Read a as group
+            print type$(a)
+            a.x++
+            Print a.x
+}
+module checkme2 {
+            Read a as pointer
+            print type$(a)
+            a=>x++
+            Print a=>x
+}
+Module  checkme3 {
+            Read &a as pointer
+            print type$(a)
+            a=>x++
+            Print a=>x
+}
+Return
+}
+MODULE GLOBAL F5 {gosub modules
+group alfa {
+x=10
+}
+b->alfa
+checkme
+checkme b
+Print b=>x=10
+Print alfa.x=10
+checkme2
+checkme2 b
+Print b=>x=11
+Print alfa.x=11
+checkme3 &b
+Print b=>x=12
+Print alfa.x=12
+End
+modules:
+module checkme {
+            group a {
+                  x=100
+            }
+            Read ? a as group
+            print type$(a)
+            a.x++
+            Print a.x
+}
+module checkme2 {
+            group a1 {
+                  x=100
+            }
+            a->a1
+            Read ? a as pointer
+            print type$(a)
+            a=>x++
+            Print a=>x
+}
+Module  checkme3 {
+            Read &a as pointer
+            print type$(a)
+            a=>x++
+            Print a=>x
+}
+Return
+
+
+}
+MODULE GLOBAL F6 {Module CheckMe {
+      Class alfa {
+            x=1000
+      }
+      Global Enum aaa {a,b,c,d}
+      \\ use Clear to clear static from level of modules like Checkit
+      Rem : Clear
+      Module Checkit {
+            \\ we can use stacks, arrays, inventories and pointers to groups
+            \\ enumerators
+            \\ for stacks
+            static z=(stack:=1,2), m=(1,2,3,4), k->alfa()
+            static b as aaa=a, cc=(List:="a":=100,"b":=500,"c":=200)
+            read ? z
+            Print k=>x
+            k=>x++
+            Print z
+            Stack z {
+                  if isnum then print number
+            }
+            Print m
+            m++
+            Return cc, "a":=cc("a")+1
+            If Exist(cc,"a") Then Print Eval(cc)
+     
+      }
+     
+      Checkit
+      Checkit
+      Checkit (stack:=5,6,7)
+      Checkit
+      Checkit
+}
+CheckMe
+}
+MODULE GLOBAL F7 {Module checkit {
+      Declare random1 lib "advapi32.SystemFunction036" {long lpbuffer, long length}
+      Buffer Clear Alfa as long*2
+      Print Eval(Alfa,0)
+      Print Eval(Alfa,1)
+      call void random1(alfa(0), 8)
+      Print Eval(Alfa,0)
+      Print Eval(Alfa,1)
+}
+checkit
+}
+MODULE GLOBAL F8 {Declare Global CryptAcquireContext Lib "advapi32.CryptAcquireContextW" {Long &hProv, pszContainer$,pszProvider$, long dwProvType, long dwFlags}
+Declare Global CryptReleaseContext Lib "advapi32.CryptReleaseContext" {Long hProv, Long dwFlags}
+Declare Global CryptGenRandom Lib"advapi32.CryptGenRandom" {Long hProv, Long dwLen, Long &ByRef}
+Global Const PROV_RSA_FULL As Long = 1
+Global Const VERIFY_CONTEXT As Long = 0xF0000000&
+ 
+Function  Random2 {
+      Long Rand=0, hProv=0
+      Call void CryptAcquireContext(&hProv, "", "", PROV_RSA_FULL, VERIFY_CONTEXT)
+      Call Void CryptGenRandom( hProv, 4&, &Rand)
+      Call Void CryptReleaseContext(hProv, 0&)
+      =Rand
+}
+Print Random2()
+}
+MODULE GLOBAL URL {Module checkit {
+      document doc$
+      any=lambda (z$)->{=lambda z$ (a$)->instr(z$,a$)>0}
+      one=lambda (z$)->{=lambda z$ (a$)->z$=a$}
+      number$="0123456789"
+
+      series=Lambda -> {
+                  func=Array([])
+                  =lambda func (&line$, &res$)->{
+                        if line$="" then exit
+                        k=each(func)
+                        def p=0,ok as boolean
+                        while k {
+                              ok=false : p++ : f=array(k)
+                              if not f(mid$(line$,p,1)) then exit
+                              ok=true
+                        }
+                        if ok then res$=left$(line$, p) : line$=mid$(line$, p+1)
+                        =ok
+                  }
+      }
+
+      is_any=lambda series, any (c$) ->series(any(c$))
+      is_one=lambda series, one (c$) ->series(one(c$))
+      Is_Alpha=series(lambda (a$)-> a$ ~ "[a-zA-Z]")
+      Is_digit=series(any(number$))
+      Is_hex=any(number$+"abcdefABCDEF")
+
+      optionals=Lambda -> {
+                  func=Array([])
+                  =lambda func (&line$, &res$)->{
+                        k=each(func)
+                        def ok as boolean
+                        while k {
+                              f=array(k)
+                              if f(&line$,&res$) then ok=true : exit
+                        }
+                        =ok
+                  }
+      }
+      repeated=Lambda (func)-> {
+                  =lambda func (&line$, &res$)->{
+                        def ok as boolean, a$
+                        res$=""
+                        do {
+                              sec=len(line$)
+                              if not func(&line$,&a$) then exit
+                              res$+=a$
+                              ok=true
+                        } until line$="" or sec=len(line$)
+                        =ok
+                  }
+      }
+
+      oneAndoptional=lambda (func1, func2) -> {
+            =lambda func1, func2 (&line$, &res$)->{
+                              def ok as boolean, a$
+                              res$=""
+                              if not func1(&line$,&res$) then exit
+                              if func2(&line$,&a$) then res$+=a$
+                              =True
+                        }      
+      }
+      many=Lambda -> {
+                  func=Array([])
+                  =lambda func (&line$, &res$)->{
+                        k=each(func)
+                        def p=0,ok as boolean, acc$
+                        oldline$=line$
+                        while k {
+                              ok=false
+                              res$=""
+                              if line$="" then exit
+                              f=array(k)
+                              if not f(&line$,&res$) then exit
+                              acc$+=res$
+                              ok=true
+                         }
+                        if not ok then {line$=oldline$} else res$=acc$
+                        =ok
+                  }
+      }
+      is_safe=series(any("$-_@.&"))
+      Is_extra=series(any("!*'(),"+chr$(34)))
+      Is_Escape=series(any("%"), is_hex, is_hex)
+      \\Is_reserved=series(any("=;/#?: "))
+      is_xalpha=optionals(Is_Alpha, is_digit, is_safe, is_extra, is_escape)
+      is_xalphas=oneAndoptional(is_xalpha,repeated(is_xalpha))
+      is_xpalpha=optionals(is_xalpha, is_one("+"))
+      is_xpalphas=oneAndoptional(is_xpalpha,repeated(is_xpalpha))
+      Is_ialpha=oneAndoptional(Is_Alpha,repeated(is_xpalphas))
+      is_fragmentid=lambda is_xalphas (&lines$, &res$) -> {
+            =is_xalphas(&lines$, &res$)
+      }
+      is_search=oneAndoptional(is_xalphas, repeated(many(series(one("+")),is_xalphas)))
+      is_void=lambda (f)-> {
+            =lambda f (&oldline$, &res$)-> {
+                  line$=oldline$
+                  if f(&line$, &res$) then {oldline$=line$ } else res$=""
+                  =true
+            }
+      }
+      is_scheme=is_ialpha
+      is_path=repeated(oneAndoptional(is_void(is_xpalphas), series(one("/"))))
+      is_uri=oneAndoptional(many(is_scheme, series(one(":")), is_path), many(series(one("?")),is_search))
+      is_fragmentaddress=oneAndoptional(is_uri, many(series(one("#")),is_fragmentid ))
+
+      data "foo://example.com:8042/over/there?name=ferret#nose"
+      data "urn:example:animal:ferret:nose"
+      data "jdbc:mysql://test_user:ouupppssss@localhost:3306/sakila?profileSQL=true "
+      data "ftp://ftp.is.co.za/rfc/rfc1808.txt"
+      data "http://www.ietf.org/rfc/rfc2396.txt#header1"
+      data "ldap://[2001:db8::7]/c=GB?objectClass=one&objectClass=two"
+      data "mailto:John.Doe@example.com"
+      data "tel:+1-816-555-1212"
+      data "telnet://192.0.2.16:80/"
+      data "urn:oasis:names:specification:docbook:dtd:xml:4.1.2"
+
+      while not empty {
+            read What$
+           
+            pen 15 {
+                  Print(What$)
+            }
+            a$=""
+            If is_scheme(&What$, &a$) Then Print( "Scheme="+a$ ): What$=mid$(What$,2)
+            If is_path(&What$, &a$) Then {
+                  count=0
+                  while left$(a$, 1)="/" { a$=mid$(a$,2): count++}
+                  if count>1 then {
+                        domain$=leftpart$(a$+"/", "/")
+                        a$=rightpart$(a$,"/")
+                        if domain$<>"" Then Print( "Domain:"+Domain$)
+                        if a$<>"" Then Print("Path:"+a$)
+                  } else.if left$(What$,1) =":" then {
+                        Print( "path:"+a$+What$): What$=""
+                  } Else Print("Data:"+ a$)
+
+            }
+
+            if left$(What$,1) =":" then {
+                  is_number=repeated(is_digit)
+                  What$=mid$(What$,2): If is_number(&What$, &a$) Then Print("Port:"+a$)
+                  if not left$(What$,1)="/" then exit
+                  If is_path(&What$, &a$) Then {
+                        while left$(a$, 1)="/" { a$=mid$(a$,2)}
+                        if a$<>"" Then Print("Path:"+a$)
+                  }
+            }
+            if left$(What$, 1)="?" then {
+                        What$=mid$(What$,2)
+                        If is_search(&What$, &a$) Then {
+                        v$=""
+                        if left$(What$, 1)="=" then {
+                              What$=mid$(What$,2)
+                              If is_search(&What$, &v$) Then Print("Query:"+a$+"="+v$)
+                        }  else Print("Query:"+a$)
+                        }
+            }
+            While left$(What$, 1)="#"  {
+            What$=mid$(What$,2)
+            if not is_xalphas(&What$, &a$) Then exit
+            Print( "fragment:"+a$)
+            }
+            if What$<>"" Then print("Data:"+ What$)
+      }
+      clipboard doc$
+      Sub Print(a$)
+            print a$
+            doc$=a$+{
+            }
+      End Sub
+}
+Checkit
+}
+MODULE GLOBAL T1 {a=(1,2,3,4,5)
+Print a#rev()
+Print a#sum()=15
+Print a#max()=5, a#min()=1
+k=-1
+L=-1
+Print a#max(K)=5, a#min(L)=1
+Print K=4 ' 5th position
+Print L=0 ' 1st position
+Print a#pos(3)=2 ' 3rd position
+Print a#val(4)=5
+\\ tuples in tuple
+a=((1,2),(3,4))
+Print a#val(0)#val(1)=2
+Print a#val(1)#val(1)=4
+a=(1,2,3,4,5,6,7,8,9)
+fold1=lambda ->{
+      push number+number
+}
+Print a#fold(fold1)=a#sum()
+Print a#fold(fold1,1)=a#sum()+1
+even=lambda (x)->x mod 2=0
+b=a#filter(even, (,))
+Print b ' 2 4 6 8
+Print a#filter(even)#fold(fold1)=20
+map1=lambda (a)->{
+      push a+100
+}
+c=b#map(map1)
+Print c ' 102,103, 104, 105
+numbers=lambda p=1 (x) ->{
+      push x+p
+      p++
+}
+oldnumbers=numbers ' we get a copy of numbers with p=1
+c=c#map(numbers)
+Print c ' 103, 106, 109, 112
+zfilter=lambda -> number>106
+tostring=lambda -> {
+      push chrcode$(number)
+}
+oneline=lambda -> {
+             shift 2 ' get second as first
+             push letter$+letter$
+}
+Line$=c#filter(zfilter)#map(tostring)#fold$(oneline,"")
+print Line$="mp", chrcode$(109)+chrcode$(112)
+zfilter=lambda -> number>200
+Line$=""
+Line$=c#filter(zfilter)#map(tostring)#fold$(oneline,"")
+\\ lines$ can't change value becuse filter has no items to give
+Print Line$=""
+\\ if we leave a second parameter without value the we get No Value error
+Try {
+      Line$=c#filter(zfilter, )#map(tostring)#fold$(oneline,"")
+}
+Print error$=" No value"
+\\ second parameter is the alternative source
+Line$=c#filter(zfilter,(109,112))#map(tostring)#fold$(oneline,"")
+Print Line$="mp"
+c=(1,1,0,1,1,1,1,0,1,1,0)
+\\ hard insert
+Print c#pos(1,0,1) ' 1  means 2nd position
+Print c#pos(3->1,0,1) ' 6  means 7th position
+\\ using another tuple
+Print c#pos((1,0,1)) ' 1  means 2nd position
+Print c#pos(3->(1,0,1)) ' 6  means 7th position
+t=(1,0,1)
+Print c#pos(t) ' 1  means 2nd position
+Print c#pos(3->t) ' 6  means 7th position
+}
+MODULE GLOBAL R1 {Function DispRev$(a$) {
+      i=1: j=Len(a$): if j=0 then ="": exit
+      z$=String$(" ",j): j++
+      do {
+            k$=mid$(a$, i, 1)
+            if i<len(a$) then {
+            while len.disp(k$+mid$(a$, i+1,1)) =len.disp(k$) {
+                  k$+=mid$(a$, i+1,1) : i++ : if i>len(a$) then exit
+                  j-- } : j-- : insert j, len(k$) Z$=K$
+            } else j-- :Insert j,1 z$=k$
+            i++
+           
+      } until i>len(a$)
+       =z$
+}
+Print DispRev$("abcd")="dcba"
+Print DispRev$("")=""
+Print DispRev$("s⃝df̅")="f̅ds⃝"
+}
+MODULE GLOBAL W1 { Module WeaselAlgorithm {
+      Print "Evolutionary Algorithm"
+      \\ Weasel Algorithm
+      \\ Using dynamic array, which expand if no fitness change,
+      \\ and reduce to minimum when fitness changed
+      \\ Abandon strings when fitness change
+      \\ Also lambda function Mutate$ change when topscore=10, to change only one character
+      l$="ABCDEFGHIJKLMNOPQRSTUVWXYZ "
+      randomstring$=lambda$ l$ ->{
+            res$=""
+            For i=1 to 28: res$+=Mid$(L$,Random(1,27),1):next i
+            =res$
+      }
+      m$="METHINKS IT IS LIKE A WEASEL"
+      lm=len(m$)
+      fitness=lambda m$, lm (this$)-> {
+            score=0 : For i=1 to lm {score+=If(mid$(m$,i,1)=mid$(this$, i, 1)->1,0)} : =score
+      }
+      Mutate$=lambda$ l$ (w$)-> {
+            a=random(1,28) : insert a, 1 w$=mid$(l$, random(1,27),1)
+            If random(3)=1 Then b=a:while b=a {b=random(1,28)} : insert b, 1 w$=mid$(l$, random(1,27),1)
+            =w$
+      }
+      Mutate1$=lambda$ l$ (w$)-> {
+            insert random(1,28), 1 w$=mid$(l$, random(1,27),1) : =w$
+      }
+      f$=randomstring$()
+      topscore=0
+      last=0
+      Pen 11 {Print "Fitness |Target:", @(16),m$, @(47),"|Total Strings"}
+      Print Over $(3,8), str$(topscore/28,"##0.0%"),"",$(0),f$, 0
+      count=0
+      gen=30
+      mut=0
+      {
+            last=0
+            Dim a$(1 to gen)<<mutate$(f$)
+            mut+=gen
+            oldscore=topscore
+            For i=1 to gen {
+                  topscore=max.data(topscore, fitness(a$(i)))
+                  If oldscore<topscore Then last=i:Exit
+            }
+            If last>0 Then {
+                  f$=a$(last) : gen=30 : If topscore=10 Then mutate$=mutate1$
+            } Else gen+=50
+            Print Over $(3,8), str$(topscore/28,"##0.0%"), "",$(0),f$, mut : refresh
+            count+=min(gen,i)
+            If topscore<28 Then loop
+      }
+      Print
+      Print "Results"
+      Print "I found this:"; a$(i)
+      Print "Total strings which evalute fitness:"; count
+      Print "Done"
+}
+WeaselAlgorithm
+}
+MODULE GLOBAL S1 {Module CheckIt {
+      Form 60, 40
+      Cls 0 ' Black
+      Gradient 0,1
+      Pen 14 ' Yellow
+      Set Fast !
+      Refresh 500
+      Module Sphere (R as long, X0 as long, Y0 as long, fun){
+            R2 = R * R
+            Def Long X, Y, D2
+            Let Scale=twipsx/R*13.5
+            For Y = -R To R step twipsx {
+            Move X0-R, Y+Y0
+            For X = -R To R step twipsy {
+                  D2 = X **2 + Y **2
+                  IF R2>D2 THEN Pset Fun(Max.Data(Min.Data((Sqrt(R2 - D2) - ( X + Y) / 2 )*Scale ,255),0))
+                  Step twipsx
+            }
+            }
+      }
+      Blue=lambda (c)->{
+            c1=c/4+192
+            =Color(c,c,c1)
+      }
+      Blue1=lambda (c)->{
+            c1=c/4+Random(150,192)
+            =Color(c,c,c1)
+      }
+      Mystery=lambda m=1 (c)->{
+            c1=c/4+m
+            m+=10
+            if m>192 then m=1
+            =Color(c,c,c1)
+      }
+      Mystery2=lambda m=1, p=true (c)->{
+            c1=c/4+m
+           if p then m+=10
+           Else m=-10
+            if m>192 then m-=10 : p=false
+            If m<0 then m+=10: p=true
+            =Color(c,c,c1)
+      }
+      Buffer Alfa as byte*8
+      Trans =lambda Alfa (c) -> {
+            Return Alfa, 0:=-point as long
+            Return Alfa, 4:=-color(c,c, c/4+192) as long
+            for i=0 to 2: Return Alfa, i:=(Eval(Alfa, i)+Eval(Alfa, i+4))/2: Next i
+            =-Eval(Alfa, 0 as long)
+      }
+      Sphere 2400, 9000,7000, Blue
+      Sphere 800, 6000, 7000, Blue1
+      Sphere 1200, 5000,5000, Mystery
+      Sphere 1200, 10000,6000, Mystery2
+      Sphere 1200, 8000,5000, trans
+      \\ set spped to normal  (Fast is normal)
+      Set Fast
+      Refresh 30
+}
+Checkit
+}
+MODULE GLOBAL M1 { Module FilterMapFold {
+      Form 80,40
+      \\ HasString()
+      \\ used to find if an array has strings or numbers
+      \\ looking first element
+      \\ because a is an iterator of array we have to copy first item
+      \\ in a fresh array, which is base 0 by default
+      \\ car(a) return first item as an array of one item
+      \\ cdr(a) return all others as an array - not used here
+      \\ (,) is the empty array - we can use Len() to check this
+      HasString=Lambda (&a) ->{
+            z=car(a)
+            if len(z)=0 then =false :exit
+            link z to s()
+            =type$(s(0))="String"
+      }
+      \\ FilterFold$()
+      \\ get an array or a pointer to array or an iterator to array
+      \\ then optional get filter
+      \\ then get the fold function (not optional)
+      \\ then get the initial string value - optional
+      \\ return string
+      FilterFold$=lambda$ HasString (w)-> {
+            f=lambda->true
+            res$=""
+            Read ? f
+            Read fold, ? res$
+            flush ' empty stack no other arguments allowed
+            if not valid(w^) then {m=each(w)} else m=w
+            if HasString(&m) then {
+                  while m {
+                        if not f(array$(m)) then continue
+                         Call fold(array$(m), &res$)
+                  }
+            } else {
+                  while m {
+                        if not f(array(m)) then continue
+                         Call fold(array(m), &res$)
+                  }
+            }
+            =res$
+      }
+      \\ FilterFold()
+      \\ get an array or a pointer to array or an iterator to array
+      \\ then optional get filter
+      \\ then get the fold function (not optional)
+      \\ then get the initial number value - optional
+      \\ return number
+      FilterFold=lambda HasString (w)-> {
+            f=lambda->true
+            res=0
+            Read ? f
+            Read fold, ? res
+            flush ' empty stack no other arguments allowed
+            if not valid(w^) then {m=each(w)} else m=w
+            if HasString(&m) then {
+                  while m {
+                        if not f(array$(m)) then continue
+                         Call fold(array$(m), &res)
+                  }
+            } else {
+                  while m {
+                        if not f(array(m)) then continue
+                         Call fold(array(m), &res)
+                  }      
+            }
+            =res
+      }
+      \\ FilterMap()
+      \\ get an array or a pointer to array or an iterator to array
+      \\ check to see if is an iterator, if not make one
+      \\ then optional get filter function
+      \\ check if has string or number
+      \\ then optional get mapfunction
+      \\ return a poinrer to a new array with results
+      \\ [ ] get all items from stack and return a stack object
+      \\ Array([])  convert stack object to array
+      FilterMap=lambda HasString (w)-> {
+            if not valid(w^) then {m=each(w)} else m=w
+            f=lambda->true
+            if HasString(&m) then {
+                  map$=lambda$->Letter$
+                  Read ? f, map$
+                  flush ' empty stack no other arguments allowed
+                  while m {
+                        if not f(array$(m)) then continue
+                        data map$(array$(m))
+                  }
+            } Else {
+                  map=lambda ->Number
+                  Read ? f, map
+                  flush ' empty stack no other arguments allowed
+                  while m {
+                        if not f(array(m)) then continue
+                        data map(array(m))
+                  }
+            }
+           =Array([])
+      }
+      \\ we can combine filters using filter()
+      \\ we can have any number of lambda functions as parameters
+      \\ if any function return false then exit and return falsa
+      \\ so return true only if all functions return true
+      \\ here we use it with one parameter
+      \\ s is a pointer to stack object
+      \\ stack(s) is a stack object as copy of s
+      \\ ! stack(s)  paste all items to current stack, the lambda stack
+      \\ so filter  return a lambda which works for any number and type of arguments
+      \\ we use T and F as boolean values - only for print statement
+      \\ because True and False are doubles, not boolean, but works nice in boolean expressions
+      \\ All comparisons return boolean.
+      Function filter {
+            Def boolean T=True, F=False
+            dim all() : all()=Array([]) : L=len(all())-1
+            =lambda all(), L , F, T -> {
+                s=[] : =T
+                for i=0 to L { if all(i)(!stack(s)) else =F : exit
+                }
+            }
+      }
+      \\ example for two parameters
+      greater=lambda (x, z)->x>z
+      divided=lambda (x, z)->x mod z=0
+      myfilter=filter(greater, divided)
+      Print myfilter(10,2)=true, myfilter(2,10)=false, myfilter(7,3)=false
+    
+      \\ combine$()
+      \\ take any number of lambda functions, which return string/object result
+      \\ combine$() get all parameters to an array and make it  a closure in the returned lambda
+      \\ stackitem$() return any type from stack (string or object), without dropping it
+      \\ because function's stack always erased at the exit, it make the drop for us.
+      Function combine$ {
+            dim all$()
+            all$()=Array$([])
+            L=len(all$())-1
+            =lambda$ all$(), L -> {
+                for i=0 to L {Push all$(i)(![])} : =StackItem$()
+            }
+      }
+      \\ combine(
+      \\ take any number of lambda functions, which return number/object result
+      \\ combine() get all parameters to an array and make it  a closure in the returned lambda
+      \\ stackitem() return any type from stack (number or object), without dropping it
+      \\ because function's stack always erased at the exit, it make the drop for us.
+      Function combine {
+            dim all()
+            all()=Array([])
+            L=len(all())-1
+            =lambda$ all(), L -> {
+                for i=0 to L {Push all(i)(![])} : =StackItem()
+            }
+      }
+      \\ so now we see some example of using these functions
+      \\ b is a pointer to array
+      b=(1,2,3,4,5,6,7,8)
+      \\ just  return a copy of b
+      Print FilterMap(b)
+      \\ we make a lambda to be used to FilterFold
+      \\ second parameter has to be passed by reference
+      \\  We can use FilterFolder with String Arrays or Number Arrays
+      \\ but we get number  as result (from FilterFolder$ we get string)
+      \\ so the reference here must be for a number
+      \\ the first parameter here is number because we have number array to fold
+      mul=lambda (x, &p) -> {
+            p*=x
+      }
+      \\ using initial value 1  (default is 0, but here 0 isn't good)
+      Print FilterFold(b,,mul,1)
+      \\ so now we use the same number array but for string result
+      \\ we make a text with one to eight starts, like a triangle of stars
+      bar$=lambda$ (x, &ret$) ->{
+            ret$+=string$("*", x)+{
+            }
+      }
+      \\ Report using 2 center each line, so we get something like a tree
+      \\ also report use proportional spacing
+      Report 2, FilterFold$(b,,bar$) +"*"
+      \\ we can make a new array adding three times b, so now b point to a new array
+      b=cons(b,b,b)
+      \\ we want the sum of all numbers in b
+      Sum=lambda (x, &total)->{
+            total+=x
+      }
+      \\ we leave empty the filter, we place the sum function. Initial value is 0 and this is nice here.
+      Print FilterFold(b, ,Sum)
+      \\ We want now to get an array of all squares of even numbers in array
+      \\ so we want  the Even function as filter (return a boolean)
+      \\ and the square function which return squares
+      Even=lambda (x)->x mod 2=0
+      Square=lambda (x)->x**2
+      \\ this is the same
+      Square=lambda (x) -> {
+            =x**2
+      }
+      \\ and this is the same too
+      Square=lambda -> {
+            Read x
+            =x**2
+      }
+      \\ or better , using  Number  which pop a number from lambda's stack
+      Square=lambda ->Number**2
+      \\ so now we get an array with all values
+      Print FilterMap(b, Even, Square)
+      \\ We can get the sum too easy:
+      Print FilterFold(FilterMap(b, Even, Square), , sum)
+      \\ Warning
+      \\ Each( )can't work with expression, it need a pointer to array or an array like a()
+      \\ so we use c as a pointer to array
+      c=FilterMap(Each(b 1 to 8), Even, Square)
+      \\ we can see items and length
+      Print c, len(c)
+      \\ so now we can use each(c,1,2) to get the two first items
+      \\ and using FilterFold we get the sum ot those two items
+      Print FilterFold(each(c,1,2), , sum)
+      \\ We can use two dimensional arrays, or more (maximum ten dimensions)
+      \\ we can set different base (low bound) for each dimension
+      \\ Dim is always like a "Dim Preserve" in VB6
+      Dim z(1 to 4, 1 to 2)
+      z(1,1)=1,2,3,4,5,6,7,8
+      \\ So now we pass z() to FilterFold, and this check that it has numbers
+      \\ and apply the proper code to support the sum function
+      Print FilterFold(z(), , sum)
+      \\ no it has numbers
+      Print HasString(&Z())
+      \\ so now we see examples with strings in array
+      a=("car","boat","cat","frog")
+      \\ check that HasString() works
+      Print HasString(&a) ' true
+      \\ filters
+      \\ check if a$ has a "t" upper or lower case
+      HasAt=lambda (a$)->instr(lcase$(a$),"t")>0
+      \\ check if a$ has three characters length
+      IsThreeLetters=lambda (a$)->len(a$)=3
+      \\ maps
+      \\ convert to uppercase
+      capitalize$=lambda$ (a$)->Ucase$(a$)
+      \\ add "123"
+      add123$=lambda$ (a$)->a$+"123"
+      \\ add brackets
+      addbrackets$=lambda$ (a$)->"["+a$+"]"
+      \\ Using filterMap with no filter/map, so we get the first two items by each()
+      Print filterMap(each(a,1,2))
+      \\ now we get all items capitalize
+      Print filterMap(a,,capitalize$)
+      \\ now we get items with three letters capitalize
+      Print filterMap(a,isThreeletters,capitalize$)
+      \\  We pass a composite filter using  filter()
+      \\ so now we want items with three letters and  have a "t" inside, and map to capitalize
+      Print filterMap(a,filter(isThreeletters,HasAt), capitalize$)
+      \\  Here we get all items with three letters an apply combine map of two functions
+      \\ last function applied last
+      Print filterMap(a,isThreeletters, combine$(capitalize$, add123$))
+      \\  Here we get all items with three letters an apply combine map
+      \\ last applied the addbrackets so we get [CAR123] [CAT123]
+      Print filterMap(a,isThreeletters, combine$(capitalize$, add123$, addbrackets$))
+      \\ So now we make a folding function
+      \\ using string for items and by reference string for accumulator
+      appendstring=lambda (x$, &all$)->{
+            all$+=x$
+      }
+      \\ we get all items in a string without spaces
+      Print FilterFold$(a,,appendstring)
+      \\ we use each with no coma using "to" and Start and End (1 and -1), in reverse
+      \\ so we get the items in a string in reverse order
+      \\ reverse, we can use each(a, -1, 1)
+      Print FilterFold$(each(a End to Start),,appendstring)
+      \ like this
+      Print FilterFold$(each(a,-1,1),,appendstring)
+      \\ we can apply a filter
+      Print FilterFold$(a,isThreeletters,appendstring)
+      \\ or we can use the FilterMap() as a parameter for FilterFold$()
+      Print FilterFold$(FilterMap(a,isThreeletters, combine$(capitalize$, addbrackets$)),,appendstring)
+      \\ Another folding function, to get the total length, so we need number,
+      \\ so we use FilterFold and not FilterFold$
+      GetLength=lambda (x$, &all)-> {
+            all+=len(x$)
+      }
+      \\ Also we can get the maximum length from items
+      GetMaxLength=lambda (x$, &max)-> {
+            If len(x$)>max then max=len(x$)
+      }
+      \\ so now we get the length from all items with three letters
+      Print FilterFold(a,isThreeletters,GetLength)=6
+      \\ and we get the maximum length from all items
+      Print FilterFold(a,,GetMaxLength)=4
+}
+FilterMapFold
+
+}
+MODULE GLOBAL H1 { Class HttpStatus {
+Events "trace", "err","high","low"
+Private:
+      myvalue
+Public:
+      Enum Status { NotFound=404, MethodNotAllowed=405}
+      Set {
+            read x ' number or enum
+            \\ if number not exist in enum list Then we get an error
+            Call event "trace", x
+            Try ok {
+                  .myvalue<=x
+            }
+            if not ok Then call event "err", format$("value {0} not accepted", x)
+      }
+      Value {
+            =.myvalue
+      }
+      Operator "++" {
+            old=.myvalue
+            .myvalue++
+            if old=.myvalue Then call event "high"
+      }
+      Operator "--" {
+            old=.myvalue
+            .myvalue--
+            if old=.myvalue Then call event "low"
+      }
+      class:
+      Module HttpStatus {
+      .myvalue<=.NotFound
+      }
+}
+Group WithEvents HttpStatus=HttpStatus()
+Function HttpStatus_trace(New a){
+      Print ">>>",a
+}
+Function HttpStatus_err(New a$) {
+      Print a$
+}
+accHigh=0
+Function HttpStatus_high {
+      Print "high limit"
+      accHigh++
+}
+Function HttpStatus_low {
+      Print "low limit"
+}
+Print HttpStatus.NotFound, HttpStatus.MethodNotAllowed
+Print HttpStatus=404
+HttpStatus=HttpStatus.MethodNotAllowed
+Print HttpStatus=405
+HttpStatus=10
+Print HttpStatus=405
+\\ 404 is ok
+HttpStatus=404
+Print HttpStatus
+HttpStatus--
+HttpStatus++
+Print HttpStatus=405
+HttpStatus++
+Print accHigh=1
+Print Type$(HttpStatus)="Group"
+Def InferType$(x)=Type$(x)
+Print InferType$(HttpStatus)="Status"
+\\ for enum types Status letter Case have to match the Case in definition
+Module Checkit(a as Status) {
+      Print type$(a) ' it is a enum type, not a group, so no events happen
+      Print a
+      a--
+      Print a, eval$(a)="NotFound"
+     
+}
+Checkit HttpStatus.NotFound ' 404 404
+Checkit HttpStatus ' 405 404
+Print Eval$(HttpStatus)="MethodNotAllowed"
+Try ok {
+      Checkit 405
+}
+If error or not ok Then Print Error$ ' Wrong type in module A.CHECKIT
+Module CheckThis(a as group) {
+      Print "ok", a=405
+      a++ ' raise high event, add one to acchigh
+}
+Try ok {
+      CheckThis HttpStatus
+}
+If Error or not ok Then Print Error$ ' Wrong type in module A.CHECKTHIS
+\\ we can pass group not value of HttpStatus
+CheckThis Group(HttpStatus)
+Print acchigh=2
+Select Case HttpStatus
+Case HttpStatus.NotFound
+      Print "Not Found"
+Case HttpStatus.MethodNotAllowed
+      Print "Method Not Allowed"
+End Select
+HttpStatus=HttpStatus.NotFound
+Module CheckThisToo(&a as group) {
+      Print "ok", a=404
+      a++ ' raise high event, add one to acchigh
+}
+\\ pass by reference
+CheckThisToo &HttpStatus
+Print HttpStatus=HttpStatus.MethodNotAllowed
+\\ check a copy of HttpStatus to a
+a=HttpStatus
+a++
+a++ ' we have no events now, a has a new cleared event list
+Print a =405
+\\ check a pointer to HttpStatus
+b->HttpStatus
+Print Eval(b), b=>NotFound, Eval$(b=>NotFound)="NotFound"
+b++ ' we get event because b is a pointer to HttpStatus
+Try {
+      \\ b is an object so we get wrongtype
+      Checkit b
+}
+\\ now we can get the value from b
+Checkit eval(b)
+\\ no used & because  b is actual a reference to HttpStatus
+\\ if we use & then we pass the reference of pointer, not the the reference of Httpstatus
+CheckThis b
+Dim a(2)
+\\ this is the second type of pointer, a pointer to a copy of HttpStatus
+a(1)->(Group(HttpStatus))
+b->a(1)
+Print Eval(a(1))=405
+a(1)--
+Print Eval(a(1))=404
+a(1)=405
+Print Type$(a(1))="Group", InferType$(Eval(a(1)))="Status"
+a(1)++ ' we get high limit, because a(1) has a float group (nameless), and event list inside is the original one.
+b++ ' now we get high limit because b and a(1) show the same nameless (or float) group
+
+
+}
+MODULE GLOBAL INF { locale 1033
+Module CheckIt {
+      Form 66,40
+      Cls 5
+      Pen 14
+      \\ Ensure True/False for Print boolean (else -1/0)
+      \\ from m2000 console use statement Switches without Set.
+      \\ use Monitor statement to see all switches.
+      Set Switches "+SBL"
+      IF version<9.4 then exit
+      IF version=9.4 and revision<25 then exit
+      Function Infinity(positive=True) {
+            buffer clear inf as byte*8
+            m=0x7F
+            if not positive then m+=128
+            return inf, 7:=m, 6:=0xF0
+            =eval(inf, 0 as double)
+      }
+      K=Infinity(false)
+      L=Infinity()
+      Function TestNegativeInfinity(k) {
+            =str$(k, 1033) = "-1.#INF"
+      }
+      Function TestPositiveInfinity(k) {
+            =str$(k, 1033) = "1.#INF"
+      }
+      Function TestInvalid {
+            =str$(Number, 1033) = "-1.#IND"
+      }
+      Pen 11 {Print "       True       True"}
+      Print TestNegativeInfinity(K), TestPositiveInfinity(L)
+      Pen 11 {Print "    -1.#INF     1.#INF    -1.#INF     1.#INF    -1.#INF     1.#INF"}
+      Print K, L, K*100, L*100, K+K, L+L
+      M=K/L
+      Pen 11 {Print "    -1.#IND    -1.#IND       True       True" }
+      Print K/L, L/K, TestInvalid(M), TestInvalid(K/L)
+      M=K+L
+      Pen 11 {Print "    -1.#IND    -1.#IND    -1.#IND       True       True"}
+      Print M, K+L, L+K, TestInvalid(M), TestInvalid(K+L)
+      Pen 11 {Print "    -1.#INF     1.#INF"}
+      Print 1+K+2, 1+L+2
+      Pen 11 {Print "    -1.#INF"}
+      Print K-L
+      Pen 11 {Print "     1.#INF"}
+      Print L-K
+}
+Checkit
+}
+MODULE GLOBAL CONV { Module Checkit {
+      Conv2dec=lambda (n$, frombase=10, dp$=".") -> {
+           neg=left$(n$,1)="-": if neg then n$=mid$(n$,2)
+           if instr(n$, dp$)>0 then {
+                 n2$=Piece$(n$,dp$,2)
+                 n$=Piece$(n$, dp$,1)
+           } else n2$=""
+           n0=0
+           l1=len(n$)+1
+           For i=len(n$) to 1
+                 dig$=Mid$(n$,l1-i,1)
+                 dig=asc(dig$)-48
+                 if dig$>"9" then dig-=7
+                 if dig>=frombase then error "not in base:"+frombase
+                 n0+=dig*frombase^(i-1)
+           next i
+           if n2$<>"" then {
+              For i=1 to len(n2$)
+                 dig$=Mid$(n2$,i,1)
+                 dig=asc(dig$)-48
+                 if dig$>"9" then dig-=7
+                 if dig>=frombase then error "not in base:"+frombase
+                 n0+=dig/frombase^i
+              Next i
+           }
+           if neg then n0-!
+           =n0
+      }
+      Conv2Any$=Lambda$ (dec, tobase=10, dp$=".", prec=16) -> {
+           a$=""
+           neg=false
+           if dec<0 then neg=true
+           dec=abs(dec)
+           n2=frac(dec)
+           if dec=0 then {
+                 a$="0"
+           } else {
+                 do {
+                        n=dec mod tobase
+                        if n>=10 then n+=7
+                        a$=chr$(n+48)+a$
+                        dec=dec div tobase
+                  } until dec==0
+            }
+            if n2<>0 then {
+                 a$+=dp$
+                 prec--
+                 do {
+                      prec--
+                      dec=n2*tobase
+                      n2=frac(dec)
+                      dec-=n2
+                      n2=round(n2)
+                      if dec>=10 then dec+=7
+                      a$+=chr$(dec+48)
+                 } until n2=0 or prec<0
+            }
+            if neg then {="-"+a$} else =a$
+      }
+      Rem : Locale 1033 ' use . for all print out for decimal point
+      Print Conv2dec("10111.01011",2); " => ";Conv2Any$(23.34375,2)
+      Print Conv2Any$(11.90625, 2); " => "; Conv2dec("1011.11101",2)
+      \\ using , for decimal point
+      Print Conv2Any$(Conv2dec("1011,11101",2, ","), 10, ",")
+      Print 12312321.1212
+      clipboard Conv2Any$(12312321.1212, 2)
+      \\ using . for 1033 locale
+      Print Str$(Conv2Dec(Conv2Any$(12312321.1212, 2), 2), 1033)="12312321.1211853"
+      Print Str$(Conv2Dec(Conv2Any$(12312321.1212, 2,,52), 2), 1033) ="12312321.1212"
+}
+Checkit
+}
+MODULE GLOBAL RAT {Module RationalNumbers {
+      Class Rational {
+            numerator as decimal, denominator as decimal
+            gcd=lambda->0
+            lcm=lambda->0
+            operator "+" {
+                 Read l
+                 denom=.lcm(l.denominator, .denominator)
+                 .numerator<=denom/l.denominator*l.numerator+denom/.denominator*.numerator
+                 if .numerator==0 then denom=1
+                 .denominator<=denom
+            }
+            Operator Unary {
+                  .numerator-!
+            }
+            Operator "-" {
+                  Read l
+                  Call Operator "+", -l
+            }
+            Operator "*" {
+                  Read l
+                  g1=.gcd(l.numerator,.denominator)
+                  g2=.gcd(.numerator, l.denominator)
+                  Push l.numerator/g1*.numerator/g2
+                  Push l.denominator/g2*.denominator/g1
+                  Read .denominator, .numerator
+
+            }
+            Function Inverse {
+                  if .numerator==0 then Error "Division by zero"
+                  ret=This
+                  sign=sgn(ret.numerator) : if sign<0 then ret.numerator-!
+                  swap ret.numerator, ret.denominator
+                  if sign<0 then ret.numerator-!
+                  =ret
+            }
+            Operator "/" {
+                  Read l
+                  call operator "*", l.inverse()
+            }
+            Function Power {
+                  Read pow as long
+                  ret=This
+                  ret.numerator<=.numerator^pow
+                  ret.denominator<=.denominator^pow
+                  =ret
+            }
+            Operator "=" {
+                  Read l
+                  Def boolean T=True, F=False
+                  if Abs(sgn(l.numerator))+Abs(sgn(.numerator))=0 then Push T: exit
+                  if sgn(l.numerator) <>sgn(.numerator) then Push F : exit
+                  pcomp=l/this
+                  PUSH pcomp.numerator=1 and pcomp.denominator=1
+            }
+            Operator ">" {
+                  Read l
+                  Def boolean F
+                  if Abs(sgn(l.numerator))+Abs(sgn(.numerator))=0 then Push F: exit
+                  if sgn(l.numerator)=0 then {
+                        PUSH .numerator>0
+                  } Else {
+                        pcomp=this/l
+                        PUSH pcomp.real>1
+                  }
+            }
+            Operator ">=" {
+                  Read l
+                  if sgn(l.numerator)=0 then {
+                        PUSH .numerator>=0
+                  } Else {
+                        pcomp=this/l
+                        PUSH pcomp.real>=1
+                  }
+            }      
+            Operator "<" {
+                  Read l
+                  Def boolean F
+                  if Abs(sgn(l.numerator))+Abs(sgn(.numerator))=0 then Push F: exit
+                  if sgn(l.numerator)=0 then {
+                        PUSH .numerator<0
+                  } Else {
+                        pcomp=this/l
+                        PUSH pcomp.real<1
+                  }
+            }
+            Operator "<=" {
+                  Read l
+                  if sgn(l.numerator)=0 then {
+                        PUSH .numerator<=0
+                  } Else {
+                        pcomp=this/l
+                        PUSH pcomp.real<=1
+                  }            
+            }
+            Operator "<>" {
+                  Read l
+                  if sgn(l.numerator)=0 then {
+                        PUSH .numerator<>0
+                  } Else {
+                        pcomp=this/l
+                        PUSH pcomp.real<>1
+                  }            
+            }
+            Group Real {
+                  value {
+                        link parent numerator, denominator to n, d
+                        =n/d
+                  }
+            }
+            Group ToString$ {
+                 value {
+                        link parent numerator, denominator to n, d
+                        =Str$(n)+"/"+Str$(d,"")
+                  }      
+            }
+            class:
+            Module Rational (.numerator, .denominator) {
+                  if .denominator<=0 then Error "Positive only denominator"
+                  gcd1=lambda (a as decimal, b as decimal) -> {
+                        if a<b then swap a,b
+                        g=a mod b
+                        while g {
+                              a=b:b=g: g=a mod b
+                        }
+                              =abs(b)
+                  }
+                  .gcd<=gcd1
+                  .lcm<=lambda gcd=gcd1 (a as decimal, b as decimal) -> {
+                        =a/gcd(a,b)*b
+                  }
+            }
+      }
+      Print rational(-3,3)<>rational(-3,3)
+      M=Rational(10, 150)
+      N=Rational(2, 4)
+      Z=M+N
+      Print Z.numerator, Z.denominator
+      Print 10/150@+2/4@
+      Print Z.real
+      Z=-M+N
+      Print Z.numerator, Z.denominator
+      Print -10/150@+2/4@
+      Print Z.real
+      Z=M-N
+      Print Z.numerator, Z.denominator
+      Print 10/150@-2/4@
+      Print Z.real
+      Z=M*N
+      Print Z.numerator, Z.denominator
+      Print (10/150@)*(2/4@)
+      Print Z.real
+      Z=M/N
+      Print Z.numerator, Z.denominator
+      Print (10/150@)/(2/4@)
+      Print Z.real
+      Z=Z.Power(2)
+      Print Z.real
+      Print Z=Z
+      Print Z=N
+      Print Z=-Z
+      ZZ=-Z
+      Print ZZ=ZZ
+      Print -Z=-Z
+      Print Z.numerator, Z.denominator
+      Print Z.real, Z.tostring$
+      \\ Array of rational numbers
+      Dim K(100)=rational(1,1)
+      M=K(4)+K(3)
+      Print M.real
+      Print K(4).toString$
+
+           pk->(Z)
+      Print pk=>toString$
+      zzz=pk+pk
+      Print zzz.toString$
+
+}
+RationalNumbers
+}
+MODULE GLOBAL TUPLE { Form 80, 60
+\\ Tuple of items (as one dimension arrays)
+A=(1,2,3,4,5)
+B=("George", 10, "Bob", 5)
+C=(("George", 10),("Bob", 5))
+Print Len(A)=5 ' true
+Print Len(B)=4 ' true
+Print Len(C)=2 ' true
+\\ get reference of A to A1
+A1=A
+B1=B
+C1=C
+\\ Get Shallow Copy
+Dim A(), B$(), C()
+A()=A
+B$()=B
+C()=C
+A(0)=10
+Print A ' 1 2 3 4 5
+Print A() ' 10 2 3 4 5
+Link B$() to B()
+B$(0)="Hello George"
+B(1)=1000
+Print B ' George 10 Bob 5
+Print B$() ' Hello George 1000 Bob 5
+C()=C
+C(0)=("New Name", 500)
+Print Array(C,0), Array(C, 1) ' George 10 Bob 5
+Print C(0)(), C(1)() ' New Name 500 Bob 5
+\\ Test Shallow Copy
+\\ we keep pointer to second array but we change values
+\\ we need a pointer to C[1]
+N=Array(C,1)
+\\ So we can use Return to return multiple values
+Return N, 0:="New Bob", 1:=5000
+\\ So Array(C,1) show us new values
+Print Array(C,0), Array(C, 1) ' George 10 New Bob 5000
+\\ And because we get shallow copy (pointer only) we get C(1)() array with new values
+Print C(0)(), C(1)() ' New Name 500 New Bob 5000
+\\ Now C(1) get a new pointer
+C(1)=("Another Name", 2000)
+Print Array(C,0), Array(C, 1) ' George 10 New Bob 5000
+Print C(0)(), C(1)() ' New Name 500 Another Name 2000
+\\ we can get a copy of A using Cons() with one argument
+NewArray=Cons(A) ' copy of A
+Print NewArray
+NewArray2=Cons(A, A) ' add A twice
+Print NewArray2
+\\ Get a copy of C() to a pointer
+CopyC=Cons(C())
+Print Array(CopyC, 0), Array(CopyC, 1)
+Return CopyC, 1:=("Just Another Name", 3000)
+Print Array(CopyC, 0), Array(CopyC, 1) ' New Name 500 Just Another Name 3000
+Print C(0)(), C(1)() ' New Name 500 Another Name 2000
+
+\\ Pointers for multi dimension arrays
+Dim A(2 to 10, 5 to 10)=1
+M=A()
+Print Len(M) = 54 ' 9X6
+Print array(M, 2,5)=1 \\ M point to a 2 dimension Array
+\\ Return use one dimension, so 0 is the first element
+Return M, 0:=1000, 6:=5000 ' 6 is the 7th item, first in second row (row, columns)
+Print array(M, 2,5)=1000, array(M, 3,5)
+Dim A(2 to 11, 5 to 10) ' add one row
+Print Len(M) = 60 ' 10X6
+Print Type$(A(11, 5))="Empty"  ' new raw has Empty as value (in calculations this is same as 0 or empty string)
+\\ So now we put a value
+For i=5 to 10:A(11,i)=1:Next i
+\\ we can alter last item using pointer M
+Return M, 59:=9999
+Print A(11, 10)=9999
+\\ assuming we have defalut base 0
+Dim A(10,6) ' redim preserving values
+Print A(9, 5)=9999, Len(A())=60
+\\ we can use Base 1 or Base 0 to explicit declare base
+Dim Base 1, A(10,6) ' redim preserving values
+Print A(10, 6)=9999, Len(A())=60
+\\ or we can use for each dimension a new base
+Dim A(5 to 14, 10 to 15) ' redim preserving values
+Print A(14, 15)=9999, Len(A())=60
+\\ Get dimensions, width for each dimension, base (min value) for each dimension, max value for each dimension
+Print Dimension(A())=2 ' 2 dimension
+Print Dimension(A(),0)=5 ' first dimension base is 5
+Print Dimension(A(),1)=10 ' 10 items
+Print Dimension(A(),2)=6 ' 6 items, so we have 10x6 items
+Print Dimension(A(),1,0)=5
+Print Dimension(A(),1,1)=14
+Print Dimension(A(),2,0)=10
+Print Dimension(A(),2,1)=15
+\\ Copy all item to stack using pointer to array (not A() but M)
+Flush  ' now stack is empty stack
+Push ! M ' now get 60 items
+Print stack.size=60 ' true
+Stack   ' now display all stack items
+Flush ' now empty stack
+\\ if we use Push ! M we send values in reverse
+Data ! M ' now get 60 items
+\\ now all item make an array and return a pointer to Z
+Z=Array([])
+Print stack.size=0
+Link Z to Z()
+Dim Z(5 to 14, 10 to 15)
+Print Z()
+Print Z(14,15)=9999
+Z++ ' Add 1 to all items
+Print Z()
+Z(14,15)-- ' Subtract 1 from one item
+Print Z(14,15)
+}
+MODULE GLOBAL TU {Module TestGroup {
+      Group A {
+            X=10
+            Dim K(10)=1
+      }
+      Dim A(), B()
+      A()=(A,)
+      B()=A()
+      A(0).X++
+      A(0).K(0)=1000
+      Print A(0).X=11, A(0).K()
+      Print B(0).X=10, B(0).K()
+}
+TestGroup
+
+
+Module TestGroup2 {
+      Group A {
+            X=10
+            Dim K(10)=1
+      }
+      Dim A(), B()
+      A()=(0,) ' one item
+      A(0)->(A) ' now A(0) has a pointer to a copy of  A
+      B()=A()
+      A(0).X++
+      A(0).K(0)=1000
+      Print A(0).X=11, A(0).K()
+      Print B(0).X=11, B(0).K()
+}
+TestGroup2
+}
+MODULE GLOBAL PEND { Module Pendulum {
+      back()
+      degree=180/pi
+      THETA=Pi/2
+      SPEED=0
+      G=9.81
+      L=0.5
+      Profiler
+      lasttimecount=0
+      cc=40 ' 40 ms every draw
+      accold=0
+      Every cc {
+            ACCEL=G*SIN(THETA*degree)/L/50
+            SPEED+=ACCEL/cc
+            THETA+=SPEED
+            Pendulum(THETA)
+            if KeyPress(32) Then Exit
+      }
+
+      Sub back()
+            If not IsWine then Smooth On
+            Cls 7,0
+            Pen 0
+            Move 0, scale.y/4
+            Draw scale.x,0
+            Step -scale.x/2
+            circle fill #AAAAAA, scale.x/50
+            Hold ' hold this as background
+      End Sub
+
+      Sub Pendulum(x)
+            x+=pi/2
+            Release ' place stored background to screen
+            Width scale.x/2000 {
+                  Draw Angle x, scale.y/2.5
+                  Width 1 {
+                        Circle Fill 14, scale.x/25
+                  }
+                  Step Angle x, -scale.y/2.5
+            }
+            Print @(1,1), lasttimecount
+            if sgn(accold)<>sgn(ACCEL) then lasttimecount=timecount: Profiler
+            accold=ACCEL
+            Refresh 1000
+      End Sub
+}
+Pendulum
+}
+MODULE GLOBAL LOGO {smooth off  ' can't use xor with GDI+, so we work with GDI32 (by default)
+Form 80, 50
+Cursor 0,0
+Gradient 11,0
+drawframeM()
+drawframe2()
+drawframe0()
+drawframe0()
+drawframe0()
+cls, 4
+Sub drawframeM()
+      local i, n=0
+      Move !
+      Pen 0 {
+            Step 100, 100
+            For i=1 to 2 {
+                  Path n {
+                        Polygon 0, 1000, 0, 0,1000, -200,0, 0,-700,-200, 0, 0,700, -200,0, 0,-700,-200, 0, 0,700, -200, 0, 0,-1000
+                        Step 200, 300
+                  }
+                  Step -300, -400
+                  n=15-n
+            }
+      }
+      Step 1400,0
+      Cursor !
+End Sub
+Sub drawframe2()
+      local i, n=0
+      Move !
+      Pen 0 {
+            Step 100, 100
+            For i=1 to 2 {
+                  Path n {
+                        Polygon 0, 1000, 0, 0,600, -700,0, 0,100,700,0,0,300, -1000,0,0,-600,700,0,0,-100,-700,0,0,-300
+                        Step 200, 300
+                  }
+                  Step -300, -400
+                  n=15-n
+            }
+      }
+      Step 1400,0
+      Cursor !
+End Sub
+Sub drawframe0()
+      local i, n=0
+      Move !
+      Pen 0 {
+            Step 100, 100
+            For i=1 to 2 {
+                  Path n {
+                        Polygon 0, 1000, 0, 0,1000, -1000,0, 0,-1000
+                        Step 200, 300
+                        Polygon 0, 600, 0, 0,400, -600,0, 0,-400
+                  }
+                  Step -300, -400
+                  n=15-n
+            }
+      }
+      Step 1400,0
+      Cursor !
+End Sub
+}
+MODULE GLOBAL EN {\\ by default Dog=1, Cat=2
+\\ we can change it: Dog=0, Cat   ' so now Cat=1
+\\ we can change it: Dog=100, Cat=200
+\\ we can put a new line in place of comma
+\\ or after comma,
+\\ we can't leave a comma as last character except new lines, in the enum block.
+Enumeration Pets {
+      Dog
+      Cat
+}
+a=Dog
+Print a=1 ' true
+a++
+Print Eval$(a)="Cat", a=2
+k=Each(Pets)
+While k {
+      Print Eval$(k), Eval(k)
+      a=Eval(k)
+      Print a<Cat
+      Alfa(a)
+}
+a=Dog
+AlfaByRef(&a)
+Print a=Cat
+
+Sub Alfa(b as Pets)
+      Print b
+End Sub
+Sub AlfaByRef(&b as Pets)
+      Print b
+      b++
+End Sub
+}
+MODULE GLOBAL FS {declare fs "Scripting.FileSystemObject"
+Method fs, "GetFolder", dir$ as fc
+With fc, "SubFolders" set SubFolders
+Print type$(SubFolders)
+With SubFolders, -4& as Folder
+With Folder, "Name" as FolderName$
+While Folder {
+      Print FolderName$
+}
+
+declare fs nothing
+}
+MODULE GLOBAL FS1 {declare fs "Scripting.FileSystemObject"
+Method fs, "GetFolder", dir$ as fc
+With fc, "files" set files
+\\ Produce the TypeLib
+mm=param(files)
+IF LEN(mm)>1 THEN {
+      For i=0 to len(mm)-1
+            Report 3, mm$(i!) ' use index, not key
+      Next i
+}
+With files, "count" as count
+With files, "item" set myfile ("llist1.gsb")
+\\ this is a property -4 which return a IEnumVariant
+With files, -4& as EnumFile
+Print Type$(EnumFile)
+\\ Produce the TypeLib
+m=param(EnumFile)
+IF LEN(m)>1 THEN {
+      For i=0 to len(m)-1
+            Report 3, m$(i!) ' use index, not key
+      Next i
+}
+With EnumFile, "Name" as aName$
+While EnumFile {
+      Print aName$
+}
+declare fs nothing
+}
+MODULE GLOBAL GAME {Module Game2048 {
+      \\ 10% 4 and 90% 2
+      Def GetTlleNumber()=If(Random(10)<2->4, 2)
+      \\ tile
+      Def Tile$(x)=If$(x=0->"[    ]", format$("[{0::-4}]", x))
+      \\ empty board
+      BoardTileRight =lambda (x, y)->x+y*4
+      BoardTileLeft=lambda (x, y)->3-x+y*4
+      BoardTileUp=lambda (x, y)->x*4+y
+      BoardTileDown=lambda (x, y)->(3-x)*4+y
+      Dim Board(0 to 15)
+      Inventory EmptyTiles
+      \\ Score is a statement but we can use it as a variable too.
+      Score=0
+      \\ Win is also a statement but we can use it as a variable too.
+      Win=False
+      ExitNow=False
+      BoardDirection=BoardtileRight
+      Process(BoardDirection)
+      \\ Split Rem lines to insert start condition to check valid moves
+      Rem : board(0)=2
+      Rem : board(1)=2, 2, 2 ' place to (1), (2), (3)
+            While len(EmptyTiles) {
+            NewTile()
+            DrawBoard()
+            Action=False
+            do {
+                  a$=key$
+                  if len(a$)=2 then {
+                        Action=true
+                        Select case Asc(mid$(a$,2))
+                        Case 72
+                        BoardDirection=BoardTileUp
+                        Case 75
+                        BoardDirection=BoardTileRight
+                        Case 77
+                        BoardDirection=BoardTileLeft
+                        Case 80
+                        BoardDirection=BoardTileDown
+                        Case 79 ' End key
+                              ExitNow=True
+                        Else
+                        Action=false
+                        end select
+                  }
+            } until Action
+            If ExitNow then exit
+            Process(BoardDirection)
+      }
+      If Win then {
+            Print "You Win"
+      } Else {
+            Print "You Loose"
+      }
+      Refresh 30
+      End
+      Sub Process(Boardtile)
+      Inventory EmptyTiles ' clear inventory
+      local where, i, j, k
+      For i=0 to 3
+            Gravity()
+            k=boardtile(0,i)
+            For j=1 to 3
+                  where=boardtile(j,i)
+                  if Board(where)<>0 then {
+                        if board(k)=board(where) then {
+                               board(k)*=2 : score+=board(where): board(where)=0
+                               if board(k)=2048 Then Win=True : ExitNow=true
+                        }
+                  }
+                  k=where
+            Next j
+            Gravity()
+            For j=0 to 3
+                  where=boardtile(j,i)
+                  if board(where)=0 then Append EmptyTiles, where
+            Next j
+      Next i
+      End Sub
+      Sub NewTile()
+            local m=EmptyTiles(Random(0, len(EmptyTiles)-1)!)
+            Board(m)=GetTlleNumber()
+            Delete EmptyTiles, m
+      End Sub
+      Sub DrawBoard()
+            Refresh 2000
+            Cls
+            Cursor 0, 10
+            Local Doc$, line$
+            Document Doc$
+            Doc$=Format$("Game 2048 Score {0}", score)
+            \\ Using Report 2 we use rendering as text, with center justify
+            Report 2, Doc$
+            Doc$={
+            }
+            Local i, j
+            For i=0 to 3
+                  line$=""
+                  For j=0 to 3
+                        line$+=Tile$(Board(BoardTileRight(j, i)))
+                  Next j
+                  Print Over $(2), Line$
+                  Print
+                  Doc$=Line$+{
+                  }
+            Next i
+            Report 2, "Next:Use Arrows | Exit: Press End"
+            Refresh
+            ClipBoard Doc$
+      End Sub
+      Sub Gravity()
+            k=-1
+            for j=0 to 3 {
+                  where=boardtile(j,i)
+                  if k=-1 then if board(where)=0 then k=j : continue
+                  if board(where)=0 then continue
+                  if k=-1 then continue
+                  board(boardtile(k,i))=board(where)
+                  board(where)=0
+                  k++
+            }  
+      End Sub
+}
+Game2048
+}
+MODULE GLOBAL FIX1 {Class fixme {
+      f=lambda->1
+}
+fix->fixme()
+next_fact=lambda fix (x)->{
+     if x<=1 then =1 :exit
+     =x*fix=>f(x-1)
+}
+fix=>f=next_fact
+Print next_fact(5)
+m=next_fact
+Print m(5)
+}
+MODULE GLOBAL Y {Module Ycombinator {
+      \\ factorial
+      Print lambda (g, x)->{=g(g, x)}(lambda (g, n)->if(n=0->1, n*g(g, n-1)),10)
+       \\ fibonacci
+      Print lambda (g, x)->{=g(g, x)}(lambda (g, n)->if(n<=1->n,g(g, n-1)+g(g, n-2)), 10)
+
+      \\ Using closure in y, y() return function
+      y=lambda (g)->lambda g (x) -> g(g, x)
+    
+      fact=y((lambda (g, n)-> if(n=0->1, n*g(g, n-1))))
+      Print fact(6), fact(24)
+    
+      fib=y(lambda (g, n)->if(n<=1->n,g(g, n-1)+g(g, n-2)))
+      Print fib(10)
+}
+Ycombinator
+}
+MODULE GLOBAL EV {Module CheckEvents {
+      \\ we can use standard functions (not lambda functions)
+      \\ we can use lambda() so we can use function with different names
+      \\ We can define functions inside groups with events
+     Group WithEvents Alfa {
+           Event "GetIt", "PushIt"
+           Function fib(n) {
+                  if n<=1 then {
+                        =val(n->Decimal)
+                  } else {
+                        if n<140 then { m=-1@} else m=-1
+                        call event "Getit", n, &m
+                        if m>-1 then =m : exit
+                        \\ m1 may get double if a decimal can write the result
+                        \\ if we use m we get overflow error
+                        m1=lambda(n-1)+lambda(n-2)
+                        call event "Pushit", n, m1
+                        =m1
+                  }            
+            }
+      }
+      \\ we use an Inventory list to save old values
+      Inventory Getit
+      \\ event's service functions
+      \\ if not event's functions exist, call event skipped
+      Function Alfa_Getit {
+            Read new key, &m
+            if exist(Getit, key) then m=eval(Getit)
+      }      
+      Function Alfa_Pushit {
+            Read new key, m
+            Append Getit, key:=m
+      }
+      Module Inner (&fibonacci()){
+            acc=0
+            For i=1 to 200 ' until 139 we get decimal type, above it we get double
+                  Print fibonacci(i),
+            Next i
+      }
+      Form 80,32
+      print $(4,20),	' set: proportional text, 20 characters column width
+      Inner &Alfa.fib()
+      print $(0,10),	' reset: no proportional text, 10 characters column width
+
+}
+CheckEvents
+}
+MODULE GLOBAL MG {Form 60,44
+Escape Off
+Flush
+Flush Garbage
+mybg=5
+Cls mybg,0 : Pen 11
+Bold 1
+Report "Console Input Parameters Easy"
+Bold 0
+Cursor 0,0 : Print Under
+Cls , 1
+
+\\  ValidateValue(number, letter$)
+\\  return a lambda function with closures And signature lambda(letter$), returning boolean
+\\  ValidateValue( number, number)
+\\  return a lambda function with closures And signature lambda(number), returning boolean
+
+Function ValidateValue {
+      IF match("NN") Then {
+            Read X1, Y1
+            =lambda X1, Y1 (n) ->{
+                  =X1<=n And n<=Y1 ' Or n<Y1
+            }
+      } Else {
+            Read what, x1$
+            =lambda x1$, what (n$) ->{
+                  IF what=0 Then {
+                        =n$ ~ x1$
+                  } Else.If what>0 Then {
+                         =n$ >= x1$ And len(n$)>what
+                  } Else = n$ >= x1$ And len(n$)>-what And n$=filter$(n$, " ")
+            }      
+      }
+}
+\\ InpValueClass make a group
+\\ We can display labels, values, recording positions
+\\ Using ScanRange we can use arrows To move from a range of input values, in Loop
+\\ using Esc we get out from Loop
+\\ we can give two more parameters
+\\ the "Exit" value  And a flag, IF True Then Exit IF value changed
+\\  mygroup=InpValueClass(#FF5522)  '' need a color for background
+\\
+\\  .Record=True  needed for recording
+\\  .PrintLabel
+\\  .PrintNext
+\\  .PrintUp
+\\  .UseLastAsList
+\\ when we record we make ranges of input/print values And we can use
+\\ .RenderView To print labels/values
+\\ .ScanRange 
+\\
+Class InpValueClass {
+Private:
+      NoKey, LastKey$, UseInteger, drawbg, overridecolors, mybg, overfr, overbg
+      Inventory Bag, EditItems
+Public:
+      Record=True,  item
+      Property mywidth {
+            Value, 
+            Set {
+                  IF value>width Then value=width
+                  IF value<3 Then value=3
+            }
+       } = 10
+      Property myheight {
+            Value,
+            Set {
+                  IF value>height-1 Then value=height-1
+                  IF value<1 Then value=1
+            }
+      }=1
+      Group MaxInputItem {
+            Value {
+                  Link Parent EditItems To Ed
+                  =Len(Ed)
+            }
+      }
+      Group MaxItem {
+            Value {
+                  Link Parent Bag To Bag
+                  =Len(Bag)
+            }
+      }
+      Group ItemValue {
+            Value (akey$) {
+                  Link Parent Bag To Bag
+                  =Bag(akey$+".value")
+            }
+            Set (akey$) {
+                  Read mGroup
+                  Link Parent Bag To Bag
+                  IF exist(Bag, akey$+".value") Then {
+                        Return Bag, akey$+".value":=mGroup
+                  }
+            }
+      }
+      Class Info {
+            iskey, isbutton, menuitem, isnumeric
+            Event CallBack { Read &What }
+            ValidValue=Lambda->True
+            myvalue$
+            stackA=stack
+            X, Y, mycolor, boldface
+            W=10, H=1
+            \\ only for button
+            mybg
+      Class:
+            Module Info {
+                  Read .isnumeric, .iskey, .MyValue$
+                  Read .X, .Y, .W, .H, .mycolor, .boldface, .ValidValue
+            }
+      }
+       Module PrintNext {
+            Cursor 0, Row-1
+            .PrintLabel
+      }
+      Module PrintLabel {
+            ticket=False
+            IF IsNum Then {
+                  ticket=1-.UseInteger 
+                  Read N 
+                  IF ticket=2 Then { what$=Trim$(Str$(N,"0")) } Else  what$=Trim$(Str$(N))
+            } Else Read what$
+            Let colour=pen, spaces=0, boldface=0
+            Read ?  spaces, colour, boldface
+            bold Abs(boldface<>0)
+            Pen colour {
+                  Print @(spaces),
+                  IF .Record Then RecordMe()
+                  IF ticket Then  what$=Format$("{0}",N)
+                  IF .drawbg Then .drawbg<=False : Print @(Pos,Row,Pos+.mywidth, Row+.myheight, .mybg);
+                  IF .myheight>1 Then {
+                        Legend ! what$, .mywidth, .myheight
+                  } Else {
+                        Legend ! what$, .mywidth, 1          
+                  }
+                  Print
+            }
+            bold 0
+            Sub RecordMe()
+                  Local mylambda=lambda->True
+                  IF Not empty Then Read myLambda
+                  IF  Not .NoKey Then {
+                        Append .Bag, what$:=.Info(False, true, what$, Pos, Row, .mywidth, .myheight, colour, Abs(boldface<>0), mylambda)
+                        .lastkey$<=what$+".value"
+                        \\ using = And Not  <= we get Error in next call
+                        \\ becaue = make a Local variable, but .lastkey$ is a group variable.
+                  } Else {
+                        Try ok {
+                              Append .EditItems, len(.Bag)
+                             Append .Bag, .lastkey$:=.Info(ticket, False, what$, Pos, Row, .mywidth, .myheight, colour, Abs(boldface<>0), mylambda)
+                         }
+                         \\ using of Flush Error To clean Error message first
+                         IF Error Or Not ok Then Flush Error : Error "You can't record two values in same key"
+                  }
+            End Sub
+      }
+      Module PrintButtonNext {
+            Cursor 0, Row-1
+            .PrintButton
+      }
+      Module  PrintButton {
+            Read .LastKey$, caption$
+            Oldmybg=.mybg
+            Read ? .mybg
+            Push caption$
+            .LastKey$<=.LastKey$+".value"
+            .NoKey~
+            .drawbg~
+            .PrintLabel
+            .NoKey~
+            \\ Bag(key) Or Bag(num!) num from 0 To len(Bag)-1
+            Read ? event_copy
+            there=Len(.Bag)-1
+            
+            For .Bag(there!), this {
+                 .isbutton<=True
+                 .callback<=event_copy
+                 .mybg<=..mybg
+            }
+            swap Oldmybg, .mybg
+      }
+      Module PrintText (Lines, TextWidth) {
+            Cursor 0, Row-1
+            .NoKey~
+            Let oldw=.mywidth, oldH=.myHeight
+             .mywidth<=TextWidth
+             .myheight<=Lines
+            .PrintLabel 
+            swap .mywidth, oldw
+            swap .myHeight, oldH
+            .NoKey~
+      }
+      Module  UseLastAsList (ArrayA) {
+            Read ? event_copy
+            IF  Instr(.lastkey$,".value") Else Exit
+            For .Bag(.Lastkey$)  {
+                  Stack New {
+                        Data !ArrayA
+                        .CallBack<=event_copy
+                        \\ this [] pass current stack To .StackA, and leave a new empty stack
+                        \\ [] is "[" and "]" (these chars can be used in variables names too)
+                        .StackA<=[]
+                  }
+            }
+      }
+      Module InpList {
+            a=Each(.EditItems)
+            While a {
+                  \\ ! use position (form 0) And no key To walk in .bag()
+                  for .bag(eval(a)!) {
+                        Print .MyValue$, Len(.stackA)>0, .isbutton, .iskey
+                  }
+            }
+      }
+      Group Json$ {
+            Value (x) {
+                 ' quote$(string$(MyValue$ as json)) 
+                 bag$=""
+                 nl$={
+                 }
+                 if x<=0 then nl$="" : x=0
+                  space$=string$(" ",x)
+                  Link Parent bag To bag
+                  a=Each(bag)
+                  While a {
+                        M= bag(a^!)
+                        For M {
+                              IF Not .iskey and Not .isbutton Then {
+                              if bag$<>"" then bag$=bag$+", "+nl$
+                                    bag$=bag$+space$+quote$(Replace$(".value","",Eval$(bag, a^-1)))+" : "+quote$(string$(.MyValue$ as json)) 
+                               }
+                        }
+                  }
+                  ="{"+nl$+bag$+nl$+"}"
+            }
+            Set {
+                  Read bag$
+                  c$=""""   \\ this is one char 34
+                  nl$={
+                  }
+                  end$=""
+                  Link Parent bag To bag
+                  safety=len(bag$)
+                   Stack New {
+                   if left$(trim$(bag$),1)="{" then  {
+                         bag$=Trim$(RightPart$(bag$,"{"))
+                         end$="]"
+                   } else.if left$(trim$(bag$),1)="[" then  { 
+                        bag$=Trim$(RightPart$(bag$,"{"))
+                        end$="}"
+                   }
+                        do {
+                              While Left$(bag$,2)=nl$ {bag$=Trim$(Mid$(bag$, 3))}
+                              bag$=Trim$(RightPart$(bag$, c$))
+                              mkey$=LeftPart$(bag$, c$)+".value"
+                              bag$=Trim$(RightPart$(bag$, c$))
+                              if mkey$="" then exit
+                              While Left$(bag$,2)=nl$ {bag$=Trim$(Mid$(bag$, 3))}
+                              bag$=Trim$(RightPart$(bag$,":"))
+                              While Left$(bag$,2)=nl$ {bag$=Trim$(Mid$(bag$, 3))}
+                              bag$=Trim$(RightPart$(bag$, c$))
+                              mval$=LeftPart$(bag$, c$)
+                              bag$=Trim$(RightPart$(bag$, c$))
+                              Group M
+                              if exist(bag, mkey$) Then {
+                                    M=eval(bag)
+                                    M.myvalue$<=format$(mval$)
+                                    Return bag, mkey$:=M
+                              }
+                              If left$(bag$, 1)="," then bag$=Trim$(Mid$(bag$, 2)) : Restart
+                              if end$<>"" then if left$(bag$,1)=end$ then exit
+                              if safety=len(bag$) then Error "Json parse problem"
+                              safety=len(bag$)                              
+                        } Until bag$=""
+                        
+                  }
+            }
+      }
+      Group Serialize$ {
+            value {
+                  bag$=""
+                  Link Parent bag To bag
+                  a=Each(bag)
+                  While a {
+                        M= bag(a^!)
+                        For M {
+                              IF Not .iskey and Not .isbutton Then {
+                                    IF .isnumeric Then {
+                                     bag$=bag$+" "+.MyValue$
+                                    } else  bag$=bag$+stack$(.MyValue$)
+                               }
+                        }
+                  }
+                  =bag$
+            }
+            Set {
+                  Read bag$
+                  Stack New {
+                        Stack bag$  \\ fill stack with special format string for stack
+                        Link Parent bag To bag
+                        a=Each(bag)
+                        Try ok {
+                              While a {
+                                    M= bag(a^!)
+                                    For M {
+                                          IF Not .iskey And Not .isbutton Then {
+                                                IF .isnumeric=1 Then {
+                                                      Read N
+                                                      .MyValue$=Trim$(Str$(N))
+                                                } Else.If  .isnumeric=2 Then {
+                                                      Read N%
+                                                      .MyValue$=Trim$(Str$(N%))
+                                                } Else Read .MyValue$
+                                           }
+                                    }
+                              }
+                        }
+                        If Error Or Not ok Then Flush Error : Error "Serialize Input Not Compatible"
+                  }
+            }
+      }
+      Module PrintUp {
+            Cursor 0, Row-1
+            .NoKey~
+            .PrintLabel
+            .NoKey~
+      }
+      Module PrintUpInteger {
+            Read N
+            Push Val(Str$(N,"0"))
+            Cursor 0, Row-1
+            .NoKey~
+            .UseInteger~
+            .PrintLabel
+            .UseInteger~
+            .NoKey~
+      }
+      Module RenderThis {
+            Read M
+            Read ? offsetX, offsetY
+            IF .overridecolors Then {
+                  mybg= .overbg
+            } else {
+                  mybg=.mybg
+            }
+            local inuse, final$
+            For M {
+                        IF this.overridecolors and .isbutton Then exit
+                        offsetX+=.X
+                        offsetY+=.Y
+                        Cursor offsetX, offsetY
+                        IF .isbutton Then mybg=.mybg  \\ from M.mybg
+                        Print @(offsetX, offsetY, offsetX+.W, offsetY+.H, mybg);
+                        IF this.overridecolors Then {inuse=this.overfr} else inuse=.mycolor
+                        Pen inuse {
+                              Bold .boldface
+                              if .isnumeric then {
+                                   final$=format$( "{0}", Val(.MyValue$) )
+                              } else final$=.MyValue$
+                              IF .H>1 Then {
+                                    Legend ! final$, .W, .H
+                              } Else Legend ! final$, .W, 1
+                              Bold 0
+                        }
+                  }
+      }
+      Module RenderView {
+            local fromA=1, toB=-1, offsetX, offsetY
+            Read ? FromA, toB, offsetX, offsetY, .overridecolors
+            IF .overridecolors Then Read .overfr, .overbg
+            N=Each(.Bag, FromA, toB)
+            While N {
+                  .RenderThis .Bag(N^!),offsetX, offsetY
+            }
+            Print
+            .overridecolors<=false
+      }
+      Module ScanRange {
+            Local FromA=1, ToB=.maxitem, vert, curx, cury, mKey$
+            IF ToB=0 Then Exit
+            Read ? FromA, ToB
+            Read ? ExitC, forever
+            Local changed
+            .item<=FromA
+            Field New 1 ' reset To 1 the Field internal variable.
+            mybg=.mybg
+            {
+                  GetAValue(.item, &changed)
+                  IF changed Then vert=False
+                  IF Field=99 Or Field=121 Then .item<=0 : Exit
+                  IF Field=1000 Then Exit
+                  IF .item=ExitC And (changed Or Not forever) Then Field New 1000 : Exit
+                  IF vert  Then {
+                        vert=False
+                        IF .item>=ToB  And Field=1 Then Exit
+                        IF .item<=FromA  And Field=-1 Then Exit
+                        IF Field=1 Then {
+                              a=Each(.EditItems, .item+1, ToB)
+                        } Else  a=Each(.EditItems, .item, FromA)
+                        last=.item
+                        Try {
+                              While a {
+                                    IF Field=1 Then {
+                                           for .bag(eval(a)!) {
+                                                IF .x>=curx And .y>cury Then last<=a^ :Break
+                                         }
+                                    } Else {
+                                           for .bag(eval(a)!) {
+                                          IF .x>=curx And  .y<cury Then {
+                                                field new 0 : last<=a^+1 
+                                                IF .x>curx   else  Break
+                                          }
+                                          }
+                                    }
+                              }
+                        }          
+                        .item<=last      
+                  } 
+                  IF Field=1 Then .item++
+                  IF Field=-1 Then .item--
+                  IF .item<FromA Then .item<=ToB
+                  IF .item>ToB Then .item<=FromA
+                  CONTHERE:
+                  Loop
+            }
+            Sub CheckOk()
+                  Refresh
+                  ok=-2
+                  {
+                        ok=inkey(100)  \\ delay 100ms IF no key pressed (return -1 IF no key pressed in 100ms)
+                        IF ok=-1 Then Loop   ' any block can performe once using loop statement
+                  }
+                  Select Case ok
+                  Case 121 ' F10
+                        oldfield=121
+                  Case 262162
+                        oldfield=99
+                  Case 38
+                        { oldfield=-1 : vert=True }
+                  Case 40  ' two Or more statements need a block after Case
+                        { oldfield=1 : vert=True}
+                  Case 39 ' left
+                        oldfield=1 
+                  Case 37 ' right
+                        oldfield=-1  
+                  Case 27, -2
+                        {
+                              While keypress(27) {} : oldfield=99
+                        }
+                  End Select
+            End Sub
+            Sub GetAValue(where, &changed)
+                  Local N,N$, posnow=Pos, rownow=Row, StackB, k$, oldfield=Field, ok
+                  IF Not Abs(oldfield)=1 Then oldfield=1
+                  Try ok {
+                        where=val(eval$(.EditItems, where-1))
+                  }
+                  IF Error Or Not ok Then Exit Sub
+                  Try {
+                        mKey$=Eval$(.Bag, where)
+                  }
+                  IF mKey$="" Then Exit Sub
+                  IF  Instr(mKey$,".value") Else Exit Sub
+                  temp=.Bag(mKey$)
+                  For temp {
+                        Let curx=.x, cury=.y
+                        IF  Len(.stackA)>0 Then {
+                              Print @(.X,.Y, .X+.W, .Y+.H, 7),
+                              IF Not .isbutton Then  Mark 1,1, 8: Print " ";
+                              Pen .myColor {
+                                    Bold .boldface
+                                    IF .H>1 Then {
+                                          Legend ! .MyValue$, .W, .H
+                                    }  Else  Legend ! .MyValue$, .W, 1
+                                    Bold 0
+                              }
+                              CheckOk()
+                              IF ok=13 Or ok=9 Or ok=32 Then {
+                                    ShowMenu()   
+                              }
+                        } Else.If  .isnumeric Then {
+                              Print @(.X,.Y, .X+.W, .Y+.H, 7);
+                                          Pen .mycolor {
+                                                Bold .boldface
+                                                Legend ! Format$("{0}",val(.MyValue$)), .W, 1
+                                                Bold 0
+                                          }
+                                          CheckOk()
+                                          IF ok>=96 And ok<=105 Then ok=ok-48
+                                          IF ok=13 Or ok=9  Or Chr$(ok) ~ "[0-9]" Then {
+                                                N=Val(.MyValue$)
+                                                Pen .mycolor {
+                                                IF Chr$(ok) ~ "[0-9]" Then {
+                                                      IF N=0 Then {N=Val(Chr$(ok))} Else N=Val(.MyValue$+Chr$(ok))
+                                                }
+                                                    Print @(.X,.Y,.X+.W, .Y+.H, 7);
+                                                    IF .isnumeric=2 Then {
+                                                            N%=N
+                                                            Input ! N%, .W
+                                                            N=N%
+                                                    } Else Input ! N, .W
+                                                }
+                                                IF .ValidValue(N) Then {
+                                                      changed=Not .MyValue$=Trim$(Str$(N))
+                                                      .MyValue$<=Trim$(Str$(N))
+                                                }
+                              }
+                        }  Else {
+                                   Print @(.X,.Y,.X+.W, .Y+.H, 7);
+                              IF .isbutton Then {
+                                   Pen .mycolor {
+                                          Bold .boldface
+                                          IF .H>1 Then {
+                                                Legend ! .MyValue$, .W, .H
+                                          }  Else Legend ! .MyValue$, .W, 1
+                                          Bold 0
+                                    } 
+                                    CheckOk()
+                                    Field New oldfield
+                                    IF  ok=13 Then  Call Event .callback,  &This, Replace$(".value","", mKey$) : changed=True
+                                    oldfield=Field
+                              } Else { 
+                                    N$=.MyValue$
+                                    Pen .mycolor {
+                                          Bold .boldface
+                                          IF .h>1 Then {
+                                                Legend ! .MyValue$, .W, .H
+                                                CheckOk()
+                                                IF ok=13 Or ok=9  Or ok=32 Then  Input ! N$, .w, .h,"Editor"
+                                          } Else {
+                                                Legend ! .MyValue$, .W, 1
+                                                CheckOk()
+                                                IF ok=13 Or ok=9 Or ok=32 Then Print @(.X,.Y,.X+.W, .Y+.H, 7); : Input ! N$, .w
+                                          }
+                                          Bold 0                              
+                                    }
+                                    IF  .ValidValue(N$)  Then {
+                                          changed=Not .MyValue$=N$
+                                          .MyValue$<=N$
+                                    }
+                              }
+                        }
+                        IF .isbutton Then {
+                        Print @(.X,.Y, .X+.W, .Y+.H, .mybg);
+                        } Else  Print @(.X,.Y,  .X+.W, .Y+.H, mybg);
+                        Pen .mycolor {
+                              Bold .boldface
+                              IF .H>1 Then {
+                                    Legend ! .MyValue$, .W, .H
+                              }  Else {
+                                    IF .isnumeric Then {
+                                      Legend ! Format$("{0}",val(.MyValue$)), .W, 1
+                                     } Else  Legend ! .MyValue$, .W, 1 
+                                }
+                              Bold 0
+                          }        
+                  }
+                  Field New oldfield
+                  Cursor posnow, rownow
+                 Return  .Bag, mKey$:=temp
+            End Sub
+            Sub ShowMenu()
+                        oldfield=1
+                        Print @(.X,.Y+1),
+                        IF Not .isbutton Then Print @(.X,.Y), :Mark 1,1, 15 :  Print " ";
+                        menu fill 7,7, .mycolor
+                        menu frame off
+                        menu  \\ erase menu
+                        StackB=Each(.stackA)
+                        While StackB {
+                              Menu  + stackitem$(StackB)
+                        }
+                        try ok {
+                              menu show .MyValue$
+                        } 
+                       IF Error Or Not ok Then Error flush : Menu !   \\ show menu
+                       Menu fill 1  \\ reset fill colors
+                       menu frame  \\ reset frame
+                       IF menu>0 Then {
+                             IF Not .isbutton Then {
+                                    changed=Not .MyValue$=menu$(menu)
+                                    .MyValue$<=menu$(menu)
+                              } Else .menuitem<=menu
+                              Field New oldfield
+                              Call Event .callback,  &This, Replace$(".value","", mKey$)
+                              oldfield=Field
+                              IF Abs(oldfield)=1 Then oldfield=0
+                        } Else oldfield=0
+      End Sub
+      }
+      Class:
+      module  InpValueClass (.mybg) {
+            Read ? .mywidth, .myheight
+      }
+}
+
+LocalVar$="New Title - Module scope variable"
+exitthis=False
+Function FromEvent {
+      Read New &What, mykey$
+      Local K
+      K=Ask(what.myvalue$, LocalVar$)
+}
+Function FromEvent2 {
+      Read New &What, mkey$
+      Local K
+
+      IF what.menuitem>0 Then {
+            IF instr(Menu$(what.menuitem),"---")>0 Then Break
+            K=Ask(what.myvalue$+" "+Menu$(what.menuitem), "No2")
+            IF what.menuitem=2 Then {
+                  M=InpValue2.ItemValue("Exit")
+                  M.myvalue$="Press me "+Time$(Now)
+                  InpValue2.ItemValue("Exit")=M
+                  InpValue2.RenderThis M
+            }
+      } Else {
+             K=Ask(what.myvalue$, "No2")
+      }
+      IF mKey$="File" And what.menuitem=4 Then Field New 99  : exitthis=True : Exit
+      Cls, -14
+      InpValue2.InpList
+}
+Function FromEvent3 {
+      \\ this is a module's variable
+'     exitthis=True
+'      Field New 99
+      \\ We can use 1000 as default Exit
+      Field New 1000
+}
+Event E1 { Read &A, B$}
+E2=E1  ' copy of E1 To E2
+FIN=E2 ' copy of E2 To FIN
+\\ Using  Lazy$(&FromEvent()) And Not FromEvent() we pass code from module
+\\ when run take the module name space, so all modules variables/modules/functions are visible
+\\ except subrutines.
+Event E1 New Lazy$(&FromEvent())
+Event E2 New Lazy$(&FromEvent2())
+Event FIN New Lazy$(&FromEvent3())
+\\ Now we have
+ InpValue=InpValueClass(mybg)
+ InpValue2=InpValueClass(mybg)
+middlepoint=0
+For InpValue {
+      .mywidth=6
+      .PrintButton "File","File [F10]",,,8,1,,E2
+      .UseLastAsList ("Menu1","Menu2","Menu3","Exit")
+      .PrintButtonNext "Edit","Edit",,6,8,1,,E2
+      .UseLastAsList ("Help","Update","--------","About")
+      }
+For InpValue2 {      
+      .mywidth=10
+      .PrintLabel "Element",,15,1
+      .PrintLabel "Type", 4
+      .PrintUp "Combo", 10, 14
+      .UseLastAsList ("ListBox","Combo", "TextBox", "EditBox"), E1
+      .PrintLabel "Name", 4
+      .PrintUp "Combo1", 10, 14,,ValidateValue(-3, "A")
+      .PrintLabel "Text Field",4
+      Document AA$={aaaaaaaaaaaaa
+                                          bbbbbbbbbbbbb
+                                          cccccccccc
+                                          }
+      .PrintText 3, 30, AA$, 10,14
+      middlepoint=.maxitem
+      Cursor 0, Row+4
+      .PrintLabel "Attributes",,15,1
+      .PrintLabel "Title", 4
+      .PrintUp "Form1", 10, 14
+      .PrintLabel "Top", 4
+      .PrintUpInteger 0, 10, 14
+      .PrintNext "Left",24
+      .PrintUpInteger 0, 30, 14
+      .PrintLabel "Width",4
+      .PrintUpInteger 4000, 10, 14, ,ValidateValue(3000, 12000)
+      .PrintNext "Height",4+20
+      .PrintUpInteger 6000, 10+20, 14
+      .PrintLabel "Double",4
+      .PrintUp pi, 10, 14
+      .PrintNext "Double1",24
+      .PrintUp 2*pi, 30, 14
+      .PrintNext "Double2",44
+      .PrintUp 4*pi, 50, 14
+      .PrintButton "Exit","For Exit Come Here", 8, 10, 15, 1,,FIN
+       Print "Press Esc Key"
+      THERE:
+     Cls, Row
+   \\    .RenderView
+}
+\\Exit
+maxInputitem=InpValue2.maxInputItem
+do {
+      do {
+      InpValue.ScanRange
+      } until Field<>121
+      IF exitthis Then Exit
+      InpValue2.ScanRange 1, maxInputitem, maxInputitem-1, True
+} until exitthis Or Field=1000
+
+\\ Part 2
+Cls 15, 1
+Pen 0
+Report "Print to Paper <Demo on Screen>"
+\\ export without buttons, black color on white paper
+InpValue2.RenderView 1,7, 5, 5, true, 0, 15
+\\ -1 is the maxitem in bag
+Cursor 0,15
+Report "We can move a group by offset X and Y"
+\\ using -1 for end mark
+\\ 5 chars right, 10 char lines down
+InpValue2.RenderView 8, -1, 5, 10, true, 0, 15
+
+Print InpValue2.maxitem
+A$=InpValue2.Serialize$
+Print A$
+InpValue2.Serialize$=A$
+A$=key$
+cls mybg,1
+Pen 15
+Report "RenderView"
+InpValue2.RenderView 
+Report "Json 2 chars indent"
+Pen 14
+Report InpValue2.Json$(2)
+A$=InpValue2.Json$(0)
+Pen 15 {
+      Report "Json 0 chars indent"
+}
+Report A$
+Pen 15 {
+      Report "Len json$ vs Serialize$"
+}
+Print  Len(A$), Len(InpValue2.Serialize$)  '' 216, 123
+InpValue2.Json$=A$
+Pen 15 {
+      Report {InpValue2.Json$={"Left" : "1000", "Top" : "500"}}
+}
+
+InpValue2.Json$={"Left" : "1000", "Top" : "500"}
+Report InpValue2.Json$(0)
+Escape on
+}
+MODULE GLOBAL QSORT3 {Module Checkit3 {
+      Class Quick {
+      Private:
+            partition=lambda-> {
+                  Read &A(), p, r : i = p-1 : x=A(r)
+                  For j=p to r-1 : If .LE(A(j), x) Then i++:Swap A(i),A(j)
+                  Next j : Swap A(i+1), A(r) :  Push  i+2, i 
+            }
+      Public:
+            LE=Lambda->Number<=Number
+            Module ForStrings {
+                  .partition<=lambda-> {
+                        Read &A$(), p, r : i = p-1 : x$=A$(r)
+                        For j=p to r-1 : If A$(j)<= x$ Then i++ : Swap A$(i),A$(j)
+                        Next j : Swap A$(i+1), A$(r) : Push i+2, i
+                  }
+            }
+            Function quicksort {
+                  Read ref$
+                  do 
+                        loop : If Stackitem() >= Stackitem(2) Then 
+                        Drop 2  
+                        \\ if  empty then Break else continue  
+                                           \\ because is hidden  if empty then {Break} else continue
+                         \\ but here 
+                         if  empty then
+                               exit 
+                        else
+                              continue
+                        end if
+                        end if
+                        over 2,2 : call .partition(ref$) :shift 3 
+                  always
+            }
+      }
+      Quick=Quick()
+      Dim A(10)<<Random(50, 100)
+      Print A()
+      Call Quick.quicksort(&A(), 0, Len(A())-1)
+      Print A()
+      Quick=Quick()
+      Function join$(a$()) {
+            n=each(a$(), 1, -2)
+            k$=""
+            while n {
+                  overwrite k$, ".", n^:=array$(n)
+            }
+            =k$
+      }
+      Stack New {
+                  Data "1.3.6.1.4.1.11.2.17.19.3.4.0.4" , "1.3.6.1.4.1.11.2.17.19.3.4.0.1", "1.3.6.1.4.1.11150.3.4.0.1"
+                  Data "1.3.6.1.4.1.11.2.17.19.3.4.0.10", "1.3.6.1.4.1.11.2.17.5.2.0.79", "1.3.6.1.4.1.11150.3.4.0"
+                  Dim Base 0, arr(Stack.Size)
+                  i=0 : While not Empty {Let arr(i)=piece$(letter$+".", ".") : i++ }
+      }
+      \\ change comparison function
+      Quick.LE=lambda (a, b)->{
+            Link a, b to a$(), b$()
+             def i=-1
+             do {
+                   i++
+             } until a$(i)="" or b$(i)="" or a$(i)<>b$(i)
+             If b$(i)="" Then =a$(i)="":Exit
+             If a$(i)="" Then =true:Exit
+             =val(a$(i))<=val(b$(i))
+      }
+      Call Quick.quicksort(&arr(), 0, Len(arr())-1)
+      For i=0 to len(arr())-1 {
+            Print join$(arr(i))
+      }
+      \\ Fresh load
+      Quick=Quick()
+      Quick.ForStrings
+      Dim A$()
+      A$()=("one","two", "three","four", "five")
+      Print A$()
+      Call Quick.quicksort(&A$(), 0, Len(A$())-1)
+      Print A$()
+}
+Checkit3
+}
+MODULE GLOBAL CONC {Thread.Plan Concurrent
+Module CheckIt {
+      Flush  \\ empty stack of values
+      Data "Enjoy", "Rosetta", "Code"
+      For i=1 to 3 {
+            Thread {
+                  Print A$
+                  Thread This Erase
+            } As K
+            Read M$
+            Thread K Execute Static A$=M$
+            Thread K Interval Random(500,1000)
+            Threads
+      }
+      Rem : Wait 3000   ' we can use just a wait loop, or the main.task loop
+      \\ main.task exit if all threads erased
+      Main.Task 30 {
+      }
+\\ when module exit all threads from this module get a signal to stop.
+\\ we can use Threads Erase to erase all threads.
+\\ Also if we press Esc we do the same
+}
+CheckIt
+ 
+\\ we can define again the module, and now we get three time each name, but not every time three same names.
+\\ if we change to Threads.Plan Sequential we get always the three same names
+\\ Also in concurrent plan we can use a block to ensure that statements run without other thread executed in parallel.
+ 
+Module CheckIt {
+      Flush  \\ empty stack of values
+      Data "Enjoy", "Rosetta", "Code"
+      For i=1 to 3 {
+            Thread {
+                  Print A$
+                  Print A$
+                  Print A$
+                  Thread This Erase
+            } As K
+            Read M$
+            Thread K Execute Static A$=M$
+            Thread K Interval Random(500,530)
+            Threads
+      }
+      Rem : Wait 3000   ' we can use just a wait loop, or the main.task loop
+      \\ main.task exit if all threads erased
+      Main.Task 30 {
+      }
+\\ when module exit all threads from this module get a signal to stop.
+\\ we can use Threads Erase to erase all threads.
+\\ Also if we press Esc we do the same
+}
+CheckIt
+}
+MODULE GLOBAL LISP {Profiler
+EntryLevel =0
+Module forall {  \\ For all subs - reusable code use Call ! Local forall
+      Local MyAcc$
+      Document MyAcc$
+      Clear Buffer$  \\ delete command - need Clear /  = is For append
+      Call Local Parser(level,  &MyAcc$)
+}
+Module Comm {
+      Read proc$
+      Call ! Local forall
+      Local dummy$=paragraph$(MyAcc$,-1,-1)
+      Local a, d, acc
+      Long a, d=forward(MyAcc$, a)  \\ there is a  backward() function too
+      If d<>0 Then {
+      Select Case proc$
+      Case "+"
+      { While a<>0 { acc+=Val(paragraph$(MyAcc$, (a))) }}
+      Case "-"
+            {         If a<>0 Then   acc=Val(paragraph$(MyAcc$, (a))) 
+                       While a<>0 { acc-=Val(paragraph$(MyAcc$, (a)))  }}
+      Case "*"
+            { acc=1: While a<>0 { acc*=Val(paragraph$(MyAcc$, (a))) }}
+      Else  '  Case "/"
+            { acc=1
+                  If a<>0 Then  acc=Val(paragraph$(MyAcc$, (a))) 
+                  While a<>0 { acc/=Val(paragraph$(MyAcc$, (a))) }}
+      End Select    
+       Accum$=Format$("{0}", acc)+nl$
+      } 
+}
+Module CommWrite {
+      Call ! Local forall
+      Print "Lisp:";
+      Local i, f=Doc.Par(MyAcc$)
+      If f>1 Then {
+      f--  : If f>1 Then Print "(";
+      For i=1 to f
+            Print paragraph$(MyAcc$, i); : If i<f Then  Print " ";
+      Next i
+      }
+      If f>1 Then { Print ")" } Else Print
+}
+Module LoopLisp {
+      Local dummy$ : Clear Buffer$
+      cnt++ : Local backhere=cnt
+      Local mylevel=level
+      {
+            Call Local Parser(myLevel, &Accum$)
+            dummy$=paragraph$(Accum$,-1,-1)     \\ throw  last nl$
+            dummy$= paragraph$(Accum$,-1,-1)
+            Accum$=nl$  \\ insert  last nl$
+            If dummy$="t" Then Exit
+            cnt=backhere
+            level=mylevel
+            loop   
+      }          
+}
+Module MyList {
+      Local MyAcc$
+      Document MyAcc$ : Clear Buffer$
+      Call Local Parser(level, &MyAcc$)
+      Accum$="("+Trim$(Replace$(nl$," ", MyAcc$))+")"+nl$       
+}
+Module Myif {
+      Call ! Local forall
+      If paragraph$(MyAcc$, 1)="t" Then {
+            Accum$=paragraph$(MyAcc$, 2)+nl$
+      } else {
+            Accum$=paragraph$(MyAcc$, 3)+nl$
+      }
+}
+Module DefVar {
+      Local MyAcc$, Iddoc$
+      Document MyAcc$, Iddoc$ : Clear Buffer$
+      cnt++
+      Call Local Parser(level,  &Iddoc$, True)
+      Call Local Parser(level,  &MyAcc$)
+      Local id$=paragraph$(Iddoc$, 1,-1)  \\ third parameter If is -1 Then delete the paragraph 
+      If id$="" Then Error "No name For variable"
+      While Doc.Par(iddoc$)>0 {
+            Call Local PrintNewLine "Var :"+id$
+            If not exist(Mem,id$) Then {
+                  Append Mem, id$:=MyAcc$
+            } Else Error "Variable "+id$+" already defined"
+           id$=paragraph$(Iddoc$, 1,-1)
+      }
+}
+Module SetVar {
+      Local MyAcc$, Iddoc$
+      Document MyAcc$, Iddoc$ : Clear Buffer$
+      cnt++
+      Call Local Parser(level, &Iddoc$, True)
+      cnt--
+      Call Local Parser(level, &MyAcc$)
+      Local id$=paragraph$(Iddoc$, 1,-1)  \\ third parameter If is -1 Then delete the paragraph 
+      If id$="" Then Error "No name For variable"
+      While Doc.Par(iddoc$)>0 {
+            Call Local PrintNewLine "Var :"+id$
+            If exist(Mem,id$) Then {
+                  Return Mem, id$:=MyAcc$
+            } Else Error "No such variable"
+           id$=paragraph$(Iddoc$, 1,-1)
+      }
+}
+Module Cons {
+      Call ! Local forall
+      Accum$=MyAcc$
+}
+Module Remark {
+     while cnt<=tmproof {
+           cnt++
+           If mid$(a$, cnt,2)=nl$ Then cnt++ : exit
+     }
+}
+Module String {
+     Local check=cnt
+     Clear Buffer$ : numeric=false
+     while cnt<=tmproof {
+           cnt++
+           If mid$(a$, cnt,1)=qu$ Then exit
+     }
+     if cnt-check>1 Then { Buffer$=Mid$(a$,check, cnt-check+1)} Else Buffer$={""}
+}
+Module  PrintBuffer {
+      If Doc.Len(Buffer$)>0 Then {
+                  If exist(Mem, Buffer$) and not GetQuote Then {
+                       Accum$=Mem$(Buffer$)
+                  } else   Accum$=Buffer$+nl$
+            Call Local PrintNewLine Buffer$
+            Clear Buffer$ : prints++
+      }
+}
+Module PrintNewLine {
+      Read New What$
+     If mess Then Print what$
+}
+Module StopChar {
+      Read New val    
+      com = val=1
+      level+=val
+      If GetQuote And level<=EntryLevel Then Call Local PrintBuffer : GetQuote=false: tmproof=cnt : Exit
+      If val<>0 Then Local oldprints=prints : prints=0
+      Call Local PrintBuffer
+      If profil=1 And val=-1 Then If prints=0 Then If oldprints=prints Then Buffer$="()" : Call Local PrintBuffer
+      profil=val
+}
+Module StopCharZero {
+      If GetQuote And level=EntryLevel Then Call Local PrintBuffer:GetQuote=false: tmproof=cnt : Exit
+      If com Then Call Local CheckCommand
+      If not com Then Call Local PrintBuffer : Exit
+}
+Module StorePeriod {
+      If Doc.Len(Buffer$)=0 Then Call Local StoreNumeric : Exit
+      If numeric Else Call Local StoreLabel : Exit  \\ see Else, same as If not numeric Then
+      If Instr(Buffer$,".")>0 Then Call Local PrintBuffer
+      Call Local StoreNumeric
+}
+Module StoreSign {
+      If Doc.Len(Buffer$)>0 And numeric Then Call Local PrintBuffer : Call Local  StoreNumeric : Exit
+      Call Local StoreNumeric  \\ maybe numeric=False so this is like storelabel...
+}
+Module StoreNumeric {
+      If Doc.Len(Buffer$)=0 Then  numeric=True 
+      buffer$=one$
+}
+Module StoreLabel {
+      numeric=False
+      buffer$=one$
+}
+Module CheckCommand {
+      com=false
+      If GetQuote Then Exit
+      If numeric Then {
+            If Doc.Len(Buffer$)=1 Then If Instr("*/+-",Buffer$)>0 Then Exit
+            Exit
+      }
+      If Exist(commands, Buffer$) Then  push eval$(commands) : Call Local letter$
+}
+Module Sym {
+      Read new w$
+      Call ! Local forall
+      If Evall(quote$(paragraph$(MyAcc$, 1) )+ w$+ Quote$(paragraph$(MyAcc$, 2) )) Then {
+       Accum$=t$  } Else  Accum$=nil$
+}
+Module Quote {
+      Clear Buffer$
+      cnt++
+      Call Local Parser(level, &Accum$, True)
+      cnt--
+}
+Module Car {
+      Call ! Local forall     
+      Accum$=paragraph$(MyAcc$, 1)+nl$
+}
+Module Cdr {
+      Call ! Local forall     
+      Local drop$=paragraph$(MyAcc$, 1,-1)
+      Accum$=MyAcc$
+}
+Module Eq {
+      Call ! Local forall
+      If paragraph$(MyAcc$, 1)=paragraph$(MyAcc$, 2) Then {
+            Accum$=t$
+      } Else  Accum$=nil$
+}
+Function Parser {
+      Read New EntryLevel,  &Back$
+      Local GetQuote  
+      Read ? GetQuote  \\ this is an optional argument For Parser
+      Local tmproof=roof, Accum$
+      Document Accum$
+      Repeat  {
+      If level<EntryLevel Then cnt-- : Back$=Accum$ : Exit
+      one$=mid$(a$,cnt,1)
+      \\ warning in each Case one command in one line or use { } For multiple commands/lines
+      \\ no empty lines allowed. 
+      Select Case one$
+      Case  qu$
+            Call Local String
+      Case ";"  \\ remark
+            Call Local Remark
+      Case "'"  \\ quote
+            Call Local Quote
+      Case "("
+            Call Local StopChar, 1 ''StopChar(1)
+      Case ")"
+            Call Local StopChar, -1 ''StopChar(-1)
+      Case " ", Ch10$, Ch13$  ' white space too
+            Call Local StopCharZero
+      Case "0" to "9"
+            Call Local StoreNumeric
+      Case "."
+            Call Local StorePeriod
+      Case "-", "+"
+            Call Local StoreNumeric
+      Else Case
+            Call Local StoreLabel
+      End Select
+      cnt++
+      } Until cnt>tmproof 
+      if cnt>tmproof  then  Back$=Accum$
+
+}
+\\ Mini lisp ver 0.01
+Clear \\ clear variables
+Flush \\ empty stack
+Form 60,48
+Print "MiniLisp Ver 0.01"
+Scroll Split  Row  \\ make this row start of scrolling screen
+\\ A simple lisp interpreter written in M2000 by George Karras
+\\For Documents "=" is For append text. Clear a$, give a new object Document.
+Document a$={
+                        "hello there this is a string"  ; this is going to result
+                        (write 1223345.788)(defvar Hello "M2000")(write Hello)
+                        (write 121 "Hello again...")
+                        (eq 7 7)(write (list 1 2 4 5))(defvar A (+ 7 9 13 1 5 7) ) (write A  (- A 10) (* A 3) (/ 5 2))
+                        (defvar (a b c d) 100)(write a b c d)(setq a (+ a 1))(write '(a =) a)(write (car '(a b c))(cdr '(a b c))) ; remark
+                        (write (cons 'a '(b c)))(write George 'Karras)(write (eq a 101))
+                        (this is written as result)(write '(This written before results) (+ a 1))
+                        (quote (Hello 1 There a b))  '(Hello 2 There a b)(eq 5 5)
+                        (loop (write a) (eq a 107) (setq a (+ a 1))) (write (list 1 A (+ A 1) 3 4 5))
+                        (write 1 A (+ A 1) 3 4 5)
+                        (write (If t 5 6))  (write ok)
+                        (write (If nil (list 1 2 3) (list 4 5 6)))
+                        (write (If nil 5 6))
+                        (write (If t (list 1 2 3) (list 4 5 6)))
+                        ; A form which calls the + function with 1,2 and 3 as arguments.
+                        ; It returns 6.
+                        (write (+ 1 2 3))
+                        }                    
+Print "Parse:";
+Report a$
+Print
+nl$={
+} \\ nl$ is new line
+Let level=0, one$="", numeric=False, prints=0, com=False, profil=1, ch10$=chr$(10),ch13$=chr$(13), qu$=chr$(34)
+Let mess=false '\\true   \\ For messages
+Let cnt=1, roof=len(a$), comlevel=-1 
+' no command
+Document Buffer$, Result$
+\\ Inventory is a hash table.
+Inventory commands="+":="Comm {+}",  "-":="Comm {-}" , "*":="Comm {*}", "/":="Comm {/}", "write":="CommWrite", "car":="Car", "cdr":="Cdr", "cons":="Cons",  "defvar":="DefVar", "eq":="Eq", "setq":="SetVar", "quote":="Quote", "loop":="loopLisp",">":="Sym {>}" ,"<":="Sym {<}", ">=":="Sym{>=}","<=":="Sym{<=}", "<>":="Sym{<>}", "list":="MyList","If":="Myif"
+Clear t$, nil$
+\\ we want a paragraph only - with new line
+Inventory mem  \\ For variables
+t$="t"+nl$
+nil$="nil"+nl$
+Append Mem, "t":=t$,"nil":=nil$
+Try ok {  Call Local Parser(level,  &Result$)}
+If Error or Not Ok Then Print Error$
+If level>0 Then Error "more ("
+If Not Mess Then {
+      Report 2, "Results" 
+      Report Replace$(nl$," ", Result$)
+}
+Print Timecount
+}
+MODULE GLOBAL P {SET FAST !
+PEN #fff9aa
+\\ BLOCK ESCAPE KEY
+ESCAPE OFF
+\\thread.plan sequential \\WE CAN USE THREAD plan sequential also.
+THREAD.PLAN CONCURRENT
+HIDE
+REFRESH  500 
+CLS 1,0   ' COLOR BLUE AND  RESET SPLIT SCREEN SETTING TO TOP LINE
+MOVE 1500,1000
+polygon 13, 1000,-500,300,1000, -2000, -500,0, -1000
+PRINT "This is first line"    ' WE CAN'T SEE THE FOUR PRINTS 
+PRINT "This is second line"   'BECAUSE WE SET A HIGH REFRESH RATE
+PRINT "This is third line"
+PRINT "This is forth line"
+PRINT $(1)  \\ NOT allowed  a PRINT of an item to exceed a column (1,2,3,5,6,7,8,9)
+MOVE 0,0
+A$=""
+COPY 3000,2000 TO A$
+GRADIENT 1, 9   ' CLEAR SCREEN WITH GRADIENT
+PEN 14 {
+FOR i=1 TO 100 {
+      MOVE RANDOM(SCALE.X),RANDOM(SCALE.Y)
+      CIRCLE FILL 14, RANDOM(3)*TWIPSX
+}
+}
+PRINT PART $(0),@(0,0),"SPACE BAR TO FIRE OR KEY 1 TO QUIT"
+\\COPY 6000,6000 TOP A$, 10, 200
+\\COPY 6000,6000 TOP A$, 45
+\\COPY 2000,2000 USE A$, 45
+HOLD  ' save screen
+MOVE 6000,6000
+I=1
+LET X=MOUSE.X, Y=MOUSE.Y
+LET range=6000, ANGLE=0
+LET canfire= true, fireX=0, fireY=0, firesize=0
+Let sX=SCALE.X/2, sY=SCALE.Y/2
+THREAD {
+IF abs(fireX-sx)>500 THEN {
+      fireX=(fireX*4+SX)/5
+      fireY=(fireY*4+SY)/5
+} ELSE {
+THREAD L HOLD
+canfire=true
+}
+} AS L
+e1x=6000 : e1y=6000 : e1z=20
+enemy1=true 
+THREAD {
+      e1z+=5
+      IF e1z>180 OR NOT enemy1 THEN enemy1=FALSE : THREAD this HOLD
+} AS E1 INTERVAL 30
+THREAD {
+      e2z+=5
+      IF e2z>180 OR NOT  enemy2 THEN enemy2=FALSE : THREAD this HOLD
+} AS E2
+e2x=SCALE.X*.8 : e2y=6000 : e2z=20
+enemy2=FALSE : THREAD e2 HOLD :  THREAD E2 INTERVAL 30
+THREAD {
+      e3z-=10
+      IF e3z<30 OR NOT  enemy3 THEN enemy3=FALSE : THREAD this HOLD
+} AS E3
+e3x=SCALE.X*.8 : e3y=SCALE.Y: e3z=180
+enemy3=FALSE : THREAD e3 HOLD :  THREAD E3 INTERVAL 50
+
+enemy4=FALSE
+pp=.02
+X=MOUSE.X
+Y=MOUSE.Y
+\\ simple routine name is case sensitive
+GOSUB basicpart
+\\MOVE x,y
+\\GOSUB ship
+SHOW
+
+TASK.MAIN 20 { 
+      I++
+      IF KEYPRESS(49) THEN EXIT
+      ' YOU CAN MAKE THE SECOND ROTATED OBJECT TO HAVE FLICKERING
+      ' IF YOU DO THAT:
+      ' COMMENT THE LINE BELOW AND PUT REFRESH TO 10 IN THE FIRST LINE
+      {
+            RELEASE
+            \\ PART USE $(4) (PROPORTIONAL TEXT), AND WRITE ONLY IN ONE LINE WITH NO WRAP
+            PRINT PART @(0,1),STR$(NOW,"HH:MM:SS"), e1z   \\, $(0),format$("({0},{1})", sX, sY)
+            
+            GOSUB basicpart
+            IF enemy1 THEN {
+                  MOVE e1x, e1y
+                  STEP sx*e1z/100-SCALE.X/2, sy*e1z/100-SCALE.Y/2
+                  SPRITE A$, 1, ANGLE/10, e1z,30+e1z/4
+            }
+            IF enemy2 THEN {
+                  MOVE e2x, e2y
+                  STEP sx*e2z/50-SCALE.X/2, sy*e2z/50-SCALE.Y/2
+                  SPRITE A$, 1, ANGLE/10, e2z,30+e2z/4
+            }
+            IF enemy3 THEN {
+                  MOVE e3x, e3y
+                  STEP -( sx*e2z/100-SCALE.X/2), -(sy*e2z/50-SCALE.Y/2)
+                  SPRITE A$, 1, ANGLE/10, e3z,30+e3z/4
+            }
+            IF enemy4 THEN {
+                  MOVE 8000,4000
+                  STEP sx-SCALE.X/2, sy-SCALE.Y/2
+                  SPRITE A$, -1, I, 100,30
+            }
+            IF canfire AND KEYPRESS(32) THEN {
+                  SCORE 2, 100,"c"  ' SET A MIDI MUSIC SCORE
+                  canfire~ : fireX=x : fireY=y
+                  firesize= (SQRT((SCALE.X/2)**2+(SCALE.Y/2)**2)-SQRT((x-SCALE.X/2)**2+(y-SCALE.Y/2)**2))/10
+                  THREAD L RESTART
+                  THREAD L INTERVAL 10
+                  PLAY 2, 10  ' PLAY THE SCORE 2 USING ORGAN 10
+            } else.if NOT canfire THEN {
+                  MOVE fireX, fireY
+                  TRY { PEN 4{CIRCLE FILL 4, firesize}}
+            }
+            MOVE X, Y   
+            GOSUB ship
+      }
+       IF NOT enemy1 and RANDOM(100)>95 THEN GOSUB enshow1
+       IF NOT enemy2 and RANDOM(100)>95 THEN GOSUB enshow2
+       IF NOT enemy3 and RANDOM(100)>97 THEN GOSUB enshow3
+              
+      REFRESH 5000   ' DO NOW A SCREEN REFRESH ONLY
+      IF MOUSE=1 THEN {
+            X=MOUSE.X
+            Y=MOUSE.Y
+      }     
+}
+\\ UNBLOCK ESCAPE KEY
+ESCAPE ON
+REFRESH 30
+EXIT
+enshow1:
+      e1x=6000+RANDOM(2000) : e1y=6000+RANDOM(2000) : e1z=20
+      enemy1=true : THREAD E1 RESTART
+RETURN
+enshow2:
+      e2x=SCALE.X*.8-RANDOM(2000) : e2y=6000-RANDOM(2000) : e2z=20
+      enemy2=true : THREAD E2 RESTART
+RETURN
+enshow3:
+      e3x=SCALE.X*.8 +RANDOM(2000): e3y=SCALE.Y: e3z=180
+      enemy3=true : THREAD E3 RESTART
+RETURN
+basicpart:
+      range = SQRT((x-SCALE.X/2)**2+(y-SCALE.Y/2)**2)
+      ANGLE =(360*(SCALE.Y-y)/SCALE.Y/2)*(SCALE.X/2-x)/SCALE.X
+      sx=SCALE.X/2-(x-SCALE.X/2)/4
+      sy=SCALE.Y/2-(y-SCALE.Y/2)/4
+      MOVE sx, sy
+      CIRCLE 300
+      MOVE 0,SCALE.Y-range/2
+      PEN 2 { polygon 2, 0,0,SCALE.X, 0,0, range/2,-SCALE.X,0,0,-range/2 }
+      STEP SCALE.X/2,0
+      PEN 0 {
+            DRAW to SCALE.X/2+(x-SCALE.X/2)/4, SCALE.Y
+            IF 1.1-PP<1 THEN {
+                  MOVE 0, SCALE.Y-range/2*(1.1-PP)
+                  DRAW SCALE.X,0 
+            }
+            MOVE 0, SCALE.Y-range/1.9*(.9-PP)
+            DRAW SCALE.X,0
+            MOVE 0, SCALE.Y-range/1.8*(.7-PP)
+            DRAW SCALE.X,0
+            IF NOT 1.1-PP<1 THEN {
+                  MOVE 0, SCALE.Y-range/1.75*(.5-PP)
+                  DRAW SCALE.X,0
+            }
+            pp+=.04
+            IF pp>.20 THEN pp=.02
+      }
+RETURN
+ship:
+TRY {
+      CIRCLE  300 *(12000-range)/5000    
+      SPRITE A$, 1, ANGLE, (12000-range)/50, 100-range/200 
+}
+RETURN
+}
+MODULE GLOBAL MEDITOR {\\ notepad for M2000 programs (gsb files)
+Show
+Clear \\ Clear all variables/objects
+Flush \\ Empty the stack
+Title$="M2000 Pad"
+Dir User
+Title Title$, 0
+Declare NotePad Form
+Declare Pad EditBox Form NotePad
+Declare File1 Combobox Form NotePad
+Declare Edit1 Combobox Form NotePad
+Declare Help1 Combobox Form NotePad
+Declare Inform1 Button Form NotePad
+Method Inform1, "Colors", 15, #FFA000
+With Inform1, "Locked", true
+Method Pad, "FontAttr", "Tahoma", 12, true   '  size=12, bold=true
+With Pad, "NoWrap", True, "SetM2000", True, "SelLength" as SelLength
+With File1,"label","File", "listtext" As list$, "list" As list$() '
+With Edit1,"label","Edit",  "Mark", Color(255,100,0)
+With Help1,"label","Help",  "Mark", Color(255,100,0)
+With NotePad,"UseIcon", True, "UseReverse", True
+With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
+\\ Call MakeStandardInfo, after setting Sizable to true to enable contol box's maximize button.
+Method NotePad,"MakeStandardInfo", 1
+With Pad, "Text" As Pad.Text$, "NoColor", False, "ShowAlways", True, "UseTab", True, "tabwidth", 6
+Def TitleStr$(a$)=ucase$(left$(a$,1))+mid$(a$,2)
+Filename$=Dir$+"Untitled.gsb"
+Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+Method NotePad,"move", 2000, 4000, 8000, 4000
+Layer NotePad {Cls #FFA000}
+With File1,"MenuStyle", True, "MenuWidth", 4000 
+With Edit1,"MenuStyle", True, "MenuWidth", 4000 
+With Help1,"MenuStyle", True, "MenuWidth", 4000 
+With File1, "MenuEnabled" As mEnable()
+For This {
+	mi$="MenuItem"  \\ is a temporary variable only for For This Block
+	Method File1, mi$,"Open",True
+	Method File1, mi$,"Save",True
+	Method File1, mi$,""    \\  only  a line here
+	Method File1, mi$,"Close",True
+	Method File1, mi$,"Quit",True
+Rem	Method File1, "Transparent"
+	
+	With File1, "MenuGroup","This"
+	
+	Method Edit1, mi$,"Cut",True
+	Method Edit1, mi$,"Copy",True
+	Method Edit1, mi$,"Paste",True
+	Method Edit1, mi$,""
+	Method Edit1, mi$,"Less Indent",True
+	Method Edit1, mi$,"More Indent",True
+	Method Edit1, mi$,""
+	Method Edit1,"MenuRadio","Tabs for Indent",True,True
+	Method Edit1,"MenuRadio","Spaces for Indent",True,false
+	Method Edit1, mi$,""
+	Method Edit1, mi$,"Show Hidden Characters", True, True
+	
+Rem	Method Edit1, "Transparent"
+	
+	With Edit1, "MenuGroup","This"
+
+	Method Help1, mi$,"About",True
+Rem	Method Help1, "Transparent"
+	With Help1, "MenuGroup","This"
+}
+Def par_Status as boolean=false, old_status
+old_status=par_Status
+With Edit1,"ListSelected" as Edit1.Selected(), "MenuEnabled" As Edit1.Enabled()
+With Pad, "showparagraph" as par_Status
+Document BackUp$="\\Write something..."
+Def ok as boolean
+Pad.Text$=BackUp$
+Function Notepad.Resize {
+	Layer NotePad { Cls Color(255, 160, 0) ,0}
+	With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
+	tHeight1=theight*2
+	Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
+	Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
+	Method Help1,"move", twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
+      	Method Inform1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*160, tHeight
+	If NP.height>2000 Then {
+		Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
+		With Pad, "NoWrap" As NoWrap
+		If Not NoWrap Then Method Pad,"Resize"
+	}
+}
+Function Pad.Inform {
+	Read New L, P
+	if old_status<>par_status then
+	With Inform1, "Caption",if$(par_status->"Hidden", "No Hidden")
+	old_status=par_status
+	else
+	With Inform1, "Caption", format$("{0}-{1}", L,P)
+	end if
+	Method Pad,"Show"
+}
+
+Function SetTabs {
+	With Pad, "UseTab", True,"tabwidth",6
+	With Inform1, "Caption","Set Tabs"
+	Method Pad,"Show"	
+}
+Function SetSpaces {
+	With Pad, "SpaceIndent", 6
+	With Inform1, "Caption","Set Spaces"
+	Method Pad,"Show"
+}
+Function ChangeHidden {
+	Edit1.Selected(10)=not par_Status
+	Method Pad,"PressKey", 121, 0   ' 121=vbkeyF10
+	old_status=par_status
+	With Inform1, "Caption",if$(Edit1.Selected(10)->"Hidden", "No Hidden")
+	Method Pad,"Show"      
+}
+Function Edit1.OpenMenu {
+	Local X
+	X=SelLength>0
+	Edit1.Enabled(0)=X
+	Edit1.Enabled(1)=X
+	Edit1.Selected(10)=par_Status
+	With Inform1, "Caption",if$(Edit1.Selected(10)->"Hidden", "No Hidden")
+}
+Function Edit1.MenuChecked {
+Read New RadioIndex 
+	If RadioIndex=7 then
+	Call Local SetTabs()
+	else.If RadioIndex=8 then
+	Call Local SetSpaces()
+	else.If RadioIndex=10 then
+	Call Local ChangeHidden()
+	else
+	With Inform1, "Caption","??"
+	Method Pad,"Show"	
+	end if
+}
+Function Edit1.DblClick {
+	Read New Edit1index
+	Select Case Edit1index
+	Case 0
+		Method Pad,"mn1sub" : Method Pad,"Resize"
+	Case 1
+		Method Pad,"mn2sub"
+	Case 2
+		Method Pad, "mn3sub" : Method Pad,"GetFocus" : Method Pad,"Resize"
+	Case 4
+		Method Pad,"PressKey", 9, 1
+	Case 5
+		Method Pad,"PressKey", 9, 0
+	Case 7
+		Call Local SetTabs()
+	Case 8
+		Call Local SetSpaces()
+	Case 10
+		Call Local ChangeHidden()
+	End Select
+}
+Function Pad.PopUp {
+      Read Local X, Y
+      Method Pad,"PopUpMenu", "",X , Y
+}
+Function File1.DblClick {
+	Read New File1index
+	Local cont, cont2, f$, NL$={
+	}
+	File1index++
+	\\ Because we want some jumps..we use  On Goto
+	\\ on Goto need here a block
+	{
+		On File1index Goto Open1, Save1, ExitNow, Save2, Unload
+Exitnow:
+		Exit
+Open1:
+		If Pad.Text$<>BackUp$ Then {
+			If ask("Save Changes first?",Title$)=1 Then Goto Save1
+		}
+		Layer NotePad {
+			\\Using "**" we can go up to drives.
+			Try ok {
+				Open.file filename$,"**","Load M2000 (Gsb) File","gsb"
+			}
+			if not ok then push "" : Dir User
+		}
+		Method Pad,"GetFocus"
+		Read f$
+		If f$<>"" Then
+			Filename$=f$
+			If exist(F$) then {
+				Clear BackUp$
+				Load.Doc BackUp$, f$
+				Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+				\\ set the current directory
+				dir file.path$(Filename$)
+				Pad.Text$=BackUp$
+			} else Pad.text$="": Clear BackUp$
+			Method Pad, "Resize"
+		End If
+		Exit
+Save1:
+		Layer NotePad {
+			try ok {
+				Save.As Filename$,"**","Save M2000 File","gsb"
+			}
+			if not ok then Push "" : Dir User
+		}
+		if not cont2 then Method Pad,"GetFocus"
+		Read f$
+		If f$="" Then Exit 
+		If lcase$(file.type$(f$))<>"gsb" then f$=f$+".gsb"
+		If Exist(f$) Then  If Ask(NL$+"Overwrite"+NL$+f$,Title$)<>1 Then Exit
+		Try ok {
+			Clear BackUp$
+			BackUp$=Pad.Text$
+			Save.Doc BackUp$, f$
+			filename$=f$
+			Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+		}
+		If ok else beep
+		If not cont then Exit
+Save2:
+		cont=True
+		If Pad.Text$<>BackUp$ Then {
+			If ask("Save Changes?",Title$)=1 Then Goto Save1
+		}
+		Clear BackUp$
+		Pad.Text$=""
+		If Cont2 then
+			Method NotePad, "CloseNow"
+		Else
+			FileName$=Dir$+"Untitled.gsb"
+			Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+			Method Pad, "Resize"
+		End If
+		Exit
+Unload:
+		Cont2=True : Goto Save2
+	}
+}
+Function Help1.DblClick {
+	Local A, info$
+	Info$={
+		This is an example
+		of a notepad for M2000 Programs
+		written in M2000
+		and run in M2000 Environment
+		}
+	A=Ask(info$,Title$,"","")
+}
+Function Notepad.InfoClick {
+	Read New X
+	If X=0 then Call Local Help1.DblClick()
+}
+Call Local Notepad.Resize()
+\\ make this as the default control (get focus)
+With Pad,"Default",True
+\\ open As modal
+Method NotePad,"Show", 1
+Declare Pad Nothing
+Declare NotePad Nothing 
+Print "Done"
+
+}
+MODULE GLOBAL INFO {dir user
+Form 68,52
+backcolor=point
+oldpen=pen
+Refresh 500
+Pen 0 {
+	cls 7
+	Double
+	Print "M2000 Interpreter ";
+	Version
+	Normal
+	Report "A collection of modules for tests version 1"
+	
+	Pen 5{
+		cursor 0, row-1
+		Report 1, "George Karras 2019"
+	}
+}
+cls backcolor, row
+Scroll split 0  ' reset the row+1 which given in cls
+pen oldpen
+Clear ' clear local variables
+If Version<9.7 then Error "No proper M2000 version"
+If Version=9.7 and revision<9 then Error "No proper M2000 revision for version 9.7"
+title("Modules ?")
+Report {
+	Modules ?    (or control+N, display all loaded modules, if nothing loaded display files)
+	You can call any module by name, try Info
+	Modules (Show every loaded module, plus files on user folder)
+	}
+Pen if(pen=7->8,7){
+	Modules ?
+	Print
+}
+title("List")
+Report {
+	You can see the global variables, if any exist, defined in console
+	Use statement Clear to clear all variables
+	}
+List
+title("Stack")
+Report {
+	You can see the stack of values, if has any value
+	Use statement Flush to empty the stack
+	}
+Stack
+refresh 30
+title("Useful Statements")
+Report {
+	Help All, Help Print, Help
+	Monitor  (to see switches), shitches
+	(some staments can be used from a module using the Set statement)
+	(Set Monitor - because Monitor is known to Console Interepreter)
+	Edit info  (press esc to exit editor)
+	Edit "disk_file.gsb"  (to edit from disk - saved at exit)
+	Edit  (no argument) open command editor (we pick in console line using up/down arrows)
+	Save filename   (without quotes, except if we want spaces)
+	load filename
+	Settings (open dialog for setting environment), 	Start  ' restart console
+	Use filename  (use info open another info in another console)
+	Dir to show current directory or Dir user to set current dir to user folder
+	Files "GSB","PRINT|FOR" (search files *.gsb for words PRINT and FOR)
+	Win Dir$	Win Calc
+	End (to exit from console)  
+	}
+FKey 1,"saveme"
+FKey 2,"Edit Info"
+FKey 3,"Info"
+FKey 4,"M2000_Editor_Information"
+FKey 6,"Edit M2000_editor_information"
+Fkey 8,"mEditor"
+FKey 10,"Settings"
+Title("Fkey")
+Fkey
+title("M2000 Writer")
+Keyboard "Writer"+chr$(13)
+End
+Sub title(a$)
+Pen #ffeeff {
+	cursor 0
+	Italic 1
+	Report a$
+	Italic 0
+	cursor 6, row-1
+}
+End Sub
+}
+MODULE GLOBAL SAVEME {dir user
+save info, info
+Print "Done"
+}
+MODULE GLOBAL M2000_EDITOR_INFORMATION {thread.plan sequential   ' can run as concurrent too
+Form 78,50
+backcolor=point
+oldpen=pen
+Refresh 500
+Pen 0 {
+	cls 7
+	Double
+	Print "M2000 Interpreter ";
+	Version
+	Normal
+	Report "M2000 Editor"
+	
+	Pen 5{
+		cursor 0, row-1
+		Report 1, "George Karras 2019"
+	}
+}
+cls backcolor, row
+pen oldpen
+title("Define a Module")
+Report {
+	Edit Alfa   (open editor to edit Alfa Module, and all modules/functions inside of it)
+	}, width-12
+title("Define a Function")
+\\ we can't put a left parenthesis without a match right parenthesis (including for strings) in a { } string literal
+Report {
+	}+"Edit Alfa() or Alfa("+{  (open editor to edit Alfa() Function, and all modules/functions inside of it)
+	}
+title("Open for edit at specific position")
+Report {
+	Edit Alfa, 100
+	}
+title("Indent a line")
+Report {
+	just press tab before any letter, to delete indentation mark the text shift +End and then press shift tab
+	You can start a indentation with spaces (Default is tab - characrer 9), using shift tab in a clear line, or a line without leading tabs.
+	}, width-12
+title("Indent multiple lines")
+Report {
+	Mark a block and then press tab or shif tab to move text right or left
+	}, width-12
+title("Functions Keys for Editor")
+Report {
+	F1 - Toggle Wrapping setting (on or off)
+	F2 - search marked or last searched word up - using shift or ctrl to search phrases
+	F3 - search marked or last searched word down - using shift or ctrl to search phrases
+	F4 - change the letters case using the marked word (no undo for this)
+	F5 - Replace marked word with one we provide in inputbox (multiple undo)
+	F6, F7, F8 Bookmarks. On press for Set, Delete, Goto Bookmark. Messages displayed
+	F9 - Count words
+	F10 - Show hidden characters (paragraph, spaces as dot, nbsp as space, figure space, tab)
+	F10 & Shift - Open Popup Menu
+	F11 - Change Syntax Color On, Language Width Normal, Syntax color Off, Language Width Small
+	F12 - Open a form displaying all names of loaded modules, we can click on any to read or copy part of source
+	Shift F12 Exit without changes (useful if Editor get crazy...)
+	}, width-12
+title("Other Keys for Editor")
+Report {
+	Ctrl+X Cut
+	Ctrl+C Copy   (copy Html and Simple Text, Html has <pre></pre> if tabs exist in copied text)
+	Ctrl+V Paste
+	Ctrl+A Select all
+	Ctrl+Z Undo (unlimited, but we loose it if we press Esc to leave from editor)
+	Ctrl+Y Redo (unlimited too)
+	Shift+Tab Insert spaces not tab
+	Tab  insert a tab in umarked text, apply indentation in marked text
+	Tab + Shift remove indentation in marked text,  Insert spaces as tab if no leading tab exist
+	
+	Ctrl+Shift Enter place Braces and a line inside with proper indentation
+		We can mark text and place braces and indentation for all marked text
+	Ctrl+Shift+Space insert a non break space
+	Alt+Shift+Space insert a figure space
+	Alt +5+9 return ANSI 0x59 (;) 
+	Alt "+" 3 0 2 a give â Unicode 0x302
+	Pairs:() {} "" []  we press the first and we get the other and cursor set inside them
+		Also we can mark text and press one of above to place makred text inside
+		we have to press two times undo to undo this
+	}, width-12
+Press()
+Cls
+title("PopUp Menu")
+Report {
+	Open with Shift+F10, Key Context Menu if exist, left mouse button in edit area, right mouse button in header area
+	We can move the menu (stay open until lost focus)
+	We can resize the menu to get bigger text (also this operation resize other interpreter forms)
+	
+	First line show line number, character position and can input a line number to move this line to center vertical as possible
+	Cut
+	Copy
+	Paste
+	Save and Exit
+	Discard Changes
+	Search up
+	Search down
+	Make same All
+	Replace word
+	Word Wrap
+	Drag Enabled (by default drop is enables, to allow drag operation we have to set this)
+	Color/Short Language
+	Paragraph Mark (show hidden characters, we can edit in this mode)
+	Word Count
+	Help  (if we makred a word - just click on it- we get a form with information about it).
+	Modules/Functions.
+	Insert File  (this is a macro which insert a file as Base64 encoded in text, for a string variable).
+	Load Resource (this is a macro which insert a binary file to a buffer type variable).
+	}, width-12
+title("View code without get the cursor from position")
+Report {
+	We can scroll up or down using vertical scroll bar. Press left or right or up or down or an key to return to previous view 
+	Use F1 to change wrap (this also has no affect to cursor).
+	Move some lines up or down holding down right mouse button. There is a timer which enable quick move.
+	The same timer enabled when we click the top or bottom areas of the scroll bar control.
+	}, width-12
+title("View code as you change the cursor from position")
+Report {
+	Use arrows, Home (change from position 1 to first non space  in row, each time we use it).
+	End to end of line.
+	Page Up, Page Down  (Page is the  half page of view).
+	Clicking with right mouse button.
+	Shift with all above mark text.
+
+	Using mouse wheel we change half pages (moving the cursor too), shift has no effect.
+	Using F6 to F8 (Bookmarks) to jump to a bookmark.
+
+	When we edit a line editor keep the line in the middle of view if it is possible.
+	If no warp enabled then the horizontal moving is automated, when we type, or when we move text to drop it, depending of the position of the "running cursor" (if we miss the drop, the cursor return to starting position).
+	}, width-12
+Press()
+Keyboard "info"+chr$(13)
+End  ' we can omit this
+Sub title(a$)
+Pen #ffeeff {
+	cursor 0
+	Italic 1
+	a$=replace$(chr$(9),"      ", a$)
+	Report a$
+	Italic 0
+	cursor 6, row-1
+}
+End Sub
+Sub Press()
+	local col=15,  col2=backcolor, threadid
+	Input End  ' empty buffer too
+	Print @(0,Height);
+	Thread {
+		Pen col {
+		Print Over $(3), "Press space bar or mouse key" 
+		}
+		swap col, col2
+	} as threadid interval 250
+	wait 500	
+	Main.Task 10 {
+		if keypress(1) or keypress(32) then exit
+	rem		if mouse>0 or inkey$<>"" then exit
+	}
+	Threads Erase
+End Sub
+}
+MODULE GLOBAL FORM44 {Set slow
+Thread.Plan  Concurrent  ' Sequential
+Refresh 40
+SMOOTH on
+Cls,0
+\\ using ,0 we switch console to minimize state
+\\ any value else or no value restore to normal state
+title "Start Up" ', 0
+N=3
+\\ we choose to use automatic event object
+\\ this event object expect to find Form1() function
+\\ using automatic object we can't disable it
+\\ also events which expect changes to variables
+\\ bypass the stantard callback and resolve to a function
+\\ like  Form1.Unload() which get back the Nook value
+
+Declare Form1(N) Form
+
+\\ Buttons can be clicked or shifted right (same as clicked)
+
+Class Buttons { 
+      Dim Butt() 
+      Module SetCaption { With .Butt(Number), "Caption",Letter$}
+      Function ReadCaption$ { With .Butt(Number), "Caption" as Result$ : = Result$}
+}  
+Dim Controls(N)=Buttons()  \\ an array of arrays
+\\ 
+For i=0 to N-1 {
+      For Controls(i) {
+            \\ need to be a new name for array
+            \\ a For object { } delete any new name
+            \\ so each time this block run, starts with no Button1() array
+            \\ then make one, then we get a copy (and references to actual objects)
+            \\ and then Button1() erased
+            \\ but Controls(i).Butt() can't erased because exist before we enter the loop
+            Declare Button1(2) button Form Form1(i)
+            For j=0 To 1 {
+                  Method Button1(j), "move", 1000+4000*j, 2000,3000,1000
+                  if j=1 then {
+                        Method Button1(j), "curve",3
+                  } else Method Button1(j), "transparent"
+                 
+            }
+            .Butt()=Button1()
+      }
+     Layer Form1(i) {
+            Cls 4, 0
+            Gradient 1,4
+            Cursor 0,3
+            Report 2, "Hello There"
+     }
+      Method Form1(i), "Show"
+}
+\\ check this. After 6 second we can unload two forms
+\\ Ttry to close anything. You can without a problem
+\\ and after 3 seconds one more
+\\ just press enter after Rem 1: to make lines ready for execution
+Rem 1: Wait 6000 : PrintAndRefresh("CloseNow") : For i=1 to 2 : Method Form1(i), "CloseNow" : Next i
+Rem 2: Wait 3000 : PrintAndRefresh("Unload") : Refresh  : Declare Form1() Nothing
+Rem 3: Show \\ get the focus back
+Rem 4: Print "ok" : Exit
+
+Form1_1=true
+Controls(1).SetCaption 0, "Click Me"
+Controls(1).SetCaption 1, "ok"
+Controls(2).SetCaption 1, "Test Me"
+\\ we make a variable bound to a property
+With form1(0), "Visible" As visible
+CloseThisForm=0
+CloseThisTitle$=""
+Function CloseAfter {
+
+      If Ask("Close Form?", CloseThisTitle$)=1 Then {
+      If CloseThisForm=1 Then Form1_1=false
+      Method Form1(CloseThisForm), "CloseNow"
+      }
+}
+Function Form1.Unload {
+      Read New index, &Nook
+      Nook=True  \\ no unload now
+      \\ After make an unamed thread
+      \\ we use this of async waiting for user to
+      \\ provide feedback from a message box
+      with Form1(index), "title" as title$
+      CloseThisTitle$=title$
+      CloseThisForm=Index
+      After 50  { Call Local CloseAfter() }
+}
+Function Button1.Click {
+      Read New K, L
+      Print "Form:";L,"Button:";K
+      Print Controls(L).ReadCaption$(K)
+      if k=1 and l=2 then test
+}
+Function Form1.MouseMove {
+      Read New K, Button, Shft, X, Y
+      If Button=1 Then {
+           Layer Form1(K) {    
+                  move X, Y
+                  circle 500, 1, 14-K
+            }
+      }
+}
+Function Form1.MouseDown {
+      Read New K, Button, Shft, X, Y
+      If Button=2 Then {
+            Method Form1(K), "Control", 1 As UserControl
+            \\ we have to use new names if we "call local" a function
+            With UserControl, "Visible" As uVisible
+            uVisible=Not uVisible  \\ we can't use X~ as X = Not X     
+      }
+}
+'goto aaa
+For i=0 to N-1 {
+\\ Threads get current layer as starting layer
+      Layer Form1(i) {
+            \\ so we make the thread inside Form Layer 
+            Thread {
+            part {
+                  If Form1_1 Then {    
+                              if not scale.x then  thread this erase
+                            \\ third parameter is for color, we can use Color(r,g,b) or Colour(r,g,b) 
+                            \\ for rgb value, or we can give an Html number like #FF0000
+                            \\ another way is by using hex 0X80000012 for system colors
+                            \\ Here we use values from the range 0 to 15 (here from 7 to 15)
+                            \\ and these are the standard colors.
+                           Draw To Random(Scale.x), Random(Scale.y), Random(7,15)
+                           \\ sub PrintAndRefresh can be run because all threads are in the same module
+                           \\ Threads have their execution object and an object to draw, here the form1
+                           \\ When thread call sub, sub run on same execution object.
+                           \\ modules and functions have own execution object
+                           \\ so subs are light and interest because the see every variable as local
+                           \\ but we can make temporary anything
+                           \\ we can also create threads in a sub, without erase them. 
+                           \\ Threads erased when parent object erased, or when we send erase command
+                           \\ or when we exit Task.Main
+                           \\ for the situation of a thread created on a thread we can use Threads Erase
+                           \\ too remove all, including these. This we need it because, the second level of thread may
+                           \\ end after the erasing of module, where we create it, so can run code with variables which
+                           \\ are cleared. So With Threads Erase before exit module we are sure that Threading Pool is empty.
+                           \\ But this in not an every day situation.
+                           \\  (an after {}  thread creation in a thread execution is an example for a second level thread)
+                           Rem 100 :
+                          If random(100)<4 then  PrintAndRefresh("draw lines")
+                          refresh
+                  } Else Thread This Erase
+                  } as mine
+            } As OneMore   Interval 30
+            thread OneMore  execute  static me=i
+            \\ OneMore is a handler, so we lost first and second handler
+            \\ but we dont care, we close thread inside using This
+            \\ or we can let the Main Task erase it at the exit 
+      }
+}
+
+Thread {     
+      PrintAndRefresh(Str$(Now,"hh:mm:ss"))
+} As Inform Interval 1000
+\\ Inform is the Thread Handler, we don't use it here
+aaa:
+\\ Need a thread to run a Main.Task
+Main.Task 100 {
+'Every 100 {
+      \\ using property  \\ 
+      
+            
+            Rem 1 :       Print Type$(Visible), Type$(Form1_1)
+            If Not visible Then break
+            threads
+      
+}
+
+\\  Cleaning;
+\\ A control has two objects, one in form (a UserControl, one type for all),
+\\ and the other is the wrapper, which serve as an event publisher,
+\\ and we can use propertiers and methods
+\\ When a Form unloaded not only erase UserControls but becaue hold referencse to wrappers
+\\ send deconstruct command to each one, to break any reference to form
+\\ and  erase internal collection - just throw references to actual objects
+\\ So our last references to wrappers are in Controls(i)
+\\ We can let M2000 to destroy the arrays, so the referecses, or we can do the job
+\\ and we can reuse it
+\\ so we check this with a jump to there
+Goto there
+For i=0 to N-1 {
+      For Controls(i) {
+            Dim .Butt()
+      }
+}
+there:
+\\ this command unload forms
+Declare Form1() Nothing
+'title "End"
+'Show
+Threads Erase
+Smooth off
+Thread.Plan Sequential  ' set the default again (can be set if no thread exist)
+Refresh 30
+Sub PrintAndRefresh(A$)
+            Print A$
+            Refresh
+End Sub
+}
+MODULE GLOBAL LIST33 {Declare Simple Form
+With Simple, "Title" As myTitle$
+\\ make window, not show yet
+Layer Simple {
+      Linespace 60
+      Font "Arial Black"
+      Window 16, 8000,6000
+      Cls 1,0 
+      Cursor 0, height div 2
+      Report 2,"Hello World"
+}
+\\ now put a ListBox
+Declare Listbox1 Listbox Form Simple
+Method Listbox1, "move", 1000,1000,6000,4000
+\\ and fill with some data
+With ListBox1,"Text",{London
+                                    Paris
+                                    Athens
+                                    Rome
+                                    Tirana
+                                    Nicosia
+                                    Brussels
+                                    Copenhagen
+                                    Berlin
+                                    Dublin
+                                    Luxembourg
+                                    London
+                                    Paris
+                                    Athens
+                                    Rome
+                                    Tirana
+                                    Nicosia
+                                    Brussels
+                                    Copenhagen
+                                    Berlin
+                                    Dublin
+                                    Luxembourg
+                                    }
+\\ and set some properties, and some of them are bind to objects that are properties to objects.
+\\ also when we call a method, internal a resolved done in first time, so next time a method call will be faster.
+With Listbox1, "transparent", True , "ListIndex" As ListIndex, "ListCount" As  ListCount
+With Listbox1, "Find" As Find(),  "List" As List$()
+\\ make simple sizable form (units for forms are in twips)
+With Simple,"Sizable", True,"SizerWidth",90
+\\ now these are the event handlers
+\\ event handlers can see anything defined in parent module
+\\ for this reason for &rgb we need a Read New (so a new rgb prepared before a reference assign to it)
+\\ any variable can get a reference to other variable once, at defining stage.
+Function Simple.Unload {
+      Keyboard "!"   \\ like press !
+}
+Function listbox1.Color {
+      Read New &rgb
+            rgb=#FF7700
+}
+Function Listbox1.DblClick {
+            Read Where 
+            if Right$(List$(Where),1)="✓" then {
+                  List$(Where)=leftPart$(List$(Where)+" "," ")
+            } else {
+                  List$(Where)=leftPart$(List$(Where)+" "," ")+" ✓"
+            }
+            Mytitle$= List$(Where) 
+'            Method Simple,"RefreshAll"
+            Method Listbox1,"Refresh"
+
+}
+Function simple.click {
+            If ListIndex>=0 Then {
+                  local K$=List$(ListIndex), i
+                  Method listbox1,"Sort"
+                  ListIndex=Find(K$)
+                  Layer {
+                        \\ we print to standard cosnole layer
+                        Print ">>", control$
+                  }
+            } Else Method Listbox1,"Sort"
+}
+Function Simple.Resize {
+      Layer Simple {
+            Mode 16
+            Cls 1,0
+            Cursor 0, height div 2
+            Report 2,"Hello World"
+            Method Listbox1,"Refresh"
+      }
+      \\ we put a refresh to console because
+      \\ when this handler run, can't run thread k.
+      Layer { Refresh}
+}
+\\ now we want to show (without modal showing)
+Method Simple, "Show"
+\\ We can put a background task (a thread), triggering each 100 mSec
+Thread {
+      Print tick  \\ tick is thread manager timer
+      refresh
+} as K interval 100
+a$=Key$ \\ no loop just wait a key, in console only
+Threads Erase
+Declare Simple Nothing
+}
+MODULE GLOBAL TEXTOUT {Module UsingEvents {
+      Form 60, 32
+      Declare WithEvents sp "SAPI.SpVoice"
+      That$={Rosetta Code is a programming chrestomathy site.
+      The idea is to present solutions to the same task in as many different languages as possible, to demonstrate how languages are similar and different, and to aid a person with a grounding in one approach to a problem in learning another. Rosetta Code currently has 913 tasks, 214 draft tasks, and is aware of 707 languages, though we do not (and cannot) have solutions to every task in every language.}
+      EndStream=False
+      LastPosition=-1
+      TxtWidth=0
+      Function sp_Word {
+            Read New &StreamNumber, &StreamPosition, &CharacterPosition, &Length
+            Rem:  Print StreamNumber, StreamPosition , CharacterPosition, Length
+            If  LastPosition=CharacterPosition Then exit
+            LastPosition=CharacterPosition
+            Local f$=" "
+            If TxtWidth=CharacterPosition+length Then f$=". "
+            If length+pos+2>width then Print
+            Print Mid$(That$, CharacterPosition+1, Length);f$;
+            If f$=". " Then Print
+            Refresh
+      }
+      Function sp_EndStream {
+            Refresh
+            EndStream=True
+      }
+      Function sp_Sentence {
+            Read New &StreamNumber, &StreamPosition, &CharacterPosition, &Length
+            if Length>0 and not CharacterPosition=0 then Print
+            Print "  ";
+            TxtWidth=CharacterPosition+Length-1
+      }
+      Const  SVEEndInputStream = 4
+      Const  SVEWordBoundary = 32
+      Const  SVESentenceBoundary = 128
+      Const SVSFlagsAsync = 1&
+ 
+      With sp, "EventInterests", SVEWordBoundary+SVEEndInputStream+SVESentenceBoundary
+      Method sp, "Speak", That$, SVSFlagsAsync
+      While Not EndStream {Wait 10}
+      Wait 100
+}
+UsingEvents
+}
+MODULE GLOBAL MOVEBUTTON {Declare Form1 Form
+Declare Button1 Button Form Form1
+Declare TextBox1 TextBox Form Form1
+Bx=4
+Layer Form1 {
+      Linespace 0
+      Window 8, 10000, 6000
+      Cls 1,0
+      Form 30, 10
+      Print @(0,4),"123456789012345678901234567890"
+      Cursor Bx, 5
+      Move !
+      Button1_Xpos=Pos.x
+      Button1_Ypos=Pos.y
+      Xt=Button1_Xpos div Bx
+      Yt=Button1_Ypos div 5
+}
+Method Textbox1,"Move", 1000,1000, 6000,600
+Method Button1,"Move", Button1_Xpos, Button1_Ypos, Xt*5, Yt*2
+Method Button1,"Curve",1 \\ 2 - 3 (single float)
+Method Form1, "Show"
+Function Form1.Unload {
+      Keyboard "!"
+}
+Function Button1.Click {
+      \\ print to console
+      layer Form1 {            
+            motion.w 0 ;
+            
+      }
+      Print "Hello"
+}
+Function Form1.MouseDown {
+      Drop 2 ' no need now (keycode and shift)
+      Read New X, Y
+      Layer Form1 {
+            Move X, Y
+            Cursor ! \\ transform to char coordinates
+            Move ! \\ transform to graphic, at the up left corner of a char
+            Method Button1,"Move", Pos.x, Pos.y
+      }
+}
+
+A$=key$
+Declare Button1 Nothing
+Declare Form1 Nothing
+}
+INFO

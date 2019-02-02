@@ -981,11 +981,11 @@ End Property
 Public Property Let MenuWidth(ByVal vNewValue As Variant)
 mMenuWidth = vNewValue
 End Property
-Public Sub Clear()
+Public Sub clear()
 On Error Resume Next
 Iam = False
 Pad.Visible = False
-glistN.Clear
+glistN.clear
 
 Textbox.SetFocus
 End Sub

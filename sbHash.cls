@@ -228,6 +228,21 @@ With PriveSpace(a)
     .firsthash = HashFunc0(Key)
     SwapStrings .Key, Key
 End With
+End Sub
+Friend Sub ItemCreatorNoSwap(Key As String, num As Long, Optional isref As Boolean = False)
+Dim a As Long
+a = Malloc()
+place HashFunc(Key), a
+With PriveSpace(a)
+    .ndx = num
+    If isref Then
+        .KeyType = 1
+    Else
+        .KeyType = 0
+    End If
+    .firsthash = HashFunc0(Key)
+    .Key = Key
+End With
 
 
 

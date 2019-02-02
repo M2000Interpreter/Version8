@@ -1666,7 +1666,11 @@ ttl = True
 Form3.Visible = False
 escok = False
 Sleep 10
+If pagio$ = "GREEK" Then
 FK$(13) = "ÓÕÃÃÑÁÖÅÁÓ"
+Else
+FK$(13) = "WRITER"
+End If
 Console = FindFormSScreen(Me)
 
 Me.WindowState = 0
@@ -1796,7 +1800,11 @@ End If
       If basestack1.Owner Is Nothing Then Exit Sub
 If basestack1.Owner.Visible = True Then basestack1.Owner.Refresh Else basestack1.Owner.Visible = True
     FKey = 0
+    If pagio$ = "GREEK" Then
     FK$(13) = "ÓÕÃÃÑÁÖÅÁÓ"
+    Else
+    FK$(13) = "WRITER"
+    End If
     INK$ = vbNullString
     mybasket.pageframe = 0
     MYSCRnum2stop = holdcontrol(DIS, mybasket)
@@ -2211,100 +2219,109 @@ KeyCode = 0
 Case vbKeyTab
 nochange = True
 If TEXT1.HaveMarkedText Then TEXT1.SelStartSilent = TEXT1.SelStart
-gList1.enabled = False
-JJ = TEXT1.SelStart
-where = JJ
-ii = 1 + TEXT1.SelStart - TEXT1.ParaSelStart
-
-If TEXT1.SelLength > 0 Then
-
-JJ = TEXT1.SelLength + JJ - ii
-TEXT1.SelStart = ii
-TEXT1.SelLength = JJ
-JJ = where
-Else
-
-TEXT1.SelStart = ii
-End If
-
-
-If TEXT1.SelText <> "" Then
-    a$ = vbCrLf + TEXT1.SelText & "*"
-    If gList1.UseTab Then
-    If shift <> 0 Then
-        If InStr(a$, vbCrLf + vbTab) = 0 Then
-        a$ = Replace(a$, vbCrLf + String$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl, ChrW(160)), vbCrLf)
-        a$ = Replace(a$, vbCrLf + space$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl), vbCrLf)
-        Else
-        a$ = Replace(a$, vbCrLf + vbTab, vbCrLf)
-        
-        End If
-        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
-         TEXT1.SelStartSilent = ii
-         TEXT1.SelLengthSilent = Len(a$) - 3
-         
+    gList1.enabled = False
+    JJ = TEXT1.SelStart
+    where = JJ
+    ii = 1 + TEXT1.SelStart - TEXT1.ParaSelStart
+    
+    If TEXT1.SelLength > 0 Then
+    
+    JJ = TEXT1.SelLength + JJ - ii
+    TEXT1.SelStart = ii
+    TEXT1.SelLength = JJ
+    JJ = where
     Else
-        If InStr(a$, vbCrLf + " ") > 0 Or InStr(a$, vbCrLf + ChrW(160)) > 0 Then
-        a$ = Replace(a$, vbCrLf, vbCrLf + space$(TabControl))
-        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
-        TEXT1.SelStartSilent = where + TabControl
-        TEXT1.SelLengthSilent = Len(a$) - 3 - (where + TabControl - ii)
-        Else
-        a$ = Replace(a$, vbCrLf, vbCrLf + vbTab)
-        
-        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
-        TEXT1.SelStartSilent = where + 1
-        TEXT1.SelLengthSilent = Len(a$) - 3 - (where + 1 - ii)
-       End If
+    TEXT1.SelStart = ii
     End If
-    Else
-    If shift <> 0 Then
-        a$ = Replace(a$, vbCrLf + String$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl, ChrW(160)), vbCrLf)
-        a$ = Replace(a$, vbCrLf + space$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl), vbCrLf)
-        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
-         TEXT1.SelStartSilent = ii
-         TEXT1.SelLengthSilent = Len(a$) - 3
-         
-    Else
-        a$ = Replace(a$, vbCrLf, vbCrLf + space$(TabControl))
-        TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
-        TEXT1.SelStartSilent = where + TabControl
-        TEXT1.SelLengthSilent = Len(a$) - 3 - (where + TabControl - ii)
-       
-    End If
-    End If
-Else
-If shift <> 0 Then
 
-    If Mid$(TEXT1.CurrentParagraph, 1, TabControl) = space$(TabControl) Or Mid$(TEXT1.CurrentParagraph, 1, TabControl) = String$(TabControl, ChrW(160)) Then
 
-            TEXT1.SelStartSilent = ii
-            TEXT1.SelLengthSilent = TabControl
-            TEXT1.InsertTextNoRender = vbNullString
-            TEXT1.SelStartSilent = ii
-    ElseIf Left$(TEXT1.CurrentParagraph, 1) = vbTab Then
-            TEXT1.SelStartSilent = ii
-            TEXT1.SelLengthSilent = 1
-            TEXT1.InsertTextNoRender = vbNullString
-            TEXT1.SelStartSilent = ii
-    Else
-            TEXT1.SelStartSilent = ii
-            TEXT1.SelLengthSilent = Len(TEXT1.CurrentParagraph) - Len(NLtrim(TEXT1.CurrentParagraph))
-            TEXT1.InsertTextNoRender = vbNullString
-            TEXT1.SelStartSilent = ii
-    End If
-    Else
+    If TEXT1.SelText <> "" Then
+        a$ = vbCrLf + TEXT1.SelText & "*"
         If gList1.UseTab Then
-        TEXT1.SelStartSilent = JJ
-        TEXT1.RemoveUndo vbTab
-        TEXT1.InsertText = vbTab
-        TEXT1.SelStartSilent = JJ + 1
+            If shift <> 0 Then
+                If InStr(a$, vbCrLf + vbTab) = 0 Then
+                a$ = Replace(a$, vbCrLf + String$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl, ChrW(160)), vbCrLf)
+                a$ = Replace(a$, vbCrLf + space$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl), vbCrLf)
+                Else
+                a$ = Replace(a$, vbCrLf + vbTab, vbCrLf)
+                
+                End If
+                TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+                 TEXT1.SelStartSilent = ii
+                 TEXT1.SelLengthSilent = Len(a$) - 3
+                 
+            Else
+                If InStr(a$, vbCrLf + " ") > 0 Or InStr(a$, vbCrLf + ChrW(160)) > 0 Then
+                a$ = Replace(a$, vbCrLf, vbCrLf + space$(TabControl))
+                TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+                TEXT1.SelStartSilent = where + TabControl
+                TEXT1.SelLengthSilent = Len(a$) - 3 - (where + TabControl - ii)
+                Else
+                a$ = Replace(a$, vbCrLf, vbCrLf + vbTab)
+                
+                TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+                TEXT1.SelStartSilent = where + 1
+                TEXT1.SelLengthSilent = Len(a$) - 3 - (where + 1 - ii)
+               End If
+            End If
         Else
-        TEXT1.SelStartSilent = JJ
-        TEXT1.RemoveUndo space(TabControl)
-        TEXT1.InsertText = space(TabControl)
+            If shift <> 0 Then
+                a$ = Replace(a$, vbCrLf + String$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl, ChrW(160)), vbCrLf)
+                a$ = Replace(a$, vbCrLf + space$(TabControl + (Len(TEXT1.CurrentParagraph) - Len(LTrim(TEXT1.CurrentParagraph))) Mod TabControl), vbCrLf)
+                TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+                 TEXT1.SelStartSilent = ii
+                 TEXT1.SelLengthSilent = Len(a$) - 3
+                 
+            Else
+                a$ = Replace(a$, vbCrLf, vbCrLf + space$(TabControl))
+                TEXT1.InsertTextNoRender = Mid$(a$, 3, Len(a$) - 3)
+                TEXT1.SelStartSilent = where + TabControl
+                TEXT1.SelLengthSilent = Len(a$) - 3 - (where + TabControl - ii)
+               
+            End If
+        End If
+    Else
+        If shift And 1 <> 1 Then
+    
+            If Mid$(TEXT1.CurrentParagraph, 1, TabControl) = space$(TabControl) Or Mid$(TEXT1.CurrentParagraph, 1, TabControl) = String$(TabControl, ChrW(160)) Then
         
-        TEXT1.SelStartSilent = where + TabControl
+                    TEXT1.SelStartSilent = ii
+                    TEXT1.SelLengthSilent = TabControl
+                    TEXT1.InsertTextNoRender = vbNullString
+                    TEXT1.SelStartSilent = ii
+            ElseIf Left$(TEXT1.CurrentParagraph, 1) = vbTab Then
+                    TEXT1.SelStartSilent = ii
+                    TEXT1.SelLengthSilent = 1
+                    TEXT1.InsertTextNoRender = vbNullString
+                    TEXT1.SelStartSilent = ii
+            Else
+                    TEXT1.SelStartSilent = ii
+                    TEXT1.SelLengthSilent = Len(TEXT1.CurrentParagraph) - Len(NLtrim(TEXT1.CurrentParagraph))
+                    TEXT1.InsertTextNoRender = vbNullString
+                    TEXT1.SelStartSilent = ii
+            End If
+        Else
+        
+            If gList1.UseTab And MyTrimL2(TEXT1.CurrentParagraph) < JJ - ii + 1 - (JJ = ii) Then
+            If (shift And 1) = 1 And Left$(TEXT1.CurrentParagraph, 1) <> ChrW(9) Then
+            TEXT1.SelStartSilent = JJ
+            TEXT1.RemoveUndo space(TabControl)
+            TEXT1.InsertText = space(TabControl)
+            
+            TEXT1.SelStartSilent = where + TabControl
+            Else
+            TEXT1.SelStartSilent = JJ
+            TEXT1.RemoveUndo vbTab
+            TEXT1.InsertText = vbTab
+            TEXT1.SelStartSilent = JJ + 1
+            End If
+            
+            Else
+            TEXT1.SelStartSilent = JJ
+            TEXT1.RemoveUndo space(TabControl)
+            TEXT1.InsertText = space(TabControl)
+            
+            TEXT1.SelStartSilent = where + TabControl
         End If
     End If
 End If

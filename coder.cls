@@ -109,12 +109,12 @@ Next i
  ExpandKey item
 Bad = item
 End Function
-Public Function decryptline(ByVal data As String, ByVal MasterKey As String, ByRef Start As Long) As String
-decryptline = GOOD(Start, MasterKey, data)
+Public Function decryptline(ByVal data As String, ByVal MasterKey As String, ByRef start As Long) As String
+decryptline = GOOD(start, MasterKey, data)
 End Function
 
-Public Function encryptline(ByVal data As String, ByVal MasterKey As String, ByRef Start As Long) As String
-encryptline = Bad(Start, MasterKey, data)
+Public Function encryptline(ByVal data As String, ByVal MasterKey As String, ByRef start As Long) As String
+encryptline = Bad(start, MasterKey, data)
 End Function
 Public Function must(sss$) As String
 must = decryptline(sss$, "MISTAKE TRY AGAIN", (Len(sss$) / 2) Mod 33)

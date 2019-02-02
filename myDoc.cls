@@ -327,6 +327,7 @@ End Sub
 
 Private Sub ColorThis2(mNum As Long, Optional count As Long = 0, Optional LookDown As Boolean = True)
 Dim mNum1 As Long, laststart As Long
+If mNum = 0 Then Exit Sub
 If count = 0 Then laststart = para(mNum).startfrom
 If ColorEvent Then
 mNum1 = mNum

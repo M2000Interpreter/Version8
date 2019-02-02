@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 9
+Global Const Revision = 10
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -874,211 +874,6 @@ End If
 
 End Function
 
-Function MySwap(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp1 As mArray
-    F = Abs(IsLabel(bstack, rest$, s$))
-    MySwap = True
-    If F = 1 Or F = 4 Then col = 1
-    If F = 5 Or F = 7 Then col = 2
-    If F = 0 Then MissingnumVar:  Exit Function
-    If (F = 3 Or F = 6) And col > 0 Then SyntaxError: MySwap = False:    Exit Function
-    If col = 1 Then
-        If GetVar(bstack, s$, F) Then
-                If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
-                i = Abs(IsLabel(bstack, rest$, ss$))
-              If i = 1 Or i = 4 Then
-                If GetVar(bstack, ss$, x1) Then
-         If MyIsObject(var(F)) Then
-            If TypeOf var(F) Is Constant Then
-            CantAssignValue
-            MySwap = False: Exit Function
-            End If
-        End If
-        If MyIsObject(var(x1)) Then
-            If TypeOf var(x1) Is Constant Then
-            CantAssignValue
-            MySwap = False: Exit Function
-            End If
-        End If
-                    SwapVariant var(F), var(x1)
-                    
-                    
-                Exit Function
-                Else
-                    Nosuchvariable ss$
-                    MySwap = False
-                    Exit Function
-                End If
-            ElseIf i = 5 Or i = 7 Then
-                If neoGetArray(bstack, ss$, pppp) Then
-                If Not pppp.Arr Then NotArray: Exit Function
-                    If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$, True) Then Exit Function
-                        If MyIsObject(var(F)) Then
-                            If TypeOf var(F) Is Constant Then
-                            CantAssignValue
-                            MySwap = False: Exit Function
-                            End If
-                        End If
-                    SwapVariant2 var(F), pppp, x1
-                    
-                    
-                Else
-                
-                    NoSwap ss$
-                    MySwap = False
-                    Exit Function
-                End If
-            Else
-                MissingnumVar
-                MySwap = False
-                Exit Function
-            End If
-        Else
-            Nosuchvariable s$
-            
-            Exit Function
-        End If
-    ElseIf col = 2 Then
-        If neoGetArray(bstack, s$, pppp) Then
-        If Not pppp.Arr Then NotArray: Exit Function
-        If Not NeoGetArrayItem(pppp, bstack, s$, F, rest$) Then Exit Function
-            If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
-                i = Abs(IsLabel(bstack, rest$, ss$))
-                  
-            If i = 1 Or i = 4 Then
-                    If GetVar(bstack, ss$, x1) Then
-                    If pppp.IHaveClass Then
-                            NoSwap ""
-                    Else
-                             If MyIsObject(var(x1)) Then
-                                If TypeOf var(x1) Is Constant Then
-                                CantAssignValue
-                                MySwap = False: Exit Function
-                                End If
-                            End If
-                    
-                    
-                         SwapVariant2 var(x1), pppp, F
-                     End If
-                        
-                    Else
-                        MissingnumVar
-                        MySwap = False
-                        Exit Function
-                    End If
-            ElseIf i = 5 Or i = 7 Then
-                    If neoGetArray(bstack, ss$, pppp1) Then
-                    If Not pppp1.Arr Then NotArray: Exit Function
-                        If Not NeoGetArrayItem(pppp1, bstack, ss$, x1, rest$) Then Exit Function
-                   If pppp.IHaveClass Xor Not pppp1.IHaveClass Then
-                            
-                        SwapVariant3 pppp, F, pppp1, x1
-                        If pppp.IHaveClass Then
-                            Set pppp.item(F).LinkRef = pppp1.GroupRef
-                            Set pppp1.item(x1).LinkRef = pppp.GroupRef
-                            End If
-                        Else
-                        NoSwap ""
-                        Exit Function
-                        End If
-                        
-                    Else
-                        MissingnumVar
-                        
-                        Exit Function
-                    End If
-            Else
-                MissingnumVar
-                
-                Exit Function
-            End If
-        Else
-            MissingnumVar
-            
-            Exit Function
-        End If
-    ElseIf F = 3 Then
-            If GetVar(bstack, s$, F) Then
-            If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
-                i = Abs(IsLabel(bstack, rest$, ss$))
-                 If i = 6 Then
-                    If Not neoGetArray(bstack, ss$, pppp) Then MissingStrVar:  Exit Function
-                    If Not pppp.Arr Then NotArray: Exit Function
-                    If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$) Then Exit Function
-                     If MyIsObject(var(F)) Then
-                        If TypeOf var(F) Is Constant Then
-                        CantAssignValue
-                        MySwap = False: Exit Function
-                        End If
-                    End If
-                    SwapVariant2 var(F), pppp, x1
-
-                ElseIf i = 3 Then
-                    If Not GetVar(bstack, ss$, x1) Then: Exit Function
-                     If MyIsObject(var(F)) Then
-                        If TypeOf var(F) Is Constant Then
-                        CantAssignValue
-                        MySwap = False: Exit Function
-                        End If
-                    End If
-                   SwapVariant var(F), var(x1)
-                Else
-                MissFuncParameterStringVar
-                MySwap = False
-                End If
-                
-                
-            Else
-                    
-                    MissFuncParameterStringVar
-                    MySwap = False
-            End If
-    ElseIf F = 6 Then
-            If neoGetArray(bstack, s$, pppp) Then
-            If Not pppp.Arr Then NotArray: Exit Function
-                If Not NeoGetArrayItem(pppp, bstack, s$, x1, rest$) Then Exit Function
-                If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
-                i = Abs(IsLabel(bstack, rest$, ss$))
-     
-                If i = 6 Then
-                    If Not neoGetArray(bstack, ss$, pppp1) Then MissingStrVar:  Exit Function
-                    If Not pppp.Arr Then NotArray: Exit Function
-                    If Not NeoGetArrayItem(pppp1, bstack, ss$, i, rest$) Then Exit Function
-
-                   SwapVariant3 pppp, x1, pppp1, i
- 
-                ElseIf i = 3 Then
-                    If Not GetVar(bstack, ss$, i) Then: Exit Function
-                    If MyIsObject(var(i)) Then
-                        If TypeOf var(i) Is Constant Then
-                        CantAssignValue
-                        MySwap = False: Exit Function
-                        End If
-                    End If
-
-
-                  SwapVariant2 var(i), pppp, x1
-                    Else
-                MissFuncParameterStringVar
-                MySwap = False
-                End If
-                
-                
-            Else
-                
-                MissPar
-                MySwap = False
-                
-            End If
-    Else
-                 
-                MissPar
-                MySwap = False
-    End If
-    Exit Function
-
-End Function
-
 Public Sub PushStage(basestack As basetask, dummy As Boolean)
         With basestack.RetStack
                basestack.SubLevel = basestack.SubLevel + 1
@@ -1294,6 +1089,7 @@ If safegroup.LastOpen <> vbNullString Then
             GoTo cont3030
     
         Else
+        safegroup.lasthere = vbNullString
         safegroup.LastOpen = vbNullString
         End If
         End If
@@ -1518,7 +1314,7 @@ RetStackSize = bstack.RetStackTotal
         v = 0
         w$ = Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1)
       If Right$(here$, 2) = "()" Then
-      If Right$(here$, 3) = ";()" Then
+      If Right$(here$, 3) = ChrW(&H1FFD) + "()" Then
       If GetVar3(bstack, bstack.fHere + "." + w$, y1) Then
                       If TypeOf var(y1) Is Group Then
                     If Not var(y1).SuperClassList Is Nothing Then
@@ -4532,6 +4328,7 @@ v1& = IsLabelOnly((v$), v$)
 VR = -1
 
 End If
+contthis1:
 v1& = Abs(v1&)
  
  If v1& = 1 Then
@@ -5311,7 +5108,7 @@ If GetVar(bstack, v$, VR) Then
             End If
         ElseIf v$ Like "Gr*" Then
             If var(VR).HasValue And Not IsOperator(a$, "::", 2) Then
-                s1$ = n$ + "." + ChrW(&H1FFF) + ";()"
+                s1$ = n$ + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
                 If GetSub(s1$, v1&) Then
 foundprivate:
                     Set nbstack = New basetask
@@ -5355,7 +5152,7 @@ foundprivate:
                     Else
                         r = 0
                         w3 = Len(n$) - rinstr(n$, ".") + 1
-                        s1$ = Left$(n$, w3) + ChrW(&HFFBF) + Mid$(n$, w3 + 1) + "." + ChrW(&H1FFF) + ";()"
+                        s1$ = Left$(n$, w3) + ChrW(&HFFBF) + Mid$(n$, w3 + 1) + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
                         If GetSub(s1$, v1&) Then GoTo foundprivate
                         InternalEror
                         IsNumberNew = False
@@ -6747,7 +6544,7 @@ End If
 End If
 If Right$(s1$, 1) = ")" Then
     If here$ Like "*." + s1$ Then
-        subHash.ItemCreator s1$, bstack.OriginalCode, True
+        subHash.ItemCreatorNoSwap s1$, bstack.OriginalCode, True
         GoTo contAr1
     ElseIf s1$ = "LAMBDA()" Then
         If bstack.IamLambda Then
@@ -6760,7 +6557,7 @@ If Right$(s1$, 1) = ")" Then
             v1& = bstack.OriginalCode
            ElseIf Not GetSub(s1$, v1&) Then
                If here$ Like "*." + s1$ Then
-                   subHash.ItemCreator s1$, bstack.OriginalCode, True
+                   subHash.ItemCreatorNoSwap s1$, bstack.OriginalCode, True
                Else
                    GoTo skiperror
                End If
@@ -6778,7 +6575,7 @@ If Right$(s1$, 1) = ")" Then
             v1& = bstack.OriginalCode
            ElseIf Not GetSub(s1$, v1&) Then
                If here$ Like "*." + s1$ Then
-                   subHash.ItemCreator s1$, bstack.OriginalCode, True
+                   subHash.ItemCreatorNoSwap s1$, bstack.OriginalCode, True
                Else
                    GoTo skiperror
                End If
@@ -7012,10 +6809,12 @@ contgroup2:
                           
                         ElseIf pppp.item(w2).HasValue Then
                        If pppp.item(w2).HasParameters Then
-                        MakeGroupPointer bstack, pppp.item(w2)
-                        r = 0
-                        Set bstack.lastobj = pppp.item(w2)
-                        Exit Function
+                       
+                       GoTo contgroup
+                   '     MakeGroupPointer bstack, pppp.item(w2)
+                    '    r = 0
+                     '   Set bstack.lastobj = pppp.item(w2)
+                      '  Exit Function
                        Else
                         IsNumberNew = SpeedGroup(bstack, pppp, "VAL", v$, "", w2) = 1
                                  If SG = 1 Then
@@ -7221,7 +7020,7 @@ comehere:
 contrightpar:
      If Typename(pppp.GroupRef) = "mHandler" Then
      
-                If IsExp(bstack, a$, p) Then
+                If IsExp(bstack, a$, p, , True) Then
                 
                 
                 If pppp.GroupRef.t1 = 2 Then ' OK for Buffer
@@ -7423,7 +7222,8 @@ contlabel:
                     Else
                         If Typename(.ValueObj) = "Group" Then
                             w2 = -.index - 100
-                            GoTo contgroup00
+                           ' GoTo contgroup00
+                            GoTo contgroup
                         Else
                             r = rValue(bstack, .ValueObj)
                             If FastSymbol(a$, "#") Then
@@ -7456,9 +7256,9 @@ contlabel:
 conthere102030:
         Set userGroup = pppp.GroupRef
         If Len(v$) > Len(userGroup.GroupName) Then
-            s1$ = Left$(v$, Len(v$) - 1) + "." + ChrW(&H1FFF) + ";()"
+            s1$ = Left$(v$, Len(v$) - 1) + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
         Else
-            s1$ = userGroup.GroupName + ChrW(&H1FFF) + ";()"
+            s1$ = userGroup.GroupName + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
         End If
         If GetSub(s1$, v1&) Then
             Set nbstack = New basetask
@@ -7575,6 +7375,14 @@ skiperror:
          If FindNameForGroup(bstack, v$) Then
         UnknownMethod1 a$, v$
  Else
+ If Len(v$) > 5 Then
+If Left$(v$, 5) = "THIS." Or Left$(v$, 5) = "¡’‘œ." Then
+v$ = Mid$(v$, 5)
+v1& = IsLabel(bstack, (v$), v$)
+s1$ = vbNullString
+If v$ <> "" Then IsNumberNew = True: GoTo contthis1
+End If
+End If
     UnknownFunction1 a$, v$
 
 End If
@@ -8431,26 +8239,48 @@ cont123:
     Else
     rrr$ = myUcase(r$, gr)
     End If
-   If dot& Then
-   nocommand = True
-                           If r$ <> "" Then
-     
-                        rr& = bstack.GetDotNew(rrr$, dot&) * rr&
-                        nocommand = rr&
-                           Else
-                          If dot& > 1 Then
-                          rrr$ = String$(dot&, ".") + rrr$: If rr& = 0 Then rr& = 1
-                          Else
-                          '' PUT THE DOT BACK
-                          If dot& = 1 Then a$ = "." + a$
-                          End If
-                          
-                          End If
-    
-    
-   End If
-   If StrPointer Then
-   If Abs(rr&) = 3 Then
+    If dot& Then
+havedot:
+        nocommand = True
+            If r$ <> "" Then
+                rr& = bstack.GetDotNew(rrr$, dot&) * rr&
+                nocommand = rr&
+            Else
+                If dot& > 1 Then
+                    rrr$ = String$(dot&, ".") + rrr$: If rr& = 0 Then rr& = 1
+                Else
+                    '' PUT THE DOT BACK
+                    If dot& = 1 Then a$ = "." + a$
+                End If
+            End If
+    ElseIf Len(rrr$) > 5 Then
+        If Left$(rrr$, 1) = "¡" Then
+        If Left$(rrr$, 5) = "¡’‘œ." Then
+        
+        
+        
+        If Len(bstack.UseGroupname) > 0 Then
+        rrr$ = bstack.UseGroupname + Mid$(rrr$, 6)
+        Else
+        rrr$ = Mid$(rrr$, 6)
+        dot& = 1
+        GoTo havedot
+        End If
+        End If
+        ElseIf Left$(rrr$, 1) = "T" Then
+        If Left$(rrr$, 5) = "THIS." Then
+          If Len(bstack.UseGroupname) > 0 Then
+        rrr$ = bstack.UseGroupname + Mid$(rrr$, 6)
+        Else
+        rrr$ = Mid$(rrr$, 6)
+        dot& = 1
+        GoTo havedot
+        End If
+        End If
+        End If
+    End If
+    If StrPointer Then
+    If Abs(rr&) = 3 Then
    cc = LastErNum1
     If IsStr1(bstack, (rrr$), rrr$) Then
         fixlen = True
@@ -10445,9 +10275,9 @@ enteragain:
                     GoTo groupstrvalue
                     Else
                         If Len(q$) > Len(pppp.GroupRef.GroupName) Then
-                            q1$ = Left$(q$, Len(q$) - 1) + "." + ChrW(&H1FFF) + ";()"
+                            q1$ = Left$(q$, Len(q$) - 1) + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
                         Else
-                            q1$ = pppp.GroupRef.GroupName + ChrW(&H1FFF) + ";()"
+                            q1$ = pppp.GroupRef.GroupName + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
                         End If
                     End If
                         q$ = BlockParam(a$)
@@ -11033,7 +10863,7 @@ there12001:
                              If FindNameForGroup(bstackstr, q$) Then
                              MyErMacroStr a$, "Unknown property  " & q$, "¢„Ì˘ÛÙÁ È‰È¸ÙÁÙ· " & q$
                              Else
-                                'MyErMacroStr A$, "Unknown variable " & q$, "¢„Ì˘ÛÙÁ ÏÂÙ·‚ÎÁÙﬁ " & q$
+
                             UnknownVariable1 a$, q$
                             End If
                     End If
@@ -13850,7 +13680,7 @@ contreadprop:
 skiperrorStr:
             If Right$(q1$, 1) = ")" Then
             If here$ Like "*." + q1$ Then
-            subHash.ItemCreator q1$, bstackstr.OriginalCode, True
+            subHash.ItemCreatorNoSwap q1$, bstackstr.OriginalCode, True
             
  GoTo contStrFun
         ElseIf q1$ = "LAMBDA$()" Then
@@ -13864,7 +13694,7 @@ skiperrorStr:
             w1& = bstackstr.OriginalCode
            ElseIf Not GetSub(q1$, w1&) Then
                 If here$ Like "*." + q1$ Then
-                subHash.ItemCreator q1$, bstackstr.OriginalCode, True
+                subHash.ItemCreatorNoSwap q1$, bstackstr.OriginalCode, True
                 Else
                 GoTo skiperrorStr
                 End If
@@ -13882,7 +13712,7 @@ skiperrorStr:
             w1& = bstackstr.OriginalCode
            ElseIf Not GetSub(q1$, w1&) Then
                     If here$ Like "*." + q1$ Then
-                    subHash.ItemCreator q1$, bstackstr.OriginalCode, True
+                    subHash.ItemCreatorNoSwap q1$, bstackstr.OriginalCode, True
                     Else
                     GoTo skiperrorStr
                     End If
@@ -16286,7 +16116,7 @@ contdo:
                                 ss$ = ec$
                                 Execute = 1
                                 bstack.addlen = y1
-                                Call executeblock(Execute, bstack, ss$, once, ok, , True)
+                                Call executeblock(Execute, bstack, ss$, once, ok, , True, True)
                                 bstack.addlen = x1
                                 
                                 If Execute = 0 Then
@@ -16301,6 +16131,10 @@ contdo:
                                         SwapStrings sw$, here$
                                         b$ = "BREAK": Exit Function
                                     End If
+                                ElseIf Execute = 1 Then
+                                If ok Then once = True: b$ = vbNullString: Exit Function
+                                ElseIf Execute = 3 Then
+                                ok = False
                                 End If
                                 If ok Or MOUT Then Exit Do
                             Loop
@@ -17522,16 +17356,15 @@ contif2:
                                         IFCTRL = 0
                                     End If
                                 End If
-                                If ok Then
-                                Exit Function
-                                End If
+                                If ok Then once = True: b$ = vbNullString: Exit Function
+                                
                                 
                                 
                             ElseIf Execute = 2 Then
                                 If ok And Len(ss$) = 0 Then b$ = "BREAK" Else b$ = ss$
                                 once = False
                                 Exit Function
-                            ElseIf Execute = 6 Then
+                            ElseIf Execute = 6 Or Execute = 3 Then
                                     GoTo ContRestart
                             ElseIf Execute = 5 Then
                             loopthis = True
@@ -22087,16 +21920,12 @@ If Len(here$) > 0 Then
                     GetSub2 = subHash.Find(bstack.FuncRec, i&)
                     If GetSub2 Then nm$ = bstack.FuncRec
                 Else
-                ' If SecureNames Then
-                    nm$ = sbf(i&).goodname
-                 '   Else
-                    'nm$ = StripRVAL(here$) + "." + nm$
-                 '  End If
+                     nm$ = sbf(i&).goodname
+
                     GetSub2 = True
                 End If
         End If
    ElseIf Right$(here$, 1) = "]" Then
-   'GetSub2 = subHash.Find(StripRVAL(here$) + "." + nm$, i&)
    GetSub2 = subHash.Find(here$ + "." + nm$, i&)
     End If
 End If
@@ -25255,7 +25084,7 @@ contthere22:
 If ThisGroup.HasStrValue Then
 F$ = ChrW(&H1FFF) + "$"
 Else
-F$ = ChrW(&H1FFF) + ";"
+F$ = ChrW(&H1FFF) + ChrW(&H1FFD)
 End If
 x1 = 1
 ThisGroup.HasValue = True
@@ -28275,7 +28104,7 @@ cont1010:
                         Dim strX1 As String
                         If MyFunction(-2 * (&H1FFF = AscW(ss$)), bstack, sss$, 1, True, MakeNew) Then '' >6 len for function
                         x1 = bstack.IndexSub
-                        If FastSymbol(sss$, ";") Then
+                        If FastSymbol(sss$, ChrW(&H1FFD)) Then
                             sbf(x1).locked = True
                             strX1 = " " + Str$(-x1)
                         Else
@@ -28313,7 +28142,7 @@ cont1010:
                        
                          x1 = bstack.IndexSub
                          
-                        If FastSymbol(sss$, ";") Then
+                        If FastSymbol(sss$, ChrW(&H1FFD)) Then
                             sbf(x1).locked = True
                             strX1 = " " + Str$(-x1)
                         Else
@@ -28601,7 +28430,7 @@ cont1010:
                         End If
                         x1 = bstack.IndexSub
                             sbf(x1).Changed = True
-                         If FastSymbol(sss$, ";") Then
+                         If FastSymbol(sss$, ChrW(&H1FFD)) Then
                             sbf(x1).locked = True
                             strX1 = " " + Str$(-x1)
                         Else
@@ -28625,7 +28454,7 @@ cont1010:
                         If MyModule(bstack, sss$, 1, True, MakeNew) Then
                          x1 = bstack.IndexSub
                          sbf(x1).Changed = True
-                        If FastSymbol(sss$, ";") Then
+                        If FastSymbol(sss$, ChrW(&H1FFD)) Then
                             sbf(x1).locked = True
                             strX1 = " " + Str$(-x1)
                         Else
@@ -28711,13 +28540,13 @@ End If
 final2 = final < 0
 If Right$(k$(0), 1) = ")" Then
 If final2 Then
-F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "};" + F$
+F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "}" + ChrW(&H1FFD) + F$
 Else
 F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "}" + F$
 End If
 Else
 If final2 Then
-F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(final)).sb + qq$ + "};" + F$
+F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(final)).sb + qq$ + "}" + ChrW(&H1FFD) + F$
 Else
 F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(final)).sb + qq$ + "}" + F$
 End If
@@ -32331,7 +32160,7 @@ ALFA12:
         End If
         Exec = oldexec ''1
         If kolpo And monce And Exec = 1 Then
-            b$ = bb$
+             SwapStrings b$, bb$
             once = True
             Exit Function
         ElseIf kolpo And NocharsInLine(bb$) Then
@@ -32409,7 +32238,7 @@ from123:
                     Exec = 1
                     i = Len(ec$) - CLng(p) + 1
                     PopStage bstack
-                    If loopthis Or stepbystep Then
+                    If loopthis Or stepbystep Or x2 = 2 Then
                         bb$ = Mid$(ec$, i)
                         GoTo fromfirst0
                     Else
@@ -37492,9 +37321,8 @@ checkconstant:
                     Else
                         If TypeOf var(i) Is Group Then
                             If Fast2Varl(rest$, "œÃ¡ƒ¡", 5, "GROUP", 5, 5, F) Then
-                                If var(i).IamApointer And Not Fast2Varl(rest$, "ƒ≈… ‘«”", 7, "POINTER", 7, 7, F) Then
-                                        MyRead = False: MissType: Exit Function
-                                End If
+                            ElseIf Fast2Varl(rest$, "ƒ≈… ‘«”", 7, "POINTER", 7, 7, F) Then
+                                     If Not var(i).IamApointer Then MyRead = False: MissType: Exit Function
                             Else
                                     MyRead = False: MissType: Exit Function
                             
@@ -41299,7 +41127,8 @@ operators:
                 If par Then
                 x1 = ModuleSub(what$, "")
                 GoTo jump1
-                        ElseIf here$ = vbNullString And GetSub2(bstack, what$, x1) And Not MakeNew Then
+                
+                        ElseIf here$ = vbNullString And subHash.Find(what$, x1) And Not MakeNew Then
                         
 jump1:
                                 If x1 >= lckfrm And lckfrm <> 0 Then   ' when we load a scrabled program..we have locked functions/modules
@@ -49156,7 +48985,7 @@ End If
 End Function
 Function GetName(ByVal part$) As String
 again:
-If InStr(part$, ChrW(&H1FFF)) > 0 Then
+If InStrRev(part$, ChrW(&H1FFF)) > 0 Then
 If InStr(part$, ".") > 0 Then
     part$ = Mid$(part$, InStr(part$, ".") + 1)
     GoTo again

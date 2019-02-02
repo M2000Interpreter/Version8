@@ -34,14 +34,14 @@ glistNN.VerticalCenterText = True
 glistNN.StickBar = True ' try with false - or hold shift to engage false
 glistNN.NoFreeMoveUpDown = True
 If Not Textbox Is Nothing Then
-Textbox.Prompt = ChrW(&H25BC) + " "
+Textbox.Prompt = ChrW$(&H25BC) + " "
 End If
 End Property
 Public Property Get ListText()
 ListText = glistN.ListValue
 End Property
 Public Property Let Label(a$)
-Textbox.Prompt = a$ + " " + ChrW(&H25BC) & " "
+Textbox.Prompt = a$ + " " + ChrW$(&H25BC) & " "
 Textbox.glistN.ShowMe
 End Property
 

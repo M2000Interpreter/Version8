@@ -427,7 +427,7 @@ End If
 Dim a$
     
     a$ = Left$(CurrentParagraph, Charpos)
-    If glistN.UseTab Then
+    If glistN.UseTab And (MyTrimL2NoTab(a$) = 1 Or Len(a$) = 0) Then
     i = ((Len(a$) - Len(NLtrim$(a$))))
     j = SelStart
     If ss$ <> "" Then
@@ -2771,7 +2771,7 @@ If kind = 0 Then
             pos2 = k - Len(a$) + 1
             addone pos2 - 1, 14
            If pos2 <= k Then
-            drop$ = block(a$) + Chr$(13)
+            drop$ = block(a$) + ChrW$(13)
             pos1 = Len(drop$) + 1
            ColorizeInnerStatements drop$, k, pos2, localfeedthis
               a$ = Mid$(a$, pos1)
@@ -3607,13 +3607,13 @@ mDoc.ColorEvent = Not NoColor
 mDoc.textDoc = RHS
 all = mDoc.DocLines
 BlockStartPara = 0
-BlockStartPos = 0
+BlockStartPos = 1
 BlockStartLine = 0
 BlockTopline = 0
 BlockStartCursor = 0
 BlockEndCursor = 0
 BlockEndPara = 0
-BlockEndPos = 0
+BlockEndPos = 1
 BlockEndline = 0
 BlockBottomline = 0
 ClearRedo
@@ -3637,13 +3637,13 @@ mDoc.ColorEvent = Not NoColor
 mDoc.textDoc2 = RHS
 all = mDoc.DocLines
 BlockStartPara = 0
-BlockStartPos = 0
+BlockStartPos = 1
 BlockStartLine = 0
 BlockTopline = 0
 BlockStartCursor = 0
 BlockEndCursor = 0
 BlockEndPara = 0
-BlockEndPos = 0
+BlockEndPos = 1
 BlockEndline = 0
 BlockBottomline = 0
 ClearRedo
@@ -4133,7 +4133,7 @@ undopara = -1
 End Sub
 Public Function CurrentParagraph() As String
 'If showparagraphWork And showparagraph Then
-'CurrentParagraph = Replace(Replace(mdoc.TextParagraph(mdoc.MarkParagraphID), " ", ChrW(&HB7)), ChrW(&H2007), ChrW(&H2423))
+'CurrentParagraph = Replace(Replace(mdoc.TextParagraph(mdoc.MarkParagraphID), " ", ChrW$(&HB7)), ChrW$(&H2007), ChrW$(&H2423))
 'Else
 CurrentParagraph = mDoc.TextParagraph(mDoc.MarkParagraphID)
 'End If
@@ -4141,7 +4141,7 @@ End Function
 Public Function NextParagraph() As String
 Dim dummy As Long
 If showparagraphWork And showparagraph Then
-NextParagraph = Replace(Replace(mDoc.NextTextParagraph(mDoc.MarkParagraphID, dummy), " ", ChrW(&HB7)), ChrW(&H2007), ChrW(&H2423))
+NextParagraph = Replace(Replace(mDoc.NextTextParagraph(mDoc.MarkParagraphID, dummy), " ", ChrW$(&HB7)), ChrW$(&H2007), ChrW$(&H2423))
 Else
 NextParagraph = mDoc.NextTextParagraph(mDoc.MarkParagraphID, dummy)
 End If
@@ -4159,12 +4159,8 @@ d$ = NextParagraph: If d$ <> "" Then If IsNumberLabel(d$, e$) Then skip = True
 If Not skip Then c$ = Trim$(c$)
 If e$ <> "" Then If val(e$) > val(c$) + 10 Then skip = False
 If (val(c$) Mod 10 = 0) And Not skip Then
-tr$ = String$(Len(Trim$(c$)), "0")
-If glistN.UseTab Then
-a$ = Format((val(c$) + 10), tr$) + vbTab
-Else
-a$ = Format((val(c$) + 10), tr$) + space$(Len(CurrentParagraph) - Len(c$) - Len(NLtrim$(b$)))
-End If
+tr$ = String$(Len(NLTrim2(c$)), "0")
+a$ = Format((val(c$) + 10), tr$) + Mid$(CurrentParagraph, 1, MyTrimL(CurrentParagraph) - 1) + Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph), MyTrimL(Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph))) - 1)
 Else
 If e$ <> "" And Trim$(Str((val(c$) + 1))) = Trim$(e$) Then
 maxw = glistN.UserControlTextWidth(c$)
@@ -4175,16 +4171,13 @@ Wend
 c$ = vbNullString
 
 Else
-tr$ = String$(Len(Trim$(c$)), "0")
-If glistN.UseTab Then
-a$ = Format((val(c$) + 1), tr$) + vbTab
-Else
-a$ = Format((val(c$) + 1), tr$) + space$(Len(CurrentParagraph) - Len(Trim$(c$)) - Len(NLtrim$(b$)))
-End If
+tr$ = String$(Len(NLTrim2(c$)), "0")
+a$ = Format((val(c$) + 1), tr$) + Mid$(CurrentParagraph, 1, MyTrimL(CurrentParagraph) - 1) + Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph), MyTrimL(Mid$(CurrentParagraph, Len(c$) + MyTrimL(CurrentParagraph))) - 1)
+
 End If
 End If
 Else
-If glistN.UseTab And Not Left$(CurrentParagraph, 1) = " " Then
+If glistN.UseTab And MyTrimL2NoTab(CurrentParagraph) = 1 Then
 a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbTab)
 Else
 a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
@@ -4192,7 +4185,7 @@ End If
 If Len(a$) > Charpos Then a$ = vbNullString
 End If
 Else
-If glistN.UseTab And Not Left$(CurrentParagraph, 1) = " " Then
+If glistN.UseTab And MyTrimL2NoTab(CurrentParagraph) = 1 Then
 a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbTab)
 Else
 a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
@@ -4682,7 +4675,7 @@ If word$ <> "" Then
             b$ = b$ & part$
             End If
             part$ = "o"
-        Case " ", ChrW(160)
+        Case " ", ChrW$(160)
           If word$ <> "" Then
   Select Case myUcase(word$, True)
   Case "THEN", "ELSE", "тоте"

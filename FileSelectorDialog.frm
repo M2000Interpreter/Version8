@@ -267,7 +267,7 @@ With gList1
 .additemFast "or double click the file list"
 .menuEnabled(21) = False
 .AddSep
-.additemFast "George Karras 2014-2017"
+.additemFast "George Karras 2014-2019"
 .menuEnabled(23) = False
 
 oldLeftMarginPixels = .LeftMarginPixels + 10
@@ -331,7 +331,7 @@ End Sub
 
 
 
-Private Sub Form_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 If Button = 1 Then
 
 If lastfactor = 0 Then lastfactor = 1
@@ -356,7 +356,7 @@ End If
 End If
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False
@@ -427,7 +427,7 @@ End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
 If dr Then Me.mousepointer = 0
 dr = False
 End Sub
@@ -550,7 +550,7 @@ gList1.ShowMe2
 End If
 End Sub
 
-Private Sub gList1_KeyDown(KeyCode As Integer, Shift As Integer)
+Private Sub gList1_KeyDown(KeyCode As Integer, shift As Integer)
 If KeyCode = vbKeyEscape Then
 mySelector.AbordAll
 CancelDialog = True
@@ -643,7 +643,7 @@ End Sub
 
 
 
-Private Sub glist3_KeyDown(KeyCode As Integer, Shift As Integer)
+Private Sub glist3_KeyDown(KeyCode As Integer, shift As Integer)
 If Not mySelector.Mydir.isReadOnly(mySelector.Mydir.path) Then
 If Not gList3.EditFlag Then
 
@@ -652,7 +652,7 @@ If NewFolder Then
 If Not (gList1.ListIndex = -1) Then
 gList1.ListIndex = -1
 gList1.ShowMe2
-gList3.Clear
+gList3.clear
 gList3.SelStart = 1
 TEXT1 = "NewFolder"
 End If
@@ -667,7 +667,7 @@ ElseIf Not FileExist Then
 If Not (gList1.ListIndex = -1) Then
 gList1.ListIndex = -1
 gList1.ShowMe2
-gList3.Clear
+gList3.clear
 gList3.SelStart = 1
 If UserFileName <> "" Then
 TEXT1 = UserFileName
@@ -856,7 +856,7 @@ mySelector.glistN.enabled = False
 
 Set LoadApicture = LoadPicture("")
 On Error Resume Next
-Err.Clear
+Err.clear
 'If FileLen(file) > 1500000 Then Image1.refresh
     s$ = CFname(file)
     Set aPic = LoadMyPicture(GetDosPath(s$), True, gList2.backcolor)
@@ -875,7 +875,7 @@ mySelector.glistN.enabled = True
 ihave = False
 End If
 End If
-Err.Clear
+Err.clear
 End Sub
 
 

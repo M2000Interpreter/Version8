@@ -3343,6 +3343,23 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimRStr = l + 2
 End Function
+Public Function MyTrimL2NoTab(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimL2NoTab = 0: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     MyTrimL2NoTab = (i - p2) \ 2 + 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimL2NoTab = 0
+End Function
 Sub test3()
 Dim a$, i As Long, j As Long
 a$ = "1234567@@@10"
@@ -3992,8 +4009,8 @@ End Function
 Public Function NLtrim$(a$)
 If Len(a$) > 0 Then NLtrim$ = Mid$(a$, MyTrimL(a$))
 End Function
-Public Function NLtrim2$(a$)
-If Len(a$) > 0 Then NLtrim2$ = Mid$(a$, MyTrimL2(a$))
+Public Function NLTrim2$(a$)
+If Len(a$) > 0 Then NLTrim2$ = Mid$(a$, MyTrimL2(a$))
 End Function
 Public Function StringId(aHash As idHash, bHash As idHash, Optional ahashbackup As idHash, Optional bhashbackup As idHash) As Boolean
 Dim myid(), i As Long

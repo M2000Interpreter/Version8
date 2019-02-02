@@ -1987,7 +1987,7 @@ INTD = TextWidth(dd, space$(MyTrimL3Len(wh$)))
 dd.CurrentX = dd.CurrentX + INTD
 
 wi = wi - INTD
-wh$ = NLtrim2$(wh$)
+wh$ = NLTrim2$(wh$)
 INTD = wi + dd.CurrentX
 
 whNoSpace$ = ReplaceStr(" ", "", wh$)
@@ -2049,7 +2049,7 @@ MinDispl = DXP * MinDispl
 If whr = 3 Or whr = 0 Then INTD = TextWidth(dd, space$(MyTrimL3Len(wh$)))
 dd.CurrentX = dd.CurrentX + INTD
 wi = wi - INTD
-wh$ = NLtrim2$(wh$)
+wh$ = NLTrim2$(wh$)
 INTD = wi + dd.CurrentX
 whNoSpace$ = ReplaceStr(" ", "", wh$)
 If whr = 2 Then
@@ -10889,7 +10889,13 @@ Sub NeoPrinthEX(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = RevisionPrint(ObjFromPtr(basestackLP), rest$, 1, Lang)
 End Sub
 Sub NeoRem(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+    Dim i As Long
+    If FastSymbol(rest$, "{") Then
+    i = blockLen(rest$)
+    If i > 0 Then rest$ = Mid$(rest$, i + 1) Else rest$ = vbNullString
+    Else
     SetNextLineNL rest$
+    End If
     resp = True
 End Sub
 Sub NeoPush(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
@@ -14886,7 +14892,7 @@ FastSymbol rest$, ","
 If s$ <> "" Then
 
 If FastSymbol(rest$, "+") Then pa$ = vbNullString Else pa$ = "new"
-If FastSymbol(rest$, "{") Then frm$ = NLtrim2$(blockString(rest$, 125))
+If FastSymbol(rest$, "{") Then frm$ = NLTrim2$(blockString(rest$, 125))
 If frm$ <> "" Then
 If isHtml Then
 If ExtractType(s$) = vbNullString Then s$ = s$ & ".html"
@@ -19698,4 +19704,209 @@ ExistNum = False
 
     
 End Function
+Function MySwap(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp1 As mArray
+    F = Abs(IsLabel(bstack, rest$, s$))
+    MySwap = True
+    If F = 1 Or F = 4 Then col = 1
+    If F = 5 Or F = 7 Then col = 2
+    If F = 0 Then MissingnumVar:  Exit Function
+    If (F = 3 Or F = 6) And col > 0 Then SyntaxError: MySwap = False:    Exit Function
+    If col = 1 Then
+        If GetVar(bstack, s$, F) Then
+                If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
+                i = Abs(IsLabel(bstack, rest$, ss$))
+              If i = 1 Or i = 4 Then
+                If GetVar(bstack, ss$, x1) Then
+         If MyIsObject(var(F)) Then
+            If TypeOf var(F) Is Constant Then
+            CantAssignValue
+            MySwap = False: Exit Function
+            End If
+        End If
+        If MyIsObject(var(x1)) Then
+            If TypeOf var(x1) Is Constant Then
+            CantAssignValue
+            MySwap = False: Exit Function
+            End If
+        End If
+                    SwapVariant var(F), var(x1)
+                    
+                    
+                Exit Function
+                Else
+                    Nosuchvariable ss$
+                    MySwap = False
+                    Exit Function
+                End If
+            ElseIf i = 5 Or i = 7 Then
+                If neoGetArray(bstack, ss$, pppp) Then
+                If Not pppp.Arr Then NotArray: Exit Function
+                    If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$, True) Then Exit Function
+                        If MyIsObject(var(F)) Then
+                            If TypeOf var(F) Is Constant Then
+                            CantAssignValue
+                            MySwap = False: Exit Function
+                            End If
+                        End If
+                    SwapVariant2 var(F), pppp, x1
+                    
+                    
+                Else
+                
+                    NoSwap ss$
+                    MySwap = False
+                    Exit Function
+                End If
+            Else
+                MissingnumVar
+                MySwap = False
+                Exit Function
+            End If
+        Else
+            Nosuchvariable s$
+            
+            Exit Function
+        End If
+    ElseIf col = 2 Then
+        If neoGetArray(bstack, s$, pppp) Then
+        If Not pppp.Arr Then NotArray: Exit Function
+        If Not NeoGetArrayItem(pppp, bstack, s$, F, rest$) Then Exit Function
+            If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
+                i = Abs(IsLabel(bstack, rest$, ss$))
+                  
+            If i = 1 Or i = 4 Then
+                    If GetVar(bstack, ss$, x1) Then
+                    If pppp.IHaveClass Then
+                            NoSwap ""
+                    Else
+                             If MyIsObject(var(x1)) Then
+                                If TypeOf var(x1) Is Constant Then
+                                CantAssignValue
+                                MySwap = False: Exit Function
+                                End If
+                            End If
+                    
+                    
+                         SwapVariant2 var(x1), pppp, F
+                     End If
+                        
+                    Else
+                        MissingnumVar
+                        MySwap = False
+                        Exit Function
+                    End If
+            ElseIf i = 5 Or i = 7 Then
+                    If neoGetArray(bstack, ss$, pppp1) Then
+                    If Not pppp1.Arr Then NotArray: Exit Function
+                        If Not NeoGetArrayItem(pppp1, bstack, ss$, x1, rest$) Then Exit Function
+                   If pppp.IHaveClass Xor Not pppp1.IHaveClass Then
+                            
+                        SwapVariant3 pppp, F, pppp1, x1
+                        If pppp.IHaveClass Then
+                            Set pppp.item(F).LinkRef = pppp1.GroupRef
+                            Set pppp1.item(x1).LinkRef = pppp.GroupRef
+                            End If
+                        Else
+                        NoSwap ""
+                        Exit Function
+                        End If
+                        
+                    Else
+                        MissingnumVar
+                        
+                        Exit Function
+                    End If
+            Else
+                MissingnumVar
+                
+                Exit Function
+            End If
+        Else
+            MissingnumVar
+            
+            Exit Function
+        End If
+    ElseIf F = 3 Then
+            If GetVar(bstack, s$, F) Then
+            If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
+                i = Abs(IsLabel(bstack, rest$, ss$))
+                 If i = 6 Then
+                    If Not neoGetArray(bstack, ss$, pppp) Then MissingStrVar:  Exit Function
+                    If Not pppp.Arr Then NotArray: Exit Function
+                    If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$) Then Exit Function
+                     If MyIsObject(var(F)) Then
+                        If TypeOf var(F) Is Constant Then
+                        CantAssignValue
+                        MySwap = False: Exit Function
+                        End If
+                    End If
+                    SwapVariant2 var(F), pppp, x1
+
+                ElseIf i = 3 Then
+                    If Not GetVar(bstack, ss$, x1) Then: Exit Function
+                     If MyIsObject(var(F)) Then
+                        If TypeOf var(F) Is Constant Then
+                        CantAssignValue
+                        MySwap = False: Exit Function
+                        End If
+                    End If
+                   SwapVariant var(F), var(x1)
+                Else
+                MissFuncParameterStringVar
+                MySwap = False
+                End If
+                
+                
+            Else
+                    
+                    MissFuncParameterStringVar
+                    MySwap = False
+            End If
+    ElseIf F = 6 Then
+            If neoGetArray(bstack, s$, pppp) Then
+            If Not pppp.Arr Then NotArray: Exit Function
+                If Not NeoGetArrayItem(pppp, bstack, s$, x1, rest$) Then Exit Function
+                If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
+                i = Abs(IsLabel(bstack, rest$, ss$))
+     
+                If i = 6 Then
+                    If Not neoGetArray(bstack, ss$, pppp1) Then MissingStrVar:  Exit Function
+                    If Not pppp.Arr Then NotArray: Exit Function
+                    If Not NeoGetArrayItem(pppp1, bstack, ss$, i, rest$) Then Exit Function
+
+                   SwapVariant3 pppp, x1, pppp1, i
+ 
+                ElseIf i = 3 Then
+                    If Not GetVar(bstack, ss$, i) Then: Exit Function
+                    If MyIsObject(var(i)) Then
+                        If TypeOf var(i) Is Constant Then
+                        CantAssignValue
+                        MySwap = False: Exit Function
+                        End If
+                    End If
+
+
+                  SwapVariant2 var(i), pppp, x1
+                    Else
+                MissFuncParameterStringVar
+                MySwap = False
+                End If
+                
+                
+            Else
+                
+                MissPar
+                MySwap = False
+                
+            End If
+    Else
+                 
+                MissPar
+                MySwap = False
+    End If
+    Exit Function
+
+End Function
+
 
