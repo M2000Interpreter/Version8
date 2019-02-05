@@ -2524,6 +2524,11 @@ GoTo newjump
  
   a$ = Mid$(a$, pos1)
 End If
+If MaybeIsSymbol(a$, ":{") Then
+   
+    onetime = True
+    GoTo again
+End If
 If InStr(drop$, " ") = 0 Or kind >= 0 Then
 GoTo CheckThis
 
@@ -2759,23 +2764,37 @@ End If
 If kind = 0 Then drop$ = "$(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 If kind = 0 Then drop$ = "~(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 If kind = 0 Then
-    If MaybeIsSymbol(a$, "-", ">") Then
+  If FastSymbol(a$, "->", , 2) Then
+    pos2 = k - Len(a$) - 1
     addone pos2, 11
-    FastSymbol a$, "->", , 2
+        pos2 = pos2 + 2
+        a$ = LTrim$(a$)
         pos2 = k - Len(a$) + 1
-        If MaybeIsSymbol(a$, "{") Then
-            localfeedthis = 0
+        addone pos2, 14
+       ' pos2 = k - Len(a$) + 1
+        If FastSymbol(a$, "{") Then
+        a$ = LTrim$(a$)
+        pos2 = k - Len(a$) + 2
+        
+localfeedthis = 0
             If col((UBound(col()) \ 2) * 2) <> 14 Then addone pos2, 14
                  localfeedthis = 0
-            FastSymbol a$, "{"
-            pos2 = k - Len(a$) + 1
+            '
+           pos2 = k - Len(a$) + 1
             addone pos2 - 1, 14
            If pos2 <= k Then
-            drop$ = block(a$) + ChrW$(13)
-            pos1 = Len(drop$) + 1
-           ColorizeInnerStatements drop$, k, pos2, localfeedthis
-              a$ = Mid$(a$, pos1)
+           If FastSymbol(a$, "{") Then
+            drop$ = block(a$)
+            If Len(drop$) > 0 Then
+           ColorizeInnerStatements drop$, k - Len(a$), pos2, localfeedthis
+           If Len(a$) > 0 Then ColorizeInnerStatements a$, k, pos2, localfeedthis
               drop$ = vbNullString
+              Else
+              Exit Sub
+              End If
+              Else
+              ColorizeInnerStatements a$, k, pos2, localfeedthis
+              End If
            End If
             kind = 0
             drop$ = vbNullString
@@ -2871,6 +2890,7 @@ ElseIf MaybeIsSymbol(a$, ")") Then
   Else
   addone pos2, 14
   End If
+  
   FastSymbol a$, ")"
     pos2 = k - Len(a$) + 1
   End If
@@ -3416,6 +3436,8 @@ While Mid$(a$, i, 1) = " "
     i = i + 1
 Wend
 If i > Len(a$) Then Exit Function
+If i > 1 Then a$ = Mid$(a$, i): i = 1
+
 ok = InStr(c$, Mid$(a$, i, 1)) > 0
 If tail$ <> "" And ok Then
 ok = Mid$(a$, i + 1, Len(tail$)) Like tail$
@@ -4954,3 +4976,24 @@ blockStringAhead = True
 
 End Function
 
+Function FastSymbol(a$, c$, Optional mis As Boolean = False, Optional cl As Long = 1) As Boolean
+Dim i As Long, j As Long
+'If Len(c$) <> cl Then Stop  ; only for check
+j = Len(a$)
+If j = 0 Then Exit Function
+i = MyTrimL(a$)
+If i > j Then Exit Function  ' this is not good
+If j - i < cl - 1 Then
+If mis Then MyEr "missing " & c$, "λείπει " & c$
+Exit Function
+End If
+'If c$ = Mid$(a$, i, cl) Then
+If InStr(c$, Mid$(a$, i, cl)) > 0 Then
+'a$ = Mid$(a$, MyTrimLi(a$, i + cl))
+a$ = Mid$(a$, cl + 1)
+'Mid$(a$, i, cl) = space$(cl)
+FastSymbol = True
+ElseIf mis Then
+MyEr "missing " & c$, "λείπει " & c$
+End If
+End Function

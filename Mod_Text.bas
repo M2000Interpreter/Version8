@@ -21,7 +21,7 @@ Public rndbase As rndvars, GDILines As Boolean
 Public LastUse As Long, cdecimaldot$
 Private funcno As Long, ua As Double, UB As Double
 Private simplestack1 As rndvars
-Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteW" (ByVal hWND As Long, ByVal lpszOp As Long, ByVal lpszFile As Long, ByVal lpszParams As Long, ByVal LpszDir As String, ByVal FsShowCmd As Long) As Long
+Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteW" (ByVal hWnd As Long, ByVal lpszOp As Long, ByVal lpszFile As Long, ByVal lpszParams As Long, ByVal LpszDir As String, ByVal FsShowCmd As Long) As Long
 Private Declare Function ShowCursor Lib "user32" (ByVal bShow As Long) As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
@@ -40,7 +40,7 @@ Private Declare Function CompareString Lib "KERNEL32" Alias "CompareStringW" (By
 Private Declare Function CallWindowProc _
  Lib "user32.dll" Alias "CallWindowProcW" ( _
  ByVal lpPrevWndFunc As Long, _
- ByVal hWND As Long, _
+ ByVal hWnd As Long, _
  ByVal Msg As Long, _
  ByVal wParam As Long, _
  ByVal lParam As Long) As Long
@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 10
+Global Const Revision = 11
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -255,11 +255,11 @@ Private Declare Function SHGetPathFromIDList Lib "shell32.dll" Alias "SHGetPathF
 Public Declare Sub Sleep Lib "KERNEL32" (ByVal dwMilliseconds As Long)
 
 Public Declare Function SetTimer Lib "user32" _
-       (ByVal hWND As Long, ByVal nIDEvent As Long, _
+       (ByVal hWnd As Long, ByVal nIDEvent As Long, _
         ByVal uElapse As Long, ByVal lpTimerFunc As Long) As Long
 
 Public Declare Sub KillTimer Lib "user32" _
-       (ByVal hWND As Long, ByVal nIDEvent As Long)
+       (ByVal hWnd As Long, ByVal nIDEvent As Long)
 'Public Type tagInitCommonControlsEx
  ' lngSize As Long
   ' lngICC As Long
@@ -966,9 +966,9 @@ End Sub
 Sub scrMove00(Scr As Object, Optional ByVal w As Variant, Optional ByVal h As Variant)
 If TypeOf Scr Is Form Then
 If IsMissing(w) And IsMissing(h) Then
-Scr.Move ScrInfo(Console).Left, ScrInfo(Console).Top
+Scr.Move ScrInfo(Console).Left, ScrInfo(Console).top
 Else
-Scr.Move ScrInfo(Console).Left, ScrInfo(Console).Top, w, h
+Scr.Move ScrInfo(Console).Left, ScrInfo(Console).top, w, h
 End If
 Else
  If IsMissing(w) And IsMissing(h) Then
@@ -2422,9 +2422,9 @@ helpSizeDialog = 1
 Settings = "time,normal,push"
 With ScrInfo(Console)
 selectorLastX = .Height / 4 + .Left
-selectorLastY = .Width / 4 + .Top
+selectorLastY = .Width / 4 + .top
 AskLastX = .Height / 4 + .Left
-AskLastY = .Width / 4 + .Top
+AskLastY = .Width / 4 + .top
 End With
 sb2used = 0
 ReDim sbf(500) As modfun
@@ -4380,11 +4380,11 @@ Exit Function
 num88: ' "œ»œÕ«","SHOW"
     If Not Screen.ActiveForm Is Nothing Then
     If bstack.Owner Is Form1.DIS Then
-    r = SG * (Form1.hWND = Screen.ActiveForm.hWND And bstack.Owner.Visible)
+    r = SG * (Form1.hWnd = Screen.ActiveForm.hWnd And bstack.Owner.Visible)
     ElseIf Typename(bstack.Owner) = "PictureBox" Then
     r = SG * bstack.Owner.Visible
     Else
-    r = SG * bstack.Owner.hWND = Screen.ActiveForm.hWND
+    r = SG * bstack.Owner.hWnd = Screen.ActiveForm.hWnd
     End If
     Else
     r = False
@@ -4634,7 +4634,7 @@ With bstack
 If .toprinter Then
     r = 0
 Else
-    r = SG * .Owner.Top
+    r = SG * .Owner.top
     End If
     
     End With
@@ -4648,12 +4648,12 @@ num40: ' "MOTION.XW", " …Õ«”«.◊–", "MOTION.WX", " …Õ«”«.–◊"
     IsNumberNew = True
     Exit Function
 num41: ' "MOTION.YW", " …Õ«”«.’–", "MOTION.WY", " …Õ«”«.–’"
-    r = SG * Form1.Top
+    r = SG * Form1.top
     
     IsNumberNew = True
     Exit Function
 num42: ' "FIELD", "–≈ƒ…œ"
-    r = SG * Result
+    r = SG * result
     
     
     IsNumberNew = True
@@ -4705,10 +4705,10 @@ If .toprinter Then
 r = Form1.PrinterDocument1.CurrentY
 ElseIf .toback Then
 'mouyb = mouy
-r = MOUSEY(Form1.Top)
+r = MOUSEY(Form1.top)
 Else
 'mouyb = mouy - di.top
-r = MOUSEY(Form1.Top + bstack.Owner.Top)
+r = MOUSEY(Form1.top + bstack.Owner.top)
 End If
 End With
        
@@ -4723,7 +4723,7 @@ num47: ' "MOUSEA.X", "ƒ≈… ‘«”¡.◊"
     Exit Function
 num48: ' "MOUSEA.Y", "ƒ≈… ‘«”¡.’"
  
-    r = SG * MOUSEY(Form1.Top)
+    r = SG * MOUSEY(Form1.top)
    
        
     IsNumberNew = True
@@ -9966,7 +9966,7 @@ rr$ = ac$
  End Function
 Function GrabFrame() As String
 Dim p As New cDIBSection
-p.CreateFromPicture hDCToPicture(GetDC(0), (AVI.Left) / DXP, (AVI.Top) / DYP, AVI.Width / DXP, AVI.Height / DYP - DYP)
+p.CreateFromPicture hDCToPicture(GetDC(0), (AVI.Left) / DXP, (AVI.top) / DYP, AVI.Width / DXP, AVI.Height / DYP - DYP)
 If p.Height > 0 Then
 
 GrabFrame = DIBtoSTR(p)
@@ -14522,7 +14522,7 @@ Set Parent = Parent.Parent
 Loop
 Set Parent = Nothing
 End Sub
-Function Execute(bstack As basetask, b$, once As Boolean, Optional linebyline As Boolean, Optional loopthis As Boolean = False, Optional noblock As Boolean = True) As Long
+Function Execute(bstack As basetask, b$, once As Boolean, Optional linebyline As Boolean, Optional loopthis As Boolean = False, Optional noblock As Boolean = True, Optional restartmodule As Boolean) As Long
 checkbreak bstack, b$, once
 Dim di As Object, nchr As Integer
 Set di = bstack.Owner
@@ -14869,7 +14869,7 @@ contTarg:
 ContScan:
                 ClearJoyAll
                 PollJoypadk
-                If GetForegroundWindow <> Form1.hWND Or Not Targets Then
+                If GetForegroundWindow <> Form1.hWnd Or Not Targets Then
                     If IsExp(bstack, b$, p, , True) Then
                     End If
                     MyDoEvents0 di
@@ -14906,7 +14906,7 @@ ContScan:
                         If IsExp(bstack, b$, p, , True) Then
                         y = Timer + p
                         x1 = Form1.lockme
-                        If x1 Then UnHook Form1.hWND
+                        If x1 Then UnHook Form1.hWnd
                             Form1.lockme = False
                             Do
                                 y1 = BLOCKkey
@@ -14923,7 +14923,7 @@ ContScan:
                                 End If
                             Loop Until NoAction Or Timer > y Or myexit(bstack) Or bstack.IamThread
                             Form1.lockme = x1
-                            If x1 And GetForegroundWindow = Form1.hWND Then Form1.hookme Form1.TEXT1.glistN
+                            If x1 And GetForegroundWindow = Form1.hWnd Then Form1.hookme Form1.TEXT1.glistN
                         Else
                         Do
                             MyDoEvents0 Form1
@@ -15023,12 +15023,17 @@ contLoop:
                 
             Case "BREAK", "ƒ…≈ œÿ≈"
 contBreak:
+            restartmodule = False
+              
                 b$ = "BREAK"
                 once = True
                 Execute = 2
                 Exit Function
             Case "CONTINUE", "”’Õ≈◊…”≈"
 ContContinue:
+ restartmodule = False
+
+
                 If Execute <> 2 Then
                     b$ = "CONTINUE"
                     once = True
@@ -15040,6 +15045,10 @@ ContContinue:
             Case "RESTART", "Œ≈ …Õ¡"
 ContRestart:
                 b$ = vbNullString
+                If restartmodule Then
+             restartmodule = False
+                loopthis = True
+                End If
                 Execute = 2
                 Exit Function
             Case "RETURN", "≈–…”‘—œ÷«"
@@ -15162,6 +15171,7 @@ exitfor:
                     once = True
                 Else
                     If Execute <> 2 Then Execute = 1 Else Execute = 3
+                   restartmodule = False
                     'PopStagePartContinue2 bstack, bstack.RetStackTotal
                     b$ = vbNullString
                     once = True
@@ -16595,7 +16605,7 @@ findEndif:
                                        TraceRestore bstack, nd&
                                 If Execute = 2 Then
                                 If Len(ss$) > 0 Then b$ = ss$: Exit Function
-                                If ok Then b$ = "BREAK": kolpo = True: Exit Function
+                                If ok Then b$ = "BREAK": once = True: Exit Function
                                 End If
                                 
                     Else
@@ -17410,7 +17420,7 @@ contif2:
                             If Not MaybeIsSymbol(b$, b123) Then GoTo contif2
                             IFCTRL = 0
                         ElseIf Execute = 2 Then
-                        If ok Then b$ = "BREAK" Else b$ = ss$
+                        If ok Then b$ = "BREAK": once = True Else b$ = ss$
                         Exit Function
                         End If
                         End If
@@ -21772,7 +21782,7 @@ If part1 <> "" Then
     End If
 TheSame = part1 = q$
 End Function
-Function StripRVAL2(s$, Result$) As Boolean
+Function StripRVAL2(s$, result$) As Boolean
 ' return s$ number as string
 ' return function name...
 '
@@ -21785,11 +21795,11 @@ i = InStrRev(s$, ".")
 If i > 1 Then s$ = Left$(s$, i - 1)
 If InStrRev(varname$, "." + s$ + " ") < 1 Then Exit Function
 s$ = Mid$(varname$, InStrRev(varname$, Chr$(1), InStrRev(varname$, "." + s$ + " ")) + 1)
-Result$ = GetStrUntil(" ", s$)
+result$ = GetStrUntil(" ", s$)
 StripRVAL2 = True
-If Not Typename(var(val(s$))) = "Group" Then StripRVAL2 = False: s$ = bb$: Result$ = vbNullString
+If Not Typename(var(val(s$))) = "Group" Then StripRVAL2 = False: s$ = bb$: result$ = vbNullString
 Else
-Result$ = GetStrUntil("[", s$)
+result$ = GetStrUntil("[", s$)
 End If
 
 End Function
@@ -22022,33 +22032,86 @@ On Error Resume Next
 If val(Left$(w$, 1)) = 0 Then w$ = w$ & ":": jmp = True
 PosLabel = Len(b$) + 1
 If Left$(b$, Len(w$)) = w$ Then
+If Not jmp Then
+
+If Mid$(b$, Len(w$) + 1, 1) Like "[0-9]" Then GoTo conthere
+    
+    End If
     i = 1
+    PosLabel = 1: Exit Function
 Else
-i = InStr(b$, Chr(10) + w$)
+conthere:
+Do
+i = InStr(i + 1, b$, Chr(10) + w$)
+If i > 0 Then
+If jmp Then Exit Do
+If Not Mid$(b$, i + Len(w$) + 1, 1) Like "[0-9]" Then Exit Do
+i = i + Len(w$)
+Else
+Exit Do
+End If
+Loop
 If i = 0 Then
 Dim w1$, w2$
 w1$ = " " & w$
 w2$ = "0" & w$
+Dim w3$
+w3$ = ChrW(9) + w$
+j = i
     Do
-    i = InStr(i + 1, b$, w1$)
-    If i = 0 Then Exit Do
-    j = Len(RTrim(Left$(b$, i)))
-    If j = 0 Then Exit Do
-    If Mid$(b$, j, 1) = Chr(10) Then Exit Do
+again00:
+    i = InStr(j + 1, b$, w3$)
+    If i = 0 Then
+    i = j
+    j = InStr(i + 1, b$, w1$)
+    
+     If j = 0 Then i = 0: Exit Do
+    i = j
+    End If
+    
+    If i < 2 Then Exit Do
+    j = MyTrimRfrom(b$, 1, i - 1)
+
+    
+    
+    If j < 2 Then Exit Do
+    If i - 1 = j Then
+    j = i + Len(w$)
+    Else
+    
+    If Mid$(b$, j - 1, 1) = Chr(10) Then
+    If Not jmp Then
+    If Not Mid$(b$, i + Len(w$) + 1, 1) Like "[0-9]" Then Exit Do
+    Else
+    Exit Do
+    End If
+    
+    End If
+    End If
+    j = j + Len(w$)
+    
     Loop
     If i = 0 Then
+    j = 0
     Do
-    i = InStr(i + 1, b$, w2$)
+    
+shiftone:
+    i = InStr(j + 1, b$, w2$)
     If i = 0 Then Exit Do
-
-    j = Len(RTrim(Left$(b$, i)))
-    If j = 0 Then Exit Do
+    If Mid$(b$, i + Len(w2$), 1) Like "[0-9]" Then j = j + 1: GoTo shiftone
+    'j = Len(RTrim(Left$(b$, i)))
+    If i <= 1 Then Exit Do
+    j = i - 1
     
     While j > 1 And Mid$(b$, j, 1) = "0"
             j = j - 1
     Wend
-    
+    If j < 2 Then Exit Do
     If Mid$(b$, j, 1) = Chr(10) Then Exit Do
+    j = MyTrimRfrom(b$, 1, j) - 1
+   
+    If Mid$(b$, j, 1) = Chr(10) Then Exit Do
+    j = i + Len(w2$)
     Loop
     End If
 End If
@@ -22066,9 +22129,10 @@ If i > 0 Then PosLabel = i + 1
 End If
 
 Else
-If i > 1 Then PosLabel = i + 1 '' Else PosLabel = 1
+If i > 1 Then PosLabel = i + 1
 End If
 End Function
+
 
 Function logical(basestack As basetask, s$, d As Variant, Optional par As Long = 0, Optional flatobject As Boolean = False, Optional ByPass As Boolean = False) As Boolean
 Dim b$, s2$, S3$ ' , OSTAC$
@@ -22936,13 +23000,13 @@ EXE$ = PP$ + EXE$
 If param <> "" Then
 'MyShell = Shell(Trim$(PP$ & EXE$ & " " & ww$ + " " + param), way)
 If Form1.Visible And way = vbNormalFocus Then
-MyShell = ShellExecute(Form1.hWND, 0, StrPtr(EXE$), StrPtr(param), StrPtr(PP$), way)
+MyShell = ShellExecute(Form1.hWnd, 0, StrPtr(EXE$), StrPtr(param), StrPtr(PP$), way)
 Else
 MyShell = ShellExecute(0, 0, StrPtr(EXE$), StrPtr(param), StrPtr(PP$), way)
 End If
 Else
 If Form1.Visible And way = vbNormalFocus Then
-MyShell = ShellExecute(Form1.hWND, 0, StrPtr(EXE$), 0, StrPtr(PP$), way)
+MyShell = ShellExecute(Form1.hWnd, 0, StrPtr(EXE$), 0, StrPtr(PP$), way)
 Else
 MyShell = ShellExecute(0, 0, StrPtr(EXE$), 0, StrPtr(PP$), way)
 End If
@@ -22966,7 +23030,7 @@ Case "@@@"
 'MyShell = Shell(RTrim$("explorer " & ww$), way)
 EXE$ = "explorer"
 If Form1.Visible Then
-MyShell = ShellExecute(Form1.hWND, 0, StrPtr(EXE$), StrPtr(ww$), 0, way)
+MyShell = ShellExecute(Form1.hWnd, 0, StrPtr(EXE$), StrPtr(ww$), 0, way)
 Else
 MyShell = ShellExecute(0, 0, StrPtr(EXE$), StrPtr(ww$), 0, way)
 End If
@@ -27026,7 +27090,7 @@ End Sub
 ''ProcMethod bstack, var(i), sS$, rest$,  LANG
 Sub ProcMethod(bstack As basetask, v(), vIndex As Long, FN$, rest$, language As Long, ok As Boolean)
 Dim var1() As Variant, s$, r As Double, l As Long, newref As Long, glob As Boolean, newvar As Boolean
-Dim vv As Object, Result As Variant, retobject As Object
+Dim vv As Object, result As Variant, retobject As Object
 Dim namarg As Long
 ok = True
 Set vv = v(vIndex)
@@ -27063,13 +27127,13 @@ Dim what$, it As Long, items As Long, y3 As Long
 If FastSymbol(rest$, "(") Then  ' we have "(par1, par2...) as result"
         RealMeth bstack, rest$, var1(), var2(), items, namarg
 If Not FastSymbol(rest$, ")", True) Then Exit Sub
-Result = CallByNameFixParamArray(vv, FN$, VbMethod, var1(), var2(), items, retobject, namarg, bstack.IamAnEvent)
+result = CallByNameFixParamArray(vv, FN$, VbMethod, var1(), var2(), items, retobject, namarg, bstack.IamAnEvent)
 ElseIf FastSymbol(rest$, ",") Then
 RealMeth bstack, rest$, var1(), var2(), items, namarg  ' if we have as result then we get an error...
- Result = CallByNameFixParamArray(vv, FN$, VbMethod, var1(), var2(), items, retobject, namarg, bstack.IamAnEvent)
+ result = CallByNameFixParamArray(vv, FN$, VbMethod, var1(), var2(), items, retobject, namarg, bstack.IamAnEvent)
 Else
 
- Result = CallByNameFixParamArray(vv, FN$, VbMethod, var1(), var2(), 0, retobject, namarg, bstack.IamAnEvent)
+ result = CallByNameFixParamArray(vv, FN$, VbMethod, var1(), var2(), 0, retobject, namarg, bstack.IamAnEvent)
 
 End If
 If Not retobject Is Nothing Then
@@ -27122,30 +27186,30 @@ Else
              Select Case Abs(IsLabel(bstack, rest$, what$))
              Case 1
                                If newvar Then
-                                    globalvar what$, Result, , glob
+                                    globalvar what$, result, , glob
                                 ElseIf GetVar(bstack, what$, it) Then
-                                    var(it) = Result
+                                    var(it) = result
                                     
                                 Else
-                                    globalvar what$, Result, , glob
+                                    globalvar what$, result, , glob
                                     
                                 End If
               Case 4
                                 If newvar Then
-                                    globalvar what$, Int(Result), , glob
+                                    globalvar what$, Int(result), , glob
                                 ElseIf GetVar(bstack, what$, it) Then
-                                    var(it) = Int(Result)
+                                    var(it) = Int(result)
                                 Else
-                                    globalvar what$, Int(Result), , glob
+                                    globalvar what$, Int(result), , glob
                                     
                                 End If
               Case 3
                                 If newvar Then
-                                    globalvar what$, Result, , glob
+                                    globalvar what$, result, , glob
                                 ElseIf GetVar(bstack, what$, it) Then
-                                    var(it) = Result
+                                    var(it) = result
                                 Else
-                                    globalvar what$, Result, , glob
+                                    globalvar what$, result, , glob
                                 End If
               End Select
             
@@ -29117,13 +29181,13 @@ where = FindFormSScreen(myform)
         If Not IsExp(bstack, rest$, y) Then procMotionW = False: Exit Function
         Else
         
-        y = myform.Top
+        y = myform.top
     End If
     If FastSymbol(rest$, ";") Then
     x = ((ScrInfo(where).Width - 1) - myform.Width) / 2 + ScrInfo(where).Left
-    y = ((ScrInfo(where).Height - 1) - myform.Height) / 2 + ScrInfo(where).Top
+    y = ((ScrInfo(where).Height - 1) - myform.Height) / 2 + ScrInfo(where).top
     If x < ScrInfo(where).Left Then x = ScrInfo(where).Left
-    If y < ScrInfo(where).Top Then y = ScrInfo(where).Top
+    If y < ScrInfo(where).top Then y = ScrInfo(where).top
     End If
     
 myform.Move x, y
@@ -29144,19 +29208,19 @@ If Form1.WindowState = 0 Then
         If Not IsExp(bstack, rest$, y) Then procMotionW = False: Exit Function
         Else
         
-        y = Form1.Top
+        y = Form1.top
     End If
     
     If FastSymbol(rest$, ";") Then
     x = ((ScrInfo(Console).Width - 1) - Form1.Width) / 2 + ScrInfo(Console).Left
-    y = ((ScrInfo(Console).Height - 1) - Form1.Height) / 2 + ScrInfo(Console).Top
+    y = ((ScrInfo(Console).Height - 1) - Form1.Height) / 2 + ScrInfo(Console).top
     End If
 ' LETS MOVE
 
 If IsWine And Form1.Width = ScrInfo(Console).Width Then Form1.Width = ScrInfo(Console).Width - dv15
-If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top
+If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top
 If IsWine Then
-If x = ScrInfo(Console).Left And y = ScrInfo(Console).Top Then
+If x = ScrInfo(Console).Left And y = ScrInfo(Console).top Then
 Form1.Move x, y
 If form5iamloaded Then Form5.RestorePos
 Sleep 10
@@ -29167,10 +29231,10 @@ If form5iamloaded Then Form5.RestorePos
 Console = FindFormSScreen(Form1)
     If FastSymbol(rest$, ";") Then
     x = ((ScrInfo(Console).Width - 1) - Form1.Width) / 2 + ScrInfo(Console).Left
-    y = ((ScrInfo(Console).Height - 1) - Form1.Height) / 2 + ScrInfo(Console).Top
+    y = ((ScrInfo(Console).Height - 1) - Form1.Height) / 2 + ScrInfo(Console).top
     If x < ScrInfo(where).Left Then x = ScrInfo(where).Left
-    If y < ScrInfo(where).Top Then y = ScrInfo(where).Top
-    If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top
+    If y < ScrInfo(where).top Then y = ScrInfo(where).top
+    If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top
     Form1.Move x, y
     End If
 Form1.Up
@@ -29646,243 +29710,6 @@ End If
 
 
 End Function
-Function MakeForm(basestack As basetask, rest$) As Boolean
-On Error Resume Next
-MakeForm = True
-Dim Scr As Object, XX As Single, p As Variant, x1 As Long, y1 As Long, x As Double, y As Double
-Dim w3 As Long, w4 As Long, sX As Double, adjustlinespace As Boolean, SZ As Single
-Dim monitor As Long
-
-Set Scr = basestack.Owner
-'monitor = FindFormSScreen(scr)
-
-Dim basketcode As Long, mAddTwipsTop As Long
-
-
-If Typename(Scr) Like "Gui*" Then
-If Typename(Scr) Like "GuiM2000" Then GoTo there1
-ElseIf Scr.name = "Form1" Then
-
-Else
-there1:
-basketcode = GetCode(Scr)
-'If players(basketcode).double Then SetNormal scr
-With players(basketcode)
-SetNormal Scr
-mAddTwipsTop = .uMineLineSpace  ' the basic
-
-If IsExp(basestack, rest$, p) Then
-    If p < 10 Then p = 10
-    x = 4
-    XX = 4
-    If Scr.name = "DIS" Then
-    Do
-    y = CDbl(XX)
-    XX = CSng(x)
-    nForm basestack, XX, w3, w4, mAddTwipsTop  'using line spacing
-    If XX > CSng(x) Then x = CDbl(XX)
-    
-    If Form1.Width < w3 * p Then Exit Do
-    x = x + 0.25
-    Loop
- 
-    
-    Else
-    Do
-    
-    y = CDbl(XX)
-    XX = CSng(x)
-
-    nForm basestack, XX, w3, w4, mAddTwipsTop  'using line spacing
-    If XX > CSng(x) Then x = CDbl(XX)
-    
-    If Scr.Width < w3 * p Then Exit Do
-    
-    x = x + 0.4
-    Loop
-    End If
-    x = y
-    sX = 0
-   
-    If FastSymbol(rest$, ",") Then
-        If IsExp(basestack, rest$, sX) Then
-        '' ok
-        
-       mAddTwipsTop = 0  ' find a new one
-       players(basketcode).MineLineSpace = 0
-       players(basketcode).uMineLineSpace = 0
-        adjustlinespace = True
-    ''    mmx = scr.Width
-''mmy = scr.Height
-        Else
-        MakeForm = False
-        MissNumExpr
-        Set Scr = Nothing
-        Exit Function
-        End If
-   
-End If
-If FastSymbol(rest$, ";") And Scr.name = "DIS" Then
-adjustlinespace = False
-If IsWine Then
-    Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top, ScrInfo(Console).Width - 1, ScrInfo(Console).Height - 1
-Else
-    Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top, ScrInfo(Console).Width, ScrInfo(Console).Height
-End If
-    Form1.backcolor = players(-1).Paper
-    
-Sleep 1
-End If
-nForm basestack, CSng(x), w3, w4, 0
-Dim mmx As Long, mmy As Long
-If sX = 0 Then
-SZ = CSng(x)
-mmx = Scr.Width
- If Scr.name = "DIS" Then
- mmy = CLng(mmx * Form1.Height / Form1.Width) ' WHY 3/4 ??
- Else
- mmy = Scr.Width
- End If
- players(basketcode).MineLineSpace = mAddTwipsTop
- players(basketcode).uMineLineSpace = mAddTwipsTop
-FrameText Scr, SZ, CLng(w3 * p), mmy, players(basketcode).Paper
-Else
-If Scr.name = "DIS" Then
-If (sX * w4) > Form1.Height Then
-y = Form1.Height
-While sX * w4 > Form1.Height
-
-XX = y / (dv20 * sX)
-
-nForm basestack, XX, w3, w4, 0  'using no spacing so we put a lot of lines
-x = CDbl(XX)
-y = y * 0.9
-Wend
-
-
-End If
-Else
-If sX * w4 > Scr.Height Then
-y = Scr.Height
-Do While sX * w4 > Scr.Height
-
-XX = y / (dv20 * sX)
-nForm basestack, XX, w3, w4, 0  'using no spacing so we put a lot of lines
-If x = CDbl(XX) Then Exit Do
-x = CDbl(XX)
-y = y * 0.9
-Loop
-
-
-End If
-
-End If
-If Scr.name = "DIS" Then
-If Not adjustlinespace Then If Scr.Height >= Form1.Height - dv15 Then mAddTwipsTop = dv15 * (((Scr.Height - sX * w4) / sX / 2) \ dv15)
-End If
-nForm basestack, (x), w3, w4, mAddTwipsTop
-SZ = CSng(x)
-'If mmx < scr.Width Then
-mmx = Scr.Width
-
-
-'If mmx < scr.Width Then
-mmy = Scr.Height
-If adjustlinespace Then
-If Scr.name = "DIS" Then
-mAddTwipsTop = dv15 * (((Form1.Height - sX * w4) / sX / 2) \ dv15)
-
-Else
-mAddTwipsTop = dv15 * (((Scr.Height - sX * w4) / sX / 2) \ dv15)
-End If
-sX = CLng(sX * (w4 + mAddTwipsTop * 2))
-Else
-sX = CLng(sX * w4)
-End If
-players(basketcode).MineLineSpace = mAddTwipsTop
-players(basketcode).uMineLineSpace = mAddTwipsTop
-FrameText Scr, SZ, CLng(w3 * p), CLng(sX), players(basketcode).Paper, Not (Scr.name = "DIS")
-
-End If
-
-
-ElseIf FastSymbol(rest$, ";") And Scr.name = "DIS" Then
-
-
-
-If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top
-If IsWine Then
-         Form1.Width = ScrInfo(Console).Width - 1
-         Form1.Height = ScrInfo(Console).Height
-         Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
-Else
-        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top, ScrInfo(Console).Width, ScrInfo(Console).Height
-    
-End If
-Form1.backcolor = players(-1).Paper
-Form1.Cls
-With players(-1)
-        .mysplit = 0
-        .MAXXGRAPH = Form1.Width
-        .MAXYGRAPH = Form2.Height
-        SetText Form1
-        End With
-MyMode Scr
-ElseIf Scr.name = "DIS" Then
-
-w3 = Form1.Left + Scr.Left
-w4 = Form1.Top + Scr.Top
-If IsWine And Form1.Width = ScrInfo(Console).Width Then Form1.Width = ScrInfo(Console).Width - dv15
-If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top: w4 = Form1.Top + Scr.Top
-scrMove00 Scr
-If IsWine Then
-    If Scr.Width = ScrInfo(Console).Width Then
-       Form1.Width = Scr.Width - 1
-    Else
-        Form1.Width = Scr.Width
-    End If
-    Form1.Height = Scr.Height
-    Form1.Move w3, w4
-Else
-    Form1.Move w3, w4, Scr.Width, Scr.Height
-End If
-Form1.Cls
-        With players(-1)
-        .mysplit = 0
-        .MAXXGRAPH = Form1.Width
-        .MAXYGRAPH = Form2.Height
-        SetText Form1
-        End With
-SetText Scr
-
-Set Scr = Nothing
-Exit Function
-Else
-'' CROP LAYER
-If basketcode > 0 Then
-With players(basketcode)
-.MAXXGRAPH = .mx * .Xt
-.MAXYGRAPH = .My * .Yt
-End With
-With Form1.dSprite(basestack.tolayer)
-.Move .Left, .Top, players(basketcode).MAXXGRAPH, players(basketcode).MAXYGRAPH
-End With
-
-End If
-End If
-
-players(basketcode).MineLineSpace = mAddTwipsTop
-players(basketcode).uMineLineSpace = mAddTwipsTop
-MakeForm = True
-.curpos = 0
-.currow = 0
-
-End With
-End If
-SetText Scr
-
-
-End Function
 Function ProcAbout(basestack As basetask, rest$, Lang As Long) As Boolean
 
 Dim par As Boolean, s$, ss$, x As Double, y As Double, i As Long
@@ -30013,7 +29840,7 @@ s$ = kk.TextParagraph(1)
                             Form4.Show , Screen.ActiveForm
        
             End If
-                myform Form4, Form4.Left, Form4.Top, CLng(x * Helplastfactor), CLng(y * Helplastfactor), True, Helplastfactor
+                myform Form4, Form4.Left, Form4.top, CLng(x * Helplastfactor), CLng(y * Helplastfactor), True, Helplastfactor
                 MoveFormToOtherMonitorOnly Form4, True
                 
         End If
@@ -30137,7 +29964,7 @@ ProcMotion = False
 Exit Function
 End If
 Else
-y1 = Scr.Top
+y1 = Scr.top
 End If
 Scr.Move x1, y1
 End If
@@ -30411,7 +30238,7 @@ If IsExp(basestack, rest$, x) Then
                    AVI.Move aviX, aviY
                     MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
                     ElseIf UseAviSize Then
-                     AVI.Move AVI.Left, AVI.Top, AviSizeX, AviSizeY
+                     AVI.Move AVI.Left, AVI.top, AviSizeX, AviSizeY
                    MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
                     End If
            Else
@@ -30860,7 +30687,7 @@ ProcField = True
  prive = GetCode(bstack.Owner)
   With players(prive)
         If IsLabelSymbolNew(rest$, "Õ≈œ", "NEW", Lang) Then
-            If IsExp(bstack, rest$, p) Then Result = p Else Result = 0
+            If IsExp(bstack, rest$, p) Then result = p Else result = 0
             Exit Function
         End If
         If IsLabelSymbolNew(rest$, "”’Õ»«Ã¡", "PASSWORD", Lang) Then i = True
@@ -30897,7 +30724,7 @@ ProcField = True
         If y1 <> 99 Then
         LCTbasket bstack.Owner, players(prive), y + 1, 0
         End If
-        Result = y1
+        result = y1
         If par Then
                 If Typename(pppp.item(it)) = doc Then
             Set pppp.item(it) = New Document
@@ -31345,6 +31172,8 @@ If myexit(bs) Then
 ProcModuleEntry = False: Exit Function
 End If
 Dim exitnow As Boolean
+Dim restart As Boolean
+restart = True
 
  Do
   frm$ = Mid$(sbf(x1).sb, i)
@@ -31354,7 +31183,7 @@ againmod:
        GoTo myerror1
        End If
         exitnow = False
-        Select Case Execute(bs, frm$, exitnow, False, loopthis)
+        Select Case Execute(bs, frm$, exitnow, False, loopthis, , restart)
 
         Case 0
         
@@ -31427,12 +31256,11 @@ GoTo thh
                     MyEr "", ""
                     End If
                     End If
-                    
+                    bs.UseofIf = 0
                     GoTo thh
-            
-        Case 1, 3
+            Case 1, 3
 thh:
- 
+    
     If bs.IamChild Then
     If Not bs.soros Is bs.Parent.soros Then
     Set bs.Parent.Sorosref = bs.soros
@@ -31594,7 +31422,6 @@ thh1:
                                          
                             End If
                     Else
-                    
 If Not loopthis Then GoTo thh1
 loopthis = False
                    End If
@@ -31602,6 +31429,19 @@ Case 12
 MyEr "Exit for out of for next loop", "∏ÓÔ‰ÔÚ „È· ›Ó˘ ·¸ √È· ≈¸ÏÂÌÔ"
 Exit Do
         End Select
+        
+If Not restart Then
+restart = True
+       
+                    bs.IFCTRL = False
+                    bs.jump = False
+                    If bs.RetStackTotal > 0 Then
+                    bs.UseofIf = 0
+                    bs.RetStack.Flush
+                    End If
+    
+
+End If
 Loop
 ProcModuleEntry = True
 Exit Function
@@ -31932,7 +31772,7 @@ With aCopy
 .lcid = 1032
 ww$(1) = ww$(1) + ":"
 Do While .FindIdentifier(ww$(1), False, there, Curs)
-If Trim$(Left$(.TextParagraph(there), Curs - 1)) = vbNullString Then
+If NLtrim$(Left$(.TextParagraph(there), Curs - 1)) = vbNullString Then
 ' we find it
                                final = -1
                                .FindPos .FirstParagraphLine(there) + 2, 1, final, a1, b, c, d
@@ -32049,9 +31889,9 @@ ss$ = Left$(aCopy.TextParagraph(there), Curs - 1)
 
 IsNumberLabel ss$, DUMP$
 If Anypos Then
-If Right$(Trim$(ss$), 1) = ":" Then ss$ = vbNullString
+If Right$(MyTrim(ss$), 1) = ":" Then ss$ = vbNullString
 End If
-                        If Trim$(ss$) = vbNullString Then
+                        If MyTrim(ss$) = vbNullString Then
                         Curs2 = Curs + Len(ww$(0))
                         there1 = there
                         If .FindWord(ww$(1), True, there1, Curs2) Then
@@ -32081,9 +31921,10 @@ Function executeblock(Exec As Long, bstack As basetask, b$, once As Boolean, kol
 executeblock = True
 Dim i As Long, ec$, ec1 As Long, LL As Long, oldLL As Long, bb$, p As Variant, x2 As Long, y2 As Long, monce As Long, w3 As Long ', removebracket As Boolean
 Dim myLevel As Long, oldexec As Long, loopthis As Boolean, subspoint As Boolean, RetStackSize As Long, subs As FastCollection, vvv As Long
-Dim oldjump As Long, oldifctrl As Long
+Dim oldjump As Long, oldifctrl As Long, olduseofif As Long
 oldjump = bstack.jump
 oldifctrl = bstack.IFCTRL
+olduseofif = bstack.UseofIf
 RetStackSize = bstack.RetStackTotal
 If Exec = 0 Then Exec = 1
 oldexec = Exec
@@ -32124,10 +31965,16 @@ fromfirst0:
      bstack.addlen = oldLL
     Select Case w3
     Case 0
+         If bstack.RetStackTotal - RetStackSize > 0 Then
+    bstack.UseofIf = olduseofif
+    bstack.RetStack.drop bstack.RetStackTotal - RetStackSize
+    End If
         If myLevel <> bstack.SubLevel Then
             b$ = bb$
             Exec = 0
-            bstack.RetStack.drop 7 * (bstack.SubLevel - myLevel)  ' NOW LEVEL HAS 5+2 ITEMS
+
+            
+          '  bstack.RetStack.drop 7 * (bstack.SubLevel - myLevel)  ' NOW LEVEL HAS 5+2 ITEMS
             Exit Function
         End If
         If NocharsInLine(bb$) Then
@@ -32491,9 +32338,16 @@ subsub02:
             End If
             Exit Do
         End Select
+        
         If myexit(bstack) Then Exec = oldexec: Exit Do
         If monce Then Exit Do
     Loop
+    If Exec > 1 Then
+    If bstack.RetStackTotal - RetStackSize > 0 Then
+    bstack.UseofIf = olduseofif
+    bstack.RetStack.drop bstack.RetStackTotal - RetStackSize
+    End If
+    End If
    bstack.jump = oldjump
     bstack.IFCTRL = oldifctrl
 
@@ -33340,19 +33194,19 @@ again:
                     
                     If Not Form1.WindowState = 0 Then Form1.WindowState = 0: Form1.Refresh
                     
-                    If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top
+                    If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top
                     If IsWine Then
-                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
+                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
                         If Form1.Width = ScrInfo(Console).Width Then
                         Form1.Width = ScrInfo(Console).Width - 1
                         Else
                         Form1.Width = ScrInfo(Console).Width
                         End If
                         Form1.Height = ScrInfo(Console).Height
-                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
+                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
                     
                     Else
-                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top, ScrInfo(Console).Width - 1, ScrInfo(Console).Height - 1
+                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top, ScrInfo(Console).Width - 1, ScrInfo(Console).Height - 1
                     End If
                     FrameText Scr, .SZ, CLng(Form1.Width), CLng(Form1.Height), .Paper
                     players(-1).MAXXGRAPH = .MAXXGRAPH
@@ -33380,7 +33234,7 @@ again:
                 Else
                     If x1 = 0 Then x1 = 14000
                     If y1 = 0 Then y1 = 6000
-                    Scr.Move Scr.Left, Scr.Top, x1, y1
+                    Scr.Move Scr.Left, Scr.top, x1, y1
                     FrameText Scr, .SZ, 0, 0, .Paper, True
                             
             End If
@@ -33392,7 +33246,7 @@ again:
                         FrameText Scr, .SZ, x1, y1, .Paper, True
                         Scr.Move (ScrInfo(Console).Width - .MAXXGRAPH) / 2, (ScrInfo(Console).Height - .MAXYGRAPH) / 2
             Else
-                        Scr.Move Scr.Left, Scr.Top, x1, y1
+                        Scr.Move Scr.Left, Scr.top, x1, y1
 
                         FrameText Scr, .SZ, 0, 0, .Paper, True
                         
@@ -33401,7 +33255,7 @@ again:
     Else
         If FastSymbol(rest$, ";") Then 'CENTER
             Form1.WindowState = 0
-            If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top
+            If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top
             
             FrameText Scr, .SZ, x1, y1, .Paper
                     
@@ -33413,10 +33267,10 @@ again:
                         End If
                         Form1.Height = .MAXYGRAPH
                         'Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
-                        Form1.Move ((ScrInfo(Console).Width - 1) - Form1.Width) / 2 + ScrInfo(Console).Left, ((ScrInfo(Console).Height - 1) - Form1.Height) / 2 + ScrInfo(Console).Top
+                        Form1.Move ((ScrInfo(Console).Width - 1) - Form1.Width) / 2 + ScrInfo(Console).Left, ((ScrInfo(Console).Height - 1) - Form1.Height) / 2 + ScrInfo(Console).top
                     Else
             
-            Form1.Move ScrInfo(Console).Left + (ScrInfo(Console).Width - .MAXXGRAPH) / 2, ScrInfo(Console).Top + (ScrInfo(Console).Height - .MAXYGRAPH) / 2, .MAXXGRAPH, .MAXYGRAPH
+            Form1.Move ScrInfo(Console).Left + (ScrInfo(Console).Width - .MAXXGRAPH) / 2, ScrInfo(Console).top + (ScrInfo(Console).Height - .MAXYGRAPH) / 2, .MAXXGRAPH, .MAXYGRAPH
             End If
             Form1.Up
             scrMove00 Scr
@@ -33429,7 +33283,7 @@ again:
              End If
         Else
             Form1.WindowState = 0
-            If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top
+            If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top
             FrameText Scr, .SZ, x1, y1, .Paper
             If IsWine Then
                         If .MAXXGRAPH = ScrInfo(Console).Width Then
@@ -33438,12 +33292,12 @@ again:
                         Form1.Width = .MAXXGRAPH
                         End If
                         Form1.Height = .MAXYGRAPH
-                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
+                        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
                                            Else
             
             
             
-            Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top, .MAXXGRAPH, .MAXYGRAPH
+            Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top, .MAXXGRAPH, .MAXYGRAPH
             End If
             players(-1).MAXXGRAPH = .MAXXGRAPH
             players(-1).MAXYGRAPH = .MAXYGRAPH
@@ -36121,10 +35975,13 @@ If IsExp(bstack, rest$, p, , True) Then
             Call executeblock(it, bstack, ss$, False, once, , True)
         End If
         bstack.addlen = nd&
+    Else
+        MissingBlockCode
     End If
+Else
+MissNumExpr
 End If
-Scr.DrawWidth = i
-Scr.DrawStyle = x1
+
 If it = 2 Then
 If ss$ = "" Then
 If once Then rest$ = ": Break": If trace Then WaitShow = 2: TestShowSub = vbNullString
@@ -36136,6 +35993,10 @@ End If
 it = 1
 End If
 If it <> 1 Then ProcDrawWidth = False: rest$ = ss$ + rest$
+If i <= 0 Then i = 1
+Scr.DrawWidth = i
+Scr.DrawStyle = x1
+
 Set Scr = Nothing
 End Function
 Function ProcCurve(bstack As basetask, rest$, Lang As Long) As Boolean
@@ -36544,7 +36405,7 @@ If IsExp(bstack, rest$, p) Then
                 If it = 0 Then
                     y = 0
                 Else
-                    y = Form1.dSprite(it).Top + players(it).y
+                    y = Form1.dSprite(it).top + players(it).y
                 End If
             End If
         End If
@@ -47681,7 +47542,7 @@ Function MyScan(basestack As basetask, rest$) As Boolean
 Dim p As Variant, y As Double, s$
 ClearJoyAll
 PollJoypadk
-If GetForegroundWindow <> Form1.hWND Or Not Targets Then
+If GetForegroundWindow <> Form1.hWnd Or Not Targets Then
 If IsExp(basestack, rest$, p, , True) Then
 
 End If
@@ -48297,19 +48158,6 @@ On Error GoTo there1246
 MyVal = val(v)
 there1246:
 End Function
-
-Function DriveSerial1(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
-    Dim s$
-    If IsStrExp(bstack, a$, s$) Then
-    r = SG * DriveSerial(Left$(s$, 3))
-  
-    
-    
-    DriveSerial1 = FastSymbol(a$, ")", True)
-    Else
-         MissParam a$
-    End If
-End Function
 Function ThisPointer(bstack As basetask, w3 As Long) As Boolean ' return var(r)
 Dim s1$
     Set bstack.lastobj = Nothing
@@ -48550,118 +48398,6 @@ conthere:
   
 End Sub
 
-Public Function TraceThis(bstack As basetask, di As Object, b$, w$, SBB$) As Boolean
-    TraceThis = True
-    PrepareLabel bstack
-    Form2.label1(1) = w$
-    Form2.label1(2) = GetStrUntil(vbCrLf, b$ & vbCrLf, False)
-    If Len(b$) = 0 Then
-    WaitShow = 0
-    bypassST = False
-    Set Form2.Process = bstack
-    Exit Function
-    Else
-        If WaitShow = 0 Or Len(b$) < WaitShow Then
-            WaitShow = 0
-            If bstack.OriginalCode < 0 Then
-                SBB$ = GetNextLine((var(-bstack.OriginalCode).code$))
-            Else
-                SBB$ = GetNextLine((sbf(Abs(bstack.OriginalCode)).sb))
-            End If
-            If Left$(SBB$, 10) = "'11001EDIT" Then
-                TestShowSub = Mid$(sbf(Abs(bstack.OriginalCode)).sb, Len(SBB$) + 3)
-                If TestShowSub = vbNullString Then
-                    TestShowSub = Mid$(sbf(FindPrevOriginal(bstack)).sb, Len(SBB$) + 3)
-                End If
-                If InStr(TestShowSub, b$) = 0 Then
-                    WaitShow = Len(b$)
-                End If
-            Else
-                If bstack.OriginalCode <> 0 Then
-                    If bstack.OriginalCode < 0 Then
-                        TestShowSub = var(-bstack.OriginalCode).code$
-                    Else
-                        TestShowSub = sbf(Abs(bstack.OriginalCode)).sb
-                    End If
-                Else
-                    If bstack.IamThread Then
-                        If bstack.Process Is Nothing Then
-                        Else
-                            TestShowSub = bstack.Process.CodeData
-                        End If
-                    Else
-                        TestShowSub = b$
-                    End If
-                End If
-            End If
-        End If
-        If bstack.addlen Then
-            If Len(TestShowSub) - bstack.addlen - Len(b$) > 0 Then
-                TestShowStart = Len(TestShowSub) - bstack.addlen - Len(b$) + 1
-            Else
-                TestShowStart = 1
-            End If
-        Else
-            TestShowStart = Len(TestShowSub) - Len(b$) + 1 ' rinstr(TestShowSub, b$)
-        End If
-        If TestShowStart <= 0 Then
-            TestShowStart = rinstr(TestShowSub, Mid$(b$, 2)) - 1
-        End If
-     bypassST = False
-          
-    Set Form2.Process = bstack
-    stackshow bstack
-        
-    End If
-    
-    If Not Form1.Visible Then
-        Form1.Show , Form5   'OK
-    End If
-
-    If STbyST Then
-        STbyST = False
-        If Not STEXIT Then
-            If Not STq Then
-                Form2.gList4.ListIndex = 0
-            End If
-        End If
-        If Not TaskMaster Is Nothing Then
-            If TaskMaster.QueueCount > 0 And TaskMaster.Processing Then TaskMaster.StopProcess
-        End If
-      
-        Do
-            BLOCKkey = False
-            If Not IsWine Then If di.Visible Then di.Refresh
-            ProcTask2 bstack
-        Loop Until STbyST Or STq Or STEXIT Or bypassST Or NOEXECUTION Or myexit(bstack) Or Not Form2.Visible
-
-        If Not TaskMaster Is Nothing Then
-           If TaskMaster.QueueCount > 0 And Not TaskMaster.Processing Then TaskMaster.StartProcess
-        End If
-        If Not STEXIT Then
-            If Not STq Then
-                Form2.gList4.ListIndex = 0
-            End If
-        End If
-        STq = False
-        If STEXIT Then
-            NOEXECUTION = True
-            trace = False
-            STEXIT = False
-            TraceThis = False
-            Exit Function
-        End If
-    Else
-If tracecounter > 0 Then If Not IsWine Then MyDoEvents1 Form2, True
-
-    End If
-    If STEXIT Then
-        trace = False
-        STEXIT = False
-        TraceThis = False
-        Exit Function
-    End If
-End Function
 
 Private Function CompareStr2(a$, b$) As Long
 On Error GoTo comperr
@@ -48974,12 +48710,12 @@ CheckThis = 2
 End Function
 Function myHwnd(bstack As basetask) As Double
 If Typename(bstack.Owner) = "GuiM2000" Then
-myHwnd = bstack.Owner.hWND
+myHwnd = bstack.Owner.hWnd
 Else
 If ttl Then
-myHwnd = Form3.hWND
+myHwnd = Form3.hWnd
 Else
-myHwnd = bstack.Owner.hWND
+myHwnd = bstack.Owner.hWnd
 End If
 End If
 End Function

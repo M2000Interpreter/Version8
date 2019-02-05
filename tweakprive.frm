@@ -730,10 +730,10 @@ cc.ClassKey = HKEY_CURRENT_USER
         End If
         MYFONT = cc.Value
     combo1.Text = cc.Value
-Err.Clear
+Err.clear
 DIS.Font.name = MYFONT
 If Err.Number > 0 Then
-Err.Clear
+Err.clear
 MYFONT = "Verdana"
 
 End If
@@ -943,7 +943,7 @@ gList11.restrictLines = 6
 gList11.CenterText = True
 gList11.VerticalCenterText = True
 
-gList11.Text = "Warning: There is no " & vbCrLf & "warning about this " & vbCrLf & "software except that" & vbCrLf & "is given AS-IS" & vbCrLf & vbCrLf & "George Karras 1999-2018 ©"
+gList11.Text = "Warning: There is no " & vbCrLf & "warning about this " & vbCrLf & "software except that" & vbCrLf & "is given AS-IS" & vbCrLf & vbCrLf & "George Karras 1999-2019 ©"
 
 height1 = 6450 * DYP / 15
 width1 = 9900 * DXP / 15

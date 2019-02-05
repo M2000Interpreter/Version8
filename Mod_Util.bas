@@ -82,7 +82,7 @@ Private Declare Function CreateSolidBrush Lib "gdi32" (ByVal crColor As Long) As
 
 Public Type RECT
         Left As Long
-        Top As Long
+        top As Long
         Right As Long
         Bottom As Long
 End Type
@@ -117,11 +117,11 @@ Private Const DT_VCENTER As Long = &H4&
 Private Const DT_WORDBREAK As Long = &H10&
 Private Const DT_WORD_ELLIPSIS As Long = &H40000
 Public Declare Function DestroyCaret Lib "user32" () As Long
-Public Declare Function CreateCaret Lib "user32" (ByVal hWND As Long, ByVal hBitmap As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
-Public Declare Function ShowCaret Lib "user32" (ByVal hWND As Long) As Long
+Public Declare Function CreateCaret Lib "user32" (ByVal hWnd As Long, ByVal hBitmap As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
+Public Declare Function ShowCaret Lib "user32" (ByVal hWnd As Long) As Long
 Public Declare Function GetFocus Lib "user32" () As Long
 Public Declare Function SetCaretPos Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
-Public Declare Function HideCaret Lib "user32" (ByVal hWND As Long) As Long
+Public Declare Function HideCaret Lib "user32" (ByVal hWnd As Long) As Long
 Const dv = 0.877551020408163
 Public QUERYLIST As String
 Public LASTQUERYLIST As Long
@@ -143,7 +143,7 @@ Public Const SRCCOPY = &HCC0020
 Public Release As Boolean
 Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
 Declare Function RoundRect Lib "gdi32" (ByVal hDC As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal y3 As Long) As Long
-Declare Function UpdateWindow Lib "user32" (ByVal hWND As Long) As Long
+Declare Function UpdateWindow Lib "user32" (ByVal hWnd As Long) As Long
 Declare Function ScrollDC Lib "user32" (ByVal hDC As Long, ByVal dX As Long, ByVal dY As Long, lprcScroll As RECT, lprcClip As RECT, ByVal hrgnUpdate As Long, lprcUpdate As RECT) As Long
 Public LastErName As String
 Public LastErNameGR As String
@@ -155,7 +155,7 @@ Type POINTAPI
         x As Long
         y As Long
 End Type
-Declare Function GetDC Lib "user32" (ByVal hWND As Long) As Long
+Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 Declare Function PaintDesktop Lib "user32" (ByVal hDC As Long) As Long
 Declare Function SelectClipPath Lib "gdi32" (ByVal hDC As Long, ByVal iMode As Long) As Long
   Public Const RGN_AND = 1
@@ -196,7 +196,7 @@ Global Const HWND_TOPMOST = -1
 Global Const HWND_NOTOPMOST = -2
 Global Const SWP_NOACTIVATE = &H10
 Global Const SWP_SHOWWINDOW = &H40
-Declare Sub SetWindowPos Lib "user32" (ByVal hWND As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cX As Long, ByVal cY As Long, ByVal wFlags As Long)
+Declare Sub SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cX As Long, ByVal cY As Long, ByVal wFlags As Long)
 Declare Function ExtFloodFill Lib "gdi32" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long, ByVal crColor As Long, ByVal wFillType As Long) As Long
 Public Const FLOODFILLSURFACE = 1
 Public Const FLOODFILLBORDER = 0
@@ -206,7 +206,7 @@ Public BigPi As Variant
 Public Const Pi = 3.14159265358979
 Public Const PI2 = 6.28318530717958
 Public EditTabWidth As Long, ReportTabWidth As Long
-Public Result As Long
+Public result As Long
 Public mcd As String
 Public NOEXECUTION As Boolean, RoundDouble As Boolean
 Public QRY As Boolean, GFQRY As Boolean
@@ -272,7 +272,7 @@ End Type
 Private Declare Function CreateRoundRectRgn Lib "gdi32" (ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal y3 As Long) As Long
 
 Private Declare Function PathToRegion Lib "gdi32" (ByVal hDC As Long) As Long
-Private Declare Function SetWindowRgn Lib "user32" (ByVal hWND As Long, ByVal hRgn As Long, ByVal bRedraw As Boolean) As Long
+Private Declare Function SetWindowRgn Lib "user32" (ByVal hWnd As Long, ByVal hRgn As Long, ByVal bRedraw As Boolean) As Long
 Private Declare Function CreateFontIndirect Lib "gdi32" Alias "CreateFontIndirectA" (lpLogFont As LOGFONT) As Long
 Private Declare Function SelectObject Lib "gdi32" (ByVal hDC As Long, ByVal hObject As Long) As Long
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
@@ -295,7 +295,7 @@ Const DFC_POPUPMENU = 5            'Only Win98/2000 !!
 Const DFCS_BUTTON3STATE = &H10
 Const DC_GRADIENT = &H20          'Only Win98/2000 !!
 
-Private Declare Function DrawCaption Lib "user32" (ByVal hWND As Long, ByVal hDC As Long, pcRect As RECT, ByVal un As Long) As Long
+Private Declare Function DrawCaption Lib "user32" (ByVal hWnd As Long, ByVal hDC As Long, pcRect As RECT, ByVal un As Long) As Long
 Private Declare Function DrawEdge Lib "user32" (ByVal hDC As Long, qrc As RECT, ByVal edge As Long, ByVal grfFlags As Long) As Long
 Private Declare Function DrawFocusRect Lib "user32" (ByVal hDC As Long, lpRect As RECT) As Long
 Private Declare Function DrawFrameControl Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
@@ -567,7 +567,7 @@ End Function
 Public Function KeyPressedLong(ByVal VirtKeyCode As Long) As Long
 On Error GoTo KEXIT
 If Not Screen.ActiveForm Is Nothing Then
-If GetForegroundWindow = Screen.ActiveForm.hWND Then
+If GetForegroundWindow = Screen.ActiveForm.hWnd Then
 KeyPressedLong = GetAsyncKeyState(VirtKeyCode)
 End If
 End If
@@ -576,7 +576,7 @@ End Function
 Public Function KeyPressed(ByVal VirtKeyCode As Long) As Boolean
 On Error GoTo KEXIT
 If Not Screen.ActiveForm Is Nothing Then
-If GetForegroundWindow = Screen.ActiveForm.hWND Then
+If GetForegroundWindow = Screen.ActiveForm.hWnd Then
 KeyPressed = CBool((GetAsyncKeyState(VirtKeyCode) And &H8000&) = &H8000&)
 End If
 End If
@@ -585,7 +585,7 @@ End Function
 Public Function mouse() As Long
 On Error GoTo MEXIT
 If Not Screen.ActiveForm Is Nothing Then
-If GetForegroundWindow = Screen.ActiveForm.hWND Then
+If GetForegroundWindow = Screen.ActiveForm.hWnd Then
 ''If Screen.ActiveForm Is Form1 Then If Form1.lockme Then Exit Function
 
 mouse = -1 * CBool((GetAsyncKeyState(1) And &H8000&) = &H8000&) - 2 * CBool((GetAsyncKeyState(2) And &H8000&) = &H8000&) - 4 * CBool((GetAsyncKeyState(4) And &H8000&) = &H8000&)
@@ -600,7 +600,7 @@ On Error GoTo MOUSEX
 Dim tp As POINTAPI
 MOUSEX = x
 If Not Screen.ActiveForm Is Nothing Then
-If GetForegroundWindow = Screen.ActiveForm.hWND Then
+If GetForegroundWindow = Screen.ActiveForm.hWnd Then
    GetCursorPos tp
    x = tp.x * dv15 - offset
   MOUSEX = x
@@ -614,7 +614,7 @@ On Error GoTo MOUSEY
 Dim tp As POINTAPI
 MOUSEY = y
 If Not Screen.ActiveForm Is Nothing Then
-If GetForegroundWindow = Screen.ActiveForm.hWND Then
+If GetForegroundWindow = Screen.ActiveForm.hWnd Then
    GetCursorPos tp
    y = tp.y * dv15 - offset
    MOUSEY = y
@@ -742,7 +742,7 @@ If Int(25 * factor) > 2 Then
 m.ScaleMode = vbPixels
 
 hRgn = CreateRoundRectRgn(0, 0, m.ScaleX(x1, 1, 3), m.ScaleY(y1, 1, 3), 25 * factor, 25 * factor)
-SetWindowRgn m.hWND, hRgn, t
+SetWindowRgn m.hWnd, hRgn, t
 DeleteObject hRgn
 m.ScaleMode = vbTwips
 
@@ -765,7 +765,7 @@ Select Case way
 Case 0
 DrawEdge m.hDC, r, CLng(par) Mod 256, CLng(par) \ 256
 Case 1
-DrawCaption m.hWND, m.hDC, r, CLng(par)
+DrawCaption m.hWnd, m.hDC, r, CLng(par)
 Case 2
 DrawEdge m.hDC, r, CLng(par), BF_RECT
 Case 3
@@ -799,7 +799,7 @@ Select Case way
 Case 0
 DrawEdge m.hDC, r, CLng(par) Mod 256, CLng(par) \ 256
 Case 1
-DrawCaption m.hWND, m.hDC, r, CLng(par)
+DrawCaption m.hWnd, m.hDC, r, CLng(par)
 Case 2
 DrawEdge m.hDC, r, CLng(par), BF_RECT
 Case 3
@@ -891,7 +891,7 @@ End Sub
 Public Sub LCTCnew(dqq As Object, mb As basket, y As Long, x As Long)
 DestroyCaret
 With mb
-CreateCaret dqq.hWND, 0, dqq.ScaleX(.Xt, 1, 3), dqq.ScaleY((.Yt - .uMineLineSpace * 2) * 0.2, 1, 3)
+CreateCaret dqq.hWnd, 0, dqq.ScaleX(.Xt, 1, 3), dqq.ScaleY((.Yt - .uMineLineSpace * 2) * 0.2, 1, 3)
 SetCaretPos dqq.ScaleX(x * .Xt, 1, 3), dqq.ScaleY((y + 0.8) * .Yt, 1, 3)
 End With
 End Sub
@@ -903,21 +903,21 @@ If t& = -1 Or Not Form1.ActiveControl Is dqq Then
         Else
         If Form1.ActiveControl Is Nothing Then
         Else
-            CreateCaret Form1.ActiveControl.hWND, 0, -1, 0
+            CreateCaret Form1.ActiveControl.hWnd, 0, -1, 0
             End If
-            CreateCaret dqq.hWND, 0, -1, 0
+            CreateCaret dqq.hWnd, 0, -1, 0
         End If
         Exit Sub
 End If
 
 If t& = 1 Then
        ' CreateCaret dqq.hWnd, 0, dqq.ScaleX(.Xt, 1, 3), dqq.ScaleY((.Yt - .uMineLineSpace * 2), 1, 3)
-       CreateCaret dqq.hWND, 0, dqq.ScaleX(.Xt, 1, 3), dqq.ScaleY(.Yt - .uMineLineSpace * 2, 1, 3)
+       CreateCaret dqq.hWnd, 0, dqq.ScaleX(.Xt, 1, 3), dqq.ScaleY(.Yt - .uMineLineSpace * 2, 1, 3)
         SetCaretPos dqq.ScaleX(.curpos * .Xt, 1, 3), dqq.ScaleY(.currow * .Yt + .uMineLineSpace, 1, 3)
         On Error Resume Next
         If Not extreme Then If INK$ = vbNullString Then dqq.Refresh
 Else
-    CreateCaret dqq.hWND, 0, dqq.ScaleX(.Xt, 1, 3), .Yt \ DYP \ 6 + 1
+    CreateCaret dqq.hWnd, 0, dqq.ScaleX(.Xt, 1, 3), .Yt \ DYP \ 6 + 1
         
             SetCaretPos dqq.ScaleX(.curpos * .Xt, 1, 3), dqq.ScaleY((.currow + 1) * .Yt - .uMineLineSpace, 1, 3) - .Yt \ DYP \ 6 - 1
         On Error Resume Next
@@ -1339,7 +1339,7 @@ Public Function GetTextWidth(dd As Object, c As String, r As RECT) As Long
 End Function
 
 Public Sub CalcRect(mHdc As Long, c As String, r As RECT)
-r.Top = 0
+r.top = 0
 r.Left = 0
 DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 End Sub
@@ -1353,12 +1353,12 @@ Public Sub MyPrintNew(ddd As Object, UAddTwipsTop, s$, Optional cr As Boolean = 
 Dim nr As RECT, nl As Long, mytop As Long
 mytop = ddd.CurrentY
 If s$ = vbNullString Then
-nr.Left = 0: nr.Right = 0: nr.Top = 0: nr.Bottom = 0
+nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
 CalcRect ddd.hDC, " ", nr
 nr.Left = ddd.CurrentX / dv15
 nr.Right = nr.Right + nr.Left
-nr.Top = ddd.CurrentY / dv15
-nr.Bottom = nr.Top + nr.Bottom
+nr.top = ddd.CurrentY / dv15
+nr.Bottom = nr.top + nr.Bottom
 nl = (nr.Bottom + 1) * dv15
 If cr Then
 ddd.CurrentY = (nr.Bottom + 1) * dv15 + UAddTwipsTop ''2
@@ -1367,12 +1367,12 @@ Else
 ddd.CurrentX = nr.Right * dv15
 End If
 Else
-nr.Left = 0: nr.Right = 0: nr.Top = 0: nr.Bottom = 0
+nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
 CalcRect ddd.hDC, s$, nr
 nr.Left = ddd.CurrentX / dv15
 nr.Right = nr.Right + nr.Left
-nr.Top = ddd.CurrentY / dv15
-nr.Bottom = nr.Top + nr.Bottom
+nr.top = ddd.CurrentY / dv15
+nr.Bottom = nr.top + nr.Bottom
 nl = (nr.Bottom + 1) * dv15
 If Not fake Then
 If nr.Left * dv15 < ddd.Width Then PrintLineControlSingle ddd.hDC, s$, nr
@@ -1390,22 +1390,22 @@ End Sub
 Public Sub MyPrint(ddd As Object, s$)
 Dim nr As RECT, nl As Long
 If s$ = vbNullString Then
-    nr.Left = 0: nr.Right = 0: nr.Top = 0: nr.Bottom = 0
+    nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
     CalcRect ddd.hDC, " ", nr
     nr.Left = ddd.CurrentX / dv15
     nr.Right = nr.Right + nr.Left
-    nr.Top = ddd.CurrentY / dv15
-    nr.Bottom = nr.Top + nr.Bottom
+    nr.top = ddd.CurrentY / dv15
+    nr.Bottom = nr.top + nr.Bottom
     nl = (nr.Bottom + 1) * dv15
     ddd.CurrentY = (nr.Bottom + 1) * dv15
     ddd.CurrentX = 0
 Else
-nr.Left = 0: nr.Right = 0: nr.Top = 0: nr.Bottom = 0
+nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
 CalcRect ddd.hDC, s$, nr
 nr.Left = ddd.CurrentX / dv15
 nr.Right = nr.Right + nr.Left
-nr.Top = ddd.CurrentY / dv15
-nr.Bottom = nr.Top + nr.Bottom
+nr.top = ddd.CurrentY / dv15
+nr.Bottom = nr.top + nr.Bottom
 nl = (nr.Bottom + 1) * dv15
 If nr.Left * dv15 < ddd.Width Then PrintLineControlSingle ddd.hDC, s$, nr
 ddd.CurrentY = nl
@@ -1451,9 +1451,9 @@ Dim rTop As Long, rBottom As Long
  With nr
  .Left = PX * pixX
  .Right = .Left + pixX
- .Top = PY * pixY + mb.uMineLineSpace \ dv15
+ .top = PY * pixY + mb.uMineLineSpace \ dv15
  
- .Bottom = .Top + pixY - mb.uMineLineSpace \ dv15 * 2
+ .Bottom = .top + pixY - mb.uMineLineSpace \ dv15 * 2
  End With
 rTop = PY * pixY
 rBottom = rTop + pixY - plusone
@@ -1464,7 +1464,7 @@ Do While Len(what) >= .mx - PX And (.mx - PX) > 0
  .Left = PX * pixX
  
  .Right = (PX + Len(p$)) * pixX + 1
- .Top = rTop
+ .top = rTop
  .Bottom = rBottom
  
  End With
@@ -1497,8 +1497,8 @@ If PY >= .My And Not ONELINE Then
 If ddd.name = "PrinterDocument1" Then
 getnextpage
  With nr
- .Top = PY * pixY + mb.uMineLineSpace
-  .Bottom = .Top + pixY - p2
+ .top = PY * pixY + mb.uMineLineSpace
+  .Bottom = .top + pixY - p2
  End With
 PY = 1
 Else
@@ -1515,8 +1515,8 @@ Else
  With nr
  .Left = PX * pixX
  .Right = .Left + pixX
- .Top = PY * pixY + mb.uMineLineSpace
- .Bottom = .Top + pixY - p2
+ .top = PY * pixY + mb.uMineLineSpace
+ .Bottom = .top + pixY - p2
  End With
 rTop = PY * pixY
 rBottom = rTop + pixY - plusone
@@ -1528,7 +1528,7 @@ If LEAVEME Then Exit Sub
      With nr2
  .Left = PX * pixX
  .Right = (PX + Len(what$)) * pixX + 1
- .Top = rTop
+ .top = rTop
  .Bottom = rBottom
  
  End With
@@ -1579,8 +1579,8 @@ With mybasket
     With nr
         .Left = PX * pixX
         .Right = .Left + pixX
-        .Top = PY * pixY + mUAddPixelsTop
-         .Bottom = .Top + pixY - mUAddPixelsTop * 2
+        .top = PY * pixY + mUAddPixelsTop
+         .Bottom = .top + pixY - mUAddPixelsTop * 2
     End With
     
     rTop = PY * pixY
@@ -1600,7 +1600,7 @@ With mybasket
         With nr2
                 .Left = PX * pixX
                  .Right = mybasket.mx * pixX + 1
-                .Top = rTop
+                .top = rTop
                 .Bottom = rBottom
         End With
         If ddd.FontTransparent = False Then FillBack ddd.hDC, nr2, .Paper
@@ -1651,8 +1651,8 @@ With mybasket
                     If ddd.name = "PrinterDocument1" Then
                         getnextpage
                          With nr
-                         .Top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .Top + pixY - p2
+                         .top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .top + pixY - p2
                          End With
                         PY = 1
                         Else
@@ -1673,8 +1673,8 @@ With mybasket
                     If ddd.name = "PrinterDocument1" Then
                         getnextpage
                          With nr
-                         .Top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .Top + pixY - p2
+                         .top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .top + pixY - p2
                          End With
                         PY = 1
                         Else
@@ -1726,8 +1726,8 @@ cont0:
         If ddd.name = "PrinterDocument1" Then
         getnextpage
          With nr
-         .Top = PY * pixY + mUAddPixelsTop
-          .Bottom = .Top + pixY - p2
+         .top = PY * pixY + mUAddPixelsTop
+          .Bottom = .top + pixY - p2
          End With
         PY = 1
         Else
@@ -1746,8 +1746,8 @@ cont0:
             With nr
                .Left = PX * pixX
                .Right = .Left + pixX
-               .Top = PY * pixY + mUAddPixelsTop
-               .Bottom = .Top + pixY - p2
+               .top = PY * pixY + mUAddPixelsTop
+               .Bottom = .top + pixY - p2
             End With
             rTop = PY * pixY
             rBottom = rTop + pixY - plusone
@@ -1767,7 +1767,7 @@ cont0:
         With nr2
             .Left = PX * pixX
             .Right = (PX + Len(what$)) * pixX + 1
-            .Top = rTop
+            .top = rTop
             .Bottom = rBottom
         End With
         FillBack ddd.hDC, nr2, mybasket.Paper
@@ -1820,8 +1820,8 @@ r1 = Len(what$) - 1
                     If ddd.name = "PrinterDocument1" Then
                         getnextpage
                          With nr
-                         .Top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .Top + pixY - p2
+                         .top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .top + pixY - p2
                          End With
                         PY = 1
                         Else
@@ -1843,8 +1843,8 @@ r1 = Len(what$) - 1
                     If ddd.name = "PrinterDocument1" Then
                         getnextpage
                          With nr
-                         .Top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .Top + pixY - p2
+                         .top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .top + pixY - p2
                          End With
                         PY = 1
                         Else
@@ -2705,7 +2705,7 @@ If Form1.Visible Then
     Set ff = Form1
     End If
     x = ff.Left / DXP
-    y = ff.Top / DYP
+    y = ff.top / DYP
     If useform1 Then Form1.Visible = False
     ff.Hide
     Sleep 50
@@ -2737,11 +2737,11 @@ With mb
 ar.Left = 0
 ar.Bottom = d.Height / dv15
 ar.Right = d.Width / dv15
-ar.Top = .mysplit * .Yt / dv15
+ar.top = .mysplit * .Yt / dv15
 p = .Yt / dv15
-r = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.Top), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.Top + p), SRCCOPY)
+r = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.top), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.top + p), SRCCOPY)
 
- ar.Top = ar.Bottom - p
+ ar.top = ar.Bottom - p
 FillBack d.hDC, ar, .Paper
 .curpos = 0
 .currow = .My - 1
@@ -2755,9 +2755,9 @@ With mb
 ar.Left = 0
 ar.Bottom = d.ScaleY(d.Height, 1, 3)
 ar.Right = d.ScaleX(d.Width, 1, 3)
-ar.Top = d.ScaleY(.mysplit * .Yt, 1, 3)
+ar.top = d.ScaleY(.mysplit * .Yt, 1, 3)
 p = d.ScaleY(.Yt, 1, 3)
-r = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.Top + p), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.Top), SRCCOPY)
+r = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.top + p), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.top), SRCCOPY)
 d.Line (0, .mysplit * .Yt)-(d.ScaleWidth, .mysplit * .Yt + .Yt), .Paper, BF
 .currow = .mysplit
 .curpos = 0
@@ -3002,33 +3002,33 @@ SetTextBasketBack dq, mybasket
                       nomoveLCTC dq, mybasket, y&, c& + x&, ins&
                       iamactive = False
            Else
-                If Not (GetForegroundWindow = Screen.ActiveForm.hWND And Screen.ActiveForm.name = "Form1") Then
+                If Not (GetForegroundWindow = Screen.ActiveForm.hWnd And Screen.ActiveForm.name = "Form1") Then
                  
                       DestroyCaret
                       nomoveLCTC dq, mybasket, y&, c& + x&, ins&
                       iamactive = False
              Else
-                         If ShowCaret(dq.hWND) = 0 Then
-                                   HideCaret dq.hWND
+                         If ShowCaret(dq.hWnd) = 0 Then
+                                   HideCaret dq.hWnd
                                    .currow = y&
                                    .curpos = c& + x&
                                    LCTCB dq, mybasket, ins&
-                                   ShowCaret dq.hWND
+                                   ShowCaret dq.hWnd
                          End If
                 End If
                 End If
      Else
   If Not Screen.ActiveForm Is Nothing Then
-            If GetForegroundWindow = Screen.ActiveForm.hWND And Screen.ActiveForm.name = "Form1" Then
+            If GetForegroundWindow = Screen.ActiveForm.hWnd And Screen.ActiveForm.name = "Form1" Then
            
                           nomoveLCTC dq, mybasket, y&, c& + x&, ins&
                              iamactive = True
-                              If ShowCaret(dq.hWND) = 0 And Screen.ActiveForm.name = "Form1" Then
-                                   HideCaret dq.hWND
+                              If ShowCaret(dq.hWnd) = 0 And Screen.ActiveForm.name = "Form1" Then
+                                   HideCaret dq.hWnd
                                    .currow = y&
                                    .curpos = c& + x&
                                    LCTCB dq, mybasket, ins&
-                                   ShowCaret dq.hWND
+                                   ShowCaret dq.hWnd
                          End If
                          End If
             End If
@@ -3333,25 +3333,25 @@ If SzOne < 4 Then SzOne = 4
     If Not Form1.WindowState = 0 Then Form1.WindowState = 0
     Sleep 10
     If Form1.WindowState = 0 Then
-        Form1.Move .Left, .Top, .Width - 1, .Height - 1
-        If Form1.Top <> .Left Or Form1.Left <> .Top Then
+        Form1.Move .Left, .top, .Width - 1, .Height - 1
+        If Form1.top <> .Left Or Form1.Left <> .top Then
             Form1.Cls
-            Form1.Move .Left, .Top, .Width - 1, .Height - 1
+            Form1.Move .Left, .top, .Width - 1, .Height - 1
         End If
     Else
         Sleep 100
         On Error Resume Next
         Form1.WindowState = 0
-        Form1.Move .Left, .Top, .Width - 1, .Height - 1
-        If Form1.Top <> .Top Or Form1.Left <> .Left Then
+        Form1.Move .Left, .top, .Width - 1, .Height - 1
+        If Form1.top <> .top Or Form1.Left <> .Left Then
         Form1.Cls
-        Form1.Move .Left, .Top, .Width - 1, .Height - 1
+        Form1.Move .Left, .top, .Width - 1, .Height - 1
         End If
     End If
 NoBackFormFirstUse = False
 If players(-1).MAXXGRAPH <> 0 Then ClearScrNew Form1, players(-1), 0&
 Form1.DIS.Visible = True
-FrameText d, SzOne, (.Width + .Left - 1 - Form1.Left), (.Height + .Top - 1 - Form1.Top), PaperOne
+FrameText d, SzOne, (.Width + .Left - 1 - Form1.Left), (.Height + .top - 1 - Form1.top), PaperOne
 End With
 Form1.DIS.backcolor = mycolor(PaperOne)
 If lckfrm = 0 Then
@@ -3546,14 +3546,14 @@ With Form1.TEXT1
         .NumberIntOnly = UseIntOnly
         OLDV$ = v$
         ScreenEdit bb, v$, x&, y&, wi& - 1, Hi&, wh&, , n, shiftlittle
-        If Result = 99 Then v$ = OLDV$
+        If result = 99 Then v$ = OLDV$
         .NumberIntOnly = False
         .NumberOnly = False
     Else
     .glistN.UseTab = True
         OLDV$ = v$
         ScreenEdit bb, v$, x&, y&, wi& - 1, Hi&, wh&, , n, shiftlittle
-        If Result = 99 And Hi& = wi& Then v$ = OLDV$
+        If result = 99 And Hi& = wi& Then v$ = OLDV$
     End If
     .showparagraph = oldshow
     .glistN.UseTab = UseTabInForm1Text1
@@ -3596,7 +3596,7 @@ With Form1.TEXT1
 'MyDoEvents
 ProcTask2 bstack
 .glistN.UseTab = True
-Hook Form1.hWND, Nothing '.glistN
+Hook Form1.hWnd, Nothing '.glistN
 .AutoNumber = Not Form1.EditTextWord
 
 .UsedAsTextBox = False
@@ -3653,11 +3653,11 @@ If bstack.toback Then
 
 Form1.TEXT1.Move x& * .Xt, y& * .Yt, (x1& - x&) * .Xt + .Xt, (y1& - y&) * .Yt + .Yt
 Else
-Form1.TEXT1.Move x& * .Xt + d.Left, y& * .Yt + d.Top, (x1& - x&) * .Xt + .Xt, (y1& - y&) * .Yt + .Yt
+Form1.TEXT1.Move x& * .Xt + d.Left, y& * .Yt + d.top, (x1& - x&) * .Xt + .Xt, (y1& - y&) * .Yt + .Yt
 End If
 End With
 If d.ForeColor = tcol Then
-Form1.TEXT1.glistN.RepaintFromOut d.Image, d.Left, d.Top
+Form1.TEXT1.glistN.RepaintFromOut d.Image, d.Left, d.top
 End If
 
 Set .mDoc = aaa
@@ -3739,7 +3739,7 @@ Set Form1.TEXT1.mDoc = New Document
 Form1.TEXT1.glistN.UseTab = UseTabInForm1Text1
 Form1.TEXT1.glistN.BackStyle = 0
 Set Form1.Point2Me = Nothing
-UnHook Form1.hWND
+UnHook Form1.hWnd
 Form1.KeyPreview = True
 
 INK$ = vbNullString
@@ -3773,7 +3773,7 @@ If d.Visible Then d.SetFocus
 With Form1.TEXT1
 'MyDoEvents
 ProcTask2 bstack
-Hook Form1.hWND, Nothing
+Hook Form1.hWnd, Nothing
 '.Filename = VbNullString
 .AutoNumber = Not Form1.EditTextWord
 
@@ -3876,10 +3876,10 @@ Else
 End If
 Else
 If maxchar > 0 Then
-.Move x& * prive.Xt + d.Left - ExcludeThisLeft, y& * prive.Yt + d.Top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt
-.glistN.RepaintFromOut d.Image, d.Left, d.Top
+.Move x& * prive.Xt + d.Left - ExcludeThisLeft, y& * prive.Yt + d.top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt
+.glistN.RepaintFromOut d.Image, d.Left, d.top
 Else
-.Move x& * prive.Xt + d.Left, y& * prive.Yt + d.Top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt
+.Move x& * prive.Xt + d.Left, y& * prive.Yt + d.top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt
 End If
 End If
 If a$ <> "" Then
@@ -3991,7 +3991,7 @@ End If
 Form1.KeyPreview = True
 If maxchar > 0 Then Form1.TEXT1.glistN.DragEnabled = ot
 
-UnHook Form1.hWND
+UnHook Form1.hWnd
 INK$ = vbNullString
 Form1.TEXT1.glistN.UseTab = False
 escok = oldesc
@@ -4175,7 +4175,7 @@ Dim s$, prive As basket
 If NOEXECUTION Then Exit Sub
 Set d = bstack.Owner
 prive = players(GetCode(d))
-Hook Form1.hWND, Form1.List1
+Hook Form1.hWnd, Form1.List1
 Dim ot As Boolean, drop
 With Form1.List1
 .Font.name = d.Font.name
@@ -4206,9 +4206,9 @@ End If
 Else
 
 If .BorderStyle = 0 Then
-.Move x& * prive.Xt + d.Left, y& * prive.Yt + d.Top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt + .HeadlineHeight * dv15
+.Move x& * prive.Xt + d.Left, y& * prive.Yt + d.top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt + .HeadlineHeight * dv15
 Else
-.Move x& * prive.Xt - dv15 + d.Left, y& * prive.Yt - dv15 + d.Top, (x1& - x&) * prive.Xt + prive.Xt + 2 * dv15, (y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15
+.Move x& * prive.Xt - dv15 + d.Left, y& * prive.Yt - dv15 + d.top, (x1& - x&) * prive.Xt + prive.Xt + 2 * dv15, (y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15
 End If
 End If
 .enabled = True
@@ -4268,16 +4268,16 @@ If a$ = vbNullString Then
 
     If .HeadlineHeight <> oldh Then
     If .BorderStyle = 0 Then
-    If ((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .Top > ScrY() Then
-    .Move .Left, .Top - (((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .Top - ScrY()), (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt + .HeadlineHeight * dv15
+    If ((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .top > ScrY() Then
+    .Move .Left, .top - (((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .top - ScrY()), (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt + .HeadlineHeight * dv15
     Else
-.Move .Left, .Top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt + .HeadlineHeight * dv15
+.Move .Left, .top, (x1& - x&) * prive.Xt + prive.Xt, (y1& - y&) * prive.Yt + prive.Yt + .HeadlineHeight * dv15
 End If
 Else
-If ((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .Top > ScrY() Then
-.Move .Left, .Top - (((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .Top - ScrY()), (x1& - x&) * prive.Xt + prive.Xt + 2 * dv15, (y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15
+If ((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .top > ScrY() Then
+.Move .Left, .top - (((y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15) + .top - ScrY()), (x1& - x&) * prive.Xt + prive.Xt + 2 * dv15, (y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15
 Else
-.Move .Left, .Top, (x1& - x&) * prive.Xt + prive.Xt + 2 * dv15, (y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15
+.Move .Left, .top, (x1& - x&) * prive.Xt + prive.Xt + 2 * dv15, (y1& - y&) * prive.Yt + prive.Yt + 2 * dv15 + .HeadlineHeight * dv15
 End If
 End If
   
@@ -4334,7 +4334,7 @@ MOUT = False: NOEXECUTION = False
   End If
 NOEDIT = True
 Set d = Nothing
-UnHook Form1.hWND
+UnHook Form1.hWnd
 Form1.KeyPreview = True
 Targets = ot
 End Sub
@@ -4580,7 +4580,7 @@ ElseIf myCut Then
 Dim mmxx1, mmyy1
 mmxx1 = .mx * .Xt
 mmyy1 = .My * .Yt
-dd.Move dd.Left, dd.Top, mmxx1, mmyy1
+dd.Move dd.Left, dd.top, mmxx1, mmyy1
 'dd.width = .mx * .Xt
 'dd.Height = .My * .Yt
 End If
@@ -4701,12 +4701,12 @@ If Form1.Visible = False Then
     End If
 Else
     Console = FindFormSScreen(Form1)
-If Form1.Top >= VirtualScreenHeight() Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
+If Form1.top >= VirtualScreenHeight() Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
 End If
 If dq.Visible = False Then dq.Visible = True
 If exWnd = 0 Then Form1.KeyPreview = True
 QRY = True
-If GetForegroundWindow = Form1.hWND Then
+If GetForegroundWindow = Form1.hWnd Then
 If exWnd = 0 Then dq.SetFocus
 End If
 
@@ -4740,7 +4740,7 @@ If Not bstack.IamThread Then
  If Not iamactive Then
  If Not Form1.Visible Then
  If Form1.WindowState = 1 Then Form1.WindowState = 0
- If Form1.Top > VirtualScreenHeight() - 100 Then Form1.Top = ScrInfo(Console).Top
+ If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top
  Form1.Visible = True
  If Form3.Visible Then Form3.skiptimer = True: Form3.WindowState = 0
  End If
@@ -4757,7 +4757,7 @@ LCTbasketCur dq, prive                       ' here
  End If
  End If
  End If
-If Not QRY Then HideCaret dq.hWND:   Exit Do
+If Not QRY Then HideCaret dq.hWnd:   Exit Do
 
  BLOCKkey = False
  If USELIST Then
@@ -4827,7 +4827,7 @@ LCTbasket dq, prive, .currow, .curpos
   
    End If
       If iamactive Then
- If ShowCaret(dq.hWND) = 0 Then
+ If ShowCaret(dq.hWnd) = 0 Then
  
    LCTCB dq, prive, 0
   End If
@@ -4837,11 +4837,11 @@ MyDoEvents1 Form1, , True
 End If
 
  If Screen.ActiveForm Is Nothing Then
- iamactive = False:  If ShowCaret(dq.hWND) <> 0 Then HideCaret dq.hWND
+ iamactive = False:  If ShowCaret(dq.hWnd) <> 0 Then HideCaret dq.hWnd
 Else
  
-    If Not GetForegroundWindow = Screen.ActiveForm.hWND Then
-    iamactive = False:  If ShowCaret(dq.hWND) <> 0 Then HideCaret dq.hWND
+    If Not GetForegroundWindow = Screen.ActiveForm.hWnd Then
+    iamactive = False:  If ShowCaret(dq.hWnd) <> 0 Then HideCaret dq.hWnd
   
     End If
     End If
@@ -4865,7 +4865,7 @@ Else
 If Screen.ActiveForm.name <> "Form1" Then
 iamactive = False
 Else
-iamactive = GetForegroundWindow = Screen.ActiveForm.hWND
+iamactive = GetForegroundWindow = Screen.ActiveForm.hWnd
 End If
 End If
 If FKey > 0 Then
@@ -4969,7 +4969,7 @@ cont12345:
                     fr1 = 1
                     If (s$ = vbNullString And a$ = "-") Or IsNumberQuery(s$ + a$, fr1, p, fr2) Then
                             If fr2 - 1 = RealLen(s$) + 1 Or (s$ = vbNullString And a$ = "-") Then
-   If ShowCaret(dq.hWND) <> 0 Then DestroyCaret
+   If ShowCaret(dq.hWnd) <> 0 Then DestroyCaret
                 If a$ = "." Then
                 If Not NoUseDec Then
                     If OverideDec Then
@@ -4992,7 +4992,7 @@ GdiFlush
                     
                     End If
             Else
-            If ShowCaret(dq.hWND) <> 0 Then DestroyCaret
+            If ShowCaret(dq.hWnd) <> 0 Then DestroyCaret
                    If safe$ <> "" Then
         a$ = safe$: safe$ = vbNullString
 End If
@@ -5214,12 +5214,12 @@ End If
 If Not Form4.Visible Then Form4.Show , Form1: bypassshow = True
 
 If bypassshow Then
-myform Form4, ScrInfo(monitor).Width - vH_x * Helplastfactor + ScrInfo(monitor).Left, ScrInfo(monitor).Height - vH_y * Helplastfactor + ScrInfo(monitor).Top, vH_x * Helplastfactor, vH_y * Helplastfactor, True, Helplastfactor
+myform Form4, ScrInfo(monitor).Width - vH_x * Helplastfactor + ScrInfo(monitor).Left, ScrInfo(monitor).Height - vH_y * Helplastfactor + ScrInfo(monitor).top, vH_x * Helplastfactor, vH_y * Helplastfactor, True, Helplastfactor
 Else
 If Screen.Width <= Form4.Left - ScrInfo(monitor).Left Then
-myform Form4, Screen.Width - vH_x * Helplastfactor + ScrInfo(monitor).Left, Form4.Top, vH_x * Helplastfactor, vH_y * Helplastfactor, True, Helplastfactor
+myform Form4, Screen.Width - vH_x * Helplastfactor + ScrInfo(monitor).Left, Form4.top, vH_x * Helplastfactor, vH_y * Helplastfactor, True, Helplastfactor
 Else
-myform Form4, Form4.Left, Form4.Top, vH_x * Helplastfactor, vH_y * Helplastfactor, True, Helplastfactor
+myform Form4, Form4.Left, Form4.top, vH_x * Helplastfactor, vH_y * Helplastfactor, True, Helplastfactor
 End If
 End If
 Form4.moveMe
@@ -9233,7 +9233,7 @@ If Not Screen.ActiveForm Is Nothing Then
      If x.name = "Form1" Or x.name = "GuiM2000" Or x.name = "Form2" Or x.name = "Form4" Then
          If x.Visible And x.enabled Then
              If catchit Then x.SetFocus: Exit Sub
-             If x.hWND = GetForegroundWindow Then
+             If x.hWnd = GetForegroundWindow Then
              catchit = True
              End If
          End If
@@ -10348,13 +10348,13 @@ Public Function LONGNAME(Spath As String) As String
 LONGNAME = ExtractPath(Spath, , True)
 End Function
 Public Function ExpEnvirStr(strInput) As String
-Dim Result As Long
+Dim result As Long
 Dim strOutput As String
 '' Two calls required, one to get expansion buffer length first then do expansion
 strOutput = space$(1000)
-Result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), Result)
-strOutput = space$(Result)
-Result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), Result)
+result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), result)
+strOutput = space$(result)
+result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), result)
 ExpEnvirStr = StripTerminator(strOutput)
 End Function
 
@@ -10963,7 +10963,7 @@ End Sub
 Sub NeoLet(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = MyLet(ObjFromPtr(basestackLP), rest$, Lang)
 End Sub
-Function GetArrayReference(bstack As basetask, a$, v$, PP, Result As mArray, index As Long) As Boolean
+Function GetArrayReference(bstack As basetask, a$, v$, PP, result As mArray, index As Long) As Boolean
 Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
 If PP Is Nothing Then Exit Function
 If Not TypeOf PP Is mArray Then
@@ -11033,11 +11033,11 @@ p = 0
                     Loop
                     
                     
-                        Set Result = pppp
+                        Set result = pppp
                         index = w2
     End If
 End Function
-Function ProcessArray(bstack As basetask, a$, v$, PP, Result) As Boolean
+Function ProcessArray(bstack As basetask, a$, v$, PP, result) As Boolean
 Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
 If Not Typename$(PP) = "mArray" Then Exit Function
 Set pppp = PP
@@ -11101,9 +11101,9 @@ p = 0
                     dn = dn + 1
                     Loop
                     If MyIsObject(pppp.item(w2)) Then
-                        Set Result = pppp.item(w2)
+                        Set result = pppp.item(w2)
                     Else
-                        Result = pppp.item(w2)
+                        result = pppp.item(w2)
                     End If
     End If
 End Function
@@ -19908,5 +19908,369 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
     Exit Function
 
 End Function
+Public Function TraceThis(bstack As basetask, di As Object, b$, w$, SBB$) As Boolean
+    TraceThis = True
+    PrepareLabel bstack
+    Form2.label1(1) = w$
+    Form2.label1(2) = GetStrUntil(vbCrLf, b$ & vbCrLf, False)
+    If Len(b$) = 0 Then
+    WaitShow = 0
+    bypassST = False
+    Set Form2.Process = bstack
+    Exit Function
+    Else
+        If WaitShow = 0 Or Len(b$) < WaitShow Then
+            WaitShow = 0
+            If bstack.OriginalCode < 0 Then
+                SBB$ = GetNextLine((var(-bstack.OriginalCode).code$))
+            Else
+                SBB$ = GetNextLine((sbf(Abs(bstack.OriginalCode)).sb))
+            End If
+            If Left$(SBB$, 10) = "'11001EDIT" Then
+                TestShowSub = Mid$(sbf(Abs(bstack.OriginalCode)).sb, Len(SBB$) + 3)
+                If TestShowSub = vbNullString Then
+                    TestShowSub = Mid$(sbf(FindPrevOriginal(bstack)).sb, Len(SBB$) + 3)
+                End If
+                If InStr(TestShowSub, b$) = 0 Then
+                    WaitShow = Len(b$)
+                End If
+            Else
+                If bstack.OriginalCode <> 0 Then
+                    If bstack.OriginalCode < 0 Then
+                        TestShowSub = var(-bstack.OriginalCode).code$
+                    Else
+                        TestShowSub = sbf(Abs(bstack.OriginalCode)).sb
+                    End If
+                Else
+                    If bstack.IamThread Then
+                        If bstack.Process Is Nothing Then
+                        Else
+                            TestShowSub = bstack.Process.CodeData
+                        End If
+                    Else
+                        TestShowSub = b$
+                    End If
+                End If
+            End If
+        End If
+        If bstack.addlen Then
+            If Len(TestShowSub) - bstack.addlen - Len(b$) > 0 Then
+                TestShowStart = Len(TestShowSub) - bstack.addlen - Len(b$) + 1
+            Else
+                TestShowStart = 1
+            End If
+        Else
+            TestShowStart = Len(TestShowSub) - Len(b$) + 1 ' rinstr(TestShowSub, b$)
+        End If
+        If TestShowStart <= 0 Then
+            TestShowStart = rinstr(TestShowSub, Mid$(b$, 2)) - 1
+        End If
+     bypassST = False
+          
+    Set Form2.Process = bstack
+    stackshow bstack
+        
+    End If
+    
+    If Not Form1.Visible Then
+        Form1.Show , Form5   'OK
+    End If
 
+    If STbyST Then
+        STbyST = False
+        If Not STEXIT Then
+            If Not STq Then
+                Form2.gList4.ListIndex = 0
+            End If
+        End If
+        If Not TaskMaster Is Nothing Then
+            If TaskMaster.QueueCount > 0 And TaskMaster.Processing Then TaskMaster.StopProcess
+        End If
+      
+        Do
+            BLOCKkey = False
+            If Not IsWine Then If di.Visible Then di.Refresh
+            ProcTask2 bstack
+        Loop Until STbyST Or STq Or STEXIT Or bypassST Or NOEXECUTION Or myexit(bstack) Or Not Form2.Visible
+
+        If Not TaskMaster Is Nothing Then
+           If TaskMaster.QueueCount > 0 And Not TaskMaster.Processing Then TaskMaster.StartProcess
+        End If
+        If Not STEXIT Then
+            If Not STq Then
+                Form2.gList4.ListIndex = 0
+            End If
+        End If
+        STq = False
+        If STEXIT Then
+            NOEXECUTION = True
+            trace = False
+            STEXIT = False
+            TraceThis = False
+            Exit Function
+        End If
+    Else
+If tracecounter > 0 Then If Not IsWine Then MyDoEvents1 Form2, True
+
+    End If
+    If STEXIT Then
+        trace = False
+        STEXIT = False
+        TraceThis = False
+        Exit Function
+    End If
+End Function
+
+
+Function DriveSerial1(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
+    Dim s$
+    If IsStrExp(bstack, a$, s$) Then
+    r = SG * DriveSerial(Left$(s$, 3))
+  
+    
+    
+    DriveSerial1 = FastSymbol(a$, ")", True)
+    Else
+         MissParam a$
+    End If
+End Function
+Function MakeForm(basestack As basetask, rest$) As Boolean
+On Error Resume Next
+MakeForm = True
+Dim Scr As Object, XX As Single, p As Variant, x1 As Long, y1 As Long, x As Double, y As Double
+Dim w3 As Long, w4 As Long, sX As Double, adjustlinespace As Boolean, SZ As Single, reduce As Single
+Dim monitor As Long
+reduce = 1
+Set Scr = basestack.Owner
+'monitor = FindFormSScreen(scr)
+
+Dim basketcode As Long, mAddTwipsTop As Long
+
+
+If Typename(Scr) Like "Gui*" Then
+If Typename(Scr) Like "GuiM2000" Then FastSymbol rest$, "!": GoTo there1
+ElseIf Scr.name = "Form1" Then
+
+Else
+If FastSymbol(rest$, "!") Then reduce = 0.9
+there1:
+
+basketcode = GetCode(Scr)
+'If players(basketcode).double Then SetNormal scr
+With players(basketcode)
+SetNormal Scr
+mAddTwipsTop = .uMineLineSpace  ' the basic
+
+If IsExp(basestack, rest$, p) Then
+    If p < 10 Then p = 10
+    x = 4
+    XX = 4
+    If Scr.name = "DIS" Then
+    Do
+    y = CDbl(XX)
+    XX = CSng(x)
+    nForm basestack, XX, w3, w4, mAddTwipsTop  'using line spacing
+    If XX > CSng(x) Then x = CDbl(XX)
+    
+    If Form1.Width * reduce < w3 * p Then Exit Do
+    x = x + 0.25
+    Loop
+ 
+    
+    Else
+    Do
+    
+    y = CDbl(XX)
+    XX = CSng(x)
+
+    nForm basestack, XX, w3, w4, mAddTwipsTop  'using line spacing
+    If XX > CSng(x) Then x = CDbl(XX)
+    
+    If Scr.Width * reduce < w3 * p Then Exit Do
+    
+    x = x + 0.4
+    Loop
+    End If
+    x = y
+    sX = 0
+   
+    If FastSymbol(rest$, ",") Then
+        If IsExp(basestack, rest$, sX) Then
+        '' ok
+        
+       mAddTwipsTop = 0  ' find a new one
+       players(basketcode).MineLineSpace = 0
+       players(basketcode).uMineLineSpace = 0
+        adjustlinespace = True
+    ''    mmx = scr.Width
+''mmy = scr.Height
+        Else
+        MakeForm = False
+        MissNumExpr
+        Set Scr = Nothing
+        Exit Function
+        End If
+   
+End If
+If FastSymbol(rest$, ";") And Scr.name = "DIS" Then
+adjustlinespace = False
+If IsWine Then
+    Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top, ScrInfo(Console).Width - 1, ScrInfo(Console).Height - 1
+Else
+    Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top, ScrInfo(Console).Width, ScrInfo(Console).Height
+End If
+    Form1.backcolor = players(-1).Paper
+    
+Sleep 1
+End If
+nForm basestack, CSng(x), w3, w4, 0
+Dim mmx As Long, mmy As Long
+If sX = 0 Then
+SZ = CSng(x)
+mmx = Scr.Width * reduce
+ If Scr.name = "DIS" Then
+ mmy = CLng(mmx * Form1.Height / Form1.Width) ' WHY 3/4 ??
+ Else
+ mmy = Scr.Width * reduce
+ End If
+ players(basketcode).MineLineSpace = mAddTwipsTop
+ players(basketcode).uMineLineSpace = mAddTwipsTop
+FrameText Scr, SZ, CLng(w3 * p), mmy, players(basketcode).Paper
+Else
+If Scr.name = "DIS" Then
+If (sX * w4) > Form1.Height * reduce Then
+y = Form1.Height * reduce
+While sX * w4 > Form1.Height * reduce
+
+XX = y / (dv20 * sX)
+
+nForm basestack, XX, w3, w4, 0  'using no spacing so we put a lot of lines
+x = CDbl(XX)
+y = y * 0.9
+Wend
+
+
+End If
+Else
+If sX * w4 > Scr.Height * reduce Then
+y = Scr.Height * reduce
+Do While sX * w4 > Scr.Height * reduce
+
+XX = y / (dv20 * sX)
+nForm basestack, XX, w3, w4, 0  'using no spacing so we put a lot of lines
+If x = CDbl(XX) Then Exit Do
+x = CDbl(XX)
+y = y * 0.9
+Loop
+
+
+End If
+
+End If
+If Scr.name = "DIS" Then
+If Not adjustlinespace Then If Scr.Height * reduce >= Form1.Height * reduce - dv15 Then mAddTwipsTop = dv15 * (((Scr.Height * reduce - sX * w4) / sX / 2) \ dv15)
+End If
+nForm basestack, (x), w3, w4, mAddTwipsTop
+SZ = CSng(x)
+'If mmx < scr.Width Then
+mmx = Scr.Width * reduce
+
+
+'If mmx < scr.Width Then
+mmy = Scr.Height * reduce
+If adjustlinespace Then
+If Scr.name = "DIS" Then
+mAddTwipsTop = dv15 * (((Form1.Height * reduce - sX * w4) / sX / 2) \ dv15)
+
+Else
+mAddTwipsTop = dv15 * (((Scr.Height * reduce - sX * w4) / sX / 2) \ dv15)
+End If
+sX = CLng(sX * (w4 + mAddTwipsTop * 2))
+Else
+sX = CLng(sX * w4)
+End If
+players(basketcode).MineLineSpace = mAddTwipsTop
+players(basketcode).uMineLineSpace = mAddTwipsTop
+FrameText Scr, SZ, CLng(w3 * p), CLng(sX), players(basketcode).Paper, Not (Scr.name = "DIS")
+
+End If
+
+
+ElseIf FastSymbol(rest$, ";") And Scr.name = "DIS" Then
+
+
+
+If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top
+If IsWine Then
+         Form1.Width = ScrInfo(Console).Width - 1
+         Form1.Height = ScrInfo(Console).Height
+         Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
+Else
+        Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top, ScrInfo(Console).Width, ScrInfo(Console).Height
+    
+End If
+Form1.backcolor = players(-1).Paper
+Form1.Cls
+With players(-1)
+        .mysplit = 0
+        .MAXXGRAPH = Form1.Width
+        .MAXYGRAPH = Form2.Height
+        SetText Form1
+        End With
+MyMode Scr
+ElseIf Scr.name = "DIS" Then
+
+w3 = Form1.Left + Scr.Left
+w4 = Form1.top + Scr.top
+If IsWine And Form1.Width = ScrInfo(Console).Width Then Form1.Width = ScrInfo(Console).Width - dv15
+If Form1.top > VirtualScreenHeight() - 100 Then Form1.top = ScrInfo(Console).top: w4 = Form1.top + Scr.top
+scrMove00 Scr
+If IsWine Then
+    If Scr.Width = ScrInfo(Console).Width Then
+       Form1.Width = Scr.Width - 1
+    Else
+        Form1.Width = Scr.Width
+    End If
+    Form1.Height = Scr.Height
+    Form1.Move w3, w4
+Else
+    Form1.Move w3, w4, Scr.Width, Scr.Height
+End If
+Form1.Cls
+        With players(-1)
+        .mysplit = 0
+        .MAXXGRAPH = Form1.Width
+        .MAXYGRAPH = Form2.Height
+        SetText Form1
+        End With
+SetText Scr
+
+Set Scr = Nothing
+Exit Function
+Else
+'' CROP LAYER
+If basketcode > 0 Then
+With players(basketcode)
+.MAXXGRAPH = .mx * .Xt
+.MAXYGRAPH = .My * .Yt
+End With
+With Form1.dSprite(basestack.tolayer)
+.Move .Left, .top, players(basketcode).MAXXGRAPH, players(basketcode).MAXYGRAPH
+End With
+
+End If
+End If
+
+players(basketcode).MineLineSpace = mAddTwipsTop
+players(basketcode).uMineLineSpace = mAddTwipsTop
+MakeForm = True
+.curpos = 0
+.currow = 0
+
+End With
+End If
+SetText Scr
+
+
+End Function
 

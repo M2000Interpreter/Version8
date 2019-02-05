@@ -3979,7 +3979,10 @@ Print "Done"
 
 }
 MODULE GLOBAL INFO {dir user
-Form 68,52
+\\ Window has the number of Monitor
+\\ We call SafeForm a global module.
+\\ Forthm                          
+SafeForm Window, 68,52,1.5, True
 backcolor=point
 oldpen=pen
 Refresh 500
@@ -4070,7 +4073,7 @@ save info, info
 Print "Done"
 }
 MODULE GLOBAL M2000_EDITOR_INFORMATION {thread.plan sequential   ' can run as concurrent too
-Form 78,50
+Cls,0
 backcolor=point
 oldpen=pen
 Refresh 500
@@ -4620,5 +4623,30 @@ Function Form1.MouseDown {
 A$=key$
 Declare Button1 Nothing
 Declare Form1 Nothing
+}
+MODULE GLOBAL SAFEFORM {read s=1, x=80, y=52, t=1, no_linespace=false
+back {
+	cls 11, 0
+}
+{
+	zx=x+t*4
+	zy=y+t*4
+	linespace 0
+	window 9, s
+	sx=scale.x
+	sy=scale.y
+	if no_linespace then
+	form zx, zy;
+	else
+	form zx, zy
+	end if
+	if scale.x>sx or scale.y>sy then
+	t++
+	loop
+	else
+	mode mode, scale.x*x/zx, scale.y*y/zy
+	end if
+	print width, height
+}
 }
 INFO

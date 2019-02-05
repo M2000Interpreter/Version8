@@ -2207,23 +2207,37 @@ End If
 If kind = 0 Then drop$ = "$(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 If kind = 0 Then drop$ = "~(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 If kind = 0 Then
-    If MaybeIsSymbol(a$, "-", ">") Then
+  If FastSymbol(a$, "->", , 2) Then
+    pos2 = k - Len(a$) - 1
     addone2000 pos2, 11
-    FastSymbol a$, "->", , 2
+        pos2 = pos2 + 2
+        a$ = LTrim$(a$)
         pos2 = k - Len(a$) + 1
-        If MaybeIsSymbol(a$, "{") Then
-            localfeedthis = 0
+        addone2000 pos2, 14
+       ' pos2 = k - Len(a$) + 1
+        If FastSymbol(a$, "{") Then
+        a$ = LTrim$(a$)
+        pos2 = k - Len(a$) + 2
+        
+localfeedthis = 0
             If col((UBound(col()) \ 2) * 2) <> 14 Then addone2000 pos2, 14
                  localfeedthis = 0
-            FastSymbol a$, "{"
-            pos2 = k - Len(a$) + 1
+            '
+           pos2 = k - Len(a$) + 1
             addone2000 pos2 - 1, 14
            If pos2 <= k Then
-            drop$ = block(a$) + Chr$(13)
-            pos1 = Len(drop$) + 1
-           ColorizeInnerStatements drop$, k, pos2, localfeedthis
-              a$ = Mid$(a$, pos1)
+           If FastSymbol(a$, "{") Then
+            drop$ = block(a$)
+            If Len(drop$) > 0 Then
+           ColorizeInnerStatements drop$, k - Len(a$), pos2, localfeedthis
+           If Len(a$) > 0 Then ColorizeInnerStatements a$, k, pos2, localfeedthis
               drop$ = vbNullString
+              Else
+              Exit Sub
+              End If
+              Else
+              ColorizeInnerStatements a$, k, pos2, localfeedthis
+              End If
            End If
             kind = 0
             drop$ = vbNullString
@@ -2319,6 +2333,7 @@ ElseIf MaybeIsSymbol(a$, ")") Then
   Else
   addone2000 pos2, 14
   End If
+  
   FastSymbol a$, ")"
     pos2 = k - Len(a$) + 1
   End If
@@ -2328,6 +2343,9 @@ GoTo again
 ElseIf MaybeIsSymbol(a$, "(", , True) Then
     addone2000 pos2, 14
     pos2 = k - Len(a$) + 1
+    'lastcol = 14
+   ' ColorizeExpressions2000 a$, k - Len(a$) + 1, pos2, feedthis
+   ' a$ = Mid$(a$, pos2)
    GoTo again
 ElseIf MaybeIsSymbol(a$, "{") Then
 addone2000 pos2, 15
@@ -2361,6 +2379,8 @@ If pos2 > 0 Then addone2000 pos2, 14
 
 
 End Sub
+
+
 
 Private Sub ColorizeExpressions(ByVal a$, k As Long, pos2 As Long, feedthis As Long)
 Dim drop$, pos1 As Long, kind As Long
@@ -3045,6 +3065,28 @@ Else
     End If
    
 End Function
+Function FastSymbol(a$, c$, Optional mis As Boolean = False, Optional cl As Long = 1) As Boolean
+Dim i As Long, j As Long
+'If Len(c$) <> cl Then Stop  ; only for check
+j = Len(a$)
+If j = 0 Then Exit Function
+i = MyTrimL(a$)
+If i > j Then Exit Function  ' this is not good
+If j - i < cl - 1 Then
+If mis Then MyEr "missing " & c$, "λείπει " & c$
+Exit Function
+End If
+'If c$ = Mid$(a$, i, cl) Then
+If InStr(c$, Mid$(a$, i, cl)) > 0 Then
+'a$ = Mid$(a$, MyTrimLi(a$, i + cl))
+a$ = Mid$(a$, cl + 1)
+'Mid$(a$, i, cl) = space$(cl)
+FastSymbol = True
+ElseIf mis Then
+MyEr "missing " & c$, "λείπει " & c$
+End If
+End Function
+
 Function IsLabelOnly2000(a$, r$) As Long 'ok
 
 Dim rr&, one As Boolean, c$, dot&, Extra&, num As Boolean
@@ -3679,7 +3721,7 @@ marvel2:
 drop$ = Mid$(a$, 1, pos1 - 1)
  ColorizeExpressions2000 drop$, k - Len(a$) + Len(drop$), pos2, feedthis
  If feedthis = 11 Or feedthis = 14 Or feedthis = 10 Then
- 
+ 'If kind < 5 Then lastcol = feedthis
 feedthis = 0
 End If
 newjump:
@@ -3694,9 +3736,9 @@ checkthistoo:
 If RTrim$(a$) = vbNullString Then
 If pos2 > 0 Then
 If feedthis <> 15 Then
-'If col((UBound(col()) \ 2) * 2) <> 11 Then
+
   If col((UBound(col()) \ 2) * 2) <> lastcol And pos2 < pos1 Then addone2000 pos2, lastcol
- ' End If
+
   End If
   Else
   makebase 14
@@ -3727,8 +3769,6 @@ End If
   addone2000 pos2, 14
     pos2 = k - Len(a$) + 1
   pos1 = 1
- ' drop$ = aheadstatus2000(a$, False, pos1)
-'GoTo marvel2
 
   End If
 ElseIf kind > 4 And onetime Then
@@ -3742,12 +3782,11 @@ If FastSymbol(a$, ",") Then
   End If
 
     If FastSymbol(a$, ")") Then
-    '' here
   addone2000 pos2, lastcol
     pos2 = k - Len(a$) + 1
   End If
   End If
-'' or here for again4
+
 
 here3:
 If kind > 0 Then
@@ -3933,6 +3972,11 @@ GoTo newjump
     If Mid$(a$, pos1 - 1, 1) = " " Then lastkind = 0
  
   a$ = Mid$(a$, pos1)
+End If
+If MaybeIsSymbol(a$, ":{") Then
+   
+    onetime = True
+    GoTo again
 End If
 If InStr(drop$, " ") = 0 Or kind >= 0 Then
 GoTo CheckThis
@@ -4120,6 +4164,7 @@ If IsNumberLabel(a$, drop$) Then
 If pos2 > 0 Then addone2000 pos2, 14
 
 End Sub
+
 
 Private Sub mDoc_ColorDataEvent1(thispara As Long, data1 As String, feedback As Long)
 col() = mDoc.Paracolordata(thispara)
