@@ -1,6 +1,6 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 11 active-X
+Version 9.7 Revision 12 active-X
 
 some bug removed
 
