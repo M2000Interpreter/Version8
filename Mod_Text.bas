@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 11
+Global Const Revision = 12
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2340,7 +2340,7 @@ On Error Resume Next
 EditTabWidth = 6
 tParam.cbSize = LenB(tParam)
 tParam.iTabLength = 6
-ReportTabWidth = 6
+ReportTabWidth = 8
 RoundDouble = False
 SetUp64 ' for Encoder64/Decoder64
 AskCancelGR = "ÁÊÕÑÏ"
@@ -22624,6 +22624,7 @@ Dim j As Long, c As Long, start As Long
 start = i
 Dim a1 As Boolean
 c = Len(s$)
+If i > c Then Exit Function
 If c < 1 Then Exit Function
 a1 = True
 Do
@@ -32812,6 +32813,10 @@ End Function
 Function newStart(basestack As basetask, rest$) As Boolean
 Dim Scr As Object, s$, pa As Long
 byPassCallback = False
+EditTabWidth = 6
+tParam.cbSize = LenB(tParam)
+tParam.iTabLength = 6
+ReportTabWidth = 8
 HaltLevel = -HaltLevel
 newStart = True
 Set Scr = basestack.Owner
@@ -32879,7 +32884,7 @@ Else
     basestack.toprinter = False
     players(DisForm).mypen = mycolor(PenOne)
     players(DisForm).Paper = mycolor(PaperOne)
-
+    players(DisForm).ReportTab = ReportTabWidth
     Form1.Cls
     
     original basestack1, "NEW:CLEAR"

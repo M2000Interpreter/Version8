@@ -51,60 +51,70 @@ print min(a(2-i),a(i)), min(a(2-i), a(i))
 print compare(a(i), a(2-i)), a(2-i), a(i)
 next i
 }
-MODULE GLOBAL D {
+MODULE GLOBAL D {\\ Identifiers in Greek language
+\\ see DR for the same program with statements in English language
+
+\\ [] return the pointer of last current stack, and leave an empty current stack
 
 Τμήμα Λατινικοί_Αριθμοί {
       Άδειασε
       Διαμέσου Αρχικοποίηση
       Έγγραφο Εγγ$
-      Ενώ όχι κενό {
+      Ενώ όχι κενό
             Διάβασε λατ$
             Τύπωσε λατ$;"=";ΤιμήΛατινικού$(λατ$)
             Εγγ$=λατ$+"="+ΤιμήΛατινικού$(λατ$)+{
             }
-      }
+      Τέλος Ενώ
       Πρόχειρο Εγγ$
       Τέλος
 Αρχικοποίηση:
       Συνάρτηση ΤιμήΛατινικού$(λατ$) {
             Άδειασε
-            Βάλε "CM", 900,"MD","CD", 400,"MD", "XC", 90,"DL", "XL", 40,"X", "IX",9,"V", "IV",4,"I"
+             ="άκυρο"           
+            Αν Φίλτρο$(λατ$,"MDCLXVI")<>"" Τότε Έξοδος
+            \\ θα μπουν ανάποδα, το τελευταίο πρώτο.
+            Βάλε "CM", "MD", "Q","CD", "MD","W", "XC", "DL", "E","XL", "X","R", "IX","V","T", "IV","I","Y"
             διπλό_λατινικό=[]
-            απλό_λατινικό=Σωρός:="M", 1000, "D", 500, "C",100, "L",50,"X", 10, "V", 5, "I",1
-            ="άκυρο"
+            \\ θα μπουν με το τελευταίο να είναι τελευταίο.
+            Σειρά "M", 1000, "Q",900,"D", 500,"W", 400,"C",100,"E",90, "L",50,"R", 40,"X", 10, "T", 9, "V", 5, "Y", 4, "I",1
+            απλό_λατινικό=[]
             σύνολο=0
             μια_τιμή=0
             μετρητής=0
             Σωρός διπλό_λατινικό {
                   Αν κενό Τότε Έξοδος
-                  Διάβασε μη_έγγυροι_χαρακτήρες$, μια_τιμή, χαρακτ$
-                  i=Θέση(λατ$,χαρακτ$)
-                  Αν i >0 Τότε {
-                        προσωρινή_τιμή$=Μεσ$(λατ$,i+2)
-                        L=Μήκος(προσωρινή_τιμή$)
-                        Αν L>0 Τότε Αν Μήκος(Φίλτρο$(προσωρινή_τιμή$, μη_έγγυροι_χαρακτήρες$))<>L Τότε λατ$="A": Διέκοψε
-                        Αν Θέση(λατ$,Μεσ$(λατ$,i,1))<i Τότε λατ$="A": Διέκοψε
-                        Παρεμβολή i, 2 λατ$="" : σύνολο+=μια_τιμή
-                  }
+                  Διάβασε απ$, μη_έγγυροι_χαρακτήρες$,χαρακτ$
+                  ι=Θέση(λατ$,χαρακτ$)
+                  Αν ι >0 Τότε
+                        προσωρινή_τιμή$=Μεσ$(λατ$,ι+2)
+                        λ=Μήκος(προσωρινή_τιμή$)
+                        Αν λ>0 Τότε Αν Μήκος(Φίλτρο$(προσωρινή_τιμή$, μη_έγγυροι_χαρακτήρες$))<>λ Τότε λατ$="A": Έξοδος
+                        Αν Θέση(λατ$,Μεσ$(λατ$,ι,1))<ι Τότε λατ$="A": Έξοδος
+                        insert ι, 2 λατ$=απ$ '  2 λέμε αλλα δίνουμε 1 χαρακτήρα και ο μεταφραστής θα βάλει ένα διάστημα 
+                  Τέλος Αν
                   Κυκλικά
             }
+            λατ$=Φίλτρο$(λατ$," ")
             Σωρός απλό_λατινικό {
                   Αν κενό Τότε Έξοδος
                   Διάβασε χαρακτ$, μια_τιμή
                   μετρητής=0
-                  Ενώ Αρισ$(λατ$,1)=χαρακτ$ {
+                  Ενώ Αρισ$(λατ$,1)=χαρακτ$
                          Παρεμβολή 1, 1 λατ$=""
                          μετρητής++
                          σύνολο+=μια_τιμή
-                  }
-                  Αν μετρητής>3 Τότε Διέκοψε
+                  Τέλος Ενώ
+                  Αν μετρητής>3 Τότε έξοδος
                   Κυκλικά
             }
-            Αν Μήκος(λατ$)>0 Τότε Έξοδος
-            =Str$(σύνολο,1033)
+            Αν Μήκος(λατ$)>0 ή μετρητής>3 Αλλιώς
+            =Γραφή$(σύνολο,1033)
+            Τέλος Αν
       }
       Σειρά "MMMCMXCIX", "LXXIIX", "MMXVII", "LXXIX", "CXCIX","MCMXCIX","MMMDCCCLXXXVIII"
-      Σειρά "CMXI","M","MCDXLIV","CCCC","IXV", "XLIXL","LXXIIX","XXXIX", "XXXX", "XIXX","IVI", "XLIX"
+      Σειρά "CMXI","M","MCDXLIV","CCCC","IXV", "XLIXL","LXXIIX","IVM"
+      Σειρά "XXXIX", "XXXX", "XIXX","IVI", "XLIX","XCIX","XCIV","XLVIII"
       Επιστροφή
 }
 Λατινικοί_Αριθμοί
@@ -1048,7 +1058,9 @@ MODULE GLOBAL W1 { Module WeaselAlgorithm {
 WeaselAlgorithm
 }
 MODULE GLOBAL S1 {Module CheckIt {
-      Form 60, 40
+      Flush
+      Form ! 60, 40    ' use ! to reduce form (for safe area for TV)
+      oldback=point  ' read color from 0,0  ' (Mode, Form. and Widow statement reset graphic cursor)
       Cls 0 ' Black
       Gradient 0,1
       Pen 14 ' Yellow
@@ -1104,6 +1116,13 @@ MODULE GLOBAL S1 {Module CheckIt {
       \\ set spped to normal  (Fast is normal)
       Set Fast
       Refresh 30
+      copy$=""
+      move 0,0
+      copy scale.x, scale.y to copy$
+      clipboard copy$
+      Print Part @(0,height),"Press a Key"
+      A$=Key$
+      Cls oldback
 }
 Checkit
 }
@@ -2118,19 +2137,65 @@ Sub AlfaByRef(&b as Pets)
       b++
 End Sub
 }
-MODULE GLOBAL FS {declare fs "Scripting.FileSystemObject"
+MODULE GLOBAL FS {\\ appdir$ is the application directory. Normally we nevert use it
+\\ dir$ is the current dir
+\\ see Help "file operations" or Help "file "
+\\ Help Files  (or one of this list BITMAPS, CLOSE, DRAWINGS, FILES, GET, LINE INPUT, MOVIES, NAME, OPEN, PUT, SEEK, SOUNDS, WRITE)
+
+Dir user  ' set current directory to M2000 user
+userdir$=dir$
+Declare fs "Scripting.FileSystemObject"
 Method fs, "GetFolder", dir$ as fc
 With fc, "SubFolders" set SubFolders
 Print type$(SubFolders)
-With SubFolders, -4& as Folder
-With Folder, "Name" as FolderName$
-While Folder {
-      Print FolderName$
-}
+show_members(SubFolders)
 
+
+With SubFolders, -4& as Folder, "count" as SF.count
+Print SF.count
+if SF.count>0 then
+	Show_Folders(SubFolders)
+else
+	Try ok {
+		SubDir NewFolder1
+		wait 100  ' give some time to system
+		if exist.dir("..\NewFolder1") then
+			Print "Folder Created"
+			Dir ..\     ' return
+		else
+			dir user
+		End if
+	
+	}
+	if error or not ok then Print "Error from SubDir:"+Error$
+	Print "Total folders="; SF.count
+	If SF.count> 0 then Show_Folders(SubFolders)
+End If
+Win Dir$  ' open explorer in M2000 user directory
+Rem Win "explorer", "/select,"+dir$  ' open explorer with selected name the folder dir$
 declare fs nothing
+
+
+sub show_members(obj)
+local mm=param(obj), i
+IF LEN(mm)>1 THEN {
+      For i=0 to len(mm)-1
+            Report 3, mm$(i!) ' use index, not key
+      Next i
 }
-MODULE GLOBAL FS1 {declare fs "Scripting.FileSystemObject"
+end sub
+sub Show_Folders(obj)
+With obj, -4& as new Folder
+
+	With Folder, "Name" as FolderName$
+	
+	While Folder {
+	      Print FolderName$
+	}
+
+end sub
+}
+MODULE GLOBAL FS1 {Declare fs "Scripting.FileSystemObject"
 Method fs, "GetFolder", dir$ as fc
 With fc, "files" set files
 \\ Produce the TypeLib
@@ -2140,23 +2205,28 @@ IF LEN(mm)>1 THEN {
             Report 3, mm$(i!) ' use index, not key
       Next i
 }
+Print "Press a key ": Print Key$
 With files, "count" as count
-With files, "item" set myfile ("llist1.gsb")
-\\ this is a property -4 which return a IEnumVariant
-With files, -4& as EnumFile
-Print Type$(EnumFile)
-\\ Produce the TypeLib
-m=param(EnumFile)
-IF LEN(m)>1 THEN {
-      For i=0 to len(m)-1
-            Report 3, m$(i!) ' use index, not key
-      Next i
-}
-With EnumFile, "Name" as aName$
-While EnumFile {
-      Print aName$
-}
-declare fs nothing
+if count>0 then
+      With files, "item" set myfile ("llist1.gsb")
+      \\ this is a property -4 which return a IEnumVariant
+      With files, -4& as EnumFile
+      Print Type$(EnumFile)
+      \\ Produce the TypeLib
+      m=param(EnumFile)
+      IF LEN(m)>1 THEN
+            For i=0 to len(m)-1
+                  Report 3, m$(i!) ' use index, not key
+            Next i
+      End If
+      Print "Press a key ": Print Key$
+      With EnumFile, "Name" as aName$
+      While EnumFile
+            Print aName$
+      End While
+End if
+Declare fs nothing
+
 }
 MODULE GLOBAL GAME {Module Game2048 {
       \\ 10% 4 and 90% 2
@@ -3484,7 +3554,8 @@ Function Parser {
 \\ Mini lisp ver 0.01
 Clear \\ clear variables
 Flush \\ empty stack
-Form 60,48
+Form ! 60,48
+
 Print "MiniLisp Ver 0.01"
 Scroll Split  Row  \\ make this row start of scrolling screen
 \\ A simple lisp interpreter written in M2000 by George Karras
@@ -3979,10 +4050,12 @@ Print "Done"
 
 }
 MODULE GLOBAL INFO {dir user
-\\ Window has the number of Monitor
-\\ We call SafeForm a global module.
-\\ Forthm                          
-SafeForm Window, 68,52,1.5, True
+back {
+	cls 11, 0   '   backcolor,  split line (0 means no split line)
+	\\ split means to define a lower part of form to be scrolled up or down
+rem	gradient 11, 0
+}
+Form ! 68,52
 backcolor=point
 oldpen=pen
 Refresh 500
@@ -4004,7 +4077,7 @@ Scroll split 0  ' reset the row+1 which given in cls
 pen oldpen
 Clear ' clear local variables
 If Version<9.7 then Error "No proper M2000 version"
-If Version=9.7 and revision<9 then Error "No proper M2000 revision for version 9.7"
+If Version=9.7 and revision<11 then Error "No proper M2000 revision for version 9.7"
 title("Modules ?")
 Report {
 	Modules ?    (or control+N, display all loaded modules, if nothing loaded display files)
@@ -4624,29 +4697,215 @@ A$=key$
 Declare Button1 Nothing
 Declare Form1 Nothing
 }
-MODULE GLOBAL SAFEFORM {read s=1, x=80, y=52, t=1, no_linespace=false
-back {
-	cls 11, 0
+MODULE GLOBAL DR {Module RomanNumbers {
+      flush  ' empty current stack
+      gosub Initialize
+      document Doc$
+      while not empty
+            read rom$
+            print rom$;"=";RomanEval$(rom$)
+            Doc$=rom$+"="+RomanEval$(rom$)+{
+            }
+      end while
+      Clipboard Doc$
+      end
+Initialize:
+      function RomanEval$(rom$) {
+            Flush
+            ="invalid"
+            if filter$(rom$,"MDCLXVI")<>"" Then Exit
+            \\ "Y" is in top of stack
+            Push "CM", "MD", "Q"
+            Push "CD", "MD","W"
+            Push "XC", "DL", "E"
+            Push "XL", "X","R"
+            Push "IX","V","T"
+            Push  "IV","I","Y"
+            \\ stack flush to doublerom
+            doublerom=[]
+            \\  "M" is in top of stack
+            Data "M", 1000, "Q",900
+            Data "D", 500,"W", 400
+            Data "C",100,"E",90
+            Data "L",50,"R", 40
+            Data "X", 10, "T", 9
+            Data "V", 5, "Y", 4, "I",1
+            \\ stack flush to singlerom
+            singlerom=[]
+            acc=0
+            value=0
+            count=0
+            stack doublerom {
+                  if empty then exit
+                  read rep$,exclude$,cc$
+                  i=instr(rom$,cc$)
+                  if i >0 then
+                        tmp$=mid$(rom$,i+2)
+                        L=Len(tmp$)
+                        if L>0 then if Len(filter$(tmp$, exclude$))<>L then rom$="A": exit
+                        if Instr(rom$,mid$(rom$,i,1))<i then rom$="A": exit
+                        insert i,2 rom$=rep$  ' replace at pos i with rep$ and place a space to i+1
+                  end if
+                  loop
+            }
+            rom$=filter$(rom$," ") ' remove spaces if exist
+ 
+            stack singlerom {
+                  if empty then exit
+                  read cc$, value
+                  count=0
+                  while left$(rom$,1)=cc$
+                         insert 1, 1 rom$=""
+                         count++
+                         acc+=value            
+                  end while
+                  if count>3 then exit
+                  loop
+            }
+            if len(rom$)>0  or count>3 Else
+                  =Str$(acc,1033)
+            end if      
+      }
+      data "MMMCMXCIX", "LXXIIX", "MMXVII", "LXXIX", "CXCIX","MCMXCIX","MMMDCCCLXXXVIII"
+      data "CMXI","M","MCDXLIV","CCCC","IXV", "XLIXL","LXXIIX","IVM"
+      data "XXXIX", "XXXX", "XIXX","IVI", "XLIX","XCIX","XCIV","XLVIII"
+      return
 }
+RomanNumbers
+}
+MODULE GLOBAL G1 {t=0
 {
-	zx=x+t*4
-	zy=y+t*4
-	linespace 0
-	window 9, s
-	sx=scale.x
-	sy=scale.y
-	if no_linespace then
-	form zx, zy;
-	else
-	form zx, zy
+'loop
+t++
+on t goto 100, 101
+
+end
+Print 0100
+Print "fault"
+0100 Print "ok1"
+Restart
+10100 Print "ok2"
+exit
+101 Print "ok"
+}
+}
+MODULE GLOBAL G2 {goto 100
+
+end
+Print 0100
+Print "fault"
+0100 Print "ok1"
+}
+MODULE GLOBAL G3 {goto 100
+
+end
+Print 100
+Print "fault"
+100 Print "ok1"
+}
+MODULE GLOBAL G11 {t=0
+again:
+{
+loop
+t++
+on t goto 100, 101
+end
+Print 0100
+Print "fault"
+0100 Print "ok1" : Print "100"
+restart
+10100 Print "fault"
+exit
+alfa:
+101 Print "ok2", t
+}
+}
+MODULE GLOBAL G12 {alfa:
+101  static a=10
+110 a--
+120 print a
+130 if a>1 then goto alfa
+140 Clear
+}
+MODULE GLOBAL G4 {Module beta {
+      print "i am beta"    
+}
+X=4
+beta: Print "ok"  \\ call beta then print ok
+beta: \\ only rem
+Print x
+x--
+If x<1 Else Goto beta
+k=false
+x=100
+
+}
+MODULE GLOBAL M2 {a=(1,2,3,4,5)
+fold1=lambda (a, b)-> {
+      push a+b
+}
+fold2=lambda (a, b$) -> {
+      if len(b$) Then {push b$+","+str$(a,"")} else push str$(a,"")
+}
+'? a#fold(fold1, 0)=a#sum()
+odd=lambda (x) ->x mod 2=1
+even=lambda (x)->x mod 2=0
+add2=lambda (x)-> {
+      push x+2
+}
+square=lambda (x)-> {
+      push x*x
+}
+combine=lambda  -> {
+      a=Array([])
+      if len(a)=0 then =lambda->{} : exit
+      =lambda  a ->{
+            for i=0 to len(A)-1 { 
+                  m=array(a,i)
+                  call m()
+            }
+      }
+}
+? "["+a#filter(odd)#fold$(fold2, "")+"]"
+? "["+a#filter(even)#map(add2)#fold$(fold2, "")+"]"
+a=(,)
+z=a#filter(even,(0,))#map(add2)
+Print z, type$(z)
+a=(1,2,3,4,5)
+? a#map(add2, square)
+? "["+a#map(add2, square)#fold$(fold2, "")+"]"
+}
+MODULE GLOBAL FS2 {Form ! 60,40
+linespace twipsY*4
+Form ! 60
+refresh
+\\ using M2000 commands
+Menu   ' clear Menu list
+Files !  + "gsb|txt"   ' ! sorted by name, + add to menu
+Print Len(menu$())
+
+a=menu$()
+
+\\ we can use Print a
+\\ but get refresh after the last item
+\\ so we can use code to diplay names in columns (expand if name is bigger for one column)
+k=each(a)
+mp=width/tab
+mc=mp*height*3/5
+m=mc
+Print $(6, 15)  ' use numbers from 0 to 9  - colum width 15
+While k {
+	Print array$(k),
+	m--
+	if pos>=width then m--
+	if m<mp and pos=0 and row=height-1 then
+	m=mc
+	Pen 15 {
+		Print Part "Press a key on keyboard or mouse (except Esc/Break)"
+		While mouse=0 and inkey$="" {Refresh}
+		Print Over @(0),
+	}
 	end if
-	if scale.x>sx or scale.y>sy then
-	t++
-	loop
-	else
-	mode mode, scale.x*x/zx, scale.y*y/zy
-	end if
-	print width, height
 }
 }
 INFO
