@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 12
+Global Const Revision = 13
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -52530,11 +52530,6 @@ noexpression:
                         If Left$(b$, 1) = ">" Then
 noexpression1:
                         If var(v).IamApointer Then
-                            If i <> 1 Then
-                            MyEr "no space allowed", "δεν επιτρέπεται κενό"
-                            Exec1 = 0: ExecuteVar = 8
-                            Exit Function
-                            End If
                             If var(v).link.IamFloatGroup Then
                             ExecuteVar = 10
 

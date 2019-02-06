@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 12 active-X
+Version 9.7 Revision 13 active-X
 
-some bug removed
+one bug removed (a raised error which was not an error, so code removed)
 
 The final 9.7 version
 when fist time run the interpreter do this in M2000 console:
