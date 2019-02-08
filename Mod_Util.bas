@@ -573,6 +573,15 @@ End If
 End If
 KEXIT:
 End Function
+Public Function KeyPressed2(ByVal VirtKeyCode As Long, ByVal VirtKeyCode2 As Long) As Boolean
+On Error GoTo KEXIT
+If Not Screen.ActiveForm Is Nothing Then
+If GetForegroundWindow = Screen.ActiveForm.hWnd Then
+KeyPressed2 = CBool((GetAsyncKeyState(VirtKeyCode) And &H8000&) = &H8000&) And CBool((GetAsyncKeyState(VirtKeyCode2) And &H8000&) = &H8000&)
+End If
+End If
+KEXIT:
+End Function
 Public Function KeyPressed(ByVal VirtKeyCode As Long) As Boolean
 On Error GoTo KEXIT
 If Not Screen.ActiveForm Is Nothing Then
@@ -17406,12 +17415,12 @@ Dim p As Variant, x As Variant, i As Long, F As Long, s$, ss$
                                                      Set pppp.GroupRef = Nothing
                                                      pppp.IHaveClass = False
                                                      If basestack.lastobj.IamSuperClass Then
-                                                    Dim myobj As Object
-                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myobj
+                                                    Dim myOBJ As Object
+                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myOBJ
                         
-                                              Set myobj.SuperClassList = basestack.lastobj.SuperClassList
-                                              Set pppp.item(i) = myobj
-                                              Set myobj = Nothing
+                                              Set myOBJ.SuperClassList = basestack.lastobj.SuperClassList
+                                              Set pppp.item(i) = myOBJ
+                                              Set myOBJ = Nothing
                                              
                                                Else
                                                   
@@ -18302,7 +18311,7 @@ Else
             
           '**********************************************************
 PROCESSCOMMAND:
-       
+      
             If Trim$(w$) <> "" Then
       
             Select Case w$
@@ -18316,6 +18325,7 @@ PROCESSCOMMAND:
             b$ = NLtrim(b$)
             SetNextLineNL b$
         Else
+         If lckfrm > 0 Then lckfrm = sb2used + 1
         NeoCall ObjPtr(bstack), b$, Lang, ok
         If Not ok Then
             interpret = 0
@@ -18568,7 +18578,7 @@ contnoproper:
                             End If
                             here$ = ohere$: GoTo there1
                             ElseIf bstack.callx1 > 0 Then
-                             
+                              If lckfrm > 0 Then lckfrm = sb2used + 1
                               If bstack.NoRun Then
                               bstack.callx1 = 0
                               bstack.callohere = vbNullString
@@ -19551,7 +19561,7 @@ Dim i, j$
 i = InStr(c$, vbCrLf)
 If i = 0 Then GetNextLineNoTrim = c$: c$ = vbNullString Else GetNextLineNoTrim = Left$(c$, i - 1): c$ = Mid$(c$, i)
 End Function
-Function PrepareLambda(basestask As basetask, myl As lambda, v As Long, frm$, c As Constant) As Boolean
+Function PrepareLambda(basestask As basetask, myl As lambda, ByVal v As Long, frm$, c As Constant) As Boolean
 On Error GoTo 1234
 If Typename(var(v)) = "Constant" Then
     Set c = var(v)

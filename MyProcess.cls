@@ -136,96 +136,9 @@ End Sub
 
 
 
-Private Sub TaskInterface_TickOLD()
- Dim x As Long, mycnt As Long, ohere$, look As Boolean
- Static offset As Double
- Dim NowProcess As basetask
- Set NowProcess = myProcess
-Set NowProcess.Owner = myOwner
-SetText myOwner
-If MyMode = 0 Then
-' λάθος δεν έχει ετοιμαστεί η σύνδεση!
-myDone = True
-End If
-If NowProcess Is Nothing Then
-myDone = True
-End If
-         
- If myDone Then GoTo there
-
- If m_duration <= uintnew(CDbl(timeGetTime)) Then
-        m_duration = uintnew(CDbl(timeGetTime)) + mYspace
-
-            If mybuf$ = vbNullString Then mybuf$ = mycode: NowProcess.IFCTRL = 0: NowProcess.jump = False
-            ohere$ = here$
-            here$ = myHere$
-            x = 1
-            look = True
-
-
-        Call executeblock(x, NowProcess, mybuf$, False, look, (Interrupted), True)
-        If Not (NowProcess Is Nothing) Then Set myOwner = NowProcess.Owner
-        If Len(mybuf$) < 3 Then
-        mybuf$ = vbNullString
-
-        Else
-      
-    If Interrupted Then m_duration = 0      ' do it in past;;
-    If Not look Then GoTo conthere
-     End If
-       '' If Not NowProcess.Parent.IamRunning Then
-       If LastErNum <> 0 Or x = 0 Then
-       myDone = True
-       End If
-        If x = 3 Then x = 1: look = False
-        If ProcessEnd Then Exit Sub
-        
-        If (x = 1 Or (x = 2 And mybuf$ = vbNullString)) And look = True Then
-        
-            If NowProcess.Parent.exist(myid, "_multi") Then
-              TaskMaster.RestEnd1
-              TaskMaster.RestEnd
-              
-            myProcessPureParent.ThrowThreads   '  διώχνει την λίστα και εκτελεί το done
-
-            MyMode = 0
-            myDone = True
-           ''
-            GoTo there
-            Else
-            GoTo there
-            End If
-        End If
-conthere:
-If NOEXECUTION Then GoTo there
-                here$ = ohere$
-        If x = 0 Then
-        myDone = True
-        
-        End If
-If MOUT Then GoTo there
-
-   
-
-
-   End If
-    If myDone Then GoTo there
-   Exit Sub
-there:
-
-On Error GoTo 0
-
-    Set myOwner = Nothing
-
-   TaskInterface_Dispose tmThisTask
-   
-End Sub
-
-
-
 Private Sub TaskInterface_Tick()
 On Error Resume Next
- Dim x As Long, mycnt As Long, ohere$, look As Boolean
+ Dim x As Long, mycnt As Long, ohere$, look As Boolean, ok As Boolean
  Static offset As Double
  Dim NowProcess As basetask
  Set NowProcess = myProcess
@@ -238,11 +151,14 @@ myDone = True
 End If
          
  If myDone Then GoTo there
+ ok = m_duration <= uintnew(CDbl(timeGetTime))
+ If ok Or mStep Then
+            If ok Then m_duration = uintnew(CDbl(timeGetTime)) + mYspace
 
- If m_duration <= uintnew(CDbl(timeGetTime)) Or mStep Then
-        If Not mStep Then m_duration = uintnew(CDbl(timeGetTime)) + mYspace
-
-            If mybuf$ = vbNullString Then mybuf$ = mycode: NowProcess.IFCTRL = 0: NowProcess.jump = False
+            If mybuf$ = vbNullString Then
+            If Not ok Then mStep = False: Exit Sub
+            mybuf$ = mycode: NowProcess.IFCTRL = 0: NowProcess.jump = False: NowProcess.UseofIf = 0
+            End If
             ohere$ = here$
             here$ = myHere$
             x = 1
@@ -255,6 +171,7 @@ If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner)): mStep 
         If Len(mybuf$) < 3 Then
             mybuf$ = vbNullString
             mStep = False
+            
         Else
       
     If Not look Then GoTo conthere

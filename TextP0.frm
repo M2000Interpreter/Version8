@@ -238,7 +238,7 @@ Private Declare Function GetLocaleInfo Lib "KERNEL32" Alias "GetLocaleInfoW" (By
 Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not NT?
 Private Const DWL_ANYTHREAD& = 0
 Const LOCALE_ILANGUAGE = 1
-Private Declare Function PeekMessageW Lib "user32" (lpMsg As Msg, ByVal hWND As Long, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long, ByVal wRemoveMsg As Long) As Long
+Private Declare Function PeekMessageW Lib "user32" (lpMsg As Msg, ByVal hWnd As Long, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long, ByVal wRemoveMsg As Long) As Long
 Const WM_KEYFIRST = &H100
  Const WM_KEYLAST = &H108
  Private Type POINTAPI
@@ -246,7 +246,7 @@ Const WM_KEYFIRST = &H100
     y As Long
 End Type
  Private Type Msg
-    hWND As Long
+    hWnd As Long
     Message As Long
     wParam As Long
     lParam As Long
@@ -261,10 +261,10 @@ Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal Ptr As Long, ByVal Value As Lo
 Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal Ptr As Long, ByVal Length As Long) As Long
 Private Declare Function GetModuleHandleW Lib "KERNEL32" (ByVal lpModuleName As Long) As Long
 Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
-Private Declare Function GetWindowLongA Lib "user32" (ByVal hWND As Long, ByVal nIndex As Long) As Long
-Private Declare Function SetWindowLongA Lib "user32" (ByVal hWND As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
-Private Declare Function SetWindowLongW Lib "user32" (ByVal hWND As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
-Private Declare Function SetWindowTextW Lib "user32" (ByVal hWND As Long, ByVal lpString As Long) As Long
+Private Declare Function GetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
+Private Declare Function SetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetWindowTextW Lib "user32" (ByVal hWnd As Long, ByVal lpString As Long) As Long
     Private Const GWL_WNDPROC = -4
     Private m_Caption As String
 Public Property Get CaptionW() As String
@@ -283,14 +283,14 @@ Public Property Let CaptionW(ByVal NewValue As String)
 
     If WndProc = 0 Then
         WndProc = GetProcAddress(GetModuleHandleW(StrPtr("user32")), "DefWindowProcW")
-        VBWndProc = GetWindowLongA(hWND, GWL_WNDPROC)
+        VBWndProc = GetWindowLongA(hWnd, GWL_WNDPROC)
     End If
 
 
     If WndProc <> 0 Then
-        SetWindowLongW hWND, GWL_WNDPROC, WndProc
-        SetWindowTextW hWND, StrPtr(m_Caption)
-        SetWindowLongA hWND, GWL_WNDPROC, VBWndProc
+        SetWindowLongW hWnd, GWL_WNDPROC, WndProc
+        SetWindowTextW hWnd, StrPtr(m_Caption)
+        SetWindowLongA hWnd, GWL_WNDPROC, VBWndProc
     Else
         Caption = m_Caption
        
@@ -382,7 +382,7 @@ If Form1.Visible Then releasemouse = True: If lockme Then hookme TEXT1.glistN
 End Sub
 
 Private Sub Form_Deactivate()
-UnHook hWND
+UnHook hWnd
 End Sub
 
 Private Sub Form_GotFocus()
@@ -547,7 +547,7 @@ i = .SelLength
 .Form1rthisEnabled = .Form1mscatEnabled
 End With
 MyPopUp.feedlabels TEXT1, EditTextWord
-MyPopUp.Up x + gList1.Left, y + gList1.Top
+MyPopUp.Up x + gList1.Left, y + gList1.top
 myButton = 0
 End Sub
 
@@ -981,11 +981,11 @@ End Sub
 Private Sub DIS_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 If Not NoAction Then
 NoAction = True
-Dim sel&
+
 If Button > 0 And Targets Then
 
 If Button = 1 Then
- '   MOUB = Button
+Dim sel&
     sel& = ScanTarget(q(), CLng(x), CLng(y), 0)
     If sel& >= 0 Then
         Select Case q(sel&).Id Mod 100
@@ -993,11 +993,11 @@ If Button = 1 Then
         If TaskMaster Is Nothing Then
         
         If Not interpret(DisStack, (q(sel&).Comm)) Then Beep
-        MyEr "", ""
+        If LastErNum1 > 0 Then MyEr "", ""
         Else
         TaskMaster.StopProcess
         If Not interpret(DisStack, (q(sel&).Comm)) Then Beep
-        MyEr "", ""
+        If LastErNum1 > 0 Then MyEr "", ""
         TaskMaster.StartProcess
         End If
         Case Else
@@ -1010,12 +1010,11 @@ If Not nomore Then NoAction = False
 
 End If
 
-If lockme Then Exit Sub
-'MOUB = Button
+
 
 
 End If
-'If QRY Or GFQRY Then Form1.KeyPreview = True Else Form1.KeyPreview = False
+
 End Sub
 
 
@@ -1267,10 +1266,12 @@ Form4.Visible = False
         Form1.SetFocus
     End If
 End If
-EXECSTOP
+'EXECSTOP
 End If
 End If
 Case vbKeyPause  '(this is the break key!!!!!'
+If Forms.count > 5 Then KeyCode = 0: Exit Sub
+If Not TaskMaster Is Nothing Then If TaskMaster.QueueCount > 0 Then KeyCode = 0: Exit Sub
 If QRY Or GFQRY Then
 If Form4.Visible Then Form4.Visible = False
 i = MOUT
@@ -1282,6 +1283,7 @@ BreakMe = True
 If MsgBoxN("Break Key - Hard Reset" + vbCrLf + "Μ2000 - Execution Stop / Τερματισμός Εκτέλεσης", vbYesNo, MesTitle$) <> vbNo Then
 
 MOUT = i
+
 extreme = False
 If AVIRUN Then AVI.GETLOST
 On Error Resume Next
@@ -1418,7 +1420,7 @@ End If
 End If
 End If
 End Sub
-Private Sub EXECSTOP()
+Friend Sub EXECSTOP()
 Dim iamhere As Boolean
 If iamhere Then Exit Sub
 iamhere = True
@@ -1641,7 +1643,7 @@ Private Sub iForm_Resize()
 DIS.Move 0, 0, ScaleWidth, ScaleHeight
 End Sub
 Public Sub Up()
-UpdateWindow hWND
+UpdateWindow hWnd
 End Sub
 
 Sub something()
@@ -1793,7 +1795,28 @@ If onetime = 1 Then
     
     
 End If
+breakit:
+If NOEXECUTION Then
+If MKEY$ = "@Start" + Chr$(13) Then
+qq$ = "@start"
+MKEY$ = vbNullString
+NOEXECUTION = False
+MOUT = True
+GoTo conthere
+End If
+NOEXECUTION = False
+MOUT = True
+End If
     QUERY basestack1, Prompt$, qq$, (mybasket.mx * 4), True
+    If NOEXECUTION And MOUT Then
+    qq$ = "@start"
+    MKEY$ = vbNullString
+    NOEXECUTION = False
+    
+
+    End If
+conthere:
+    
     If ExTarget = True Then Exit Sub
       mybasket = players(DisForm)
 
@@ -1819,7 +1842,7 @@ If LoadFileAndSwitches$ = vbNullString And qq$ = vbNullString Then helpcnt = hel
     End If
     End If
  crNew basestack1, mybasket
-
+If NOEXECUTION Then GoTo breakit
  
 Else
    sHelp "", "", 0, 0
@@ -1842,7 +1865,7 @@ MOUT = interpret(basestack1, "cls")
 
 mybasket = players(DisForm)
 End If
-
+NOEXECUTION = False
 Loop Until qq$ <> ""
 
 NoAction = True
@@ -1878,7 +1901,7 @@ If NERR Then Exit Do
                 closeAll
                 mybasket = players(DisForm)
                 If byPassCallback Then Exit Do
-                PlainBaSket DIS, mybasket, "ESC " & qq$
+               If Not MKEY$ = "@Start" + Chr$(13) Then PlainBaSket DIS, mybasket, "ESC " & qq$
         Else
         ' look last error
                 If Left$(LastErName & " ", 1) <> "?" Then
@@ -2009,7 +2032,7 @@ KeyCode = 0
  Exit Sub
  End If
  End If
- If TEXT1.UsedAsTextBox Then Result = 99
+ If TEXT1.UsedAsTextBox Then result = 99
 NOEDIT = True: noentrance = False: Exit Sub
 End If
 If KeyCode = vbKeyPause Then
@@ -2021,12 +2044,15 @@ If KeyCode = vbKeyPause Then
                 Form1.SetFocus
             End If
             End If
-            BreakMe = True
+            If Forms.count > 5 Then KeyCode = 0: Exit Sub
+            If Not TaskMaster Is Nothing Then If TaskMaster.QueueCount > 0 Then KeyCode = 0: Exit Sub
+            If BreakMe Then noentrance = False: Exit Sub
             If ASKINUSE Then
                 
-                If BreakMe Then noentrance = False: Exit Sub
+                
                 Unload NeoMsgBox: ASKINUSE = False: noentrance = False: Exit Sub
                 End If
+            BreakMe = True
             If Form3.ask(basestack1, "Break Key - Hard Reset" & vbCrLf & "Μ2000 - Execution Stop / Τερματισμός Εκτέλεσης") = 1 Then
             
             If AVIRUN Then
@@ -2059,9 +2085,9 @@ End If
 If TEXT1.UsedAsTextBox Then
 Select Case KeyCode
 Case Is = vbKeyTab And (shift Mod 2 = 1), vbKeyUp
-Result = -1
+result = -1
 Case vbKeyReturn, vbKeyTab, vbKeyDown
-Result = 1
+result = 1
 Case Else
 noentrance = False
 Exit Sub
@@ -2528,7 +2554,7 @@ If IsWine Then
 With view1
 On Error Resume Next
     .Visible = True
-    .Top = IEY
+    .top = IEY
     .Left = IEX
     .Width = IESizeX
     .Height = IESizeY

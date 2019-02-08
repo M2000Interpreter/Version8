@@ -9,6 +9,7 @@ Attribute VB_Name = "Module1"
 ' In 9.3 rev >2 Asc() and Chr$() in M2000 use Locale. In previous versions these functions works for greek ascii.
 
 Option Explicit
+Private timestamp As Long
 Global OsInfo As New clsOSInfo
 Global HaltLevel As Long
 Global startaddress As Long, stacksize As Long, findstack As Long
@@ -82,7 +83,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 13
+Global Const Revision = 14
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -14523,11 +14524,10 @@ Loop
 Set Parent = Nothing
 End Sub
 Function Execute(bstack As basetask, b$, once As Boolean, Optional linebyline As Boolean, Optional loopthis As Boolean = False, Optional noblock As Boolean = True, Optional restartmodule As Boolean) As Long
-checkbreak bstack, b$, once
 Dim di As Object, nchr As Integer
 Set di = bstack.Owner
 Dim myobject As Object
-
+checkbreak bstack, b$, once
 Dim pppp As mArray, bb$, Us$, ec$, i As Long, jump As Boolean, slct As Long, sp As Variant, sw$, ok As Boolean, IFCTRL As Long
 'If linebyline Then
 If loopthis Or linebyline Then IFCTRL = bstack.IFCTRL: jump = bstack.jump
@@ -14548,13 +14548,18 @@ Do While Len(b$) <> LLL
         extreme = False
         If MOUT Then
             TaskMaster.Dispose
-            NOEXECUTION = False
+            'NOEXECUTION = False
             MOUT = False
-            b$ = "@Start : error {}"
+            MKEY$ = "@Start" + Chr$(13)
+            'b$ = "@Start : error {}"
             once = False
+            Prefresh(GetCode(bstack.Owner)).k1 = 0
             MyDoEvents0 bstack.Owner
             MyEr "", ""
             LLL = 0
+            'NOEXECUTION = True
+            Execute = 0
+            Exit Function
         Else
             myesc b$
             If once Then
@@ -16670,9 +16675,10 @@ ContTry:
                     PopErrStage bstack
                     TraceRestore bstack, x1
                     bstack.nokillvars = False
+                    If NOEXECUTION Then Exit Function
                     once = False
                     MOUT = False
-                    NOEXECUTION = False
+                   ' NOEXECUTION = False
                     NERR = False
                     LastErNum = 0
                     LastErNum1 = 0
@@ -16712,8 +16718,9 @@ ContTry:
                     PopErrStage bstack
                     
                     var(v) = CDbl(Execute = 1)
+                    If NOEXECUTION Then Exit Function
                     MOUT = False
-                    NOEXECUTION = False
+                   ' NOEXECUTION = False
                     NERR = False
                     LastErNum = 0
                     LastErNum2 = LastErNum1
@@ -18244,6 +18251,7 @@ ohere$ = here$
 'if iRVAL(here$, 1) > funcdeep Then
 If CurrentStackSize > stacksize Then
     MyEr "Function's Stack is Full - 15", "Η στοίβα των συναρτήσεων έχει γεμίσει - 15"
+    MOUT = True
     Set basestack = Nothing
     GoFunc = False: Exit Function
 End If
@@ -30995,7 +31003,7 @@ x1 = Abs(IsLabel(basestack, rest$, s$))
 jump1:
             ' επιτρέπεται αλλαγή σε περίπτωση που κάποιο τμήμα έτρεξε και πιάσαμε με TRY το λάθος
             ' να δώσουμε την δυνατότητα για αλλαγή χωρίς να σταματήσουν τυχόν νήματα!
-            If x1 >= lckfrm And lckfrm <> 0 Then
+            If x1 < lckfrm And lckfrm <> 0 Then
             MyEr s$ & " is locked", s$ & " είναι κλειδωμένο"
             rest$ = vbNullString
             Set Scr = Nothing
@@ -31481,21 +31489,21 @@ Set ParentStack.lastobj = Nothing
                 If ParentStack.lastobj Is Nothing Then
                 ps.DataValLong p
                 ElseIf TypeOf ParentStack.lastobj Is mHandler Then
-                If TypeOf ParentStack.lastobj.objref Is mStiva Then
-                    ps.MergeBottom ParentStack.lastobj.objref
-                    ElseIf TypeOf ParentStack.lastobj.objref Is mArray Then
-                      ps.MergeBottomCopyArray ParentStack.lastobj.objref
+                    If TypeOf ParentStack.lastobj.objref Is mStiva Then
+                        ps.MergeBottom ParentStack.lastobj.objref
+                        ElseIf TypeOf ParentStack.lastobj.objref Is mArray Then
+                          ps.MergeBottomCopyArray ParentStack.lastobj.objref
+                        End If
+                    Else
+                        PushParamGeneralV7 = False
+                        MyEr "Expected Stack Object after !", "Περίμενα αντικείμενο τύπου Σωρού μετά το !"
+                        Set ParentStack.lastobj = Nothing
+                        Exit Function
                     End If
-                    
-                    Set ParentStack.lastobj = Nothing
-                Else
-                    PushParamGeneralV7 = False
-                    MyEr "Expected Stack Object after !", "Περίμενα αντικείμενο τύπου Σωρού μετά το !"
-                    Set ParentStack.lastobj = Nothing
-                    Exit Function
+                ElseIf TypeOf ParentStack.lastobj Is mArray Then
+                          ps.MergeBottomCopyArray ParentStack.lastobj
                 End If
-                
-                End If
+                Set ParentStack.lastobj = Nothing
                 ElseIf IsExp(ParentStack, rest$, p) Then
         If Not ParentStack.lastobj Is Nothing Then
         
@@ -31590,8 +31598,11 @@ Dim ps As mStiva, p As Variant, s$, ok As Long
                             Set basestack.lastobj = Nothing
                             Exit Function
                     End If
-                Set basestack.lastobj = Nothing
+                ElseIf TypeOf basestack.lastobj Is mArray Then
+                     ps.MergeBottomCopyArray basestack.lastobj
+                     
                 End If
+                Set basestack.lastobj = Nothing
                 End If
                 ElseIf IsExp(basestack, rest$, p) Then
         If Not basestack.lastobj Is Nothing Then
@@ -31963,6 +31974,9 @@ fromfirst0:
     bstack.addlen = LL
             
     w3 = Execute(bstack, bb$, kolpo, stepbystep, loopthis, noblock)
+    If NOEXECUTION Then
+    w3 = 0
+    End If
      bstack.addlen = oldLL
     Select Case w3
     Case 0
@@ -32812,6 +32826,9 @@ preProcessor = backup
 End Function
 Function newStart(basestack As basetask, rest$) As Boolean
 Dim Scr As Object, s$, pa As Long
+MyEr "", ""
+NOEXECUTION = False
+MOUT = False
 byPassCallback = False
 EditTabWidth = 6
 tParam.cbSize = LenB(tParam)
@@ -33547,7 +33564,7 @@ var2used = var2used + 1
        AllocVar = var2used
 End Function
 Function AllocSub() As Long
-    On Error Resume Next
+    'On Error Resume Next
     If UBound(sbf()) <= sb2used + 1 Then
     ReDim Preserve sbf(UBound(sbf()) * 2 + 1) As modfun
     End If
@@ -38692,6 +38709,9 @@ Do
                   
                     End If
                     Set bstack.lastobj = Nothing
+                ElseIf TypeOf bstack.lastobj Is mArray Then
+                    bstack.soros.MergeTopCopyArray bstack.lastobj
+                    Set bstack.lastobj = Nothing
                 End If
                 End If
                 ElseIf IsExp(bstack, rest$, p) Then
@@ -38742,8 +38762,12 @@ Do
                             Set bstack.lastobj = Nothing
                             Exit Function
                         End If
-                            Set bstack.lastobj = Nothing
-                        End If
+                        Set bstack.lastobj = Nothing
+                    ElseIf TypeOf bstack.lastobj Is mArray Then
+                        bstack.soros.MergeBottomCopyArray bstack.lastobj
+                        Set bstack.lastobj = Nothing
+                    End If
+                        
                      End If
                 ElseIf IsExp(bstack, rest$, p) Then
                   If bstack.lastobj Is Nothing Then
@@ -46669,7 +46693,7 @@ jumphere:
                 ss$ = mycoder.decryptline(ss$, w$, (Len(ss$) / 2) Mod 33)
                 If Abs(IsLabel(basestack, ss$, w$)) Then
                         If Not (Left$(ss$, 3) = ":" & vbCrLf) Then ProcLoad = False: Exit Function
-                        If lckfrm = 0 And Not NORUN1 Then lckfrm = sb2used + 1
+                        If Not NORUN1 Then lckfrm = sb2used + 1
                         GoTo skipme2
                 End If
         End If
@@ -46696,7 +46720,7 @@ If (AscW(ss$) > 127 And myUcase(Left$(ss$, 5)) <> "ΚΛΑΣΗ" And myUcase(Left$(ss$,
     If IsLabelA1("", ss$, w$) Then
         If Not (Left$(ss$, 3) = ":" & vbCrLf) Then ProcLoad = False: Exit Function
         'lock that module
-        If lckfrm = 0 And Not NORUN1 Then lckfrm = sb2used + 1
+        If Not NORUN1 Then lckfrm = sb2used + 1
     Else
         MOUT = True
     End If
@@ -46719,6 +46743,7 @@ End If
 End If
 End If
 Loop Until MOUT Or Not IsSymbol(rest$, "&&", 2)
+If lckfrm > 0 Then timestamp = -1
 basestack.NoRun = NoRun
 ProcLoad = interpret(basestack, CStr(vvl), Len(here$) > 0)
 basestack.NoRun = False
@@ -47298,12 +47323,12 @@ ArrBase = usethisbase
                                                      Set pppp.GroupRef = Nothing
                                                      pppp.IHaveClass = False
                                                      If basestack.lastobj.IamSuperClass Then
-                                                    Dim myobj As Object
-                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myobj
+                                                    Dim myOBJ As Object
+                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myOBJ
                         
-                                              Set myobj.SuperClassList = basestack.lastobj.SuperClassList
-                                              Set pppp.item(i) = myobj
-                                              Set myobj = Nothing
+                                              Set myOBJ.SuperClassList = basestack.lastobj.SuperClassList
+                                              Set pppp.item(i) = myOBJ
+                                              Set myOBJ = Nothing
                                              
                                                Else
                                                   
@@ -47498,6 +47523,7 @@ Set basestack.lastobj = Nothing
 Set basestack.lastpointer = Nothing
 End Function
 Function MyNew(basestack As basetask, rest$, Lang As Long) As Boolean
+timestamp = -1
 MyNew = True
 If (basestack.Process Is Nothing) And (basestack.Parent Is Nothing) Then
 Set basestack.StaticCollection = Nothing 'New FastCollection
@@ -48964,27 +48990,49 @@ End Function
 
 
 Private Sub checkbreak(bstack As basetask, b$, once As Boolean)
-Static jump As Long
-If jump Then jump = jump - 1: Exit Sub
-jump = 5000
+Static busy As Boolean
+If timestamp < 0 Then
+If lckfrm > 0 Then Exit Sub
+timestamp = timeGetTime + 1000
+End If
+If Abs(timestamp - timeGetTime) < 1000 Then Exit Sub
+timestamp = timeGetTime + 1000
+If Forms.count > 5 Then Exit Sub
+If busy Then Exit Sub
 If Not bstack.IamAnEvent Then
-If Not KeyPressedLong(&H13) = 1 Then Exit Sub
+If bstack.TaskMain Then Exit Sub
+If KeyPressed2(&H11, &H43) Then
+busy = True
+Form1.EXECSTOP
+timestamp = timeGetTime + 1000
+busy = False
+Exit Sub
+ElseIf KeyPressedLong(&H13) = 0 Then
+Exit Sub
+End If
+busy = True
+ResetBreak
 If Form1.mybreak1() Then
     
         Modalid = 0
         If Not TaskMaster Is Nothing Then TaskMaster.Dispose
-        NOEXECUTION = False
-        MOUT = False
+        NOEXECUTION = True
+        MOUT = True
+         MKEY$ = "@Start" + Chr$(13)
+            b$ = " "
+            MyEr "", ""
         
-        b$ = "@Start : error {}"
         
         once = False
-        k1 = 0
+         Prefresh(GetCode(bstack.Owner)).k1 = 0
         MyDoEvents0 bstack.Owner
-        MyEr "", ""
+        
         End If
     
 End If
+ResetBreak
+timestamp = timeGetTime + 1000
+busy = False
 End Sub
 Public Sub ClearStr(a$)
 Dim i As Long, j As Long
@@ -51666,7 +51714,7 @@ End If
 Exit Function
 End Function
 Public Function GetPointer(bstack As basetask, a$) As Boolean
-Dim w1 As Long, s$, pppp As mArray, w2 As Long, p, nbstack As basetask, myobj As Object, i As Long
+Dim w1 As Long, s$, pppp As mArray, w2 As Long, p, nbstack As basetask, myOBJ As Object, i As Long
 Dim glob As Boolean
 w1 = Abs(IsLabel(bstack, a$, s$))
 If w1 = 1 Or w1 = 3 Then
@@ -51682,8 +51730,8 @@ Else
                         PushStage bstack, False
                     
                             i = globalvar("_1", 0, , True)
-                            Set myobj = var(w1)
-                            UnFloatGroup bstack, "_1", i, myobj, True
+                            Set myOBJ = var(w1)
+                            UnFloatGroup bstack, "_1", i, myOBJ, True
                             
                         Set p = CopyGroupObj(var(i))
                         PopStage bstack
@@ -51727,8 +51775,8 @@ If GetSub(s$ + ")", w2) Then
                         PushStage bstack, False
                     
                             i = globalvar("_1", 0, , True)
-                            Set myobj = p
-                            UnFloatGroup bstack, "_1", i, myobj, True
+                            Set myOBJ = p
+                            UnFloatGroup bstack, "_1", i, myOBJ, True
                             
                         Set p = CopyGroupObj(var(i))
                         PopStage bstack
@@ -51809,8 +51857,8 @@ End If
                         PushStage bstack, False
                     
                             i = globalvar("_1", 0, , True)
-                            Set myobj = p
-                            UnFloatGroup bstack, "_1", i, myobj, True
+                            Set myOBJ = p
+                            UnFloatGroup bstack, "_1", i, myOBJ, True
                             
                         Set p = CopyGroupObj(var(i))
                         PopStage bstack

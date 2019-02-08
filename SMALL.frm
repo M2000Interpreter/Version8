@@ -49,16 +49,16 @@ Private Declare Function GetModuleHandleW Lib "KERNEL32" (ByVal lpModuleName As 
 Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
 
 
-Private Declare Function GetWindowLongA Lib "user32" (ByVal hWND As Long, ByVal nIndex As Long) As Long
+Private Declare Function GetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
 
 
-Private Declare Function SetWindowLongA Lib "user32" (ByVal hWND As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 
 
-Private Declare Function SetWindowLongW Lib "user32" (ByVal hWND As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 
 
-Private Declare Function SetWindowTextW Lib "user32" (ByVal hWND As Long, ByVal lpString As Long) As Long
+Private Declare Function SetWindowTextW Lib "user32" (ByVal hWnd As Long, ByVal lpString As Long) As Long
     Private Const GWL_WNDPROC = -4
     Private m_Caption As String
 
@@ -85,7 +85,7 @@ Public Property Let CaptionW(ByVal NewValue As String)
         ' the default Unicode window procedure
         WndProc = GetProcAddress(GetModuleHandleW(StrPtr("user32")), "DefWindowProcW")
         ' window procedure of this form
-        VBWndProc = GetWindowLongA(hWND, GWL_WNDPROC)
+        VBWndProc = GetWindowLongA(hWnd, GWL_WNDPROC)
     End If
     ' ensure we got them
 
@@ -93,11 +93,11 @@ Public Property Let CaptionW(ByVal NewValue As String)
     If WndProc <> 0 Then
         ' replace form's window procedure with t
         '     he default Unicode one
-        SetWindowLongW hWND, GWL_WNDPROC, WndProc
+        SetWindowLongW hWnd, GWL_WNDPROC, WndProc
         ' change form's caption
-        SetWindowTextW hWND, StrPtr(m_Caption)
+        SetWindowTextW hWnd, StrPtr(m_Caption)
         ' restore the original window procedure
-        SetWindowLongA hWND, GWL_WNDPROC, VBWndProc
+        SetWindowLongA hWnd, GWL_WNDPROC, VBWndProc
     Else
         ' no Unicode for us
         Caption = m_Caption
@@ -121,7 +121,7 @@ Public Property Let CaptionWsilent(ByVal NewValue As String)
         ' the default Unicode window procedure
         WndProc = GetProcAddress(GetModuleHandleW(StrPtr("user32")), "DefWindowProcW")
         ' window procedure of this form
-        VBWndProc = GetWindowLongA(hWND, GWL_WNDPROC)
+        VBWndProc = GetWindowLongA(hWnd, GWL_WNDPROC)
     End If
     ' ensure we got them
 
@@ -129,11 +129,11 @@ Public Property Let CaptionWsilent(ByVal NewValue As String)
     If WndProc <> 0 Then
         ' replace form's window procedure with t
         '     he default Unicode one
-        SetWindowLongW hWND, GWL_WNDPROC, WndProc
+        SetWindowLongW hWnd, GWL_WNDPROC, WndProc
         ' change form's caption
-        SetWindowTextW hWND, StrPtr(m_Caption)
+        SetWindowTextW hWnd, StrPtr(m_Caption)
         ' restore the original window procedure
-        SetWindowLongA hWND, GWL_WNDPROC, VBWndProc
+        SetWindowLongA hWnd, GWL_WNDPROC, VBWndProc
     Else
         ' no Unicode for us
         Caption = m_Caption
@@ -255,6 +255,7 @@ If TaskMaster Is Nothing Then
       Else
        TaskMaster.TimerTickNow
        TaskMaster.StopProcess
+       
        DoEvents
        TaskMaster.StartProcess
        End If
@@ -317,7 +318,7 @@ If bstack.Process Is Nothing Then
 If PP = 0 Then Exit Sub
 Else
 
-Err.Clear
+Err.clear
 p = bstack.Process.Done
 If Err.Number = 0 Then
 e = True
@@ -367,7 +368,7 @@ If bstack.Process Is Nothing Then
 If PP = 0 Then Exit Sub
 Else
 
-Err.Clear
+Err.clear
 p = bstack.Process.Done
 If Err.Number = 0 Then
 e = True
@@ -448,7 +449,7 @@ Private Sub Form_Load()
 Debug.Assert (InIDECheck = True)
 Timer1.Interval = 10000
 Timer1.enabled = False
-If Not byPassCallback Then Set Me.Icon = Form1.Icon
+If Not byPassCallback Then Set Me.icon = Form1.icon
 End Sub
 
 

@@ -333,11 +333,16 @@ Next i
 End Function
 Function ShowRev() As String
 Dim i As Long
+If toplim > UBound(PriveSpace()) Then
+toplim = UBound(PriveSpace()) - 1
+InternalEror
+Else
 For i = 0 To toplim
 ' remove if to take hidden functions
 If InStr(PriveSpace(i).Key, ChrW(&H1FFF)) = 0 And InStr(PriveSpace(i).Key, ChrW(&HFFBF)) = 0 Then
 ShowRev = ShowRev + Chr(1) + PriveSpace(i).Key + Str$(PriveSpace(i).ndx) + Chr(1)
 End If
 Next i
+End If
 End Function
 

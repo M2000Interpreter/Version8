@@ -176,11 +176,20 @@ End Function
 Public Sub AddTask(ByRef NewTask As TaskInterface, Optional Priority As PriorityLevel)
   ' Add to list
  
-  If Priority = tmHigh And myMasterList.count > 0 Then
-    myMasterList.Add NewTask, "", 1
-
-  Else
+  If Priority = tmHigh Then
+    If myMasterList.count > 0 Then
+    
+    myMasterList.Add NewTask, , 1
+    Else
     myMasterList.Add NewTask
+    End If
+  Else
+        If myMasterList.count > 0 Then
+    
+    myMasterList.Add NewTask, , , myMasterList.count
+    Else
+    myMasterList.Add NewTask
+    End If
 
   End If
 
@@ -433,8 +442,6 @@ If myTimerHandle = 0 Then Exit Sub
   
   Set this = myMasterList(1)
   myMasterList.Remove 1
-
-  
  If OnlyMusic Then
  If this.Id > 100 Then
  AddTask this
