@@ -199,7 +199,7 @@ Wend
 '  For Each LibHdl In LibHdls: FreeLibrary LibHdl: Next
   Set LibHdls = Nothing
 End Sub
-Function IsWine()
+Function IsWine() As Boolean
 Static www As Boolean, wwb As Boolean
 If www Then
 Else

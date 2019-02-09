@@ -101,6 +101,8 @@ For i = 1 To curdotcol
 .MoveNameDot dotcol(i)
 Next i
 .DropRetStack
+.UseGroupname = UseGroupname
+.GroupName = GroupName
 End With
 
 
@@ -369,7 +371,9 @@ End If
 End Sub
 
 Public Sub MoveNameDot(a$)
+
 If a$ = vbNullString Then Exit Sub
+Debug.Print a$
 If curdotcol < dotcolmax Then
     curdotcol = curdotcol + 1
      dotcol(curdotcol) = a$

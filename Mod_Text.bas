@@ -83,7 +83,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 14
+Global Const Revision = 15
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1386,6 +1386,7 @@ RetStackSize = bstack.RetStackTotal
                 Else
                     bstack.MoveNameDot w$
             End If
+        '    depth = depth + 1
             End If
             Else
             
@@ -1411,6 +1412,7 @@ If pppp.refgroup Is Nothing Then
         If v >= 0 Then w$ = pppp.CodeName + CStr(v) Else w$ = pppp.CodeName + "_" + CStr(Abs(v))
         Else
         If pppp.refgroup.LastOpen = vbNullString Then
+   
         w$ = pppp.CodeName + CStr(v)
         pppp.refgroup.LastOpen = w$
         pppp.refgroup.lasthere$ = here$
@@ -1443,7 +1445,8 @@ If pppp.refgroup Is Nothing Then
                 Set safegroup = Nothing
                 v = 0
                 Else
-                bstack.MoveNameDot safegroup.lasthere + "." + safegroup.GroupName
+               ' bstack.MoveNameDot safegroup.lasthere + "." + safegroup.GroupName
+                bstack.MoveNameDot safegroup.GroupName
                 v = -1
                 GoTo contheretoo1
                 End If
@@ -1478,6 +1481,7 @@ conthere145:
         Else
         bstack.MoveNameDot myUcase(w$)
         End If
+      '  depth = depth + 1
     End If
 contheretoo1:
 Set mm = New mStiva2
@@ -1539,12 +1543,17 @@ contheretoo:
                                              v = 0
                                              Else
                                           
-                                                         w$ = pppp.item(v).lasthere + "." + pppp.item(v).GroupName
+                                                      '   w$ = pppp.item(v).lasthere + "." + pppp.item(v).GroupName
+                                                          w$ = pppp.item(v).GroupName
                                                          GoTo conthere3
                                              End If
                                              End If
                                              If safegroup Is Nothing Then
                                              Set safegroup = pppp.item(v)
+                                             Else
+                                             If Not pppp.item(v).IamApointer Then
+                                             Set safegroup = pppp.item(v)
+                                             End If
                                              End If
                                              If safegroup.LastOpen <> vbNullString Then
                                                 
@@ -1616,12 +1625,10 @@ y1 = 0
         
         End If
         Else
-        If Left$(w$, 1) = "." Then w$ = "THIS" + w$
       GoTo JUMPTHERE
        
         End If
         Else
-        If Left$(w$, 1) = "." Then w$ = "THIS" + w$
         End If
         If y1 = 0 Then
 contpointer:
@@ -1892,7 +1899,10 @@ breakexit:
             Else
                 If Not pppp.refgroup Is Nothing Then
                 Set safegroup = pppp.refgroup
+                 
                 Set safegroup.LinkRef = CopyGroupObj(var(y1))
+                safegroup.LastOpen = vbNullString
+                 safegroup.lasthere = vbNullString
                 Set safegroup = Nothing
                 
                 Else
@@ -2033,7 +2043,7 @@ cont2020:
         End If
         End If
         End If
-        SpeedGroup = Execute(bstack, b$, True)
+        SpeedGroup = Execute(bstack, b$, True, , , , , True)
         
 CONTlastEtnum:
 If LastErNum <> 0 Then
@@ -14523,7 +14533,7 @@ Set Parent = Parent.Parent
 Loop
 Set Parent = Nothing
 End Sub
-Function Execute(bstack As basetask, b$, once As Boolean, Optional linebyline As Boolean, Optional loopthis As Boolean = False, Optional noblock As Boolean = True, Optional restartmodule As Boolean) As Long
+Function Execute(bstack As basetask, b$, once As Boolean, Optional linebyline As Boolean, Optional loopthis As Boolean = False, Optional noblock As Boolean = True, Optional restartmodule As Boolean, Optional onlyone As Boolean = False) As Long
 Dim di As Object, nchr As Integer
 Set di = bstack.Owner
 Dim myobject As Object
@@ -14782,7 +14792,8 @@ again4:
             End If
             If trace Then
                 If Not bypasstrace Then
-                    If Not TraceThis(bstack, di, b$, w$, SBB$) Then Execute = 0: Exit Function
+                
+                    If Not TraceThis(bstack, di, b$, ss$, SBB$) Then Execute = 0: Exit Function
                 End If
             End If
             iscom = False
@@ -16147,7 +16158,7 @@ contdo:
                                         b$ = "BREAK": Exit Function
                                     End If
                                 ElseIf Execute = 1 Then
-                                If ok Then once = True: b$ = vbNullString: Exit Function
+                                'If ok Then once = True: b$ = vbNullString: Exit Function
                                 ElseIf Execute = 3 Then
                                 ok = False
                                 End If
@@ -18103,6 +18114,9 @@ If once Then
 'If jump Or IFCTRL Then
     If Not MaybeIsSymbol(b$, ":") Then
     Exit Do
+    Else
+    If onlyone Then Exit Do
+
     End If
 'Else
 'Exit Do

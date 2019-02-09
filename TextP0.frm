@@ -1781,7 +1781,7 @@ If onetime = 1 Then
     If forwine = 0 Then
     forwine = 1
     newStart basestack1, ""
-    
+    MOUT = True
     ElseIf Form1.Visible = False Then
     Else
     Form1.SetFocus
@@ -1807,11 +1807,11 @@ End If
 NOEXECUTION = False
 MOUT = True
 End If
+
     QUERY basestack1, Prompt$, qq$, (mybasket.mx * 4), True
     If NOEXECUTION And MOUT Then
-    qq$ = "@start"
-    MKEY$ = vbNullString
-    NOEXECUTION = False
+    If MKEY$ = "@Start" + Chr$(13) Then qq$ = "@start"
+        NOEXECUTION = False
     
 
     End If

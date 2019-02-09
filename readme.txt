@@ -1,12 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 14 active-X
+Version 9.7 Revision 15 active-X
 
-Esc now break Try { } block.
-
-Break key, Ctrl+C works as expected, in all speed mode (Slow, Fast, Fast !)
-just hold down break or ctrl+c, and in less than a second a messagebox pop up, to confirm to break (erase program) or to stop execution.
-When we use user forms these keys have no effect.
+Last minutes fixes. Supposed to be a perfect interpreter.
 
 
 The final 9.7 version

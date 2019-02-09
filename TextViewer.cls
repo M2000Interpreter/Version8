@@ -107,7 +107,7 @@ Private Declare Function GetClipboardData Lib "user32" _
     Private Declare Function SetClipboardData Lib "user32" _
     (ByVal wFormat As Long, ByVal hMem As Long) As Long
     Private Declare Function OpenClipboard Lib "user32" _
-    (ByVal hWND As Long) As Long
+    (ByVal hWnd As Long) As Long
 Private Declare Function CloseClipboard Lib "user32" _
     () As Long
     Private Declare Function IsClipboardFormatAvailable Lib "user32" _
@@ -758,7 +758,7 @@ FillBack thisHDC, b, glistN.CapColor
   For i = 1 To mDoc1.DocLines
   
     PrintItem2 thisHDC, mDoc1.TextLine2(i, False, True), a
-    a.Top = a.Top + onelineheight
+    a.top = a.top + onelineheight
   Next i
   RaiseEvent ExposeRect(item, thisrect, thisHDC, skip)
   skip = True
@@ -767,7 +767,7 @@ FillBack thisHDC, b, glistN.CapColor
 Else
 showparagraphWork = showparagraph
   ' a.Left = a.Left + 1
-    a.Top = a.Top + glistN.addpixels \ 2
+    a.top = a.top + glistN.addpixels \ 2
     pastchars = mDoc.TextParagraphLine2(item + 1, what$, ThatPara, showparagraph)
     
         If MarkedTextAny Then
@@ -950,7 +950,7 @@ FillBack thisHDC, b, glistN.CapColor
   
  '   PrintItem2 thisHDC, mDoc1.TextLine(i), A
     PrintItem2 thisHDC, mDoc1.TextLine2(i, False, True), a
-    a.Top = a.Top + onelineheight
+    a.top = a.top + onelineheight
   Next i
   RaiseEvent ExposeRect(item, thisrect, thisHDC, skip)
   skip = True
@@ -958,7 +958,7 @@ FillBack thisHDC, b, glistN.CapColor
    
 Else
    a.Left = a.Left + 1
-    a.Top = a.Top + glistN.addpixels \ 2
+    a.top = a.top + glistN.addpixels \ 2
     pastchars = mDoc.TextParagraphLine2(item + 1, what$, ThatPara, showparagraph)
     
         If MarkedTextAny Then
@@ -2183,6 +2183,10 @@ If kind > 0 Then
                                             GoTo again
                                         ElseIf ismine5(drop$) Then
                                         GoTo again500
+                                        ElseIf ismine3(drop$) Then
+                                            onetime = True
+                                            GoTo again
+                                       
                                         End If
                                 End If
              
@@ -3838,11 +3842,11 @@ Public Property Let ForeColor(ByVal RHS As OLE_COLOR)
 
 End Property
 
-Public Property Get Top() As Long
-Top = glistN.TopTwips
+Public Property Get top() As Long
+top = glistN.TopTwips
 End Property
 
-Public Property Let Top(ByVal RHS As Long)
+Public Property Let top(ByVal RHS As Long)
 glistN.TopTwips = RHS
 End Property
 Public Property Get Height() As Long
@@ -4286,7 +4290,7 @@ On Error Resume Next
     For i = items& To 0 Step -1
         CM = ww$(i)
         r.Left = offset + rleft + addthis
-        r.Top = r.Top + TextPixelOffset
+        r.top = r.top + TextPixelOffset
         b = r
         If i > 0 Then
         
@@ -4302,7 +4306,7 @@ On Error Resume Next
         DrawTextEx mHdc, StrPtr(CM), -1, r, mway, VarPtr(tParam)
           SelectClipRgn mHdc, &H0
    DeleteObject hRgn
-           r.Top = r.Top - TextPixelOffset
+           r.top = r.top - TextPixelOffset
    
     Next i
 Else
@@ -4320,12 +4324,12 @@ Else
         ' for Kenring
         addthis = glistN.UserControlTextWidthPixels(CM + c) - offset - glistN.UserControlTextWidthPixels(c)
         r.Left = offset + rleft + addthis
-        r.Top = r.Top + TextPixelOffset
+        r.top = r.top + TextPixelOffset
         
         If Not NoColor Then SetTextColor mHdc, M2000(col(i * 2))
     
         DrawTextEx mHdc, StrPtr(c), -1, r, mway, VarPtr(tParam)
-        r.Top = r.Top - TextPixelOffset
+        r.top = r.top - TextPixelOffset
         If r.Left < 0 Then Exit For
     Next i
 
@@ -4361,7 +4365,7 @@ On Error Resume Next
     For i = items& To 0 Step -1
         CM = ww$(i)
         r.Left = offset + rleft + addthis
-        r.Top = r.Top + TextPixelOffset
+        r.top = r.top + TextPixelOffset
         b = r
         If i > 0 Then
         
@@ -4377,7 +4381,7 @@ On Error Resume Next
         DrawTextEx mHdc, StrPtr(CM), -1, r, mway, VarPtr(tParam)
           SelectClipRgn mHdc, &H0
    DeleteObject hRgn
-           r.Top = r.Top - TextPixelOffset
+           r.top = r.top - TextPixelOffset
    
     Next i
 Else
@@ -4395,12 +4399,12 @@ Else
         ' for Kenring
         addthis = glistN.UserControlTextWidthPixels(CM + c) - offset - glistN.UserControlTextWidthPixels(c)
         r.Left = offset + rleft + addthis
-        r.Top = r.Top + TextPixelOffset
+        r.top = r.top + TextPixelOffset
         
         If Not NoColor Then SetTextColor mHdc, M2000(col(i * 2))
     
         DrawTextEx mHdc, StrPtr(c), -1, r, mway, VarPtr(tParam)
-        r.Top = r.Top - TextPixelOffset
+        r.top = r.top - TextPixelOffset
         If r.Left < 0 Then Exit For
     Next i
 

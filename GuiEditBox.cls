@@ -130,7 +130,7 @@ Private Declare Function GetClipboardData Lib "user32" _
     Private Declare Function SetClipboardData Lib "user32" _
     (ByVal wFormat As Long, ByVal hMem As Long) As Long
     Private Declare Function OpenClipboard Lib "user32" _
-    (ByVal hWND As Long) As Long
+    (ByVal hWnd As Long) As Long
 Private Declare Function CloseClipboard Lib "user32" _
     () As Long
     Private Declare Function IsClipboardFormatAvailable Lib "user32" _
@@ -709,9 +709,9 @@ End Sub
 Private Sub glistN_OutPopUp(x As Single, y As Single, myButton As Integer)
 '
 If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).Top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
    Else
-      Callback.Callback mesCtrlName + ".PopUp(" + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).Top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+      Callback.Callback mesCtrlName + ".PopUp(" + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
       End If
 End Sub
 
@@ -948,7 +948,7 @@ FillBack thisHDC, b, glistN.CapColor
   For i = 1 To mDoc1.DocLines
   
     PrintItem2 thisHDC, mDoc1.TextLine2(i, False, True), a
-    a.Top = a.Top + onelineheight
+    a.top = a.top + onelineheight
   Next i
  ' RaiseEvent ExposeRect(item, thisrect, thisHDC, skip)
   skip = True
@@ -957,7 +957,7 @@ FillBack thisHDC, b, glistN.CapColor
 Else
 showparagraphWork = showparagraph
   ' a.Left = a.Left + 1
-    a.Top = a.Top + glistN.addpixels \ 2
+    a.top = a.top + glistN.addpixels \ 2
     pastchars = mDoc.TextParagraphLine2(item + 1, what$, ThatPara, showparagraph)
     
         If MarkedTextAny Then
@@ -1179,9 +1179,9 @@ End If
 If KeyCode = vbKeyF10 And shift <> 0 Then
 KeyCode = 0
 If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.Top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
+   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
    Else
-      Callback.Callback mesCtrlName + ".PopUp(" + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.Top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
+      Callback.Callback mesCtrlName + ".PopUp(" + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
       End If
 Exit Sub
 End If
@@ -3631,7 +3631,10 @@ If kind > 0 Then
                                             onetime = True
                                             GoTo again
                                         ElseIf ismine5(drop$) Then
-                                        GoTo again500
+                                            GoTo again500
+                                        ElseIf ismine3(drop$) Then
+                                            onetime = True
+                                            GoTo again
                                         End If
                                 End If
              
@@ -4619,7 +4622,7 @@ DeleteObject my_brush
 End Sub
  Private Sub PrintItem1(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP)
  Dim cc As String
-r.Top = r.Top + TextPixelOffset
+r.top = r.top + TextPixelOffset
  If showparagraphonce Then
          cc = c & "¶"
   DrawTextEx mHdc, StrPtr(cc), -1, r, way, VarPtr(tParam)
@@ -4627,12 +4630,12 @@ r.Top = r.Top + TextPixelOffset
   DrawTextEx mHdc, StrPtr(c), -1, r, way, VarPtr(tParam)
    
     End If
-    r.Top = r.Top - TextPixelOffset
+    r.top = r.top - TextPixelOffset
     End Sub
  Private Sub PrintItem(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP)
-  r.Top = r.Top + TextPixelOffset
+  r.top = r.top + TextPixelOffset
   DrawTextEx mHdc, StrPtr(c), -1, r, way, VarPtr(tParam)
-r.Top = r.Top - TextPixelOffset
+r.top = r.top - TextPixelOffset
     End Sub
      Private Sub PrintItem2(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP)
  Dim that As Long
@@ -4952,12 +4955,12 @@ Public Property Let ForeColor(ByVal RHS As OLE_COLOR)
 
 End Property
 
-Public Property Get Top() As Long
-Top = Callback.Controls(ctrlName).Top
+Public Property Get top() As Long
+top = Callback.Controls(ctrlName).top
 End Property
 
-Public Property Let Top(ByVal RHS As Long)
-Callback.Controls(ctrlName).Top = RHS
+Public Property Let top(ByVal RHS As Long)
+Callback.Controls(ctrlName).top = RHS
 End Property
 Public Property Get Left() As Variant
 Left = Callback.Controls(ctrlName).Left
@@ -5433,7 +5436,7 @@ On Error Resume Next
     For i = items& To 0 Step -1
         CM = ww$(i)
         r.Left = offset + rleft + addthis
-        r.Top = r.Top + TextPixelOffset
+        r.top = r.top + TextPixelOffset
         b = r
         If i > 0 Then
         
@@ -5449,7 +5452,7 @@ On Error Resume Next
         DrawTextEx mHdc, StrPtr(CM), -1, r, mway, VarPtr(tParam)
           SelectClipRgn mHdc, &H0
    DeleteObject hRgn
-           r.Top = r.Top - TextPixelOffset
+           r.top = r.top - TextPixelOffset
    
     Next i
 Else
@@ -5467,12 +5470,12 @@ Else
         ' for Kenring
         addthis = glistN.UserControlTextWidthPixels(CM + c) - offset - glistN.UserControlTextWidthPixels(c)
         r.Left = offset + rleft + addthis
-        r.Top = r.Top + TextPixelOffset
+        r.top = r.top + TextPixelOffset
         
         If Not mNoColor1 Then SetTextColor mHdc, M2000(col(i * 2))
     
         DrawTextEx mHdc, StrPtr(c), -1, r, mway, VarPtr(tParam)
-        r.Top = r.Top - TextPixelOffset
+        r.top = r.top - TextPixelOffset
         If r.Left < 0 Then Exit For
     Next i
 
@@ -6959,7 +6962,7 @@ MyPopUp.ZOrder 0
         Do While MyPopUp.Visible
    ProcTask2 basestack1
    If Not Screen.ActiveForm Is Nothing Then
-If GetForegroundWindow <> Screen.ActiveForm.hWND Then MyPopUp.Visible = False
+If GetForegroundWindow <> Screen.ActiveForm.hWnd Then MyPopUp.Visible = False
 End If
                 '     mywait basestack1, 1
                 If ExTarget Then Exit Do

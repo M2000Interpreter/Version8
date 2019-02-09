@@ -1,4 +1,4 @@
-﻿MODULE GLOBAL A {Superclass alfa {
+﻿MODULE A {Superclass alfa {
       Unique:
             counter=1
       Public:
@@ -28,12 +28,12 @@ For z {
 }
 Print eval(z)=10, a=11, b=12, eval(z)=13 ' true true true true
 }
-MODULE GLOBAL B {\\ m is an auto array (a tuple)
+MODULE B {\\ m is an auto array (a tuple)
 \\ z is an iterator of m
 m=(1,2) : Print valid(m^)=false ' bug return valid(m^)=true
 z=each(m): Print Valid(z^)=true
 }
-MODULE GLOBAL C {dim a(), b()
+MODULE C {dim a(), b()
 a()=(1,2,3)
 b()=(3,2,1)
 for i=0 to 2
@@ -51,7 +51,7 @@ print min(a(2-i),a(i)), min(a(2-i), a(i))
 print compare(a(i), a(2-i)), a(2-i), a(i)
 next i
 }
-MODULE GLOBAL D {\\ Identifiers in Greek language
+MODULE D {\\ Identifiers in Greek language
 \\ see DR for the same program with statements in English language
 
 \\ [] return the pointer of last current stack, and leave an empty current stack
@@ -119,7 +119,7 @@ MODULE GLOBAL D {\\ Identifiers in Greek language
 }
 Λατινικοί_Αριθμοί
 }
-MODULE GLOBAL DD {class beta {
+MODULE DD {class beta {
       structure alfa1 {
             a as long*4
             b as long*4
@@ -135,7 +135,7 @@ beta=beta()
 Print beta.alfa("b")
 list
 }
-MODULE GLOBAL DD1 {local group alfa {
+MODULE DD1 {local group alfa {
       x=10, y%=50, z$="asdasda"
       dim M(4)=10
       event alfa {read b}
@@ -176,7 +176,7 @@ List
 Modules ?
 
 }
-MODULE GLOBAL DD2 {const b=lambda->100
+MODULE DD2 {const b=lambda->100
 const b%=lambda->100
 const b$=lambda$->"hello"
 Print b%()
@@ -186,7 +186,7 @@ Try {
 }
 Print b()
 }
-MODULE GLOBAL DD3 {\\ this is in a global module A
+MODULE DD3 {\\ this is in a global module A
 group alfa {
       x=100
       b=lambda->{
@@ -232,7 +232,7 @@ Print beta.b()
 p=pointer(beta) ' as reference to beta
 Print p=>b(), p=>b()
 }
-MODULE GLOBAL DD4 {n=lambda ->500
+MODULE DD4 {n=lambda ->500
 a=lambda n (x)->{
       if x<=0 then=0 : exit
       =lambda(x-1)+x+n()
@@ -278,7 +278,7 @@ a=lambda z (x) -> {
 }
 Print a(10)=3055
 }
-MODULE GLOBAL DD5 {class a {
+MODULE DD5 {class a {
       counter as long
 }
 b=lambda k=pointer(a()) (x)-> {
@@ -300,7 +300,7 @@ Print z is m 'true
 Print z=>counter=930
 Print k.counter=330 ' old value
 }
-MODULE GLOBAL DD6 {group beta {
+MODULE DD6 {group beta {
       x$="1000mm"
       m=100
 }
@@ -347,7 +347,7 @@ n=>m++
 Print z(150)(2)(1)("z")(3)(1)(300)(5).m=102
 Print g(2)(1)("z")(3)(1)(300)(5).m=102
 }
-MODULE GLOBAL DD7 {module Checkit {
+MODULE DD7 {module Checkit {
       Stack New {
             Data "foo://example.com:8042/over/there?name=ferret#nose", "urn:example:animal:ferret:nose"
             Data "jdbc:mysql://test_user:ouupppssss@localhost:3306/sakila?profileSQL=true", "ftp://ftp.is.co.za/rfc/rfc1808.txt"
@@ -389,7 +389,7 @@ MODULE GLOBAL DD7 {module Checkit {
 }
 Checkit
 }
-MODULE GLOBAL DD8 {Module Pairs {
+MODULE DD8 {Module Pairs {
       \\ written in version 9.5 rev. 13
       \\ use Gdi+ antialiasing (not work with Wine in Linux, but we get no error)
       smooth on
@@ -462,7 +462,7 @@ MODULE GLOBAL DD8 {Module Pairs {
 }
 Pairs
 }
-MODULE GLOBAL DD9 {a=10
+MODULE DD9 {a=10
 Module Checkit {
       if random(10)=1 then Clear ' erase all statics and variables from this level
       Module Checkit {
@@ -489,7 +489,7 @@ Module Checkit {
 Checkit
 Print a ' a exist always
 }
-MODULE GLOBAL F1 {Group alfa {
+MODULE F1 {Group alfa {
       private:
             x=10
       public:
@@ -506,7 +506,7 @@ Print valid(alfa.x)=false
 alfa.incX
 alfa.print   ' print 11
 }
-MODULE GLOBAL F2 {module checkit {
+MODULE F2 {module checkit {
       def long counter=0
       class b1 {
             x=10
@@ -556,7 +556,7 @@ MODULE GLOBAL F2 {module checkit {
 }
 Checkit
 }
-MODULE GLOBAL F3 {Module Checkit {
+MODULE F3 {Module Checkit {
       group alfa {
       x=10
       }
@@ -590,7 +590,7 @@ MODULE GLOBAL F3 {Module Checkit {
 }
 Checkit
 }
-MODULE GLOBAL F4 {gosub modules
+MODULE F4 {gosub modules
 group alfa {
 x=10
 }
@@ -626,7 +626,7 @@ Module  checkme3 {
 }
 Return
 }
-MODULE GLOBAL F5 {gosub modules
+MODULE F5 {gosub modules
 group alfa {
 x=10
 }
@@ -673,7 +673,7 @@ Return
 
 
 }
-MODULE GLOBAL F6 {Module CheckMe {
+MODULE F6 {Module CheckMe {
       Class alfa {
             x=1000
       }
@@ -708,7 +708,7 @@ MODULE GLOBAL F6 {Module CheckMe {
 }
 CheckMe
 }
-MODULE GLOBAL F7 {Module checkit {
+MODULE F7 {Module checkit {
       Declare random1 lib "advapi32.SystemFunction036" {long lpbuffer, long length}
       Buffer Clear Alfa as long*2
       Print Eval(Alfa,0)
@@ -719,7 +719,7 @@ MODULE GLOBAL F7 {Module checkit {
 }
 checkit
 }
-MODULE GLOBAL F8 {Declare Global CryptAcquireContext Lib "advapi32.CryptAcquireContextW" {Long &hProv, pszContainer$,pszProvider$, long dwProvType, long dwFlags}
+MODULE F8 {Declare Global CryptAcquireContext Lib "advapi32.CryptAcquireContextW" {Long &hProv, pszContainer$,pszProvider$, long dwProvType, long dwFlags}
 Declare Global CryptReleaseContext Lib "advapi32.CryptReleaseContext" {Long hProv, Long dwFlags}
 Declare Global CryptGenRandom Lib"advapi32.CryptGenRandom" {Long hProv, Long dwLen, Long &ByRef}
 Global Const PROV_RSA_FULL As Long = 1
@@ -734,7 +734,7 @@ Function  Random2 {
 }
 Print Random2()
 }
-MODULE GLOBAL URL {Module checkit {
+MODULE URL {Module checkit {
       document doc$
       any=lambda (z$)->{=lambda z$ (a$)->instr(z$,a$)>0}
       one=lambda (z$)->{=lambda z$ (a$)->z$=a$}
@@ -909,7 +909,7 @@ MODULE GLOBAL URL {Module checkit {
 }
 Checkit
 }
-MODULE GLOBAL T1 {a=(1,2,3,4,5)
+MODULE T1 {a=(1,2,3,4,5)
 Print a#rev()
 Print a#sum()=15
 Print a#max()=5, a#min()=1
@@ -980,7 +980,7 @@ t=(1,0,1)
 Print c#pos(t) ' 1  means 2nd position
 Print c#pos(3->t) ' 6  means 7th position
 }
-MODULE GLOBAL R1 {Function DispRev$(a$) {
+MODULE R1 {Function DispRev$(a$) {
       i=1: j=Len(a$): if j=0 then ="": exit
       z$=String$(" ",j): j++
       do {
@@ -999,7 +999,7 @@ Print DispRev$("abcd")="dcba"
 Print DispRev$("")=""
 Print DispRev$("s⃝df̅")="f̅ds⃝"
 }
-MODULE GLOBAL W1 { Module WeaselAlgorithm {
+MODULE W1 { Module WeaselAlgorithm {
       Print "Evolutionary Algorithm"
       \\ Weasel Algorithm
       \\ Using dynamic array, which expand if no fitness change,
@@ -1057,7 +1057,7 @@ MODULE GLOBAL W1 { Module WeaselAlgorithm {
 }
 WeaselAlgorithm
 }
-MODULE GLOBAL S1 {Module CheckIt {
+MODULE S1 {Module CheckIt {
       Flush
       Form ! 60, 40    ' use ! to reduce form (for safe area for TV)
       oldback=point  ' read color from 0,0  ' (Mode, Form. and Widow statement reset graphic cursor)
@@ -1126,7 +1126,7 @@ MODULE GLOBAL S1 {Module CheckIt {
 }
 Checkit
 }
-MODULE GLOBAL M1 { Module FilterMapFold {
+MODULE M1 { Module FilterMapFold {
       Form 80,40
       \\ HasString()
       \\ used to find if an array has strings or numbers
@@ -1415,7 +1415,7 @@ MODULE GLOBAL M1 { Module FilterMapFold {
 FilterMapFold
 
 }
-MODULE GLOBAL H1 { Class HttpStatus {
+MODULE H1 { Class HttpStatus {
 Events "trace", "err","high","low"
 Private:
       myvalue
@@ -1552,7 +1552,7 @@ b++ ' now we get high limit because b and a(1) show the same nameless (or float)
 
 
 }
-MODULE GLOBAL INF { locale 1033
+MODULE INF { locale 1033
 Module CheckIt {
       Form 66,40
       Cls 5
@@ -1600,7 +1600,7 @@ Module CheckIt {
 }
 Checkit
 }
-MODULE GLOBAL CONV { Module Checkit {
+MODULE CONV { Module Checkit {
       Conv2dec=lambda (n$, frombase=10, dp$=".") -> {
            neg=left$(n$,1)="-": if neg then n$=mid$(n$,2)
            if instr(n$, dp$)>0 then {
@@ -1672,7 +1672,7 @@ MODULE GLOBAL CONV { Module Checkit {
 }
 Checkit
 }
-MODULE GLOBAL RAT {Module RationalNumbers {
+MODULE RAT {Module RationalNumbers {
       Class Rational {
             numerator as decimal, denominator as decimal
             gcd=lambda->0
@@ -1852,7 +1852,7 @@ MODULE GLOBAL RAT {Module RationalNumbers {
 }
 RationalNumbers
 }
-MODULE GLOBAL TUPLE { Form 80, 60
+MODULE TUPLE { Form 80, 60
 \\ Tuple of items (as one dimension arrays)
 A=(1,2,3,4,5)
 B=("George", 10, "Bob", 5)
@@ -1961,7 +1961,7 @@ Print Z()
 Z(14,15)-- ' Subtract 1 from one item
 Print Z(14,15)
 }
-MODULE GLOBAL TU {Module TestGroup {
+MODULE TU {Module TestGroup {
       Group A {
             X=10
             Dim K(10)=1
@@ -1993,7 +1993,7 @@ Module TestGroup2 {
 }
 TestGroup2
 }
-MODULE GLOBAL PEND { Module Pendulum {
+MODULE PEND { Module Pendulum {
       back()
       degree=180/pi
       THETA=Pi/2
@@ -2041,7 +2041,7 @@ MODULE GLOBAL PEND { Module Pendulum {
 }
 Pendulum
 }
-MODULE GLOBAL LOGO {smooth off  ' can't use xor with GDI+, so we work with GDI32 (by default)
+MODULE LOGO {smooth off  ' can't use xor with GDI+, so we work with GDI32 (by default)
 Form 80, 50
 Cursor 0,0
 Gradient 11,0
@@ -2104,7 +2104,7 @@ Sub drawframe0()
       Cursor !
 End Sub
 }
-MODULE GLOBAL EN {\\ by default Dog=1, Cat=2
+MODULE EN {\\ by default Dog=1, Cat=2
 \\ we can change it: Dog=0, Cat   ' so now Cat=1
 \\ we can change it: Dog=100, Cat=200
 \\ we can put a new line in place of comma
@@ -2137,7 +2137,7 @@ Sub AlfaByRef(&b as Pets)
       b++
 End Sub
 }
-MODULE GLOBAL FS {\\ appdir$ is the application directory. Normally we nevert use it
+MODULE FS {\\ appdir$ is the application directory. Normally we nevert use it
 \\ dir$ is the current dir
 \\ see Help "file operations" or Help "file "
 \\ Help Files  (or one of this list BITMAPS, CLOSE, DRAWINGS, FILES, GET, LINE INPUT, MOVIES, NAME, OPEN, PUT, SEEK, SOUNDS, WRITE)
@@ -2195,7 +2195,7 @@ With obj, -4& as new Folder
 
 end sub
 }
-MODULE GLOBAL FS1 {Declare fs "Scripting.FileSystemObject"
+MODULE FS1 {Declare fs "Scripting.FileSystemObject"
 Method fs, "GetFolder", dir$ as fc
 With fc, "files" set files
 \\ Produce the TypeLib
@@ -2228,7 +2228,7 @@ End if
 Declare fs nothing
 
 }
-MODULE GLOBAL GAME {Module Game2048 {
+MODULE GAME {Module Game2048 {
       \\ 10% 4 and 90% 2
       Def GetTlleNumber()=If(Random(10)<2->4, 2)
       \\ tile
@@ -2353,7 +2353,7 @@ MODULE GLOBAL GAME {Module Game2048 {
 }
 Game2048
 }
-MODULE GLOBAL FIX1 {Class fixme {
+MODULE FIX1 {Class fixme {
       f=lambda->1
 }
 fix->fixme()
@@ -2366,7 +2366,7 @@ Print next_fact(5)
 m=next_fact
 Print m(5)
 }
-MODULE GLOBAL Y {Module Ycombinator {
+MODULE Y {Module Ycombinator {
       \\ factorial
       Print lambda (g, x)->{=g(g, x)}(lambda (g, n)->if(n=0->1, n*g(g, n-1)),10)
        \\ fibonacci
@@ -2383,7 +2383,7 @@ MODULE GLOBAL Y {Module Ycombinator {
 }
 Ycombinator
 }
-MODULE GLOBAL EV {Module CheckEvents {
+MODULE EV {Module CheckEvents {
       \\ we can use standard functions (not lambda functions)
       \\ we can use lambda() so we can use function with different names
       \\ We can define functions inside groups with events
@@ -2430,7 +2430,7 @@ MODULE GLOBAL EV {Module CheckEvents {
 }
 CheckEvents
 }
-MODULE GLOBAL MG {Form 60,44
+MODULE MG {Form 60,44
 Escape Off
 Flush
 Flush Garbage
@@ -3173,7 +3173,7 @@ InpValue2.Json$={"Left" : "1000", "Top" : "500"}
 Report InpValue2.Json$(0)
 Escape on
 }
-MODULE GLOBAL QSORT3 {Module Checkit3 {
+MODULE QSORT3 {Module Checkit3 {
       Class Quick {
       Private:
             partition=lambda-> {
@@ -3254,7 +3254,7 @@ MODULE GLOBAL QSORT3 {Module Checkit3 {
 }
 Checkit3
 }
-MODULE GLOBAL CONC {Thread.Plan Concurrent
+MODULE CONC {Thread.Plan Concurrent
 Module CheckIt {
       Flush  \\ empty stack of values
       Data "Enjoy", "Rosetta", "Code"
@@ -3307,7 +3307,7 @@ Module CheckIt {
 }
 CheckIt
 }
-MODULE GLOBAL LISP {Profiler
+MODULE LISP {Profiler
 EntryLevel =0
 Module forall {  \\ For all subs - reusable code use Call ! Local forall
       Local MyAcc$
@@ -3606,7 +3606,7 @@ If Not Mess Then {
 }
 Print Timecount
 }
-MODULE GLOBAL P {SET FAST !
+MODULE P {SET FAST !
 PEN #fff9aa
 \\ BLOCK ESCAPE KEY
 ESCAPE OFF
@@ -3788,7 +3788,7 @@ TRY {
 }
 RETURN
 }
-MODULE GLOBAL MEDITOR {\\ notepad for M2000 programs (gsb files)
+MODULE MEDITOR {\\ notepad for M2000 programs (gsb files)
 Show
 Clear \\ Clear all variables/objects
 Flush \\ Empty the stack
@@ -4049,15 +4049,17 @@ Declare NotePad Nothing
 Print "Done"
 
 }
-MODULE GLOBAL INFO {dir user
+MODULE INFO {Title "Info"   ' open a window in task bar with name info (if  you run Demo, at the exit you get no window in task bar, so we can restore it)
+dir user
+Player 0  ' erase any layer
 back {
 	cls 11, 0   '   backcolor,  split line (0 means no split line)
 	\\ split means to define a lower part of form to be scrolled up or down
 rem	gradient 11, 0
 }
 Form ! 68,52
-backcolor=point
-oldpen=pen
+backcolor=5   'point
+oldpen=14  ' pen
 Refresh 500
 Pen 0 {
 	cls 7
@@ -4123,6 +4125,7 @@ FKey 1,"saveme"
 FKey 2,"Edit Info"
 FKey 3,"Info"
 FKey 4,"M2000_Editor_Information"
+FKey 5,"Demo1"
 FKey 6,"Edit M2000_editor_information"
 Fkey 8,"mEditor"
 FKey 10,"Settings"
@@ -4141,11 +4144,11 @@ Pen #ffeeff {
 }
 End Sub
 }
-MODULE GLOBAL SAVEME {dir user
+MODULE SAVEME {dir user
 save info, info
 Print "Done"
 }
-MODULE GLOBAL M2000_EDITOR_INFORMATION {thread.plan sequential   ' can run as concurrent too
+MODULE M2000_EDITOR_INFORMATION {thread.plan sequential   ' can run as concurrent too
 Cls,0
 backcolor=point
 oldpen=pen
@@ -4287,6 +4290,7 @@ Pen #ffeeff {
 }
 End Sub
 Sub Press()
+	wait 200
 	local col=15,  col2=backcolor, threadid
 	Input End  ' empty buffer too
 	Print @(0,Height);
@@ -4296,7 +4300,7 @@ Sub Press()
 		}
 		swap col, col2
 	} as threadid interval 250
-	wait 500	
+\	wait 500	
 	Main.Task 10 {
 		if keypress(1) or keypress(32) then exit
 	rem		if mouse>0 or inkey$<>"" then exit
@@ -4304,7 +4308,7 @@ Sub Press()
 	Threads Erase
 End Sub
 }
-MODULE GLOBAL FORM44 {Set slow
+MODULE FORM44 {Set slow
 Thread.Plan  Concurrent  ' Sequential
 Refresh 40
 SMOOTH on
@@ -4507,7 +4511,7 @@ Sub PrintAndRefresh(A$)
             Refresh
 End Sub
 }
-MODULE GLOBAL LIST33 {Declare Simple Form
+MODULE LIST33 {Declare Simple Form
 With Simple, "Title" As myTitle$
 \\ make window, not show yet
 Layer Simple {
@@ -4608,7 +4612,7 @@ a$=Key$ \\ no loop just wait a key, in console only
 Threads Erase
 Declare Simple Nothing
 }
-MODULE GLOBAL TEXTOUT {Module UsingEvents {
+MODULE TEXTOUT {Module UsingEvents {
       Form 60, 32
       Declare WithEvents sp "SAPI.SpVoice"
       That$={Rosetta Code is a programming chrestomathy site.
@@ -4650,7 +4654,7 @@ MODULE GLOBAL TEXTOUT {Module UsingEvents {
 }
 UsingEvents
 }
-MODULE GLOBAL MOVEBUTTON {Declare Form1 Form
+MODULE MOVEBUTTON {Declare Form1 Form
 Declare Button1 Button Form Form1
 Declare TextBox1 TextBox Form Form1
 Bx=4
@@ -4697,7 +4701,7 @@ A$=key$
 Declare Button1 Nothing
 Declare Form1 Nothing
 }
-MODULE GLOBAL DR {Module RomanNumbers {
+MODULE DR {Module RomanNumbers {
       flush  ' empty current stack
       gosub Initialize
       document Doc$
@@ -4773,7 +4777,7 @@ Initialize:
 }
 RomanNumbers
 }
-MODULE GLOBAL G1 {t=0
+MODULE G1 {t=0
 {
 'loop
 t++
@@ -4789,21 +4793,21 @@ exit
 101 Print "ok"
 }
 }
-MODULE GLOBAL G2 {goto 100
+MODULE G2 {goto 100
 
 end
 Print 0100
 Print "fault"
 0100 Print "ok1"
 }
-MODULE GLOBAL G3 {goto 100
+MODULE G3 {goto 100
 
 end
 Print 100
 Print "fault"
 100 Print "ok1"
 }
-MODULE GLOBAL G11 {t=0
+MODULE G11 {t=0
 again:
 {
 loop
@@ -4820,14 +4824,14 @@ alfa:
 101 Print "ok2", t
 }
 }
-MODULE GLOBAL G12 {alfa:
+MODULE G12 {alfa:
 101  static a=10
 110 a--
 120 print a
 130 if a>1 then goto alfa
 140 Clear
 }
-MODULE GLOBAL G4 {Module beta {
+MODULE G4 {Module beta {
       print "i am beta"    
 }
 X=4
@@ -4840,7 +4844,7 @@ k=false
 x=100
 
 }
-MODULE GLOBAL M2 {a=(1,2,3,4,5)
+MODULE M2 {a=(1,2,3,4,5)
 fold1=lambda (a, b)-> {
       push a+b
 }
@@ -4875,7 +4879,7 @@ a=(1,2,3,4,5)
 ? a#map(add2, square)
 ? "["+a#map(add2, square)#fold$(fold2, "")+"]"
 }
-MODULE GLOBAL FS2 {Form ! 60,40
+MODULE FS2 {Form ! 60,40
 linespace twipsY*4
 Form ! 60
 refresh
@@ -4907,5 +4911,1674 @@ While k {
 	}
 	end if
 }
+}
+MODULE DEMO1 {set Fast !
+smooth on
+Rem :  Thread.plan sequential
+\\ we can set Thread.plan before any thread created
+Rem :  
+Thread.plan concurrent
+\\ concurrent execute one by one statements
+\\ except those in { }
+\\ also from Revision 52 Part {} as variable works fine with it
+local counter1, counter2
+Title "", 0 ' 0  to hide console
+Set FAST !
+\\ by api
+Structure VecType {
+          x As Double
+          y As Double
+          z As Double
+}
+\\ Program
+Structure Variables {
+      vRot1 As VecType
+      vRot2 As VecType
+      vRot3 As VecType
+      vRot4 As VecType
+      vBase As VecType
+      vAxis As VecType
+}
+Buffer Clear Var As Variables
+\\ utility function
+VecAdr=Lambda Var (a$) -> {
+      =Var(0,a$)
+}
+VecOff=Lambda Var, VecType (a$, b$) -> {
+      =Var(0, a$, VecType(b$)!)
+}
+Class cLine {
+      X1, Y1, X2, Y2, color
+      Module Render {
+            ' read Number from stack
+            z=Round(Number,4)
+            z1=Round(Number, 4)
+            If z>=z1 Then {
+                  Move .X1, .Y1
+                  Width 3 {Draw to .X2, .Y2, .color}
+                  Circle Fill #aa33cc, z/40+200
+            } Else {
+                  Move .X2, .Y2
+                  Circle Fill #aa33cc, z/40+200
+                  Width 3 {Draw to .X1, .Y1, .color}
+            }
+      }
+Class:
+      Module cLine (.color){
+            If Match("NNNN") Then Read .X1, .Y1, .X2, .Y2
+      }     
+}
+
+\\ find address
+vBase=VecAdr("vBase")
+vBase.x=VecOff("vBase","x")
+vBase.y=VecOff("vBase","y")
+vBase.z=VecOff("vBase","z")
+vRot1=VecAdr("vRot1")
+vRot1.x=VecOff("vRot1","x")
+vRot1.y=VecOff("vRot1","y")
+vRot1.z=VecOff("vRot1","z")
+vRot2=VecAdr("vRot2")
+vRot2.x=VecOff("vRot2","x")
+vRot2.y=VecOff("vRot2","y")
+vRot2.z=VecOff("vRot2","z")
+vRot3=VecAdr("vRot3")
+vRot3.x=VecOff("vRot3","x")
+vRot3.y=VecOff("vRot3","y")
+vRot3.z=VecOff("vRot3","z")
+vRot4=VecAdr("vRot4")
+vRot4.x=VecOff("vRot4","x")
+vRot4.y=VecOff("vRot4","y")
+vRot4.z=VecOff("vRot4","z")
+vAxis=VecAdr("vAxis")
+Refresh 100
+Declare Alfa Form
+With Alfa, "Title", "Demo1", "UseIcon", True, "UseReverse", True  ' icon now is in the left side
+Method Alfa,"MakeStandardInfo", 1   ' 1 for English
+Def  info$, AskRet
+Function Alfa.InfoClick {
+	Read New X
+	If X=0 then
+	after 100 {
+			Info$={
+				This is an example
+				of  using MATH object
+				(included in M2000 Interpreter)
+				}
+			AskRet=Ask(info$,"About Demo1","","")	
+	}
+	end if
+}
+\\ a string to hold static background
+screen$=""
+disp=False
+Inventory Depth
+aLine=Each(Depth)
+once=False
+Function DepthSort() {
+                   Inventory Queue Depth ' clear Depth, Then make keys As numbers
+                   Append Depth, Eval(Var, vRot1.z As double):=1, Eval(Var, vRot2.z As double):=2, Eval(Var, vRot3.z As double):=3
+                   Sort Depth As number
+}
+Thread {
+      part {
+                  Method Math, "RotVectMult", 4, vRot1, vAxis, vRot1, dAngle
+                  Push Eval(Var, vBase.y As double), Eval(Var, vBase.x As double)
+                  \\ x is in top, y is after x
+                  Over 2, 2 \\  copy two times from second, so double two top
+                  Push Eval(Var, vRot4.x As double)+Number : Over 1, 2 \\ copy 2 times top only
+                        Read Line1.X1, Line2.X1, Line3.X1
+                        Push Eval(Var, vRot4.y As double)+Number : Over 1, 2
+                        Read Line1.Y1, Line2.Y1, Line3.Y1
+                        Over 2, 4 \\ now original 2 values copied 4 times
+                        Line1.X2 = Eval(Var, vRot1.x As double)+Number
+                        Line1.Y2 = Eval(Var, vRot1.y As double)+Number
+                        Line2.X2 = Eval(Var, vRot2.x As double)+Number
+                        Line2.Y2 = Eval(Var, vRot2.y As double)+Number
+                        Line3.X2 = Eval(Var, vRot3.x As double)+Number
+                        Line3.Y2 = Eval(Var, vRot3.y As double)+Number
+                        call local depthsort()
+                        counter1++
+                        if random(20)>1 then exit
+                        Method Math, "Vector", vAxis,.4 -.8*rnd, 1.6, .2-.3*rnd
+                        Method Math, "UnitVect", vAxis
+      }  As once
+} As Compute
+dim All(1 to 3)
+Layer Alfa {
+      Window 12, 10000, 8000;
+      Form 40, 20
+      Line1=cline(#0000FF, scale.x/2, scale.y/2, scale.x/2, scale.y/2-2220 )
+      Line2=cline(#FF0000, scale.x/2, scale.y/2, scale.x/2-2340, scale.y/2-60 )
+      Line3=cline(#00FF00, scale.x/2, scale.y/2, scale.x/2-780, scale.y/2-1200 )
+      All(1)->Line1
+      All(2)->line2
+      All(3)->line3
+      Declare Math Math
+      Method Math, "Vector", vBase,scale.x/2-1500, scale.y/2+1500, 1500 '  -1000
+      Method Math, "Vector", vRot1, Line1.X2, Line1.Y2, -1000
+      Method Math, "Vector", vRot2, Line2.X2, Line2.Y2, -1200
+      Method Math, "Vector", vRot3, Line3.X2, Line3.Y2, 1700
+      Method Math, "Vector", vRot4, Line1.X1, Line1.Y1, 0
+      Method Math,  "VecDiffMult", 4, vRot1, vBase, vRot1
+      Inventory Depth=Eval(Var, vRot1.z As double):=1, Eval(Var, vRot2.z As double):=2, Eval(Var, vRot3.z As double):=3
+      Sort Depth As number
+      Method Math, "Vector", vAxis, -.8, 1.6, .3
+      Method Math, "UnitVect", vAxis
+      Rad2Deg =Lambda pidivby180=pi/180 (RadAngle)->RadAngle / pidivby180
+      dAngle =5
+      Pen 0
+      Cls 7
+      Gradient 11, 13
+      Move 0,0
+      Cursor 0, Height-1
+      Cls 7, Height-1
+      Copy scale.x, scale.y to screen$
+      Cursor 0,Height
+      together=False
+      ok1=true
+      Thread {
+            ok1~
+      } as mm interval 1000/25
+      tm=0
+      Thread {
+            static internal=1
+'            Refresh 0
+            Move 0,0
+            Copy 0,0 use screen$
+            Part {
+                  tm=timecount
+            } as ok1
+            Print @(3,3); format$("{0:2:-5}",tm)
+                  Cursor 0,height-1
+
+            Part {
+                       Part {
+                        aLine=Each(Depth)
+                        push  Eval(Var, vRot4.z As double) : Over 1, 2
+                        while aline {
+                                    pp=all(eval(aLine))
+                                    pp=>render  Val(eval$(Depth, aLine^))
+                        }
+                        counter2++
+                        } As disp
+                   Print Part $(5,Width/4), counter1, counter2,internal, $(7),Str$(Now , "hh:mm:ss" ) 
+                  Refresh 5000' execute together
+            }  As together
+            internal++
+            Profiler
+      } As PlayThis
+}
+\\ we set variables outside threads
+State=False
+blinking=False
+Thread {
+       If state Then disp~
+ } As blink
+Thread blink Hold
+ExitNow=False
+Function Alfa.Unload {
+      ExitNow=True
+      threads erase
+}
+Function Alfa.Click {
+                  State~
+                  If State Then {
+                         Thread compute Hold
+                         Thread blink interval 1000/4
+                         Thread blink Restart
+                         blinking=true
+                  } Else {
+                        disp=False
+                        If blinking Then Thread blink  Hold : blinking~
+                        Thread compute Restart
+                  }
+}
+Thread PlayThis interval 1000/120
+Thread compute interval 10
+Wait 200
+Method Alfa, "Show"
+\\ Change Task.Main with Every
+\\ Task.Main is a Thread
+\\ ExitNow needed If we have Every in place of Task.Main
+Task.Main 50 {
+\\      If counter1>1000 Then Threads Erase : Exit
+      If ExitNow Then Exit
+}
+Threads Erase
+Wait 100  \ some delay here
+Method Alfa, "CloseNow"
+Declare Alfa Nothing
+Declare Math Nothing
+Print counter1, counter2
+}
+MODULE UPDATE {dir appdir$
+save info, info
+dir user
+save info, info
+}
+MODULE BJ { Flush  \\empty Stack, we use optional arguments in Modules
+ NoPlayers=4
+\\ Dealer get one hidden And one open Card
+\\ Player's get two open cards, one at a time
+\\ Options for Split and Double Down
+\\ If Player has a BlackJack Then dealer play for 21, changing cards for other players/splits
+\\ Standard Bet 100 credits.  Each player start with 10000 credits
+MakeLayer()
+
+Print $(4)
+Inventory Suits = "♠":=0, "♥":=4, "♦":=4, "♣":=0 'suit -> color
+Inventory Cards = "two":=2, "three":=3, "four":=4, "five":=5
+Append Cards, "six":=6, "seven":=7, "eight":=8, "nine":=9
+Append Cards, "ten":=10, "jack":=10, "queen":=10, "king":=10, "ace":=1
+Global CardsView
+\\ use <= to feed CardsView
+Inventory CardsView <= 2, 3, 4, 5, 6, 7, 8, 9,10, "jack", "queen", "king","ace"
+
+\\ We use Module because each module has own use of dots..
+\\ And we call it inside a For Object {} And outside of it
+DealerMoney=0
+Module PrintCardOnly (k, Suits, Cards, x=0) {
+          For k {
+                Pen Suits(.suit!) {
+                        Print Part @(10+x,row,15+x,row+1,#FFE4E1,0), Eval$(Suits, .suit)+" "+CardsView$(.card!)
+                        Print
+                   }
+        }
+}
+' Using a Stack object
+StackPack = Stack
+Module AppendArray (N, A) {
+      Stack N {Data !A}
+}
+Class OneCard {
+      suit=-1, Card
+Class:
+     Module OneCard {
+           \\ ? for optional reading
+           read ? .suit, .card
+     }
+}
+\\ 3X52 cards
+Dim Pack(Len(Cards)*Len(Suits)*(NoPlayers+1)) \\ Not used here =OneCard()
+Pen 14
+Double
+Pen 14 {Report 2, "BlackJack"}
+Normal
+Cls, 2
+k=0
+\\ fill cards to Pack()
+For times=NoPlayers+1 To 1 {
+      N=each(Suits)
+      While N {
+            M=each(Cards)
+            While M {
+                  Pack(k)=OneCard(N^, M^)
+                  k++
+            }
+      }     
+}
+Layer 1 {
+	Report 2, "Prepare Cards"
+}
+Rem : DisplayAll() ' in order
+Suffle()
+Rem : DisplayAll() ' at random positions
+Print
+' first cut for player
+layer 1{
+	Print "Make a Cut: 0-51:";
+	Repeat {
+	      N1=Random(0,51)
+	      Try {
+	            Input ! N1, 10
+	      }
+	      Stack StackPack {
+	            Drop N1
+	      }
+	} Until N1>=0 And N1<=51
+	Print N1
+}
+\\ used to pass the Dealer's hidden Card
+Hidden=OneCard()
+DealerHidden=OneCard()
+Class PlayerJB {
+      Class PlayerGame {
+            \\ Class is a Group Factory - a function whuch return Group
+            \\ Class Definition in a Group is local else is Global
+            \\ until erased when Definition Holder exit or end (a Module/Function where we define a class)
+            Playervalue, Bet
+            \\ we can define groups using class like this If class constructor work without parammeters
+            OneCard LastCard
+            Class:
+            \\ Class: means that this module exist only at construction stage
+            Module PlayerGame {
+                  ' This module as part of constructor
+                  ' so has own Stack when called as constructor
+                 Read .Playervalue, .Bet
+                 If Not Empty Then Read .LastCard
+            }
+      }
+      Inventory queue PlayerCards
+      OneCard PlayerFaceUp2nd, SplitCard
+      Bet=100, PlayerMoney
+      Playervalue
+      OldPlayerValues=Stack
+      Done=false
+Class:
+      Module PlayerJb (.PlayerMoney) {}
+}
+Dim Base 1, Players(NoPlayers)=PlayerJB(10000)
+Def Val$(x)=If$(x=-1 -> "Black Jack", Str$(x,""))
+Card=OneCard()
+Function ClearCards {
+      Inventory queue ClearCards
+      =ClearCards
+}
+Function PlayerHasNoBlackJack(HasTheDealer) {
+      ' we get two parameters
+      If Not HasTheDealer Then Exit ' the second parameter droped from Stack
+      ' now we read 2nd
+      Read k
+      Def Range(X, X1, X2)=X>=X1 and X<=X2
+      m=false
+      If k.PlayerCards(0!).card=12 And Range(k.PlayerFaceUp2nd.card,8 ,11) Then m=m or true
+      If k.PlayerFaceUp2nd.card=12 And Range(k.PlayerCards(0!).card,8 ,11) Then m=m or true
+      =Not m
+}
+DealerRow=0
+Repeat {
+      layer 1 {cls}
+      donecount=0
+      For i=1 to NoPlayers {
+            For Players(i) {
+                  .SplitCard=OneCard()
+                  .OldPlayerValues=Stack
+                  If .done Then donecount++ :  Exit
+                  If .PlayerMoney<.Bet Then {
+                      Layer 1{
+                          Print Format$("Player({0}), you run out of money...Bye Bye", i)
+                      }
+                        .done=true
+                         donecount++
+                  } Else {
+                     Layer 1{
+                           Print format$("Player({0}) Money:",i), .PlayerMoney
+                              Print "Play Game ?(Y/N)"
+                              If Key$ ~ "[NnΝν]" Then .done=true :  donecount++
+                    }
+                  }
+            }
+      }
+      if donecount<NoPlayers Then Print "Press space to deal cards" : while Key$<>" " {}
+      cls,2
+      AllPlayers=NoPlayers
+      BlackJack=false
+      PlayersBurst=0
+      Clear dealervalue
+      DealerCards=ClearCards()
+      For i=1 to NoPlayers {
+            For Players(i) {
+                  If .done Then AllPlayers-- : Exit
+                  Clear .playervalue
+                   .PlayerCards=ClearCards()
+                  Print Format$("Player {0} Hand: 1st Card", i)
+                  PlayerCard(&.playervalue, .PlayerCards)
+            }
+      }
+      If AllPlayers=0 Then Print "No More Players" : Exit
+      Print "Dealer Hand: 1st Card"
+      DealerRow=row
+      DealerCard(&dealervalue)
+      cursor 0,2
+      For i=1 to NoPlayers {
+            If Not Players(i).done Then {
+                  Print @(18),Format$("2nd Card", i)
+                  For Players(i) {
+                        NextCard()
+                        .PlayerFaceUp2nd<=Card
+                        PrintCardOnly Card, Suits, Cards, 18
+                  }
+            }
+      }
+      Print @(18), "2nd Card"
+      NextCard()
+      Print @(18), "Face Down Card"
+      cls , row+1 
+      DealerHidden=Card
+      ' now If dealer face up Card is Ace or 10 or Figure can see If has a black jack
+      N2=Cards(Card.card!)
+      If N2=10 And Cards(DealerCards(0!).card!)=1 Then DealerBlackJack()
+      If N2=1 And Cards(DealerCards(0!).card!)=10 Then DealerBlackJack()
+      For i=1 to NoPlayers {
+           If Not Players(i).done Then
+                  If PlayerHasNoBlackJack(BlackJack, Players(i)) Then
+                  cls, 2
+                  For Players(i) {.PlayerMoney-=.Bet : DealerMoney+=.Bet} 
+                  Exit
+                  end If
+                   For Players(i) {
+                         Bet=.Bet
+                         Again:
+                              Print format$("Player {0} Play", i)
+                              If .PlayerCards(0!).card=.PlayerFaceUp2nd.card Then {
+                                    If .PlayerMoney<2*.Bet Then exit
+                                    Print "Split Cards ?(Y/N)"
+                                    If Key$ ~ "[NnΝν]" Then Exit
+                                    AllPlayers++
+                                    .SplitCard<=.PlayerFaceUp2nd
+                                    NextCard()
+                                    .PlayerFaceUp2nd<=Card
+                                    Stack .OldPlayerValues {Push .PlayerGame(.playervalue, Bet)}
+                              }
+                              Print "Player Hand:"
+                              Hidden=.PlayerFaceUp2nd : .PlayerFaceUp2nd<=OneCard()
+                              PrintCardOnly .PlayerCards(0!), Suits, Cards ' show first Card
+                              PlayHand(.PlayerCards,&.playervalue, False, False, .PlayerMoney)
+                              ' first we get Bet
+                              .PlayerMoney-=Bet
+                              DealerMoney+=Bet
+                              Print
+                              If .playervalue>21 Then {
+                                    PlayersBurst++
+                                    Print "Dealer Win"
+                              } else.if .playervalue=-1 Then {
+                                    ' dealer has to play with player now
+                                    PlayersBurst++
+                                    Print Format$("Dealer play against Player({0})",i)
+                                    PrintCardOnly DealerCards(0!), Suits, Cards
+                                    Hidden=DealerHidden : DealerHidden=OneCard()
+                                    \\ ? means undefined value
+                                    PlayHand(DealerCards,&dealervalue, true, true, ?)
+                                    If dealervalue<>21 Then {
+                                            Print "Player Win", Bet*3/2 : .PlayerMoney+=Bet*5/2 ' one we get before
+                                            DealerMoney-=Bet*5/2
+                                    } Else {
+                                          Print "Dealer Win"  
+                                    }
+                                    If PlayersBurst<AllPlayers Then {
+                                          Clear dealervalue, DealerCards
+                                          ' dealer take two cards to play with others
+                                          Print "Dealer Hand: 1st Card"
+                                          DealerCard(&dealervalue, DealerRow)
+                                          Print "Dealer Hand: 2nd Card"
+                                          NextCard()
+                                          Print @(10), "Face Down Card"
+                                          DealerHidden=Card
+                                          ' now If dealer face up Card is Ace or 10 or Figure can see If has a black jack
+                                          N2=Cards(Card.card!)
+                                          If N2=10 And Cards(DealerCards(0!).card!)=1 Then DealerBlackJack()
+                                          If N2=1 And Cards(DealerCards(0!).card!)=10 Then DealerBlackJack()
+                                    }
+                              }
+                              ' Data push to end of Stack
+                              ' Push push to top of Stack
+                              ' Read read always from top
+                                    If .SplitCard.suit<>-1 Then {
+                                    Card=If(Bet>.Bet -> .PlayerCards((Len(.PlayerCards)-1)!), OneCard())
+                                    Stack .OldPlayerValues {Data .PlayerGame(.playervalue, Bet, Card) : Read NextGame}
+                                    Bet=NextGame.Bet
+                                    Drop .PlayerCards Len(.PlayerCards) ' erase all cards
+                                    Append .PlayerCards, "Split":=.SplitCard
+                                    '.playervalue=Cards(.SplitCard.Card!)  ' this is the same
+                                    .playervalue=NextGame.playervalue
+                                    NextCard()
+                                    .PlayerFaceUp2nd<=Card
+                                    .SplitCard.Suit=-1
+                                    Goto Again
+                              }
+                        Card=If(Bet>.Bet -> .PlayerCards((Len(.PlayerCards)-1)!), OneCard())
+                        Stack .OldPlayerValues {Data .PlayerGame(.playervalue, Bet, Card)}
+                  }
+           end If      
+      }
+      If PlayersBurst<AllPlayers And Not BlackJack Then {
+            Print "Dealer Play"
+            PrintCardOnly DealerCards(0!), Suits, Cards
+            Hidden=DealerHidden : DealerHidden=OneCard()
+            PlayHand(DealerCards,&dealervalue, true, false, ?)
+            Layer 1 {
+                  Pen 3 {
+                        Report 2, "Table Results"
+                        For i=1 to NoPlayers {
+                              For Players(i) {
+                                    Repeat {
+                                          If .done Then exit
+                                          Stack .OldPlayerValues { Read NextGame }
+                                          playervalue=NextGame.playervalue
+                                          Bet=NextGame.Bet
+                                          If Not playervalue=-1 Then {
+                                                If Bet>.Bet Then {
+                                                      Print "Face Up Card"
+                                                      PrintCardOnly NextGame.LastCard, Suits, Cards
+                                                }
+                                                If playervalue>21 Then {
+                                                     Print Format$("Dealer Win Player({0})", i)
+                                                } Else.If dealervalue>playervalue And dealervalue<22 Then {
+                                                     Print Format$("Dealer Win Player({0})", i)
+                                                } Else.If dealervalue>21 Or dealervalue<playervalue Then {
+                                                      Print Format$("Player({0}) Win Dealer", i)
+                                                      .PlayerMoney+=Bet*2
+                                                      DealerMoney-=Bet*2
+                                                } Else {
+                                                      Print Format$("Player({0}) keep bet for next time", i)
+                                                       .PlayerMoney+=Bet
+                                                      DealerMoney-=Bet
+                                                }
+                                                Print format$("Player({0}): {1}  Dealer: {2}", i, Val$(playervalue), Val$(dealervalue))
+                                          }
+                                    } Until Len(.OldPlayerValues)=0
+                                    Refresh
+                              }
+                        }
+                  }
+                  Print "Press space to continue" : while Key$<>" " {}
+            }
+            Cls ,2
+      }
+} Always
+Print "Dealer Money:", DealerMoney
+Print "Press space to exit" : while Key$<>" " {}
+Player 0
+cls,0
+End
+Sub Suffle()
+      Layer 1 {
+            Print
+            Local N=Len(Pack())-1, N2, i, j, total=N*4+4, cur=1
+            For j=1 To 4 {
+                  For i=0 To N {
+                        If cur Mod 4=3 Then Print Over format$("Suffle {0:0}%",cur/total*100)
+                        N2=random(0, N)
+                        While N2=i {N2=random(0, N)}
+                        Swap Pack(i), Pack(N2)
+                        cur++
+                  }
+            }
+            AppendArray StackPack, Pack()
+            Print
+      }
+End Sub
+Sub DisplayAll()
+      For k=0 To Len(Pack())-1 {
+            PrintCard(k)
+      }
+End Sub
+Sub PrintCard(k)
+      For Pack(k) {
+            Pen Suits(.suit!) {
+                  Print Eval$(Suits, .suit)+Eval$(Cards, .card),
+            }
+       }
+End Sub
+Sub DealCard()
+      Layer 1 {
+            Print "PRESS A KEY TO DEAL CARD"
+            If Key$="9" Then  Stack STACKPACK {Flush}
+      }
+End Sub
+Sub NextCard()
+          Rem :  DealCard()
+            If Len(StackPack)=0 Then {
+                  Suffle()
+                  Stack StackPack {
+                        Drop Random(0, 51)
+                  }
+            }
+            Stack StackPack {
+                  Read Card
+            }
+End Sub
+Sub PlayerCard(&acc, MyCards)
+      NextCard()
+      PrintCardOnly Card, Suits, Cards
+      acc+=Cards(Card.Card!)
+      Append MyCards, len(MyCards):=Card
+End Sub
+Sub DealerCard(&acc, thisrowtoo=-1)
+      NextCard()
+      PrintCardOnly Card, Suits, Cards
+      local oldrow=row
+      If thisrowtoo>=0 Then
+      cursor 0, thisrowtoo
+      PrintCardOnly Card, Suits, Cards
+      cursor 0, oldrow
+      end If
+      acc+=Cards(Card.Card!)
+      Append DealerCards, len(DealerCards):=Card
+End Sub
+Sub PlayHand(MyCards, &acc, nomessage, sorryblackjack)
+      ' Optional - We have to pass a ? If we have module or Sub
+      Read ? MyMoney
+      Local N2, morevalues=0, ok, Card=OneCard(), DoublingDown
+      If MyCards(0!).card=12 Then morevalues=10
+      Repeat {
+            If Hidden.suit>=0 Then {
+                  N2=Hidden.card
+                  PrintCardOnly Hidden, Suits, Cards
+                  Append MyCards, Len(MyCards):=Hidden
+                  Hidden=OneCard()
+            } Else {
+                  NextCard()
+                  If DoublingDown Then {
+                        Print @(10), "Face Down Card"
+                  } Else {
+                        PrintCardOnly Card, Suits, Cards
+                  }
+                  N2=Card.Card
+                  Append MyCards, Len(MyCards):=Card
+            }
+            If N2=12 Then {
+                  If morevalues=0 Then {
+                        morevalues=10
+                  } Else N2=13 : morevalues=-50
+            }
+            If acc=10 And N2=12 And Len(MyCards)=2 Then acc=-1: Pen 15 {Print "BlackJack" }: Exit
+            If morevalues>0 And Cards(if(N2<13 -> N2, 1)!)=10 And Len(MyCards)=2 Then acc=-1: pen 15 {Print "BlackJack" } : Exit
+            If N2<=12 Then {
+                  acc+=Cards(N2!)
+            } Else acc+=11
+            If acc>21 And Not DoublingDown Then Print "Busting" : Exit
+            If acc=21 Then Exit
+            If nomessage Then {
+                  If sorryblackjack Then {
+                              ok=acc>20 Or acc+morevalues=21
+                  }  Else  ok=acc>16 Or (acc+morevalues<22 And acc+morevalues>16)
+            } Else {
+                  If DoublingDown Then ok=True : Exit
+                  If Len(MyCards)=2 Then If acc=9 or acc=10 or acc=11 And acc+morevalues<>21 Then DoublingDown=true
+                  If DoublingDown Then {
+                        If MyMoney>=2*Bet Then {
+                              Print "Doubling Down ?(Y/N)"
+                              DoublingDown=Not Key$ ~ "[NnΝν]"
+                        } Else DoublingDown=False
+                  }
+                  If DoublingDown Then {
+                        ' get a card Face Down
+                        Bet*=2
+                        ok=false
+                  } Else {
+                        Print Part "Stand or Hit ?(S/H)"
+                        ok=Key$ ~ "[SsΣσ]"
+                  }
+            }
+      } Until ok
+      If acc=-1 Then morevalues=0
+      While morevalues>0 {
+            If acc+morevalues<22 Then Exit
+            morevalues-=10
+      }
+      If morevalues<0 Then Exit Sub
+      acc+=morevalues
+End Sub
+Sub DealerBlackJack()
+      Pen 15 {Print "BlackJack" }
+      PrintCardOnly Card, Suits, Cards
+      Print "Face Up Card"
+      Print "Dealer Win All"
+      Print "Press space to continue" : while Key$<>" " {}
+      BlackJack=True
+End Sub
+Sub MakeLayer()
+      Font "Arial"
+      back {
+            Cls #477148,0
+            Local k=if( scale.x*4/3<scale.y->40, 60)
+      }
+      Form ! k, 30
+      linespace twipsY*4
+      Mode Mode*.8;
+      
+      Cls #477148,0    ' Poker Green Color
+      cursor width/2, 2
+      Move !   ' move graphic cursor to cursor
+      myMode=Mode
+      x1=scale.x/2
+      y1=scale.y-pos.y
+      y2=pos.y+motion.y
+      x2=x1+motion.x
+      player 0
+      Layer 1 {
+            window myMode, x1, y1
+            motion x2,y2
+            Cls #FFE4C4,0
+            Pen 0
+            show
+            bold 1
+            Print $(4)
+      }
+      Cursor 0,0
+
+End Sub
+}
+MODULE JSON {' Process data in json format
+
+' we can load from external file with Inline "libName"
+' or multiple files Inline "file1" && "file2"
+' but here we have the library in a module
+Inline Code Lib3
+' So now we make a Parser object (a group type in M2000)
+Parser=ParserClass()
+' We can display any function, module that is public and known list
+Modules ?
+' And this are all known variables (or and objects)
+List !
+'exit
+Document json$
+' We can load from file
+'Load.Doc json$, "alfa.json"
+json$={{
+      "zero": 0,
+      "alfa":-0.11221e+12,
+      "array" : [
+            -0.67,
+            "alfa1",
+            [
+                  10,
+                  20 
+            ],
+            "beta1",
+            1.21e12,
+            [
+            ],
+            21.12145,
+            "ok"
+      ],
+      "delta": false, "epsilon" : true, "Null Value" : null
+}}
+Save.Doc json$, "json2.json"    \\ by default in Utf-8 with BOM
+' just show multiline text
+' Report display lines and stop after 3/4 of console height lines
+' just press a key or click mouse button
+Report json$
+' so now we get text to a new object
+alfa=Parser.Eval(json$)
+' check t
+Print Type$(alfa)  ' it is a group
+Print "alfa.type$=";alfa.type$  \\ this is a read only property
+
+Report "as one line"
+Report Parser.Ser$(alfa, 0)
+
+Report "as multiline"
+Report Parser.Ser$(alfa, 1)
+
+Print "Using Print"
+Print Parser.ReadAnyString$(alfa)
+
+Print "Value for alfa, id alfa"
+Print Parser.ReadAnyString$(alfa,"alfa")
+Report "as multiline"
+Report Parser.Ser$(Parser.Eval(Parser.ReadAnyString$(alfa,"array", 2)), 1)
+' We get a copy of an array as a Group (a group which return an array)
+Alfa3=Parser.Eval(Parser.ReadAnyString$(alfa,"array", 2))
+' First value is for actual object, second value is a reafonly property of this object
+Print type$(Alfa3),  Alfa3.type$
+Dim B()
+' Now Alfa3 run Value part and pass a pointer of array
+' B()  is an array and here take a pointer to Alfa3 array (as value of Alfa3)
+B()=Alfa3
+' each() make an iterator for B()
+N=each(B())
+While N {
+      \\ Using B() we get values always. but if we have "object" or "array" then Print prints items **
+      Print B(N^)
+}
+' ** Print show here nothing because if value is object then "print" just leave a column and continue to next one
+Print B()
+' we have to use Group() to get group not value of group (if any).
+' Group() works for "named" group, not for stored in an array or an inventory or a stack
+Print Parser.StringValue$(Group(Alfa3),  0)
+Print Parser.StringValue$(Group(Alfa3),  1)
+' Now we want to pass a new value
+' Interpreter want to match type of expression from left side to right side
+' Because Parser.StringValue$ is actuall a Group (As property),
+' we have a second linked name:  Parser.StringValue
+' we have to use Parser.StringValue()
+' and all values must be groups, as those provided by Parser
+Parser.StringValue(Group(Alfa3),  1)=Parser.Numeric(1234)
+Print Parser.StringValue$(Group(Alfa3),  1)
+Print Parser.StringValue$(Group(Alfa), "array", 2, 0)
+' we have to use Parser.StringValue$()
+Parser.StringValue$(Group(Alfa), "array", 2, 0)=Parser.JString$("Changed to String")
+Print Parser.StringValue$(Group(Alfa), "array", 2,0)
+Try ok {
+      Print Parser.StringValue$(Group(Alfa), "array", 2)
+}
+If  Error or not ok Then Print Error$
+Parser.StringValue.Add = True
+Parser.StringValue$(Group(Alfa), "array", 2, 10)=Parser.JString$("Changed to String 2")
+Parser.StringValue(Group(Alfa), "Last value")=Parser.Boolean(true)
+Report "as multiline"
+Report Parser.Ser$(alfa3, 1)
+Report Parser.Ser$(alfa, 1)
+Parser.StringValue.Add = False
+Parser.StringValue.Del = True
+Parser.StringValue(Group(Alfa), "array", 0)=Parser.Null()
+Parser.StringValue(Group(Alfa), "delta")=Parser.Null()
+Parser.StringValue.Del = False
+For Parser {
+      .StringValue(Group(Alfa), "array", 1,5)=.Arr((.Numeric(10), .Jstring$("ok 20"), .Boolean(true)))
+}
+Report Parser.Ser$(alfa, 1)
+}
+MODULE LIB3 {      Class ParserClass {
+      Private:
+            Class bStream {
+                  Private:
+                  cnt, Buffer A
+                  Public:
+                  Value (&c) {Try { c=eval(.A, .cnt) : .cnt++:=true}}
+                  Class:
+                  Module final bStream (a$){
+                        Buffer .A as Integer*Len(a$)
+                        Return .A, 0:=a$           
+                  }
+            }
+            Func=Lambda->false
+            char=0
+            ' using obj as pointer to  Stack 
+            obj=Stack
+            Function final IsId {
+                  If .char=34 Then =.IsString(false)
+            }
+            Function final IsTrue {
+                  ' U+0074 U+0072 U+0075 U+0065
+                  If .char=0x74 Then If .func() Then If .char=0x72 Then If .func() Then If .char=0x75 Then If .func() Then If .char=0x65 Then PushIt() : =True
+                  Sub PushIt()
+                        Stack .obj {
+                              Push .Boolean(True)
+                        }
+                  End Sub
+            }
+            Function final IsFalse {
+                  ' U+0066 U+0061 U+006c U+0073 U+0065
+                  If .char=0x66 Then If .func() Then If .char=0x61 Then If .func() Then If .char=0x6c Then If .func() Then If .char=0x73 Then If .func() Then If .char=0x65 Then PushIt() : =True
+                  Sub PushIt()
+                        Stack .obj {
+                              Push .Boolean(False)
+                        }
+                  End Sub
+            }
+            Function final IsNull {
+                  ' U+006E U+0075 U+006C U+006C
+                  If .char=0x6e Then If .func() Then If  .char=0x75 Then If .func() Then If .char=0x6c Then If .func() Then If .char=0x6c Then PushIt() : =True
+                  Sub PushIt()
+                        Stack .obj {
+                              Push .Null()
+                        }
+                  End Sub
+            }
+            Function final IsSemiCol {
+                    If .char=0x3a Then =true 
+            }
+            Function final IsComma {
+                    If .char=0x2c Then =true 
+            }
+            Function final IsObject {
+                  If  .char=123 Else exit
+                  inventory objinv
+                 ' we push object with a pointer to objinv
+                 Stack .obj { Push .Object(objinv)}
+                 .Trim
+                 While .IsId() 
+                       .Trim
+                       If  .IsSemiCol() Then
+                             .Trim
+                             If .IsValue() Then
+                                   Stack .obj {
+                                          Shift 2   ' move top as second
+                                          ' letter$ is ok If top is string, and throw it
+                                          Append objinv, Letter$:=Group
+                                    }
+                              End If
+                       Else
+                             Exit
+                       End If
+                       .Trim
+                        If not .IsComma() Then exit
+                       .Trim
+                  End While
+                  If .char=125 Then =true  Else .obj<=Stack : .func<=lambda->0 
+            }
+            Function final IsValue {
+                  If .IsString(True) Then
+                         =True    
+                  Else.if .IsNumber() Then
+                        =True
+                  Else.if .IsTrue() Then
+                        =True
+                  Else.if .IsFalse() Then
+                        =True
+                  Else.if .IsNull() Then
+                        =True
+                  Else.if .IsArray() Then
+                        =True
+                  Else.if .IsObject() Then
+                        =True
+                  Else
+                        ? "what", .char
+                        Stack .obj { Stack}
+                        .func<=lambda->0
+                  End If
+            }
+            Function final Digits (private_stack){
+                  While .func()
+                        Select Case .char
+                        Case 48 to 57
+                        {
+                              =true
+                             Stack private_stack { Data .char}
+                        }
+                        Else Case
+                             break
+                        End Select
+                  End While    
+            }
+            Function final IsNumber {
+                  a=Stack
+                  Select Case .char
+                  Case 45 ' -
+                  {
+                              oldfunc=.func            
+                              Stack a { Data .char}
+                              If .Func() Then
+                                    Select Case .char
+                                    Case 48 
+                                    {
+                                            Stack a { Data .char}
+                                            If  .func() Then
+                                                If .char=46 Then
+                                                      Fraction()
+                                                      Exponent()
+                                                End If
+                                          End If
+                                    }
+                                    Case 49 to 57
+                                    {
+                                          Stack a { Data .char}
+                                          If .Digits(a) Then {}
+                                          Fraction()    
+                                          Exponent()
+                                    }
+                                    Else Case
+                                          a=stack
+                                    End Select
+                              End If
+                  }
+                  Case 48  ' 0
+                  {
+                        oldfunc=.func
+                        Stack a { Data .char}
+                        If  .func() Then
+                            If .char=46 Then
+                                  Fraction()
+                                  Exponent()
+                            End If
+                      End If
+                  }
+                  Case 49 to 57
+                  {
+                              oldfunc=.func
+                              Stack a { Data .char} 
+                              If .Digits(a) Then {}
+                              Fraction()
+                              Exponent()
+                  }
+                  End Select
+                  
+                  If len(a)>0 Then {
+                        b=each(a)
+                        Document D$
+                        While b
+                              D$=chrcode$(StackItem(b))
+                        End While
+                        .func<=oldfunc
+                        If len(D$)>1 Then For i=2 to len(D$) { .Trim}
+                        Stack .obj { Push .Numeric(D$) }
+                        =True
+                  }
+                  '  here is an auto exit from function. Sub as command is an exit
+                  Sub Fraction()
+                        If .char=46 Then Stack a { Data .char}
+                        If .Digits(a) Then { }
+                  End Sub
+                  Sub Exponent()
+                        If .char=101 or .char=61 Then
+                              Stack a { Data .char}
+                              If .func() Then
+                                    If .char=43 or .char=45  Then
+                                          Stack a { Data .char }
+                                          If .Digits(a) Else
+                                                a=Stack  ' cleat by point to new Stack
+                                          End if
+                                    Else.if  .char>47 and .char<58  Then
+                                          Stack a { Data .char}
+                                          If .Digits(a) Then {}
+                                    Else 
+                                           a=Stack
+                                    End If
+                              End If
+                        End If
+                  End Sub
+            }
+            Function final IsString (as_object){
+            If .char=34 Else exit
+                  Document D$
+                  While  .func()
+                        If .char=34 Then 2000
+                        If .char=92 Then
+                              ' special care
+                              If .func() Then
+                                    Select Case .Char
+                                    Case 117 'u
+                                    GetHex()
+                                    Case 114 ' r
+                                    .char<=0x0d
+                                    Case 110 ' n
+                                    .char<=0x0a
+                                    Case 116 ' t
+                                    .char<=0x09
+                                    Case 98 ' b
+                                    .char<=0x08
+                                    Case 102 ' f
+                                    .char<=0x0c
+                                    Case 0x22, 0x2f , 0x5c 
+                                    Else
+                                    Exit   ' not normal
+                                    End Select
+                              End If
+                        End If
+                        D$=chrcode$(.char)
+                  End While
+                  Exit
+      02000    Stack .obj { 
+                        If as_object Then Push .JString$(D$) Else Push D$
+                  } : =True 
+                  Sub GetHex()
+                        Local D$
+                        Document D$="0x"
+                        For i=1 to 4
+                              If .func() Then End If
+                                    If  Chrcode(.char) ~ "[0123456789ABCDEFabcdef]"  Then
+                                          D$=Chrcode(.char)
+                                    Else
+                                          Goto 3000
+                                   End If
+                              End If
+                        Next I
+                        If i<>5 Then 3000
+                        .Char=Eval(D$)
+      03000    End Sub
+            }
+            Function final IsArray {
+                
+                  If  .char=91 Else exit
+                  Dim Gr()
+                  ' We place a pointer ro Array
+                  .Trim
+                  If .char=93 Then  =true : Stack .obj { Push .Arr(Gr())}  : exit
+                        While .IsValue()
+                              Stack .obj {
+                                    Dim Gr(Len(Gr())+1)
+                                    Gr(len(Gr())-1)=Group
+                              }
+                              .Trim
+                              If not .IsComma() Then exit
+                              .Trim
+                        End While
+                  ' Push later pointer to array (maybe altered in redimension)
+                  If .char=93 Then  =true :  Stack .obj { Push .Arr(Gr())}  Else .Func<=lambda->false
+            }
+            Module final Trim  {
+                  While  .func()
+                         If  .char<33 or .char=160 Else exit      
+                  End While
+            }
+            Function final  IsContainer {
+                 .Trim
+                 Select Case chrcode$(.char)
+                 Case "{"
+                        =.IsObject() 
+                 Case "["
+                        =.IsArray()
+                 end select
+            }
+      ' merge a foreign group here
+            Module final ReadArrayItem (temp, object){
+                   Select Case temp.type$
+                        Case "String","Boolean","Number", "Null"
+                        {
+                              If object Then Error "No object "+quote$(temp.type$)
+                              Push temp.str$
+                        }
+                        Case "Object"
+                        {
+                              If not Empty Then
+                                 Call .ReadObject temp, object, letter$
+                              Else
+                                    If object Then Push Temp : exit
+                                    Push .ser$(group(temp),0)
+                              End If
+                        }
+                        Case "Array"
+                        {
+                              If not Empty Then
+                                    ' recursion only with Call statement for modules
+                                    Call .ReadArrayItem, Array(temp, number), object
+                              Else
+                                    If object Then Push Temp : exit
+                                    Push .ser$(group(temp),0)
+                              End If
+                        }
+                        End Select
+            }
+            Module final ReadObject (json, object){
+                  If type$(json)="Inventory" Then
+                        If exist(json, Letter$) Then
+                              temp=eval(json)
+                        Else
+                             push "none"
+                             Break  ' exit Module final  (Break do something Else in Select End Select)
+                        End If
+                  Else
+                        temp=json
+                  End If
+                        Select Case temp.type$
+                        Case "String","Boolean","Number", "Null"
+                        {
+                              If object Then Error "No object "+quote$(temp.type$)
+                              Push temp.str$
+                        }
+                        Case "Object"
+                        {
+                              If not Empty Then
+                                    Call .ReadObject temp, object ', letter$
+                              Else
+                                    If object Then Push Temp : exit                              
+                                    Push .ser$(group(temp),0)
+                              End If
+                        }
+                        Case "Array"
+                        {
+                              If not Empty Then
+                                    Call .ReadArrayItem array(temp, number), object
+                              Else
+                                    If object Then Push Temp : exit
+                                    Push .ser$(group(temp),0)
+                              End If
+                        }
+                        End Select
+            }
+            Module final Worker (object){                        
+                         If match("IN") Or match("IS") Then   ' inventory & number or inventory and string
+                         '    maybe we have more items in Stack
+                               Push object : ShiftBack 2
+                              .ReadObject
+                         Else
+                              read Temp  ' get  a group which returns Iventoty or an mArray
+                              If Type$(Temp)="mArray" Then
+                                    If not Empty Then
+                                          Call .ReadArrayItem, Array(Temp, number), object
+                                    Else
+                                          If object Then Push Temp : exit
+                                          Push .ser$(Temp,0)
+                                    End If
+                              Else
+                                    If not Empty Then
+                                                Call .ReadObject Temp, object
+                                    Else
+                                          If not Empty Then
+                                                Call .ReadObject Temp, object
+                                          Else
+                                                If object Then Push Temp : exit
+                                                If Type$(Temp)="Inventory" Then
+                                                      Push .ser$(.Object(Temp),0)
+                                                Else
+                                                      Push .ser$(group(Temp),0)
+                                                End If
+                                          End if
+                                   End If
+                              End If
+                        End If
+            }
+      Public:
+      \\ This is the Public part
+      \\ First we set Public some class for later use
+      \\ Using Pointer to Array in Class Arr
+            Class Arr {
+            Private:
+                  MyValue
+            Public:
+                  Property Type$ {Value} ="Array"
+                  Value {
+                        =.MyValue
+                  }
+            Class:
+                  Module final Arr (.MyValue) {}
+            }
+            Class Null {
+                 Property Type$ {Value} ="Null"
+                 Property Str$ {Value}="null"
+                 Value { =0}
+            }
+            Class JString$ {
+            Private:
+                  MyValue$=""
+            Public:
+                  Property Type$ {Value} ="String"
+                  Property Str$ {
+                        Value{
+                              Link parent MyValue$ to MyValue$
+                              value$=quote$(string$(MyValue$ as json))
+                        }
+                  }
+                  Value {
+                        =.MyValue$
+                  }
+            Class:
+                  Module final JString (.MyValue$) {}
+            }
+            Class Numeric {
+            Private:
+                  MyValue$=""
+            Public:
+                  Property Type$ {Value} ="Number"
+                  Property Str$ {
+                        Value{
+                              Link parent MyValue$ to MyValue$
+                              value$=MyValue$
+                        }
+                  }
+                  Value {
+                        =Val(.MyValue$)
+                  }
+            Class:
+                  Module final Numeric {
+                  If match("S") Then
+                        Read .MyValue$
+                  Else
+                        value$=trim$(str$(Number))
+                        ' M2000 return -.3 for -0.35
+                        ' using ? str$(MyValue, "0.#############")
+                        ' we get locale decimal char - maybe is comma
+                        ' so using str$(MyValue) we get integer or float with char "." for decimal always
+                        ' so we have to add 0
+                        If left$(value$, 1)="." Then
+                              value$="0"+value$
+                        Else
+                               If  value$ ~ "-.*" Then value$=replace$("-.","-0.", value$)
+                         End If
+                        .Myvalue$<=value$
+                  End If
+                  }
+            }
+            Class Boolean {
+            Private:
+                  MyValue=false
+            Public:
+                  Property Type$ {Value} ="Boolean"
+                  Property Str$ {
+                        Value{
+                              Link parent MyValue to MyValue
+                              If MyValue Then {
+                                    value$="true"
+                              } Else value$="false"
+                        }
+                  }
+                  Value {
+                        =.MyValue
+                  }
+            Class:
+                  Module final Boolean (.MyValue) {}
+            }
+            Class Object {
+            Private:
+                  Inventory MyValue
+            Public:
+                  Property Type$ {Value} ="Object"
+                  Value {
+                        =.MyValue
+                  }
+            Class:
+                  Module final Object (.MyValue) {}
+            }
+      \\ Empty group, with $, so we get two vars, Ser and Ser$ ( Ser$ we want to return a value type String)
+            Group Ser$
+            Module final SetSpace (.ser.space) { ' set space for values - 6 by default
+            }
+            Function final UseDecimalPoint$ {
+                  ' use this to change standard decimal point to local decimal point character
+                  =str$(val(letter$),"")
+            }
+            Function final ReadNumber$ {
+                        .Worker false   'modules get caller Stack
+                        =.UseDecimalPoint$( Letter$)
+            }           
+            Function final ReadAnyString$ {
+                        \\ read an inventory
+                        .Worker false
+                        =Letter$
+            }
+            Function final ReadAny {
+                        \\ read an inventory
+                        .Worker true
+                        Read A
+                        =A
+            }
+            Function final Eval {
+                  ' Letter$  pop a string ftom Stack Else give error
+                   .func<=Lambda z=.bStream(Letter$) -> {
+                         link .char to c
+                         ' we can't pass reference in a private member
+                         =z(&c)
+                   }
+                  ' In this Parser we use a dedicated Stack
+                  ' for use from recuirsive memberts
+                  ' .obj is a pointer to Stack
+                  ' we can delete it simply setting a new Stack
+                  ' .obj<=Stack 
+                  ' or we can flush all elements Using a command Flush
+                  ' .obj,  char and .func() are visible from group members
+                  ' test
+                  Stack .obj { Flush}
+                  .char<=0
+                  If   .IsContainer()  Then
+                        ' we get the pointer
+                        =StackItem(.obj)
+                        .obj<=Stack
+                  Else
+                        ' return an Empty object
+                        inventory emptinv
+                        =.Object(emptinv)
+                  End If
+            }
+            Group StringValue$ {
+                  Add=false
+                  Del=false
+                  ' from revision 12 we can place temp in parameter block
+                  Set (temp) {
+                        ' always first read is for the assigned value to Group
+                        Read temp1
+                        If type$(temp)<>"Group" Then error "Need a group"
+                        If not valid(temp.type$="") Then error "not a proper group"
+                        If not valid(temp1.type$="") Then error "not a proper group for value"
+                        ' because Null() is out of this scope we have to link
+                        Link parent Null() to MyNull()
+                        Null=MyNull()
+                        ' or we can hard code the Null object
+'                        Group Null {
+'                                  Property Type$ {Value} ="Null"
+'                                  Property Str$ {Value}="null"
+'                                  Value { =0}
+'                       }
+                        Dim Base 1, A(1)
+                        \\ now we get the second interface for arrays
+                        \\ bb() has a reference to b (one reference allowed)
+                        \\ but b is pointer to array and can change to point to other arrrays
+                        \\ we need ths to perform some tasks which belong to standard arrray interface
+                        b=(,) : Link b to bb()  
+                        A(1)=Group(temp)
+                        Do
+                              again=false
+                              Select Case A(1).type$
+                              Case "Array"
+                              {
+                                    If match("N") Then
+                                          Read where
+                                          If len(A(1))<=where and Empty Then
+                                          ' only the last array we can redimension
+                                                If .add and not .del Then
+                                                      cursize=Len(A(1))
+                                                      b=A(1) ' A(1) has a pointer so now b has the same pointer
+                                                      ' dim preserve values
+                                                      Dim bb(where+1)  ' need one more because all "automatic arrays" have base 0
+                                                      Stock bb(cursize) sweep Len(b)-cursize, Group(Null)
+                                                Else
+                                                      Error "Index out of limits"+str$(where)
+                                                End If
+                                          Else
+                                                If where<0 Then Error "Index out of limits "+str$(where)
+                                          End If
+                                          If Empty Then
+                                                If .del Then
+                                                      cursize=Len(A(1))
+                                                      b=A(1) ' A(1) has a pointer so now b has the same pointer
+                                                      If where<cursize-1 Then
+                                                            Stock bb(where+1) Keep cursize-where, bb(where)
+                                                      End If
+                                                      Dim bb(cursize-1)   ' bb(0) is an empty array
+                                                Else
+                                                      Return A(1), where:=Group(temp1)
+                                                End If
+                                          Else
+                                                A(1)=Array(A(1),where)
+                                                again=True
+                                          End If
+                                    Else
+                                          Error "No Index Found"
+                                    End If
+                              }
+                              Case "Object"
+                              {
+                                    If match("S") Then
+                                          Read k$
+                                          If Exist(A(1), k$)   Then
+                                                If Empty Then
+                                                      If .del Then
+                                                           Delete A(1) , k$
+                                                      Else
+                                                            Return A(1), k$:=Group(temp1)
+                                                      End If
+                                                Else
+                                                      A(1)=Eval(A(1))  ' Eval(inventory_pointer) return  object pointer
+                                                      again=True
+                                                End If
+                                        Else.if .add and not .del Then
+                                                 If Empty Then
+                                                            Append A(1), k$:=Group(temp1)
+                                                Else
+                                                      Error "No such Tag "+k$
+                                                End If
+                                         Else
+                                               Error "No such Tag "+k$
+                                         End If
+                                    Else
+                                          Error "No Tag Found"
+                                    End If
+                              }
+                              End Select
+                         until not again
+                  }
+                  Value (temp) {
+                        If type$(temp)<>"Group" Then error "Need a group"
+                        If not valid(temp.type$="") Then error "not a proper group"
+                        Dim Base 1, A(1)
+                        A(1)=Group(temp)
+                        Do
+                              again=false
+                              Select Case A(1).type$ 
+                              Case "String", "Number", "Null", "Boolean"
+                                    Exit
+                              Case "Array"
+                              {
+                                    If match("N") Then
+                                          A(1)=Array(A(1), Number)
+                                    Else
+                                          Error "No Index Found"
+                                    End If
+                                    again=True
+                              }
+                              Case "Object"
+                              {
+                                    If match("S") Then
+                                          If Exist(A(1), Letter$)   Then
+                                                A(1)=Eval(A(1))  ' Eval(inventory_pointer) return  object pointer
+                                          Else
+                                                Error "No such Tag"
+                                          End If
+                                    Else
+                                          Error "No Tag Found"
+                                     End If     
+                                    again=True
+                              }
+                              End Select
+                        until not again
+                         =A(1).str$
+                  }
+            }
+      Class:
+      \ one time definitions
+            Class CreatSerialize$ {
+            Private:
+                  usen=0
+                  n=0
+                  nl1$={
+                  }
+                  Function final Jarray$ (json1, n){
+                        \\ json1 is group type Array
+                                 A=json1
+                              \\ A is mArray (pointer to Array)
+                              nl$=.nl1$
+                              If .usen>0 Then
+                                    nl$=nl$+string$(" ",  n+.space)
+                              End If
+                              document a$
+                              a$="["
+                              If Len(A)>0 Then
+                                    If .usen>0 Then a$=nl$
+                                     k=each(A)
+                                     M=len(A)-1
+                                     while k
+                                          For This {
+                                                \\ temporary group
+                                                Temp=array(k)
+                                                select Case temp.type$
+                                                Case "Number", "Null","Boolean", "String"
+                                                a$=temp.str$
+                                                Case "Array"
+                                                {
+                                                      nn=0
+                                                      If .usen>0 Then
+                                                            nn=n +.space
+                                                      End If
+                                                      a$=.Jarray$(Temp, nn, "")
+                                                }
+                                                Case "Object"
+                                                {
+                                                     nn=0
+                                                      If .usen>0 Then
+                                                            nn=n +.space
+                                                      End If
+                                                      a$=.Jobject$(Temp, nn,"")
+                                                }
+                                                Else Case
+                                                      a$=" "+temp.type$
+                                                end select
+                                                 If k^<M Then
+                                                     a$=", "
+                                                      If .usen>0 Then a$=nl$
+                                                Else
+                                                      If .usen>0 Then a$=.nl1$
+                                                End If
+                                          }
+                                    End While
+                               Else
+                                     If .usen>0 Then  a$=.nl1$
+                               End If
+                               If .usen>0 Then a$=string$(" ", n)
+                        a$="]"
+                           =a$+letter$
+                  }
+                  Function final Jobject$ (json1, n){
+                                    json=json1
+                                    \\ json has to be an object inventory
+                                    nl$=.nl1$
+                                    If .usen>0 Then
+                                          nl$=nl$+string$(" ",  n+.space)
+                                    End If
+                                    document a$
+                                    a$="{"
+                                    If .usen>0 Then a$=nl$
+                                     k=each(json)
+                                     M=len(json)-1
+                                     while k
+                                          a$=quote$(eval$(json, k^)) +" : "
+                                          select Case json(k^!).type$
+                                          Case "Array"
+                                          {
+                                                nn=0
+                                                If .usen>0 Then
+                                                      nn=n +.space
+                                                End If
+                                                a$=.Jarray$(eval(k), nn, "")
+                                          }
+                                          Case  "Boolean", "Null", "Number", "String"
+                                                a$=json(k^!).str$
+                                          Case "Object"
+                                          {
+                                                nn=0
+                                                If .usen>0 Then
+                                                      nn=n +.space
+                                                End If
+                                                a$=.Jobject$(eval(k), nn, "")
+                                          }
+                                          Else Case
+                                                a$=" "+json( k^!).type$
+                                          end select
+                                          If k^<M Then
+                                               a$=", "
+                                                If .usen>0 Then a$=nl$
+                                          Else
+                                                If .usen>0 Then a$=.nl1$
+                                          End If
+                                    End While
+                               If .usen>0 Then a$=string$(" ", n)
+                              a$="}"
+                              =a$+letter$
+                  }
+                  Class Object {
+                  Private:
+                        Inventory MyValue
+                  Public:
+                        Property Type$ {Value} ="Object"
+                        Value {
+                              =.MyValue
+                        }
+                  Class:
+                        Module final Object (.MyValue) {}
+                  }
+            Public:
+                  space=10
+                  Value (json, n) {
+                              a$=.nl1$
+                              b$=""
+                              .usen<=n
+                              n--
+                              If n<=0 Then  a$="" : n=0 Else b$=string$(" ", n)
+                              If type$(json)<>"Group" Then
+                                    If type$(json)="Inventory" Then
+                                          =b$+.Jobject$(.Object(json),n, a$)
+                                    Else.if type$(json)="mArray" Then
+                                          =b$+.Jarray$(json, n, a$)
+                                    End If
+                              Else
+                                    If json.type$="Object" Then
+                                          =b$+.Jobject$(json, n,a$)
+                                    Else.if json.type$="Array" Then
+                                          =b$+.Jarray$(json, n, a$)
+                                    End If
+                              End If
+                  }
+            }
+            Module final ParserClass {
+                  \ constructor
+                  \ Let work as Push .CreatSerialize$() : Read .Ser
+                  \ So now Group Ser loaded from CreatSerialize$()
+                  \ Class CreatSerialize$ is a Function final, and because it is after Class:
+                  \ Deleted before ParserClass return Group
+                  Let .Ser=.CreatSerialize$()
+            }
+      }
 }
 INFO
