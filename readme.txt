@@ -1,6 +1,7 @@
 M2000 Interpreter and Environment
 
 Version 9.7 Revision 17 active-X
+Update info.gsb
 
 Fix some bugs on using unary minus with constants as as second argument in an expression
 so if a and b are constants now a*-b works fine

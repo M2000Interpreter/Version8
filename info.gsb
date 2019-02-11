@@ -7804,14 +7804,14 @@ end if
 
 
 }
-MODULE ICONS {if isWine then N=10 else N=50
+MODULE ICONS {if isWine then sp=10 : r=30 else sp=50 : r=60
 Escape off
 Def a,b,c
 call ico, 2
 read ico
 gradient 5,0
 move scale.x/2, scale.y/2
-legend str$(N,0)+{ Sprites
+legend str$(sp,0)+{ Sprites
 rotating,resizing
 changing opacity
 }, "Arial Black", 22,0,2,1,150
@@ -7820,7 +7820,7 @@ Wait 500
 mouse.icon hide
 n=0
 p=false
-every 1000/60 {
+every 1000/r {
 	release
 	if p then 
 	move mouse.x, mouse.y
@@ -7829,7 +7829,7 @@ every 1000/60 {
 	p=false
 	end if
 	
-	For i=1 to N {
+	For i=1 to sp {
 		move Random(14000)+1000, Random(10000)+1000
 		let  a=random(90), b=random(50)+350, c=random(50)-50*(random(10)=1)
 		sprite ico, , a,b,c
