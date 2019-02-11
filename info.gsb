@@ -4060,17 +4060,19 @@ rem	gradient 11, 0
 Cls 11,0
 WINDOW 12, 0  ' 0 FOR MONITOR 0
 \\ Use form without ! for less border
-Form ! 68,54
+\\ Form ! 100,66
+Form ! 80,66
 backcolor=5   'point
 oldpen=14  ' pen
 Refresh 500
 Pen 0 {
 	cls 7
+	ico 1   ' draw icon (a png image, loaded as text as BASE64 encoded)
 	Double
-	Print "M2000 Interpreter ";
-	Version
+	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
+	Print
 	Normal
-	Report "A collection of modules for tests version 1"
+	Report " A collection of modules for tests version 2"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4082,7 +4084,7 @@ Scroll split 0  ' reset the row+1 which given in cls
 pen oldpen
 Clear ' clear local variables
 If Version<9.7 then Error "No proper M2000 version"
-If Version=9.7 and revision<16 then Error "No proper M2000 revision for version 9.7"
+If Version=9.7 and revision<17 then Error "No proper M2000 revision for version 9.7"
 title("Modules ?")
 Report {
 	Modules ?    (or control+N, display all loaded modules, if nothing loaded display files)
@@ -4129,14 +4131,15 @@ FKey 2,"Edit Info ' edit this"
 FKey 3,"Info ' this page"
 FKey 4,"M2000_Editor_Information  ' about editor"
 FKey 5,"Demo1  ' 3d Drawing in a Window"
-FKey 6,"Edit M2000_editor_information"
+\\FKey 6,"Edit M2000_editor_information"
+FKey 6,"icons ' an example using sprites of type png"
 Fkey 7,"Tr 'Three Oscilloscopes"
 Fkey 8,"mEditor ' A window based M2000 Editor"
 Fkey 9,"kb ' A keyboard to play music"
 FKey 10,"Settings"
 Title("Fkey")
 Fkey
-title("M2000 Writer")
+\\title("M2000 Writer")
 \\Keyboard "Writer"+chr$(13)
 End
 Sub title(a$)
@@ -4154,18 +4157,21 @@ save info, info
 Print "Done"
 }
 MODULE M2000_EDITOR_INFORMATION {thread.plan sequential   ' can run as concurrent too
-Cls,0
+linespace twipsY*2
+' Mode as read only value return the height of layer form in pt. Using Mode we set to the same Mode but we cut extra space (use linespace also)
+Mode Mode   
+'Cls,0
 backcolor=point
 oldpen=pen
 Refresh 500
 Pen 0 {
 	cls 7
+	call ico, 1
 	Double
-	Print "M2000 Interpreter ";
-	Version
+	Print part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
+	Print
 	Normal
-	Report "M2000 Editor"
-	
+	Report " M2000 Editor"
 	Pen 5{
 		cursor 0, row-1
 		Report 1, "George Karras 2019"
@@ -7340,62 +7346,77 @@ print x(2.3) ' prints 8.3
 print foo()=4
 
 }
-MODULE TR {Escape Off
+MODULE TR {\\ goto no_random_mode
+m=random(700,1100)/1000
+mode 8, scale.x*m, scale.y*m
+
+no_random_mode:
+\\ Version 2 we make the drawing to scale based to height
+let sc=scale.y/14000, yoffset=100
+mode 11*scale.y/14000
+Escape Off
 Flush
 Global alfa=60*4
-Smooth On  \\ use Gdi+
+\\ check for linux (there is no smooth function, we can give the command but we get not the proper results)
+if not iswine then Smooth On  \\ use Gdi+
 Cls 5,0
 Pen 14
 Gradient 5,1
+
+\\ set refresh to 1500 msec
 Refresh 1500 
+\\ temporary we use double heigt characters
 Double
-Report 2, {Example three oscilloscopes},8000
+Report 2, {Example three oscilloscopes},8000*sc
 Normal
-Cursor 0,12
-\\Report ! 6  ' set tab width
-\\Print "  ";   ' set intendation
-Pen 7 {
-	Report 2, {
-		Press
-		Keyboard
-		any key - exit
-		Mouse buttons
-		left - Acc. left
-		right - Acc. right
-		}, 3000   \\ width 
-}
-\\Report ! 8  ' set tab width
-Print
 Gosub put_a_title
 Gosub define_module_b
 Gosub make_classes
-Triangle=drw(4000,2500)
-Tk=Display(8000,500,8000,4000,45)
-b 2000,3, &Triangle.a(), 0
-Hexagon=drw(4000,6750)
-Hk=Display(8000,4750,8000,4000,15)
-b 2000,6, &Hexagon.a(), 0
-My_Circle=drw(4000,11000)
-Ck=Display(8000,9000,8000,4000,30)
-b 2000,alfa div 2, &My_Circle.a(), 0
 
+Triangle=drw(4000*sc,2500*sc+yoffset)
+Tk=Display(8000*sc,500*sc+yoffset,8000*sc,4000*sc,45, sc)
+b 2000*sc,3, &Triangle.a(), 0
+Hexagon=drw(4000*sc,6750*sc+yoffset)
+Hk=Display(8000*sc,4750*sc+yoffset,8000*sc,4000*sc,15, sc)
+b 2000*sc,6, &Hexagon.a(), 0
+My_Circle=drw(4000*sc,11000*sc+yoffset)
+Ck=Display(8000*sc,9000*sc+yoffset,8000*sc,4000*sc,30, sc)
+b 2000*sc,alfa div 2, &My_Circle.a(), 0
+flash=true
+introtime=0
+timeinterval=600
+Dim Fcol(-1 to 0)
+Fcol(-1)=#ff3322, #773300
+thread {
+	flash~
+	introtime++
+	if flash then
+		timeinterval*=.9
+		Thread this interval timeinterval
+	else 
+		Thread this interval 200
+	end if
+} as t1 interval timeinterval
 Hold
 i=0
 k=1
+tipstop=8000*sc
 Every 10 { 
       Pen 15 {
             Refresh 1500
             Release  ' we get the background using Hold.
+            if t1>0  then Print.Info(flash) : if introtime>50  then Thread t1 Erase : t1=0        
+
             Triangle.draw_to (i+alfa/6) mod alfa
-                  Draw to 8000, pos.y
+                  Draw to tipstop, pos.y
                   Tk.tip
                        
             Hexagon.draw_to (i+alfa/12) mod alfa
-                  Draw to 8000, pos.y
+                  Draw to tipstop, pos.y
                   Hk.tip
                        
             My_Circle.draw_to i
-                  Draw to 8000, pos.y
+                  Draw to tipstop, pos.y
                   Ck.tip
             If keypress(1) Then
                   k++
@@ -7407,17 +7428,19 @@ Every 10 {
       }
       If inkey$<>"" Then Exit
 }
+Threads Erase
 Escape off
 \\ call info again
 Keyboard "info"+chr$(13)
+smooth off
 Exit
 put_a_title:
-      Move -320, scale.y
+      Move -320*sc, scale.y
       Path { 
-          legend "Μ2000","Arial Black", 90,pi/2,0,0,100 
+          legend "Μ2000","Arial Black", 90*sc,pi/2,0,0,100 
       } ;
-      Move -320, scale.y-8000
-      Fill 2000, 8000, #775566, #221133,1,1
+      Move -320*sc, scale.y-10000*sc
+      Fill 2000*sc, 10000*sc, #775566, #221133,1,1
       Path { } ;
 Return
 define_module_b:
@@ -7478,9 +7501,9 @@ Class drw {
 }
 Class Display {
       x, y, wi, he, stp, tp=-1
-      dscr$, counter
+      dscr$, counter, sc
       Module Display {
-            Read .x,.y,.wi,.he, .stp
+            Read .x,.y,.wi,.he, .stp, .sc
             .y-=30
             .he+=60
             .tp<=1
@@ -7509,11 +7532,24 @@ Class Display {
             Pen 14 { Draw .wi }
             Move .x+.wi/2,.y+200
             Pen 12 {
-                  Legend Format$("Oscilloscope: {0}sec 10x",str$(.counter/10,"000000.0")), "Lucida Console", 11, 0, 2, 1, 20
+                  Legend Format$("Oscilloscope: {0}sec 10x",str$(.counter/10,"000000.0")), "Lucida Console", 11*.sc, 0, 2, 1, 20
             }
       }
 }
 Return
+Sub Print.Info(x)
+	Cursor 0,12
+	Pen Fcol(x) {
+		Report 2, {
+			Press
+			Keyboard
+			any key - exit
+			Mouse buttons
+			left - Acc. left
+			right - Acc. right
+			}, 3000*sc   \\ width 
+	}
+End Sub
 }
 MODULE HT {text alfa.html {
 <!doctype html>
@@ -7745,5 +7781,112 @@ a$=key$
 Declare Text1 nothing
 Declare combo1 nothing
 Declare form1 nothing
+}
+MODULE ICO {\\$ ..........\appdata\roaming\m2000\m2000png.png
+Binary {
+      iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA+vAAAP
+      1wExQtGTAAAADXRFWHRDb21tZW50ACSZhQMALhdS/QAAAUZJREFUeJzFlosNwyAM
+      RNl/A2bJcK6S1MT4D5QUdCpSif04O7QFyn/nOYDK2ZjaNwVwHMclHlgkhVu/hGkA
+      QIJpSS2tQpT74dIArMS12uKOeBIAeOKuDMpJr0SrigDAsbwB4KzsE9h3VVl7AFiG
+      EGCXA2cCLEPKAX56zQm+NwNgufCKA14ZOgcyp9UccnsA/DJsd4ACaC6oPWCd1uoR
+      D+C5KOSl1GRZS9cWUKU5NAcCNYDaB1vRHADQIOFjjr4xOgAckQNGcmxgqhBiGAB8
+      AA7zKgAmxhB7AJQS0EROiD0OxKeUPWIDOLIcGAGQEDMAigMRBO2LHnoUoNNTtQiC
+      VnatBNcaCgdAiJFSCAAPgt/h/C2Yh6A/CqrN8u7WADgEB7HBCEAEIffZtdauZB2C
+      AWSndxNqYxOADZGu/yxAtmfS/wf+AYExPhJPvgsIMdG8AAAAAElFTkSuQmCC
+} As ico
+read com
+if com=1 then 
+	Move 0,0
+	Image ico, scale.x/width*2  ' (twips/character)
+else
+	push ico
+end if
+
+
+}
+MODULE ICONS {if isWine then N=10 else N=50
+Escape off
+Def a,b,c
+call ico, 2
+read ico
+gradient 5,0
+move scale.x/2, scale.y/2
+legend str$(N,0)+{ Sprites
+rotating,resizing
+changing opacity
+}, "Arial Black", 22,0,2,1,150
+hold
+Wait 500
+mouse.icon hide
+n=0
+p=false
+every 1000/60 {
+	release
+	if p then 
+	move mouse.x, mouse.y
+	sprite ico,,n-29,200,50
+	hold
+	p=false
+	end if
+	
+	For i=1 to N {
+		move Random(14000)+1000, Random(10000)+1000
+		let  a=random(90), b=random(50)+350, c=random(50)-50*(random(10)=1)
+		sprite ico, , a,b,c
+	}
+	move mouse.x, mouse.y
+	sprite ico,,n,200
+	n+=29
+	refresh 1500
+	if keypress(2) then exit
+	p= keypress(1)
+}
+release
+all$=""
+move 0,0
+copy scale.x, scale.y to all$
+If Ask("Save the file","icons","Save it","No", all$)=1 then
+Menu  ' erase menu list
+files + "screen*.bmp"
+copy "screen"+str$(menuitems+1,"000")+".bmp"
+End if
+mouse.icon show
+Refresh 30
+cls,0
+
+\\ In console M2000 has no events, except for this:,  an old variant of Menu can get the finish event in a global menu.
+\\ so giving the globalmenu Menu statement open the menu end leave it there to be used in a loop or something.
+Menu
+Menu title "MOVE ME" 
+Menu fill #F377FF, 7, 0
+files + "screen*.bmp"
+if menuitems=0 then exit
+global ex=false, loadnow=0
+Module Global globalmenu {
+\\ unhide this to exit menu if get a double click
+\\	ex<=true  \\ we can use this to exit on double click or enter.
+	if menu=0 then ex<=true : Print "You press Esc" else loadnow<=menu
+}
+Print @(0,0), "Select Image or End:";
+Menu @ "globalmenu" !
+wait 200
+menu1=0
+do {
+	wait 100
+	refresh
+	if keypress(2) or ex then exit
+	menu1=menu
+	if menu1=0 then continue
+\\ using this line we open one if double click or press enter
+Rem	if  loadnow=0 then continue
+\\using this we get response also as we move the menu caret
+ 	if loadnow=0 then loadnow<=menu1
+	move 0,0
+	image menu$(loadnow), scale.x
+	Print @(0,0), "Image:";menu$(loadnow)
+	loadnow<=0
+} always
+Menu
+Escape On
 }
 INFO
