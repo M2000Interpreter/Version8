@@ -6287,7 +6287,7 @@ enabled = b
   
 End Sub
 Private Sub PressKey_A(KeyCode As Integer, shift As Integer)
-Static ctrl As Boolean, noentrance As Boolean, where As Long
+Static ctrl As Boolean, noentrance As Boolean, where As Long, noinp As Double
 Dim aa$, a$, JJ As Long, ii As Long
 If noentrance Then
 KeyCode = 0
@@ -6342,11 +6342,12 @@ Case vbKeyF2
 If shift <> 0 Then
 If s$ = vbNullString And SelText <> "" Then s$ = SelText
 If pagio$ = "GREEK" Then
-s$ = InputBoxN("Αναζήτησε προς τα πάνω:", "Συγγραφή Κειμένου", s$)
+s$ = InputBoxN("Αναζήτησε προς τα πάνω:", "Συγγραφή Κειμένου", s$, noinp)
 Else
-s$ = InputBoxN("Search to top:", "Text Editor", s$)
+s$ = InputBoxN("Search to top:", "Text Editor", s$, noinp)
 End If
-If s$ <> "" Then Searchup s$, shift Mod 2 = 1
+If noinp <> 1 Then Exit Sub
+If MyTrim(s$) <> "" Then Searchup s$, shift Mod 2 = 1
 shift = 0
 ElseIf SelText <> "" Or s$ <> "" Then
 supsub
@@ -6357,11 +6358,12 @@ Case vbKeyF3
 If shift <> 0 Then
 If s$ = vbNullString And SelText <> "" Then s$ = SelText
 If pagio$ = "GREEK" Then
-s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$)
+s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$, noinp)
 Else
-s$ = InputBoxN("Search to down:", "Text Editor", s$)
+s$ = InputBoxN("Search to down:", "Text Editor", s$, noinp)
 End If
-If s$ <> "" Then SearchDown s$, shift Mod 2 = 1
+If noinp <> 1 Then Exit Sub
+If MyTrim(s$) <> "" Then SearchDown s$, shift Mod 2 = 1
 shift = 0
 ElseIf SelText <> "" Or s$ <> "" Then
 
@@ -6725,7 +6727,7 @@ End Sub
 
 Public Sub rthissub()
 Dim l As Long, w As Long, s$, TempLcid As Long, OldLcid As Long
-Dim el As Long, eW As Long, safety As Long, TT$, w1 As Long, i1 As Long
+Dim el As Long, eW As Long, safety As Long, TT$, w1 As Long, i1 As Long, noinp As Double
 Dim neo$, mDoc10 As Document, addthat As Long, w2 As Long
 w = mDoc.MarkParagraphID
 eW = w
@@ -6737,11 +6739,11 @@ SelStartSilent = SelStart
 el = Charpos  ' charpos maybe is in the start or the end of block
 
 If pagio$ = "GREEK" Then
-neo$ = InputBoxN("Αλλαγή Λέξης (Shift για σταμάτημα)", "Συγγραφή Κειμένου", s$)
+neo$ = InputBoxN("Αλλαγή Λέξης (Shift για σταμάτημα)", "Συγγραφή Κειμένου", s$, noinp)
 Else
-neo$ = InputBoxN("Replace Word (use Shift for Stop)", "Text Editor", s$)
+neo$ = InputBoxN("Replace Word (use Shift for Stop)", "Text Editor", s$, noinp)
 End If
-If neo$ = vbNullString Then Exit Sub
+If noinp <> 1 Then Exit Sub
 OldLcid = mDoc.lcid
 TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then mDoc.lcid = TempLcid

@@ -79,6 +79,8 @@ Public NoError As Boolean, lastpointer As Object
 Public tmpstr As String
 Public CopyInOutCol As Collection
 Public CallLocalLast As Boolean
+Public IamGlobal As Boolean
+Public numnumlimit As Long
 Public Sub CopyStrip(bst As basetask)
 With bst
 .StaticInUse = StaticInUse
@@ -373,7 +375,6 @@ End Sub
 Public Sub MoveNameDot(a$)
 
 If a$ = vbNullString Then Exit Sub
-Debug.Print a$
 If curdotcol < dotcolmax Then
     curdotcol = curdotcol + 1
      dotcol(curdotcol) = a$

@@ -69,7 +69,7 @@ x = CSng(MOUSEX())
 y = CSng(MOUSEY())
 Else
 x = x + Form1.Left
-y = y + Form1.Top
+y = y + Form1.top
 End If
 If x + Width > VirtualScreenWidth() Then
 If y + Height > VirtualScreenHeight() Then
@@ -95,7 +95,7 @@ gList1.HeadLine = vbNullString
 gList1.HeadlineHeight = 0
 End If
 x = x + that.Left
-y = y + that.Top
+y = y + that.top
 
 
 If x + Width > VirtualScreenWidth() Then
@@ -525,7 +525,7 @@ Private Sub gList1_selected2(item As Long)
 End Sub
 Private Sub DoCommand(item As Long)
 Dim k As Long, l As Long
-Dim b As basetask, fname$, files() As String, reader As Document, neo$, s$
+Dim b As basetask, fname$, files() As String, reader As Document, neo$, s$, noinp As Double
 If Typename(myobject) = "GuiEditBox" Then k = 4: l = 100
 Select Case item - 1
 Case -2
@@ -646,12 +646,14 @@ fname$ = GetFile(b, ttl$(2), mcd, "", True)
 If fname$ <> "" Then
 If pagio$ = "GREEK" Then
 s$ = "Πόρος"
-neo$ = Trim$(InputBoxN("Όνομα Μεταβλητής (αριθμητική ή αλφαριθμητική)", "Συγγραφή Κειμένου", s$))
-If Len(neo$) = 0 Then neo$ = "Πόρος"
+neo$ = Trim$(InputBoxN("Όνομα Μεταβλητής (αριθμητική ή αλφαριθμητική)", "Συγγραφή Κειμένου", s$, noinp))
+If noinp <> 1 Then Exit Sub
+If MyTrim(neo$) = vbNullString Then neo$ = "Πόρος"
 Else
 s$ = "Resource"
-neo$ = Trim$(InputBoxN("Variable Name (numeric or string)", "Text Editor", s$))
-If Len(neo$) = 0 Then neo$ = "Resource"
+neo$ = Trim$(InputBoxN("Variable Name (numeric or string)", "Text Editor", s$, noinp))
+If noinp <> 1 Then Exit Sub
+If MyTrim(neo$) = vbNullString Then neo$ = "Resource"
 End If
 If Right$(neo$, 1) = "$" Then
     s$ = "$"
@@ -755,7 +757,7 @@ allheight = height1 * factor
 itemWidth = allwidth - 2 * borderleft
 ''MyForm Me, Left, top, allwidth, allheight, True, factor
 
-Move Left, Top, allwidth, allheight
+Move Left, top, allwidth, allheight
   
 gList1.addpixels = 4 * factor
 

@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 15 active-X
+Version 9.7 Revision 16 active-X
 
-Last minutes fixes. Supposed to be a perfect interpreter.
+refactoring to gain speed. Additions for using M2000 identifiers as variables/functions.
+Updated Info.gsb  (including a Keyboard for playing music written in 159 lines)
 
 
 The final 9.7 version

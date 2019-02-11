@@ -128,7 +128,7 @@ Do
     If PriveSpace(k).Key = Key Then
     
     PriveSpace(k).Key = NewKey
-    PriveSpace(k).firsthash = HashFunc0(NewKey)
+    PriveSpace(k).firsthash = HD(NewKey)
                 ReDim Hash(MaxSpace * 2 + 3)
                hashlen = MaxSpace * 2 + 3
              '  reHash...
@@ -225,7 +225,7 @@ With PriveSpace(a)
     Else
         .KeyType = 0
     End If
-    .firsthash = HashFunc0(Key)
+    .firsthash = HD(Key)
     SwapStrings .Key, Key
 End With
 End Sub
@@ -240,7 +240,7 @@ With PriveSpace(a)
     Else
         .KeyType = 0
     End If
-    .firsthash = HashFunc0(Key)
+    .firsthash = HD(Key)
     .Key = Key
 End With
 
@@ -255,7 +255,7 @@ place HashFunc(Key), a
 With PriveSpace(a)
     .ndx = num
     .KeyType = internal
-    .firsthash = HashFunc0(Key)
+    .firsthash = HD(Key)
      SwapStrings .Key, Key
 End With
 
@@ -272,57 +272,15 @@ Private Sub place(ByVal b, ByVal a)
     End If
     PriveSpace(a).lastpos = b
 End Sub
-Private Sub ab(ByVal a As Long, b As Long)
-b = (b + a + 1024 * a) Xor &H83F3CF
-End Sub
-Public Function HashFunc0(a$) As Long
-Dim i&, p2 As Long, p1 As Integer, p4 As Long, k As Long, p3 As Long
-  p4 = Len(a$) * 2 '- 2
-  p2 = StrPtr(a$): p4 = p2 + p4 - 2
-   For i = p4 To p4 - 4 Step -2
-  GetMem2 i, p1
-  p3 = UINT(p1)
-  HashFunc0 = (HashFunc0 + p3 + 1024& * p3) Xor &H83F3CF
-  Next i
-  k = 2
-  For i = p4 - 6 To p2 Step -2
-  GetMem2 i, p1
-  p3 = UINT(p1)
-  HashFunc0 = (HashFunc0 + p3 + 1024& * p3) Xor &H83F3CF
- i = i - 2 * k
-  k = k + 1
-  Next i
- 
-End Function
-Private Function UINT(ByVal a As Integer) As Long 'δίνει έναν integer σαν Unsigned integer σε long
- Dim b As Integer
- b = a And &HFFFF
- If b < 0 Then
- UINT = CLng(&H10000 + b)
- Else
- UINT = CLng(b)
- End If
- 
- End Function
+
 Private Function HashFunc2(where As Long)
-HashFunc2 = MyMod(uintnew(PriveSpace(where).firsthash Or &HAFFAFF7 + Len(PriveSpace(where).Key) + hashlen + 1), hashlen)
+HashFunc2 = PriveSpace(where).firsthash Mod hashlen
 End Function
 
 Private Function HashFunc(a$)
-HashFunc = MyMod(uintnew(HashFunc0(a$) Or &HAFFAFF7 + Len(a$) + hashlen + 1), hashlen)
+HashFunc = HD(a$) Mod hashlen
 End Function
-Private Function MyMod(r1, po) As Variant
-MyMod = r1 - Fix(r1 / po) * po
-End Function
-Private Function uintnew(ByVal a As Currency) As Currency
-If a > 2147483647@ Then a = 2147483647@
-If a < -2147483648@ Then a = -2147483648@
-If a < 0 Then
-uintnew = 4294967296@ + a
-Else
-uintnew = a
-End If
-End Function
+
 Function Show() As String
 Dim i As Long
 For i = 0 To toplim

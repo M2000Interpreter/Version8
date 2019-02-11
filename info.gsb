@@ -4057,7 +4057,10 @@ back {
 	\\ split means to define a lower part of form to be scrolled up or down
 rem	gradient 11, 0
 }
-Form ! 68,52
+Cls 11,0
+WINDOW 12, 0  ' 0 FOR MONITOR 0
+\\ Use form without ! for less border
+Form ! 68,54
 backcolor=5   'point
 oldpen=14  ' pen
 Refresh 500
@@ -4079,7 +4082,7 @@ Scroll split 0  ' reset the row+1 which given in cls
 pen oldpen
 Clear ' clear local variables
 If Version<9.7 then Error "No proper M2000 version"
-If Version=9.7 and revision<11 then Error "No proper M2000 revision for version 9.7"
+If Version=9.7 and revision<16 then Error "No proper M2000 revision for version 9.7"
 title("Modules ?")
 Report {
 	Modules ?    (or control+N, display all loaded modules, if nothing loaded display files)
@@ -4121,18 +4124,20 @@ Report {
 	Win Dir$	Win Calc
 	End (to exit from console)  
 	}
-FKey 1,"saveme"
-FKey 2,"Edit Info"
-FKey 3,"Info"
-FKey 4,"M2000_Editor_Information"
-FKey 5,"Demo1"
+FKey 1,"Saveme ' save all loaded modules"
+FKey 2,"Edit Info ' edit this"
+FKey 3,"Info ' this page"
+FKey 4,"M2000_Editor_Information  ' about editor"
+FKey 5,"Demo1  ' 3d Drawing in a Window"
 FKey 6,"Edit M2000_editor_information"
-Fkey 8,"mEditor"
+Fkey 7,"Tr 'Three Oscilloscopes"
+Fkey 8,"mEditor ' A window based M2000 Editor"
+Fkey 9,"kb ' A keyboard to play music"
 FKey 10,"Settings"
 Title("Fkey")
 Fkey
 title("M2000 Writer")
-Keyboard "Writer"+chr$(13)
+\\Keyboard "Writer"+chr$(13)
 End
 Sub title(a$)
 Pen #ffeeff {
@@ -4914,10 +4919,10 @@ While k {
 }
 MODULE DEMO1 {set Fast !
 smooth on
-Rem :  Thread.plan sequential
+Rem : 
+ Thread.plan sequential
 \\ we can set Thread.plan before any thread created
-Rem :  
-Thread.plan concurrent
+Rem :  Thread.plan concurrent
 \\ concurrent execute one by one statements
 \\ except those in { }
 \\ also from Revision 52 Part {} as variable works fine with it
@@ -5134,7 +5139,11 @@ Function Alfa.Click {
                         Thread compute Restart
                   }
 }
-Thread PlayThis interval 1000/120
+if IsWine then
+      Thread PlayThis interval 1000/30
+else
+      Thread PlayThis interval 1000/120
+end if  
 Thread compute interval 10
 Wait 200
 Method Alfa, "Show"
@@ -5151,6 +5160,7 @@ Method Alfa, "CloseNow"
 Declare Alfa Nothing
 Declare Math Nothing
 Print counter1, counter2
+Title "Demo Complete"
 }
 MODULE UPDATE {dir appdir$
 save info, info
@@ -6580,5 +6590,1160 @@ MODULE LIB3 {      Class ParserClass {
                   Let .Ser=.CreatSerialize$()
             }
       }
+}
+MODULE R2 {\\ we can change mid$(), only for this sub
+\\ integer has value 3 (as a M2000 read only value)
+\\ also control$ is a string read only value
+function mid$(a$, x) {
+	=string$(a$, x)
+}
+Module Inside {
+	Print mid$("aaa",2), "from inside module"
+}
+see_work()
+inside
+print mid$("aaa",2), integer, control$="MAIN"
+
+sub see_work()
+	Local integer=10, control$="Hello"
+	\\ we can redifine functions, but using New, we make a new one, without erasing an other
+	\\ if you change new with global you get error because mid$() defined as local in this module
+	\\ so a local function has priority over a global one
+	\\ We get error because the local one expect string first, not a number
+	function new mid$(x) {
+		read x
+		=str$(x,"0.00")
+	}
+	'inside
+	Print mid$(10), integer, control$
+end sub
+}
+MODULE FL {\\ Slow,  Fast and Fast !
+\\ Normal is Fast
+Set Fast !
+Rem Try To unhide this line : Test "flowers"
+N=Random(!123567)
+N=7
+Dim Px(N+1), Py(N+1), Pz(N+1)
+For i=1 To N {      \\ x.twips and y.twips are the resolution of the displayed form in twips.
+      Px(i)=random(50,1100)*15
+      Py(i)=random(50, 800)*15
+      Pz(i)=random(2,6)*500
+}
+Dim Dx(100),Dy(100)
+For i=0 To 99 {
+      Dx(i)=COS(i*36)*150
+      Dy(i)=SIN(I*27)*150
+}
+Let mx=Mouse.X, my=Mouse.Y
+Let kk=Pi/5, kkk=kk, mx1=mx, my1=my, nnn=100, m=0
+Refresh 1000
+Cls #1155AA, 0
+j=0
+Repeat {
+      Cls
+      j++
+      nnn= nnn Mod 64
+      For i=1 To N {      \\ x.twips and y.twips are the resolution of the displayed form in twips.
+            Px(i)+=Dx((j+3*i) Mod 100) +mx1-mx
+            Py(i)+=Dy((j+i) Mod 100) +my1-my
+            Let mx1=mx, my1=my
+            Move Px(i),Py(i)
+            \\ M2000 have intresting blocks, like the Witdh { } block, to change line width inside it, or Pen {} block to alter pen color,  Path {} block to alter region, area and fill transparency.
+            Width 5 {    \\ setting line width
+                  Pen #AA6600  {  \\using colors like html hex values
+                        nnn+=kk    
+                       kkk=Pi-nnn/Pi
+                       For q=Pi/8 To 2*Pi-Pi/8 Step Pi/4 {
+                              Move Px(i), Py(i)
+                             Path #FF66FF, abs(m) { curve angle Pi/3+q-kkk, Pz(i)/6,Pi/4+q-kkk,Pz(i),Pi+q-kkk,Pz(i)*2/3 }
+                        }
+                        Move Px(i),Py(i)
+                        Circle Fill #FFAA20, Pz(i)/3
+                  }
+            }
+            m=Keypress(1)
+            If m then {
+                  px(i)=Mouse.X
+                  py(i)=Mouse.Y
+            }
+            mx=Mouse.X
+            my=Mouse.Y
+      }
+      Refresh 1000
+ }  Until Keypress(2)
+
+Hold   \\ save screen to memory
+Move Scale.X/2, Scale.Y/2
+def speed(i)=1.45*i
+i=8
+While i<120 {
+      Legend  "Game Over","ARIAL BLACK", speed(i), i/180,2,0
+      Refresh 1000
+      Wait 30
+      release  \\ copy from memory
+      i*=1.05
+}
+SET FAST
+CLS
+}
+MODULE FB {Class BigNum {
+      a=stack
+      Function Digits {
+            =len(.a)*14-(14-len(str$(stackitem(.a,len(.a)) ,"")))
+      }
+      Operator "+" (n) {
+            \\ we get a copy, but .a is pointer
+             \\ we make a copy, and get a new pointer
+            .a<=stack(.a)
+           
+            acc=0
+            carry=0
+            const d=100000000000000@
+                  k=min.data(Len(.a), len(n.a))
+                  i=each(.a, 1,k )
+                  j=each(n.a, 1,k)
+                  while  i, j {
+                        acc=stackitem(i)+stackitem(j)+carry
+                        carry= acc div d
+                        return .a, i^+1:=acc mod d
+                  } 
+                  if len(.a)<len(n.a) Then  {
+                        i=each(n.a, k+1, -1)
+                        while i {
+                              acc=stackitem(i)+carry
+                              carry= acc div d
+                              stack .a  {data acc mod d}
+                        }
+                  } ELse.if len(.a)>len(n.a) Then  {
+                        i=each(.a, k+1, -1)
+                        while i {
+                              acc=stackitem(i)+carry
+                              carry= acc div d
+                              Return .a, i^+1:=acc mod d
+                              if carry else exit
+                        }     
+                  }
+                  if carry then stack .a { data carry}
+      }
+      Function tostring$ {
+            if len(.a)=0 then ="0" : Exit
+            if len(.a)=1 then =str$(Stackitem(.a),"") : Exit
+            document buf$=str$(Stackitem(.a, len(.a)),"")
+            for i=len(.a)-1 to  1 {
+                  Stack .a {
+                        buf$=str$(StackItem(i), "00000000000000")
+                  }
+            }
+            =buf$
+      }
+      class:
+      Module BigNum (s$) {
+            s$=filter$(s$,"+-.,")
+            if s$<>""  Then {
+                  repeat {
+                        If len(s$)<14 then Stack .a { Data  val(s$) }: Exit
+                        Stack .a { Data  val(Right$(s$, 14)) }
+                        S$=Left$(S$, len(S$)-14)
+                  } Until S$=""
+            }
+      }
+} 
+
+Inventory K=0:=BigNum("0"),1:=BigNum("1")
+fib=Lambda K (x as decimal)-> {
+      If Exist(K, x) Then =Eval(K) :Exit
+      Ret=If(x>1->Lambda(x-1)+Lambda(x-2), bignum(str$(x,"")))
+      Append K, x:=Ret
+      =Ret
+}
+Set Fast!
+For i=1 to 2000 {
+      N=Fib(i)
+      Print i
+      Print N.tostring$()
+      Refresh
+}
+Set Fast
+}
+MODULE BN {Dim Mod$(0 to 99), Mul(0 to 9,0 to 9)
+for j=0 to 9 : For i=0 to 9:Mod$(i+j*10)=str$(i mod 10,0): Mul(i,j)=i*j : Next i :Next j
+profiler
+a$="1231231231231231231231231231232132131213130989802139080120931920389"
+\\ a$ x n
+n1$="1234567767765675576765234324243122131213122113123120898031238910823"
+Print val(n1$)*val(a$)
+k=0
+acc=0
+a$=strrev$(a$)
+inventory num
+rev3$=""
+n1=len(n1$)
+while n1>0 
+n=val(mid$(n1$,n1,1))
+n1--
+rev2$=string$("0", k)
+rev1$=""
+k++
+
+if n>0 then
+      if not exist(num, n) then
+      digit=0&
+      For i=1 to len(a$)
+      digit+=n*val(mid$(a$,i,1))
+      rev1$+=str$(digit mod 10,0)
+      digit/=10&
+      Next i
+      if digit then rev1$+=str$(digit mod 10,0)
+            Append num, n:=rev1$
+      else
+            rev1$=num$(n)
+      End if
+      rev2$+=rev1$
+      if len(rev3$)=0 then
+            swap rev2$, rev3$
+      else
+            swap rev1$, rev3$
+            rev3$=""
+            if rev2$<rev1$ then swap rev1$, rev2$
+            digit=0
+            For i=1 to len(rev1$)
+            digit+=val(mid$(rev1$, i, 1))+val(mid$(rev2$, i, 1))
+            rev3$+=str$(digit mod 10,0)
+            digit/=10&
+            next i
+            if digit>0 then rev3$+=str$(digit mod 10,0)
+      end  if
+      End if
+End While
+Print strrev$(rev3$)
+print timecount
+}
+MODULE DI {Function ProDiv$ {
+      Read a$, b$, pp
+      Let v$="", gg=len(b$), p=pp,  mm=0
+      {
+            s=len(b$)
+            c$=left$(a$,s)
+            if c$<b$ then  s++: c$=left$(a$, s) : if s=len(b$) then exit
+            d1=val(c$) div val(b$)
+            if gg<s-1 then { 
+                  if v$="0" then mm=-s+gg
+                  v$=v$+string$("0",s-1-gg) 
+            }
+            v$=v$+str$(d1,"0")
+            r$=str$(val(c$)-val(b$)*d1,"0")
+            gg=len(r$)
+            a$ =r$+mid$(a$,s+1)
+            cc=false
+            if len(a$)=len(b$) then {
+                  if a$>b$ then cc=true
+            }  else cc=len(a$)>len(b$) and a$<>"0" 
+            if cc else if p=0 then  exit
+            if p>0  and not cc then {
+                  mm=len(v$)+1
+                  a$=a$+string$("0",p) : p=0 
+            }
+            loop
+      }
+      \\ scientific notation
+      if mm<>0 then {
+            if mm>1 then {
+                  =Left$(v$,1)+"."+mid$(v$,2,mm-2)+mid$(v$,mm+1)+"E+"+str$(mm-2,"00")
+            } else.if mm<0 then {
+                  =Mid$(v$,-mm+1,1)+"."+Mid$(v$,-mm+2)+"E-"+str$(abs(mm),"00")
+            }
+      } else {
+            mm=len(v$)
+            if mm>1 then {
+              =Left$(v$,1)+"."+mid$(v$,2)+"E+"+str$(mm-1,"00")
+            } else =V$
+      }
+}
+Def ExpStr$(x)= str$(X,"0.00000000000000000E-00")
+a$="57645834674367349573945793457359374512154545412313137868768787874738942834756234896582946937658926582565"
+b$="3224241711"
+op=Pen
+Pen 11{
+      Print "Calculation for ";
+}
+Print a$;~(12);"/";~(op);b$
+Print ExpStr$(val(a$)/val(b$))
+Print
+Print "Expanded:", ProDiv$(a$, b$, 100)
+a$="1"
+b$="3224241711"
+Print
+Pen 11 {
+      Print "Calculation for ";
+}
+Print a$;~(12);"/";~(op);b$
+Print ExpStr$(val(a$)/val(b$))
+Print
+Print "Expanded:", ProDiv$(a$, b$, 100)
+}
+MODULE HU {Module Huffman {
+      comp=lambda (a, b) ->{
+            =array(a, 0)<array(b, 0)
+      }
+      module InsertPQ (a, n, &comp) {
+            if len(a)=0 then stack a {data n} : exit
+            if comp(n, stackitem(a)) then stack a {push n} : exit
+             stack a {
+                  push n
+                  t=2: b=len(a)
+                   m=b
+                   While t<=b {
+                         t1=m
+                        m=(b+t) div 2
+                        if m=0 then  m=t1 : exit 
+                        If comp(stackitem(m),n) then t=m+1:  continue
+                        b=m-1
+                        m=b
+                  }
+                  if m>1 then shiftback m
+            }
+      }
+ 
+      a$="this is an example for huffman encoding"
+ 
+      inventory queue freq
+      For i=1 to len(a$)   {
+            b$=mid$(a$,i,1)
+            if exist(freq, b$) then Return freq, b$:=freq(b$)+1 : continue
+            append freq, b$:=1
+      }
+      sort ascending freq
+      b=stack
+      K=each(freq)
+      LenA=len(a$)
+      While k {
+            InsertPQ b, (Round(Eval(k)/lenA, 4), eval$(k, k^)), &comp
+      }
+      While len(b)>1 {
+            Stack b {
+                 Read m1, m2
+                 InsertPQ b, (Array(m1)+Array(m2), (m1, m2) ), &comp
+            }
+      }
+      Print  "Size of stack object (has only the Root):"; len(b)
+      Print "Root probability:";Round(Array(Stackitem(b)), 3)
+      inventory encode, decode
+ 
+      Traverse(stackitem(b), "")
+      message$=""
+      For i=1 to len(a$)
+      message$+=encode$(mid$(a$, i, 1))
+      Next i
+ 
+      Print  message$
+      j=1
+      check$=""
+      For i=1 to len(a$)
+            d=each(encode)
+            While d {
+                  code$=eval$(d)
+                  if mid$(message$, j, len(code$))=code$ then {
+                        check$+=decode$(code$)
+                        Print decode$(code$); : j+=len(code$)
+                  }
+            }
+      Next i
+      Print
+      Print len(message$);" bits ", if$(a$=check$->"Encoding/decoding worked", "Encoding/Decoding failed")
+ 
+ 
+      Sub Traverse(a, a$)
+            local b=array(a,1)      
+            if type$(b)="mArray"  Else {
+                  Print  @(10); quote$(array$(a, 1));" "; a$,@(20),array(a)
+                  Append decode, a$ :=array$(a, 1)
+                  Append encode, array$(a, 1):=a$
+                  Exit Sub   
+            }
+            traverse(array(b), a$+"0")
+            traverse(array(b,1), a$+"1")
+      End Sub
+}
+Huffman
+ 
+}
+MODULE RE {Module CheckIt {
+      declare global ObjRegEx "VBscript.RegExp"
+      Function RegEx.Replace$(from$, what$) {
+            Method ObjRegEx, "Replace", from$, what$ as response$
+            =response$
+      }
+      Function RegEx.Test(what$) {
+            Method ObjRegEx, "Test", what$ as response
+            =response
+      }
+      Print Type$(ObjRegEx)
+      With ObjRegEx, "Global", True, "Pattern" as pattern$
+      pattern$="Mona Lisa"
+      Print RegEx.Test("The Mona Lisa is in the Louvre.")=true
+      Print RegEx.Replace$("The Mona Lisa is in the Louvre.", "La Gioconda")
+      Pattern$ = " {2,}"
+      Print "Myer Ken,  Vice President,  Sales and Services"
+      \\ Removing some spaces
+      Print RegEx.Replace$("Myer Ken,  Vice President,  Sales and Services", " ")
+      pattern$="(\d{3})-(\d{3})-(\d{4})"
+ 
+      Method ObjRegEx, "Execute", "555-123-4567, 555-943-6717" as MyMatches
+      Print Type$(MyMatches)  ' it is a IMatchCollection2
+      With MyMatches, "Count" as count, "Item" as List$()
+      For i=0 to Count-1 : Print List$(i) : Next i
+ 
+ 
+      Print RegEx.Replace$("555-123-4567, 555-943-6717", "($1) $2-$3")
+      Pattern$ = "(\S+), (\S+)"
+      Print RegEx.Replace$("Myer, Ken", "$2 $1")
+      Method ObjRegEx, "Execute", "Myer, Ken" as MyMatches
+      Rem : DisplayFunctions(MyMatches)
+      \\ we can use Enumerator
+      With MyMatches, "_NewEnum" as New Matches
+      Rem : DisplayFunctions(Matches)
+      With Matches, "Value" as New item$
+      While Matches {
+           Print Item$
+      }
+      \\ Or just using the list$()
+      For i=0 to Count-1 : Print List$(i) : Next i
+      declare ObjRegEx Nothing
+      End
+      Sub DisplayFunctions(x)
+            Local cc=param(x),  ec=each(cc)
+            while ec {
+                  Print eval$(ec)   ' print every function/property of object x
+            }
+      End Sub
+}
+Checkit
+}
+MODULE RE1 {Module Internal {
+      what$="Mona Lisa"
+      Document a$="The Mona Lisa is in the Louvre."
+      Find a$, what$
+      Read FindWhere
+      If FindWhere<>0 then Read parNo, parlocation
+      \\ replace in place
+      Insert  FindWhere, Len(what$)  a$="La Gioconda"
+      Report a$
+ 
+      n$="The Mona Lisa is in the Louvre, not the Mona Lisa"
+      Report Replace$("Mona Lisa", "La Gioconda", n$, 1, 1)  ' replace from start only one
+      dim a$()
+      a$()=Piece$("Myer, Ken",", ")
+      Print a$(1)+", "+a$(0)="Ken, Myer"
+}
+Internal
+}
+MODULE RO {Module RankLanguages {
+      Const Part1$="<a href="+""""+ "/wiki/Category", Part2$="member"
+      Const langHttp$="http://rosettacode.org/wiki/Category:Programming_Languages"
+      Const categoriesHttp$="http://www.rosettacode.org/mw/index.php?title=Special:Categories&limit=5000"
+      Def long m, i,j, tasks, counter, limit, T, t1
+      Def string LastLang$, job$
+ 
+      Document final$, languages$, categories$
+      httpGet$=lambda$  (url$, timeout=1000)->{
+            Declare htmldoc "Msxml2.ServerXMLHTTP"
+            With htmldoc , "readyState" as ready
+            Report "Download:"+url$
+            Method htmldoc "open","get", url$, True
+            Method htmldoc "send"
+            Profiler
+            While Ready<>4 {
+                  Wait 20
+                  Print Over format$("Wait: {0:3} sec", timecount/1000)
+                  If timecount>timeout then Exit
+            }
+            If ready=4 Then  With  htmldoc, "responseText" as ready$ : =ready$
+            Declare htmldoc Nothing
+            print
+      }
+ 
+      languages$=httpGet$(langHttp$, 30000)
+      If Doc.Len(languages$)=0 then  Error "File download failed (languages)"
+ 
+      Inventory Lang
+ 
+      m=Paragraph(languages$, 0) 
+      If Forward(languages$,m) then {
+            While m {
+                  job$=Paragraph$(languages$,(m))
+                  If Instr(job$, part1$) Else Continue
+                  i = Instr(job$, "</a>")
+                  If i Else Continue   ' same as If i=0 Then Continue
+                  j = i
+                   i=Rinstr(job$, ">", -i)
+                  If i Else Continue
+                  LastLang$=MID$(job$, i+1, j-i-1)
+                  if Instr(job$, "Category:"+lastlang$) then Append lang, lastlang$:=0  :  Print Over format$("Languages: {0}", len(lang))
+            }
+      }
+      Print
+      Document categories$=httpGet$(categoriesHttp$, 30000)
+      If Doc.Len(categories$)=0 then  Error "File download failed (categories)"
+      limit=Doc.Par(categories$)
+      If limit<Len(Lang) then Error "Invalid data"
+      Refresh
+      set slow
+      m=Paragraph(categories$, 0) 
+      counter=0
+      If Forward(categories$,m) then {
+            While m {
+                  job$=Paragraph$(categories$,(m))
+                  counter++
+                  Print Over format$("{0:2:-6}%", counter/limit*100)
+                  i=Instr(job$, part2$) 
+                  If  i Else Continue          
+                  i=Rinstr(job$, "(", -i)
+                  If  i Else Continue
+                  tasks=Val(Filter$(Mid$(job$, i+1),","))
+                  If tasks Else Continue
+                  i=Rinstr(job$, "<", -i)
+                  If i Else Continue
+                  j = i
+                  i=Rinstr(job$, ">", -i)
+                  If i Else Continue
+                  LastLang$=MID$(job$, i+1, j-i-1)
+                  If Exist(Lang, LastLang$) Then {
+                         Return Lang, LastLang$:=Lang(LastLang$)+tasks
+                  }
+            }
+      }
+      Print
+      \\ this type of iventory can get same keys
+      \\ also has stable sort
+      Report "Make Inventory list by Task"
+      Inventory queue ByTask
+      t1=Len(Lang)
+      T=Each(Lang)
+      While T {
+            Append ByTask, Eval(T):=Eval$(T!)
+            Print Over format$("Complete: {0} of {1}", T^+1, t1 )
+      }
+      Print
+      Report "Sort by task (stable sort, sort keys as numbers)"
+      Sort descending ByTask as number
+      Report "Make List"
+      T=Each(ByTask)
+      final$="Sample output on "+Date$(Today, 1033, "long date")+{:
+ 
+      }
+      While T {
+            final$=format$("rank:{0::-4}. {1:-5} entries - {2}", T^+1, Eval$(T!), Eval$(T))+{
+            }
+      }
+      Report "Copy to Clipboard"
+      clipboard final$
+      \\ present to console with 3/4 fill lines then stop for space bar or mouse click to continue
+      Report final$     
+}
+RankLanguages
+}
+MODULE CE {a$="THIS IS MY TEXT TO ENCODE WITH CAESAR CIPHER"
+Function Cipher$(a$, N) {
+      If Len(a$)=0 Then Exit
+      a$=Ucase$(a$)
+      N=N mod 25 +1
+      \\ Integer in Mem is unsigned number
+      Buffer Mem as Integer*Len(a$)
+      Return Mem, 0:=a$
+      For i=0 to Len(a$)-1 {
+            If Eval(mem, i)>=65 and Eval(mem, i)<=90 then Return Mem, i:=(Eval(mem, i)-65+N) mod 26+65
+       }
+       =Eval$(Mem)
+}
+B$=Cipher$(a$, 12)
+Print B$
+Print Cipher$(B$,12)
+}
+MODULE CO {Module Check {
+      \\ we use an internal object for Math functions (here for Atan2)
+      Declare Math Math
+      Const tau=2*Pi, Center=2
+      \\ change console size,  and center it ( using ;) to current monitor      
+      Window 12, 800*twipsX,600*twipsY;
+      \\ actual size maybe less (so can fit text exactly)
+      Double  ' Double height characters
+      Report Center, "Color wheel"
+      Normal  ' restore to normal
+      Atan2=Lambda Math (a, b) ->{
+            Method Math, "Atan2", a, b As ret
+            =ret
+      }
+      \\ brightness=1 for this program
+      hsb2rgb=Lambda (hue, sat) ->{
+            If sat == 0 Then {
+                = 255, 255, 255
+           } Else {
+                  h=frac(hue+1)*6
+                  f = frac(h)  
+                  p = Int((1-sat)*255 + 0.5)
+                  q = Int((1-sat*f)*255 + 0.5)
+                  t = Int((1-sat*(1-f))*255 + 0.5)
+                  Select Case Int(h)
+                  Case 1
+                      = q, 255, p
+                  Case 2
+                      = p, 255, t
+                  Case 3
+                     = p, q, 255
+                  Case 4
+                      = t, p, 255
+                  Case 5
+                      = 255, p, q
+                  Else Case
+                      = 255, t, p
+                  End Select
+          }
+      }
+      Let OffsetX=X.twips/2-128*TwipsX, OffsetY=Y.twips/2-128*TwipsY
+      \\ a pixel has a size of TwipsX x TwipsY
+      OffsetX=(OffsetX div TwipsX)*TwipsX
+      OffsetY=(OffsetY div TwipsY)*TwipsY
+      \\ We set hsb2rgb, OffsetX, OffsetY as closures to PrintPixel
+      \\ We send to stack the R G B values using Stack ! array
+      \\ hsb2rgb() return an array of values
+      \\ we pop these values using Number
+      PrintPixel = Lambda  hsb2rgb, OffsetX, OffsetY (x,y, theta, sat)  -> {
+            Stack ! hsb2rgb(theta,sat)  
+            PSet Color(number, number, number), x*TwipsX+offsetX, y*TwipsY+offsetY
+      }
+      \\ set Atan2, tau as closures to HueCircle
+      \\ we can rotate/flip the wheel by changing signs in Atan2() and
+      \\ by changing order of arguments (dx,dy) or (dy,dx). 8 combinations
+      HueCircle= Lambda Atan2, tau (PrintPixel) -> {
+            Let  c_width=256, c_height=256
+            Let  cx=c_width/2, cy=c_height/2
+            Let  radius=If(cx<=cy->cx, cy)
+            c_width--
+            c_height--
+            dy=-cy
+            For y=0 To c_height {
+                  dy++ : dy2=dy*dy : dx=-cx
+                  For x=0 To c_width {
+                        dx++ : dist=Sqrt(dx^2+dy2)
+                        If dist>radius Then continue
+                        Call PrintPixel(x,y, Atan2(dx, -dy)/tau, dist/radius)
+                  }
+            }
+      }
+      Call HueCircle(PrintPixel)
+      Scr$=""  ' we use this string  to load an image
+      Move 0,0
+      \\ scale.x, scale.y are twips height and width, of current layer
+      Copy scale.x, scale.y to Scr$
+      Clipboard Scr$  ' save window to clipboard
+}
+Check
+a$=KEY$
+\\ CALL INFO NOW \\ DELETE THIS LINE IF INFO NOT EXIST IN MODULE'S LIST
+INFO
+}
+MODULE SH {hide
+wait 100
+Desktop  ' copy dedcktop to background
+BackGround {
+	img$=""
+	move 0,0
+	copy scale.x, scale.y to img$
+}
+wait 1000
+show
+Title "Shift Console"
+cx=pos
+cy=row
+Escape off
+x=motion.x
+y=motion.y
+t=1000/25
+for i=1 to 200 step 5
+motion x+i*twipsy, y+i*twipsx
+wait t
+Next i
+wait 1000
+motion x, y
+Escape on
+Form  ' cut border
+x=motion.xw
+y=motion.yw
+t=1000/25
+for i=1 to 200 step 5
+motion.w x+i*twipsy, y+i*twipsx
+wait t
+Next i
+wait 1000
+motion.w x, y
+Bmp$=""
+Move 0,0
+Copy scale.x, scale.y to Bmp$
+form ;    ' clear screan and restore border
+image bmp$
+refresh
+cursor cx,cy
+Move scale.x/2, scale.y/2
+Image img$, scale.x/3
+sprite img$,5 ,45,30,40
+clipboard img$
+Title "Shift Console.. complete"
+}
+MODULE GR {\\ Gray Code
+Module GrayCode {
+      Function bin$(a) {
+            a$=""
+            do {
+                  n= a mod 2
+                  a$=if$(n=1->"1", "0")+a$
+                  a=a div 2
+            } until a==0
+            =a$
+      }
+      Function GrayEncode(a) {
+            =binary.xor(a, binary.shift(a,-1))
+      }
+      Function GrayDecode(a) {
+            b=0
+            do {b=binary.xor(a, b) : a=binary.shift(a,-1) } until a=0
+            =b
+      }
+      For i=0 to 32 {
+            g=GrayEncode(i)
+            b=GrayDecode(g)
+            Print format$("{0::-2} {1:-6} {2:-6} {3:-6} {4::-2}", i, bin$(i), bin$(g), bin$(b), b)
+      }
+}
+GrayCode
+}
+MODULE AC {\\ M2000 Interpreter
+\\ accumulator factory
+foo=lambda acc=0 (n as double=0) -> {
+      if n=0 then =acc : exit 
+      acc+=n
+      =lambda n=acc (x) -> {
+            \\ x has no type here, can be any numeric type (also can be an object too)       
+            \\ accumulator is double, and is a closure (a copy of n in foo)
+            n+=x
+            \\ any variable in M2000 hold  first type
+            \\ if x is an object then we get error, except if object use this operator
+            x=n
+            \\ so we return x type
+            =x
+      }
+}
+x=foo(1)
+call void x(5)
+call void foo(3)   ' void tell to interpreter to throw result
+print x(2.3) ' prints 8.3
+print foo()=4
+
+}
+MODULE TR {Escape Off
+Flush
+Global alfa=60*4
+Smooth On  \\ use Gdi+
+Cls 5,0
+Pen 14
+Gradient 5,1
+Refresh 1500 
+Double
+Report 2, {Example three oscilloscopes},8000
+Normal
+Cursor 0,12
+\\Report ! 6  ' set tab width
+\\Print "  ";   ' set intendation
+Pen 7 {
+	Report 2, {
+		Press
+		Keyboard
+		any key - exit
+		Mouse buttons
+		left - Acc. left
+		right - Acc. right
+		}, 3000   \\ width 
+}
+\\Report ! 8  ' set tab width
+Print
+Gosub put_a_title
+Gosub define_module_b
+Gosub make_classes
+Triangle=drw(4000,2500)
+Tk=Display(8000,500,8000,4000,45)
+b 2000,3, &Triangle.a(), 0
+Hexagon=drw(4000,6750)
+Hk=Display(8000,4750,8000,4000,15)
+b 2000,6, &Hexagon.a(), 0
+My_Circle=drw(4000,11000)
+Ck=Display(8000,9000,8000,4000,30)
+b 2000,alfa div 2, &My_Circle.a(), 0
+
+Hold
+i=0
+k=1
+Every 10 { 
+      Pen 15 {
+            Refresh 1500
+            Release  ' we get the background using Hold.
+            Triangle.draw_to (i+alfa/6) mod alfa
+                  Draw to 8000, pos.y
+                  Tk.tip
+                       
+            Hexagon.draw_to (i+alfa/12) mod alfa
+                  Draw to 8000, pos.y
+                  Hk.tip
+                       
+            My_Circle.draw_to i
+                  Draw to 8000, pos.y
+                  Ck.tip
+            If keypress(1) Then
+                  k++
+            Else.If keypress(2) Then
+                  k--
+            End If
+            i+=k
+            i=i mod# alfa
+      }
+      If inkey$<>"" Then Exit
+}
+Escape off
+\\ call info again
+Keyboard "info"+chr$(13)
+Exit
+put_a_title:
+      Move -320, scale.y
+      Path { 
+          legend "Μ2000","Arial Black", 90,pi/2,0,0,100 
+      } ;
+      Move -320, scale.y-8000
+      Fill 2000, 8000, #775566, #221133,1,1
+      Path { } ;
+Return
+define_module_b:
+Module b {
+      Read a, n, &ar(), cir
+      Dim ar(alfa,2)
+      z=pi/2
+      km=0
+      x=pos.x
+      y=pos.y
+      If cir Then Circle a
+      g=n/2
+      kk=alfa/n
+      Step Angle -(pi/2+pi/n),a
+      b=(x-pos.x)*2/kk
+      d=Abs(y-pos.y)
+      Step Angle -(pi/2+pi/n),-a
+      If cir Then If d>0 Then Circle d
+      Step Angle -(pi/2+pi/n)+z,a
+      Step Angle 0,0
+      For i=0 to 2*pi Step pi/g
+            x1=pos.x
+            y1=pos.y
+            For L=1 to kk
+                  Move x1, y1
+                  Draw Angle i+z, b*L
+                  ar(km,0)=pos.x
+                  ar(km,1)=pos.y
+                  km++ 
+                  km=km mod alfa
+                  If cir Then Circle Fill 11,30,1,11
+            Next L
+      Next i
+      Step Angle -(pi/2+pi/n)+z,-a
+}
+Return
+make_classes:
+Class drw {
+      Dim a(0)
+      x, y
+      Module drw {
+            Read .x, .y
+            Move .x, .y
+      }
+      Module draw_to {
+            If Match("N") Then
+                  Read i
+                  i=Abs(int(i)) mod alfa
+                  Move .x,.y
+                  Draw to .a(i,0), .a(i,1)
+            Else
+                  For i=0 to alfa-1
+                        Move .x,.y
+                        Draw to .a(i,0), .a(i,1)
+                  Next i
+            End If
+      }
+}
+Class Display {
+      x, y, wi, he, stp, tp=-1
+      dscr$, counter
+      Module Display {
+            Read .x,.y,.wi,.he, .stp
+            .y-=30
+            .he+=60
+            .tp<=1
+            x1=pos.x
+            y1=pos.y
+            Move .x, .y
+            Fill .wi, .he, 1,7
+            Move .x+100, .y+.he-100
+            Pen 11 {
+                  Legend "Osc 2000", "Verdana", 8,pi/2,0,0
+            }
+            Move x1, y1
+      }
+      Module Tip {
+            If .tp=-1 Then Exit
+            tp1=pos.y
+            If .dscr$<>"" Then { copy .x+.stp, .y use .dscr$ } Else .tp=tp1
+            .counter++
+            If .counter mod (alfa div 4)=1 Then Move .x+.stp/2, .y : Width 1,3 { Draw 0 ,.he,14 } 
+            Move .x, tp1
+            Draw to .x+.stp, .tp
+            .tp<=tp1
+            Move .x,.y
+            copy .wi-.stp/2, .he To .dscr$
+            Move .x, .y+.he/2
+            Pen 14 { Draw .wi }
+            Move .x+.wi/2,.y+200
+            Pen 12 {
+                  Legend Format$("Oscilloscope: {0}sec 10x",str$(.counter/10,"000000.0")), "Lucida Console", 11, 0, 2, 1, 20
+            }
+      }
+}
+Return
+}
+MODULE HT {text alfa.html {
+<!doctype html>
+<html>
+<head>
+<title>Hello There</title>
+<meta name="GENERATOR" content="M2000">
+<meta name="FORMATTER" content="M2000">
+<meta content="this, other, that" name=keywords>
+<meta content=All name=robots> 
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=windows-1253">
+<meta NAME="Author" CONTENT="GEORGE KARRAS">
+<style type="text/css">
+body {
+    overflow:hidden;
+}
+</style>
+</head>
+<body bgcolor="white" text="#000000" link="#0000ff" vlink="#800080" alink="#ff0000" >
+<h2>My First JavaScript</h2>
+
+<button type="button"
+onclick="document.getElementById('demo').innerHTML = Date()">
+Click me to display Date and Time.</button>
+
+<p id="demo"></p>
+
+</body>
+}
+browser "alfa.html",motion.xw+motion.x,motion.yw+motion.y, scale.x,6000
+Print "click, and pres Esc, or use statement Browser"
+}
+MODULE KB {Fkey Clear
+\\ Keyboard - can play two or more notes at once
+\\ some keybards can play max 6 notes, some other max 4
+dim note1$(10,3), note2$(10,3)
+FillArray()
+Form ! 60,30
+Pen 14
+Cls 5
+Double
+Report 2, "Keyboard 005"   
+Normal
+Report 2,{Menu
+1-Exit  3-Xylophone 4-Piano 5-Saxophone  8-Show Keys/Notes 9-Rythm Yes 0-Rythm No
+
+Space bar - set higher the volume for each note
+-- George Karras --
+
+}
+Thread.Plan Sequential
+Play 0 \\ clear music threads
+Global kb$=" ", tempo=300, org=5, f=0, vol$="V90", voi(18), use(17) ' 0 ..17,
+n=1
+For i=1 to 16 { use(i)=True }
+use(10)= false \\ For drum machine
+\\ compute virtual clavie position
+mm=2*(scale.x div 14)
+mm2= mm div 2
+kk=row/height*scale.y
+kk1=scale.y/height*8
+gram=scale.y/height*1.5
+Cls , row+9
+Module ClKey {
+      Read a$, press, sel
+      If press Then {
+      If Instr(kb$,a$+"-")>0 Then Exit
+      Next()
+      voi(sel)=f
+      Print a$, f
+      Score f, tempo, a$+vol$ : kb$<=kb$+a$+"-": Play f, org
+      } else {
+            kb$<=Replace$(a$+"-","", kb$)
+            If voi(sel)>0 Then {
+             Play voi(sel), 0 
+             use(voi(sel))~
+             voi(sel)=0
+             }
+      }
+      Sub Next()
+      Local i
+      For i=1 to 16 {
+            If use(i) Then Exit
+      }
+      If i<17 Then { f<=i : use(i)~ } else f<=1: use(1)=True : Print "!!!!!!!!"
+      End Sub
+}
+\\ 10 for drum machine
+Thread { Score 10,400,"CV90CC  ab Cd eCC" : Play 10,1 } as L Interval 60
+Thread {
+      ClKey "A#2", KeyPress(asc("A")), 1
+      ClKey "B2", KeyPress(asc("Z")), 2
+      ClKey "C3", KeyPress(asc("X")), 3
+      ClKey "C#3", KeyPress(asc("D")), 4
+      ClKey "D3", KeyPress(asc("C")), 5
+      ClKey "D#3", KeyPress(asc("F")), 6
+      ClKey "E3", KeyPress(asc("V")), 7
+      ClKey "F3", KeyPress(asc("B")), 8
+      ClKey "F#3", KeyPress(asc("H")), 9
+      ClKey "G3", KeyPress(asc("N")), 10
+      ClKey "G#3", KeyPress(asc("J")), 11
+      ClKey "A3", KeyPress(asc("M")), 12
+      ClKey "A#3", KeyPress(asc("K")), 13
+      \\ https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
+      ClKey "B3", KeyPress(0xBC), 14 \\ VK_OEM_COMMA
+      ClKey "C4", KeyPress(0xBE), 15 \\ VK_OEM_PERIOD
+      ClKey "C#4", KeyPress(0xBA), 16 \\ VK_OEM_1
+      ClKey "D4", KeyPress(0xBF), 17 \\VK_OEM_2  
+} as al Interval 50
+Print "οκ"
+Threads
+Thread L Interval 6000
+Main.Task 10 {
+      Display(mm, kk, mm2, kk1)
+      Refresh 1000
+      If KeyPress(asc("1")) Then Exit
+      If KeyPress(asc("3")) Then org<=14 : tempo<=100 
+      If KeyPress(asc("4")) Then org<=5 : tempo<=300
+      If KeyPress(asc("5")) Then org<=65 : tempo<=5000
+      If KeyPress(asc("8")) Then n=1-n
+      If KeyPress(asc("9")) Then Thread L Restart
+      If KeyPress(asc("0")) Then Thread L Hold
+      If KeyPress(32) Then { vol$ <= "V127"  } else vol$ <= "V90"
+      Print "--------"
+}
+Threads Erase
+Print "End"
+\\ delete this line
+Keyboard "Info"+chr$(13)
+End
+Sub Display(p0,y0, p1, y1)
+      Clavie(p0, y0, p1, y1, 0, &note1$())
+      Clavie(p0-p1/2,y0,p1,y1*2/3, -1, &note2$())
+      Refresh 1000
+End Sub
+Sub Clavie(p0, y0,p1, y1, p3, &n$())
+      Link n$() to n()
+      p3-!
+      Local k=-1, i
+      For i=p0 to 9*p1+p0 step p1
+      k++
+      If n$(k,0)<>"" Then {
+            Move i+p3*p1/6, y0
+            If p3 Then {
+                  Fill p1-p3*p1/3-15,y1-15, 7* (1-(voi(n(k,2))>0))+1, 0,1
+            } else {
+                  Fill p1-15,y1-15,15,7* (1-(voi(n(k,2))=0))+1,1
+            }
+            Move i+p3*p1/6, y0
+            Fill @ p1-p3*p1/3,y1,2,1
+            Move i+p3*p1/6, y0+y1-gram
+            Pen p3*15 { Fill @ p1-p3*p1/3,gram,5,n$(k,n)}
+      }
+      Next i
+End Sub
+Sub FillArray()
+Local n,p, n$, k$, no
+Stack New {
+      Data "A#2", "A", 1, 1, 2
+      Data "B2", "Z", 2, 1, 1
+      Data "C3", "X", 3, 2, 1
+      Data "C#3", "D", 4, 3, 2
+      Data "D3", "C", 5, 3, 1
+      Data "D#3", "F", 6, 4, 2
+      Data "E3", "V", 7, 4, 1
+      Data "F3", "B", 8, 5, 1
+      Data "F#3", "H", 9, 6, 2
+      Data "G3", "N", 10, 6, 1
+      Data "G#3", "J", 11, 7, 2
+      Data "A3", "M", 12, 7, 1
+      Data "A#3", "K", 13, 8, 2
+      Data "B3", ",", 14, 8, 1
+      Data "C4", ".", 15, 9, 1
+      Data "C#4",";", 16 , 10, 2
+      Data "D4", "/", 17, 10, 1 
+      While Not Empty {
+      Read n$, k$, no, n, p
+            If p=1 Then {
+                note1$(n-1,0):= n$, k$, no  \\ feed a row
+            } else {
+                  note2$(n-1,0):= n$, k$, no
+            }
+      }
+}
+End Sub
+}
+MODULE AU {Declare form1 Form
+Declare combo1 combobox Form form1
+Declare text1 textbox Form form1
+With form1,"Title" As title$
+With combo1,"Edit", True,"UseOnlyTheList", false,"autocomplete", True, "listIndex" As ListIndex,"ShowAlways", True
+With combo1,"label","Combo1", "ListText" As item$, "list" As list$(), "text" As combo1$
+item$={alfa
+            delta
+            gamma
+            beta
+            }
+With combo1,"Find" As Find()
+Method combo1,"Sort"
+combo1$=list$(find("gam*"))
+
+Method combo1,"Move", 1000,1000,6000,600
+Method text1, "Move", 1000,2900,6000,600
+
+With text1, "left" As left, "text" As text1.text$ , "ShowAlways", True
+Print left
+Method form1, "show"
+Method text1,"GetFocus"
+Function form1.unload {
+      Keyboard "!"
+      show
+}
+Function combo1.dblclick {
+        text1.text$=combo1$
+        title$=combo1$
+        If find(title$)= -1 Then {
+            Method combo1,"additem",title$
+            Method combo1,"Sort"
+            listindex=find(title$)
+      }
+}
+Function combo1.click {
+      If listindex>=0 Then text1.text$=list$(listindex)
+}
+Function combo1.scroll {
+      If listindex>=0 Then text1.text$=list$(listindex)
+}
+a$=key$
+Declare Text1 nothing
+Declare combo1 nothing
+Declare form1 nothing
 }
 INFO

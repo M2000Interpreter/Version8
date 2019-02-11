@@ -540,7 +540,7 @@ If AllowSameKey Then Exit Function
     Do
             If PriveSpace(k).Key = Key Then
                 PriveSpace(k).Key = NewKey
-                PriveSpace(k).firsthash = HashFunc0(NewKey)
+                PriveSpace(k).firsthash = HD(NewKey)
                 ReDim Hash(MaxSpace * 2 + 3)
                 hashlen = MaxSpace * 2 + 3
                 ReHash
@@ -842,7 +842,7 @@ End Function
 Private Sub ItemCreator(Key As String, nValue As Variant)
 Dim a As Long, kk As Long
 Done = False
-kk = HashFunc0(Key)
+kk = HD(Key)
 If Not AllowSameKey Then If ExistKey2(Key, kk) Then Exit Sub  ' done is false
 a = Malloc()
 With PriveSpace(a)
@@ -873,48 +873,16 @@ Private Sub place(ByVal b, ByVal a)
     End If
     PriveSpace(a).lastpos = b
 End Sub
-Public Function HashFunc0(a$) As Long
-  Dim i&, p2 As Long, p1 As Integer, p4 As Long
-  p4 = Len(a$) * 2
-  p2 = StrPtr(a$): p4 = p2 + p4 - 2
-  For i = p4 To p2 Step -1
-    GetMem2 i, p1
-    HashFunc0 = HashFunc0 Xor p1
-  Next i
-  If HashFunc0 = 0 Then HashFunc0 = 1
-End Function
 Private Function HashFunc2(where As Long)
-HashFunc2 = MyMod(uintnew(PriveSpace(where).firsthash Or &HAFFAFF7) + Len(PriveSpace(where).Key) + hashlen + 1, hashlen)
+HashFunc2 = PriveSpace(where).firsthash Mod hashlen
 End Function
 Private Function HashFunc1(nkey As Long, a$)
-HashFunc1 = MyMod(uintnew(nkey Or &HAFFAFF7) + Len(a$) + hashlen + 1, hashlen)
+HashFunc1 = nkey Mod hashlen
 End Function
 Private Function HashFunc(a$)
-HashFunc = MyMod(uintnew(HashFunc0(a$) Or &HAFFAFF7) + Len(a$) + hashlen + 1, hashlen)
+HashFunc = HD(a$) Mod hashlen
 End Function
-Private Function UINT(ByVal a As Integer) As Long
- Dim b As Integer
- b = a And &HFFFF
- If b < 0 Then
- UINT = CLng(&H10000 + b)
- Else
- UINT = CLng(b)
- End If
- 
- End Function
 
-Private Function MyMod(r1, po) As Variant
-MyMod = r1 - Fix(r1 / po) * po
-End Function
-Private Function uintnew(ByVal a As Currency) As Currency
-If a > 2147483647@ Then a = 2147483647@
-If a < -2147483648@ Then a = -2147483648@
-If a < 0 Then
-uintnew = 4294967296@ + a
-Else
-uintnew = a
-End If
-End Function
 
 Private Sub SwapVariant(ByRef a As Variant, ByRef b As Variant)
    Dim t(0 To 3) As Long ' 4 Longs * 4 bytes each = 16 bytes

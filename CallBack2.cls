@@ -31,7 +31,7 @@ If Forms.count = 0 Then Exit Property
 If RHS Then
 Form1.Visible = True
 Form1.WindowState = 0
-If Form1.Top >= VirtualScreenHeight Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
+If Form1.top >= VirtualScreenHeight Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
 Else
 If Form1.WindowState = 0 Then
 If Not (QRY Or GFQRY Or Forms.count > 5) Then Form1.Visible = False
@@ -110,12 +110,12 @@ Else
         On Error Resume Next
         If mName$ <> "" Then
             mObjRef.Run mName$ + "_ErrorAtt", what
-            If Err Then Err.Clear: mObjRef.Run mName$ + ":ErrorAtt", what
+            If Err Then Err.clear: mObjRef.Run mName$ + ":ErrorAtt", what
             
         Else
             mObjRef.Run "ErrorAtt", what
         End If
-        Err.Clear
+        Err.clear
         If what = True Then
             Reset
         Else
@@ -142,12 +142,12 @@ If Not GetSubFullName2(myUcase(modulename$, True), full$, where) Then
         On Error Resume Next
         If mName$ <> "" Then
             mObjRef.Run mName$ + "_ErrorAtt", what
-            If Err Then Err.Clear: mObjRef.Run mName$ + ":ErrorAtt", what
+            If Err Then Err.clear: mObjRef.Run mName$ + ":ErrorAtt", what
             
         Else
             mObjRef.Run "ErrorAtt", what
         End If
-        Err.Clear
+        Err.clear
         If what = True Then
             Reset
         Else
@@ -209,7 +209,7 @@ If IhaveSignature Then
 look = IsLabelOnly(sign$, dummy$)
 If look = 2 Then ' byref
 look = IsLabelOnly(sign$, dummy$)
-look = globalvar("b" + CStr(var2used) + "." + dummy$, True) ' perhaps this is a fault, why is true??
+look = globalvarGroup("b" + CStr(var2used) + "." + dummy$, True) ' perhaps this is a fault, why is true??
 ElseIf look > 4 Then
 FastSymbol sign, ")", True
 mS.DataObj ar
@@ -250,12 +250,12 @@ If probe <> 1 Then
         On Error Resume Next
         If mName$ <> "" Then
             mObjRef.Run mName$ + "_ErrorAtt", what
-            If Err Then Err.Clear: mObjRef.Run mName$ + ":ErrorAtt", what
+            If Err Then Err.clear: mObjRef.Run mName$ + ":ErrorAtt", what
             
         Else
             mObjRef.Run "ErrorAtt", what
         End If
-        Err.Clear
+        Err.clear
         If what = True Then
             Reset
         Else
@@ -376,12 +376,12 @@ If mObjRef Is Nothing Then
         On Error Resume Next
         If mName$ <> "" Then
             mObjRef.Run mName$ + "_ErrorAtt", stay
-            If Err Then Err.Clear: mObjRef.Run mName$ + ":ErrorAtt", stay
+            If Err Then Err.clear: mObjRef.Run mName$ + ":ErrorAtt", stay
             
         Else
             mObjRef.Run "ErrorAtt", stay
         End If
-        Err.Clear
+        Err.clear
         If stay = True Then
             Reset
         Else

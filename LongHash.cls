@@ -65,8 +65,8 @@ Private Function Malloc() As Long
         toplim = toplim + 1
         Malloc = toplim
 End Function
-Property Get Count()
-Count = toplim + 1
+Property Get count()
+count = toplim + 1
 End Property
 Private Function Find(Key As Long) As Boolean
 Dim k As Long
@@ -121,7 +121,7 @@ End Sub
 Private Sub ItemCreator(Key As Long, storethis As String, andthis As String)
 Dim a As Long, first As Long
 Done = False
-first = HashFunc0(Key)
+first = HD(Key)
 a = Malloc()
 With PriveSpace(a)
     .Key = Key
@@ -133,7 +133,7 @@ End With
 End Sub
 Public Sub ItemCreator2(Key As Long, storethis As String)
 Dim first As Long
-first = HashFunc0(Key)
+first = HD(Key)
 index = Malloc()
 With PriveSpace(index)
     .Key = Key
@@ -152,31 +152,19 @@ Private Sub place(ByVal b, ByVal a)
     End If
     PriveSpace(a).lastpos = b
 End Sub
-
 Private Function HashFunc2(where As Long)
-HashFunc2 = MyMod(uintnew(PriveSpace(where).firsthash Or &HAFFAFF7 + 5 + hashlen), hashlen)
+HashFunc2 = PriveSpace(where).firsthash Mod hashlen
 End Function
-Public Function HashFunc0(ByVal v As Long) As Long
-       If v = 0 Then v = 1 Else HashFunc0 = v
+Public Function HD(ByVal v As Long) As Long
+       If v = 0 Then v = 1 Else HD = v
 End Function
 Private Function HashFunc1(readyhash)
-HashFunc1 = MyMod(uintnew(readyhash Or &HAFFAFF7 + 5 + hashlen), hashlen)
+HashFunc1 = readyhash Mod hashlen
 End Function
 Private Function HashFunc(a As Long)
-HashFunc = MyMod(uintnew(HashFunc0(a) Or &HAFFAFF7 + 5 + hashlen), hashlen)
+HashFunc = HD(a) Mod hashlen
 End Function
-Private Function MyMod(r1, po) As Variant
-MyMod = r1 - Fix(r1 / po) * po
-End Function
-Private Function uintnew(ByVal a As Currency) As Currency
-If a > 2147483647@ Then a = 2147483647@
-If a < -2147483648@ Then a = -2147483648@
-If a < 0 Then
-uintnew = 4294967296@ + a
-Else
-uintnew = a
-End If
-End Function
+
 Property Get Value() As String
 If index = -1 Then
 Else

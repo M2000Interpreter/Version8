@@ -859,7 +859,7 @@ ElseIf curitem < 0 Then
 'item = GroupRef.objref.Value
 'End If
 'Else
-If GroupRef.t1 <> 1 Then Stop
+If GroupRef.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
 If GroupRef.objref.Done Then
     If GroupRef.objref.IsObj Then
         Set item = GroupRef.objref.ValueObj

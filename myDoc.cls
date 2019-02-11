@@ -2544,12 +2544,12 @@ End Function
 Private Function CountWords2(a$, uLCID As Long) As Long
 Dim l As Long
 Const NORM_IGNORECASE = &H1001
-Dim Top As Long
+Dim top As Long
 l = Len(a$)
 If l = 1 Then
 CountWords2 = -(Trim(a$) <> "")
-Top = CountWords2
-If Top > 0 Then
+top = CountWords2
+If top > 0 Then
 ReDim pos(1 To 1) As Long, slen(1 To 1) As Long, hit(1 To 1) As Long
 pos(1) = StrPtr(a$)
 slen(1) = 1
@@ -2568,7 +2568,7 @@ p4 = p2
 Do
          If p4 >= l Then
          If p4 <> p2 Then GoTo there1
-        CountWords2 = Top: Exit Function
+        CountWords2 = top: Exit Function
         End If
             GetMem2 p4, bb
             Select Case bb
@@ -2579,7 +2579,7 @@ Do
             If p4 <> p2 Then
 there1:
                 k = (p4 - p2) \ 2
-                mtop = Top
+                mtop = top
                 mda = 0
                 md = (mtop - mda + 1) \ 2
                 p6 = mda + md
@@ -2598,19 +2598,19 @@ there1:
                     p6 = mda + md
                 Loop
                 If md = 0 Then
-                If Top = p5 Then
+                If top = p5 Then
                 p5 = p5 * 2
                 ReDim Preserve pos(1 To p5) As Long, slen(1 To p5) As Long, hit(1 To p5) As Long
                 End If
-                    Top = Top + 1
+                    top = top + 1
                     
-                    If mda = Top - 1 Then
-                        pos(Top) = p2
-                        slen(Top) = k
+                    If mda = top - 1 Then
+                        pos(top) = p2
+                        slen(top) = k
                     Else
-                        CopyMemory ByVal VarPtr(pos(1)) + mda * 4 + 4, ByVal VarPtr(pos(1)) + mda * 4, (Top - mda - 1) * 4
-                        CopyMemory ByVal VarPtr(slen(1)) + mda * 4 + 4, ByVal VarPtr(slen(1)) + mda * 4, (Top - mda - 1) * 4
-                        CopyMemory ByVal VarPtr(hit(1)) + mda * 4 + 4, ByVal VarPtr(hit(1)) + mda * 4, (Top - mda - 1) * 4
+                        CopyMemory ByVal VarPtr(pos(1)) + mda * 4 + 4, ByVal VarPtr(pos(1)) + mda * 4, (top - mda - 1) * 4
+                        CopyMemory ByVal VarPtr(slen(1)) + mda * 4 + 4, ByVal VarPtr(slen(1)) + mda * 4, (top - mda - 1) * 4
+                        CopyMemory ByVal VarPtr(hit(1)) + mda * 4 + 4, ByVal VarPtr(hit(1)) + mda * 4, (top - mda - 1) * 4
                         pos(mda + 1) = p2
                         slen(mda + 1) = k
                         hit(mda + 1) = 0
@@ -2621,7 +2621,7 @@ there1:
             End Select
             p4 = p4 + 2
   Loop
-CountWords2 = Top
+CountWords2 = top
 End If
 End Function
 Private Function MakeString(copythat As Long, ByVal lSize As Long) As String
@@ -2953,14 +2953,14 @@ PutMem2 VarPtr(acc), mValue
 RangeUnsignInteger = acc >= Abs(mFrom) And acc <= Abs(mTo)
 End Function
 Function FindWord(Find$, Direction As Boolean, there As Long, cur As Long) As Boolean
-Dim oncemore As Boolean, Result As Boolean, res$, code As Integer
+Dim oncemore As Boolean, result As Boolean, res$, code As Integer
 again:
 If Direction Then
- Result = FindStrDown(Find$, there, cur)
+ result = FindStrDown(Find$, there, cur)
  Else
- Result = FindStrUp(Find$, there, cur)
+ result = FindStrUp(Find$, there, cur)
  End If
-If Result Then
+If result Then
 res$ = TextParagraph(there)
 If cur > 1 Then
     code = AscW(Mid$(res$, cur - 1, 1))
@@ -2987,11 +2987,11 @@ If (Len(res$) - cur + 1) > Len(Find$) Then
                 If there > 0 Then
                     cur = TextParagraphLen(there)
                 Else
-                    Result = False
+                    result = False
                 Exit Function
             End If
         Else
-        cur = cur + 1
+        cur = cur + Len(Find$)
         End If
     End If
     GoTo again
@@ -3017,17 +3017,17 @@ End Function
 
 Function FindIdentifier(Find$, Direction As Boolean, there As Long, cur As Long) As Boolean
 ' there is paragraph number not paragraph order
-Dim oncemore As Boolean, Result As Boolean, res$
+Dim oncemore As Boolean, result As Boolean, res$
 If Len(Find$) > 1 And Left$(Find$, 1) = "&" Then Find$ = Mid$(Find$, 2): cur = cur + 1
 If InStr(Find$, Chr$(13)) > 0 Then Exit Function
 If InStr(Find$, Chr$(10)) > 0 Then Exit Function
 again:
 If Direction Then
- Result = FindStrDown(Find$, there, cur)
+ result = FindStrDown(Find$, there, cur)
  Else
- Result = FindStrUp(Find$, there, cur)
+ result = FindStrUp(Find$, there, cur)
  End If
-If Result Then
+If result Then
 res$ = TextParagraph(there)
 If cur > 1 Then
     Select Case AscW(Mid$(res$, cur - 1, 1))
@@ -3048,16 +3048,16 @@ If (Len(res$) - cur + 1) > Len(Find$) Then
     If Direction Then
     cur = cur + 1
     Else
-        If cur <= 0 Then
+        If cur <= Len(Find$) Then
             there = DocParaBack(there)
                 If there > 0 Then
                     cur = TextParagraphLen(there)
                 Else
-                    Result = False
+                    result = False
                 Exit Function
             End If
         Else
-        cur = cur + 1
+        cur = cur + Len(Find$)
         End If
     End If
     GoTo again

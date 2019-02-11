@@ -31,6 +31,12 @@ Dim toplim As Long
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Private index As Long
 Private Hash() As Long
+Public Sub BigSize(n As Long)
+    MaxSpace = n
+    ReDim PriveSpace(MaxSpace) As item, Hash(MaxSpace * 2 + 3)
+    hashlen = MaxSpace * 2 + 3
+    toplim = -1
+End Sub
 Private Sub Class_Initialize()
     MaxSpace = 10
     ReDim PriveSpace(MaxSpace) As item, Hash(MaxSpace * 2 + 3)
@@ -60,10 +66,11 @@ Private Sub ExpandHash()
     place HashFunc2(i), i
     Next i
 End Sub
+
+
 Friend Sub ReduceHash(newTop As Long, v())
     Dim i As Long
-    
-    For i = toplim To newTop Step -1
+     For i = toplim To newTop Step -1
        With PriveSpace(i)
         
     
@@ -89,6 +96,8 @@ Friend Sub ReduceHash(newTop As Long, v())
         End With
 
     Next i
+    If MaxSpace >= 6000 Then
+    
     If MaxSpace - newTop + 1 > 2 * newTop + 2 Then
         MaxSpace = 2 * (newTop + 1) + 1
         ReDim Preserve PriveSpace(MaxSpace) As item
@@ -100,7 +109,9 @@ Friend Sub ReduceHash(newTop As Long, v())
     For i = 0 To toplim
         place HashFunc2(i), i
     Next i
-
+    Else
+     toplim = newTop - 1
+    End If
 Else
  toplim = newTop - 1
     End If
@@ -212,13 +223,28 @@ a = Malloc()
 On Error GoTo exxx
 place HashFunc(Key), a
 With PriveSpace(a)
-  '  .Key = Key
     .ndx = num
     .KeyType = CByte(Abs(isref))
     .originaltype = CByte(deftype)
     .globalvar = CByte(isglobal)
-    .firsthash = HashFunc0(Key)
+    .firsthash = HD(Key)
      SwapStrings .Key, Key
+End With
+
+exxx:
+End Sub
+Friend Sub ItemCreator2(Id As idHash, Key As String, num As Long, Optional isref As Boolean = False, Optional isglobal As Boolean = False, Optional deftype As Boolean = False)
+Dim a As Long
+a = Malloc()
+On Error GoTo exxx
+place Id.lastHashFunc0 Mod hashlen, a
+With PriveSpace(a)
+    .ndx = num
+    .KeyType = CByte(Abs(isref))
+    .originaltype = CByte(deftype)
+    .globalvar = CByte(isglobal)
+    .firsthash = HD(Key)
+     .Key = Key
 End With
 
 exxx:
@@ -235,55 +261,17 @@ Private Sub place(ByVal b, ByVal a)
     End If
     PriveSpace(a).lastpos = b
 End Sub
-Private Sub ab(ByVal a As Long, b As Long)
-b = (b + a + 1024 * a) Xor &H83F3CF
-End Sub
-Public Function HashFunc0(a$) As Long
-Dim i&, p2 As Long, p1 As Integer, p4 As Long, k As Long, p3 As Long
-  p4 = Len(a$) * 2 '- 2
-  p2 = StrPtr(a$): p4 = p2 + p4 - 2
-   For i = p4 To p4 - 4 Step -2
-  GetMem2 i, p1
-  p3 = UINT(p1)
-  HashFunc0 = (HashFunc0 + p3 + 1024& * p3) Xor &H83F3CF
-  Next i
-  k = 2
-  For i = p4 - 6 To p2 Step -2
-  GetMem2 i, p1
-  p3 = UINT(p1)
-  HashFunc0 = (HashFunc0 + p3 + 1024& * p3) Xor &H83F3CF
- i = i - 2 * k
-  k = k + 1
-  Next i
- 
-End Function
-Private Function UINT(ByVal a As Integer) As Long 'δίνει έναν integer σαν Unsigned integer σε long
- Dim b As Integer
- b = a And &HFFFF
- If b < 0 Then
- UINT = CLng(&H10000 + b)
- Else
- UINT = CLng(b)
- End If
- 
- End Function
+
 Private Function HashFunc2(where As Long)
-HashFunc2 = MyMod(uintnew(PriveSpace(where).firsthash Or &HAFFAFF7 + Len(PriveSpace(where).Key) + hashlen + 1), hashlen)
+HashFunc2 = PriveSpace(where).firsthash Mod hashlen
 End Function
 
 Private Function HashFunc(a$)
-HashFunc = MyMod(uintnew(HashFunc0(a$) Or &HAFFAFF7 + Len(a$) + hashlen + 1), hashlen)
+HashFunc = HD(a$) Mod hashlen
+'Debug.Print HashFunc, hashlen, a$
 End Function
-Private Function MyMod(r1, po) As Variant
-MyMod = r1 - Fix(r1 / po) * po
-End Function
-Private Function uintnew(ByVal a As Currency) As Currency
-If a > 2147483647@ Then a = 2147483647@
-If a < -2147483648@ Then a = -2147483648@
-If a < 0 Then
-uintnew = 4294967296@ + a
-Else
-uintnew = a
-End If
-End Function
+
+
+
+
 

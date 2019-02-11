@@ -1,5 +1,6 @@
 Attribute VB_Name = "PicHandler"
 Option Explicit
+Private Declare Function HashData Lib "shlwapi" (ByVal straddr As Long, ByVal bytesize As Long, ByVal res As Long, ByVal ressize As Long) As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Any)
 Public fonttest As PictureBox
 Private Declare Function GetTextMetrics Lib "gdi32" _
@@ -2516,7 +2517,7 @@ End If
     MsgBoxN = 1
     End If
 End Function
-Public Function InputBoxN(a$, b$, vv$) As String
+Public Function InputBoxN(a$, b$, vv$, thisresp As Double) As String
 Dim resp As Double
 If ASKINUSE Then
 
@@ -2533,6 +2534,7 @@ End If
     resp = Form3.NeoASK(basestack1)
         If resp = 1 Then InputBoxN = basestack1.soros.PopStr
           AskInput = False
+          thisresp = resp
 End Function
 Public Function ask(a$, Optional retry As Boolean = False) As Double
 'If Form3.Visible Then
@@ -4443,3 +4445,9 @@ For i = 0 To UBound(zones) - 1 Step 2
 zHash.AddKey zones(i), zones(i + 1)
 Next i
 End Sub
+Public Function HD(a$) As Long
+Dim ret As Long
+ret = HashData(StrPtr(a$), LenB(a$), VarPtr(HD), 4)
+HD = HD And &H7FFFFFFF
+If HD = 0 Then HD = 1
+End Function
