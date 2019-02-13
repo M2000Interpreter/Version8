@@ -738,7 +738,7 @@ End Sub
 
 Public Sub rthissub(Optional anystr As Boolean = False)
 If TEXT1.mDoc.busy Then Exit Sub
-Dim l As Long, w As Long, s$, TempLcid As Long, OldLcid As Long
+Dim l As Long, w As Long, s$, TempLcid As Long, OldLcid As Long, noinp As Double
 Dim el As Long, eW As Long, safety As Long, TT$, w1 As Long, i1 As Long
 Dim neo$, mDoc10 As Document, addthat As Long, w2 As Long
 w = TEXT1.mDoc.MarkParagraphID
@@ -750,11 +750,11 @@ TEXT1.SelStartSilent = TEXT1.SelStart
 el = TEXT1.Charpos  ' charpos maybe is in the start or the end of block
 
 If pagio$ = "GREEK" Then
-neo$ = InputBoxN("Αλλαγή Λέξης (Shift για σταμάτημα)", "Συγγραφή Κειμένου", s$)
+neo$ = InputBoxN("Αλλαγή Λέξης (Shift για σταμάτημα)", "Συγγραφή Κειμένου", s$, noinp)
 Else
-neo$ = InputBoxN("Replace Word (use Shift for Stop)", "Text Editor", s$)
+neo$ = InputBoxN("Replace Word (use Shift for Stop)", "Text Editor", s$, noinp)
 End If
-'If neo$ = vbNullString Then Exit Sub
+If noinp <> 1 Then Exit Sub
 OldLcid = TEXT1.mDoc.lcid
 TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then TEXT1.mDoc.lcid = TempLcid
@@ -2019,7 +2019,7 @@ End Sub
 
 
 Private Sub gList1_KeyDown(KeyCode As Integer, shift As Integer)
-Static ctrl As Boolean, noentrance As Boolean, where As Long
+Static ctrl As Boolean, noentrance As Boolean, where As Long, noinp As Double
 
 Dim aa$, a$, JJ As Long, ii As Long, gothere As Long
 If KeyCode = vbKeyEscape Then
@@ -2153,11 +2153,11 @@ Case vbKeyF2
 If shift <> 0 Then
 If s$ = vbNullString And TEXT1.SelText <> "" Then s$ = TEXT1.SelText
 If pagio$ = "GREEK" Then
-s$ = InputBoxN("Αναζήτησε προς τα πάνω:", "Συγγραφή Κειμένου", s$)
+s$ = InputBoxN("Αναζήτησε προς τα πάνω:", "Συγγραφή Κειμένου", s$, noinp)
 Else
-s$ = InputBoxN("Search to top:", "Text Editor", s$)
+s$ = InputBoxN("Search to top:", "Text Editor", s$, noinp)
 End If
-If s$ <> "" Then Searchup s$, shift Mod 2 = 1
+If MyTrim$(s$) <> "" And noinp = 1 Then Searchup s$, shift Mod 2 = 1
 shift = 0
 ElseIf TEXT1.SelText <> "" Or s$ <> "" Then
 supsub
@@ -2169,11 +2169,11 @@ If shift <> 0 Then
 If s$ = vbNullString And TEXT1.SelText <> "" Then s$ = TEXT1.SelText
 If pagio$ = "GREEK" Then
 
-s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$)
+s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$, noinp)
 Else
-s$ = InputBoxN("Search to down:", "Text Editor", s$)
+s$ = InputBoxN("Search to down:", "Text Editor", s$, noinp)
 End If
-If s$ <> "" Then SearchDown s$, shift Mod 2 = 1
+If MyTrim$(s$) <> "" And noinp = 1 Then SearchDown s$, shift Mod 2 = 1
 shift = 0
 ElseIf TEXT1.SelText <> "" Or s$ <> "" Then
 
