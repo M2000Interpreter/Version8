@@ -65,7 +65,6 @@ Public Sub GetForm(F As Object)
 
 Set ExtForm = F
 'If F Is Nothing Then Exit Sub
-
 End Sub
 Public Sub StackMax(stack As Long)
 If IsWine Then
@@ -229,7 +228,7 @@ If Forms.count = 0 Then Exit Property
 If RHS Then
 Form1.Visible = True
 Form1.WindowState = 0
-If Form1.Top >= VirtualScreenHeight Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).Top
+If Form1.top >= VirtualScreenHeight Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
 Else
 If Form1.WindowState = 0 Then
 If Not (QRY Or GFQRY Or Forms.count > 5) Then Form1.Visible = False

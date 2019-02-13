@@ -75,7 +75,7 @@ Private Declare Sub CopyMemoryStr Lib "KERNEL32" Alias "RtlMoveMemory" ( _
 
 Private Declare Function SetWindowLong Lib "user32" _
     Alias "SetWindowLongA" _
-   (ByVal hWND As Long, _
+   (ByVal hWnd As Long, _
     ByVal nIndex As Long, _
     ByVal dwNewLong As Long) As Long
 Public Const GWL_STYLE = (-16)
@@ -100,16 +100,16 @@ Private Const EM_EMPTYUNDOBUFFER = &HCD
 Private Const EM_UNDO = WM_USER + 23
 Public defWndProc As Long
 Private Declare Function SetLayeredWindowAttributes Lib "user32" ( _
-                ByVal hWND As Long, _
+                ByVal hWnd As Long, _
                 ByVal crKey As Long, _
                 ByVal bAlpha As Byte, _
                 ByVal dwFlags As Long) As Long
                 
 Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" ( _
-                ByVal hWND As Long, _
+                ByVal hWnd As Long, _
                 ByVal nIndex As Long) As Long
 Private Declare Function SendMessageAsLong Lib "user32" _
-       Alias "SendMessageA" (ByVal hWND As Long, ByVal wMsg As Long, _
+       Alias "SendMessageA" (ByVal hWnd As Long, ByVal wMsg As Long, _
        ByVal wParam As Long, ByVal lParam As Long) As Long
 Private Const SND_APPLICATION = &H80 ' look for application specific association
 Private Const SND_ALIAS = &H10000 ' name is a WIN.INI [sounds] entry
@@ -130,7 +130,7 @@ Declare Function GetShortPathName Lib "KERNEL32" Alias _
 ByVal lpszShortPath As Long, ByVal cchBuffer As Long) As Long
 
 Private Type SHFILEOPSTRUCT
-    hWND As Long
+    hWnd As Long
     wFunc As Long
     pFrom As String
     pTo As String
@@ -141,7 +141,7 @@ Private Type SHFILEOPSTRUCT
 End Type
 
 Private Type SHFILEOPSTRUCTW
-    hWND As Long
+    hWnd As Long
     wFunc As Long
     pFrom As Long 'String
     pTo As Long 'String
@@ -264,7 +264,7 @@ Public Function FormatTimeWithLocale(ByRef the_sFormat As String, the_datTime As
     If VariantTimeToSystemTime(the_datTime, uSystemTime) = 1 Then
         nBufferSize = getTimeFormat(the_nLocale, 0&, uSystemTime, StrPtr(the_sFormat), 0&, 0&)
         If nBufferSize > 0 Then
-            FormatTimeWithLocale = Space$(nBufferSize - 1)
+            FormatTimeWithLocale = space$(nBufferSize - 1)
             getTimeFormat the_nLocale, 0&, uSystemTime, StrPtr(the_sFormat), StrPtr(FormatTimeWithLocale), nBufferSize
         End If
 
@@ -281,7 +281,7 @@ Public Function FormatDateWithLocale(ByRef the_sFormat As String, the_datDate As
     If VariantTimeToSystemTime(the_datDate, uSystemTime) = 1 Then
         nBufferSize = GetDateFormat(the_nLocale, 0&, uSystemTime, StrPtr(the_sFormat), 0&, 0&)
         If nBufferSize > 0 Then
-            FormatDateWithLocale = Space$(nBufferSize - 1)
+            FormatDateWithLocale = space$(nBufferSize - 1)
             GetDateFormat the_nLocale, 0&, uSystemTime, StrPtr(the_sFormat), StrPtr(FormatDateWithLocale), nBufferSize
         End If
 
@@ -382,7 +382,7 @@ Dim noValidcharList
 noValidcharList = "*?\<>:/|" + Chr$(34)
 Dim a$, i As Long, ddt As Boolean, j As Long
 If Len(sStr) > 0 Then
-a$ = Space$(Len(sStr))
+a$ = space$(Len(sStr))
 j = 1
 For i = 1 To Len(sStr)
 If InStr(noValidcharList, Mid$(sStr, i, 1)) = 0 Then
@@ -549,12 +549,12 @@ End Sub
        
 Public Sub SetTrans(oForm As Form, Optional bytAlpha As Byte = 255, Optional lColor As Long = 0, Optional TRMODE As Boolean = False)
     Dim lStyle As Long
-    lStyle = GetWindowLong(oForm.hWND, GWL_EXSTYLE)
+    lStyle = GetWindowLong(oForm.hWnd, GWL_EXSTYLE)
     If Not (lStyle And WS_EX_LAYERED) = WS_EX_LAYERED Then _
-        SetWindowLong oForm.hWND, GWL_EXSTYLE, lStyle Or WS_EX_LAYERED
+        SetWindowLong oForm.hWnd, GWL_EXSTYLE, lStyle Or WS_EX_LAYERED
        
-    SetLayeredWindowAttributes oForm.hWND, lColor, bytAlpha, IIf(TRMODE, LWA_COLORKEY Or LWA_Defaut, LWA_Defaut)
-    UpdateWindow oForm.hWND
+    SetLayeredWindowAttributes oForm.hWnd, lColor, bytAlpha, IIf(TRMODE, LWA_COLORKEY Or LWA_Defaut, LWA_Defaut)
+    UpdateWindow oForm.hWnd
 End Sub
 
 
@@ -987,12 +987,20 @@ Static once
 If once Then Exit Sub
 once = True
 UseMe.StopTimer
+If InitOk = 0 Then
+myToken = InitGDIPlus()
+InitOk = 1
+End If
 backhere:
 UseMe.CliRun
 If UseMe Is Nothing Then Exit Sub
 UseMe.Shutdown Cancel
 If Cancel Then GoTo backhere
 Set UseMe = Nothing
+If InitOk > 0 Then
+InitOk = 0
+FreeGDIPlus myToken
+End If
 once = False
 End Sub
 

@@ -83,7 +83,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 17
+Global Const Revision = 18
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -4686,7 +4686,7 @@ num42: ' "FIELD", "ΠΕΔΙΟ"
     Exit Function
 num43: ' "MOUSE.KEY", "ΔΕΙΚΤΗΣ.ΚΟΜ"
   
-    r = SG * mouse
+    r = SG * mouse2
 
 
        
@@ -30567,7 +30567,7 @@ cont1:
                         If Not FastSymbol(rest$, ")", True) Then ProcImage = False: Exit Function
                     End If
                     Set photo = New cDIBSection
-                    If Not ihavepic Or aPic Is Nothing Then
+                    If Not (ihavepic Or Not aPic Is Nothing) Then
                         s$ = CFname(s$)
                         Set aPic = LoadMyPicture(s$, usecolorback, mycolor(p))
                     End If
@@ -30630,7 +30630,7 @@ cont1:
                         If Not FastSymbol(rest$, ")", True) Then ProcImage = False: Exit Function
                     End If
                     Set photo = New cDIBSection
-                    If Not ihavepic Or aPic Is Nothing Then
+                    If Not (ihavepic Or Not aPic Is Nothing) Then
                         s$ = CFname(s$)
                         Set aPic = LoadMyPicture(s$, usecolorback, mycolor(p))
                     End If
@@ -30685,7 +30685,7 @@ cont1:
         If IsStrExp(bstack, rest$, w$) Then
             If Not CanKillFile(w$) Then FilePathNotForUser:  Exit Function
             Set photo = New cDIBSection
-            If Not ihavepic And Not aPic Is Nothing Then
+            If Not (ihavepic Or Not aPic Is Nothing) Then
                  MyEr "No found Image in String or Buffer", "Δεν βρήκα εικόνα σε αλφαριθμητικό ή σε διάρθρωση μνήμης"
                  ProcImage = False
                  Exit Function
@@ -38939,9 +38939,13 @@ ElseIf y1 < 5 And y1 > 0 Then
             MyClear = False
             Exit Function
         End If
-
+            If var(i).objref.IsQueue Then
+            Set var(i) = Nothing
+            MakeitObjectInventory var(i), True
+            Else
             Set var(i) = Nothing
             MakeitObjectInventory var(i)
+            End If
            
        ElseIf var(i).t1 = 2 Then
        
@@ -38958,6 +38962,10 @@ ElseIf y1 < 5 And y1 > 0 Then
        If Typename$(var(i).objref) = myArray Then
        With var(i)
         Set .objref = New mArray
+       End With
+       ElseIf Typename$(var(i).objref) = "mStiva" Then
+       With var(i)
+        Set .objref = New mStiva
        End With
        End If
        End If

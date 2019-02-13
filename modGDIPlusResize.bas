@@ -11,8 +11,8 @@ End Type
 Private Type PICTDESC
    Size     As Long
    Type     As Long
-   hBmp     As Long
-   hpal     As Long
+   hbmp     As Long
+   hPal     As Long
    reserved As Long
 End Type
 
@@ -31,7 +31,7 @@ End Type
 
 Private Type PWMFRect16
     Left   As Integer
-    Top    As Integer
+    top    As Integer
     Right  As Integer
     Bottom As Integer
 End Type
@@ -63,56 +63,56 @@ Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As Long) As Long
 
 ' GDI+ functions
 Private Declare Function GdipSetSmoothingMode Lib "GdiPlus.dll" (ByVal mGraphics As Long, ByVal mSmoothingMode As Long) As Long
-Private Declare Function GdipTranslateWorldTransform Lib "gdiplus" (ByVal graphics As Long, ByVal dX As Single, ByVal dY As Single, ByVal order As Long) As Long
+Private Declare Function GdipTranslateWorldTransform Lib "gdiplus" (ByVal Graphics As Long, ByVal dX As Single, ByVal dY As Single, ByVal order As Long) As Long
 Private Declare Function GdipDisposeImageAttributes Lib "gdiplus" (ByVal imgAttr As Long) As Long
 Private Declare Function GdipCreateImageAttributes Lib "gdiplus" (ByRef imgAttr As Long) As Long
 Private Declare Function GdipSetImageAttributesColorMatrix Lib "gdiplus" (ByVal imgAttr As Long, ByVal clrAdjust As Long, ByVal clrAdjustEnabled As Long, ByRef clrMatrix As Any, ByRef grayMatrix As Any, ByVal clrMatrixFlags As Long) As Long
 Private Declare Function GdipSetImageAttributesColorKeys Lib "GdiPlus.dll" (ByVal mImageattr As Long, ByVal mType As Long, ByVal mEnableFlag As Long, ByVal mColorLow As Long, ByVal mColorHigh As Long) As Long
-Private Declare Function GdipSetPixelOffsetMode Lib "GdiPlus.dll" (ByVal graphics As Long, ByVal PixelOffsetMode As Long) As Long
-Private Declare Function GdipRotateWorldTransform Lib "GdiPlus.dll" (ByVal graphics As Long, ByVal angle As Single, ByVal order As Long) As Long
+Private Declare Function GdipSetPixelOffsetMode Lib "GdiPlus.dll" (ByVal Graphics As Long, ByVal PixelOffsetMode As Long) As Long
+Private Declare Function GdipRotateWorldTransform Lib "GdiPlus.dll" (ByVal Graphics As Long, ByVal angle As Single, ByVal order As Long) As Long
 Private Declare Function GdipLoadImageFromFile Lib "GdiPlus.dll" (ByVal FileName As Long, GpImage As Long) As Long
 Private Declare Function GdiplusStartup Lib "GdiPlus.dll" (Token As Long, gdipInput As GdiplusStartupInput, GdiplusStartupOutput As Long) As Long
 Private Declare Function GdipCreateFromHDC Lib "GdiPlus.dll" (ByVal hDC As Long, GpGraphics As Long) As Long
-Private Declare Function GdipSetInterpolationMode Lib "GdiPlus.dll" (ByVal graphics As Long, ByVal InterMode As Long) As Long
-Private Declare Function GdipDrawImageRectI Lib "GdiPlus.dll" (ByVal graphics As Long, ByVal Img As Long, ByVal x As Long, ByVal y As Long, ByVal Width As Long, ByVal Height As Long) As Long
-Private Declare Function GdipDrawImageRectRectI Lib "GdiPlus.dll" (ByVal graphics As Long, ByVal Img As Long, ByVal dstX As Long, ByVal dstY As Long, ByVal dstWidth As Long, ByVal dstHeight As Long, ByVal srcX As Long, ByVal srcY As Long, ByVal srcWidth As Long, ByVal srcHeight As Long, ByVal srcUnit As Long, Optional ByVal imageAttributes As Long = 0, Optional ByVal Callback As Long = 0, Optional ByVal callbackData As Long = 0) As Long
-Private Declare Function GdipDeleteGraphics Lib "GdiPlus.dll" (ByVal graphics As Long) As Long
+Private Declare Function GdipSetInterpolationMode Lib "GdiPlus.dll" (ByVal Graphics As Long, ByVal InterMode As Long) As Long
+Private Declare Function GdipDrawImageRectI Lib "GdiPlus.dll" (ByVal Graphics As Long, ByVal Img As Long, ByVal x As Long, ByVal y As Long, ByVal Width As Long, ByVal Height As Long) As Long
+Private Declare Function GdipDrawImageRectRectI Lib "GdiPlus.dll" (ByVal Graphics As Long, ByVal Img As Long, ByVal dstX As Long, ByVal dstY As Long, ByVal dstWidth As Long, ByVal dstHeight As Long, ByVal srcX As Long, ByVal srcY As Long, ByVal srcWidth As Long, ByVal srcHeight As Long, ByVal srcUnit As Long, Optional ByVal imageAttributes As Long = 0, Optional ByVal Callback As Long = 0, Optional ByVal callbackData As Long = 0) As Long
+Private Declare Function GdipDeleteGraphics Lib "GdiPlus.dll" (ByVal Graphics As Long) As Long
 Private Declare Function GdipDisposeImage Lib "GdiPlus.dll" (ByVal Image As Long) As Long
-Private Declare Function GdipCreateBitmapFromHBITMAP Lib "GdiPlus.dll" (ByVal hBmp As Long, ByVal hpal As Long, GpBitmap As Long) As Long
+Private Declare Function GdipCreateBitmapFromHBITMAP Lib "GdiPlus.dll" (ByVal hbmp As Long, ByVal hPal As Long, GpBitmap As Long) As Long
 Private Declare Function GdipGetImageWidth Lib "GdiPlus.dll" (ByVal Image As Long, Width As Long) As Long
 Private Declare Function GdipGetImageHeight Lib "GdiPlus.dll" (ByVal Image As Long, Height As Long) As Long
 Private Declare Function GdipCreateMetafileFromWmf Lib "GdiPlus.dll" (ByVal hWmf As Long, ByVal deleteWmf As Long, WmfHeader As wmfPlaceableFileHeader, Metafile As Long) As Long
 Private Declare Function GdipCreateMetafileFromEmf Lib "GdiPlus.dll" (ByVal hEmf As Long, ByVal deleteEmf As Long, Metafile As Long) As Long
 Private Declare Function GdipCreateBitmapFromHICON Lib "GdiPlus.dll" (ByVal hIcon As Long, GpBitmap As Long) As Long
 Private Declare Sub GdiplusShutdown Lib "GdiPlus.dll" (ByVal Token As Long)
-Private Declare Function GdipDrawLineI Lib "gdiplus" (ByVal graphics As Long, ByVal pen As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
+Private Declare Function GdipDrawLineI Lib "gdiplus" (ByVal Graphics As Long, ByVal pen As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
 Private Declare Function GdipCreateSolidFill Lib "GdiPlus.dll" (ByVal mColor As Long, ByRef mBrush As Long) As Long
 Private Declare Function GdipDeleteBrush Lib "GdiPlus.dll" (ByVal mBrush As Long) As Long
 Private Declare Function GdipDeletePen Lib "GdiPlus.dll" (ByVal mPen As Long) As Long
 Private Declare Function GdipCreatePen1 Lib "GdiPlus.dll" (ByVal mColor As Long, ByVal mWidth As Single, ByVal mUnit As Long, ByRef mPen As Long) As Long
 Private Declare Function GdipSetPenEndCap Lib "GdiPlus.dll" (ByVal mPen As Long, ByVal mCap As Long) As Long
 Private Declare Function GdipSetPenStartCap Lib "GdiPlus.dll" (ByVal mPen As Long, ByVal mCap As Long) As Long
-Private Declare Function GdipDrawLinesI Lib "gdiplus" (ByVal graphics As Long, ByVal pen As Long, ByRef pPoints As Any, ByVal count As Long) As Long
+Private Declare Function GdipDrawLinesI Lib "gdiplus" (ByVal Graphics As Long, ByVal pen As Long, ByRef pPoints As Any, ByVal count As Long) As Long
 Private Declare Function GdipSetPenLineJoin Lib "gdiplus" (ByVal pen As Long, ByVal lnJoin As Long) As Long
-Private Declare Function GdipFillPolygon2I Lib "gdiplus" (ByVal graphics As Long, ByVal Brush As Long, Points As Any, ByVal count As Long) As Long
+Private Declare Function GdipFillPolygon2I Lib "gdiplus" (ByVal Graphics As Long, ByVal Brush As Long, Points As Any, ByVal count As Long) As Long
 Private Declare Function GdipCreateHatchBrush Lib "GdiPlus.dll" (ByVal mHatchStyle As Long, ByVal mForecol As Long, ByVal mBackcol As Long, ByRef mBrush As Long) As Long
 Private Declare Function GdipSetPenDashStyle Lib "GdiPlus.dll" (ByVal mPen As Long, ByVal mDashStyle As Long) As Long
-Private Declare Function GdipDrawCurveI Lib "gdiplus" (ByVal graphics As Long, ByVal mPen As Long, Points As Any, ByVal count As Long) As Long
-Public Declare Function GdipDrawCurve2I Lib "gdiplus" (ByVal graphics As Long, ByVal mPen As Long, Points As Any, ByVal count As Long, ByVal tension As Single) As Long
-Private Declare Function GdipFillClosedCurveI Lib "gdiplus" (ByVal graphics As Long, ByVal Brush As Long, Points As Any, ByVal count As Long) As Long
-Private Declare Function GdipFillClosedCurve2I Lib "gdiplus" (ByVal graphics As Long, ByVal Brush As Long, Points As Any, ByVal count As Long, ByVal tension As Single, ByVal FillMd As Long) As Long
-Private Declare Function GdipDrawBeziersI Lib "gdiplus" (ByVal graphics As Long, ByVal pen As Long, Points As Any, ByVal count As Long) As Long
+Private Declare Function GdipDrawCurveI Lib "gdiplus" (ByVal Graphics As Long, ByVal mPen As Long, Points As Any, ByVal count As Long) As Long
+Public Declare Function GdipDrawCurve2I Lib "gdiplus" (ByVal Graphics As Long, ByVal mPen As Long, Points As Any, ByVal count As Long, ByVal tension As Single) As Long
+Private Declare Function GdipFillClosedCurveI Lib "gdiplus" (ByVal Graphics As Long, ByVal Brush As Long, Points As Any, ByVal count As Long) As Long
+Private Declare Function GdipFillClosedCurve2I Lib "gdiplus" (ByVal Graphics As Long, ByVal Brush As Long, Points As Any, ByVal count As Long, ByVal tension As Single, ByVal FillMd As Long) As Long
+Private Declare Function GdipDrawBeziersI Lib "gdiplus" (ByVal Graphics As Long, ByVal pen As Long, Points As Any, ByVal count As Long) As Long
 Private Declare Function GdipCreatePath Lib "gdiplus" (ByVal brushmode As Long, path As Long) As Long
 Private Declare Function GdipAddPathBeziersI Lib "gdiplus" (ByVal path As Long, Points As Any, ByVal count As Long) As Long
-Private Declare Function GdipFillPath Lib "gdiplus" (ByVal graphics As Long, ByVal Brush As Long, ByVal path As Long) As Long
-Private Declare Function GdipDrawPath Lib "gdiplus" (ByVal graphics As Long, ByVal mPen As Long, ByVal path As Long) As Long
+Private Declare Function GdipFillPath Lib "gdiplus" (ByVal Graphics As Long, ByVal Brush As Long, ByVal path As Long) As Long
+Private Declare Function GdipDrawPath Lib "gdiplus" (ByVal Graphics As Long, ByVal mPen As Long, ByVal path As Long) As Long
 Private Declare Function GdipDeletePath Lib "gdiplus" (ByVal path As Long) As Long
-Private Declare Function GdipDrawEllipseI Lib "gdiplus" (ByVal graphics As Long, ByVal mPen As Long, ByVal x As Long, ByVal y As Long, ByVal mWidth As Long, ByVal mHeight As Long) As Long
-Private Declare Function GdipFillEllipseI Lib "gdiplus" (ByVal graphics As Long, ByVal Brush As Long, ByVal x As Long, ByVal y As Long, ByVal mWidth As Long, ByVal mHeight As Long) As Long
-Private Declare Function GdipDrawPieI Lib "gdiplus" (ByVal graphics As Long, ByVal pen As Long, ByVal x As Long, ByVal y As Long, ByVal Width As Long, ByVal Height As Long, ByVal startAngle As Single, ByVal sweepAngle As Single) As Long
-Private Declare Function GdipFillPie Lib "gdiplus" (ByVal graphics As Long, ByVal Brush As Long, ByVal x As Single, ByVal y As Single, ByVal Width As Single, ByVal Height As Single, ByVal startAngle As Single, ByVal sweepAngle As Single) As Long
-Private Declare Function GdipDrawArcI Lib "gdiplus" (ByVal graphics As Long, ByVal pen As Long, ByVal x As Long, ByVal y As Long, ByVal Width As Long, ByVal Height As Long, ByVal startAngle As Single, ByVal sweepAngle As Single) As Long
-
+Private Declare Function GdipDrawEllipseI Lib "gdiplus" (ByVal Graphics As Long, ByVal mPen As Long, ByVal x As Long, ByVal y As Long, ByVal mWidth As Long, ByVal mHeight As Long) As Long
+Private Declare Function GdipFillEllipseI Lib "gdiplus" (ByVal Graphics As Long, ByVal Brush As Long, ByVal x As Long, ByVal y As Long, ByVal mWidth As Long, ByVal mHeight As Long) As Long
+Private Declare Function GdipDrawPieI Lib "gdiplus" (ByVal Graphics As Long, ByVal pen As Long, ByVal x As Long, ByVal y As Long, ByVal Width As Long, ByVal Height As Long, ByVal startAngle As Single, ByVal sweepAngle As Single) As Long
+Private Declare Function GdipFillPie Lib "gdiplus" (ByVal Graphics As Long, ByVal Brush As Long, ByVal x As Single, ByVal y As Single, ByVal Width As Single, ByVal Height As Single, ByVal startAngle As Single, ByVal sweepAngle As Single) As Long
+Private Declare Function GdipDrawArcI Lib "gdiplus" (ByVal Graphics As Long, ByVal pen As Long, ByVal x As Long, ByVal y As Long, ByVal Width As Long, ByVal Height As Long, ByVal startAngle As Single, ByVal sweepAngle As Single) As Long
+Private Declare Function GdipFlush Lib "gdiplus" (ByVal Graphics As Long, ByVal intention As Long) As Long
 Private Declare Sub CreateStreamOnHGlobal Lib "ole32.dll" _
     (ByRef hGlobal As Any, ByVal fDeleteOnRelease As Long, _
     ByRef ppstm As Any)
@@ -154,23 +154,26 @@ Private Const PICTYPE_BITMAP = 1     ' Bitmap type
 Private Const InterpolationModeHighQualityBicubic = 7
 Private Const GDIP_WMF_PLACEABLEKEY = &H9AC6CDD7
 Private Const UnitPixel = 2
-Private InitOk As Boolean, myToken As Long
+Public InitOk As Boolean, myToken As Long
 ' Initialises GDI Plus
 Private Sub SetTokenNow()
+Exit Sub
 If InitOk = 0 Then
 myToken = InitGDIPlus()
 InitOk = 1
-Else
-InitOk = InitOk + 1
+'Else
+'InitOk = InitOk + 1
 End If
 End Sub
 Private Sub ResetTokenNow()
+Exit Sub
 If InitOk > 0 Then
 InitOk = InitOk - 1
 If InitOk = 0 Then FreeGDIPlus myToken
 End If
 End Sub
 Public Sub ResetTokenFinal()
+Exit Sub
 If InitOk > 0 Then
 InitOk = 0
 FreeGDIPlus myToken
@@ -178,11 +181,14 @@ End If
 End Sub
 Public Function InitGDIPlus() As Long
     Dim Token    As Long
+    On Error GoTo err1
     Dim gdipInit As GdiplusStartupInput
     
     gdipInit.GdiplusVersion = 1
     GdiplusStartup Token, gdipInit, ByVal 0&
     InitGDIPlus = Token
+    Exit Function
+err1:
 End Function
 
 ' Frees GDI Plus
@@ -195,10 +201,10 @@ Public Function LoadPictureGDIPlus(picFile As String, Optional Width As Long = -
     Dim hDC     As Long
     Dim hBitmap As Long
     Dim Img     As Long
-SetTokenNow
+
     ' Load the image
     If GdipLoadImageFromFile(StrPtr(picFile), Img) <> 0 Then
-        ResetTokenNow
+        
         'Err.Raise 999, "GDI+ Module", "Error loading picture " & PicFile
         MyEr "GDI+ - can't load picture", "GDI+ - δεν μπορώ να φορώτσω την εικόνα"
         Exit Function
@@ -222,7 +228,7 @@ SetTokenNow
 
     ' Create the picture
     Set LoadPictureGDIPlus = CreatePicture(hBitmap)
-    ResetTokenNow
+    
 End Function
 ' Initialises the hDC to draw
 Private Sub InitDC(hDC As Long, hBitmap As Long, backcolor As Long, Width As Long, Height As Long)
@@ -238,27 +244,27 @@ Private Sub InitDC(hDC As Long, hBitmap As Long, backcolor As Long, Width As Lon
     DeleteObject SelectObject(hDC, hBrush)
 End Sub
 Public Sub DrawLineGdi(hDC As Long, pencolor As Long, ByVal penwidth As Long, DashStyle As Long, x1 As Long, y1 As Long, x2 As Long, y2 As Long)
-Dim mPen As Long, graphics As Long
+Dim mPen As Long, Graphics As Long
 If DashStyle = 5 Then Exit Sub
-SetTokenNow
-GdipCreateFromHDC hDC, graphics
-GdipSetSmoothingMode graphics, 4
+
+GdipCreateFromHDC hDC, Graphics
+GdipSetSmoothingMode Graphics, 4
 
 If penwidth <= 1 Then penwidth = 1
 If GdiPlusExec(GdipCreatePen1(GDIP_ARGB1(255, pencolor), penwidth, UnitPixel, mPen)) = ok Then
     GdipSetPenEndCap mPen, 2
     GdipSetPenStartCap mPen, 2
     GdipSetPenDashStyle mPen, DashStyle
-    GdipDrawLineI graphics, mPen, x1, y1, x2, y2
+    GdipDrawLineI Graphics, mPen, x1, y1, x2, y2
     GdipDeletePen mPen
 End If
-GdipDeleteGraphics graphics
-ResetTokenNow
+GdipDeleteGraphics Graphics
+
 End Sub
 Public Sub DrawArcPieGdi(hDC As Long, pencolor As Long, backcolor As Long, ByVal fillstyle As Long, ByVal penwidth As Long, DashStyle As Long, x1 As Long, y1 As Long, x2 As Long, y2 As Long, ByVal startAngle As Single, ByVal endAngle As Single)
-Dim mPen As Long, graphics As Long, mBrush As Long, swap
+Dim mPen As Long, Graphics As Long, mBrush As Long, swap
 If DashStyle = 5 Then Exit Sub
-SetTokenNow
+
 endAngle = MyMod(endAngle / 1.745329E-02!, 360)
 startAngle = MyMod(startAngle / 1.745329E-02!, 360)
 If endAngle < 0 Then
@@ -278,8 +284,8 @@ endAngle = swap
 
 
 
-GdipCreateFromHDC hDC, graphics
-GdipSetSmoothingMode graphics, 4
+GdipCreateFromHDC hDC, Graphics
+GdipSetSmoothingMode Graphics, 4
 fillstyle = fillstyle - 2
 If DashStyle = 5 Then pencolor = -1
 If penwidth <= 1 Then penwidth = 1
@@ -289,7 +295,7 @@ If pencolor >= 0 Then
         GdipSetPenEndCap mPen, 2
         GdipSetPenStartCap mPen, 2
         GdipSetPenDashStyle mPen, DashStyle
-        GdipDrawArcI graphics, mPen, x1, y1, x2, y2, startAngle, endAngle
+        GdipDrawArcI Graphics, mPen, x1, y1, x2, y2, startAngle, endAngle
         GdipDeletePen mPen
     End If
 End If
@@ -302,12 +308,12 @@ If fillstyle = -2 Then
                 GdipSetPenStartCap mPen, 2
                 GdipSetPenLineJoin mPen, 2
                 GdipSetPenDashStyle mPen, DashStyle
-                GdipFillPie graphics, mBrush, x1, y1, x2, y2, startAngle, endAngle
-                GdipDrawPieI graphics, mPen, x1, y1, x2, y2, startAngle, endAngle
+                GdipFillPie Graphics, mBrush, x1, y1, x2, y2, startAngle, endAngle
+                GdipDrawPieI Graphics, mPen, x1, y1, x2, y2, startAngle, endAngle
                 GdipDeletePen mPen
             End If
         Else
-                GdipFillEllipseI graphics, mBrush, x1, y1, x2, y2
+                GdipFillEllipseI Graphics, mBrush, x1, y1, x2, y2
         End If
         GdipDeleteBrush mBrush
     End If
@@ -319,27 +325,27 @@ If GdiPlusExec(GdipCreateHatchBrush(fillstyle, GDIP_ARGB1(255, backcolor), GDIP_
             GdipSetPenStartCap mPen, 2
             GdipSetPenLineJoin mPen, 2
             GdipSetPenDashStyle mPen, DashStyle
-            GdipFillPie graphics, mBrush, x1, y1, x2, y2, startAngle, endAngle
-            GdipDrawPieI graphics, mPen, x1, y1, x2, y2, startAngle, endAngle
+            GdipFillPie Graphics, mBrush, x1, y1, x2, y2, startAngle, endAngle
+            GdipDrawPieI Graphics, mPen, x1, y1, x2, y2, startAngle, endAngle
             GdipDeletePen mPen
         End If
     Else
-            GdipDrawPieI graphics, mBrush, x1, y1, x2, y2, startAngle, endAngle
+            GdipDrawPieI Graphics, mBrush, x1, y1, x2, y2, startAngle, endAngle
     End If
     GdipDeleteBrush mBrush
 End If
 
 End If
 End If
-GdipDeleteGraphics graphics
-ResetTokenNow
+GdipDeleteGraphics Graphics
+
 End Sub
 Public Sub DrawEllipseGdi(hDC As Long, pencolor As Long, backcolor As Long, ByVal fillstyle As Long, ByVal penwidth As Long, DashStyle As Long, x1 As Long, y1 As Long, x2 As Long, y2 As Long)
-Dim mPen As Long, graphics As Long, mBrush As Long
+Dim mPen As Long, Graphics As Long, mBrush As Long
 If DashStyle = 5 Then Exit Sub
-SetTokenNow
-GdipCreateFromHDC hDC, graphics
-GdipSetSmoothingMode graphics, 4
+
+GdipCreateFromHDC hDC, Graphics
+GdipSetSmoothingMode Graphics, 4
 fillstyle = fillstyle - 2
 If DashStyle = 5 Then pencolor = -1
 If penwidth <= 1 Then penwidth = 1
@@ -349,7 +355,7 @@ If pencolor >= 0 Then
         GdipSetPenEndCap mPen, 2
         GdipSetPenStartCap mPen, 2
         GdipSetPenDashStyle mPen, DashStyle
-        GdipDrawEllipseI graphics, mPen, x1, y1, x2, y2
+        GdipDrawEllipseI Graphics, mPen, x1, y1, x2, y2
         GdipDeletePen mPen
     End If
 End If
@@ -362,12 +368,12 @@ If fillstyle = -2 Then
                 GdipSetPenStartCap mPen, 2
                 GdipSetPenLineJoin mPen, 2
                 GdipSetPenDashStyle mPen, DashStyle
-                GdipFillEllipseI graphics, mBrush, x1, y1, x2, y2
-                GdipDrawEllipseI graphics, mPen, x1, y1, x2, y2
+                GdipFillEllipseI Graphics, mBrush, x1, y1, x2, y2
+                GdipDrawEllipseI Graphics, mPen, x1, y1, x2, y2
                 GdipDeletePen mPen
             End If
         Else
-                GdipFillEllipseI graphics, mBrush, x1, y1, x2, y2
+                GdipFillEllipseI Graphics, mBrush, x1, y1, x2, y2
         End If
         GdipDeleteBrush mBrush
     End If
@@ -379,45 +385,45 @@ If GdiPlusExec(GdipCreateHatchBrush(fillstyle, GDIP_ARGB1(255, backcolor), GDIP_
             GdipSetPenStartCap mPen, 2
             GdipSetPenLineJoin mPen, 2
             GdipSetPenDashStyle mPen, DashStyle
-            GdipFillEllipseI graphics, mBrush, x1, y1, x2, y2
-            GdipDrawEllipseI graphics, mPen, x1, y1, x2, y2
+            GdipFillEllipseI Graphics, mBrush, x1, y1, x2, y2
+            GdipDrawEllipseI Graphics, mPen, x1, y1, x2, y2
             GdipDeletePen mPen
         End If
     Else
-            GdipFillEllipseI graphics, mBrush, x1, y1, x2, y2
+            GdipFillEllipseI Graphics, mBrush, x1, y1, x2, y2
     End If
     GdipDeleteBrush mBrush
 End If
 
 End If
 End If
-GdipDeleteGraphics graphics
-ResetTokenNow
+GdipDeleteGraphics Graphics
+
 End Sub
 Public Sub DrawLinesGdi(hDC As Long, pencolor As Long, ByVal penwidth As Long, Points() As POINTAPI, count As Long)
-Dim mPen As Long, graphics As Long
-SetTokenNow
-GdipCreateFromHDC hDC, graphics
-GdipSetSmoothingMode graphics, 4
+Dim mPen As Long, Graphics As Long
+
+GdipCreateFromHDC hDC, Graphics
+GdipSetSmoothingMode Graphics, 4
 
 If penwidth <= 1 Then penwidth = 1
 If GdiPlusExec(GdipCreatePen1(GDIP_ARGB1(255, pencolor), penwidth, UnitPixel, mPen)) = ok Then
     GdipSetPenEndCap mPen, 2
     GdipSetPenStartCap mPen, 2
     GdipSetPenLineJoin mPen, 2
-    GdipDrawLinesI graphics, mPen, ByVal VarPtr(Points(0)), count ' graphics, mPen, x1, y1, x2, y2
+    GdipDrawLinesI Graphics, mPen, ByVal VarPtr(Points(0)), count ' graphics, mPen, x1, y1, x2, y2
     
     GdipDeletePen mPen
 End If
-GdipDeleteGraphics graphics
-ResetTokenNow
+GdipDeleteGraphics Graphics
+
 End Sub
 '
 Public Sub DrawBezierGdi(hDC As Long, ByVal pencolor As Long, backcolor As Long, ByVal fillstyle As Long, ByVal penwidth As Long, DashStyle As Long, Points() As POINTAPI, count As Long)
-Dim mPen As Long, graphics As Long, mBrush As Long, mPath As Long
-SetTokenNow
-GdipCreateFromHDC hDC, graphics
-GdipSetSmoothingMode graphics, 4
+Dim mPen As Long, Graphics As Long, mBrush As Long, mPath As Long
+
+GdipCreateFromHDC hDC, Graphics
+GdipSetSmoothingMode Graphics, 4
 fillstyle = fillstyle - 2
 If DashStyle = 5 Then pencolor = -1
 If penwidth <= 1 Then penwidth = 1
@@ -428,7 +434,7 @@ If pencolor >= 0 Then
         GdipSetPenStartCap mPen, 2
         GdipSetPenLineJoin mPen, 2
         GdipSetPenDashStyle mPen, DashStyle
-        GdipDrawBeziersI graphics, mPen, ByVal VarPtr(Points(0)), count
+        GdipDrawBeziersI Graphics, mPen, ByVal VarPtr(Points(0)), count
         GdipDeletePen mPen
     End If
 End If
@@ -443,8 +449,8 @@ If GdiPlusExec(GdipCreateSolidFill(GDIP_ARGB1(255, backcolor), mBrush)) = ok The
             GdipSetPenDashStyle mPen, DashStyle
             If GdiPlusExec(GdipCreatePath(1, mPath)) = ok Then
                 GdipAddPathBeziersI mPath, ByVal VarPtr(Points(0)), count
-                GdipFillPath graphics, mBrush, mPath
-                GdipDrawPath graphics, mPen, mPath
+                GdipFillPath Graphics, mBrush, mPath
+                GdipDrawPath Graphics, mPen, mPath
                 GdipDeletePath mPath
             End If
             GdipDeletePen mPen
@@ -452,7 +458,7 @@ If GdiPlusExec(GdipCreateSolidFill(GDIP_ARGB1(255, backcolor), mBrush)) = ok The
     Else
             If GdiPlusExec(GdipCreatePath(1, mPath)) = ok Then
                 GdipAddPathBeziersI mPath, ByVal VarPtr(Points(0)), count
-                GdipFillPath graphics, mBrush, mPath
+                GdipFillPath Graphics, mBrush, mPath
                 GdipDeletePath mPath
             End If
     End If
@@ -468,8 +474,8 @@ If GdiPlusExec(GdipCreateHatchBrush(fillstyle, GDIP_ARGB1(255, backcolor), GDIP_
             GdipSetPenDashStyle mPen, DashStyle
             If GdiPlusExec(GdipCreatePath(1, mPath)) = ok Then
                 GdipAddPathBeziersI mPath, ByVal VarPtr(Points(0)), count
-                GdipFillPath graphics, mBrush, mPath
-                GdipDrawPath graphics, mPen, mPath
+                GdipFillPath Graphics, mBrush, mPath
+                GdipDrawPath Graphics, mPen, mPath
                 GdipDeletePath mPath
             End If
             GdipDeletePen mPen
@@ -477,7 +483,7 @@ If GdiPlusExec(GdipCreateHatchBrush(fillstyle, GDIP_ARGB1(255, backcolor), GDIP_
     Else
             If GdiPlusExec(GdipCreatePath(1, mPath)) = ok Then
                 GdipAddPathBeziersI mPath, ByVal VarPtr(Points(0)), count
-                GdipFillPath graphics, mBrush, mPath
+                GdipFillPath Graphics, mBrush, mPath
                 GdipDeletePath mPath
             End If
     End If
@@ -486,14 +492,14 @@ End If
 
 End If
 End If
-GdipDeleteGraphics graphics
-ResetTokenNow
+GdipDeleteGraphics Graphics
+
 End Sub
 Public Sub DrawPolygonGdi(hDC As Long, ByVal pencolor As Long, backcolor As Long, ByVal fillstyle As Long, ByVal penwidth As Long, DashStyle As Long, Points() As POINTAPI, count As Long)
-Dim mPen As Long, graphics As Long, mBrush As Long
-SetTokenNow
-GdipCreateFromHDC hDC, graphics
-GdipSetSmoothingMode graphics, 4
+Dim mPen As Long, Graphics As Long, mBrush As Long
+
+GdipCreateFromHDC hDC, Graphics
+GdipSetSmoothingMode Graphics, 4
 fillstyle = fillstyle - 2
 If DashStyle = 5 Then pencolor = -1
 If penwidth <= 1 Then penwidth = 1
@@ -504,7 +510,7 @@ If pencolor >= 0 Then
         GdipSetPenStartCap mPen, 2
         GdipSetPenLineJoin mPen, 2
         GdipSetPenDashStyle mPen, DashStyle
-        GdipDrawLinesI graphics, mPen, ByVal VarPtr(Points(0)), count
+        GdipDrawLinesI Graphics, mPen, ByVal VarPtr(Points(0)), count
         GdipDeletePen mPen
     End If
 End If
@@ -517,12 +523,12 @@ If GdiPlusExec(GdipCreateSolidFill(GDIP_ARGB1(255, backcolor), mBrush)) = ok The
             GdipSetPenStartCap mPen, 2
             GdipSetPenLineJoin mPen, 2
             GdipSetPenDashStyle mPen, DashStyle
-            GdipFillPolygon2I graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
-            GdipDrawLinesI graphics, mPen, ByVal VarPtr(Points(0)), count
+            GdipFillPolygon2I Graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
+            GdipDrawLinesI Graphics, mPen, ByVal VarPtr(Points(0)), count
             GdipDeletePen mPen
         End If
     Else
-             GdipFillPolygon2I graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
+             GdipFillPolygon2I Graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
     End If
     GdipDeleteBrush mBrush
 End If
@@ -534,24 +540,24 @@ If GdiPlusExec(GdipCreateHatchBrush(fillstyle, GDIP_ARGB1(255, backcolor), GDIP_
             GdipSetPenStartCap mPen, 2
             GdipSetPenLineJoin mPen, 2
             GdipSetPenDashStyle mPen, DashStyle
-            GdipFillPolygon2I graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
-            GdipDrawLinesI graphics, mPen, ByVal VarPtr(Points(0)), count
+            GdipFillPolygon2I Graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
+            GdipDrawLinesI Graphics, mPen, ByVal VarPtr(Points(0)), count
             GdipDeletePen mPen
         End If
     Else
-            GdipFillPolygon2I graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
+            GdipFillPolygon2I Graphics, mBrush, ByVal VarPtr(Points(0)), count  ' graphics, mPen, x1, y1, x2, y2
     End If
     GdipDeleteBrush mBrush
 End If
 
 End If
 End If
-GdipDeleteGraphics graphics
-ResetTokenNow
+GdipDeleteGraphics Graphics
+
 End Sub
 ' Resize the picture using GDI plus
 Private Sub gdipResize(Img As Long, hDC As Long, Width As Long, Height As Long, Optional RetainRatio As Boolean = False)
-    Dim graphics   As Long      ' Graphics Object Pointer
+    Dim Graphics   As Long      ' Graphics Object Pointer
     Dim OrWidth    As Long      ' Original Image Width
     Dim OrHeight   As Long      ' Original Image Height
     Dim OrRatio    As Double    ' Original Image Ratio
@@ -561,9 +567,9 @@ Private Sub gdipResize(Img As Long, hDC As Long, Width As Long, Height As Long, 
     Dim DestWidth  As Long      ' Destination image Width
     Dim DestHeight As Long      ' Destination image Height
     
-    GdipCreateFromHDC hDC, graphics
+    GdipCreateFromHDC hDC, Graphics
     
-   GdipSetInterpolationMode graphics, InterpolationModeHighQualityBicubic
+   GdipSetInterpolationMode Graphics, InterpolationModeHighQualityBicubic
    ' GdipSetInterpolationMode Graphics, 0
     If RetainRatio Then
         GdipGetImageWidth Img, OrWidth
@@ -580,19 +586,19 @@ Private Sub gdipResize(Img As Long, hDC As Long, Width As Long, Height As Long, 
         DestX = 0
         DestY = 0
 
-        GdipDrawImageRectRectI graphics, Img, DestX, DestY, DestWidth, DestHeight, 0, 0, OrWidth, OrHeight, UnitPixel, 0, 0, 0
+        GdipDrawImageRectRectI Graphics, Img, DestX, DestY, DestWidth, DestHeight, 0, 0, OrWidth, OrHeight, UnitPixel, 0, 0, 0
     Else
-        GdipDrawImageRectI graphics, Img, 0, 0, Width, Height
+        GdipDrawImageRectI Graphics, Img, 0, 0, Width, Height
     End If
-    GdipDeleteGraphics graphics
+    GdipDeleteGraphics Graphics
 End Sub
 Private Sub gdipResizeToXYsimple(Img As Long, hDC As Long, DestX As Long, DestY As Long, Width As Long, Height As Long, Optional RetainRatio As Boolean = False)
-    Dim graphics   As Long      ' Graphics Object Pointer
-    GdipCreateFromHDC hDC, graphics
+    Dim Graphics   As Long      ' Graphics Object Pointer
+    GdipCreateFromHDC hDC, Graphics
    ' GdipSetInterpolationMode graphics, InterpolationModeHighQualityBicubic
-    GdipSetPixelOffsetMode graphics, 4
-    GdipDrawImageRectI graphics, Img, DestX, DestY, Width, Height
-    GdipDeleteGraphics graphics
+    GdipSetPixelOffsetMode Graphics, 4
+    GdipDrawImageRectI Graphics, Img, DestX, DestY, Width, Height
+    GdipDeleteGraphics Graphics
 End Sub
 Private Function MyMod(r1 As Single, po As Single) As Single
 MyMod = r1 - Fix(r1 / po) * po
@@ -602,13 +608,18 @@ Private Sub gdipResizeToXY(bstack As basetask, Img As Long, angle!, zoomfactor A
     Dim hDC As Long, DestX As Long, DestY As Long
     
     
-    Dim graphics   As Long      ' Graphics Object Pointer
+    Dim Graphics   As Long      ' Graphics Object Pointer
     Dim Width As Long
     Dim Height As Long
     
     Dim OrWidth    As Long      ' Original Image Width
     Dim OrHeight   As Long      ' Original Image Height
     Dim m_Attr As Long
+    
+'     Enum FlushIntention
+Const FlushIntentionFlush = 0&          ' Flush all batched rendering operations
+   Const FlushIntentionSync = 1&          ' Flush all batched rendering operations
+'End Enum
        Const Pi = 3.14159!
     angle! = -MyMod(angle!, 360!)
     If angle! < 0 Then angle! = angle! + 360!
@@ -616,21 +627,13 @@ If zoomfactor <= 1 Then zoomfactor = 1
 zoomfactor = zoomfactor / 100#
 
      Const ColorAdjustTypeBitmap As Long = &H1&
-    GdipCreateFromHDC bstack.Owner.hDC, graphics
-    'GdipSetSmoothingMode graphics, 3
-    'GdipSetInterpolationMode graphics, InterpolationModeHighQualityBicubic
-    'PixelOffsetModeDefault = 0
-    'PixelOffsetModeHighSpeed = 1
-    'PixelOffsetModeHighQuality = 2
-    'PixelOffsetModeNone = 3
-    'PixelOffsetModeHalf = 4
-    GdipSetPixelOffsetMode graphics, 2
-    GdipRotateWorldTransform graphics, angle!, 1
-    '  destX + destWidth / 2, destY + destHeight
+    GdipCreateFromHDC bstack.Owner.hDC, Graphics
+    GdipSetPixelOffsetMode Graphics, 2
+    GdipRotateWorldTransform Graphics, angle!, 1
     Dim prive As Long, Scr As Object
     Set Scr = bstack.Owner
     With players(GetCode(Scr))
-    GdipTranslateWorldTransform graphics, Scr.ScaleX(.XGRAPH, 1, 3), Scr.ScaleY(.YGRAPH, 1, 3), 1
+    GdipTranslateWorldTransform Graphics, Scr.ScaleX(.XGRAPH, 1, 3), Scr.ScaleY(.YGRAPH, 1, 3), 1
     End With
     If Alpha! <> 0! Or backcolor <> -1 Then Call GdipCreateImageAttributes(m_Attr)
     
@@ -649,15 +652,16 @@ zoomfactor = zoomfactor / 100#
     If m_Attr And backcolor >= 0 Then
      GdipSetImageAttributesColorKeys m_Attr, 1&, 1&, GDIP_ARGB1(0, backcolor), GDIP_ARGB1(255, backcolor)
     End If
-    'GdipDrawImageRectI graphics, Img, -Width \ 2, -Height \ 2, Width, Height
     GdipGetImageWidth Img, OrWidth
     GdipGetImageHeight Img, OrHeight
     Height = OrHeight * zoomfactor
     Width = OrWidth * zoomfactor
-    GdipDrawImageRectRectI graphics, Img, -Width \ 2, -Height \ 2, Width, Height, 0, 0, OrWidth, OrHeight, UnitPixel, m_Attr
+    GdipDrawImageRectRectI Graphics, Img, -Width \ 2, -Height \ 2, Width, Height, 0, 0, OrWidth, OrHeight, UnitPixel, m_Attr
     
     If m_Attr Then GdipDisposeImageAttributes m_Attr
-    GdipDeleteGraphics graphics
+    
+    GdipFlush Graphics, FlushIntentionSync
+    GdipDeleteGraphics Graphics
 End Sub
 ' Replaces the old bitmap of the hDC, Returns the bitmap and Deletes the hDC
 Private Sub GetBitmap(hDC As Long, hBitmap As Long)
@@ -679,7 +683,7 @@ Private Function CreatePicture(hBitmap As Long) As IPicture
     ' Fill Pic with necessary parts
     pic.Size = Len(pic)        ' Length of structure
     pic.Type = PICTYPE_BITMAP  ' Type of Picture (bitmap)
-    pic.hBmp = hBitmap         ' Handle to bitmap
+    pic.hbmp = hBitmap         ' Handle to bitmap
 
     ' Create the picture
     OleCreatePictureIndirect pic, IID_IDispatch, True, IPic
@@ -731,7 +735,7 @@ Public Function ReadSizeImageFromBuffer(ResData() As Byte, Width As Long, Height
     Dim hDC As Long
     Dim Img As Long
     Dim hBitmap As Long
-    SetTokenNow
+    
     Call CreateStreamOnHGlobal(ResData(0), _
     False, Stream)
     If Not (Stream Is Nothing) Then
@@ -750,14 +754,14 @@ Public Function ReadSizeImageFromBuffer(ResData() As Byte, Width As Long, Height
     
 PROC_EXIT:
     Set Stream = Nothing
-    ResetTokenNow
+    
     Exit Function
     
 PROC_ERR:
 Dim er$
 er$ = "GDI+: " & Err.Number & ". " & Err.Description
     MyEr er$, er$
-    Err.Clear
+    Err.clear
     Resume PROC_EXIT
 
 End Function
@@ -768,7 +772,7 @@ Public Function LoadImageFromBuffer2(ResData() As Byte, Optional Width As Long =
     Dim hDC As Long
     Dim Img As Long
     Dim hBitmap As Long
-    SetTokenNow
+    
     ' Ressource in ByteArray speichern
     
     ' Stream erzeugen
@@ -808,14 +812,14 @@ Public Function LoadImageFromBuffer2(ResData() As Byte, Optional Width As Long =
     
 PROC_EXIT:
     Set Stream = Nothing
-    ResetTokenNow
+    
     Exit Function
     
 PROC_ERR:
 Dim er$
 er$ = "GDI+: " & Err.Number & ". " & Err.Description
     MyEr er$, er$
-    Err.Clear
+    Err.clear
     Resume PROC_EXIT
 
 End Function
@@ -825,7 +829,7 @@ Public Function DrawImageFromBuffer(ResData() As Byte, hDC As Long, Optional x A
     Dim Stream As IUnknown
     Dim Img As Long
     Dim hBitmap As Long
-    SetTokenNow
+    
     Call CreateStreamOnHGlobal(ResData(0), False, Stream)
     
     If Not (Stream Is Nothing) Then
@@ -850,14 +854,14 @@ Public Function DrawImageFromBuffer(ResData() As Byte, hDC As Long, Optional x A
     
 PROC_EXIT:
     Set Stream = Nothing
-    ResetTokenNow
+    
     Exit Function
     
 PROC_ERR:
 Dim er$
 er$ = "GDI+: " & Err.Number & ". " & Err.Description
     MyEr er$, er$
-    Err.Clear
+    Err.clear
 
     Resume PROC_EXIT
 
@@ -868,7 +872,7 @@ Public Function DrawSpriteFromBuffer(bstack As basetask, ResData() As Byte, sprt
     Dim Stream As IUnknown
     Dim Img As Long
     Dim hBitmap As Long
-    SetTokenNow
+    
     Call CreateStreamOnHGlobal(ResData(0), False, Stream)
     Dim Width As Long, Height As Long
     If Not (Stream Is Nothing) Then
@@ -878,19 +882,20 @@ Public Function DrawSpriteFromBuffer(bstack As basetask, ResData() As Byte, sprt
             If sprt Then GetBackSprite bstack, Width, Height, angle!, zoomfactor
             gdipResizeToXY bstack, Img, angle!, zoomfactor!, blend!, backcolor
             GdipDisposeImage Img
+            
         End If
     End If
     
 PROC_EXIT:
     Set Stream = Nothing
-    ResetTokenNow
+    
     Exit Function
     
 PROC_ERR:
 Dim er$
 er$ = "GDI+: " & Err.Number & ". " & Err.Description
     MyEr er$, er$
-    Err.Clear
+    Err.clear
 
     Resume PROC_EXIT
 
@@ -940,7 +945,7 @@ PROC_ERR:
 Dim er$
 er$ = "GDI+: " & Err.Number & ". " & Err.Description
     MyEr er$, er$
-    Err.Clear
+    Err.clear
 
     Resume PROC_EXIT
 
@@ -983,13 +988,13 @@ Private Function GdiPlusExec(ByVal lReturn As Status) As Status
         Dim er$
     er$ = "GDI+: " & GdiErrorString(lReturn) & " GDI+ Error:" & lReturn
     MyEr er$, er$
-    Err.Clear
+    Err.clear
     End If
     GdiPlusExec = lCurErr
 End Function
 Private Function HandleToPicture(ByVal hGDIHandle As Long, _
     ByVal ObjectType As PictureTypeConstants, _
-    Optional ByVal hpal As Long = 0) As StdPicture
+    Optional ByVal hPal As Long = 0) As StdPicture
     
     Dim tPictDesc As PICTDESC
     Dim IID_IPicture As IID
@@ -999,8 +1004,8 @@ Private Function HandleToPicture(ByVal hGDIHandle As Long, _
     With tPictDesc
          .Size = Len(tPictDesc)
         .Type = ObjectType
-        .hBmp = hGDIHandle
-        .hpal = hpal
+        .hbmp = hGDIHandle
+        .hPal = hPal
     End With
     
     ' Initialisiert das IPicture Interface ID
