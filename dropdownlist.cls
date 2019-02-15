@@ -31,10 +31,12 @@ glistNN.SingleLineSlide = True
 glistNN.LeaveonChoose = True
 glistNN.LeftMarginPixels = 8
 glistNN.VerticalCenterText = True
-glistNN.StickBar = True ' try with false - or hold shift to engage false
-glistNN.NoFreeMoveUpDown = True
+glistNN.StickBar = False ' True ' try with false - or hold shift to engage false
+glistNN.NoWheel = True ' New wheel is not
+glistNN.NoFreeMoveUpDown = False
 If Not Textbox Is Nothing Then
 Textbox.Prompt = ChrW$(&H25BC) + " "
+Textbox.FadePartColor = &H777777
 End If
 End Property
 Public Property Get ListText()
@@ -109,7 +111,7 @@ If glistN.Visible Then glistN.enabled = True: Textbox.SkipProcAtExitFocus = True
   If glistN.ListIndex < 0 Then
   glistN.ListIndex = 0
   Else
-  glistN.ShowThis glistN.ListIndex + 1
+ ' glistN.ShowThis glistN.ListIndex + 1
   
   End If
   Else
@@ -210,9 +212,9 @@ Textbox.locked = False
 Iam = False
 End If
 End Sub
-Private Sub glistN_SyncKeyboard(item As Integer)
+Private Sub glistN_SyncKeyboardUnicode(a As String)
 Static F As Long
-F = glistN.FindItemStartWidth(Chr$(item), Not NoCaseSensitive, F + 1)
+F = glistN.FindItemStartWidth(a, Not NoCaseSensitive, F + 1)
 If F >= 0 Then
 glistN.ScrollTo F - glistN.lines / 2, F + 1
  RaiseEvent PickOther(glistN.ListValue)

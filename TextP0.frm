@@ -378,11 +378,18 @@ If IsWine Then If DIS.Visible Then DIS.SetFocus
 End If
 End If
 If Form1.Visible Then releasemouse = True: If lockme Then hookme TEXT1.glistN
-
+    If Typename(ActiveControl) = "gList" Then
+                
+                Hook hWnd, ActiveControl
+                
+                End If
 End Sub
-
-Private Sub Form_Deactivate()
+Public Sub UNhookMe()
+Set LastGlist = Nothing
 UnHook hWnd
+End Sub
+Private Sub Form_Deactivate()
+UNhookMe
 End Sub
 
 Private Sub Form_GotFocus()
@@ -476,6 +483,7 @@ End With
 End If
 End Sub
 
+
 Private Sub gList1_GetBackPicture(pic As Object)
 Set pic = Point2Me
 End Sub
@@ -495,6 +503,7 @@ i = .SelLength
 .Form1mscatEnabled = .Form1sdnEnabled Or .Form1supEnabled
 .Form1rthisEnabled = .Form1mscatEnabled
 End With
+UNhookMe
 MyPopUp.feedlabels TEXT1, EditTextWord
 MyPopUp.Up
 
@@ -546,6 +555,7 @@ i = .SelLength
 .Form1mscatEnabled = .Form1sdnEnabled Or .Form1supEnabled
 .Form1rthisEnabled = .Form1mscatEnabled
 End With
+UNhookMe
 MyPopUp.feedlabels TEXT1, EditTextWord
 MyPopUp.Up x + gList1.Left, y + gList1.top
 myButton = 0
@@ -595,6 +605,18 @@ End If
 MyEr "Menu Error " & CStr(code), "Λάθος στην ΕΠΙΛΟΓΗ αριθμός " & CStr(code)
 End Sub
 
+
+Private Sub glist1_RegisterGlist(this As gList)
+On Error Resume Next
+hookme this
+If Err.Number > 0 Then this.NoWheel = True
+End Sub
+
+Private Sub gList1_UnregisterGlist()
+On Error Resume Next
+Set LastGlist = Nothing
+If Err.Number > 0 Then gList1.NoWheel = True
+End Sub
 
 Private Function HTML_oncontextmenu() As Boolean
 HTML_oncontextmenu = False
@@ -666,11 +688,7 @@ List1.Visible = False
 End If
 End Sub
 
-Private Sub List1_SyncKeyboard(item As Integer)
-'refresh
-MyDoEvents2
-INK$ = INK$ & Chr(item)
-End Sub
+
 
 Public Sub mn5sub()
  'If Not EditTextWord Then
@@ -2196,12 +2214,30 @@ Case vbKeyF8  'Set/Show/Reset Para2
 MarkSoftButton Para3, PosPara3
 KeyCode = 0
 
-Case vbKeyF9  ' Count Words
+Case vbKeyF9  ' Count Words/
+If shift <> 0 Then
+TEXT1.NoCenterLineEdit = Not TEXT1.NoCenterLineEdit
+If UserCodePage = 1253 Then
+If TEXT1.NoCenterLineEdit Then
+TEXT1.ReplaceTitle = "Ελεύθερη διόρθωση στο κείμενο"
+Else
+TEXT1.ReplaceTitle = "Διόρθωση στη κεντρική γραμμή"
+End If
+Else
+If TEXT1.NoCenterLineEdit Then
+TEXT1.ReplaceTitle = "Free line edit mode"
+Else
+TEXT1.ReplaceTitle = "Center line edit mode"
+End If
+End If
+
+Else
 If TEXT1.glistN.lines > 1 Then
 If UserCodePage = 1253 Then
 TEXT1.ReplaceTitle = "Λέξεις στο κείμενο:" + CStr(TEXT1.mDoc.WordCount)
 Else
 TEXT1.ReplaceTitle = "Words in text:" + CStr(TEXT1.mDoc.WordCount)
+End If
 End If
 End If
 KeyCode = 0
@@ -2218,6 +2254,7 @@ ii = .SelLength
 .Form1mscatEnabled = .Form1sdnEnabled Or .Form1supEnabled
 .Form1rthisEnabled = .Form1mscatEnabled
 End With
+UNhookMe
 MyPopUp.feedlabels TEXT1, EditTextWord
 MyPopUp.Up
 Else
@@ -2338,7 +2375,7 @@ If TEXT1.HaveMarkedText Then TEXT1.SelStartSilent = TEXT1.SelStart
             Else
             TEXT1.SelStartSilent = JJ
             TEXT1.RemoveUndo vbTab
-            TEXT1.InsertText = vbTab
+            TEXT1.InsertText2 = vbTab
             TEXT1.SelStartSilent = JJ + 1
             End If
             
@@ -2365,6 +2402,17 @@ Case Else
 ctrl = False
 End Select
 noentrance = False
+End Sub
+
+Private Sub List1_SyncKeyboardUnicode(a As String)
+'refresh
+MyDoEvents2
+If QRY Or GFQRY Then
+If a = Left$(INK$, 1) Then INK$ = Mid$(a, 2)
+a = ""
+Else
+INK$ = INK$ & a
+End If
 End Sub
 
 Private Sub TEXT1_CtrlPlusF1()

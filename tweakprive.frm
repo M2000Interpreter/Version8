@@ -484,7 +484,7 @@ End Sub
 
 
 Private Sub Form_Load()
-Hook hWND, Nothing
+Hook hWnd, Nothing
 DIS.enabled = True
 AutoRedraw = True
 Form_Load1
@@ -611,7 +611,7 @@ allheight = height1 * factor
 itemWidth = allwidth - 2 * borderleft
 itemwidth3 = (itemWidth - 2 * borderleft) / 3
 itemwidth2 = (itemWidth - borderleft) / 2
-Move Left, Top, allwidth, allheight
+Move Left, top, allwidth, allheight
 FontTransparent = False  ' clear background  or false to write over
 gList2.Move borderleft, bordertop, itemWidth, bordertop * 3
 gList2.FloatLimitTop = VirtualScreenHeight() - bordertop - bordertop * 3
@@ -926,11 +926,14 @@ End If
 textbox4.Retired
 '' continue for others
 
-Dim aa As New Document
+Dim aa As New Document, bb As New FastCollection
 
-
-    For i = 0 To Screen.FontCount - 1  ' Determine number of fonts.
-        aa.AppendParagraphOneLine Screen.Fonts(i)    ' Put each font into list box.
+    For i = 0 To Screen.FontCount - 1
+        If bb.ExistKey(Trim(Screen.Fonts(i))) Then
+        Else
+        aa.AppendParagraphOneLine Screen.Fonts(i)
+        bb.AddKey Trim(Screen.Fonts(i))
+        End If
        If ex Then Exit For
     Next i
     aa.SortDoc 1, 1, aa.DocLines
@@ -958,8 +961,6 @@ gList2.enabled = True
 gList2.CapColor = rgb(255, 160, 0)
 gList2.FloatList = True
 gList2.MoveParent = True
-' I have run in Immediate mode this SpellUnicode("G?????? ?a????")
-' I get the unicode chars so i can give it to a variable
 Form1.AutoRedraw = True
 a$ = ListenUnicode(915, 953, 974, 961, 947, 959, 962, 32, 922, 945, 961, 961, 940, 962)
 lastfactor = ScaleDialogFix(SizeDialog)
@@ -1089,13 +1090,13 @@ b = 2
 CopyFromLParamToRect a, thatRect
 a.Left = b
 a.Right = setupxy - b
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), 0
 b = 5
 a.Left = b
 a.Right = setupxy - b
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), rgb(255, 160, 0)
 
@@ -1117,7 +1118,7 @@ End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
 Set LastGlist = Nothing
-UnHook hWND
+UnHook hWnd
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)

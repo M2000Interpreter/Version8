@@ -132,6 +132,7 @@ With gList1
 .SingleLineSlide = True
 .NoPanRight = True
 .AutoHide = True
+.FreeMouse = True
 End With
 height1 = 5475 * DYP / 15
 width1 = 4155 * DXP / 15
@@ -293,6 +294,21 @@ End Sub
 
 
 
+Private Sub Form_Activate()
+    If Typename(ActiveControl) = "gList" Then
+                If HOOKTEST <> 0 Then UnHook HOOKTEST
+                Hook hWnd, gList1
+                
+                End If
+End Sub
+Public Sub UNhookMe()
+Set LastGlist = Nothing
+UnHook hWnd
+End Sub
+Private Sub Form_Deactivate()
+UNhookMe
+End Sub
+
 Private Sub Form_Load()
 Set LASTActiveForm = Screen.ActiveForm
 End Sub
@@ -436,6 +452,7 @@ If item = -1 Then
 Else
 gList1.mousepointer = 1
 If gokeyboard Then Exit Sub
+If gList1.ListSep(item) Then Exit Sub
 gList1.EditFlag = False
 ''''''''''''''''''''''''''''''
 If lastitem = item Then Exit Sub
@@ -490,6 +507,12 @@ gokeyboard = False
 gList1.PromptLineIdent = 0
 If lastitem = item Then Exit Sub
 gList1.ListindexPrivateUse = -1
+End Sub
+
+Private Sub glist1_RegisterGlist(this As gList)
+On Error Resume Next
+hookme this
+If Err.Number > 0 Then this.NoWheel = True '
 End Sub
 
 Private Sub gList1_ScrollSelected(item As Long, y As Long)
@@ -611,7 +634,7 @@ Case 23 - l
 showmodules
 Case 24 - l
 ''Debug.Print GetFile("file to load")
-
+UNhookMe
 Set b = New basetask
 Set b.Owner = LASTActiveForm
 If b.Owner Is Nothing Then Set b.Owner = Form1
@@ -623,6 +646,7 @@ If ReturnListOfFiles <> "" Then
     files() = Split(ReturnListOfFiles, "#")
     For k = 0 To UBound(files())
     Form1.TEXT1.PasteText "\\$ " + files(k)
+    Set reader = New Document
     reader.ReadUnicodeOrANSI files(k), True
     Form1.TEXT1.PasteText reader.textDoc
     Next k
@@ -636,6 +660,7 @@ End If
 Form1.TEXT1.glistN.enabled = True
 Unload Me
 Case 26 - 1
+UNhookMe
     Set b = New basetask
     Set b.Owner = LASTActiveForm
     If b.Owner Is Nothing Then Set b.Owner = Form1
@@ -778,4 +803,10 @@ rgbcolor = rgb(100, 132, 254)
 End Sub
 Private Sub gList1_RefreshDesktop()
 If Form1.Visible Then Form1.Refresh: If Form1.DIS.Visible Then Form1.DIS.Refresh
+End Sub
+
+Private Sub gList1_UnregisterGlist()
+On Error Resume Next
+Set LastGlist = Nothing
+If Err.Number > 0 Then gList1.NoWheel = True
 End Sub

@@ -395,10 +395,10 @@ If item < 0 Then  ' this is a headline
 If Not skip Then FillBack thisHDC, b, glistN.CapColor
       mDoc1.TextParagraphLine 1, what$, ThatPara
       glistN.HeadlineHeight = mDoc1.DocLines * (onelineheight + 1) + 2
-      a.Top = a.Top + 1
+      a.top = a.top + 1
       For i = 1 To mDoc1.DocLines
         PrintItem thisHDC, mDoc1.TextLine(i), a
-        a.Top = a.Top + onelineheight + 1
+        a.top = a.top + onelineheight + 1
       Next i
  If topoffsetpixel = 0 Then topoffsetpixel = glistN.LineTopOffsetPixels
      
@@ -410,7 +410,7 @@ If Not skip Then FillBack thisHDC, b, glistN.CapColor
 
 ElseIf Left$(Mydir.list(item), 1) = Chr$(2) Then
         a.Left = a.Left + 1
-        a.Top = a.Top + topoffsetpixel
+        a.top = a.top + topoffsetpixel
         If item = glistN.ListIndex And Not glistN.ListSep(item) Then
             FillBack thisHDC, b, &HBFBFBB
             SetTextColor thisHDC, &HF0F0FF
@@ -446,7 +446,7 @@ Else
             
             End If
             SetTextColor thisHDC, &HF0F0FF ' 0
-              b.Top = b.Bottom - 1
+              b.top = b.Bottom - 1
        
             FillBack thisHDC, b, &H777777
            
@@ -455,11 +455,11 @@ Else
                 FillBack thisHDC, b, &HAA
             End If
             SetTextColor thisHDC, glistN.ForeColor
-            b.Top = b.Bottom - 1
+            b.top = b.Bottom - 1
             FillBack thisHDC, b, 0
     End If
     a.Left = a.Left + 1 + (Mydir.ReadLevel(item) - 1) * 30 * lastfactor
-    a.Top = a.Top + topoffsetpixel
+    a.top = a.top + topoffsetpixel
     PrintItem thisHDC, Mydir.ExtractName(Mydir.list(item)), a
 End If
 skip = True
@@ -567,9 +567,9 @@ Private Sub FillBackSmall(thathDC As Long, there As RECT, bgcolor As Long)
 Dim my_brush As Long, one As RECT
 one = there
 one.Left = one.Left + 1
-one.Top = one.Top + 2
-one.Right = one.Left + 4 + (one.Bottom - one.Top) \ 5
-one.Bottom = one.Top + 2 + (one.Bottom - one.Top) \ 5
+one.top = one.top + 2
+one.Right = one.Left + 4 + (one.Bottom - one.top) \ 5
+one.Bottom = one.top + 2 + (one.Bottom - one.top) \ 5
 my_brush = CreateSolidBrush(bgcolor)
 FillRect thathDC, one, my_brush
 DeleteObject my_brush

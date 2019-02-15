@@ -118,9 +118,10 @@ Private Type myImage
     Image As StdPicture
     Height As Long
     Width As Long
-    Top As Long
+    top As Long
     Left As Long
 End Type
+Private ShearchList As String
 Dim Image1 As myImage
 Dim iTop As Long, iLeft As Long, iwidth As Long, iheight As Long
 Dim nopreview As Boolean
@@ -134,13 +135,42 @@ Dim allwidth As Long, itemWidth As Long
 Dim dirlistindex As Long
 Dim dirlisttop As Long
   Dim ihave As Boolean
+Private LastActive As Object
 
+Private Sub Form_Activate()
 
+     On Error Resume Next
+             If LastActive Is Nothing Then Set LastActive = gList1
+              If Typename(ActiveControl) = "gList" Then
+                If LastActive Is ActiveControl Then
+                Hook hwnd, ActiveControl
+                Else
+                Hook hwnd, Nothing
+                End If
+                Else
+               
+                Hook hwnd, Nothing
+                End If
+
+        
+        
+     
+        
+  
+            If LastActive.enabled Then
+            If LastActive.Visible Then If Not ActiveControl Is LastActive Then LastActive.SetFocus
+         End If
+
+End Sub
+
+Private Sub Form_Deactivate()
+UnHook hwnd
+End Sub
 
 Private Sub Form_Load()
 height1 = 8145 * DYP / 15
 width1 = 3690 * DXP / 15
-UnHook3 hWND
+'UnHook3 hWnd
 loadfileiamloaded = True
 scrTwips = Screen.TwipsPerPixelX
 ' clear data...
@@ -328,8 +358,16 @@ gList1.Value = gList1.ListIndex
 gList1.Spinner = False
 End If
 End Sub
+Public Sub UNhookMe()
+Set LastGlist = Nothing
+UnHook hwnd
+End Sub
 
-
+Private Sub Form_LostFocus()
+If HOOKTEST <> 0 Then
+UnHook hwnd
+End If
+End Sub
 
 Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 If Button = 1 Then
@@ -431,7 +469,13 @@ Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As 
 If dr Then Me.mousepointer = 0
 dr = False
 End Sub
+
+Private Sub Form_Terminate()
+Set LastActive = Nothing
+End Sub
+
 Private Sub Form_Unload(Cancel As Integer)
+UNhookMe
 DestroyCaret
 Dim i As Long, filetosave As String
 If mySelector.mselChecked Then
@@ -463,8 +507,9 @@ Set Image1.Image = Nothing
 Image1.Width = 0
 
 selectorLastX = Left
-selectorLastY = Top
+selectorLastY = top
 Sleep 200
+Set LastActive = Nothing
 loadfileiamloaded = False
 End Sub
 Private Sub MakeFolder(ByVal a$)
@@ -472,6 +517,10 @@ a$ = Left$(a$, Len(a$) - 1)
 On Error Resume Next
 MkDir a$
 Sleep 1
+End Sub
+
+Private Sub gList1_CheckGotFocus()
+Set LastActive = gList1
 End Sub
 
 Private Sub gList1_CtrlPlusF1()
@@ -560,6 +609,14 @@ End Sub
 
 
 
+Private Sub gList1_ScrollSelected(item As Long, y As Long)
+ShearchList = vbNullString
+End Sub
+
+Private Sub gList1_selected(item As Long)
+ShearchList = vbNullString
+End Sub
+
 Private Sub gList1_selected2(item As Long)
 If mySelector.NostateDir = True Then
 ' we ar in setup
@@ -580,9 +637,51 @@ End Sub
 
 Private Sub gList1_SyncKeyboard(item As Integer)
 If item = 8 Then
+If Len(ShearchList) > 0 Then
+        ShearchList = Mid$(ShearchList, 1, Len(ShearchList) - 1)
+Else
     FlipList
+End If
     item = 0
 End If
+End Sub
+
+Private Sub gList1_SyncKeyboardUnicode(a As String)
+    If gList1.HeadLine = SetUp Then Exit Sub
+    ShearchList = ShearchList + a
+Dim oldf As Long
+    
+    
+Static F As Long
+oldf = F
+F = gList1.ListIndex
+F = mySelector.myDir2.FindItemStartWidth(ShearchList, True, F + 1)
+If F < 0 Then
+F = mySelector.myDir2.FindItemStartWidth(ShearchList, True, F + 1)
+End If
+If F >= 0 Then
+gList1.ScrollTo F - gList1.lines / 2, F + 1
+ ''RaiseEvent PickOther(gList1.ListValue)
+Else
+F = oldf
+ShearchList = Mid$(ShearchList, 1, Len(ShearchList) - 1)
+If Len(ShearchList) = 0 Then F = -1: Exit Sub
+F = mySelector.myDir2.FindItemStartWidth(ShearchList, True, F + 1)
+If F >= 0 Then
+gList1.ScrollTo F - gList1.lines / 2, F + 1
+ ''RaiseEvent PickOther(gList1.ListValue)
+Else
+
+F = -1
+End If
+End If
+End Sub
+
+Private Sub gList1_UnregisterGlist()
+On Error Resume Next
+If gList1.TabStopSoft Then Set LastActive = gList1
+Set LastGlist = Nothing
+If Err.Number > 0 Then gList1.NoWheel = True
 End Sub
 
 Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
@@ -611,11 +710,33 @@ End Sub
 
 
 
+Private Sub gList2_MouseUp(x As Single, y As Single)
+            If mySelector.myDir2 Is Nothing Then Exit Sub
+            If Not LastActive Is Nothing Then
+            If LastActive.enabled Then
+            If LastActive.Visible Then LastActive.SetFocus
+            End If
+            End If
+End Sub
+
+Private Sub gList2_Selected2(item As Long)
+ On Error Resume Next
+        If LastActive Is Nothing Then
+        Set LastActive = gList1
+        Else
+            If LastActive.enabled Then
+            If LastActive.Visible Then LastActive.SetFocus
+            End If
+        End If
+End Sub
+
 Private Sub glist3_CheckGotFocus()
+Set LastActive = gList3
        gList3.backcolor = rgb(0, 160, 0)
     gList3.ShowMe2
     noChangeColorGlist3 = True
 End Sub
+
 
 Private Sub glist3_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 If gList3.EditFlag Then Exit Sub
@@ -683,7 +804,13 @@ gList3.NoCaretShow = False
 gList3.backcolor = &H0
 gList3.ForeColor = &HFFFFFF
 Else
-If KeyCode = vbKeyReturn Then GoTo here
+If KeyCode = vbKeyReturn Then
+GoTo here
+ElseIf KeyCode = vbKeyUp Or vbKeyDown Then
+DestroyCaret
+KeyCode = 0
+gList1.SetFocus
+End If
 End If
 gList3.ShowMe2
 KeyCode = 0
@@ -697,7 +824,9 @@ gList3.enabled = False
 glist3_PanLeftRight True
 End If
 KeyCode = 0
+
 End If
+
 End If
 
 End Sub
@@ -892,10 +1021,10 @@ b = CLng(Rnd * 3) + setupxy / 3
 
 CopyFromLParamToRect a, thatRect
 a.Left = a.Right - setupxy
-a.Top = b
+a.top = b
 a.Bottom = b + setupxy / 5
 mySelector.FillThere thathDC, VarPtr(a), thatbgcolor
-a.Top = b + setupxy / 5 + setupxy / 10
+a.top = b + setupxy / 5 + setupxy / 10
 a.Bottom = b + setupxy \ 2
 mySelector.FillThere thathDC, VarPtr(a), thatbgcolor
 
@@ -906,13 +1035,13 @@ b = 2
 CopyFromLParamToRect a, thatRect
 a.Left = b
 a.Right = setupxy - b
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 mySelector.FillThere thathDC, VarPtr(a), 0
 b = 5
 a.Left = b
 a.Right = setupxy - b
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 mySelector.FillThere thathDC, VarPtr(a), rgb(255, 160, 0)
 
@@ -1058,7 +1187,7 @@ allheight = bordertop + heightTop + bordertop + heightSelector + bordertop + Hei
 
 End If
 
-Move Left, Top, allwidth, allheight
+Move Left, top, allwidth, allheight
 gList2.Move borderleft, bordertop, itemWidth, heightTop
 gList1.Move borderleft, 2 * bordertop + heightTop, itemWidth, heightSelector
 gList3.Move borderleft, allheight - HeightBottom - bordertop, itemWidth, HeightBottom
@@ -1110,10 +1239,12 @@ PaintPicture a.Image, neoTop, NeoLeft, NeoWidth, NeoHeight
 End If
 Refresh
 End Sub
-Private Sub gList1_RegisterGlist(this As gList)
-Set LastGlist3 = this
+Private Sub glist1_RegisterGlist(this As gList)
+On Error Resume Next
+Set LastGlist = this
+If Err.Number > 0 Then this.NoWheel = True
 End Sub
 Public Sub hookme(this As gList)
-Set LastGlist3 = this
+If this Is gList1 Then Set LastGlist = this Else Set LastGlist = Nothing
 End Sub
 

@@ -31,7 +31,7 @@ Private mesCtrlName As String
 Dim mIndex As Long, mStayOpen As Boolean, mMenuStyle As Boolean, mMenuWidth As Long
 Dim Callback As GuiM2000
 Dim mListText As String
-
+Dim lastitem As Long
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
@@ -106,7 +106,7 @@ ElseIf IsMissing(h) Then
 Else
 .glistN.MoveTwips CLng(x), CLng(y), CLng(w), CLng(h)
 End If
-Pad.Move Pad.Left, Pad.Top, .glistN.widthtwips, .glistN.HeightTwips * 5
+Pad.Move Pad.Left, Pad.top, .glistN.widthtwips, .glistN.HeightTwips * 5
 End With
 glistN.restrictLines = 5
 glistN.MoveTwips 0, 0, Pad.Width, Pad.Height
@@ -158,6 +158,20 @@ Textbox.glistN.ShowMe
 End Property
 
 
+
+Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+If item = -1 Then
+
+Else
+glistN.mousepointer = 1
+If lastitem = item Then Exit Sub
+If glistN.ListSep(item) Then Exit Sub
+glistN.ListindexPrivateUse = item
+glistN.ShowMe2
+lastitem = item
+glistN.ListindexPrivateUse = -1
+End If
+End Sub
 
 Private Sub glistN_MenuChecked(item As Long)
 '
@@ -211,6 +225,7 @@ End Sub
 
 Private Sub glistN_CheckGotFocus()
 Textbox.SkipProcAtExitFocus = True
+glistN.FreeMouse = True
 If Textbox.glistN.TabStopSoft Then Callback.LastActive = ctrlName
 
 Textbox.glistN.NoCaretShow = True
@@ -222,7 +237,7 @@ Textbox.glistN.dropkey = False
 End Sub
 Private Sub glistN_CheckLostFocus()
 If Textbox.SkipProcAtExitFocus Then
-Textbox.Retired
+'Textbox.Retired   'wrong...
 Textbox.SkipProcAtExitFocus = False
 Callback.LastActive = vbNullString
 Else
@@ -318,7 +333,7 @@ If glistN.PanPos <> 0 Then glistN.PanPos = 0
 End Sub
 
 Private Sub Pad_Activate()
-glistN.SetFocus
+glistN.GiveSoftFocus
 End Sub
 
 
@@ -338,6 +353,7 @@ ShowMenu
 End Sub
 
 Private Sub textbox_KeyDown(KeyCode As Integer, shift As Integer)
+If Not glistN.enabled Then KeyCode = 0: shift = 0: Exit Sub
 Dim b$
 Dim gl As Long, x As Long, x1 As gList, XX As Boolean
 Iam = True
@@ -467,9 +483,9 @@ glistN.ShowPan
     End If
 End If
     If mMenuWidth <> 0 Then
-    Callback.PopUpPos Pad, Left, Top, Callback.Controls(ctrlName).Height
+    Callback.PopUpPos Pad, Left, top, Callback.Controls(ctrlName).Height
     Else
-Callback.PopUpPos Pad, Left + Callback.Controls(ctrlName).Width - Pad.Width, Top, Callback.Controls(ctrlName).Height
+Callback.PopUpPos Pad, Left + Callback.Controls(ctrlName).Width - Pad.Width, top, Callback.Controls(ctrlName).Height
 End If
 If Textbox.glistN.TabStopSoft Then Callback.LastActive = ctrlName
 
@@ -572,7 +588,7 @@ End Sub
 
 Private Sub textbox_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim gl As Long
-
+If Not glistN.enabled Then Button = 0: shift = 0: Exit Sub
 If Textbox.glistN.DblClick Then
 Iam = False
 
@@ -649,9 +665,9 @@ glistN.ShowBar = False
     End If
 'Hook Pad.hWnd, glistN
     If mMenuWidth <> 0 Then
-    Callback.PopUpPos Pad, Left, Top, Callback.Controls(ctrlName).Height
+    Callback.PopUpPos Pad, Left, top, Callback.Controls(ctrlName).Height
     Else
-Callback.PopUpPos Pad, Left + Callback.Controls(ctrlName).Width - Pad.Width, Top, Callback.Controls(ctrlName).Height
+Callback.PopUpPos Pad, Left + Callback.Controls(ctrlName).Width - Pad.Width, top, Callback.Controls(ctrlName).Height
 End If
 Button = 0
 Textbox.glistN.dropkey = False
@@ -660,9 +676,9 @@ Iam = Not Pad.Visible
 End If
 
 End Sub
-Private Sub glistN_SyncKeyboard(item As Integer)
+Private Sub glistN_SyncKeyboardUnicode(a As String)
 Static F As Long
-F = glistN.FindItemStartWidth(Chr$(item), Not NoCaseSensitive, F + 1)
+F = glistN.FindItemStartWidth(a, Not NoCaseSensitive, F + 1)
 If F >= 0 Then
 glistN.ScrollTo F - glistN.lines / 2, F + 1
     If mIndex >= 0 Then
@@ -907,11 +923,11 @@ End Property
 Public Property Let Left(ByVal RHS As Variant)
 Callback.Controls(ctrlName).Left = RHS
 End Property
-Public Property Get Top() As Variant
-Top = Callback.Controls(ctrlName).Top
+Public Property Get top() As Variant
+top = Callback.Controls(ctrlName).top
 End Property
-Public Property Let Top(ByVal RHS As Variant)
-Callback.Controls(ctrlName).Top = RHS
+Public Property Let top(ByVal RHS As Variant)
+Callback.Controls(ctrlName).top = RHS
 End Property
 Public Sub Sort(Optional SkipChar As Long = 1)
 If glistN.listcount < 2 Then Exit Sub

@@ -21,6 +21,7 @@ Private col() As Variant, lastdata As String, thispara As Long
 Private TextPixelOffset As Long
 Private nochange As Boolean
 Private TabControl As Long
+Public NoCenterLineEdit As Boolean
 Public SeekNextLine As Boolean
 Public ShadowMarks As Boolean
 Public OtherSymbols As String
@@ -833,14 +834,14 @@ Else
     checklistindex = mDoc.FirstParagraphLine(mDoc.MarkParagraphID) + mDoc.TextParagraph2Line(mDoc.MarkParagraphID, Charpos, selstart2)
     If (checklistindex - glistN.ScrollFrom) >= glistN.lines + 1 Then
      glistN.ListindexPrivateUse = checklistindex
-     glistN.ScrollTo checklistindex - glistN.lines
+     glistN.ScrollToTextEdit checklistindex - glistN.lines
      glistN.SelStartEventAlways = selstart2
      
 
     
     ElseIf checklistindex < glistN.ScrollFrom Then
      glistN.ListindexPrivateUse = checklistindex
-     glistN.ScrollTo checklistindex
+     glistN.ScrollToTextEdit checklistindex
           glistN.SelStartEventAlways = selstart2
     Else
     glistN.ListindexPrivateUse = checklistindex
@@ -874,7 +875,7 @@ Else
 End If
 ''glistN.PrepareToShow
 On Error Resume Next
-glistN.ShowMe
+If NoCenterLineEdit Then glistN.ShowMe2 Else glistN.ShowMe
 End Sub
 
 Private Sub glistN_DragData(ThatData As String)
@@ -6387,12 +6388,29 @@ If Not (UsedAsTextBox Or NumberOnly Or NumberIntOnly) Then MarkSoftButton Para3,
 KeyCode = 0
 
 Case vbKeyF9  ' Count Words
+If shift <> 0 Then
+NoCenterLineEdit = Not NoCenterLineEdit
+If UserCodePage = 1253 Then
+If NoCenterLineEdit Then
+ReplaceTitle = "Ελεύθερη διόρθωση στο κείμενο"
+Else
+ReplaceTitle = "Διόρθωση στη κεντρική γραμμή"
+End If
+Else
+If NoCenterLineEdit Then
+ReplaceTitle = "Free line edit mode"
+Else
+ReplaceTitle = "Center line edit mode"
+End If
+End If
+Else
 If Not (UsedAsTextBox Or NumberOnly Or NumberIntOnly) Then
 If glistN.lines > 1 Then
 If UserCodePage = 1253 Then
 ReplaceTitle = "Λέξεις στο κείμενο:" + Str(mDoc.WordCount)
 Else
 ReplaceTitle = "Words in text:" + Str(mDoc.WordCount)
+End If
 End If
 End If
 End If
@@ -6956,6 +6974,7 @@ Form1rthisEnabled = Form1mscatEnabled
 oldModalId = Modalid
 Modalid = Rnd * 113314324
 'UnHook Callback.hWnd
+UNhookMe
 MyPopUp.feedlabels Me, False
 MyPopUp.UpGui Callback, x, y, poptitle$
 MyPopUp.Visible = True
@@ -7119,7 +7138,7 @@ EditDoc = False
 glistN.PanPos = 0
 nowrap = False
 mDoc1.WrapAgain
-glistN.ScrollTo 0
+glistN.ScrollToTextEdit 0
 Me.SetRowColumn 1, 1, True
 End Sub
 Sub Transparent()
@@ -7387,4 +7406,8 @@ blockStringAhead = True
 
 
 End Function
-
+Public Sub UNhookMe()
+On Error Resume Next
+Set LastGlist = Nothing
+UnHook Callback.hWnd
+End Sub

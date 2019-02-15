@@ -64,6 +64,13 @@ Private Declare Function SetWindowTextW Lib "user32" (ByVal hWnd As Long, ByVal 
 
 Public lastform As Form
 Public skiptimer As Boolean
+Private Declare Function DefWindowProcW Lib "user32" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+Private Declare Sub PutMem4 Lib "msvbvm60" (Destination As Any, Value As Any)
+Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal OleStr As Long, ByVal bLen As Long) As Long
+
+Private Const WM_GETTEXT = &HD
+Private Const WM_GETTEXTLENGTH = &HE
+Private Const WM_SETTEXT = &HC
 Public Property Get CaptionW() As String
     If m_Caption = "M2000" Then
         CaptionW = vbNullString
@@ -74,35 +81,11 @@ End Property
 
 
 Public Property Let CaptionW(ByVal NewValue As String)
-    Static WndProc As Long, VBWndProc As Long
-    If NewValue = vbNullString Then NewValue = "M2000"
+
+If LenB(NewValue) = 0 Then NewValue = "M2000"
     m_Caption = NewValue
-    ' get window procedures if we don't have
-    '     them
- '   ttl = True
-
-    If WndProc = 0 Then
-        ' the default Unicode window procedure
-        WndProc = GetProcAddress(GetModuleHandleW(StrPtr("user32")), "DefWindowProcW")
-        ' window procedure of this form
-        VBWndProc = GetWindowLongA(hWnd, GWL_WNDPROC)
-    End If
-    ' ensure we got them
-
-
-    If WndProc <> 0 Then
-        ' replace form's window procedure with t
-        '     he default Unicode one
-        SetWindowLongW hWnd, GWL_WNDPROC, WndProc
-        ' change form's caption
-        SetWindowTextW hWnd, StrPtr(m_Caption)
-        ' restore the original window procedure
-        SetWindowLongA hWnd, GWL_WNDPROC, VBWndProc
-    Else
-        ' no Unicode for us
-        Caption = m_Caption
-       
-    End If
+DefWindowProcW Me.hWnd, WM_SETTEXT, 0, ByVal StrPtr(NewValue)
+  
     If lastform Is Nothing Then
     Show
     MyDoEvents1 Me, True
@@ -111,34 +94,10 @@ Public Property Let CaptionW(ByVal NewValue As String)
      
 End Property
 Public Property Let CaptionWsilent(ByVal NewValue As String)
-    Static WndProc As Long, VBWndProc As Long
-    If NewValue = vbNullString Then NewValue = "M2000"
+
+If LenB(NewValue) = 0 Then NewValue = "M2000"
     m_Caption = NewValue
-    
-  '  ttl = True
-
-    If WndProc = 0 Then
-        ' the default Unicode window procedure
-        WndProc = GetProcAddress(GetModuleHandleW(StrPtr("user32")), "DefWindowProcW")
-        ' window procedure of this form
-        VBWndProc = GetWindowLongA(hWnd, GWL_WNDPROC)
-    End If
-    ' ensure we got them
-
-
-    If WndProc <> 0 Then
-        ' replace form's window procedure with t
-        '     he default Unicode one
-        SetWindowLongW hWnd, GWL_WNDPROC, WndProc
-        ' change form's caption
-        SetWindowTextW hWnd, StrPtr(m_Caption)
-        ' restore the original window procedure
-        SetWindowLongA hWnd, GWL_WNDPROC, VBWndProc
-    Else
-        ' no Unicode for us
-        Caption = m_Caption
-       
-    End If
+DefWindowProcW Me.hWnd, WM_SETTEXT, 0, ByVal StrPtr(NewValue)
 End Property
 Public Function ask(bstack As basetask, a$) As Double
 If ASKINUSE Then Exit Function
@@ -244,6 +203,7 @@ If INFOONLY Then
 NeoMsgBox.command1(0).SetFocus
 End If
 Modalid = mycode
+
 Do
 If TaskMaster Is Nothing Then
         mywaitOld bstack, 5

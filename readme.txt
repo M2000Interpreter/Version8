@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 18 active-X
-Update info.gsb
+Version 9.7 Revision 19 active-X
+Update gui controls.
 
 
 

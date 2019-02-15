@@ -243,6 +243,12 @@ Else
 foundmulti = True
 End If
 End If
+If TypeOf bstack.Owner Is GuiM2000 Then
+    bstack.Owner.UNhookMe
+ElseIf Not Screen.ActiveForm Is Nothing Then
+    Screen.ActiveForm.UNhookMe
+End If
+
 If Thisform Is Nothing Then
 LoadFile.Show
 Else
@@ -259,13 +265,12 @@ If Not LoadFile.Visible Then
     LoadFile.Visible = True
     MyDoEvents
     End If
-Hook3 LoadFile.hWND, Nothing
+'Hook3 LoadFile.hWnd, Nothing
 WaitDialog bstack
 If Not Thisform Is Nothing Then
           If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
           If Thisform.Visible Then Thisform.SetFocus
 End If
-Set LastGlist3 = Nothing
 If ReturnListOfFiles <> "" Or ReturnFile <> "" Then OpenDialog = Not CancelDialog
 If MULTFILES And Not FOUNDMILTI Then
 

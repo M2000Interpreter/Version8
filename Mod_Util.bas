@@ -5,6 +5,9 @@ Const b123 = vbCr + "'\"
 Const b1234 = vbCr + "'\:"
 Public k1 As Long, Kform As Boolean
 Private Const doc = "Document"
+Public Declare Function IsWindow Lib "user32" (ByVal hWnd As Long) As Long
+Public Declare Function IsWindowEnabled Lib "user32" (ByVal hWnd As Long) As Long
+Public Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
 Public stackshowonly As Boolean, NoBackFormFirstUse As Boolean
 Private Declare Function IsBadCodePtr Lib "KERNEL32" (ByVal lpfn As Long) As Long
 Public Enum Ftypes
@@ -4443,6 +4446,9 @@ For Each x In Forms
                                     End If
         End If
 Next x
+On Error Resume Next
+If zz.enabled Then zz.SetFocus
+Set zz = Nothing
       Do
    
 
@@ -4459,6 +4465,7 @@ Next x
     Loop Until drop = 0 Or MOUT Or LastErNum <> 0
  ' NOEDIT = True
  BLOCKkey = True
+
 While KeyPressed(&H1B) ''And UseEsc
 
 ProcTask2 bstack
@@ -4471,8 +4478,6 @@ Set z = Nothing
             If x.Visible And x.name = "GuiM2000" Then
                 If Not x.Enablecontrol Then
                         x.TestModal mycode
-               ' Else
-                '        Set Z = x
                 End If
             End If
             Next x
@@ -4481,11 +4486,9 @@ Set z = Nothing
 BLOCKkey = False
 escok = oldesc
 INK$ = vbNullString
-
-Form1.KeyPreview = Not Form1.gList1.Visible
+If Form1.Visible Then Form1.KeyPreview = Not Form1.gList1.Visible
 Targets = ot
  mywait11 bstack, 5
-
 End Sub
 
 Public Sub FrameText(dd As Object, ByVal Size As Single, x As Long, y As Long, cc As Long, Optional myCut As Boolean = False)
@@ -6337,6 +6340,18 @@ End If
 conthere:
   
 Loop
+If flag = False Then
+If Len(what$) > 0 Then
+If level2 = 0 Then
+    what$ = UCase(what$)
+    If what$ = "ALWAYS" Then
+        pos = pos - Len(what$)
+        flag = True
+        Exit Sub
+    End If
+End If
+End If
+End If
 pos = lenA + 2
 
 End Sub
@@ -17184,7 +17199,7 @@ conthere:
                                                             bstack.addlen = nd&
                                                             If i = 0 Then
                                                                 ExecuteLong = 0: Exit Function
-                                                            ElseIf i = 1 And ss$ = vbNullString Then 'this is an exit ой3
+                                                            ElseIf i = 1 And ss$ = vbNullString And once Then  'this is an exit ой3
                                                                 b$ = vbNullString
                                                                 ExecuteLong = 1
                                                                 Exit Function
@@ -17267,7 +17282,7 @@ conthere:
                                                                         End If
                                                             ElseIf i = 3 Then
                                                             If Len(ss$) > 0 Then b$ = ss$
-                                                                If DUM = True And b$ <> "" Then slct = 0: b$ = GetNextLine(ss$)
+                                                                If DUM = True And b$ <> "" Then slct = 0: b$ = Mid$(b$, 2): GetNextLine (ss$)
                                                             End If
                                                             End If
                                         Else
@@ -17280,33 +17295,45 @@ conthere:
                                                             i = 1
                                                             ' #10 call one command inside ELSE
                                                             once = True
+                                                            DUM = True
                                                             'TraceStore bstack, nd&, b$, 0
-                                                            Call executeblock(i, bstack, b$, once, DUM, , True)
-                                                            'TraceRestore bstack, nd&
+                                                            ss$ = GetNextLine(b$) + vbCrLf + "'"
+                                                            TraceStore bstack, nd&, b$, 3
+                                                            Call executeblock(i, bstack, ss$, once, DUM, True, True)
+                                                        
+                                                            TraceRestore bstack, nd&
                                                             If i = 0 Then
                                                                     ExecuteLong = 0: Exit Function
-                                                            ElseIf i = 1 And b$ = vbNullString Then 'this is an exit
-                                             
-                                                            ExecuteLong = 1
-                                                            Exit Function
+                                                            ElseIf i = 1 And ss$ = vbNullString And once Then  'this is an exit
+                                                                b$ = vbNullString
+                                                                ExecuteLong = 1
+                                                                Exit Function
                                                             ElseIf i = 2 Then
                                                               
-                                                                          If DUM = True And b$ <> "" Then
+                                                                          If DUM = True And Len(ss$) > 0 Then
                                                                             slct = -1
-                                                                          ElseIf b$ <> "" Then
+                                                                          ElseIf Len(ss$) > 0 Then
+                                                                            b$ = ss$
                                                                             ExecuteLong = 2
                                                                             once = False
                                                                              Exit Function
                                                                           Else
-                                                                          ExecuteLong = i
-                                                                          exeSelect = Not once
+                                                                            ExecuteLong = i
+                                                                            b$ = ss$
+                                                                            exeSelect = DUM
                                                                             Exit Function
                                                                         End If
                                                             ElseIf i = 3 Then
-                                                    If DUM = True And b$ <> "" Then slct = 0
-                                                   ElseIf i = 5 Then
-                                                            ExecuteLong = 2
-                                                            exeSelect = False
+                                                                If DUM = True And ss$ <> "" Then
+                                                                    slct = 0
+                                                                Else
+                                                                    i = 2
+                                                                    b$ = vbNullString
+                                                                    exeSelect = True
+                                                                End If
+                                                            ElseIf i = 5 Then
+                                                                ExecuteLong = 2
+                                                                exeSelect = False
                                               End If
                                     End If
                                 End If

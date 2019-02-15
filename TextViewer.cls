@@ -18,6 +18,7 @@ Const mway As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP
 Private col() As Variant, lastdata As String, thispara As Long
 Private TextPixelOffset As Long
 Public ColorSet As Long
+Public NoCenterLineEdit As Boolean
 Public NumberOnly As Boolean
 Public NumberIntOnly As Boolean
 Public WithEvents glistN As gList
@@ -131,6 +132,7 @@ Private Declare Function CreateRectRgnIndirect Lib "gdi32" (ByRef lpRect As RECT
 Private Declare Function SelectClipRgn Lib "gdi32" (ByVal hDC As Long, ByVal hRgn As Long) As Long
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
+Private LastListIndex As Long
 Public Property Set Container(glistNN As gList)
 Set glistN = glistNN
 glistN.DropEnabled = True
@@ -465,6 +467,7 @@ RaiseEvent inform(glistN.ListIndex + 1, 1)
 Else
 RaiseEvent inform(glistN.ListIndex + 1, (glistN.SelStart))
 End If
+glistN.ShowMe
 End Sub
 
 
@@ -550,11 +553,7 @@ a = Replace(a, vbTab, ChrW(&H21E5))
 End If
 End Sub
 
-Private Sub glistN_RegisterGlist(this As gList)
-On Error Resume Next
-glistN.Parent.hookme this
-If Err.Number > 0 Then this.NoWheel = True
-End Sub
+
 
 Private Sub glistN_RemoveOne(that As String)
 ' push undo removeone
@@ -637,14 +636,14 @@ Else
     checklistindex = mDoc.FirstParagraphLine(mDoc.MarkParagraphID) + mDoc.TextParagraph2Line(mDoc.MarkParagraphID, Charpos, selstart2)
     If (checklistindex - glistN.ScrollFrom) >= glistN.lines + 1 Then
      glistN.ListindexPrivateUse = checklistindex
-     glistN.ScrollTo checklistindex - glistN.lines
+     glistN.ScrollToTextEdit checklistindex - glistN.lines
      glistN.SelStartEventAlways = selstart2
      
 
     
     ElseIf checklistindex < glistN.ScrollFrom Then
      glistN.ListindexPrivateUse = checklistindex
-     glistN.ScrollTo checklistindex
+     glistN.ScrollToTextEdit checklistindex
           glistN.SelStartEventAlways = selstart2
     Else
     glistN.ListindexPrivateUse = checklistindex
@@ -666,6 +665,9 @@ RaiseEvent inform(glistN.ListIndex + 1, 1)
 Else
 RaiseEvent inform(glistN.ListIndex + 1, (glistN.SelStart))
 End If
+If NoCenterLineEdit Then Exit Sub
+If LastListIndex <> glistN.ListIndex Then LastListIndex = glistN.ListIndex: glistN.ShowMe
+
 End Sub
 
 Private Sub glistN_DragData(ThatData As String)
@@ -1968,6 +1970,7 @@ If NoMark Then item = 0
 If blockKeyboard Then item = 0
 If item > 32 And item <> 127 Then GetUndoNext = True
 End Sub
+
 
 Private Sub mDoc_BreakLine(data As String, datanext As String)
  ' Nowrap = True mean no Wrap
@@ -3621,6 +3624,7 @@ Text = mDoc.textDoc
 End Property
 Public Property Let Text(RHS As String)
 Dim oldenabled As Boolean
+LastListIndex = 0
 If Me.HaveMarkedText Then
 BlockStartPara = BlockEndPara
 BlockStartPos = BlockEndPos
@@ -3973,7 +3977,7 @@ all = mDoc.DocLines
 End If
 enabled = b
 End Property
-Private Property Let InsertText2(ByVal RHS As String)
+Public Property Let InsertText2(ByVal RHS As String)
 glistN_MarkDelete True
 glistN.MarkNext = 0
 If Right$(RHS, 1) = vbCr Then RHS = RHS + vbLf
@@ -4242,7 +4246,7 @@ Function GetLCIDFromKeyboard() As Long
         ret = GetLocaleInfo(r, LOCALE_ILANGUAGE, StrPtr(Buffer), Len(Buffer))
     GetLCIDFromKeyboard = CLng(val("&h" + Left$(Buffer, ret - 1)))
 End Function
-Public Property Let ReplaceTitle(a$)  ' at the end
+Public Property Let ReplaceTitle(a$)
 
 Dim curlines As Long
 NoTitle = False
@@ -4262,7 +4266,7 @@ onelineheight = glistN.HeadlineHeight
 glistN.HeadlineHeight = mDoc1.DocLines * onelineheight
 
 there12345:
-glistN.ShowMe
+glistN.ShowMe False, True
 
 End Property
 Private Sub PrintItem1X(mHdc As Long, ByVal c As String, r As RECT, col() As Variant)
@@ -5001,3 +5005,4 @@ ElseIf mis Then
 MyEr "missing " & c$, "λείπει " & c$
 End If
 End Function
+

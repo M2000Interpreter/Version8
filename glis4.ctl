@@ -84,6 +84,7 @@ Private Type Myshape
     Height As Long
 End Type
 Private mynum$, dragslow As Long, lastshift As Integer
+Public BypassKey As Boolean
 Public BlinkON As Boolean
 Private mBlinkTime
 Public UseTab As Boolean
@@ -243,6 +244,7 @@ Event GetBackPicture(pic As Object)
 Event KeyDown(KeyCode As Integer, shift As Integer)
 Event KeyDownAfter(KeyCode As Integer, shift As Integer)
 Event SyncKeyboard(item As Integer)
+Event SyncKeyboardUnicode(a$)
 Event Find(Key As String, where As Long, skip As Boolean)
 Event ExposeRect(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
 Event ExposeListcount(cListCount As Long)
@@ -546,9 +548,25 @@ Text = Left$(Text, thiscur - 1)
 
 RaiseEvent PureListOff
 End Property
-Public Sub ScrollTo(ThatTopItem As Long, Optional this As Long = -2)
+Public Sub ScrollToTextEdit(ThatTopItem As Long, Optional this As Long = -2)
 On Error GoTo scroend
 topitem = ThatTopItem
+If topitem < 0 Then topitem = 0
+If this > -2 Then
+SELECTEDITEM = this
+End If
+CalcAndShowBar1
+Timer1.enabled = True
+scroend:
+End Sub
+Public Sub ScrollTo(ThatTopItem As Long, Optional this As Long = -2)
+On Error GoTo scroend
+
+If ThatTopItem + lines >= listcount Then
+        If ThatTopItem - lines < 0 Then topitem = 0 Else topitem = listcount - lines - 1
+Else
+topitem = ThatTopItem
+End If
 If topitem < 0 Then topitem = 0
 If this > -2 Then
 SELECTEDITEM = this
@@ -895,6 +913,7 @@ If Not NoWheel Then RaiseEvent RegisterGlist(Me)
 End Sub
 
 Private Sub UserControl_KeyPress(KeyAscii As Integer)
+If BypassKey Then KeyAscii = 0: Exit Sub
 If dropkey Then KeyAscii = 0: Exit Sub
 Dim bb As Boolean, kk$, pair$, b1 As Boolean
 If ListIndex < 0 Then
@@ -947,6 +966,7 @@ Else
                     Else
           kk$ = GetKeY(KeyAscii)
           End If
+          
   RaiseEvent getpair(kk$, pair$)
              '
              
@@ -964,13 +984,25 @@ Else
             End If
            End If
            RaiseEvent RemoveOne(kk$)
+           
+           ' SelStartEventAlways = SelStart   ' reverse
             SelStartEventAlways = SelStart + 1
             RaiseEvent PureListOn
+           ' If SelStart = 1 Then   for reverse writing
+            'list(SELECTEDITEM - 1) = kk$ + list(SELECTEDITEM - 1)
+            'Else
                list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
-                
+             '   End If
         
             RaiseEvent PureListOff
-         
+            Else
+            If UKEY$ <> "" Then
+                    kk$ = UKEY$
+                    UKEY$ = vbNullString
+                    Else
+          kk$ = GetKeY(KeyAscii)
+          End If
+          RaiseEvent SyncKeyboardUnicode(kk$)
             End If
          End If
          End If
@@ -1154,6 +1186,7 @@ NoPanLeft = True
 NoPanRight = True
 
 End Sub
+
 Public Sub PressKey(KeyCode As Integer, shift As Integer, Optional NoEvents As Boolean = False)
 
 If shift <> 0 And KeyCode = 16 Then Exit Sub
@@ -1161,8 +1194,8 @@ If shift <> 0 And KeyCode = 16 Then Exit Sub
 Timer1.enabled = False
 If BlinkON Then BlinkTimer.enabled = True
 'Timer1.Interval = 1000
-Dim lastlistindex As Long, bb As Boolean
-lastlistindex = ListIndex
+Dim LastListIndex As Long, bb As Boolean
+LastListIndex = ListIndex
 If KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyDown Or KeyCode = vbKeyRight Or KeyCode = vbKeyEnd Or KeyCode = vbKeyHome Or KeyCode = vbKeyPageUp Or KeyCode = vbKeyPageDown Then
 If MarkNext = 0 Then RaiseEvent KeyDownAfter(KeyCode, shift)
 End If
@@ -1184,7 +1217,7 @@ ShowThis 1
        Do While Not (Not ListSep(ListIndex) Or ListIndex = listcount - 1)
     ShowThis SELECTEDITEM + 1
     Loop
-    If ListSep(ListIndex) Then ListIndex = lastlistindex
+    If ListSep(ListIndex) Then ListIndex = LastListIndex
     RaiseEvent ChangeSelStart(SelStart)
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 End If
@@ -1196,7 +1229,7 @@ Else
     Do While Not (Not ListSep(ListIndex) Or ListIndex = 0)
         ShowThis SELECTEDITEM - 1
     Loop
-    If ListSep(ListIndex) Then ListIndex = lastlistindex
+    If ListSep(ListIndex) Then ListIndex = LastListIndex
     RaiseEvent ChangeSelStart(SelStart)
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 End If
@@ -1225,7 +1258,7 @@ Case vbKeyPageUp
     While ListSep(ListIndex) And Not ListIndex = 0
         ShowThis SELECTEDITEM - 1
     Wend
-    If ListSep(ListIndex) Then ListIndex = lastlistindex
+    If ListSep(ListIndex) Then ListIndex = LastListIndex
     RaiseEvent ChangeSelStart(SelStart)
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
          If shift <> 0 Then If MarkNext > 0 Then RaiseEvent KeyDownAfter(KeyCode, shift)
@@ -1233,15 +1266,20 @@ Case vbKeyPageUp
      shift = 0: KeyCode = 0: Exit Sub
 Case vbKeyUp
 If Spinner Then Exit Sub
+    If SELECTEDITEM > 1 Then
     Do
-        ShowThis SELECTEDITEM - 1
-    
+       'ListindexPrivateUse = SELECTEDITEM - 2
+       ShowThis SELECTEDITEM - 1
     Loop Until Not ListSep(ListIndex) Or ListIndex = 0
-    
-    If ListSep(ListIndex) Then ListIndex = lastlistindex
+  
+   
+    End If
+    If Not MultiLineEditBox Then If ListSep(ListIndex) Then ListIndex = LastListIndex
      RaiseEvent ChangeSelStart(SelStart)
+'     If MultiLineEditBox Then FindRealCursor ListIndex
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
        If shift <> 0 Then
+   If ListIndex < topitem Then topitem = ListIndex
    
     PrepareToShow 5
     If MarkNext > 0 Then RaiseEvent KeyDownAfter(KeyCode, shift)
@@ -1249,10 +1287,13 @@ If Spinner Then Exit Sub
       RaiseEvent MarkDestroyAny
     MarkNext = 0
     If NoFreeMoveUpDown Then
-        ShowMe2
+    If ListIndex < topitem Then topitem = ListIndex Else topitem = topitem - 1
+    If ListIndex - topitem > lines Then topitem = ListIndex - lines
+    If topitem < 0 Then topitem = 0
+       ShowMe2
     Else
     KeyCode = 0
-
+If ListIndex < topitem Then topitem = ListIndex
       PrepareToShow 5
     End If
         Exit Sub
@@ -1263,24 +1304,37 @@ If Spinner Then Exit Sub
     
 Case vbKeyDown
 If Spinner Then Exit Sub
+    If SELECTEDITEM < listcount Then
     Do
-    ShowThis SELECTEDITEM + 1
+        'ListindexPrivateUse = SELECTEDITEM
+        ShowThis SELECTEDITEM + 1
     Loop Until Not ListSep(ListIndex) Or ListIndex = listcount - 1
-    If ListSep(ListIndex) Then ListIndex = lastlistindex
+   
+    End If
+    If Not MultiLineEditBox Then If ListSep(ListIndex) Then ListIndex = LastListIndex
   
     SelStartEventAlways = SelStart
+   ' If MultiLineEditBox Then FindRealCursor ListIndex
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
     If shift <> 0 Then
-
+    
+    If ListIndex - topitem > lines Then topitem = ListIndex - lines
+    
     PrepareToShow 5
   If MarkNext > 0 Then RaiseEvent KeyDownAfter(KeyCode, shift)
     Else
     RaiseEvent MarkDestroyAny
     MarkNext = 0
         If NoFreeMoveUpDown Then
-        ShowMe2
+        If topitem + lines + 2 > listcount Then
+       If ListIndex - topitem > lines Then topitem = ListIndex - lines
+        Else
+        topitem = topitem + 1
+        End If
+         ShowMe2
     Else
     KeyCode = 0
+    If ListIndex - topitem > lines Then topitem = ListIndex - lines
     PrepareToShow 5
     End If
     Exit Sub
@@ -1309,7 +1363,7 @@ If shift = 0 Then RaiseEvent MarkDestroyAny
     While ListSep(ListIndex) And Not ListIndex = listcount - 1
     ShowThis SELECTEDITEM + 1
     Wend
-    If ListSep(ListIndex) Then ListIndex = lastlistindex
+    If ListSep(ListIndex) Then ListIndex = LastListIndex
     RaiseEvent ChangeSelStart(SelStart)
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
     If shift <> 0 Then If MarkNext > 0 Then RaiseEvent KeyDownAfter(KeyCode, shift)
@@ -1450,13 +1504,20 @@ End Select
 If KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyDown Or KeyCode = vbKeyRight Or KeyCode = vbKeyEnd Or KeyCode = vbKeyHome Or KeyCode = vbKeyPageUp Or KeyCode = vbKeyPageDown Then
 If MarkNext > 0 Then RaiseEvent KeyDownAfter(KeyCode, shift)
 End If
+
+If MultiLineEditBox Then
+SelStartEventAlways = SelStart
+If shift Or Not (KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyDown Or KeyCode = vbKeyRight Or KeyCode = vbKeyPageUp Or KeyCode = vbKeyPageDown) Then Me.PrepareToShow 5
+Else
 KeyCode = 0
 SelStartEventAlways = SelStart
 Me.PrepareToShow 5
+End If
 KeyCode = 0
 End Sub
 
 Private Sub UserControl_KeyUp(KeyCode As Integer, shift As Integer)
+If BypassKey Then KeyCode = 0: shift = 0: Exit Sub
 Dim i As Long
 
 lastshift = shift
@@ -1551,6 +1612,7 @@ If mHeadline <> "" And Timer2.enabled = False Then
         RaiseEvent ExposeItemMouseMove(Button, topitem + YYT - 1, CLng(x) / scrTwips, CLng(y - (YYT - 1) * myt - mHeadlineHeightTwips) / scrTwips)
     End If
 ElseIf myEnabled Then
+Debug.Print topitem + YYT
     RaiseEvent ExposeItemMouseMove(Button, topitem + YYT, CLng(x) / scrTwips, CLng(y - YYT * myt) / scrTwips)
 End If
 If oldbutton <> Button Then Exit Sub
@@ -2674,7 +2736,7 @@ If item > 0 And item <= listcount Then
     If MultiLineEditBox Then FindRealCursor item
     If item - topitem > 0 And item - topitem <= lines + 1 Then
         If restrictLines > 0 Then
-            If listcount - topitem < lines Then
+            If listcount <= topitem + lines Then
                 topitem = listcount - lines - 1
                 If topitem < 0 Then topitem = 0
             End If
@@ -2718,6 +2780,7 @@ If item > 0 And item <= listcount Then
 Exit Sub
 
 End If
+If MultiLineEditBox Then Exit Sub
 If noselect Then
 SELECTEDITEM = 0
   End If
@@ -2859,7 +2922,7 @@ Timer1.enabled = True
 
 
 End Sub
-Public Sub ShowMe(Optional visibleme As Boolean = False)
+Public Sub ShowMe(Optional visibleme As Boolean = False, Optional headeronly As Boolean)
  Dim REALX As Long, REALX2 As Long, myt1, oldtopitem As Long
 If visibleme Then
  barwidth = UserControlTextWidth("W")
@@ -2873,7 +2936,7 @@ End If
 
 Dim i As Long, j As Long, g$, nr As RECT, fg As Long, hnr As RECT, skipme As Boolean, nfg As Long
 If MultiSelect And LeftMarginPixels < mytPixels Then LeftMarginPixels = mytPixels
-Repaint
+If Not headeronly Then Repaint
 CurrentY = 0
 nr.top = 0
 nr.Left = 0
@@ -2906,7 +2969,10 @@ hnr.Bottom = nr.Bottom - hnr.top
 hnr.Left = 0
 hnr.Right = nr.Right
 PrintLineControlHeader UserControl.hDC, mHeadline, hnr, DT_CENTER
-
+If headeronly Then
+Refresh
+Exit Sub
+End If
      nr.top = nr.Bottom
 nr.Bottom = nr.top + mytPixels + 1
 End If
@@ -4118,6 +4184,7 @@ mpercent = RHS
 PropertyChanged "Percent"
 End Property
 Private Sub UserControl_KeyDown(KeyCode As Integer, shift As Integer)
+If BypassKey Then KeyCode = 0: shift = 0: Exit Sub
 lastshift = shift
 If KeyCode = 27 And NoEscapeKey Then
 KeyCode = 0
@@ -4582,6 +4649,7 @@ st = st1
 End If
 Wend
 If probeX > UserControlTextWidth(Mid$(s$, 1, st1)) Then
+
 st1 = st1 + 1
 Else
 If st1 = 2 Then
@@ -4593,7 +4661,11 @@ st1 = st1 - 1
 s$ = Mid$(s$, 1, st1)  '
 realpos = UserControlTextWidth(s$)
 Loop While realpos > probeX And Len(s$) > 1
+If Right$(s$, 1) = Chr$(9) Then
+usedCharLength = Len(s$) - 1
+Else
 usedCharLength = Len(s$)
+End If
 End If
 End Sub
 Public Function Pixels2Twips(pixels As Long) As Long
