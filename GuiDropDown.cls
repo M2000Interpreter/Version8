@@ -54,7 +54,8 @@ End Sub
  Set glistN = Pad.Controls(1)
  End If
  PadGui.PopUpMenuVal = True
- With Pad
+ With PadGui
+.NoHook = True
 .gList2.HeadLine = vbNullString
 .gList2.HeadLine = vbNullString
 .gList2.HeadlineHeight = .gList2.HeightPixels
@@ -64,6 +65,7 @@ End With
  Set Textbox.Container = there.Controls.Add("m2000.glist", ctrlName)
  there.AddGuiControl Me
  glistN.Dynamic
+ glistN.NoWheel = True
  Textbox.glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
  mesCtrlName = name$
@@ -92,6 +94,7 @@ End With
  Set Textbox.Container = there.Controls.Add("m2000.glist", ctrlName)
  there.AddGuiControl Me
  glistN.Dynamic
+ glistN.NoWheel = True
  Textbox.glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
  mesCtrlName = name$
@@ -169,7 +172,7 @@ If glistN.ListSep(item) Then Exit Sub
 glistN.ListindexPrivateUse = item
 glistN.ShowMe2
 lastitem = item
-glistN.ListindexPrivateUse = -1
+'glistN.ListindexPrivateUse = -1
 End If
 End Sub
 
@@ -202,19 +205,6 @@ Private Sub glistN_RefreshOnly()
 glistN.PrepareToShow
 End Sub
 
-Private Sub glistN_RegisterGlist(this As gList)
-Dim mo As Object
-Set mo = glistN.Parent
-If Not mo Is Nothing Then
-On Error Resume Next
-mo.hookme this
-If Err.Number > 0 Then this.NoWheel = True
-End If
-Set mo = Nothing
-End Sub
-
-
-
 
 Private Sub Class_Terminate()
 Set Textbox = Nothing
@@ -238,6 +228,7 @@ End Sub
 Private Sub glistN_CheckLostFocus()
 If Textbox.SkipProcAtExitFocus Then
 'Textbox.Retired   'wrong...
+glistN.ListindexPrivateUse = -1
 Textbox.SkipProcAtExitFocus = False
 Callback.LastActive = vbNullString
 Else

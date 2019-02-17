@@ -581,7 +581,7 @@ glistN.backcolor = white
 
 Else
 mNoColor = True
-glistN.NoCaretShow = False Or NoMark
+glistN.NoCaretShow = NoMark
 glistN.ForeColor = white
 glistN.backcolor = dimm1
 End If
@@ -611,7 +611,7 @@ Exit Sub
 End If
 If Not SkipProcAtExitFocus Then
 mNoColor = True
-glistN.NoCaretShow = False Or NoMark
+glistN.NoCaretShow = NoMark
 glistN.HideCaretOnexit = True
 glistN.ForeColor = white
 If glistN.BackStyle <> 1 Then
@@ -706,6 +706,7 @@ Else
 End If
 Render
 End Sub
+
 
 Private Sub glistN_OutPopUp(x As Single, y As Single, myButton As Integer)
 '
@@ -1122,15 +1123,12 @@ End Sub
 
 
 Public Sub Render()
-' we have charpos and listindex
-'glistN.NoScroll = True
-'glistN.PanPos = 0
+If mDoc.busy Then Exit Sub
 Dim selstart2 As Long
+mDoc.busy = True
 all = mDoc.DocLines
-glistN.ListIndex = mDoc.FirstParagraphLine(mDoc.MarkParagraphID) + mDoc.TextParagraph2Line(mDoc.MarkParagraphID, Charpos, selstart2, mNoColor)
+glistN.ListIndex = mDoc.FirstParagraphLine(mDoc.MarkParagraphID) + mDoc.TextParagraph2Line(mDoc.MarkParagraphID, Charpos, selstart2, NoColor)
 glistN.SelStart = selstart2
-
-'EditDoc = EditDoc
 If glistN.ListIndex < glistN.ScrollFrom Then
 If glistN.ListIndex > glistN.lines Then
 glistN.ScrollToSilent glistN.ListIndex - glistN.lines / 2
@@ -1138,11 +1136,16 @@ Else
 glistN.ScrollToSilent 0
 End If
 ElseIf glistN.ListIndex > glistN.ScrollFrom + glistN.lines Then
-glistN.ScrollToSilent glistN.ListIndex - glistN.lines
-ElseIf glistN.ListIndex > glistN.lines And glistN.listcount - glistN.ListIndex < glistN.lines Then
-glistN.ScrollToSilent glistN.ListIndex - glistN.lines
+If glistN.listcount - glistN.ListIndex < glistN.lines Then
+glistN.ScrollToSilent glistN.listcount - glistN.lines
+Else
+glistN.ScrollToSilent glistN.ListIndex - glistN.lines / 2
 End If
-If glistN.enabled Then glistN.ShowPan 'glistN.PrepareToShow 10
+ElseIf glistN.ListIndex > glistN.lines And glistN.listcount - glistN.ListIndex < glistN.lines Then
+glistN.ScrollToSilent glistN.listcount - glistN.lines
+End If
+If glistN.enabled Then glistN.ShowPan
+mDoc.busy = False
 End Sub
 
 Public Sub WrapMarkedPara()
@@ -1648,15 +1651,13 @@ Private Function SetTextDataLong( _
     ) As Boolean
     ' use strptr and lenb
     Dim hMem As Long, lPtr As Long
- ''   Dim checkme As Long
     Dim lSize As Long
         lSize = 4
     hMem = GlobalAlloc(0, lSize)
 If (hMem > 0) Then
         lPtr = GlobalLock(hMem)
         CopyMemory ByVal lPtr, dLong, lSize
-       '' CopyMemory checkme, ByVal lPtr, lSize
-     
+       
         GlobalUnlock hMem
        If (OpenClipboard(0) <> 0) Then
      SetClipboardData lFormatId, hMem
@@ -1979,7 +1980,6 @@ End Sub
 
 Private Sub glistN_Selected(item As Long)
   If undomode = 1 And undotext <> "" Then PushUndo
-If NoMark Then Exit Sub
 If mEditDoc <> glistN.EditFlag Then EditDoc = EditDoc
 Dim what$, ThatPara As Long
    mDoc.TextParagraphLine2 item, what$, ThatPara, showparagraphWork And showparagraph
@@ -1988,6 +1988,15 @@ End Sub
 
 
 Private Sub glistN_Selected2(item As Long)
+If Not EditDoc Then
+ 
+   If mIndex >= 0 Then
+   Callback.Callback mesCtrlName + ".Click(" + Str(mIndex) + ")"
+   Else
+      Callback.Callback mesCtrlName + ".Click()"
+      End If
+Else
+
 If undomode = 1 And undotext <> "" Then PushUndo
 If ClickInsideMarkedText Then
 ' start drag
@@ -1995,18 +2004,14 @@ glistN.MarkNext = 4
 
 glistN.DragNow
 End If
+End If
 End Sub
+
 
 Private Sub glistN_ShowExternalCursor()
 glistN.PrepareToShow 5
 End Sub
 
-
-
-Private Sub glistN_SpinnerValue(ThatValue As Long)
-'
-
-End Sub
 
 Private Sub glistN_SplitLine()
 '
@@ -2075,6 +2080,7 @@ Private Sub glistN_WordMarked(ThisWord As String)
    Else
       Callback.Callback mesCtrlName + ".Word({" + ThisWord + "})"
       End If
+      If mEditDoc = False Then ThisWord = vbNullString
 End Sub
 
 Private Sub mDoc_BreakLine(data As String, datanext As String)
@@ -4765,18 +4771,17 @@ End Property
 Public Property Let Text(RHS As String)
 On Error Resume Next
 If glistN Is Nothing Then Exit Property
+
 If UsedAsTextBox Or NumberOnly Or NumberIntOnly Then
 If Not mNoWrap = True Then
     mNoWrap = True
     glistN.NoScroll = False
 End If
-
 End If
 Dim oldenabled As Boolean
 If Me.HaveMarkedText Then
 BlockStartPara = BlockEndPara
 BlockStartPos = BlockEndPos
-
 glistN.MarkNext = 0
 End If
 oldenabled = glistN.enabled
@@ -4973,7 +4978,6 @@ End Property
 Public Property Get Height() As Long
 Height = glistN.HeightTwips
 End Property
-
 Public Property Let Height(ByVal RHS As Long)
 glistN.HeightTwips = RHS
 End Property
@@ -5484,34 +5488,7 @@ End If
     r.Left = rleft
     End Sub
 
-    
 
-
-
-    
-
-Function colorline(ParamArray aa() As Variant) As Variant()
-colorline = aa()
-End Function
-
-
-Function checkme(bb() As Variant, probethis As Long) As Long
-Dim st&, ste&
-'' checkme colorline(5, 1, 1,20,3,24,1,29),60
-ste& = UBound(bb())
-If probethis = -1 Then
-checkme = bb(ste& - 1)
-Else
-For st& = 3 To ste& Step 2
-    If probethis < bb(st&) Then
-    
-    checkme = bb(st& - 3)
-    Exit Function
-    End If
-Next st&
-checkme = bb(st& - 3)
-End If
-End Function
 Function SplitStringUsingArray(ByVal c$, bb() As Variant, wc&, cuts() As Variant) As String()
 Dim cc$()
 ReDim cc$((UBound(bb()) + 1) / 2)
@@ -7030,9 +7007,6 @@ RemoveUndo aa$
 ReColorBlock
 End Sub
 
-Private Sub wdragSub()
-glistN.DragEnabled = Not glistN.DragEnabled
-End Sub
 
 Public Sub wordwrapsub()
 nowrap = Not nowrap
@@ -7133,13 +7107,22 @@ mStayOpen = False
 NoMark = True
 mNoColor = True
 mNoColor1 = True
-
 EditDoc = False
 glistN.PanPos = 0
 nowrap = False
 mDoc1.WrapAgain
 glistN.ScrollToTextEdit 0
 Me.SetRowColumn 1, 1, True
+End Sub
+Sub EditTextView(ByVal OnOff As Boolean)
+mStayOpen = True
+glistN.ForeColor = black 'rgb(0, 0, 0)
+glistN.backcolor = white ' rgb(255, 255, 255)
+NoMark = Not OnOff
+mEditDoc = OnOff
+If Not OnOff Then glistN.MarkNext = 0 Else glistN.MarkNext = 2
+glistN.EditFlag = OnOff
+glistN.NoCaretShow = NoMark
 End Sub
 Sub Transparent()
 Dim x  As Long, y As Long

@@ -3872,27 +3872,36 @@ MODULE MEDITOR {\\ notepad for M2000 programs (gsb files)
 Show
 Clear \\ Clear all variables/objects
 Flush \\ Empty the stack
+CurDir$=Dir$
 Title$="M2000 Pad"
-Dir User
 Title Title$, 0
 Declare NotePad Form
 Declare Pad EditBox Form NotePad
+Declare HelpPad EditBox Form NotePad
 Declare File1 Combobox Form NotePad
 Declare Edit1 Combobox Form NotePad
+Declare Run1 Combobox Form NotePad
 Declare Help1 Combobox Form NotePad
 Declare Inform1 Button Form NotePad
 Method Inform1, "Colors", 15, #FFA000
 With Inform1, "Locked", true
-Method Pad, "FontAttr", "Tahoma", 12, true   '  size=12, bold=true
+Method Pad, "FontAttr", "Verdana", 12, true   '  size=12, bold=true
+Method HelpPad,"FontAttr","Verdana", 10, true 
+Method HelpPad, "TextViewOnly"
+With HelpPad, "visible" as helpshow, "ShowAlways", True, "Text" as HelpText$, "enabled" as HelpEnabled
+With HelpPad, "NoCenterLineEdit", True, "SetM2000", True, "EditDoc" as HelpEdit ' predifined for word picking
+HelpEnabled=false
+
 With Pad, "NoWrap", True, "SetM2000", True, "SelLength" as SelLength
-With File1,"label","File", "listtext" As list$, "list" As list$() '
+With File1,"label","File", "listtext" as list$, "list" as list$() '
 With Edit1,"label","Edit",  "Mark", Color(255,100,0)
+With Run1,"label","Run",  "Mark", Color(255,100,0)
 With Help1,"label","Help",  "Mark", Color(255,100,0)
-With NotePad,"UseIcon", True, "UseReverse", True
-With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
+With NotePad,"UseIcon", True, "UseReverse", True, "Quit" as Quit
+With NotePad, "Title" as Caption$, "Visible" as Visible, "TitleHeight" as tHeight, "Sizable", True
 \\ Call MakeStandardInfo, after setting Sizable to true to enable contol box's maximize button.
 Method NotePad,"MakeStandardInfo", 1
-With Pad, "Text" As Pad.Text$, "NoColor", False, "ShowAlways", True, "UseTab", True, "tabwidth", 6
+With Pad, "Text" as Pad.Text$, "NoColor", False, "ShowAlways", True, "UseTab", True, "tabwidth", 6
 Def TitleStr$(a$)=ucase$(left$(a$,1))+mid$(a$,2)
 Filename$=Dir$+"Untitled.gsb"
 Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
@@ -3900,8 +3909,10 @@ Method NotePad,"move", 2000, 4000, 8000, 4000
 Layer NotePad {Cls #FFA000}
 With File1,"MenuStyle", True, "MenuWidth", 4000 
 With Edit1,"MenuStyle", True, "MenuWidth", 4000 
+With Run1,"MenuStyle", True, "MenuWidth", 4000 
 With Help1,"MenuStyle", True, "MenuWidth", 4000 
-With File1, "MenuEnabled" As mEnable()
+With File1, "MenuEnabled" as mEnable()
+LoadState=false
 For This {
 	mi$="MenuItem"  \\ is a temporary variable only for For This Block
 	Method File1, mi$,"Open",True
@@ -3909,7 +3920,7 @@ For This {
 	Method File1, mi$,""    \\  only  a line here
 	Method File1, mi$,"Close",True
 	Method File1, mi$,"Quit",True
-Rem	Method File1, "Transparent"
+
 	
 	With File1, "MenuGroup","This"
 	
@@ -3924,44 +3935,137 @@ Rem	Method File1, "Transparent"
 	Method Edit1,"MenuRadio","Spaces for Indent",True,false
 	Method Edit1, mi$,""
 	Method Edit1, mi$,"Show Hidden Characters", True, True
+	Method Edit1, mi$,"Free Style Edit Shift+F9", True, True
 	
-Rem	Method Edit1, "Transparent"
+
 	
 	With Edit1, "MenuGroup","This"
 
+	Method Run1, mi$,"Debug",True
+	Method Run1, mi$,""
+	Method Run1, mi$,"Test Slow",True
+	Method Run1, mi$,"Test Normal", True
+
+	With Run1, "MenuGroup","This"
 	Method Help1, mi$,"About",True
-Rem	Method Help1, "Transparent"
+	Method Help1, mi$,""
+	Method Help1, mi$,"Find Topic",True
+	Method Help1, mi$,"Open Topic",HelpShow
+	Method Help1, mi$,""
+	Method Help1, mi$,"Close Help",HelpShow
+	
+
 	With Help1, "MenuGroup","This"
 }
-Def par_Status as boolean=false, old_status
+Def par_Status as boolean=false, old_status, style_status as boolean=false
 old_status=par_Status
-With Edit1,"ListSelected" as Edit1.Selected(), "MenuEnabled" As Edit1.Enabled()
-With Pad, "showparagraph" as par_Status
-Document BackUp$="\\Write something..."
+With Edit1,"ListSelected" as Edit1.Selected(), "MenuEnabled" as Edit1.Enabled()
+With Pad, "showparagraph" as par_Status, "NoCenterLineEdit" as style_status
+With Help1, "MenuEnabled" as Help1.Enabled()
+Document BackUp$="\\Write something...", LoadFile$
 Def ok as boolean
+Const nl$=chr$(13)+chr$(10)
 Pad.Text$=BackUp$
+Def what$, lastcommand$, mod2run$
+\\ function to retrieve info from help database, help2000.mdb in appdir$
+Def boolean HelpView
+
+Function GetHelp$(&word$, find) {
+	word$=ucase$(word$)
+	Eng=chrcode(word$)<128
+	If find Then
+		Retrieve appdir$+"HELP2000", "Select * FROM [COMMANDS] WHERE "+If$(Eng-> "ENGLISH","DESCRIPTION")+" Like '"+word$+"%'",1,"",""
+	Else
+		Retrieve appdir$+"HELP2000", "COMMANDS",1,If$(Eng->"ENGLISH","DESCRIPTION"),word$
+	End If
+	If number>0 Then
+		read new word1$, hlp$, word2$
+		=If$(Eng->RightPart$(hlp$,"__<ENG>__"), LeftPart$(hlp$,"__<ENG>__")) :	word$=If$(Eng->word2$, word1$)
+	End If
+	
+}
+
+Function HelpPad.click {
+	Method  HelpPad, "EditTextView", false
+	If ask("Topic to find",,,,, what$)=1 Then Read what$ :Call Local FindWord(what$, true)
+}
+Function Help1.OpenMenu {
+	Help1.Enabled(3)=HelpShow  and not HelpEdit
+	Help1.Enabled(5)=HelpShow
+}
+Function HelpPad.word {
+	Call Local FindWord(letter$, false)
+}
+Function NotePad.Unload {
+      Read New &Ok
+      
+      If LoadState Then Quit=true : Call Local InformNow("Quit Loading..") : Exit
+      If Pad.Text$<>BackUp$ Then
+      After 50 {Call Local File1.DblClick(4)}
+      Ok=True
+      End If
+
+}
+Function InformNow {
+      With Inform1, "Caption",  letter$
+}
 Function Notepad.Resize {
 	Layer NotePad { Cls Color(255, 160, 0) ,0}
-	With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
+	With NotePad, "Width" as NP.Width, "Height" as NP.Height, "TitleHeight" as tHeight
 	tHeight1=theight*2
 	Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
 	Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
-	Method Help1,"move", twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
-      	Method Inform1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*160, tHeight
-	If NP.height>2000 Then {
-		Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
-		With Pad, "NoWrap" As NoWrap
+	Method Run1,"move",  twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
+	Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*80, tHeight
+      	Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*160, tHeight
+	If NP.height>1800 Then {
+		If helpview Then
+			free=NP.Height-tHeight1-twipsX*3
+			third=free/3
+			free=free-third-twipsX*3
+			Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, free
+			Method HelpPad,"move", twipsX*2, tHeight1+free+twipsX*3,  NP.Width-twipsX*5,third
+			helpshow=true
+		Else
+			helpshow=false
+			Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsX*3
+		End If
+		With Pad, "NoWrap" as NoWrap
 		If Not NoWrap Then Method Pad,"Resize"
+		Method helppad, "resize"
+
 	}
+	
+}
+Def oldword$
+Function FindWord {
+	read new word$, find=false
+	Local hlp$=GetHelp$(&Word$, find)
+	If len(hlp$) Else Exit
+	HelpText$=word$+nl$+hlp$
+	If not helpview Then helpview=true: helpenabled=true:
+	Call Local Notepad.Resize()
+}
+Function Pad.KeyDown {
+	Read New &kc, &Shf
+	If kc=116 and shf=2 Then
+		kc=0 : shf=0
+		After 20{
+			Call Local Run1.DblClick(0)
+		}
+	End If
+}
+Function Pad.Word() {
+	Call Local FindWord(letter$, false)
 }
 Function Pad.Inform {
 	Read New L, P
-	if old_status<>par_status then
-	With Inform1, "Caption",if$(par_status->"Hidden", "No Hidden")
+	If old_status<>par_status Then
+	With Inform1, "Caption",If$(par_status->"Hidden", "No Hidden")
 	old_status=par_status
-	else
+	Else
 	With Inform1, "Caption", format$("{0}-{1}", L,P)
-	end if
+	End If
 	Method Pad,"Show"
 }
 
@@ -3979,29 +4083,35 @@ Function ChangeHidden {
 	Edit1.Selected(10)=not par_Status
 	Method Pad,"PressKey", 121, 0   ' 121=vbkeyF10
 	old_status=par_status
-	With Inform1, "Caption",if$(Edit1.Selected(10)->"Hidden", "No Hidden")
+	With Inform1, "Caption",If$(Edit1.Selected(10)->"Hidden", "No Hidden")
 	Method Pad,"Show"      
+}
+Function ChangeStyle {
+	Edit1.Selected(11)=not style_status
+	Method Pad,"PressKey", 120, 1
 }
 Function Edit1.OpenMenu {
 	Local X
 	X=SelLength>0
 	Edit1.Enabled(0)=X
 	Edit1.Enabled(1)=X
-	Edit1.Selected(10)=par_Status
-	With Inform1, "Caption",if$(Edit1.Selected(10)->"Hidden", "No Hidden")
+	Edit1.Selected(10)= par_Status
+	Edit1.Selected(11)= style_status
 }
 Function Edit1.MenuChecked {
 Read New RadioIndex 
-	If RadioIndex=7 then
+	If RadioIndex=7 Then
 	Call Local SetTabs()
-	else.If RadioIndex=8 then
+	Else.If RadioIndex=8 Then
 	Call Local SetSpaces()
-	else.If RadioIndex=10 then
+	Else.If RadioIndex=10 Then
 	Call Local ChangeHidden()
-	else
+	Else.If RadioIndex=11 Then
+	Call Local ChangeStyle()
+	Else
 	With Inform1, "Caption","??"
 	Method Pad,"Show"	
-	end if
+	End If
 }
 Function Edit1.DblClick {
 	Read New Edit1index
@@ -4022,6 +4132,31 @@ Function Edit1.DblClick {
 		Call Local SetSpaces()
 	Case 10
 		Call Local ChangeHidden()
+	Case 11
+		Call Local ChangeStyle()
+	End Select
+}
+Document TestFile$
+UseShow$={
+	Use statement Show to select when console open. Use { END } to skip waiting for key before end
+	}
+Function Run1.DblClick {
+	Read New Run1index
+	Select Case Run1index
+	Case 0,2,3
+	{
+		If ask(if$(Run1index=0->"Module to run","Command(s) to execute"	+UseShow$),,,,,mod2run$) Then
+			Read mod2run$
+			Clear TestFile$
+			TestFile$=If$(Run1index=2->"Set Slow"+nl$,"")
+			TestFile$="Module TestThis {"+Pad.Text$+nl$+"}"+nl$
+			TestFile$="Title "+quote$(LeftPart$(Caption$," -"))+nl$
+			TestFile$="Script TestThis :"+If$(Run1index=0->"Test ","")+mod2run$+": Push Key$: Drop: End"
+			Save.Doc TestFile$, "Test1234.gsb"
+			Win appdir$+"m2000.exe", dir$+"Test1234.gsb"
+
+		End If
+	}
 	End Select
 }
 Function Pad.PopUp {
@@ -4048,21 +4183,35 @@ Open1:
 			Try ok {
 				Open.file filename$,"**","Load M2000 (Gsb) File","gsb"
 			}
-			if not ok then push "" : Dir User
+			If not ok Then push "" : Dir User
 		}
 		Method Pad,"GetFocus"
 		Read f$
 		If f$<>"" Then
-			Filename$=f$
-			If exist(F$) then {
-				Clear BackUp$
-				Load.Doc BackUp$, f$
-				Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+			If exist(F$) Then {
+				Clear LoadFile$
+				Method Pad,"PressKey", 0, 0
+				LoadState=true
+				Call Local InformNow("Loading...")
+				layer NotePad {
+					Load.Doc LoadFile$, f$
+				}
 				\\ set the current directory
+				If quit Then break
+				Filename$=f$
 				dir file.path$(Filename$)
-				Pad.Text$=BackUp$
-			} else Pad.text$="": Clear BackUp$
+				If not quit Then 
+					Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+					Clear Backup$
+					BackUp$=LoadFile$
+					Clear LoadFile$
+					Pad.Text$=BackUp$
+				End If
+			} Else Pad.text$="": Clear BackUp$
+			Call Local InformNow("Rendering...")
 			Method Pad, "Resize"
+			Call Local InformNow("Ready...")
+			LoadState=false
 		End If
 		Exit
 Save1:
@@ -4070,22 +4219,23 @@ Save1:
 			try ok {
 				Save.As Filename$,"**","Save M2000 File","gsb"
 			}
-			if not ok then Push "" : Dir User
+			If not ok Then Push "" : Dir User
 		}
-		if not cont2 then Method Pad,"GetFocus"
+		If not cont2 Then Method Pad,"GetFocus"
 		Read f$
 		If f$="" Then Exit 
-		If lcase$(file.type$(f$))<>"gsb" then f$=f$+".gsb"
+		If lcase$(file.type$(f$))<>"gsb" Then f$=f$+".gsb"
 		If Exist(f$) Then  If Ask(NL$+"Overwrite"+NL$+f$,Title$)<>1 Then Exit
 		Try ok {
 			Clear BackUp$
 			BackUp$=Pad.Text$
 			Save.Doc BackUp$, f$
 			filename$=f$
+			dir file.path$(Filename$)
 			Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
 		}
-		If ok else beep
-		If not cont then Exit
+		If ok Else beep
+		If not cont Then Exit
 Save2:
 		cont=True
 		If Pad.Text$<>BackUp$ Then {
@@ -4093,12 +4243,14 @@ Save2:
 		}
 		Clear BackUp$
 		Pad.Text$=""
-		If Cont2 then
+		If Cont2 Then
+			Dir CurDir$
 			Method NotePad, "CloseNow"
 		Else
 			FileName$=Dir$+"Untitled.gsb"
 			Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
 			Method Pad, "Resize"
+			Method Pad,"GetFocus"
 		End If
 		Exit
 Unload:
@@ -4106,28 +4258,40 @@ Unload:
 	}
 }
 Function Help1.DblClick {
-	Local A, info$
-	Info$={
-		This is an example
-		of a notepad for M2000 Programs
-		written in M2000
-		and run in M2000 Environment
-		}
-	A=Ask(info$,Title$,"","")
+	read new  Help1.index
+	Select Case Help1.index
+	Case 0
+	{
+		Local A, info$
+		Info$={
+			This is an example
+			of a notepad for M2000 Programs
+			written in M2000
+			and run in M2000 Environment
+			}
+		A=Ask(info$,Title$,"","")
+	}
+	Case 2
+		Call Local HelpPad.click()
+	Case 3
+		Method  HelpPad, "EditTextView", True: Call Local Notepad.Resize()
+	Case 5
+		Method  HelpPad, "EditTextView", false : HelpView=false:HelpEnabled=False: Call Local Notepad.Resize()
+	End Select
+	
 }
 Function Notepad.InfoClick {
 	Read New X
-	If X=0 then Call Local Help1.DblClick()
+	If X=0 Then Call Local Help1.DblClick()
 }
 Call Local Notepad.Resize()
 \\ make this as the default control (get focus)
 With Pad,"Default",True
-\\ open As modal
+\\ open as modal
 Method NotePad,"Show", 1
 Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
-
 }
 MODULE INFO {Title "Info"   ' open a window in task bar with name info (if  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -4152,7 +4316,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 2"
+	Report " A collection of modules for tests version 3"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -7947,7 +8111,7 @@ MODULE ICONS {function dummy {
 			
 			For i=1 to sp {
 				move Random(14000)+1000, Random(10000)+1000
-				let  a=random(90), b=random(50)+350, c=random(50)-50*(random(10)=1)
+				let  a=random(90), b=random(50)+150, c=random(50)-50*(random(10)=1)
 				sprite spr$,5, a,b,c
 			}
 			move mouse.x, mouse.y
@@ -7970,7 +8134,7 @@ MODULE ICONS {function dummy {
 			
 			For i=1 to sp {
 				move Random(14000)+1000, Random(10000)+1000
-				let  a=random(90), b=random(50)+350, c=random(50)-50*(random(10)=1)
+				let  a=random(90), b=random(50)+150, c=random(50)-50*(random(10)=1)
 				sprite ico, , a,b,c
 			}
 			move mouse.x, mouse.y
@@ -8039,6 +8203,7 @@ function dummy1 {
 FadeScreen &Dummy(), 1.7
 }
 MODULE COMPILER {Module CompilerExample {
+	Set Fast !
 	Module lexical_analyzer (a$){
 	        lim=Len(a$)
 	        LineNo=1
@@ -8668,27 +8833,7 @@ MODULE COMPILER {Module CompilerExample {
 				=""
 			end if
 		}
-		\\ module to print a string to console using codes, 13, 10, 9
-		\\ not used any more. we use Print #-2 to send a string so 13, 10 and 9 are processed now
-		Module printsrv (a$) {
-			for i=1 to len(a$)
-				select case chrcode(Mid$(a$,i,1))
-				case 13
-					cursor 0
-				case 10
-					cursor 0 : Print
-				case 9
-					cursor ((pos+tab) div tab)*tab
-				else case
-				{
-					m=pos :if pos>=width then Print : m=pos
-					Print Mid$(a$,i,1);
-					if m<=width then cursor m+1
-				}
-				end select
-			next i
-		}
-		const nl$=chr$(13)+chr$(10)
+ 		const nl$=chr$(13)+chr$(10)
 		\\ we can set starting value to any number  n where 0<=n<=232
 		enum op {	halt_=232, add_, sub_, mul_, div_, mod_, not_, neg_, and_, or_, lt_,
 			    	gt_, le_, ge_, ne_, eq_, prts_, prti_, prtc_, store_, fetch_, push_,
@@ -8718,10 +8863,11 @@ MODULE COMPILER {Module CompilerExample {
 		Append  func, ge_:=lambda->{Return stack_, sp+1:=uint(if(sint(eval(stack_, sp+1))>=sint(eval(stack_, sp))->-1, 0)):sp++}
 		Append  func, ne_:=lambda->{Return stack_, sp+1:=uint(if(eval(stack_, sp+1)<>eval(stack_, sp)->-1, 0)):sp++}
 		Append  func, eq_:=lambda->{Return stack_, sp+1:=uint(if(eval(stack_, sp+1)=eval(stack_, sp)->-1, 0)):sp++}
-		Append  func, prts_:=lambda->{Print #-2, strings$(eval(stack_,sp));:sp++}
-		Append  func, prti_:=lambda->{Print #-2, str$(sint(eval(stack_,sp)),0);:sp++}
-		Append  func, prtc_:=lambda->{Print #-2,  chrcode$(eval(stack_,sp));:sp++}
-		Rem : Form 120, 60 ' change console width X height to run Ascii Mandlebrot examlpe
+		Append  func, prts_:=lambda->{Print #-2, string$(eval(stack_,sp));: Refresh:sp++}
+		Append  func, prti_:=lambda->{Print #-2, str$(sint(eval(stack_,sp)),0);: Refresh:sp++}
+		Append  func, prtc_:=lambda->{Print #-2, chrcode$(eval(stack_,sp));: Refresh:sp++}
+		Rem : Form 120, 60 ' change console width X height to run Ascii Mandlebrot example
+		\\ change Report with Print #-2,   (report stop when scrolling 3/4 of height of console, waiting key or mouse key to continue)
 		Print #-2,  "Virtual Assembly Code:"+{
 		}+a$
 		Print "Prepare Byte Code"
@@ -8836,6 +8982,7 @@ MODULE COMPILER {Module CompilerExample {
 	Print "Code Generator" : Refresh
 	CodeGenerator
 	Virtual_Machine_Interpreter
+	Set Fast 'restore speed setting
 }
 CompilerExample
 }

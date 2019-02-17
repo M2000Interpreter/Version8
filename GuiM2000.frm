@@ -138,12 +138,13 @@ Public LastActive As String
 Public RefreshList As Long
 Private Declare Function DefWindowProcW Lib "user32" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
 Private Declare Sub PutMem4 Lib "msvbvm60" (Destination As Any, Value As Any)
-Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal OleStr As Long, ByVal bLen As Long) As Long
+Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal OleStr As Long, ByVal BLen As Long) As Long
 
 Private Const WM_GETTEXT = &HD
 Private Const WM_GETTEXTLENGTH = &HE
 Private Const WM_SETTEXT = &HC
-
+Public NoHook As Boolean
+Dim lastitem As Long
 
 Public Property Let CaptionW(ByVal NewValue As String)
 If mNoCaption Then Exit Property
@@ -318,15 +319,16 @@ End Sub
 Public Sub ShowmeALL()
 Dim w As Object
 If IamPopUp Then
-If EnableStandardInfo Then
-glistN.menuEnabled(2) = False
-End If
-If Not MyForm3 Is Nothing Then
-drawminimized = False
-mNoTaskBar = True
-If Not MyForm3 Is Nothing Then
-Unload MyForm3
-Set MyForm3 = Nothing
+    If EnableStandardInfo Then
+        glistN.menuEnabled(2) = False
+    End If
+    If Not MyForm3 Is Nothing Then
+        drawminimized = False
+        mNoTaskBar = True
+        If Not MyForm3 Is Nothing Then
+        Unload MyForm3
+        Set MyForm3 = Nothing
+        ttl = False
 End If
 
 End If
@@ -387,12 +389,14 @@ ResizeMark.backcolor = GetPixel(Me.hDC, 0, 0)
 ResizeMark.Visible = Sizable
 If Sizable Then ResizeMark.ZOrder 0
 If HOOKTEST <> 0 Then UnHook HOOKTEST
+If Not NoHook Then
 If Typename(ActiveControl) = "gList" Then
 
 Hook hWnd, ActiveControl
 
 Else
 Hook hWnd, Nothing
+End If
 End If
 If DefaultName <> "" Then
 Dim aa As gList
@@ -425,39 +429,6 @@ MyForm3.Visible = True
 End If
 End If
 End Sub
-Private Sub Form_Deactivate0()
-If PopupOn Then
-UnHook hWnd
-
-Exit Sub
-End If
-If IamPopUp Then
-If mModalid = Modalid And Modalid <> 0 Then
-        
-        If Visible Then Hide
-       
-        Modalid = 0
-            novisible = False
-End If
-Else
-    If mModalid = Modalid And Modalid <> 0 Then
-        If Visible Then
-            On Error Resume Next
-            Me.SetFocus
-        Else
-        UnHook hWnd
-            If mModalid <> 0 Then Modalid = 0
- 
-            
-        End If
-    
-    Else
-    UnHook hWnd
-    End If
-   
-    End If
-End Sub
-
 
 Private Sub Form_Deactivate()
 UNhookMe
@@ -565,7 +536,10 @@ End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
 If mModalid = Modalid And Modalid <> 0 Then
-    If Visible Then Hide:  Quit = byPassCallback
+    If Visible Then
+    Hide
+    Quit = byPassCallback
+    End If
     If mModalid <> 0 Then Modalid = 0
     Cancel = Not byPassCallback
     novisible = False
@@ -690,8 +664,10 @@ Pad.Height = (((glistN.HeadlineHeightTwips * gl) \ dv15) + 1) * dv15
 glistN.MoveTwips 0, 0, Pad.Width, Pad.Height
 glistN.LeaveonChoose = True
 glistN.ListindexPrivateUseFirstFree 0
+glistN.FreeMouse = True
 glistN.ShowBar = False
 glistN.PanPos = 0
+glistN.NoWheel = True
 If Not UseReverse Then
 PopUpPos Pad, Width - mMenuWidth, gList2.Height / 2, gList2.Height / 2
 Else
@@ -916,10 +892,12 @@ If Not Quit Then CallEventFromGuiNow Me, myEvent, mMyName$ + ".Unload()", var()
 End If
 If var(0) = 0 Then
                      If ttl And Not mNoTaskBar Then
+                     If Not MyForm3 Is Nothing Then
                      MyForm3.CaptionW = vbNullString
                      If MyForm3.WindowState = 1 Then MyForm3.WindowState = 0
                
                     Unload MyForm3
+                    End If
              End If
                               Unload Me
                       End If
@@ -1171,7 +1149,10 @@ If vNewValue <> "" Then  ' was <> " "
 If mNoTaskBar Then Exit Property
 If Not ttl Then
 drawminimized = Not IsWine
+If Not MyForm3 Is Nothing Then
+Else
 Set MyForm3 = New Form3
+End If
 Set MyForm3.lastform = Me
 MyForm3.Timer1.enabled = False
 ttl = True
@@ -1290,12 +1271,7 @@ Public Property Get CtrlFontBold()
 End Property
 
 
-Private Sub gList2_HeadLineChange(a As String)
-If ttl And a <> "" And a <> "Form" Then
 
-End If
-
-End Sub
 
 Private Sub gList2_KeyDown(KeyCode As Integer, shift As Integer)
 If moveMe Then
@@ -1470,6 +1446,21 @@ If Not moveMe Then
                If IsWine Then If glistN.Visible Then gList2.SetFocus
                 End If
 End Sub
+
+Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+If item = -1 Then
+
+Else
+glistN.mousepointer = 1
+If lastitem = item Then Exit Sub
+If glistN.ListSep(item) Then Exit Sub
+glistN.ListindexPrivateUse = item
+glistN.ShowMe2
+lastitem = item
+'glistN.ListindexPrivateUse = -1
+End If
+End Sub
+
 Private Sub glistN_KeyDown(KeyCode As Integer, shift As Integer)
 If KeyCode = vbKeyLeft Or KeyCode = vbKeyRight Then
 
@@ -1920,6 +1911,7 @@ With glistN
     .backcolor = rgb(255, 255, 255)
     .ForeColor = 0
     .enabled = True
+    .FreeMouse = True
     .NoPanLeft = True
     .NoPanRight = False
     .SingleLineSlide = True
@@ -1945,6 +1937,7 @@ With glistN
     If mMenuWidth < 3000 Then mMenuWidth = 3000
  End If
  PadGui.PopUpMenuVal = True
+ PadGui.NoHook = True
  With Pad
     .gList2.HeadLine = vbNullString
     .gList2.HeadLine = vbNullString

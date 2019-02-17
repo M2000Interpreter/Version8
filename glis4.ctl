@@ -1130,7 +1130,6 @@ state = True ' no keyboard input
 secreset = False
 Timer2.enabled = False
 FreeMouse = False
-
 If (Not BypassLeaveonChoose) And LeaveonChoose Then
 If Not MultiLineEditBox Then If EditFlag And caretCreated Then caretCreated = False: DestroyCaret
 SELECTEDITEM = -1: RaiseEvent Selected2(-2)
@@ -1612,7 +1611,7 @@ If mHeadline <> "" And Timer2.enabled = False Then
         RaiseEvent ExposeItemMouseMove(Button, topitem + YYT - 1, CLng(x) / scrTwips, CLng(y - (YYT - 1) * myt - mHeadlineHeightTwips) / scrTwips)
     End If
 ElseIf myEnabled Then
-Debug.Print topitem + YYT
+'Debug.Print topitem + YYT  ' THIS IS THE RETURNED KEY
     RaiseEvent ExposeItemMouseMove(Button, topitem + YYT, CLng(x) / scrTwips, CLng(y - YYT * myt) / scrTwips)
 End If
 If oldbutton <> Button Then Exit Sub
@@ -1979,7 +1978,7 @@ If (Button And 3) > 0 And myEnabled Then
         ' this is a double click
         secreset = False
          If Not ListSep(topitem + YYT) Then
-         If MarkNext = 0 And EditFlag Then
+         If MarkNext = 0 And (EditFlag Or MultiLineEditBox) Then
          
       MarkWord
       
@@ -4658,14 +4657,17 @@ End If
 End If
 Do
 st1 = st1 - 1
-s$ = Mid$(s$, 1, st1)  '
+s$ = Mid$(s$, 1, st1)
+
 realpos = UserControlTextWidth(s$)
+
 Loop While realpos > probeX And Len(s$) > 1
-If Right$(s$, 1) = Chr$(9) Then
-usedCharLength = Len(s$) - 1
+If realpos > probeX Then
+usedCharLength = 0
 Else
 usedCharLength = Len(s$)
 End If
+
 End If
 End Sub
 Public Function Pixels2Twips(pixels As Long) As Long
@@ -4759,7 +4761,7 @@ Wend
 If probeX > UserControlTextWidth(Mid$(s$, 1, st1 + 1)) Then
 st1 = st1 + 1
 Else
-If probeX < UserControlTextWidth(Mid$(s$, 1, st1)) Then st1 = st0  ' new in m2000
+If probeX < UserControlTextWidth(Mid$(s$, 1, st1)) Then st1 = st0
 If st1 = 2 Then
 
 If probeX < UserControlTextWidth(Mid$(s$, 1, 1)) Then st1 = 1
@@ -4996,7 +4998,7 @@ marvel = True
 UserControl.OLEDrag
 marvel = False
 End Sub
-Private Sub MarkWord()
+Friend Sub MarkWord()
 If ListIndex < 0 Then Exit Sub
 Dim one$
 Dim mline$, pos As Long, Epos As Long, oldselstart As Long
@@ -5019,27 +5021,28 @@ If InStr(1, WordCharRight, one$) Then Exit Do
 Epos = Epos + 1
 Loop
 If (Epos - pos - 1) > 0 Then
-this$ = Mid$(mline$, pos + 1, Epos - pos - 1)
-RaiseEvent WordMarked(this$)
-If this = vbNullString Then Exit Sub
-oldselstart = SelStart
-MarkNext = 0
-If (oldselstart - pos - 1) > (Epos - oldselstart) Then
-SelStart = pos + 1
-RaiseEvent MarkIn
-MarkNext = 1
-SelStart = Epos
-RaiseEvent MarkOut
-Else
-SelStart = Epos
-RaiseEvent MarkIn
-SelStart = pos + 1
-MarkNext = 1
-RaiseEvent MarkOut
-SelStart = pos + 1
-End If
-
+    this$ = Mid$(mline$, pos + 1, Epos - pos - 1)
+    RaiseEvent WordMarked(this$)
+    If this = vbNullString Or Not EditFlag Then Exit Sub
+    oldselstart = SelStart
+    MarkNext = 0
+    If (oldselstart - pos - 1) > (Epos - oldselstart) Then
+        SelStart = pos + 1
+        RaiseEvent MarkIn
+        MarkNext = 1
+        SelStart = Epos
+        RaiseEvent MarkOut
+    Else
+        SelStart = Epos
+        RaiseEvent MarkIn
+        SelStart = pos + 1
+        MarkNext = 1
+        RaiseEvent MarkOut
+        SelStart = pos + 1
+    End If
 ShowMe2
+ElseIf Not EditFlag Then
+    PressSoft
 End If
 End If
 'Enabled = True

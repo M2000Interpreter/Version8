@@ -213,8 +213,12 @@ Private Declare Function CopyFromLParamToRect Lib "user32" Alias "CopyRect" (lpD
 Dim EXECUTED As Boolean
 Dim stolemodalid As Variant
 Public Property Set Process(mBtask As basetask)
+If mBtask Is Nothing Then
+'Set MyBaseTask = Nothing
+Else
 Set MyBaseTask = New basetask
 mBtask.CopyStrip2 MyBaseTask
+End If
 End Property
 
 Private Sub Command1_Click()
@@ -527,13 +531,13 @@ b = 2
 CopyFromLParamToRect a, thatRect
 a.Left = b
 a.Right = setupxy - b
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), 0
 b = 5
 a.Left = b
 a.Right = setupxy - b
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), rgb(255, 160, 0)
 
@@ -709,7 +713,7 @@ b.Right = gList4.WidthPixels
              End If
              'EXECUTED = False
               SetTextColor thisHDC, 0
-              b.Top = b.Bottom - 1 * lastfactor
+              b.top = b.Bottom - 1 * lastfactor
        
             FillBack thisHDC, b, &H777777
            
@@ -717,7 +721,7 @@ b.Right = gList4.WidthPixels
           
           
     SetTextColor thisHDC, gList4.ForeColor
-    b.Top = b.Bottom - 1
+    b.top = b.Bottom - 1
     FillBack thisHDC, b, 0
     End If
     If item = gList4.ListIndex Then
@@ -897,7 +901,7 @@ allheight = height1 * factor
 itemWidth = allwidth - 2 * borderleft
 itemwidth3 = itemWidth * 2 / 5
 itemwidth2 = itemWidth * 3 / 5 - borderleft
-Move Left, Top, allwidth, allheight
+Move Left, top, allwidth, allheight
 FontTransparent = False  ' clear background  or false to write over
 gList2.Move borderleft, bordertop, itemWidth, bordertop * 3
 gList2.FloatLimitTop = VirtualScreenHeight() - bordertop - bordertop * 3

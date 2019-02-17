@@ -105,7 +105,7 @@ If Not ColorDialog.Visible Then
     End If
 WaitDialog bstack
 If Not Thisform Is Nothing Then
-          If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
+          ' If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
           If Thisform.Visible Then Thisform.SetFocus
 End If
 OpenColor = Not CancelDialog
@@ -136,7 +136,7 @@ If Not FontDialog.Visible Then
     End If
 WaitDialog bstack
 If Not Thisform Is Nothing Then
-          If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
+          ' If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
           If Thisform.Visible Then Thisform.SetFocus
 End If
 If ReturnFontName <> "" Then OpenFont = Not CancelDialog
@@ -194,7 +194,7 @@ If Not LoadFile.Visible Then
     End If
 WaitDialog bstack
 If Not Thisform Is Nothing Then
-          If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
+          ' If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
           If Thisform.Visible Then Thisform.SetFocus
 End If
 If ReturnListOfFiles <> "" Or ReturnFile <> "" Then OpenImage = Not CancelDialog
@@ -268,7 +268,7 @@ If Not LoadFile.Visible Then
 'Hook3 LoadFile.hWnd, Nothing
 WaitDialog bstack
 If Not Thisform Is Nothing Then
-          If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
+          ' If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
           If Thisform.Visible Then Thisform.SetFocus
 End If
 If ReturnListOfFiles <> "" Or ReturnFile <> "" Then OpenDialog = Not CancelDialog
@@ -333,7 +333,7 @@ MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.name = "GuiM2000"
     End If
 WaitDialog bstack
 If Not Thisform Is Nothing Then
-          If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
+          ' If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
           If Thisform.Visible Then Thisform.SetFocus
 End If
 If ReturnFile <> "" Then SaveAsDialog = Not CancelDialog
@@ -406,7 +406,7 @@ If Not LoadFile.Visible Then
     End If
 WaitDialog bstack
 If Not Thisform Is Nothing Then
-          If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
+          ' If Typename(Thisform) = "GuiM2000" Then Thisform.ShowmeALL
           If Thisform.Visible Then Thisform.SetFocus
 End If
 If ReturnFile <> "" Then FolderSelector = Not CancelDialog

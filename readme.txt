@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 19 active-X
-Update gui controls.
+Version 9.7 Revision 20 active-X
+Update gui controls. New meditor in info.gsb
 
 
 

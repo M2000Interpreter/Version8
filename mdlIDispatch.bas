@@ -210,10 +210,10 @@ jumphere:
                     Set myform = pobjTarget
                     MoveFormToOtherMonitorOnly myform
                ElseIf items = 2 Then
-                    If Not varArr(1) = 0 Then
+                    If varArr(0) <> 0 Then
                     GoTo conthere
                     Else
-                    CallByName pobjTarget, pstrProcName, VbMethod, 0, varArr(0)
+                    CallByName pobjTarget, pstrProcName, VbMethod, 0, varArr(1)
 
                    
                     Set myform = pobjTarget
@@ -235,6 +235,9 @@ conthere:
                    pobjTarget.Modal = mycodeid
                    Dim x As Form, z As Form, zz As Form
                    Set zz = Screen.ActiveForm
+                   If zz.name = "Form3" Then
+                   Set zz = zz.lastform
+                   End If
                    If Not pobjTarget.IamPopUp Then
                         For Each x In Forms
                             If x.Visible And x.name = "GuiM2000" Then
@@ -250,7 +253,7 @@ conthere:
                     If pobjTarget.NeverShow Then
                     Modalid = mycodeid
                     If items = 2 Then
-                    CallByName pobjTarget, pstrProcName, VbMethod, 0, varArr(0)
+                    CallByName pobjTarget, pstrProcName, VbMethod, 0, varArr(1)
                     Else
                     CallByName pobjTarget, pstrProcName, VbMethod, 0, GiveForm()
                     End If
@@ -278,12 +281,10 @@ conthere:
                                         If Screen.ActiveForm.PopUpMenuVal Or Screen.ActiveForm.IamPopUp Then
                                             handlepopup = True
                                         End If
-                                    ElseIf GetForegroundWindow <> Screen.ActiveForm.hWND Then
+                                    ElseIf GetForegroundWindow <> Screen.ActiveForm.hWnd Then
                                         handlepopup = False
                                         If Screen.ActiveForm.PopUpMenuVal Or Screen.ActiveForm.IamPopUp Then
                                             Screen.ActiveForm.Visible = False
-                                        Else
-                                            If pobjTarget.Visible Then pobjTarget.SetFocus
                                         End If
                                     End If
                                 End If
@@ -304,9 +305,14 @@ conthere:
                 Next x
                 If Not zz Is Nothing Then Set z = zz
                 If Typename(z) = "GuiM2000" Then
+                If z.Modal = Modalid Then
+                
+                Else
                     z.ShowmeALL
                     z.SetFocus
+                    End If
                     Set z = Nothing
+                    
                 ElseIf Not z Is Nothing Then
                     If z.Visible Then z.SetFocus
                 End If
@@ -373,12 +379,12 @@ End If
 VarRet = CLng(0)
 End If
 there:
-Err.Clear
+Err.clear
 CallByNameFixParamArray = VarRet
 Exit Function
 exithere:
     If Err.Number <> 0 Then CallByNameFixParamArray = VarRet
-Err.Clear
+Err.clear
     If items > 0 Then
                 ' Fill parameters arrays. The array must be
                 ' filled in reverse order.
@@ -429,7 +435,7 @@ Public Function ReadOneParameter(pobjTarget As Object, dispid As Long, ERrR$, Va
         End If
 
         ' Invoke method/property
-        Err.Clear
+        Err.clear
        On Error Resume Next
         lngRet = IDsp.Invoke(dispid, riid, 0, CallType, params, VarRet, Excep, lngArgErr)
 If Err > 0 Then
@@ -456,7 +462,7 @@ Else
     'End If
 ReadOneParameter = Err = 0
   ''  If Err.Number <> 0 Then ReadOneParameter = varRet
-Err.Clear
+Err.clear
 End Function
 Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR$, ThisIndex As Variant, Optional useset As Boolean = False) As Variant
     
@@ -503,7 +509,7 @@ Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR
   
 
   
-        Err.Clear
+        Err.clear
         On Error Resume Next
         lngRet = IDsp.Invoke(dispid, riid, 0, CallType, params, VarRet, Excep, lngArgErr)
 If Err > 0 Then
@@ -530,7 +536,7 @@ Else
     End If
 
   ''  If Err.Number <> 0 Then ReadOneParameter = varRet
-Err.Clear
+Err.clear
 End Function
 Public Sub ChangeOneParameter(pobjTarget As Object, dispid As Long, val1, ERrR$)
     

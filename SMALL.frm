@@ -62,15 +62,17 @@ Private Declare Function SetWindowTextW Lib "user32" (ByVal hWnd As Long, ByVal 
     Private Const GWL_WNDPROC = -4
     Private m_Caption As String
 
-Public lastform As Form
+'Public lastform As Form
+Private affiliatehwnd As Long
 Public skiptimer As Boolean
 Private Declare Function DefWindowProcW Lib "user32" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
 Private Declare Sub PutMem4 Lib "msvbvm60" (Destination As Any, Value As Any)
-Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal OleStr As Long, ByVal bLen As Long) As Long
+Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal OleStr As Long, ByVal BLen As Long) As Long
 
 Private Const WM_GETTEXT = &HD
 Private Const WM_GETTEXTLENGTH = &HE
 Private Const WM_SETTEXT = &HC
+
 Public Property Get CaptionW() As String
     If m_Caption = "M2000" Then
         CaptionW = vbNullString
@@ -741,3 +743,23 @@ Public Function InIDECheck() As Boolean
     m_bInIDE = True
     InIDECheck = True
 End Function
+
+Public Property Get lastform() As Form
+If affiliatehwnd = 0 Then
+    Set lastform = Nothing
+Else
+Dim i As Long
+    For i = 1 To Forms.count - 1
+        If Forms(i).hWnd = affiliatehwnd Then Set lastform = Forms(i)
+    Next i
+End If
+End Property
+
+Public Property Set lastform(vNewValue As Form)
+On Error Resume Next
+Dim i
+For i = 1 To Forms.count - 1
+If Forms(i) Is vNewValue Then affiliatehwnd = Forms(i).hWnd: Exit Property
+Next i
+affiliatehwnd = 0
+End Property

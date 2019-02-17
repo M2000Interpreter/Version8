@@ -267,6 +267,7 @@ Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal 
 Private Declare Function SetWindowTextW Lib "user32" (ByVal hWnd As Long, ByVal lpString As Long) As Long
     Private Const GWL_WNDPROC = -4
     Private m_Caption As String
+Public lastitem As Long
 Public Property Get CaptionW() As String
     If m_Caption = "M2000" Then
         CaptionW = vbNullString
@@ -644,6 +645,20 @@ End If
 End Select
 End Sub
 
+Private Sub List1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+If item = -1 Then
+
+Else
+List1.mousepointer = 1
+If lastitem = item Then Exit Sub
+If List1.ListSep(item) Then Exit Sub
+List1.ListindexPrivateUse = item
+List1.ShowMe2
+lastitem = item
+'List1.ListindexPrivateUse = -1
+End If
+End Sub
+
 Private Sub list1_ExposeRect(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
 If item = List1.ListIndex Then
 
@@ -654,7 +669,6 @@ Else
 skip = False
 End If
 End Sub
-
 
 Private Sub List1_PanLeftRight(Direction As Boolean)
 Dim dummy As Boolean
@@ -1508,6 +1522,8 @@ TEXT1.TabWidth = 4
 .WordCharRightButIncluded = "("
 
 End With
+List1.NoWheel = True
+List1.FreeMouse = True
 List1.LeftMarginPixels = 4
 List1.NoPanRight = False
 List1.SingleLineSlide = True

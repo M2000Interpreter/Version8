@@ -83,7 +83,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 18
+Global Const Revision = 20
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -8131,8 +8131,7 @@ cont123:
                     rr& = 0
                     Exit Do
             End If
-            
-        Case 36 ' "$"
+            Case 36 ' "$"
        If one Then Exit Do
             If r$ <> "" Then
             one = True
@@ -8200,7 +8199,7 @@ cont123:
     If skipcase Then
     rrr$ = r$
     Else
-    rrr$ = myUcase(r$, gr)
+      rrr$ = myUcase(r$, gr)
     End If
     If dot& Then
 havedot:
@@ -8290,8 +8289,8 @@ havedot:
    Else
     IsLabelBig = rr&
     End If
+    
     nocommand = IsLabelBig And (Len(r$) = 1 Or nocommand)
- '' a$ = LTrim$(a$)
 
 End Function
 Function IsLabelFileName(bstack As basetask, a$, rrr$, Optional nocommand As Boolean, Optional r$, Optional noconvert As Boolean = False) As Long
@@ -8951,11 +8950,7 @@ Case Is < 0, Is > 64 ' >=A and negative
     
     
    End If
-   
     innerIsLabel = rr&
-
- '' a$ = LTrim$(a$)
-
 End Function
 Function IsLabelDIM(bstack As basetask, a$, r$) As Long
 Dim rr&, one As Boolean, c$, dot&, gr As Boolean, skipcase As Boolean, cc As Long
@@ -9744,10 +9739,9 @@ a$ = NLtrim$(a$)
         End If
 
     Loop
-r$ = myUcase(r$, gr)
+    r$ = myUcase(r$, gr)
 
     IsLabelA1 = rr&
-   'a$ = LTrim$(a$)
 
 End Function
 
@@ -25405,6 +25399,16 @@ x1 = IsLabelA("", rest$, w$)
             
    End If
 Case "REM", "сгл"
+If FastSymbol(rest$, "{") Then
+   i = blockLen(rest$)
+   If i > 0 Then
+    Mid$(rest$, 1, i) = space$(i)
+    Else
+                    MissString
+                    ExecuteGroupStruct = 0
+                    Exit Function
+    End If
+End If
 SetNextLine rest$: GoTo there100
 Case "FUNCTION", "сумаятгсг"
 If IsLabelSymbolNew(rest$, "цемийг", "GLOBAL", Lang) Then
@@ -43598,6 +43602,7 @@ If FastSymbol(rest$, "@") Then
 
     If Not IsStrExp(bstack, rest$, s$) Then
   bstack.Owner.TabStop = False
+    Form1.List1.Tag = vbNullString
     Form1.List1.HeadLine = vbNullString: Form1.KeyPreview = True: Exit Function
     End If
     
@@ -43671,10 +43676,12 @@ If x1 < 0 Then
             .enabled = True
             .NoPanRight = False
             .NoFreeMoveUpDown = True
+            .FreeMouse = True
             .SingleLineSlide = True
             SetTextBasketBack bstack.Owner, players(prive)
             .overrideTextHeight = fonttest.TextHeight("fj")
             End With
+            Form1.lastitem = 0
     ListChoise bstack, frm$, x1, y1, F + x1, it + y1 - 1
     INK$ = vbNullString
     ''UINK$ = VbNullString
