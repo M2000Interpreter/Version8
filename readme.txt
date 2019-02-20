@@ -1,11 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 21 active-X
+Version 9.7 Revision 22 active-X
 
-1.Minor bugs removes
-2.Update gui controls. New meditor in info.gsb
-3.Now we can call com objects passing by reference variables. (for events from com by reference work allways, so no change happen there)
-4.Updated help2000.mdb
+one last bug...
 
 The final 9.7 version
 when fist time run the interpreter do this in M2000 console:

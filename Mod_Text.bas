@@ -83,7 +83,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 21
+Global Const Revision = 22
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -34444,7 +34444,7 @@ contEvArray:
                                 For i = 0 To ar - 1
                                 CreateFormObject aVar, 1
                                 Set pppp.item(i) = aVar
-                                Dim aaa As GuiM2000, safe As safeforms
+                                Dim aaa As GuiM2000, safe As LongHash
                                 Set safe = getSafeFormList()
                                 Set aaa = aVar
                                 
