@@ -107,6 +107,7 @@ gList1.CapColor = rgb(255, 160, 0)
 gList1.LeftMarginPixels = 4
 Set label1 = New TextViewer
 Set label1.Container = gList1
+label1.NoCenterLineEdit = True
 label1.FileName = vbNullString
 label1.glistN.NoMoveDrag = True
 label1.glistN.DropEnabled = False
@@ -120,15 +121,22 @@ label1.glistN.FloatList = True
 label1.glistN.MoveParent = True
 With label1.glistN
 If FeedbackExec$ = vbNullString Or Not abt Then
-.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "!", "'", ";", "=", ">", "<", """", " ", "+", "-", "/", "*", "^")
-.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", , "!", ";", "'", "=", ">", "<", """", " ", "+", "-", "/", "*", "^")
-.WordCharRightButIncluded = ChrW(160) ' so aaa(sdd) give aaa( as word
+'.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "!", "'", ";", "=", ">", "<", """", " ", "+", "-", "/", "*", "^")
+'.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", , "!", ";", "'", "=", ">", "<", """", " ", "+", "-", "/", "*", "^")
+.WordCharRightButIncluded = ChrW(160) + "("
+.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9), "#", "%", "&", "$")
+.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9), "#")
+'.WordCharRightButIncluded = "("
+.WordCharLeftButIncluded = "#$@~"
 Else
 .WordCharLeft = "['"
 .WordCharRight = "']"
 .WordCharRightButIncluded = ChrW(160)
+.WordCharLeftButIncluded = vbNullString
 End If
+
 End With
+
 mt = DXP
 ''Set HelpStack.Owner = Me
 ''SetTrans Me, 200, &HFFFFFF
@@ -151,7 +159,7 @@ End If
 End Sub
 Public Sub moveMe()
 ScaleDialog Helplastfactor, HelpLastWidth
-Hook2 hWND, gList1
+Hook2 hWnd, gList1
 label1.glistN.SoftEnterFocus
 If IsWine Then
 If Not Screen.ActiveForm Is Nothing Then
@@ -162,40 +170,40 @@ End If
 End If
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
 
 If Button = 1 Then
     
     If Helplastfactor = 0 Then Helplastfactor = 1
 
     If bordertop < 150 Then
-    If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
+    If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = x
-    ly = y
+    Lx = X
+    ly = Y
     End If
     
     Else
-    If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
+    If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = x
-    ly = y
+    Lx = X
+    ly = Y
     End If
     End If
 
 End If
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False: drmove = False
 If bordertop < 150 Then
-If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
  Else
- If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+ If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
 End If
 If dr Then
 
@@ -203,12 +211,12 @@ If dr Then
 
 If bordertop < 150 Then
 
-        If y < (Height - 150) Or y > Height Then addy = (y - ly)
-     If x < (Width - 150) Or x > Width Then addX = (x - Lx)
+        If Y < (Height - 150) Or Y > Height Then addy = (Y - ly)
+     If X < (Width - 150) Or X > Width Then addX = (X - Lx)
      
 Else
-    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
-        If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
+    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
+        If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
     End If
     
 
@@ -237,10 +245,10 @@ Else
         
         If Helplastfactor <> factor Then ScaleDialog Helplastfactor, Width
 
-        Lx = x
+        Lx = X
         
         Else
-        Lx = x * Helplastfactor / factor
+        Lx = X * Helplastfactor / factor
              ScaleDialog Helplastfactor, (Width + addX) * Helplastfactor / factor
          
    
@@ -254,14 +262,14 @@ Else
         ly = ly * Helplastfactor / factor
         End If
         Else
-        Lx = x
-        ly = y
+        Lx = X
+        ly = Y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
 
 If dr Then Me.mousepointer = 0
 dr = False
@@ -269,7 +277,7 @@ End Sub
 
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
-UnHook2 hWND
+UnHook2 hWnd
 Set LastGlist2 = Nothing
 End Sub
 
@@ -295,9 +303,9 @@ Helplastfactor = 1
 helpSizeDialog = 1
 End Sub
 
-Private Sub gList1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
 If item = -1 Then
-If gList1.DoubleClickCheck(Button, item, x, y, gList1.WidthPixels - 10 * Helplastfactor, 10 * Helplastfactor, 8 * Helplastfactor, -1) Then
+If gList1.DoubleClickCheck(Button, item, X, Y, gList1.WidthPixels - 10 * Helplastfactor, 10 * Helplastfactor, 8 * Helplastfactor, -1) Then
 HelpLastWidth = -1
             Unload Me
 End If
@@ -343,7 +351,7 @@ flagmarkout = False: Exit Sub
 End If
 End Sub
 
-Private Sub gList1_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub gList1_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 flagmarkout = True
 If mHelp Then
 shift = 0
@@ -396,14 +404,14 @@ b = setupxy / 3
 CopyFromLParamToRect a, thatRect
 a.Right = a.Right - b
 a.Left = a.Right - setupxy - b
-a.Top = b
+a.top = b
 a.Bottom = b + setupxy / 5
 FillThere thathDC, VarPtr(a), thatbgcolor
-a.Top = b + setupxy / 5 + setupxy / 10
+a.top = b + setupxy / 5 + setupxy / 10
 a.Bottom = b + setupxy \ 2
 FillThere thathDC, VarPtr(a), thatbgcolor
-a.Top = b + 2 * (setupxy / 5 + setupxy / 10)
-a.Bottom = a.Top + setupxy / 5
+a.top = b + 2 * (setupxy / 5 + setupxy / 10)
+a.Bottom = a.top + setupxy / 5
 FillThere thathDC, VarPtr(a), thatbgcolor
 
 End Sub
@@ -413,13 +421,13 @@ b = 2
 CopyFromLParamToRect a, thatRect
 a.Left = a.Right - b
 a.Right = a.Right - setupxy + b
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), gList1.dcolor
 b = 5
 a.Left = a.Left - 3
 a.Right = a.Right + 3
-a.Top = b
+a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), gList1.CapColor
 
@@ -462,7 +470,7 @@ End If
 allwidth = NewWidth  ''vH_x * factor
 allheight = vH_y * factor
 itemWidth = allwidth - 2 * borderleft
-myform Me, Left, Top, allwidth, allheight, True, factor
+myform Me, Left, top, allwidth, allheight, True, factor
 
   
 gList1.addpixels = 4 * factor

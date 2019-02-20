@@ -594,7 +594,9 @@ Property Let textDoc(norawtext As String)
     a() = Split(norawtext, vbCrLf)
     End If
         norawtext = Join(a(), vbLf)
-        
+             If InStr(norawtext, vbCr) Then
+              norawtext = Join(Split(norawtext, vbCr), vbLf)
+     End If
         If InStr(norawtext, vbLf) = 0 Then
         AppendParagraph norawtext
         Else
@@ -650,6 +652,9 @@ Property Let FasttextDoc(norawtext As String)
         a() = Split(norawtext, vbCrLf)
         End If
         norawtext = Join(a(), vbLf)
+          If InStr(norawtext, vbCr) Then
+              norawtext = Join(Split(norawtext, vbCr), vbLf)
+         End If
             If InStr(norawtext, vbLf) = 0 Then
             AppendParagraph norawtext
             Else
@@ -903,7 +908,12 @@ Public Sub InsertDoc(ByVal ParaNum As Long, fromPos As Long, norawtext As String
     once = True
       a() = Split(norawtext, vbCrLf)
         norawtext = Join(a(), vbLf)
+     If InStr(norawtext, vbCr) Then
+      a() = Split(norawtext, vbCr)
+      norawtext = Join(a(), vbLf)
+     End If
      a() = Split(norawtext + vbLf, vbLf)
+     
 Dim i As Long, k As Long, j As Long, ii As Long
     i = LBound(a())
     Do
@@ -2953,14 +2963,14 @@ PutMem2 VarPtr(acc), mValue
 RangeUnsignInteger = acc >= Abs(mFrom) And acc <= Abs(mTo)
 End Function
 Function FindWord(Find$, Direction As Boolean, there As Long, cur As Long) As Boolean
-Dim oncemore As Boolean, result As Boolean, res$, code As Integer
+Dim oncemore As Boolean, Result As Boolean, res$, code As Integer
 again:
 If Direction Then
- result = FindStrDown(Find$, there, cur)
+ Result = FindStrDown(Find$, there, cur)
  Else
- result = FindStrUp(Find$, there, cur)
+ Result = FindStrUp(Find$, there, cur)
  End If
-If result Then
+If Result Then
 res$ = TextParagraph(there)
 If cur > 1 Then
     code = AscW(Mid$(res$, cur - 1, 1))
@@ -2987,7 +2997,7 @@ If (Len(res$) - cur + 1) > Len(Find$) Then
                 If there > 0 Then
                     cur = TextParagraphLen(there)
                 Else
-                    result = False
+                    Result = False
                 Exit Function
             End If
         Else
@@ -3017,26 +3027,29 @@ End Function
 
 Function FindIdentifier(Find$, Direction As Boolean, there As Long, cur As Long) As Boolean
 ' there is paragraph number not paragraph order
-Dim oncemore As Boolean, result As Boolean, res$
+Dim oncemore As Boolean, Result As Boolean, res$
 If Len(Find$) > 1 And Left$(Find$, 1) = "&" Then Find$ = Mid$(Find$, 2): cur = cur + 1
 If InStr(Find$, Chr$(13)) > 0 Then Exit Function
 If InStr(Find$, Chr$(10)) > 0 Then Exit Function
 again:
 If Direction Then
- result = FindStrDown(Find$, there, cur)
+ Result = FindStrDown(Find$, there, cur)
  Else
- result = FindStrUp(Find$, there, cur)
+ Result = FindStrUp(Find$, there, cur)
  End If
-If result Then
+If Result Then
 res$ = TextParagraph(there)
 If cur > 1 Then
+If AscW(Mid$(res$, cur, 1)) = 35 Then
+Else
     Select Case AscW(Mid$(res$, cur - 1, 1))
     Case 160
-    Case 46, 65 To 90, 95, 97 To 122, Is > 127
+    Case 35, 46, 65 To 90, 95, 97 To 122, Is > 127
     If Direction Then cur = cur + 1 Else cur = cur - 1
     GoTo again
     Case Else
     End Select
+    End If
 End If
 If Find$ = "" Then Exit Function
 Select Case AscW(Right$(Find$, 1))
@@ -3053,7 +3066,7 @@ If (Len(res$) - cur + 1) > Len(Find$) Then
                 If there > 0 Then
                     cur = TextParagraphLen(there)
                 Else
-                    result = False
+                    Result = False
                 Exit Function
             End If
         Else

@@ -22,7 +22,7 @@ Event AutoCompleteDone(ByVal this$)
 Event PickOther(ByVal this$)
 Dim Iam As Boolean
 Public AutoComplete As Boolean
-Public NoCaseSensitive As Boolean
+Public NoCaseSensitive As Boolean, lastitem As Long
 Public Property Set Container(glistNN As gList)
 Set glistN = glistNN
 glistNN.enabled = True
@@ -32,7 +32,7 @@ glistNN.LeaveonChoose = True
 glistNN.LeftMarginPixels = 8
 glistNN.VerticalCenterText = True
 glistNN.StickBar = False ' True ' try with false - or hold shift to engage false
-glistNN.NoWheel = True ' New wheel is not
+''glistNN.NoWheel = True ' New wheel is not
 glistNN.NoFreeMoveUpDown = False
 If Not Textbox Is Nothing Then
 Textbox.Prompt = ChrW$(&H25BC) + " "
@@ -46,6 +46,19 @@ Public Property Let Label(a$)
 Textbox.Prompt = a$ + " " + ChrW$(&H25BC) & " "
 Textbox.glistN.ShowMe
 End Property
+
+Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+If item = -1 Then
+
+Else
+glistN.mousepointer = 1
+If lastitem = item Then Exit Sub
+If glistN.ListSep(item) Then Exit Sub
+glistN.ListindexPrivateUse = item
+glistN.ShowMe2
+lastitem = item
+End If
+End Sub
 
 Private Sub glistN_RegisterGlist(this As gList)
 Dim mo As Object
@@ -95,6 +108,12 @@ Text = glistN.list(glistN.ListIndex)
 End If
 End Sub
 
+
+Private Sub glistN_UnregisterGlist()
+On Error Resume Next
+Set LastGlist = Nothing
+If Err.Number > 0 Then glistN.NoWheel = True
+End Sub
 
 Private Sub textbox_KeyDown(KeyCode As Integer, shift As Integer)
 Dim b$
@@ -176,7 +195,7 @@ End If
 End Sub
 
 
-Private Sub textbox_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub textbox_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 If Textbox.glistN.DblClick Then
 Iam = False
 

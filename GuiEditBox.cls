@@ -708,12 +708,12 @@ Render
 End Sub
 
 
-Private Sub glistN_OutPopUp(x As Single, y As Single, myButton As Integer)
+Private Sub glistN_OutPopUp(X As Single, Y As Single, myButton As Integer)
 '
 If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(X + Callback.Controls(ctrlName).Left) + "," + Str(Y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
    Else
-      Callback.Callback mesCtrlName + ".PopUp(" + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+      Callback.Callback mesCtrlName + ".PopUp(" + Str(X + Callback.Controls(ctrlName).Left) + "," + Str(Y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
       End If
 End Sub
 
@@ -1129,21 +1129,24 @@ mDoc.busy = True
 all = mDoc.DocLines
 glistN.ListIndex = mDoc.FirstParagraphLine(mDoc.MarkParagraphID) + mDoc.TextParagraph2Line(mDoc.MarkParagraphID, Charpos, selstart2, NoColor)
 glistN.SelStart = selstart2
+'GoTo aaa
 If glistN.ListIndex < glistN.ScrollFrom Then
 If glistN.ListIndex > glistN.lines Then
 glistN.ScrollToSilent glistN.ListIndex - glistN.lines / 2
 Else
 glistN.ScrollToSilent 0
 End If
+ElseIf glistN.ListIndex > glistN.lines And glistN.listcount - glistN.ListIndex <= glistN.lines Then
+    glistN.ScrollToSilent glistN.listcount - glistN.lines - 1
 ElseIf glistN.ListIndex > glistN.ScrollFrom + glistN.lines Then
 If glistN.listcount - glistN.ListIndex < glistN.lines Then
 glistN.ScrollToSilent glistN.listcount - glistN.lines
 Else
 glistN.ScrollToSilent glistN.ListIndex - glistN.lines / 2
 End If
-ElseIf glistN.ListIndex > glistN.lines And glistN.listcount - glistN.ListIndex < glistN.lines Then
-glistN.ScrollToSilent glistN.listcount - glistN.lines
 End If
+aaa:
+glistN.ScrollToSilent glistN.ScrollFrom
 If glistN.enabled Then glistN.ShowPan
 mDoc.busy = False
 End Sub
@@ -1971,7 +1974,7 @@ End Sub
 
 'End Sub
 
-Private Sub glistN_ScrollSelected(item As Long, y As Long)
+Private Sub glistN_ScrollSelected(item As Long, Y As Long)
 If NoMark Then Exit Sub
 Dim what$, ThatPara As Long
    mDoc.TextParagraphLine item, what$, ThatPara
@@ -3448,10 +3451,11 @@ Public Property Let SetM2000(RHS)
     EnablePairs = True
     AutoNumber = True
     AllowInsertBrackets = True
-    glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9))
-    glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9))
+    glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9), "#", "%", "&")
+    glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9), "#")
     glistN.WordCharRightButIncluded = "(" ' so aaa(sdd) give aaa( as word
-    End If
+    glistN.WordCharLeftButIncluded = "#"
+   End If
 End Property
 Private Sub mDoc_ColorDataEvent(thispara1 As Long, data As String, feedback As Long)
 If M2000code Then
@@ -5324,7 +5328,12 @@ a$ = Format((val(c$) + 1), tr$) + Mid$(CurrentParagraph, 1, MyTrimL(CurrentParag
 End If
 End If
 Else
+If (UseTab And (TabControl = 0 Or Myleft$(CurrentParagraph, 1) = ChrW$(9))) And Not Myleft$(CurrentParagraph, 1) = " " Then
+a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbKeyTab)
+Else
 a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
+End If
+
 End If
 Else
 If UseTab And (TabControl = 0 Or Myleft$(CurrentParagraph, 1) = ChrW$(9)) Then
@@ -5355,7 +5364,7 @@ glistN_MarkDelete False
 ss$ = undotext
 End If
 Dim a$
-    
+glistN.enabled = False
     a$ = Myleft(CurrentParagraph, Charpos)
     If TabControl = 0 Then
     i = ((Len(a$) - Len(NLtrim$(a$))))
@@ -5382,6 +5391,7 @@ Dim a$
     End If
     SelStartSilent = j + i + 3 + 6
     End If
+glistN.enabled = True
 Render
 End Sub
 Function GetLCIDFromKeyboard() As Long
@@ -6193,15 +6203,15 @@ End If
 aheadstatus = b$
 End Function
 
-Public Sub Move(x, y, Optional w, Optional h)
+Public Sub Move(X, Y, Optional w, Optional h)
 If IsMissing(w) Then
-glistN.MoveTwips CLng(x), CLng(y), 0, 0
+glistN.MoveTwips CLng(X), CLng(Y), 0, 0
 ElseIf IsMissing(h) Then
 
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), 0
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), 0
 RelocateMarkedText
 Else
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), CLng(h)
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), CLng(h)
 RelocateMarkedText
 End If
 
@@ -6324,13 +6334,13 @@ s$ = InputBoxN("Αναζήτησε προς τα πάνω:", "Συγγραφή Κειμένου", s$, noinp)
 Else
 s$ = InputBoxN("Search to top:", "Text Editor", s$, noinp)
 End If
-If noinp <> 1 Then Exit Sub
+If noinp = 1 Then
 If MyTrim(s$) <> "" Then Searchup s$, shift Mod 2 = 1
 shift = 0
 ElseIf SelText <> "" Or s$ <> "" Then
 supsub
 End If
-
+End If
 KeyCode = 0
 Case vbKeyF3
 If shift <> 0 Then
@@ -6340,12 +6350,13 @@ s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$, noinp)
 Else
 s$ = InputBoxN("Search to down:", "Text Editor", s$, noinp)
 End If
-If noinp <> 1 Then Exit Sub
+If noinp = 1 Then
 If MyTrim(s$) <> "" Then SearchDown s$, shift Mod 2 = 1
 shift = 0
 ElseIf SelText <> "" Or s$ <> "" Then
 
 sdnSub
+End If
 End If
 KeyCode = 0
 Case vbKeyF4
@@ -6936,7 +6947,7 @@ Public Property Let MultiLineComment2(ByVal vNewValue As Variant)
 mMultiLineComment2 = vNewValue
 mDoc.final = vNewValue
 End Property
-Public Sub PopUpMenu(poptitle$, x As Variant, y As Variant)
+Public Sub PopUpMenu(poptitle$, X As Variant, Y As Variant)
 Dim oldModalId As Variant, i As Long
 ''If UsedAsTextBox Then Exit Sub
 i = SelLength
@@ -6953,7 +6964,7 @@ Modalid = Rnd * 113314324
 'UnHook Callback.hWnd
 UNhookMe
 MyPopUp.feedlabels Me, False
-MyPopUp.UpGui Callback, x, y, poptitle$
+MyPopUp.UpGui Callback, X, Y, poptitle$
 MyPopUp.Visible = True
 MyPopUp.ZOrder 0
 
@@ -7125,10 +7136,10 @@ glistN.EditFlag = OnOff
 glistN.NoCaretShow = NoMark
 End Sub
 Sub Transparent()
-Dim x  As Long, y As Long
+Dim X  As Long, Y As Long
 glistN.BackStyle = 1
-glistN.GetLeftTop x, y
-glistN.RepaintFromOut Callback.Image, x, y
+glistN.GetLeftTop X, Y
+glistN.RepaintFromOut Callback.Image, X, Y
 glistN.ShowMe
 Callback.RefreshList = Callback.RefreshList + 1
 End Sub
@@ -7238,7 +7249,12 @@ If Not glistN Is Nothing Then
 glistN.WordCharRight = vNewValue
 End If
 End Property
+Public Property Let WordCharLeftButIncluded(ByVal vNewValue As String)
+If Not glistN Is Nothing Then
+glistN.WordCharLeftButIncluded = vNewValue
+End If
 
+End Property
 Public Property Let WordCharRightButIncluded(ByVal vNewValue As String)
 If Not glistN Is Nothing Then
 glistN.WordCharRightButIncluded = vNewValue

@@ -21,7 +21,7 @@ Event KeyDown(KeyCode As Integer, shift As Integer)
 Event LostFocus()
 Event GotFocus()
 Event KeyPress(KeyAscii As Integer)
-Event MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Event MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 Event SpinnerValue(ThisValue As Long)
 Event DeployMenu()
 Event CtrlPlusF1()
@@ -58,7 +58,7 @@ Private Declare Function GetClipboardData Lib "user32" _
     Private Declare Function SetClipboardData Lib "user32" _
     (ByVal wFormat As Long, ByVal hMem As Long) As Long
     Private Declare Function OpenClipboard Lib "user32" _
-    (ByVal hWND As Long) As Long
+    (ByVal hWnd As Long) As Long
 Private Declare Function CloseClipboard Lib "user32" _
     () As Long
     Private Declare Function IsClipboardFormatAvailable Lib "user32" _
@@ -123,10 +123,10 @@ glistN.ShowMe
 locked = True
 End Property
 
-Public Property Get Top() As Long
-Top = glistN.TopTwips
+Public Property Get top() As Long
+top = glistN.TopTwips
 End Property
-Public Property Let Top(RHS As Long)
+Public Property Let top(RHS As Long)
 glistN.TopTwips = RHS
 End Property
 Public Property Set Container(glistNN As gList)
@@ -234,8 +234,10 @@ End If
 End Sub
 Public Sub Retired()
 glistN.FadeLastLinePart = 0
+If Not mStayOpen Then
 glistN.ForeColor = rgb(255, 255, 255)
 glistN.backcolor = rgb(200, 120, 60)
+End If
 glistN.NoCaretShow = True: glistN.PanPos = 0: glistN.ShowMe
 End Sub
 
@@ -298,8 +300,8 @@ On Error Resume Next
 glistN.SetFocus
 End Sub
 
-Private Sub glistN_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
-RaiseEvent MouseMove(Button, shift, x, y)
+Private Sub glistN_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+RaiseEvent MouseMove(Button, shift, X, Y)
 End Sub
 
 Private Sub glistN_SyncKeyboard(item As Integer)

@@ -63,29 +63,29 @@ Private myobject As Object
 Public LASTActiveForm As Form
 Dim ttl$(1 To 2)
 
-Public Sub Up(Optional x As Variant, Optional y As Variant)
-If IsMissing(x) Then
-x = CSng(MOUSEX())
-y = CSng(MOUSEY())
+Public Sub Up(Optional X As Variant, Optional Y As Variant)
+If IsMissing(X) Then
+X = CSng(MOUSEX())
+Y = CSng(MOUSEY())
 Else
-x = x + Form1.Left
-y = y + Form1.top
+X = X + Form1.Left
+Y = Y + Form1.top
 End If
-If x + Width > VirtualScreenWidth() Then
-If y + Height > VirtualScreenHeight() Then
+If X + Width > VirtualScreenWidth() Then
+If Y + Height > VirtualScreenHeight() Then
 Move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
 Else
-Move VirtualScreenWidth() - Width, y
+Move VirtualScreenWidth() - Width, Y
 End If
-ElseIf y + Height > VirtualScreenHeight() Then
-Move x, VirtualScreenHeight() - Height
+ElseIf Y + Height > VirtualScreenHeight() Then
+Move X, VirtualScreenHeight() - Height
 Else
-Move x, y
+Move X, Y
 End If
 Show
 MyDoEvents
 End Sub
-Public Sub UpGui(that As Object, x As Variant, y As Variant, thistitle$)
+Public Sub UpGui(that As Object, X As Variant, Y As Variant, thistitle$)
 If thistitle$ <> "" Then
 gList1.HeadLine = vbNullString
 gList1.HeadLine = thistitle$
@@ -94,20 +94,20 @@ Else
 gList1.HeadLine = vbNullString
 gList1.HeadlineHeight = 0
 End If
-x = x + that.Left
-y = y + that.top
+X = X + that.Left
+Y = Y + that.top
 
 
-If x + Width > VirtualScreenWidth() Then
-If y + Height > VirtualScreenHeight() Then
+If X + Width > VirtualScreenWidth() Then
+If Y + Height > VirtualScreenHeight() Then
 Move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
 Else
-Move VirtualScreenWidth() - Width, y
+Move VirtualScreenWidth() - Width, Y
 End If
-ElseIf y + Height > VirtualScreenHeight() Then
-Move x, VirtualScreenHeight() - Height
+ElseIf Y + Height > VirtualScreenHeight() Then
+Move X, VirtualScreenHeight() - Height
 Else
-Move x, y
+Move X, Y
 End If
 If thistilte$ <> "" Then
 
@@ -125,7 +125,7 @@ Dim k As Long
 Set myobject = that
 
 With gList1
-.NoWheel = True
+'.NoWheel = True
 .restrictLines = 14
 .FloatList = True
 .MoveParent = True
@@ -291,61 +291,47 @@ gList1.NoPanLeft = False
 gList1.SoftEnterFocus
 
 End Sub
-
-
-
-Private Sub Form_Activate()
-    If Typename(ActiveControl) = "gList" Then
-                If HOOKTEST <> 0 Then UnHook HOOKTEST
-                Hook hWnd, gList1
-                
-                End If
-End Sub
 Public Sub UNhookMe()
-Set LastGlist = Nothing
-UnHook hWnd
-End Sub
-Private Sub Form_Deactivate()
-UNhookMe
+' nothing
 End Sub
 
 Private Sub Form_Load()
 Set LASTActiveForm = Screen.ActiveForm
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
 
 If Button = 1 Then
     
     If Pouplastfactor = 0 Then Pouplastfactor = 1
 
     If bordertop < 150 Then
-    If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
+    If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = x
-    ly = y
+    Lx = X
+    ly = Y
     End If
     
     Else
-    If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
+    If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = x
-    ly = y
+    Lx = X
+    ly = Y
     End If
     End If
 
 End If
 End Sub
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False: drmove = False
 If bordertop < 150 Then
-If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
  Else
- If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+ If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
 End If
 If dr Then
 
@@ -353,12 +339,12 @@ If dr Then
 
 If bordertop < 150 Then
 
-        If y < (Height - 150) Or y > Height Then addy = (y - ly)
-     If x < (Width - 150) Or x > Width Then addX = (x - Lx)
+        If Y < (Height - 150) Or Y > Height Then addy = (Y - ly)
+     If X < (Width - 150) Or X > Width Then addX = (X - Lx)
      
 Else
-    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
-        If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
+    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
+        If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
     End If
     
 
@@ -387,10 +373,10 @@ Else
         
         If Pouplastfactor <> factor Then ScaleDialog Pouplastfactor, Width
 
-        Lx = x
+        Lx = X
         
         Else
-        Lx = x * Pouplastfactor / factor
+        Lx = X * Pouplastfactor / factor
              ScaleDialog Pouplastfactor, (Width + addX) * Pouplastfactor / factor
          
    
@@ -404,14 +390,14 @@ Else
         ly = ly * Pouplastfactor / factor
         End If
         Else
-        Lx = x
-        ly = y
+        Lx = X
+        ly = Y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
 
 If dr Then Me.mousepointer = 0
 dr = False
@@ -444,7 +430,9 @@ content1 = Int(val("0" & Trim$(Mid$(content, Len(part1) + 1))))
 End If
 End Sub
 
-Private Sub gList1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+
+
+Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
 ''If X * dv15 > Width / 2 Then
 
 If item = -1 Then
@@ -456,11 +444,11 @@ If gList1.ListSep(item) Then Exit Sub
 gList1.EditFlag = False
 ''''''''''''''''''''''''''''''
 If lastitem = item Then Exit Sub
+If gList1.ListSep(item) Then Exit Sub
 gList1.ListindexPrivateUse = item
 gList1.ShowMe2
 
 lastitem = item
-gList1.ListindexPrivateUse = -1
 End If
 End Sub
 
@@ -501,7 +489,7 @@ Private Sub gList1_LostFocus()
 Unload Me
 End Sub
 
-Private Sub gList1_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub gList1_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 
 gokeyboard = False
 gList1.PromptLineIdent = 0
@@ -510,12 +498,10 @@ gList1.ListindexPrivateUse = -1
 End Sub
 
 Private Sub glist1_RegisterGlist(this As gList)
-On Error Resume Next
-hookme this
-If Err.Number > 0 Then this.NoWheel = True '
+this.NoWheel = True '
 End Sub
 
-Private Sub gList1_ScrollSelected(item As Long, y As Long)
+Private Sub gList1_ScrollSelected(item As Long, Y As Long)
 If gokeyboard Then Exit Sub
 
 gList1.EditFlag = False
@@ -633,8 +619,6 @@ End If
 Case 23 - l
 showmodules
 Case 24 - l
-''Debug.Print GetFile("file to load")
-UNhookMe
 Set b = New basetask
 Set b.Owner = LASTActiveForm
 If b.Owner Is Nothing Then Set b.Owner = Form1
@@ -660,7 +644,6 @@ End If
 Form1.TEXT1.glistN.enabled = True
 Unload Me
 Case 26 - 1
-UNhookMe
     Set b = New basetask
     Set b.Owner = LASTActiveForm
     If b.Owner Is Nothing Then Set b.Owner = Form1
@@ -796,7 +779,7 @@ gList1.FloatLimitLeft = VirtualScreenWidth() - borderleft * 3
 End Sub
 
 Public Sub hookme(this As gList)
-If Not this Is Nothing Then this.NoWheel = True
+'' do nothing
 End Sub
 Private Sub gList1_SpecialColor(rgbcolor As Long)
 rgbcolor = rgb(100, 132, 254)
@@ -806,7 +789,5 @@ If Form1.Visible Then Form1.Refresh: If Form1.DIS.Visible Then Form1.DIS.Refresh
 End Sub
 
 Private Sub gList1_UnregisterGlist()
-On Error Resume Next
-Set LastGlist = Nothing
-If Err.Number > 0 Then gList1.NoWheel = True
+gList1.NoWheel = True
 End Sub

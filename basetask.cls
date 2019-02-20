@@ -16,6 +16,7 @@ Option Explicit
 ' This is a utility soros for passing parammeters to functions
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Public LoadOnly As Boolean, NoRun As Boolean
+Public CheckUnReferenceGui As Long
 Public callx1 As Long
 Public RRCOUNTER As Long
 Public callohere As String

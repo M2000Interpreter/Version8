@@ -23,8 +23,8 @@ Dim Callback As GuiM2000, Point2Me As Object
 ' colors
 Dim white As Long, black As Long, dimm1 As Long, dimm2 As Long, trans As Boolean, noeditme As Boolean
 Private mHideCaret As Boolean, mTitle As String
-Private lastshift As Boolean
-
+Private lastshift As Boolean, lastitem As Long
+Public maychange As Boolean
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
@@ -56,13 +56,13 @@ If Not glistN Is Nothing Then glistN.Shutdown
 Set Callback = Nothing
 Set glistN = Nothing
 End Sub
-Public Sub Move(x, y, Optional w, Optional h)
+Public Sub Move(X, Y, Optional w, Optional h)
 If IsMissing(w) Then
-glistN.MoveTwips CLng(x), CLng(y), 0, 0
+glistN.MoveTwips CLng(X), CLng(Y), 0, 0
 ElseIf IsMissing(h) Then
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), 0
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), 0
 Else
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), CLng(h)
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), CLng(h)
 End If
 End Sub
 
@@ -71,6 +71,16 @@ Set Point2Me = Nothing
 End Sub
 
 Private Sub glistN_BlockCaret(item As Long, blockme As Boolean, skipme As Boolean)
+Dim var(1) As Variant
+var(0) = item
+If mIndex > -1 Then
+Callback.CallbackNow mesCtrlName + ".Sep(" + CStr(mIndex) + ")", var()
+Else
+Callback.CallbackNow mesCtrlName + ".Sep()", var()
+End If
+If var(0) = -1 Then skipme = True: blockme = True
+
+
 If (trans And noeditme) Or mHideCaret Then
 blockme = True
 If mHideCaret Then glistN.NoCaretShow = True
@@ -78,12 +88,29 @@ End If
 End Sub
 
 
-Private Sub glistN_OutPopUp(x As Single, y As Single, myButton As Integer)
+Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+
+
+
+If item = -1 Then
+ElseIf maychange And Not Button = 2 Then
+If lastitem = item Then Exit Sub
+glistN.mousepointer = 1
+If glistN.ListSep(item) Then Exit Sub
+
+
+glistN.ListindexPrivateUse = item
+glistN.ShowMe2
+lastitem = item
+End If
+End Sub
+
+Private Sub glistN_OutPopUp(X As Single, Y As Single, myButton As Integer)
 If myButton And &H2 = 2 Then
 If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).Top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(X + Callback.Controls(ctrlName).Left) + "," + Str(Y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
    Else
-      Callback.Callback mesCtrlName + ".PopUp(" + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).Top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+      Callback.Callback mesCtrlName + ".PopUp(" + Str(X + Callback.Controls(ctrlName).Left) + "," + Str(Y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
       End If
       End If
 End Sub
@@ -106,7 +133,7 @@ VR(2) = item
       
 thispos = VR(1)
 content = VR(0)
-If thispos <> glistN.SelStart And content <> "" Then glistN.SelStart = thispos: glistN.ShowMe
+If thispos <> glistN.SelStart And content <> "" Then glistN.SelStart = thispos: glistN.ShowMe Else lastitem = -1
 End Sub
 Private Sub glistN_CtrlPlusF1()
   If mIndex >= 0 Then
@@ -256,9 +283,9 @@ shift = VR(1)
 If KeyCode = vbKeyF10 And shift <> 0 Then
 KeyCode = 0
 If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.Top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
+   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
    Else
-      Callback.Callback mesCtrlName + ".PopUp(" + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.Top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
+      Callback.Callback mesCtrlName + ".PopUp(" + Str(MOUSEX(Callback.Left)) + "," + Str(MOUSEY(Callback.top)) + "," + Str(2) + "," + Str(glistN.ListIndex + 1) + ")"
       End If
 Exit Sub
 End If
@@ -320,7 +347,7 @@ Private Sub glistN_ScrollMove(item As Long)
       End If
 End Sub
 
-Private Sub glistN_ScrollSelected(item As Long, y As Long)
+Private Sub glistN_ScrollSelected(item As Long, Y As Long)
    If mIndex >= 0 Then
    Callback.Callback mesCtrlName + ".Scroll(" + Str(mIndex) + "," + Str(item) + ")"
    Else
@@ -415,8 +442,8 @@ End Sub
 Sub Insert(content$)
 glistN.additemAtListIndex content$
 End Sub
-Sub Clear()
-glistN.Clear
+Sub clear()
+glistN.clear
 If glistN.Visible Then glistN.ShowMe2
 End Sub
 

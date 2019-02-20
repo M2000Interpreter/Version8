@@ -315,12 +315,7 @@ If Execute(objref, code$, False) <> 1 Then
                  MOUT = True
 End If
 If clean Or MOUT Or ExTarget Then
-                Dim x As Form
-                    For Each x In Forms
-             
-                    If Typename$(x) = "GuiM2000" Then Unload x
-                    Next
-                    Set x = Nothing
+ClearLoadedForms
 If NERR Then
 
 RaiseEvent ErrorAtt(stay)

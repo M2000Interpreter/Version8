@@ -242,8 +242,8 @@ Private Declare Function PeekMessageW Lib "user32" (lpMsg As Msg, ByVal hWnd As 
 Const WM_KEYFIRST = &H100
  Const WM_KEYLAST = &H108
  Private Type POINTAPI
-    x As Long
-    y As Long
+    X As Long
+    Y As Long
 End Type
  Private Type Msg
     hWnd As Long
@@ -337,7 +337,7 @@ DestroyCaret
 End If
 End Sub
 
-Private Sub DIS_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, x As Single, y As Single, state As Integer)
+Private Sub DIS_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -359,7 +359,7 @@ DestroyCaret
 End If
 End Sub
 
-Private Sub dSprite_OLEDragOver(index As Integer, data As DataObject, Effect As Long, Button As Integer, shift As Integer, x As Single, y As Single, state As Integer)
+Private Sub dSprite_OLEDragOver(index As Integer, data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -434,7 +434,7 @@ End If
 UseEsc = False
 End Sub
 
-Private Sub Form_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, x As Single, y As Single, state As Integer)
+Private Sub Form_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -541,7 +541,7 @@ If KeyAscii = 9 Then KeyAscii = 0: Exit Sub
 If KeyAscii = 13 Then KeyAscii = 0: Exit Sub
 End Sub
 
-Private Sub gList1_OutPopUp(x As Single, y As Single, myButton As Integer)
+Private Sub gList1_OutPopUp(X As Single, Y As Single, myButton As Integer)
 Dim i As Long
 
 If Not gList1.enabled Then Exit Sub
@@ -558,7 +558,7 @@ i = .SelLength
 End With
 UNhookMe
 MyPopUp.feedlabels TEXT1, EditTextWord
-MyPopUp.Up x + gList1.Left, y + gList1.top
+MyPopUp.Up X + gList1.Left, Y + gList1.top
 myButton = 0
 End Sub
 
@@ -645,7 +645,7 @@ End If
 End Select
 End Sub
 
-Private Sub List1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+Private Sub List1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
 If item = -1 Then
 
 Else
@@ -1010,7 +1010,7 @@ End If
 
 End Sub
 
-Private Sub DIS_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub DIS_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
 If Not NoAction Then
 NoAction = True
 
@@ -1018,7 +1018,7 @@ If Button > 0 And Targets Then
 
 If Button = 1 Then
 Dim sel&
-    sel& = ScanTarget(q(), CLng(x), CLng(y), 0)
+    sel& = ScanTarget(q(), CLng(X), CLng(Y), 0)
     If sel& >= 0 Then
         Select Case q(sel&).Id Mod 100
         Case Is < 10
@@ -1052,7 +1052,7 @@ End Sub
 
 
 
-Private Sub dSprite_MouseDown(index As Integer, Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub dSprite_MouseDown(index As Integer, Button As Integer, shift As Integer, X As Single, Y As Single)
 Dim p As Long, u2 As Long
 If lockme Then Exit Sub
 If Not NoAction Then
@@ -1064,7 +1064,7 @@ With players(p)
 
         If Button > 0 And Targets Then
 
-        sel& = ScanTarget(q(), CLng(x), CLng(y), index)
+        sel& = ScanTarget(q(), CLng(X), CLng(Y), index)
             If sel& >= 0 Then
                 If Button = 1 Then
                 Select Case q(sel&).Id Mod 100
@@ -1614,13 +1614,13 @@ End Sub
 
 
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
 If NoAction Then Exit Sub
 NoAction = True
 Dim sel&
 
 If Button > 0 And Targets Then
-sel& = ScanTarget(q(), CLng(x), CLng(y), -1)
+sel& = ScanTarget(q(), CLng(X), CLng(Y), -1)
 
 If sel& >= 0 Then
 
@@ -1775,11 +1775,11 @@ MyDoEvents
     Form2.label1(2) = "..."
     Form2.gList3(2).backcolor = &H3B3B3B
     TestShowCode = False
-     TestShowSub = vbNullString
- TestShowStart = 0
-      Set Form2.Process = basestack1
-   stackshow basestack1
-Form2.ComputeNow
+    TestShowSub = vbNullString
+    TestShowStart = 0
+    Set Form2.Process = basestack1
+    stackshow basestack1
+    Form2.ComputeNow
 
    
     End If
@@ -1913,12 +1913,7 @@ MOUT = False
 ClearLabels
 If Not interpret(basestack1, qq$) Then
 mybasket = players(DisForm)
-                Dim x As Form
-                    For Each x In Forms
-             
-                    If Typename$(x) = "GuiM2000" Then Unload x
-                    Next
-                     Set x = Nothing
+'' ClearLoadedForms  not needed any more
 If NERR Then Exit Do
     basestack1.toprinter = False
     If MOUT Then
@@ -2066,7 +2061,7 @@ KeyCode = 0
  Exit Sub
  End If
  End If
- If TEXT1.UsedAsTextBox Then result = 99
+ If TEXT1.UsedAsTextBox Then Result = 99
 NOEDIT = True: noentrance = False: Exit Sub
 End If
 If KeyCode = vbKeyPause Then
@@ -2119,9 +2114,9 @@ End If
 If TEXT1.UsedAsTextBox Then
 Select Case KeyCode
 Case Is = vbKeyTab And (shift Mod 2 = 1), vbKeyUp
-result = -1
+Result = -1
 Case vbKeyReturn, vbKeyTab, vbKeyDown
-result = 1
+Result = 1
 Case Else
 noentrance = False
 Exit Sub
@@ -2732,13 +2727,7 @@ End Function
 
 
 Public Sub myBreak(basestack As basetask)
-''Dim pagio$
-       Dim x As Form, aPic As StdPicture
-                    For Each x In Forms
-             
-                    If Typename$(x) = "GuiM2000" Then Unload x
-                    Next
-                     Set x = Nothing
+   ClearLoadedForms
 Dim cc As Object
 Set cc = New cRegistry
 
@@ -3002,21 +2991,8 @@ If OperatingSystem > System_Windows_7 Then
                 ElseIf basestack.tolayer > 0 Or basestack.toback Then
                  DIS.mousepointer = 1
                           Set DIS.mouseicon = Nothing
-                           
-                
-                Else
-                           ' If basestack.LastState Then
-                                    'basestack.LastState = False
-                                    'If basestack.LastMouse1 = 99 Then
-                                   '       s$ = CFname(basestack.LastMouse2)
-                                   '        Set aPic = LoadMyPicture(GetDosPath(s$))
-                                   '         If Not aPic Is Nothing Then
-                                   '        DIS.MouseIcon = aPic
-                                   '       End If
-                                  '  End If
-                                  '  DIS.mousepointer = basestack.LastMouse1
-                          '  End If
-                End If
+                                           
+               End If
 End Sub
 
 Public Sub mn1sub()

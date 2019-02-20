@@ -3869,12 +3869,14 @@ TRY {
 RETURN
 }
 MODULE MEDITOR {\\ notepad for M2000 programs (gsb files)
-Show
+\\ Use F1 in editor to change to no wrap<->wrap
+
 Clear \\ Clear all variables/objects
 Flush \\ Empty the stack
 CurDir$=Dir$
 Title$="M2000 Pad"
-Title Title$, 0
+Title Title$, 0   ' hide the console - 0
+\\ Gui Elements
 Declare NotePad Form
 Declare Pad EditBox Form NotePad
 Declare HelpPad EditBox Form NotePad
@@ -3883,38 +3885,88 @@ Declare Edit1 Combobox Form NotePad
 Declare Run1 Combobox Form NotePad
 Declare Help1 Combobox Form NotePad
 Declare Inform1 Button Form NotePad
+
+\\ setting form, to show control box icon using english labels (use 0 for greek)
+Method NotePad,"MakeStandardInfo", 1
+
+\\ we can display an icon (the M2000 by default)
+\\ Normal the icon is in the rright side, the control icon for close is in the left side. Here we do the oposite
+\\ Also we get the Quit property. Is a property which a Document read when do a busy work of loading to quit it.
+With NotePad,"UseIcon", True, "UseReverse", True, "Quit" as Quit
+
+\\ We nead then title height after title displayed toget the height where we place the elements, in resize event
+\\ we set the form to produce resize event by grabing the low right corner of form
+With NotePad, "Title" as Caption$, "Visible" as Visible, "TitleHeight" as tHeight, "Sizable", True
+
+
+
+\\ Elements Properties (some of them changed using Methods, to pass more than one value)
+\\ Change bavkground to M2000 Orange
 Method Inform1, "Colors", 15, #FFA000
+
+\\ We want the Button to act as a label only
 With Inform1, "Locked", true
+
+\\ Set the font for Pad, and for HelpPad, the two EditBoxes
 Method Pad, "FontAttr", "Verdana", 12, true   '  size=12, bold=true
 Method HelpPad,"FontAttr","Verdana", 10, true 
+
+\\ We call a method to setup EditBox for Text View (we can use keys to move the text)
 Method HelpPad, "TextViewOnly"
+
+
+\\ ShowAlways prevent changing color when HelpPad is inactive
+\\ We make some variables bound to properties
 With HelpPad, "visible" as helpshow, "ShowAlways", True, "Text" as HelpText$, "enabled" as HelpEnabled
 With HelpPad, "NoCenterLineEdit", True, "SetM2000", True, "EditDoc" as HelpEdit ' predifined for word picking
+\\ we want HelpPad not shown from beginning, so we disable it
 HelpEnabled=false
 
 With Pad, "NoWrap", True, "SetM2000", True, "SelLength" as SelLength
-With File1,"label","File", "listtext" as list$, "list" as list$() '
+
+\\ Set labels for menu's headers. and thecolor for check mark/ disable items,  in menus which we have those
+With File1,"label","File"
 With Edit1,"label","Edit",  "Mark", Color(255,100,0)
 With Run1,"label","Run",  "Mark", Color(255,100,0)
-With Help1,"label","Help",  "Mark", Color(255,100,0)
-With NotePad,"UseIcon", True, "UseReverse", True, "Quit" as Quit
-With NotePad, "Title" as Caption$, "Visible" as Visible, "TitleHeight" as tHeight, "Sizable", True
-\\ Call MakeStandardInfo, after setting Sizable to true to enable contol box's maximize button.
-Method NotePad,"MakeStandardInfo", 1
+With Help1,"label","Help",  "Mark", Color(255,100,0), "Id" as Id$()
+
+\\ set a property variable to read/write text to pad, also we can use Tab
 With Pad, "Text" as Pad.Text$, "NoColor", False, "ShowAlways", True, "UseTab", True, "tabwidth", 6
+
+\\ we want to control by menu  these two properties (they can change by keystroke also)
+\\ F10 tongle to hidden/no hidden characters, and Ctrl+F9 change the edit style in EditBox
+With Pad, "showparagraph" as par_Status, "NoCenterLineEdit" as style_status
+\\ they are false by default
+par_Status=False
+style_status=True
+
+\\ Just for beginnig we make a function to alter the first letter of a name, to be a title
 Def TitleStr$(a$)=ucase$(left$(a$,1))+mid$(a$,2)
 Filename$=Dir$+"Untitled.gsb"
+\\ Caption$ is the Title property of form. This is the forumla to display proper the filename$ (excluding path)
 Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+\\ The form is hidden, but we can move it
 Method NotePad,"move", 2000, 4000, 8000, 4000
+\\ Also we like to give M2000 Orange to layer unter the title
 Layer NotePad {Cls #FFA000}
+
+\\ Now we make the menu. We set 4000 twips for each dropdown list (height calculated automatic)
 With File1,"MenuStyle", True, "MenuWidth", 4000 
 With Edit1,"MenuStyle", True, "MenuWidth", 4000 
 With Run1,"MenuStyle", True, "MenuWidth", 4000 
 With Help1,"MenuStyle", True, "MenuWidth", 4000 
-With File1, "MenuEnabled" as mEnable()
-LoadState=false
+
+\\ the for This block used for erasing temporary variables, here the mi$ and mr$
+\\ we have to give a Group name (anything, so here we pick "This")
+\\ A Menuitem without name is a line separator
+\\ Menuradio used in Edit1, all other are Menuitems
+\\ the last two items in Edit1 have a third parameter to True, which means they are checkboxes
+\\ Internal
+\\ MenuItem(a$, Optional enabledthis As Boolean = True, Optional checked As Boolean = False, Optional radiobutton As Boolean = False, Optional firstate As Boolean = False, Optional IdD)
+
 For This {
-	mi$="MenuItem"  \\ is a temporary variable only for For This Block
+	const mi$="MenuItem"  \\ is a temporary variable only for For This Block
+	const mr$="MenuRadio"
 	Method File1, mi$,"Open",True
 	Method File1, mi$,"Save",True
 	Method File1, mi$,""    \\  only  a line here
@@ -3931,8 +3983,8 @@ For This {
 	Method Edit1, mi$,"Less Indent",True
 	Method Edit1, mi$,"More Indent",True
 	Method Edit1, mi$,""
-	Method Edit1,"MenuRadio","Tabs for Indent",True,True
-	Method Edit1,"MenuRadio","Spaces for Indent",True,false
+	Method Edit1, mr$,"Tabs for Indent",True,True
+	Method Edit1, mr$,"Spaces for Indent",True,false
 	Method Edit1, mi$,""
 	Method Edit1, mi$,"Show Hidden Characters", True, True
 	Method Edit1, mi$,"Free Style Edit Shift+F9", True, True
@@ -3945,28 +3997,43 @@ For This {
 	Method Run1, mi$,""
 	Method Run1, mi$,"Test Slow",True
 	Method Run1, mi$,"Test Normal", True
+	Method Run1, mi$,""
+	Method Run1, mi$,"Settings"
 
 	With Run1, "MenuGroup","This"
-	Method Help1, mi$,"About",True
+	Method Help1, mi$,"About",True,,,,"ABOUT"
 	Method Help1, mi$,""
-	Method Help1, mi$,"Find Topic",True
-	Method Help1, mi$,"Open Topic",HelpShow
+	Method Help1, mi$,"Find Topic",True,,,,"FIND"
+	Method Help1, mi$,"Open Topic",HelpShow,,,,"OPEN"
 	Method Help1, mi$,""
-	Method Help1, mi$,"Close Help",HelpShow
+	Method Help1, mi$,"Close Help",HelpShow,,,,"CLOSE"
 	
 
 	With Help1, "MenuGroup","This"
 }
-Def par_Status as boolean=false, old_status, style_status as boolean=false
-old_status=par_Status
+
+\\ Some variable for program. We can ue Def for a variable once, if we do that a second time the we get error.
+\\ always Def make local variables. We can set a type before for all non typed names after
+\\ or we can use as type and give a first value (not an expression here).
+\\ by defailt false is the va;ue for boolean type, so the =false not needed
+Def boolean LoadState=false,  old_status=false
+
+ \\ We need some properties with inexes, so we make these as arrays 
+ \\ They look as arrays but they are objects (PropReference)
+ \\ We can give names with dot, isn't a problem. Dot can be used for any name
 With Edit1,"ListSelected" as Edit1.Selected(), "MenuEnabled" as Edit1.Enabled()
-With Pad, "showparagraph" as par_Status, "NoCenterLineEdit" as style_status
 With Help1, "MenuEnabled" as Help1.Enabled()
+
+\\ Some variables for specific task.
+\\ Document make or change a local string variable (or global using <=)  to a Document type object (a linked list of paragraphs)
+\\ we have to use Clear Name$ to erase the document's paragraphs.
+\\ Using = or <= for globals we append text to it
 Document BackUp$="\\Write something...", LoadFile$
 Def ok as boolean
 Const nl$=chr$(13)+chr$(10)
 Pad.Text$=BackUp$
 Def what$, lastcommand$, mod2run$
+
 \\ function to retrieve info from help database, help2000.mdb in appdir$
 Def boolean HelpView
 
@@ -3982,46 +4049,61 @@ Function GetHelp$(&word$, find) {
 		read new word1$, hlp$, word2$
 		=If$(Eng->RightPart$(hlp$,"__<ENG>__"), LeftPart$(hlp$,"__<ENG>__")) :	word$=If$(Eng->word2$, word1$)
 	End If
-	
 }
 
-Function HelpPad.click {
-	Method  HelpPad, "EditTextView", false
-	If ask("Topic to find",,,,, what$)=1 Then Read what$ :Call Local FindWord(what$, true)
+\\ this call using Call Local (otherwise we get error because GetHepl$() isn't a global, or a local to FindWord)
+Function FindWord {
+	read new word$, find=false
+	Local hlp$=GetHelp$(&Word$, find)
+	If len(hlp$) Else Exit
+	HelpText$=word$+nl$+hlp$
+	If not helpview Then helpview=true : helpenabled=true
+	Call Local Notepad.Resize()
 }
-Function Help1.OpenMenu {
-	Help1.Enabled(3)=HelpShow  and not HelpEdit
-	Help1.Enabled(5)=HelpShow
-}
-Function HelpPad.word {
-	Call Local FindWord(letter$, false)
-}
-Function NotePad.Unload {
-      Read New &Ok
-      
-      If LoadState Then Quit=true : Call Local InformNow("Quit Loading..") : Exit
-      If Pad.Text$<>BackUp$ Then
-      After 50 {Call Local File1.DblClick(4)}
-      Ok=True
-      End If
 
-}
+\\this call using Call Local too, because inform1 is in this module scope
+\\ we use letter$ to pop a string (so we don't have to make a variable first)
 Function InformNow {
-      With Inform1, "Caption",  letter$
+	With Inform1, "Caption",  letter$
 }
+
+
+
+\\ so now we have to make some event service functions.
+\\ all these functions call local, means they use the same namespace as the one which the object defined
+\\ we have to use Read New  or place a new in parameter list () like in NotePad.Unload
+\\ this prevents to use a same local variable. Events may be called again, while still executed
+\\ to prove that we have to open a big file (rename a big txt file as gsb, say bigger than 10Mbytes)
+\\ then open it, and before actual placed in Pad, we can use he same service function to close the NotePad
+
+\\ Form's Events  (NotePad is the object)
+\\ The NotePad.Unload event get an argument by reference. If this change to true the unload canceled
+
+Function NotePad.Unload(New &Ok) {
+	If LoadState Then Quit=true : Call Local InformNow("Quit Loading..") : Exit
+	If Pad.Text$<>BackUp$ Then
+		After 50 {Call Local File1.DblClick(4)}
+		Ok=True
+	End If
+}
+\\ we can change this in code if we change the font of title (because a new TitleHeight  prodced), or if we remove the header (make it invinsible)
+def onetime=true
 Function Notepad.Resize {
 	Layer NotePad { Cls Color(255, 160, 0) ,0}
 	With NotePad, "Width" as NP.Width, "Height" as NP.Height, "TitleHeight" as tHeight
 	tHeight1=theight*2
-	Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
-	Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
-	Method Run1,"move",  twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
-	Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*80, tHeight
-      	Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*160, tHeight
+	if onetime then
+		Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
+		Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
+		Method Run1,"move",  twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
+		Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*80, tHeight
+		Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*160, tHeight
+		onetime=false
+	End if
 	If NP.height>1800 Then {
 		If helpview Then
-			free=NP.Height-tHeight1-twipsX*3
-			third=free/3
+			local free=NP.Height-tHeight1-twipsX*3
+			local third=free/3
 			free=free-third-twipsX*3
 			Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, free
 			Method HelpPad,"move", twipsX*2, tHeight1+free+twipsX*3,  NP.Width-twipsX*5,third
@@ -4032,20 +4114,26 @@ Function Notepad.Resize {
 		End If
 		With Pad, "NoWrap" as NoWrap
 		If Not NoWrap Then Method Pad,"Resize"
-		Method helppad, "resize"
-
+		Method HelpPad, "resize"
 	}
-	
 }
-Def oldword$
-Function FindWord {
-	read new word$, find=false
-	Local hlp$=GetHelp$(&Word$, find)
-	If len(hlp$) Else Exit
-	HelpText$=word$+nl$+hlp$
-	If not helpview Then helpview=true: helpenabled=true:
-	Call Local Notepad.Resize()
+
+\\ The HelpPad (for displaying help) use a newer event, the click, which open a message box, as input box
+\\ if the ask() return 1 then in stack of values we get the new value
+Function HelpPad.click {
+	Method  HelpPad, "EditTextView", false
+	If ask("Topic to find",,,,, what$)=1 Then Read what$ :Call Local FindWord(what$, true)
 }
+
+\\ this is the event to do something with a word clicking on heplPad
+Function HelpPad.word {
+	Call Local FindWord(letter$, false)
+}
+
+
+\\ From Pad we want to intercept the Ctrl+F5, to call the the first menu item in Run1
+\\ We can use a After {} thread (a M2000 Thread), to make the call asyncronus
+\\ also we make the key and shift zeroes, to not used by Pad (normaly F5 open the Replace Input Box, if we mark a word )
 Function Pad.KeyDown {
 	Read New &kc, &Shf
 	If kc=116 and shf=2 Then
@@ -4055,9 +4143,22 @@ Function Pad.KeyDown {
 		}
 	End If
 }
-Function Pad.Word() {
-	Call Local FindWord(letter$, false)
+
+
+\\Also we want from Pad to get a word, and open/change HelpPad
+
+\???
+
+\\ Also Local can be used if we didn't use &, for by reference variables
+\\ PopUpMenu is the standard menu for EditBox, but we can change it
+\\ using this event
+\\ This event fires when we use right mouse button  or Ctrl+F10, or Contex Menu Key.
+Function Pad.PopUp {
+      Read Local X, Y
+      Method Pad,"PopUpMenu", "",X , Y
 }
+
+\\ Each time we change SelStart or SelWidth of Pad, we get an Inform event
 Function Pad.Inform {
 	Read New L, P
 	If old_status<>par_status Then
@@ -4066,9 +4167,11 @@ Function Pad.Inform {
 	Else
 	With Inform1, "Caption", format$("{0}-{1}", L,P)
 	End If
+	\\ set focus to Pad - refresh if not scheduled
 	Method Pad,"Show"
 }
 
+\\ Helper functions for Edit1
 Function SetTabs {
 	With Pad, "UseTab", True,"tabwidth",6
 	With Inform1, "Caption","Set Tabs"
@@ -4089,7 +4192,11 @@ Function ChangeHidden {
 Function ChangeStyle {
 	Edit1.Selected(11)=not style_status
 	Method Pad,"PressKey", 120, 1
+	\\ no need to refresh, the effect is internal, and we see the cursor
+	\\ to leave the center line if free style used, not only in top or bottom page
 }
+
+\\ Befor Edit1 opened
 Function Edit1.OpenMenu {
 	Local X
 	X=SelLength>0
@@ -4098,21 +4205,30 @@ Function Edit1.OpenMenu {
 	Edit1.Selected(10)= par_Status
 	Edit1.Selected(11)= style_status
 }
+\\ We can check in checkboxes and radiobutton withou closing the menu
+\\ if we click on checks - (not on names)
+\\ here we use If Else.If Else End If
+
 Function Edit1.MenuChecked {
-Read New RadioIndex 
+	Read New RadioIndex 
 	If RadioIndex=7 Then
-	Call Local SetTabs()
+		Call Local SetTabs()
 	Else.If RadioIndex=8 Then
-	Call Local SetSpaces()
+		Call Local SetSpaces()
 	Else.If RadioIndex=10 Then
-	Call Local ChangeHidden()
+		Call Local ChangeHidden()
 	Else.If RadioIndex=11 Then
-	Call Local ChangeStyle()
+		Call Local ChangeStyle()
 	Else
-	With Inform1, "Caption","??"
-	Method Pad,"Show"	
+		With Inform1, "Caption","??"
+		Method Pad,"Show"	
 	End If
 }
+
+\\ When we double click on a menu item
+\\ We use Select Case
+\\ In M2000 after a Case can be one line of commands, or a block of commands {}
+\\ but no two or more lines of commands
 Function Edit1.DblClick {
 	Read New Edit1index
 	Select Case Edit1index
@@ -4136,33 +4252,58 @@ Function Edit1.DblClick {
 		Call Local ChangeStyle()
 	End Select
 }
+
+\\ Prepare the Run part
 Document TestFile$
 UseShow$={
 	Use statement Show to select when console open. Use { END } to skip waiting for key before end
 	}
+	
+\\ 0,2,3 menuitems call the same 
+\\ 1 is the line separator
 Function Run1.DblClick {
 	Read New Run1index
-	Select Case Run1index
-	Case 0,2,3
-	{
-		If ask(if$(Run1index=0->"Module to run","Command(s) to execute"	+UseShow$),,,,,mod2run$) Then
-			Read mod2run$
-			Clear TestFile$
-			TestFile$=If$(Run1index=2->"Set Slow"+nl$,"")
-			TestFile$="Module TestThis {"+Pad.Text$+nl$+"}"+nl$
-			TestFile$="Title "+quote$(LeftPart$(Caption$," -"))+nl$
-			TestFile$="Script TestThis :"+If$(Run1index=0->"Test ","")+mod2run$+": Push Key$: Drop: End"
-			Save.Doc TestFile$, "Test1234.gsb"
-			Win appdir$+"m2000.exe", dir$+"Test1234.gsb"
+	if Run1index=1 then
+		exit
+	else.if Run1index=5 then
+		Clear TestFile$
+		TestFile$={
+		Module A {
+			Title "Settings", 0
+			Settings
+			Wait 2000
+			While Control$="SETTINGS"
+				Wait 500
+			End while
+		}
+		A : End
+		}
+		Save.Doc TestFile$, "Test1235.gsb"
+		Win appdir$+"m2000.exe", dir$+"Test1235.gsb"
+	else.If ask(if$(Run1index=0->"Module to run","Command(s) to execute"	+UseShow$),,,,,mod2run$)=1 Then
+		Read mod2run$
+		Clear TestFile$
+		TestFile$=If$(Run1index=2->"Set Slow"+nl$,"")
+		TestFile$="Module TestThis {"+Pad.Text$+nl$+"}"+nl$
+		TestFile$="Title "+quote$(LeftPart$(Caption$," -"))+nl$
+		TestFile$="Script TestThis :"+If$(Run1index=0->"Test ","")+mod2run$+": Push Key$: Drop: End"
+		Save.Doc TestFile$, "Test1234.gsb"
+		Win appdir$+"m2000.exe", dir$+"Test1234.gsb"
 
-		End If
-	}
-	End Select
+	End If
 }
-Function Pad.PopUp {
-      Read Local X, Y
-      Method Pad,"PopUpMenu", "",X , Y
-}
+
+\\ This is the File1 DblCkick event
+\\ We use On Goto who start from 1, so we add one to File1index
+\\ We use labels and goto because the logic is a kind of spagheti
+\\ From Open1: may we go to Save1:
+\\ From Unload: we go to Save2:
+\\ From Save2: may we go to Save1:
+\\ There several cases to exit
+\\ the code use If with blocks {}  ' not updated yet
+\\ The Break statement stopped only from a Try {},
+\\ so Break make exit from all blocks, and exit from function.
+
 Function File1.DblClick {
 	Read New File1index
 	Local cont, cont2, f$, NL$={
@@ -4257,10 +4398,25 @@ Unload:
 		Cont2=True : Goto Save2
 	}
 }
+
+\\ These are the Help1 events
+\\ We want to enable/disable 3 and 5 menuitems
+GetIndex=lambda Help1 (id$) ->{
+	ret=-1&
+	Method Help1, "GetMenuId", id$, &ret as ok
+	if ok then =ret
+}
+
+Function Help1.OpenMenu {
+	Help1.Enabled(GetIndex("OPEN"))=HelpShow  and not HelpEdit
+	Help1.Enabled(GetIndex("CLOSE"))=HelpShow
+}
+
 Function Help1.DblClick {
 	read new  Help1.index
-	Select Case Help1.index
-	Case 0
+	call local InformNow(id$(Help1.index))
+	Select Case id$(Help1.index)
+	Case "ABOUT"
 	{
 		Local A, info$
 		Info$={
@@ -4271,15 +4427,19 @@ Function Help1.DblClick {
 			}
 		A=Ask(info$,Title$,"","")
 	}
-	Case 2
+	Case "FIND"
 		Call Local HelpPad.click()
-	Case 3
+	Case "OPEN"
 		Method  HelpPad, "EditTextView", True: Call Local Notepad.Resize()
-	Case 5
-		Method  HelpPad, "EditTextView", false : HelpView=false:HelpEnabled=False: Call Local Notepad.Resize()
+	Case "CLOSE"
+		Method  HelpPad, "EditTextView", false : HelpView=false: Call Local Notepad.Resize()
 	End Select
 	
 }
+Function Pad.Word() {
+	Call Local FindWord(letter$, false)
+}
+
 Function Notepad.InfoClick {
 	Read New X
 	If X=0 Then Call Local Help1.DblClick()
@@ -4288,12 +4448,14 @@ Call Local Notepad.Resize()
 \\ make this as the default control (get focus)
 With Pad,"Default",True
 \\ open as modal
+With NotePad,  "Blink", 50, "BlinkTimes", 20
 Method NotePad,"Show", 1
 Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
 }
 MODULE INFO {Title "Info"   ' open a window in task bar with name info (if  you run Demo, at the exit you get no window in task bar, so we can restore it)
+If IsWine Then Font "Verdana"
 dir user
 Player 0  ' erase any layer
 back {
@@ -4316,7 +4478,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 3"
+	Report " A collection of modules for tests version 2"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4773,7 +4935,7 @@ Layer Simple {
       Linespace 60
       Font "Arial Black"
       Window 16, 8000,6000
-      Cls 1,0 
+      Cls 7,0 
       Cursor 0, height div 2
       Report 2,"Hello World"
 }
@@ -4792,34 +4954,40 @@ With ListBox1,"Text",{London
                                     Berlin
                                     Dublin
                                     Luxembourg
-                                    London
-                                    Paris
-                                    Athens
-                                    Rome
-                                    Tirana
-                                    Nicosia
-                                    Brussels
-                                    Copenhagen
-                                    Berlin
-                                    Dublin
-                                    Luxembourg
+                                    London2
+                                    Paris2
+                                    Athens2
+                                    Rome2
+                                    Tirana2
+                                    Nicosia2
+                                    Brussels2
+                                    Copenhagen2
+                                    Berlin2
+                                    Dublin2
+                                    Luxembourg2
                                     }
 \\ and set some properties, and some of them are bind to objects that are properties to objects.
 \\ also when we call a method, internal a resolved done in first time, so next time a method call will be faster.
 With Listbox1, "transparent", True , "ListIndex" As ListIndex, "ListCount" As  ListCount
-With Listbox1, "Find" As Find(),  "List" As List$()
+With Listbox1, "Find" As Find(),  "List" As List$(), "maychange", true
 \\ make simple sizable form (units for forms are in twips)
 With Simple,"Sizable", True,"SizerWidth",90
 \\ now these are the event handlers
 \\ event handlers can see anything defined in parent module
 \\ for this reason for &rgb we need a Read New (so a new rgb prepared before a reference assign to it)
 \\ any variable can get a reference to other variable once, at defining stage.
+Inventory Blocked= "Rome", "Rome2", "Berlin"
 Function Simple.Unload {
       Keyboard "!"   \\ like press !
 }
 Function listbox1.Color {
       Read New &rgb
             rgb=#FF7700
+}
+Function listbox1.Sep {
+      Read New &D
+		if exist(Blocked, List$(d)) then d=-1
+		
 }
 Function Listbox1.DblClick {
             Read Where 
@@ -4847,7 +5015,7 @@ Function simple.click {
 Function Simple.Resize {
       Layer Simple {
             Mode 16
-            Cls 1,0
+            Cls 7,0
             Cursor 0, height div 2
             Report 2,"Hello World"
             Method Listbox1,"Refresh"
@@ -8151,12 +8319,12 @@ MODULE ICONS {function dummy {
 	all$=""
 	move 0,0
 	copy scale.x, scale.y to all$
+	mouse.icon show
 	If Ask("Save the file","icons","Save it","No", all$)=1 then
 	Menu  ' erase menu list
 	files + "screen*.bmp"
 	copy "screen"+str$(menuitems+1,"000")+".bmp"
 	End if
-	mouse.icon show
 	Refresh 30
 	cls,0
 	
@@ -9086,5 +9254,250 @@ MODULE PP {function dummy {
 }
 Inline Code LibFade
 FadeScreen &Dummy(), 1.7
+}
+MODULE COMP {\\ compose lambda functions
+\\ We can put closures (as copy of values, or copy of pointers if a variable is a pointer)
+
+\\ In M2000, there are: Values, Pointers, Refereneces.  Pointers hold Objects. Values maybe objects too. References are just names with no own value or poiner, but refer to another variable
+\\ We can use reference to array items, with an internal copy in copy out, method. First interpreter make a hidden variable, copy the item to that variable, then pass the variable to function or module by reference, and at return copy back the variable to the array item (checking if it can be done, maybe the array has change). We can't pass values to references, except of a string. A reference passed as week reference, a string with the a proper name for the variable, to stack of values (as a value), so a Read statement which has & before a name, search for a string, and then resolve it or not. If not raise error. We can read the string (the weakr reference) and read it any other time (a copy of it), if we know that this variable exist. Also there are "string pointer"
+
+\\Arrays can passed by reference without copy in copy out (by using a weak reference too)
+
+X=10
+k$=weak$(x)
+k$.++
+Print Eval(k$.)=11
+Print x=11
+Dim a(10)=100
+k$=Weak$(a(5))
+k$.++
+Print Eval(k$.)=101
+Print a(5)=101
+
+Module ByRefArrItemOrVariable(&x) {
+	x++
+}
+ByRefArrItemOrVariable &a(5)
+Print a(5)=102
+\\ we can add space between name and parameter list
+Module ByRefArray1 (&b()) {
+	b(5)++
+}
+
+ByRefArray1 &a()
+Print a(5)=103
+
+
+\\ we can send the pointer (array is an object)
+\\ Interpreter know that we wish to use the pointer, because we choose a name without parenthesis
+
+Module ByRefArray2 (b) {
+	Return b, 5:=Array(b,5)+1
+	link  b to a()
+	a(5)++
+}
+
+ByRefArray2 a()
+Print a(5)=105
+
+Function ByCopyArray(b()) {
+	For i=Dimension(b(), 1,0) to Dimension(b(), 1,1)
+		b(i)+=1
+	Next i
+	=b()
+}
+Print Dimension(a(), 1,0), Dimension(a(), 1,1)
+Dim z()
+z()=ByCopyArray(a())
+Print z()
+
+\\ We can pass an expression for late evalution:
+x=10 
+z=3
+Module DoSomething(&s()) {
+	Print s()
+}
+DoSomething Lazy$(x**z)   'return 1000
+function dummy {
+	x++
+	=x**z
+}
+DoSomething Lazy$(&dummy())   'return 1331
+
+function dummy2 {
+	Read New k
+	x++
+	=x**z+k
+}
+a$=Lazy$(&dummy2())   'return 1331
+\\ so now expression is function body in a$
+\\ Unremark this to see the definition of function
+Rem : Report a$
+Module DoSomething2(&s()) {
+	Print s(100)
+}
+DoSomething2 a$
+Print Function(a$, 200)
+
+
+\\ Normally a function can be passed by reference
+\\ the reference is the actual code
+Def OneLine(X)=X**2+5*x+6
+DoSomething2 &OnelIne()    ' 10506
+\\ for groups including the reference of group
+Group {
+	x=100
+	Function InGroup {
+		
+	}
+	
+}
+
+Module CheckFirst {
+      RAD = lambda -> number/180*pi
+      ASIN = lambda RAD -> {
+          Read x : x=Round(x,10)
+            If x>=0 and X<1 Then {
+                  =RAD(abs(2*Round(ATN(x/(1+SQRT(1-x**2))))))
+            } Else.if x==1 Then {
+                  =RAD(90)
+            } Else error "asin exit limit"
+      }
+      ACOS=lambda ASIN (x) -> PI/2 - ASIN(x)
+      POW3 = Lambda ->number**3
+      POW3INV =Lambda ->number**(1/3)
+      COSRAD =lambda ->Cos(number*180/pi)
+      SINRAD=lambda ->Sin(number*180/pi)
+      Composed=lambda (f1, f2) -> {
+            =lambda f1, f2 (x)->{
+                  =f1(f2(x))
+            }
+      }
+      Dim Base 0, A(3), B(3), C(3)
+      A(0)=ACOS, ASIN, POW3INV
+      B(0)=COSRAD, SINRAD, POW3
+      C(0)=Composed(ACOS, COSRAD), Composed(ASIN, SINRAD), Composed(POW3INV, POW3)
+      Print $("0.00")
+      For i=0 To 2 {
+            Print A(i)(B(i)(.5)), C(i)(.5)
+      }
+            Print $("")
+}
+CheckFirst
+ 
+}
+MODULE COMP2 {Dim A(10)=1000, Z()
+Function b(m) {
+	link m to c()
+	c(3)=10
+	=m
+}
+z()=b(a())
+Print z(3), a(3)
+
+}
+MODULE CL {Class zz {
+      module bb {
+            Superclass A {
+                  unique:
+                  counter
+            }
+            Superclass B1 {
+                  unique:
+                  counter
+            }
+            Superclass B2 {
+                  unique:
+                  counter
+            }
+            \\ We can make a group Alfa with a member, another group Beta
+            \\ Group Beta can't see parent group, but can see own member groups
+            \\ Group Alfa can see everything in nested groups, in any level,
+            \\ but can't see inside modules/functions/operator/value/set
+            Group Alfa {
+                  Group Beta { }
+            }
+            Alfa=A
+            Alfa.Beta=B1
+            \\ we make 3 groups for marshaling counters
+            \\ each group get a superclass
+            Marshal1=A
+            Marshal2=B1
+            Marshal3=B2
+            \\ Now we want to add functionality7
+            \\ Inc module to add 1 to counter
+            \\ a Value function to return counter
+            \\ Without Value a group return a copy
+            \\ If a group has a value then we can get copy using Group(nameofgroup)
+            \\ just delete Group Marshal1 and remove Rem when we make Marshal1 using a class function
+            Group Marshal1 {
+                  Module Inc {
+                        For SuperClass {.counter++}
+                  }
+                  Value {
+                        For SuperClass {=.counter}
+                  }
+            }
+            Class AnyMarshal {
+                  Module Inc {
+                        For SuperClass {.counter++}
+                  }
+                  Value {
+                        For SuperClass {=.counter}
+                  }
+            }
+            \\ here we merge groups
+            Rem : Marshal1=AnyMarshal()
+            Marshal2=AnyMarshal()
+            Marshal3=AnyMarshal()
+ 
+            \\ So now we see counters (three zero)
+            Print Marshal1, Marshal2, Marshal3 \\ 0, 0, 0
+            \\ Now we prepare Alfa and Alfa.Beta groups
+            Group Alfa {
+                  Group Beta {
+                        Function SuperClass.Counter {
+                              For SuperClass {
+                                    =.counter
+                              }           
+                        }      
+                  }
+                  Module PrintData {
+                        For SuperClass {
+                              Print .counter, This.Beta.SuperClass.Counter()
+                        }
+                  }
+            }
+            \\ some marshaling to counters
+            Marshal1.inc
+            Marshal2.inc
+            Marshal2.inc
+            Marshal3.inc
+            \\ lets print results
+            Print Marshal1, Marshal2, Marshal3 \\ 1   2   1
+            \\ Calling Alfa.PrintData
+            Alfa.PrintData  \\ 1   2
+            \\ Merging a group in a group make a change to superclass pointer inside group
+            Alfa.Beta=B2 \\ change supeclass
+            Alfa.PrintData  \\ 1   1
+            For i=1 to 10 : Marshal3.inc : Next i
+            Alfa.PrintData  \\ 1   11
+            Alfa.Beta=B1 \\ change supeclass
+            Alfa.PrintData  \\ 1   2
+            Epsilon=Alfa
+            Print Valid(@alfa as epsilon), Valid(@alfa.beta as epsilon.beta) \\ -1   -1
+            Epsilon.PrintData \\ 1 2
+            Alfa.Beta=B2 \\ change supeclass
+            Alfa.PrintData  \\ 1   11
+            Epsilon.PrintData \\ 1 2
+            \\ validation being for top group superclass and all members if are same
+            \\ but not for inner superclasses. This maybe change in later revisions of language.
+            Print Valid(@alfa as epsilon), Valid(@alfa.beta as epsilon.beta) \\ -1  0
+ 
+      }
+}
+Dim A(10)
+A(3)=zz()
+A(3).bb
 }
 INFO

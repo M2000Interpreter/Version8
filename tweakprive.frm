@@ -3,8 +3,8 @@ Begin VB.Form TweakForm
    BackColor       =   &H003B3B3B&
    BorderStyle     =   0  'None
    ClientHeight    =   6300
-   ClientLeft      =   0
-   ClientTop       =   -105
+   ClientLeft      =   3000
+   ClientTop       =   3000
    ClientWidth     =   7485
    FillColor       =   &H00FFFFFF&
    ForeColor       =   &H00FFFFFF&
@@ -15,7 +15,6 @@ Begin VB.Form TweakForm
    ScaleHeight     =   6300
    ScaleWidth      =   7485
    ShowInTaskbar   =   0   'False
-   StartUpPosition =   3  'Windows Default
    Begin M2000.gList DIS 
       Height          =   2265
       Left            =   285
@@ -483,8 +482,11 @@ playfontname this$
 End Sub
 
 
-Private Sub Form_Load()
+Private Sub Form_Activate()
 Hook hWnd, Nothing
+End Sub
+
+Private Sub Form_Load()
 DIS.enabled = True
 AutoRedraw = True
 Form_Load1
@@ -494,40 +496,40 @@ DIS.TabStop = False
 gList2.TabStop = False
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
 
 If Button = 1 Then
     
     If lastfactor = 0 Then lastfactor = 1
 
     If bordertop < 150 Then
-    If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
+    If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = x
-    ly = y
+    Lx = X
+    ly = Y
     End If
     
     Else
-    If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
+    If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = x
-    ly = y
+    Lx = X
+    ly = Y
     End If
     End If
 
 End If
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False: drmove = False
 If bordertop < 150 Then
-If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
  Else
- If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+ If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
 End If
 If dr Then
 
@@ -535,12 +537,12 @@ If dr Then
 
 If bordertop < 150 Then
 
-        If y < (Height - 150) Or y > Height Then addy = (y - ly)
-     If x < (Width - 150) Or x > Width Then addX = (x - Lx)
+        If Y < (Height - 150) Or Y > Height Then addy = (Y - ly)
+     If X < (Width - 150) Or X > Width Then addX = (X - Lx)
      
 Else
-    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
-        If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
+    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
+        If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
     End If
     
 
@@ -567,10 +569,10 @@ Else
 
         If addX = 0 Then
         If lastfactor <> factor Then ScaleDialog lastfactor, Width
-        Lx = x
+        Lx = X
         
         Else
-        Lx = x * lastfactor / factor
+        Lx = X * lastfactor / factor
          ScaleDialog lastfactor, (Width + addX) * lastfactor / factor
          End If
 
@@ -586,14 +588,14 @@ Else
         ly = ly * lastfactor / factor
         End If
         Else
-        Lx = x
-        ly = y
+        Lx = X
+        ly = Y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
 
 If dr Then Me.mousepointer = 0
 dr = False
@@ -1146,8 +1148,8 @@ skip = True
 End If
 End Sub
 
-Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
-If gList2.DoubleClickCheck(Button, item, x, y, 10 * lastfactor, 10 * lastfactor, 8 * lastfactor, -1) Then
+Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+If gList2.DoubleClickCheck(Button, item, X, Y, 10 * lastfactor, 10 * lastfactor, 8 * lastfactor, -1) Then
                       ShutMe
 End If
 End Sub
@@ -1159,7 +1161,7 @@ Private Sub glist3_LostFocus()
 playall
 End Sub
 
-Private Sub glist3_ScrollSelected(item As Long, y As Long)
+Private Sub glist3_ScrollSelected(item As Long, Y As Long)
 playall
 End Sub
 

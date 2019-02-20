@@ -59,16 +59,16 @@ End If
 If lngRet = 0 Then FindDISPID = dispid
 End Function
 Public Sub ShutEnabledGuiM2000(Optional all As Boolean = False)
-Dim x As Form, bb As Boolean
+Dim X As Form, bb As Boolean
 
 Do
-For Each x In Forms
+For Each X In Forms
 bb = True
-If TypeOf x Is GuiM2000 Then
-    If x.enabled Then bb = False: x.CloseNow: bb = False: Exit For
+If TypeOf X Is GuiM2000 Then
+    If X.enabled Then bb = False: X.CloseNow: bb = False: Exit For
     
 End If
-Next x
+Next X
 
 Loop Until bb Or Not all
 
@@ -233,22 +233,22 @@ conthere:
                    oldmoldid = Modalid
                    mycodeid = Rnd * 1000000
                    pobjTarget.Modal = mycodeid
-                   Dim x As Form, z As Form, zz As Form
+                   Dim X As Form, z As Form, zz As Form
                    Set zz = Screen.ActiveForm
                    If zz.name = "Form3" Then
                    Set zz = zz.lastform
                    End If
                    If Not pobjTarget.IamPopUp Then
-                        For Each x In Forms
-                            If x.Visible And x.name = "GuiM2000" Then
-                                If Not x Is pobjTarget Then
-                                    If x.Enablecontrol Then
-                                        x.Modal = mycodeid
-                                        x.Enablecontrol = False
+                        For Each X In Forms
+                            If X.Visible And X.name = "GuiM2000" Then
+                                If Not X Is pobjTarget Then
+                                    If X.Enablecontrol Then
+                                        X.Modal = mycodeid
+                                        X.Enablecontrol = False
                                     End If
                                 End If
                             End If
-                        Next x
+                        Next X
                     End If
                     If pobjTarget.NeverShow Then
                     Modalid = mycodeid
@@ -297,12 +297,12 @@ conthere:
                     Modalid = mycodeid
                 End If
                 Set z = Nothing
-                For Each x In Forms
-                    If x.Visible And x.name = "GuiM2000" Then
-                        x.TestModal mycodeid
-                        If x.Enablecontrol Then Set z = x
+                For Each X In Forms
+                    If X.Visible And X.name = "GuiM2000" Then
+                        X.TestModal mycodeid
+                        If X.Enablecontrol Then Set z = X
                     End If
-                Next x
+                Next X
                 If Not zz Is Nothing Then Set z = zz
                 If Typename(z) = "GuiM2000" Then
                 If z.Modal = Modalid Then
@@ -321,30 +321,8 @@ conthere:
     ElseIf items = 0 Then
         CallByName pobjTarget, pstrProcName, VbMethod
     Else
-        Select Case items
-        Case 1
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(0)
-        Case 2
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(1), varArr(0)
-        Case 3
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(2), varArr(1), varArr(0)
-        Case 4
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(3), varArr(2), varArr(1), varArr(0)
-        Case 5
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
-        Case 6
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
-        Case 7
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
-        Case 8
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(7), varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
-        Case 9
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(8), varArr(7), varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
-        Case 10
-            CallByName pobjTarget, pstrProcName, VbMethod, varArr(9), varArr(8), varArr(7), varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
-        Case Else
-            Err.Raise -2147352567
-        End Select
+        CallByName pobjTarget, pstrProcName, VbMethod, varArr()
+        
     End If
 Else
     Err.Raise lngRet
@@ -354,11 +332,25 @@ End If
 
         Err.Raise lngRet
     End If
+    Dim where As Long
     If items > 0 Then
                 ' Fill parameters arrays. The array must be
                 ' filled in reverse order.
                 For lngLoop = 0 To items - 1 + fixnamearg
-                    SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop)
+                where = fixnamearg + items - 1 - lngLoop
+                If VariantIsRef(VarPtr(varArr(where))) Then
+                If Not MyIsNumericPointer(pArgs(lngLoop)) Then
+                    VarByRefCleanRef VarPtr(varArr(where))
+                    SwapVariant varArr(where), pArgs(lngLoop)
+                Else
+                VarByRefClean VarPtr(varArr(where))
+                If pArgs(lngLoop) = vbEmpty Then
+                SwapVariant varArr(where), pArgs(lngLoop)
+                End If
+                End If
+                Else
+                    SwapVariant varArr(where), pArgs(lngLoop)
+                    End If
                 Next
     End If
     On Error Resume Next

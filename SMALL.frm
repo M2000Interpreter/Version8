@@ -187,20 +187,20 @@ End If
     NeoMsgBox.Visible = True
     MyDoEvents
     End If
-    Dim mycode As Double, oldcodeid As Double, x As Form
+    Dim mycode As Double, oldcodeid As Double, X As Form
 mycode = Rnd * 12312314
 oldcodeid = Modalid
 
- For Each x In Forms
-                            If x.Visible And x.name = "GuiM2000" Then
+ For Each X In Forms
+                            If X.Visible And X.name = "GuiM2000" Then
                      
-                           If x.Enablecontrol Then
-                               x.Modal = mycode
-                                x.Enablecontrol = False
+                           If X.Enablecontrol Then
+                               X.Modal = mycode
+                                X.Enablecontrol = False
                             End If
                             End If
-                    Next x
-                     Set x = Nothing
+                    Next X
+                     Set X = Nothing
 If INFOONLY Then
 NeoMsgBox.command1(0).SetFocus
 End If
@@ -236,13 +236,13 @@ AskTitle$ = vbNullString
 Dim z As Form
  Set z = Nothing
 
-           For Each x In Forms
-            If x.Visible And x.name = "GuiM2000" Then
-            If Not x.Enablecontrol Then x.TestModal mycode
-          If x.Enablecontrol Then Set z = x
+           For Each X In Forms
+            If X.Visible And X.name = "GuiM2000" Then
+            If Not X.Enablecontrol Then X.TestModal mycode
+          If X.Enablecontrol Then Set z = X
             End If
-            Next x
-             Set x = Nothing
+            Next X
+             Set X = Nothing
           If Not zz Is Nothing Then Set z = zz
           
           If Typename(z) = "GuiM2000" Then
@@ -528,8 +528,6 @@ Else
  End If
  once = False
 End Sub
-
-
 
 Private Sub Form_Unload(Cancel As Integer)
 Set lastform = Nothing

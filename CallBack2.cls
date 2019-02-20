@@ -352,7 +352,6 @@ Run = True
         LastErNum = 0: LastErNum1 = 0
         LastErName = vbNullString
         LastErNameGR = vbNullString
-
 If Execute(objref, code$, False) <> 1 Then
 Run = False
 
@@ -362,12 +361,7 @@ If Not App.StartMode = vbSModeStandalone Then
 End If
             
             
-                Dim x As Form
-                    For Each x In Forms
-             
-                    If Typename$(x) = "GuiM2000" Then Unload x
-                    Next
-                    Set x = Nothing
+ClearLoadedForms
 If NERR Then
 If mObjRef Is Nothing Then
     RaiseEvent ErrorAtt(stay)

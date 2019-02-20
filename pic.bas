@@ -1061,7 +1061,7 @@ On Error Resume Next
 
 Set cDIBbuffer1 = Nothing
 End Sub
-Public Function GetBackSpriteHDC(bstack As basetask, ThisHDC As Long, piw As Long, pih As Long, Optional ByVal angle! = 0, Optional ByVal zoomfactor As Single = 100)
+Public Function GetBackSpriteHDC(bstack As basetask, thisHDC As Long, piw As Long, pih As Long, Optional ByVal angle! = 0, Optional ByVal zoomfactor As Single = 100)
     ' piw, pih pixels
     
 angle! = -MyMod(angle!, 360!) * 1.74532925199433E-02
@@ -1078,9 +1078,9 @@ If cDibbuffer0.Create(myw, myh) Then
 On Error GoTo there
         With bstack.Owner
          If bstack.toprinter Then
-         cDibbuffer0.LoadPictureBlt ThisHDC, Int(.ScaleX(prive.XGRAPH, 0, 3) - myw \ 2), Int(.ScaleX(prive.YGRAPH, 0, 3) - myh \ 2)
+         cDibbuffer0.LoadPictureBlt thisHDC, Int(.ScaleX(prive.XGRAPH, 0, 3) - myw \ 2), Int(.ScaleX(prive.YGRAPH, 0, 3) - myh \ 2)
          Else
-        cDibbuffer0.LoadPictureBlt ThisHDC, Int(.ScaleX(prive.XGRAPH, 1, 3) - myw \ 2), Int(.ScaleX(prive.YGRAPH, 1, 3) - myh \ 2)
+        cDibbuffer0.LoadPictureBlt thisHDC, Int(.ScaleX(prive.XGRAPH, 1, 3) - myw \ 2), Int(.ScaleX(prive.YGRAPH, 1, 3) - myh \ 2)
             End If
             BACKSPRITE = DIBtoSTR(cDibbuffer0)
         End With
@@ -2673,6 +2673,42 @@ k = "bye"
 SwapString2Variant a$, k
 Debug.Print a$, k
 End Sub
+Sub OptVariant(ByRef VarOpt)
+Dim t(0 To 3) As Long
+t(0) = 10 ' VT_ERROR
+t(2) = -2147352572
+   CopyMemory ByVal VarPtr(VarOpt), t(0), 16
+End Sub
+'  &H4000  VY_BYREF
+Sub VarByRef(ByVal a As Long, ByRef b As Variant)
+Dim t(0 To 3) As Long
+   CopyMemory t(0), ByVal VarPtr(b), 16
+   t(0) = t(0) Or &H4000
+   t(2) = VarPtr(b) + 8
+   CopyMemory ByVal a, t(0), 16
+End Sub
+Sub VarByRefDecimal(ByVal a As Long, ByRef b As Variant)
+Dim t(0 To 3) As Long
+   CopyMemory t(0), ByVal VarPtr(b), 2
+   t(0) = t(0) Or &H4000
+   t(2) = VarPtr(b)
+   CopyMemory ByVal a, t(0), 16
+End Sub
+Sub VarByRefCleanRef(ByRef a As Long)
+Dim t(0 To 3) As Long
+   CopyMemory t(0), ByVal VarPtr(a), 2
+   t(0) = t(0) And &HFFFFBFFF
+   CopyMemory ByVal a, t(0), 2
+End Sub
+Sub VarByRefClean(ByVal a As Long)
+Dim z As Variant
+CopyMemory ByVal a, z, 16
+End Sub
+Function VariantIsRef(ByVal a As Long) As Boolean
+Dim z As Integer
+   CopyMemory z, ByVal a, 4
+   VariantIsRef = (z And &H4000) = &H4000
+End Function
 Sub SwapVariant(ByRef a As Variant, ByRef b As Variant)
    Dim t(0 To 3) As Long ' 4 Longs * 4 bytes each = 16 bytes
    CopyMemory t(0), ByVal VarPtr(a), 16

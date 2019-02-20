@@ -78,13 +78,13 @@ Public Property Let enabled(ByVal RHS As Long)
 If glistN Is Nothing Then Exit Property
 glistN.enabled = RHS
 End Property
-Public Sub Move(x, y, Optional w, Optional h)
+Public Sub Move(X, Y, Optional w, Optional h)
 If IsMissing(w) Then
-glistN.MoveTwips CLng(x), CLng(y), 0, 0
+glistN.MoveTwips CLng(X), CLng(Y), 0, 0
 ElseIf IsMissing(h) Then
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), 0
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), 0
 Else
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), CLng(h)
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), CLng(h)
 End If
 End Sub
 Public Sub deconstruct()
@@ -222,11 +222,11 @@ Private Sub glistN_Selected2(item As Long)
       Callback.Callback mesCtrlName + ".Click(" + Str(checked) + ")"
       End If
 End Sub
-Public Property Get Top() As Variant
-Top = Callback.Controls(ctrlName).Top
+Public Property Get top() As Variant
+top = Callback.Controls(ctrlName).top
 End Property
-Public Property Let Top(ByVal RHS As Variant)
-Callback.Controls(ctrlName).Top = RHS
+Public Property Let top(ByVal RHS As Variant)
+Callback.Controls(ctrlName).top = RHS
 End Property
 Public Property Get Left() As Variant
 Left = Callback.Controls(ctrlName).Left
