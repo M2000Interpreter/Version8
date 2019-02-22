@@ -455,8 +455,8 @@ If nochange Then
 nochange = True
 With TEXT1
 i = .SelLength
-.Form1mn1Enabled = i > 1
-.Form1mn2Enabled = i > 1
+.Form1mn1Enabled = i > 0
+.Form1mn2Enabled = i > 0
 .Form1mn3Enabled = Clipboard.GetFormat(13) Or Clipboard.GetFormat(1)
 .Form1sdnEnabled = i > 0 And (.Length - .SelStart) > i
 .Form1supEnabled = i > 0 And .SelStart > i
@@ -473,8 +473,8 @@ Dim i As Long
 If gList1.enabled Then
 With TEXT1
 i = .SelLength
-.Form1mn1Enabled = i > 1
-.Form1mn2Enabled = i > 1
+.Form1mn1Enabled = i > 0
+.Form1mn2Enabled = i > 0
 .Form1mn3Enabled = Clipboard.GetFormat(13) Or Clipboard.GetFormat(1)
 .Form1sdnEnabled = i > 0 And (.Length - .SelStart) > i
 .Form1supEnabled = i > 0 And .SelStart > i
@@ -496,8 +496,8 @@ If Not gList1.enabled Then Exit Sub
 With TEXT1
 If .UsedAsTextBox Then Exit Sub
 i = .SelLength
-.Form1mn1Enabled = i > 1
-.Form1mn2Enabled = i > 1
+.Form1mn1Enabled = i > 0
+.Form1mn2Enabled = i > 0
 .Form1mn3Enabled = Clipboard.GetFormat(13) Or Clipboard.GetFormat(1)
 .Form1sdnEnabled = i > 0 And (.Length - .SelStart) > .SelLength
 .Form1supEnabled = i > 0 And .SelStart > .SelLength
@@ -526,8 +526,8 @@ Public Sub Pack1()
 Dim i As Long
 With TEXT1
 i = .SelLength
-.Form1mn1Enabled = i > 1
-.Form1mn2Enabled = i > 1
+.Form1mn1Enabled = i > 0
+.Form1mn2Enabled = i > 0
 .Form1mn3Enabled = Clipboard.GetFormat(13) Or Clipboard.GetFormat(1)
 .Form1sdnEnabled = i > 0 And (.Length - .SelStart) > i
 .Form1supEnabled = i > 0 And .SelStart > i
@@ -548,8 +548,8 @@ If Not gList1.enabled Then Exit Sub
 With TEXT1
 If .UsedAsTextBox Then Exit Sub
 i = .SelLength
-.Form1mn1Enabled = i > 1
-.Form1mn2Enabled = i > 1
+.Form1mn1Enabled = i > 0
+.Form1mn2Enabled = i > 0
 .Form1mn3Enabled = Clipboard.GetFormat(13) Or Clipboard.GetFormat(1)
 .Form1sdnEnabled = i > 0 And (.Length - .SelStart) > .SelLength
 .Form1supEnabled = i > 0 And .SelStart > .SelLength

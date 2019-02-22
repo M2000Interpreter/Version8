@@ -5029,7 +5029,7 @@ Do While pos > 0
 If InStr(1, WordCharLeft, Mid$(mline$, pos, 1)) Then Exit Do
 pos = pos - 1
 Loop
-If pos > 1 Then If InStr(1, WordCharLeftButIncluded, Mid$(mline$, pos, 1)) Then pos = pos - 1
+If pos > 0 Then If InStr(1, WordCharLeftButIncluded, Mid$(mline$, pos, 1)) Then pos = pos - 1
 Do While Epos <= Len(mline$)
 one$ = Mid$(mline$, Epos, 1)
 If InStr(1, WordCharRightButIncluded, one$) Then Epos = Epos + 1: Exit Do

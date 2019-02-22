@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 22 active-X
+Version 9.7 Revision 23 active-X
 
-one last bug...
+Minor corrections (in popup menu when when sellength=1 now we can copy or cut)
 
 The final 9.7 version
 when fist time run the interpreter do this in M2000 console:

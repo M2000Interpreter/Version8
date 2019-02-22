@@ -6951,8 +6951,8 @@ Public Sub PopUpMenu(poptitle$, X As Variant, Y As Variant)
 Dim oldModalId As Variant, i As Long
 ''If UsedAsTextBox Then Exit Sub
 i = SelLength
-Form1mn1Enabled = i > 1
-Form1mn2Enabled = i > 1
+Form1mn1Enabled = i > 0
+Form1mn2Enabled = i > 0
 Form1mn3Enabled = Clipboard.GetFormat(13) Or Clipboard.GetFormat(1)
 Form1sdnEnabled = i > 0 And (Length - SelStart) > SelLength
 Form1supEnabled = i > 0 And SelStart > SelLength
