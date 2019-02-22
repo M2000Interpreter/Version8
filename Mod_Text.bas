@@ -83,7 +83,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 7
-Global Const Revision = 23
+Global Const Revision = 24
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -6764,7 +6764,7 @@ contAr2:
         Do While dn <= dd
             ' pppp.SerialItem w3, dn, 6
              pppp.GetDnum dn, w3, v1&
-            If IsExp(bstack, a$, p) Then
+            If IsExp(bstack, a$, p, , True) Then
                 If dn < dd Then
                     If Not FastSymbol(a$, ",") Then: MyErMacro a$, "need index for " & v$ & ")", "χρειάζομαι δείκτη για το πίνακα " & v$ & ")": IsNumberNew = False: Exit Function
                 Else
@@ -20766,12 +20766,12 @@ i = 1
 GoTo dummyarray
 Else
     Do
-        If IsExp(bstack, rst$, p) Then
+        If IsExp(bstack, rst$, p, , True) Then
             pbase = afto.myarrbase
             If Fast2Label(rst$, "TO", 2, "ΕΩΣ", 3, 3) Then
                 pbase = -p
                 onemore = 0
-                If IsExp(bstack, rst$, p) Then
+                If IsExp(bstack, rst$, p, , True) Then
                     If p < -pbase Then
                         j = -p
                         p = -pbase
@@ -23683,7 +23683,7 @@ End If
 End If
 Do While dn <= dd
 PP.GetDnum dn, w3, lim
- If IsExp(bstack, rst$, p) Then
+ If IsExp(bstack, rst$, p, , True) Then
  If dn < dd Then
         If Not FastSymbol(rst$, ",") Then MyEr "need index for " & v$ & sp$, "χρειάζομαι δείκτη για το πίνακα " & v$ & sp$: Exit Function
         Else

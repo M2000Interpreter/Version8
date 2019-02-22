@@ -51,64 +51,6 @@ print min(a(2-i),a(i)), min(a(2-i), a(i))
 print compare(a(i), a(2-i)), a(2-i), a(i)
 next i
 }
-MODULE K {function alfa {
-      static container=buffer
-      list
-      Print Type$(container)
-}
-'buffer alfa1 as byte*100
-'call alfa(alfa1)
-call alfa()
-}
-MODULE K1 {flush
-module mm {
-      Static n=Inventory
-      Print type$(n)
-      ? len(n)
-      ? Eval$(n, 0)
-      ? n("ok")
-      list
-}
-Inventory aa="ok":=100
-b=each(aa)
-mm b
-mm
-flush
-list
-}
-MODULE K2 {flush
-module mm (? m){
-      Static n=m
-      Print type$(n)
-      ? len(n), n(0)
-       list
-}
-buffer b as byte*100
-mm b
-mm
-flush
-list
-}
-MODULE K3 {flush
-module mm (? m){
-      Static n=m
-'      Print type$(n)
-      ? len(n), n(0)
- '      list
-      stack n {
-     ' if not empty then  print number
-     if empty then print number, "malaka"
-     flush
-      }
-     ' ? len(n) 
-     
-}
-b=stack:=1,2,3,4
-mm b
-mm
-flush
-list
-}
 MODULE B1 {Module FadeScreen  {
       static Img1, tempo=1, gx=3, gy=5
       ? tempo, gx, gy
