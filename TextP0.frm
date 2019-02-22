@@ -2781,8 +2781,8 @@ MYFONT = defFontname
             End If
             
                     SzOne = 14
-             PenOne = 15
-             PaperOne = 1
+             PenOne = 14
+             PaperOne = 5
              DIS.ForeColor = mycolor(PenOne)
              On Error Resume Next
              cc.Value = Form1.FontName

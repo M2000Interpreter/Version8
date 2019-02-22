@@ -15297,238 +15297,225 @@ Set bstack.lastobj = useHandler
 End If
 multi = True
 Case "POS", "»≈”«"
-res = -1
-cur = 0
-Dim st() As String, sn() As Variant
-If IsExp(bstack, a$, p) Then
-p = Int(p)
-If p < 0 Then p = 0
+    res = -1
+    cur = 0
+    Dim st() As String, sn() As Variant
+    If IsExp(bstack, a$, p) Then
+        p = Int(p)
+        If p < 0 Then p = 0
 again1:
-    If FastSymbol(a$, "->", , 2) Then
-        If IsExp(bstack, a$, r) Then
-        If bstack.lastobj Is Nothing Then
-            ReDim sn(0 To 4) As Variant
-            sn(0) = r
-            Else
+        If FastSymbol(a$, "->", , 2) Then
+            If IsExp(bstack, a$, r) Then
+                If bstack.lastobj Is Nothing Then
+                    ReDim sn(0 To 4) As Variant
+                    sn(0) = r
+                Else
 dothis:
-            Set anything = bstack.lastobj
-            Set bstack.lastobj = Nothing
-            If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
-            Set useHandler = anything
-            If Not TypeOf useHandler.objref Is mArray Then
-            If useHandler.t1 = 4 Then Set useHandler = Nothing: Set anything = Nothing: GoTo again1
-            Exit Function
+                    Set anything = bstack.lastobj
+                    Set bstack.lastobj = Nothing
+                    If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
+                    Set useHandler = anything
+                    If Not TypeOf useHandler.objref Is mArray Then
+                        If useHandler.t1 = 4 Then Set useHandler = Nothing: Set anything = Nothing: GoTo again1
+                        Exit Function
+                    End If
+                    Set pppp1 = useHandler.objref
+            
+                    sn() = pppp1.GetCopy()
+                    If pppp1.count > 0 Then
+                        ReDim Preserve sn(0 To pppp1.count - 1)
+                    End If
+                    cur = pppp1.count - 1
+                    w3 = p
+                End If
+            ElseIf IsStrExp(bstack, a$, Pad$) Then
+                GoTo there
+            Else
+                MissParam a$: Exit Function
             End If
-            Set pppp1 = useHandler.objref
-
-            sn() = pppp1.GetCopy()
-            If pppp1.count > 0 Then
-            ReDim Preserve sn(0 To pppp1.count - 1)
+        Else
+            If bstack.lastobj Is Nothing Then
+                r = p
+                p = 0
+                ReDim sn(0 To 4) As Variant
+                sn(0) = r
+            Else
+                GoTo dothis
             End If
-            cur = pppp1.count - 1
-            w3 = p
         End If
-        ElseIf IsStrExp(bstack, a$, Pad$) Then
-            GoTo there
-        Else
-            MissParam a$: Exit Function
-        End If
-    Else
-        If bstack.lastobj Is Nothing Then
-        r = p
-        p = 0
-        ReDim sn(0 To 4) As Variant
-        sn(0) = r
-        Else
-        GoTo dothis
-        End If
-    End If
-    
-    
-    If pppp.count > 0 Then
-    res = -1
-    If Not pppp1 Is Nothing Then
-    While res = -1 And cur >= 0 And w3 < pppp.count - cur - 1
-    For w3 = w3 To pppp.count - cur - 1
-       If pppp.MyIsObject(pppp.item(w3)) Then
-            If pppp.MyIsObject(sn(0)) Then GoTo inside
-       Else
-           If pppp.MyIsObject(sn(0)) Then GoTo inside
-          If pppp.item(w3) = sn(0) Then
+        
+        If pppp.count > 0 Then
+            res = -1
+            If Not pppp1 Is Nothing Then
+                While res = -1 And cur >= 0 And w3 < pppp.count - cur - 1
+                    For w3 = w3 To pppp.count - cur - 1
+                        If pppp.MyIsObject(pppp.item(w3)) Then
+                             If pppp.MyIsObject(sn(0)) Then GoTo inside
+                        Else
+                            If pppp.MyIsObject(sn(0)) Then GoTo inside
+                            If pppp.item(w3) = sn(0) Then
 inside:
-            res = w3
-            w4 = w3 + 1
-            For w2 = 1 To cur
-                If w4 < pppp.count Then
-                     If pppp.MyIsObject(pppp.item(w4)) Then
-                     If Not pppp.MyIsObject(sn(w2)) Then
-                      res = -1
-                      Exit For
-                      End If
-                     Else
-                      If pppp.MyIsObject(sn(w2)) Then
-                      res = -1
-                      Exit For
-                      Else
-                     If pppp.item(w4) <> sn(w2) Then res = -1: Exit For
-                     End If
-                     End If
-                End If
-                w4 = w4 + 1
-            Next w2
-            If w2 > cur Then Exit For
-          End If
-      End If
-    Next w3
-    Wend
-
-    Else
-    For w3 = p To pppp.count - 1
-    If pppp.MyIsNumeric(pppp.item(w3)) Then
-    If pppp.item(w3) = r Then res = w3: Exit For
-    Else
-    If Typename(pppp.item(w3)) = "mHandler" Then
-    Set useHandler = pppp.item(w3)
-    If useHandler.t1 = 4 Then
-    
-    If useHandler.index_cursor * useHandler.sign = r Then res = w3: Exit For
-    End If
-    End If
-    End If
-    Next w3
-    w2 = 1
-    Do While FastSymbol(a$, ",")
-    If cur = UBound(sn()) Then ReDim Preserve sn(0 To cur * 2 - 1) As Variant
-    cur = cur + 1
-    If IsExp(bstack, a$, sn(cur), , True) Then
-        
-        If res > -1 Then
-            w3 = w3 + 1
-            If w3 < pppp.count Then
-                If pppp.MyIsNumeric(pppp.item(w3)) Then
-                    If pppp.item(w3) <> sn(cur) Then w2 = -1
-                ElseIf Typename(pppp.item(w3)) = "mHandler" Then
-                    Set useHandler = pppp.item(w3)
-                    If useHandler.t1 = 4 Then
-                        If useHandler.index_cursor * useHandler.sign <> sn(cur) Then w2 = -1
-                    Else
-                    w2 = -1
-                    End If
-                Else
-                
-                 w2 = -1
-                End If
+                                res = w3
+                                w4 = w3 + 1
+                                For w2 = 1 To cur
+                                    If w4 < pppp.count Then
+                                        If pppp.MyIsObject(pppp.item(w4)) Then
+                                            If Not pppp.MyIsObject(sn(w2)) Then
+                                                res = -1
+                                                Exit For
+                                            End If
+                                        Else
+                                            If pppp.MyIsObject(sn(w2)) Then
+                                                res = -1
+                                                Exit For
+                                            Else
+                                                If pppp.item(w4) <> sn(w2) Then res = -1: Exit For
+                                            End If
+                                        End If
+                                    End If
+                                    w4 = w4 + 1
+                                Next w2
+                                If w2 > cur Then Exit For
+                            End If
+                        End If
+                    Next w3
+                Wend
             Else
-                w2 = -1
-            End If
-        End If
-    End If
-    Loop
-    If w2 <> -1 Then
-    
-    Else
-    w3 = res + 1
-    res = -1
-    While res = -1 And cur > 0 And w3 < pppp.count - cur - 1
-    
-    For w3 = w3 To pppp.count - cur - 1
-        If pppp.MyIsNumeric(pppp.item(w3)) Then
-          If pppp.item(w3) = sn(0) Then
-            res = w3
-            w4 = w3 + 1
-            For w2 = 1 To cur
-                If w4 < pppp.count Then
-                    If pppp.MyIsNumeric(pppp.itemnumeric(w4)) Then
-                        If pppp.item(w4) <> sn(w2) Then res = -1: Exit For
-                    ElseIf Typename(pppp.item(w4)) = "mHandler" Then
-                    Set useHandler = pppp.item(w4)
-                    If useHandler.t1 = 4 Then
-                        If useHandler.index_cursor * useHandler.sign <> sn(w2) Then res = -1
+                For w3 = p To pppp.count - 1
+                    If pppp.MyIsNumeric(pppp.item(w3)) Then
+                        If pppp.item(w3) = r Then res = w3: Exit For
                     Else
+                        If Typename(pppp.item(w3)) = "mHandler" Then
+                            Set useHandler = pppp.item(w3)
+                            If useHandler.t1 = 4 Then
+                                If useHandler.index_cursor * useHandler.sign = r Then res = w3: Exit For
+                            End If
+                        End If
+                    End If
+                Next w3
+                w2 = 1
+                Do While FastSymbol(a$, ",")
+                    If cur = UBound(sn()) Then ReDim Preserve sn(0 To cur * 2 - 1) As Variant
+                    cur = cur + 1
+                    If IsExp(bstack, a$, sn(cur), , True) Then
+                        If res > -1 Then
+                            w3 = w3 + 1
+                            If w3 < pppp.count Then
+                                If pppp.MyIsNumeric(pppp.item(w3)) Then
+                                    If pppp.item(w3) <> sn(cur) Then w2 = -1
+                                ElseIf Typename(pppp.item(w3)) = "mHandler" Then
+                                    Set useHandler = pppp.item(w3)
+                                    If useHandler.t1 = 4 Then
+                                        If useHandler.index_cursor * useHandler.sign <> sn(cur) Then w2 = -1
+                                    Else
+                                        w2 = -1
+                                    End If
+                                Else
+                                    w2 = -1
+                                End If
+                            Else
+                                w2 = -1
+                            End If
+                        End If
+                    End If
+                Loop
+                If w2 = -1 Then
+                    w3 = res + 1
                     res = -1
-                    End If
-                    Else
-                        res = -1
-                    End If
+                    While res = -1 And cur > 0 And w3 < pppp.count - cur - 1
+                        For w3 = w3 To pppp.count - cur - 1
+                            If pppp.MyIsNumeric(pppp.item(w3)) Then
+                                If pppp.item(w3) = sn(0) Then
+                                    res = w3
+                                    w4 = w3 + 1
+                                    For w2 = 1 To cur
+                                        If w4 < pppp.count Then
+                                            If pppp.MyIsNumeric(pppp.itemnumeric(w4)) Then
+                                                If pppp.item(w4) <> sn(w2) Then res = -1: Exit For
+                                            ElseIf Typename(pppp.item(w4)) = "mHandler" Then
+                                                Set useHandler = pppp.item(w4)
+                                                If useHandler.t1 = 4 Then
+                                                    If useHandler.index_cursor * useHandler.sign <> sn(w2) Then res = -1
+                                                Else
+                                                    res = -1
+                                                End If
+                                            Else
+                                                res = -1
+                                            End If
+                                        End If
+                                        w4 = w4 + 1
+                                    Next w2
+                                    If w2 > cur Then Exit For
+                                End If
+                            End If
+                        Next w3
+                    Wend
                 End If
-                w4 = w4 + 1
-            Next w2
-            If w2 > cur Then Exit For
-          End If
+            End If
         End If
-    Next w3
-    Wend
-    End If
-    End If
-ElseIf IsStrExp(bstack, a$, Pad$) Then
-    
-there:
-    ReDim st(0 To 4) As String
-    st(0) = Pad$
-    
-    If pppp.count > 0 Then
-    res = -1
-    For w3 = p To pppp.count - 1
-    If pppp.IsStringItem(w3) Then
-        If pppp.item(w3) = st(0) Then res = w3: Exit For
-    End If
-    Next w3
-    w2 = 1
-    Do While FastSymbol(a$, ",")
-    If cur = UBound(st()) Then ReDim Preserve st(0 To cur * 2 - 1) As String
-    cur = cur + 1
-    If IsStrExp(bstack, a$, st(cur)) Then
+    ElseIf IsStrExp(bstack, a$, Pad$) Then
         
-        If res > -1 Then
-            w3 = w3 + 1
-            If w3 < pppp.count Then
+there:
+        ReDim st(0 To 4) As String
+        st(0) = Pad$
+        If pppp.count > 0 Then
+            res = -1
+            For w3 = p To pppp.count - 1
                 If pppp.IsStringItem(w3) Then
-                    If pppp.item(w3) <> st(cur) Then w2 = -1
+                    If pppp.item(w3) = st(0) Then res = w3: Exit For
+                End If
+            Next w3
+            w2 = 1
+            Do While FastSymbol(a$, ",")
+                If cur = UBound(st()) Then ReDim Preserve st(0 To cur * 2 - 1) As String
+                cur = cur + 1
+                If IsStrExp(bstack, a$, st(cur)) Then
+                    If res > -1 Then
+                        w3 = w3 + 1
+                        If w3 < pppp.count Then
+                            If pppp.IsStringItem(w3) Then
+                                If pppp.item(w3) <> st(cur) Then w2 = -1
+                            Else
+                                w2 = -1
+                            End If
+                        Else
+                            w2 = -1
+                        End If
+                    End If
                 Else
                     w2 = -1
                 End If
-            Else
-                w2 = -1
+            Loop
+            If w2 = -1 Then
+                w3 = res + 1
+                res = -1
+                While res = -1 And cur > 0 And w3 < pppp.count - cur - 1
+                    For w3 = w3 To pppp.count - cur - 1
+                        If pppp.IsStringItem(w3) Then
+                            If pppp.item(w3) = st(0) Then
+                                res = w3
+                                w4 = w3 + 1
+                                For w2 = 1 To cur
+                                    If w4 < pppp.count Then
+                                        If pppp.IsStringItem(w4) Then
+                                            If pppp.item(w4) <> st(w2) Then res = -1: Exit For
+                                        Else
+                                            res = -1
+                                        End If
+                                    End If
+                                    w4 = w4 + 1
+                                Next w2
+                                If w2 > cur Then Exit For
+                            End If
+                        End If
+                    Next w3
+                Wend
             End If
         End If
     Else
-    w2 = -1
+        MissParam a$
+        Exit Function
     End If
-    Loop
-    If w2 <> -1 Then
-    
-    Else
-    w3 = res + 1
-    res = -1
-    While res = -1 And cur > 0 And w3 < pppp.count - cur - 1
-    
-    For w3 = w3 To pppp.count - cur - 1
-        If pppp.IsStringItem(w3) Then
-          If pppp.item(w3) = st(0) Then
-            res = w3
-            w4 = w3 + 1
-            For w2 = 1 To cur
-                If w4 < pppp.count Then
-                    If pppp.IsStringItem(w4) Then
-                        If pppp.item(w4) <> st(w2) Then res = -1: Exit For
-                    Else
-                        res = -1
-                    End If
-                End If
-                w4 = w4 + 1
-            Next w2
-            If w2 > cur Then Exit For
-          End If
-        End If
-    Next w3
-    Wend
-    End If
-    End If
-    End If
-Else
-MissParam a$
-Exit Function
-End If
 End Select
 Matrix = FastSymbol(a$, ")")
 If Not multi Then Exit Do

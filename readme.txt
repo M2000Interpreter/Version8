@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.7 Revision 24 active-X
+Version 9.7 Revision 25 active-X
 
-Minor corrections enum variables can be used in array dimensions.
+Bug removed if #pos() when first argument was a string
 
 The final 9.7 version
 when fist time run the interpreter do this in M2000 console:
