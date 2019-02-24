@@ -4963,13 +4963,8 @@ End Select
 i = i + 1
 
 Loop Until i > c Or j = 0
-'If j = 0 Then
-'If j = 0 Then i = i + 1
 pos1 = i - 1
 blockStringAhead = True
-'Else
-'blockStringAhead = False
-'End If
 
 
 End Function

@@ -34,7 +34,7 @@ End Sub
 ''Public Par1 As Variant
 Private Sub Class_Terminate()
 If Not objref Is Nothing Then
-If Typename(objref) = "GuiM2000" Then Stop
+'If Typename(objref) = "GuiM2000" Then Stop
 Set objref = Nothing
 End If
 End Sub

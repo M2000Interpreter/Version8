@@ -971,7 +971,6 @@ End With
 End Sub
 
 Sub BoxBigNew(dqq As Object, mb As basket, x1&, y1&, c As Long)
-
 With mb
 dqq.Line (.curpos * .Xt - DXP, .currow * .Yt - DYP)-(x1& * .Xt - DXP + .Xt, y1& * .Yt + .Yt - DYP), mycolor(c), B
 End With
@@ -979,7 +978,6 @@ End With
 End Sub
 Sub CircleBig(dqq As Object, mb As basket, x1&, y1&, c As Long, el As Boolean)
 Dim X&, Y&
-
 With mb
 X& = .curpos
 Y& = .currow
@@ -3076,7 +3074,7 @@ SetTextBasketBack dq, mybasket
                         b$ = o$
                                           NOEXECUTION = False
                                          BLOCKkey = True
-                                    While KeyPressed(&H1B) ''And UseEsc
+                                    While KeyPressed(&H1B)
                                     If Not TaskMaster Is Nothing Then
                              If TaskMaster.Processing Then
                                                 TaskMaster.RestEnd1
@@ -3146,7 +3144,7 @@ SetTextBasketBack dq, mybasket
                         b$ = o$
                                     NOEXECUTION = False
                                     BLOCKkey = True
-                                    While KeyPressed(&H1B) ''And UseEsc
+                                    While KeyPressed(&H1B)
                                     If Not TaskMaster Is Nothing Then
                                     If TaskMaster.Processing Then
                                             TaskMaster.RestEnd1
@@ -3741,10 +3739,10 @@ ProcTask2 bstack
 
 'End If
 
-Loop Until NOEDIT ''Or (KeyPressed(&H1B) And UseEsc)
+Loop Until NOEDIT
  NOEXECUTION = False
  BLOCKkey = True
-While KeyPressed(&H1B) ''And UseEsc
+While KeyPressed(&H1B)
 ProcTask2 bstack
 
 Wend
@@ -3989,7 +3987,7 @@ ProcTask2 bstack
  Loop Until NOEDIT
  NOEXECUTION = False
  BLOCKkey = True
-While KeyPressed(&H1B) ''And UseEsc
+While KeyPressed(&H1B)
 '
 ProcTask2 bstack
 
@@ -4031,11 +4029,13 @@ escok = oldesc
 Set d = Nothing
 End Sub
 
-Function blockCheck(ByVal s$, ByVal Lang As Long, countlines As Long, Optional ByVal sbname$ = vbNullString) As Boolean
+Function blockCheck(ByVal s$, ByVal Lang As Long, countlines As Long, Optional ByVal sbname$ = vbNullString, Optional Column As Long) As Boolean
 If s$ = vbNullString Then blockCheck = True: Exit Function
 Dim i As Long, j As Long, c As Long, b$, resp&
-Dim openpar As Long, oldi As Long
+Dim openpar As Long, oldi As Long, lastlabel$, oldjump As Boolean, st As Long, stc As Long
+Dim paren As New mStiva2
 countlines = 1
+Column = 0
 Lang = Not Lang
 Dim a1 As Boolean
 Dim jump As Boolean
@@ -4044,13 +4044,47 @@ c = Len(s$)
 a1 = True
 i = 1
 Do
+Column = Column + 1
+'Debug.Print Mid$(s$, i, 1)
 Select Case AscW(Mid$(s$, i, 1))
+Case 10
+Column = 0
 Case 13
-
+lastlabel$ = ""
+If openpar <> 0 Then
+GoTo pareprob
+End If
+oldjump = False
+jump = False
 If Len(s$) > i + 1 Then countlines = countlines + 1
+Column = 0
+Case 58
+lastlabel$ = ""
+oldjump = False
+jump = False
 Case 32, 160, 9
-' nothing
+If Len(lastlabel$) > 0 Then
+lastlabel$ = myUcase(lastlabel$)
+If Not ismine1(lastlabel$) Then
+If Not ismine2(lastlabel$) Then
+If Not ismine22(lastlabel$) Then
+    jump = Not oldjump
+Else
+    oldjump = True
+    jump = False
+End If
+Else
+oldjump = True
+jump = False
+End If
+Else
+oldjump = False
+jump = False
+End If
+lastlabel$ = ""
+End If
 Case 34
+lastlabel$ = ""
 oldi = i
 Do While i < c
 i = i + 1
@@ -4061,9 +4095,9 @@ Case 13
 
 checkit:
     If Not Lang Then
-        b$ = sbname$ + "Problem in string in line " + CStr(countlines)
+        b$ = sbname$ + "Problem in string in paragraph " + CStr(countlines)
     Else
-        b$ = sbname$ + "Πρόβλημα με το αλφαριθμητικό στη γραμμή " + CStr(countlines)
+        b$ = sbname$ + "Πρόβλημα με το αλφαριθμητικό στη παράγραφο " + CStr(countlines)
     End If
     resp& = ask(b$, True)
 If resp& <> 4 Then
@@ -4080,76 +4114,93 @@ GoTo checkit
 End If
 
 Case 40
+lastlabel$ = ""
+jump = True
 openpar = openpar + 1
+paren.PushVal countlines
 Case 41
+lastlabel$ = ""
 openpar = openpar - 1
+If openpar = 0 Then jump = False
+If openpar < 0 Then Exit Do
+paren.drop 1
+
 Case 39, 92
-If openpar <= 0 Then
+lastlabel$ = ""
 Do While i < c
 i = i + 1
 If Mid$(s$, i, 2) = vbCrLf Then Exit Do
 Loop
-End If
-Case 61
+countlines = countlines + 1
+If openpar > 0 Then Exit Do
+Case 61, 43, 44
+lastlabel$ = ""
 jump = True
 Case 123
-
+If Len(lastlabel$) > 0 Then
+lastlabel$ = myUcase(lastlabel$)
+If Not ismine1(lastlabel$) Then
+If Not ismine2(lastlabel$) Then
+If Not ismine22(lastlabel$) Then
+    jump = Not oldjump
+Else
+    oldjump = True
+    jump = False
+End If
+Else
+oldjump = True
+jump = False
+End If
+Else
+oldjump = False
+jump = False
+End If
+lastlabel$ = ""
+End If
 
 If jump Then
 jump = False
 ' we have a multiline text
 Dim target As Long
 target = j
+st = countlines
+stc = Column
     Do
     Select Case AscW(Mid$(s$, i, 1))
-    Case 13
-    If Len(s$) > i + 1 Then countlines = countlines + 1
-Case 34
-Do While i < c
-i = i + 1
-Select Case AscW(Mid$(s$, i, 1))
-Case 34
-Exit Do
-Case 13
- i = oldi + 1
- Do While i < c
- If AscW(Mid$(s$, i, 1)) = 125 Then j = j + 1: Exit Do
- i = i + 1
- Loop
- i = i + 1
- Exit Do
-    If Not Lang Then
-        b$ = sbname$ + "Problem in string in line " + CStr(countlines)
-    Else
-        b$ = sbname$ + "Πρόβλημα με το αλφαριθμητικό στη γραμμή " + CStr(countlines)
-    End If
-    resp& = ask(b$, True)
-If resp& <> 4 Then
-blockCheck = True
-End If
-    Exit Function
-'case 10 then
-End Select
-Loop
-    Case 123
-    j = j - 1
-    Case 125
-    j = j + 1: If j = target Then Exit Do
+            Case 34
+            Do While i < c
+            i = i + 1
+            If AscW(Mid$(s$, i, 1)) = 34 Then Exit Do
+            If AscW(Mid$(s$, i, 1)) = 13 Then GoTo checkit
+            Loop
+        Case 13
+        countlines = countlines + 1
+        Case 123
+        j = j - 1
+        Case 125
+        j = j + 1: If j = target Then Exit Do
     End Select
     i = i + 1
     Loop Until i > c
-    If j <> target Then Exit Do
+    If j <> target Then
+    countlines = st
+    Column = st
+    Exit Do
+    End If
     Else
 j = j - 1
+oldjump = False
 End If
-
+Case 13
 
 Case 125
 If openpar <> 0 And j > 0 Then
+pareprob:
+If paren.count > 0 Then countlines = paren.PopVal
 If Not Lang Then
-        b$ = sbname$ + "Problem in parenthesis in line " + CStr(countlines)
+        b$ = sbname$ + "Problem in parenthesis in paragraph" + Str$(countlines)
     Else
-        b$ = sbname$ + "Πρόβλημα με τις παρενθέσεις στη γραμμή " + CStr(countlines)
+        b$ = sbname$ + "Πρόβλημα με τις παρενθέσεις στη παράγραφο" + Str$(countlines)
     End If
     resp& = ask(b$, True)
 If resp& <> 4 Then
@@ -4159,24 +4210,24 @@ End If
 
 End If
 j = j + 1: If j = 1 Then Exit Do
+Case 65 To 93, 97 To 122, Is > 127
+jump = False
+lastlabel$ = lastlabel$ + Mid$(s$, i, 1)
+Case 46
+jump = False
+lastlabel$ = lastlabel$ + Mid$(s$, i, 1)
+
+Case 48 To 57, 95
+jump = False
+If Len(lastlabel$) > 0 Then lastlabel$ = lastlabel$ + Mid$(s$, i, 1)
 Case Else
 jump = False
-
+lastlabel$ = ""
 End Select
 i = i + 1
 Loop Until i > c
 If openpar <> 0 Then
-If Not Lang Then
-        b$ = sbname$ + "Problem in parenthesis in line " + CStr(countlines)
-    Else
-        b$ = sbname$ + "Πρόβλημα με τις παρενθέσεις στη γραμμή " + CStr(countlines)
-    End If
-    resp& = ask(b$, True)
-If resp& <> 4 Then
-blockCheck = True
-
-End If
-
+GoTo pareprob
 End If
 If j = 0 Then
 
@@ -4345,7 +4396,7 @@ TaskMaster.rest
     MyDoEvents
     Loop Until drop = 0 Or MOUT
     MOUT = False
-    While KeyPressed(&H1B) ''And UseEsc
+    While KeyPressed(&H1B)
 ProcTask2 bstack
 Wend
 MOUT = False: NOEXECUTION = False
@@ -4468,7 +4519,7 @@ Set zz = Nothing
  ' NOEDIT = True
  BLOCKkey = True
 
-While KeyPressed(&H1B) ''And UseEsc
+While KeyPressed(&H1B)
 
 ProcTask2 bstack
 NOEXECUTION = False
@@ -14757,7 +14808,7 @@ Function ProcEnumGroup(bstack As basetask, rest$, Optional glob As Boolean = Fal
     enumvalue = 0
     If IsLabelOnly(rest$, w1$) = 1 Then
        ' w1$ = myUcase$(w1$)
-        v = globalvar(bstack.GroupName + w1$, v, , glob)
+        v = globalvar(bstack.GroupName + myUcase$(w1$), v, , glob)
         Set myenum = New Enumeration
         
         myenum.EnumName = w1$
@@ -14791,7 +14842,7 @@ Function ProcEnumGroup(bstack As basetask, rest$, Optional glob As Boolean = Fal
             mh.ReadOnly = True
             mh.index_cursor = enumvalue
             mh.index_start = myenum.count - 1
-             v1 = globalvar(bstack.GroupName + w1$, v1, , glob)
+             v1 = globalvar(bstack.GroupName + myUcase(w1$), v1, , glob)
              Set var(v1) = mh
             ProcEnumGroup = True
         Else
@@ -18609,7 +18660,7 @@ contnoproper:
                      End If
                     
                     If i <> 0 Then
-                     If Not IsBadCodePtr(i) Then
+                     If IsBadCodePtr(i) = 0 Then
                         If Not CallByPtr(i, bstack, b$, Lang) Then
                                If NOEXECUTION Then
                                     MyEr "", ""
@@ -20366,3 +20417,452 @@ Set mycol = var(i)
 End If
 Set getSafeFormList = mycol.mylist
 End Function
+Function ProcBrowser(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim s$, w$, X As Double
+ProcBrowser = True
+If Not IsStrExp(bstack, rest$, s$) Then
+
+    If Not Abs(IsLabelFileName(bstack, rest$, s$, , w$)) = 1 Then
+         If NOEDIT Then
+                If Form1.view1.Visible Then
+                    Form1.KeyPreview = True
+                    ProcTask2 bstack
+                    Form1.view1.SetFocus: Form1.KeyPreview = False
+                Else
+                    Form1.KeyPreview = True
+                End If
+        End If
+            Exit Function
+    Else
+     s$ = w$ '' low case
+    End If
+End If
+            If FastSymbol(rest$, ",") Then
+                    If IsExp(bstack, rest$, X) Then IEX = CLng(X): IESizeX = Form1.ScaleWidth - IEX Else MissNumExpr: ProcBrowser = False: Exit Function
+                If FastSymbol(rest$, ",") Then
+                    If IsExp(bstack, rest$, X) Then IEY = CLng(X): IESizeY = Form1.ScaleHeight - IEY Else MissNumExpr: ProcBrowser = False: Exit Function
+                                If FastSymbol(rest$, ",") Then
+                    If IsExp(bstack, rest$, X) Then IESizeX = CLng(X) Else MissNumExpr: ProcBrowser = False: Exit Function
+                                    If FastSymbol(rest$, ",") Then
+                    If IsExp(bstack, rest$, X) Then IESizeY = CLng(X) Else MissNumExpr: ProcBrowser = False: Exit Function
+                 End If
+                End If
+             End If
+           End If
+           If IESizeX = 0 Or IESizeY = 0 Then
+           IEX = Form1.ScaleWidth / 8
+           IEY = Form1.ScaleHeight / 8
+           IESizeX = Form1.ScaleWidth * 6 / 8
+           IESizeY = Form1.ScaleHeight * 6 / 8
+           End If
+
+If myLcase(Left$(s$, 8)) = "https://" Or myLcase(Left$(s$, 7)) = "http://" Or myLcase(Left$(s$, 4)) = "www." Or myLcase(Left$(s$, 6)) = "about:" Then
+Form1.IEUP s$
+ElseIf s$ <> "" Then
+Form1.IEUP "file:" & strTemp + s$
+Else
+Form1.IEUP ""
+Form1.KeyPreview = True
+End If
+ProcTask2 bstack
+
+End Function
+
+Function MyScore(bstack As basetask, rest$) As Boolean
+Dim s$, sX As Double, p As Variant
+MyScore = False
+If IsExp(bstack, rest$, p) Then
+If p >= 1 And p <= 16 Then
+If FastSymbol(rest$, ",") Then
+If IsExp(bstack, rest$, sX) Then
+If FastSymbol(rest$, ",") Then
+If IsStrExp(bstack, rest$, s$) Then
+voices(p - 1) = s$
+BEATS(p - 1) = sX
+MyScore = True
+End If
+End If
+End If
+End If
+End If
+End If
+End Function
+
+Function MyPlayScore(bstack As basetask, rest$) As Boolean
+Dim task As TaskInterface, sX As Double, p As Variant
+
+MyPlayScore = True
+If IsExp(bstack, rest$, p) Then
+    If p = 0 Then
+    TaskMaster.MusicTaskNum = 0
+    TaskMaster.OnlyMusic = True
+    Do
+    TaskMaster.TimerTickNow
+    Loop Until TaskMaster.PlayMusic = False
+    TaskMaster.OnlyMusic = False   '' forget it in revision 130
+   mute = True
+    Else
+    mute = False
+    If FastSymbol(rest$, ",") Then
+        If IsExp(bstack, rest$, sX) Then
+          If sX < 1 Then
+          sX = 0
+          Do While TaskMaster.ThrowOne(CLng(p))
+          sX = sX - 1
+          If sX < -100 Then Exit Do
+          Loop
+          Else
+          Set task = New MusicBox
+          Set task.Owner = Form1.DIS
+         
+          task.Parameters CLng(p), CLng(sX)
+          TaskMaster.MusicTaskNum = TaskMaster.MusicTaskNum + 1
+          TaskMaster.AddTask task
+          End If
+          Do While FastSymbol(rest$, ",")
+           MyPlayScore = False
+        If IsExp(bstack, rest$, p) Then
+             If FastSymbol(rest$, ",") Then
+                If IsExp(bstack, rest$, sX) Then
+                If sX < 1 Then
+                        sX = 0
+                        Do While TaskMaster.ThrowOne(CLng(p))
+                        sX = sX - 1
+                        If sX < -100 Then Exit Do
+                        Loop
+                  Else
+                    Set task = New MusicBox
+                    Set task.Owner = Form1.DIS
+                    task.Parameters CLng(p), CLng(sX)
+                    TaskMaster.MusicTaskNum = TaskMaster.MusicTaskNum + 1
+                     TaskMaster.AddTask task
+              End If
+                MyPlayScore = True
+                 End If
+            End If
+        End If
+        If MyPlayScore = False Then
+          mute = True
+        Exit Do
+        End If
+          Loop
+        End If
+    End If
+    End If
+Else
+
+MyPlayScore = False
+End If
+End Function
+
+Function IdPara(basestack As basetask, rest$, Lang As Long) As Boolean
+Dim x1 As Long, y1 As Long, i As Long, it As Long, vvl As Variant
+Dim X As Double, Y As Double, s$, what$, w3 As Long, w4 As Long, z As Double
+Dim xa As Long, ya As Long
+Dim pppp As mArray
+
+
+IdPara = True
+If IsLabelSymbolNew(rest$, "ΣΤΟ", "TO", Lang) Then
+        If Not IsExp(basestack, rest$, Y) Then
+            MissNumExpr
+            IdPara = False
+            Exit Function
+        Else
+        
+          Y = Y - 1
+                     If Y < 0 Then Y = -1
+         If FastSymbol(rest$, ",") Then
+                    If IsExp(basestack, rest$, X) Then
+                        X = Int(X)
+                        If X < 1 Then
+                        MyErMacro rest$, "the index base must be >=1", "η βάση δείκτη πρέπει να είναι >=1"
+                        
+                        Exit Function
+                        End If
+                   
+                    End If
+                    If FastSymbol(rest$, ",") Then
+                     If IsExp(basestack, rest$, z) Then
+                         z = Int(z)
+                         If z < 1 Then
+                         MyErMacro rest$, "the lenght base must be >=1", "το μήκος πρέπει να είναι >=1"
+                         
+                         Exit Function
+                         End If
+                    
+                     End If
+                    Else
+                    z = 0
+                    End If
+            Else
+                X = 0
+            End If
+        
+            x1 = Abs(IsLabel(basestack, rest$, what$))
+            If x1 = 3 Then
+                    If GetVar(basestack, what$, i) Then
+                        If Typename(var(i)) = doc Then
+                                If Not FastSymbol(rest$, "=") Then
+                                    MissSymbolMyEr "="
+                                    IdPara = False
+                                    Exit Function
+                                Else
+                                    If Not IsStrExp(basestack, rest$, s$) Then
+                                        MissStringExpr
+                                        IdPara = False
+                                        Exit Function
+                                    Else
+                                    If Y = -1 Then
+                                    Y = var(i).DocParagraphs
+                                    End If
+                                   If var(i).ParagraphFromOrder(Y + 1) = -1 Then
+                                   CheckVar var(i), s$
+                                    ElseIf Y < 1 Then
+                                     w3 = var(i).ParagraphFromOrder(1)
+                                     w4 = X
+                                       If z > 0 Then
+                                    var(i).BackSpaceNchars w3, w4 + CLng(z), CLng(z)
+                                    End If
+                                    If w3 < 1 Then w3 = 1
+                                    If Len(s$) > 0 Then var(i).InsertDoc w3, w4, s$
+                                    Else
+                                    w3 = var(i).ParagraphFromOrder(Y + 1)
+                                    w4 = X
+                                       If z > 0 Then
+                                    var(i).BackSpaceNchars w3, w4 + CLng(z), CLng(z)
+                                    End If
+                                    If w3 < 1 Then w3 = 1
+                                    If Len(s$) > 0 Then var(i).InsertDoc w3, w4, s$
+                                    End If
+                                    End If
+                                End If
+                        Else
+                             MissingDoc   ' only doc not string var
+                             IdPara = False
+                            Exit Function
+                        End If
+                    Else
+                        Nosuchvariable what$
+                        IdPara = False
+                        Exit Function
+                    End If
+            ElseIf x1 = 6 Then
+                    If neoGetArray(basestack, what$, pppp) Then
+                        If Not NeoGetArrayItem(pppp, basestack, what$, it, rest$) Then IdPara = False: Exit Function
+                        If Typename(pppp.item(it)) = doc Then
+                                    If Not FastSymbol(rest$, "=") Then
+                                            MissSymbolMyEr "="
+                                            IdPara = False
+                                            Exit Function
+                                            Else
+                                If IsStrExp(basestack, rest$, s$) Then
+                                
+                                
+                                    If pppp.item(it).ParagraphFromOrder(Y + 1) = -1 Then
+                                       CheckVar pppp.item(it), s$
+                                        ElseIf Y < 1 Then
+                                   w3 = pppp.item(it).ParagraphFromOrder(1)
+                                     w4 = X
+                                       If z > 0 Then
+                                    pppp.item(it).BackSpaceNchars w3, w4 + CLng(z), CLng(z)
+                                    End If
+                                    If w3 < 1 Then w3 = 1
+                                    If Len(s$) > 0 Then pppp.item(it).InsertDoc w3, w4, s$
+                                   
+                                        Else
+                                        w3 = pppp.item(it).ParagraphFromOrder(Y + 1)
+                                    w4 = X
+                                       If z > 0 Then
+                                    pppp.item(it).BackSpaceNchars w3, w4 + CLng(z), CLng(z)
+                                    End If
+                                    If w3 < 1 Then w3 = 1
+                                    If Len(s$) > 0 Then pppp.item(it).InsertDoc w3, w4, s$
+                                    
+                                        End If
+                                
+                                
+                                
+                                Else
+                                    MissStringExpr
+                                    IdPara = False
+                                    Exit Function
+                                
+                                End If
+
+                            End If
+                        Else
+                             MissingDoc   ' only doc not string var
+                             IdPara = False
+                            Exit Function
+                        End If
+                    End If
+            Else
+                MissingDoc   ' only doc not string var
+                IdPara = False
+                Exit Function
+            End If
+        End If
+ ElseIf IsExp(basestack, rest$, X) Then
+    X = Int(X)
+    If X < 1 Then
+    MyErMacro rest$, "the index base must be >=1", "η βάση δείκτη πρέπει να είναι >=1"
+    ' not needed to change idpara must be true because macro embed an ERROR command
+    Exit Function
+    End If
+    If FastSymbol(rest$, ",") Then
+        If Not IsExp(basestack, rest$, Y) Then
+        MissNumExpr
+        IdPara = False
+        Exit Function
+        End If
+        Y = Int(Y)
+        If Y < 0 Then
+            MyErMacro rest$, "number to delete chars must positive or zero", "ο αριθμός για να διαγράψω πρέπει να είναι θετικός ή μηδέν"
+            Exit Function
+        End If
+    Else
+    Y = 0  ' only insert
+    End If
+
+     x1 = Abs(IsLabel(basestack, rest$, what$))
+        If x1 = 3 Then
+            If GetVar(basestack, what$, i) Then
+        
+                If Typename(var(i)) = doc Then
+                    If Not FastSymbol(rest$, "=") Then
+                    MissSymbolMyEr "="
+                    IdPara = False
+                    Exit Function
+                    Else
+                            If Not IsStrExp(basestack, rest$, s$) Then
+                                MissStringExpr
+                                IdPara = False
+                                Exit Function
+                            Else
+                                    If Y = 0 Then
+                                           var(i).FindPos 1, 0, CLng(X), x1, y1, w3, w4
+                                           If w4 = 0 Then
+                                          ' ' merge to previous
+                                           End If
+       
+                                    Else
+                                             var(i).FindPos 1, 0, X + Y, x1, y1, w3, w4
+                                            ' so now we now the paragraph w3 and the position w4
+                                            var(i).BackSpaceNchars w3, w4, Y
+                                    End If
+                                    If s$ <> "" Then var(i).InsertDoc w3, w4, s$
+                            End If
+                     End If
+                ElseIf Typename(var(i)) = "Constant" Then
+                CantAssignValue
+                    IdPara = False
+            Exit Function
+                
+                Else
+                    If Not FastSymbol(rest$, "=") Then
+                    MissSymbolMyEr "="
+                    IdPara = False
+                    Exit Function
+                    Else
+                    If Not IsStrExp(basestack, rest$, s$) Then
+                                MissStringExpr
+                                IdPara = False
+                                Exit Function
+                            Else
+                                    If Y = 0 Then
+                                        var(i) = Left$(var(i), X - 1) & s$ & Mid$(var(i), X)
+                                    Else
+                                        If s$ = vbNullString Then
+                                        var(i) = Left$(var(i), X - 1) & Mid$(var(i), X + Y)
+                                        Else
+                                        If Len(s$) = Y Then
+                                        Mid$(var(i), X, Y) = s$
+                                        ElseIf Len(s$) < Y Then
+                                        Mid$(var(i), X, Y) = s$ + space$(Y - Len(s$))
+                                        Else
+                                        var(i) = Left$(var(i), X - 1) & s$ & Mid$(var(i), X + Y)
+                                        End If
+                                        End If
+                                    End If
+                            End If
+                    End If
+                
+                End If
+            Else
+            Nosuchvariable what$
+            IdPara = False
+            Exit Function
+            
+            End If
+        ElseIf x1 = 6 Then
+        
+        
+        If neoGetArray(basestack, what$, pppp) Then
+                If Not NeoGetArrayItem(pppp, basestack, what$, it, rest$) Then IdPara = False: Exit Function
+                If Typename(pppp.item(it)) = doc Then
+                    If FastSymbol(rest$, "=") Then
+                        If IsStrExp(basestack, rest$, s$) Then
+                      If Y = 0 Then
+                                     pppp.item(it).FindPos 1, 0, CLng(X), xa, ya, w3, w4
+                                           If w4 = 0 Then
+                                          ' ' merge to previous
+                                           End If
+
+                      Else
+                                     pppp.item(it).FindPos 1, 0, X + Y, xa, ya, w3, w4
+                                            ' so now we now the paragraph w3 and the position w4
+                                            pppp.item(it).BackSpaceNchars w3, w4, Y
+                      End If
+                       If s$ <> "" Then pppp.item(it).InsertDoc w3, w4, s$
+                        Else
+                            MissStringExpr
+                            IdPara = False
+                        End If
+                    End If
+                Else
+                If FastSymbol(rest$, "=") Then
+                If IsStrExp(basestack, rest$, s$) Then
+                If Y = 0 Then
+                    pppp.item(it) = Left$(pppp.item(it), X - 1) & s$ & Mid$(var(i), X)
+                Else
+                                                        If s$ = vbNullString Then
+                                        pppp.item(it) = Left$(pppp.item(it), X - 1) & Mid$(pppp.item(it), X + Y)
+                                        Else
+                                      vvl = pppp.item(it)
+                                       If Len(vvl) = Y Then
+                                      
+                                        Mid$(vvl, X, Y) = s$
+                                        ElseIf Len(s$) < Y Then
+                                            Mid$(vvl, X, Y) = s$ + space$(Y - Len(s$))
+                                        Else
+                                        vvl = Left$(vvl, X - 1) & s$ & Mid$(vvl, X + Y)
+                                        End If
+                                        pppp.item(it) = vvl
+                                        End If
+                End If
+                Else
+                     MissStringExpr
+                            IdPara = False
+                End If
+                End If
+                End If
+        Else
+            IdPara = True
+        End If
+        
+        
+        
+        Else
+        MissingStrVar
+        IdPara = False
+        ' wrong parameter
+        End If
+
+
+ 
+ 
+End If
+
+End Function
+

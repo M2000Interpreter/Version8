@@ -2054,7 +2054,9 @@ MODULE PEND { Module Pendulum {
             Refresh 1000
       End Sub
 }
+while inkey$<>"" : end while
 Pendulum
+Info
 }
 MODULE LOGO {smooth off  ' can't use xor with GDI+, so we work with GDI32 (by default)
 Form 80, 50
@@ -2445,7 +2447,8 @@ MODULE EV {Module CheckEvents {
 }
 CheckEvents
 }
-MODULE MG {Form 60,44
+MODULE MG {Font "Arial"
+Form 60,44
 Escape Off
 Flush
 Flush Garbage
@@ -3828,9 +3831,6 @@ Declare Run1 Combobox Form NotePad
 Declare Help1 Combobox Form NotePad
 Declare Inform1 Button Form NotePad
 
-\\ setting form, to show control box icon using english labels (use 0 for greek)
-Method NotePad,"MakeStandardInfo", 1
-
 \\ we can display an icon (the M2000 by default)
 \\ Normal the icon is in the rright side, the control icon for close is in the left side. Here we do the oposite
 \\ Also we get the Quit property. Is a property which a Document read when do a busy work of loading to quit it.
@@ -3840,6 +3840,10 @@ With NotePad,"UseIcon", True, "UseReverse", True, "Quit" as Quit
 \\ we set the form to produce resize event by grabing the low right corner of form
 With NotePad, "Title" as Caption$, "Visible" as Visible, "TitleHeight" as tHeight, "Sizable", True
 
+
+\\ setting form, to show control box icon using english labels (use 0 for greek)
+\\ we have to place afrer "Sizable", true to have "maximeze" enabled from the start.
+Method NotePad,"MakeStandardInfo", 1
 
 
 \\ Elements Properties (some of them changed using Methods, to pass more than one value)
@@ -4062,9 +4066,11 @@ Function Notepad.Resize {
 
 \\ The HelpPad (for displaying help) use a newer event, the click, which open a message box, as input box
 \\ if the ask() return 1 then in stack of values we get the new value
+ms$={Find Topic
+Use ALL to get a list of all topics}
 Function HelpPad.click {
 	Method  HelpPad, "EditTextView", false
-	If ask("Topic to find",,,,, what$)=1 Then Read what$ :Call Local FindWord(what$, true)
+	If ask(ms$,,,,, what$)=1 Then Read what$ :Call Local FindWord(what$, true)
 }
 
 \\ this is the event to do something with a word clicking on heplPad
@@ -4396,7 +4402,13 @@ Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
 }
-MODULE INFO {Title "Info"   ' open a window in task bar with name info (if  you run Demo, at the exit you get no window in task bar, so we can restore it)
+MODULE INFO {If Version<9.8 then Error "No proper M2000 version"
+Rem :  If Version=9.8 and revision<1 then Error "No proper M2000 revision for version 9.8"
+FONT "ARIA"
+PEN 14
+CLS,0
+Set Fast
+Title "Info"   ' open a window in task bar with name info (if  you run Demo, at the exit you get no window in task bar, so we can restore it)
 If IsWine Then Font "Verdana"
 dir user
 Player 0  ' erase any layer
@@ -4420,7 +4432,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 2"
+	Report " A collection of modules for tests version 3"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4431,8 +4443,6 @@ cls backcolor, row
 Scroll split 0  ' reset the row+1 which given in cls
 pen oldpen
 Clear ' clear local variables
-If Version<9.7 then Error "No proper M2000 version"
-If Version=9.7 and revision<17 then Error "No proper M2000 revision for version 9.7"
 title("Modules ?")
 Report {
 	Modules ?    (or control+N, display all loaded modules, if nothing loaded display files)
@@ -4474,6 +4484,7 @@ Report {
 	Win Dir$	Win Calc
 	End (to exit from console)  
 	}
+Fkey Clear
 FKey 1,"Saveme ' save all loaded modules"
 FKey 2,"Edit Info ' edit this"
 FKey 3,"Info ' this page"
@@ -4485,6 +4496,12 @@ Fkey 7,"Tr 'Three Oscilloscopes"
 Fkey 8,"mEditor ' A window based M2000 Editor"
 Fkey 9,"kb ' A keyboard to play music"
 FKey 10,"Settings"
+FKey 19,"List33  ' Listbox control Example"
+FKey 18,"Form44  ' Muliple Windows Example"
+FKey 17,"Maze2  ' Maze Drawing in console"
+FKey 16,"Cal  ' Snoopy Calendar"
+FKey 15,"OOP1  ' EventHandler Class"
+FKey 14,"Pend  ' Pendulum Animation"
 Title("Fkey")
 Fkey
 \\title("M2000 Writer")
@@ -4557,7 +4574,7 @@ Report {
 	F4 - change the letters case using the marked word (no undo for this)
 	F5 - Replace marked word with one we provide in inputbox (multiple undo)
 	F6, F7, F8 Bookmarks. On press for Set, Delete, Goto Bookmark. Messages displayed
-	F9 - Count words
+	F9 - Count words  / Shift F9 change Editor Style
 	F10 - Show hidden characters (paragraph, spaces as dot, nbsp as space, figure space, tab)
 	F10 & Shift - Open Popup Menu
 	F11 - Change Syntax Color On, Language Width Normal, Syntax color Off, Language Width Small
@@ -4667,208 +4684,234 @@ Sub Press()
 	Threads Erase
 End Sub
 }
-MODULE FORM44 {Set slow
-Thread.Plan  Concurrent  ' Sequential
-Refresh 40
-SMOOTH on
-Cls,0
-\\ using ,0 we switch console to minimize state
-\\ any value else or no value restore to normal state
-title "Start Up" ', 0
-N=3
-\\ we choose to use automatic event object
-\\ this event object expect to find Form1() function
-\\ using automatic object we can't disable it
-\\ also events which expect changes to variables
-\\ bypass the stantard callback and resolve to a function
-\\ like  Form1.Unload() which get back the Nook value
-
-Declare Form1(N) Form
-
-\\ Buttons can be clicked or shifted right (same as clicked)
-
-Class Buttons { 
-      Dim Butt() 
-      Module SetCaption { With .Butt(Number), "Caption",Letter$}
-      Function ReadCaption$ { With .Butt(Number), "Caption" as Result$ : = Result$}
-}  
-Dim Controls(N)=Buttons()  \\ an array of arrays
-\\ 
-For i=0 to N-1 {
-      For Controls(i) {
-            \\ need to be a new name for array
-            \\ a For object { } delete any new name
-            \\ so each time this block run, starts with no Button1() array
-            \\ then make one, then we get a copy (and references to actual objects)
-            \\ and then Button1() erased
-            \\ but Controls(i).Butt() can't erased because exist before we enter the loop
-            Declare Button1(2) button Form Form1(i)
-            For j=0 To 1 {
-                  Method Button1(j), "move", 1000+4000*j, 2000,3000,1000
-                  if j=1 then {
-                        Method Button1(j), "curve",3
-                  } else Method Button1(j), "transparent"
-                 
-            }
-            .Butt()=Button1()
-      }
-     Layer Form1(i) {
-            Cls 4, 0
-            Gradient 1,4
-            Cursor 0,3
-            Report 2, "Hello There"
-     }
-      Method Form1(i), "Show"
+MODULE FORM44 {Module TryIt {
+	Rem : Set slow
+	Set fast
+	Thread.Plan  Concurrent  ' Sequential
+	Refresh 40
+	SMOOTH on
+	Cls,0
+	\\ using ,0 we switch console to minimize state
+	\\ any value else or no value restore to normal state
+	title "Start Up" ', 0
+	N=3
+	\\ we choose to use automatic event object
+	\\ this event object expect to find Form1() function
+	\\ using automatic object we can't disable it
+	\\ also events which expect changes to variables
+	\\ bypass the stantard callback and resolve to a function
+	\\ like  Form1.Unload() which get back the Nook value
+	
+	Declare Form1(N) Form
+	
+	\\ Buttons can be clicked or shifted right (same as clicked)
+	
+	Class Buttons { 
+	      Dim Butt() 
+	      Module SetCaption { With .Butt(Number), "Caption",Letter$}
+	      Function ReadCaption$ { With .Butt(Number), "Caption" as Result$ : = Result$}
+	}  
+	Dim Controls(N)=Buttons()  \\ an array of arrays
+	\\ 
+	For i=0 to N-1 {
+	      For Controls(i) {
+	            \\ need to be a new name for array
+	            \\ a For object { } delete any new name
+	            \\ so each time this block run, starts with no Button1() array
+	            \\ then make one, then we get a copy (and references to actual objects)
+	            \\ and then Button1() erased
+	            \\ but Controls(i).Butt() can't erased because exist before we enter the loop
+	            Declare Button1(2) button Form Form1(i)
+	            For j=0 To 1 {
+	                  Method Button1(j), "move", 1000+4000*j, 2000,3000,1000
+	                  if j=1 then {
+	                        Method Button1(j), "curve",3
+	                  } else Method Button1(j), "transparent"
+	                 
+	            }
+	            .Butt()=Button1()
+	      }
+	     Layer Form1(i) {
+	            Cls 4, 0
+	            Gradient 1,4
+	            Cursor 0,3
+	            Report 2, "Hello There"
+	     }
+	      Method Form1(i), "Show"
+	}
+	\\ check this. After 6 second we can unload two forms
+	\\ Ttry to close anything. You can without a problem
+	\\ and after 3 seconds one more
+	\\ just press enter after Rem 1: to make lines ready for execution
+	Rem 1: Wait 6000 : PrintAndRefresh("CloseNow") : For i=1 to 2 : Method Form1(i), "CloseNow" : Next i
+	Rem 2: Wait 3000 : PrintAndRefresh("Unload") : Refresh  : Declare Form1() Nothing
+	Rem 3: Show \\ get the focus back
+	Rem 4: Print "ok" : Exit
+	
+	Form1_1=true
+	Controls(1).SetCaption 0, "Click Me"
+	Controls(1).SetCaption 1, "ok"
+	Controls(2).SetCaption 1, "Test Me"
+	\\ we make a variable bound to a property
+	With form1(0), "Visible" As visible
+	CloseThisForm=0
+	CloseThisTitle$=""
+	Function CloseAfter {
+	
+	      If Ask("Close Form?", CloseThisTitle$)=1 Then {
+	      If CloseThisForm=1 Then Form1_1=false
+	      Method Form1(CloseThisForm), "CloseNow"
+	      }
+	}
+	Function Form1.Unload {
+	      Read New index, &Nook
+	      Nook=True  \\ no unload now
+	      \\ After make an unamed thread
+	      \\ we use this of async waiting for user to
+	      \\ provide feedback from a message box
+	      with Form1(index), "title" as title$
+	      CloseThisTitle$=title$
+	      CloseThisForm=Index
+	      After 50  { Call Local CloseAfter() }
+	}
+	Function Button1.Click {
+	      Read New K, L
+	      Print "Form:";L,"Button:";K
+	      Print Controls(L).ReadCaption$(K)
+	      if k=1 and l=2 then test
+	}
+	Function Form1.MouseMove {
+	      Read New K, Button, Shft, X, Y
+	      If Button=1 Then {
+	           Layer Form1(K) {    
+	                  move X, Y
+	                  circle 500, 1, 14-K
+	            }
+	      }
+	}
+	Function Form1.MouseDown {
+	      Read New K, Button, Shft, X, Y
+	      If Button=2 Then {
+	            Method Form1(K), "Control", 1 As UserControl
+	            \\ we have to use new names if we "call local" a function
+	            With UserControl, "Visible" As uVisible
+	            uVisible=Not uVisible  \\ we can't use X~ as X = Not X     
+	      }
+	}
+	'goto aaa
+	For i=0 to N-1 {
+	\\ Threads get current layer as starting layer
+	      Layer Form1(i) {
+	            \\ so we make the thread inside Form Layer 
+	            Thread {
+	            part {
+	                  If Form1_1 Then {    
+	                              if not scale.x then  thread this erase
+	                            \\ third parameter is for color, we can use Color(r,g,b) or Colour(r,g,b) 
+	                            \\ for rgb value, or we can give an Html number like #FF0000
+	                            \\ another way is by using hex 0X80000012 for system colors
+	                            \\ Here we use values from the range 0 to 15 (here from 7 to 15)
+	                            \\ and these are the standard colors.
+	                           Draw To Random(Scale.x), Random(Scale.y), Random(7,15)
+	                           \\ sub PrintAndRefresh can be run because all threads are in the same module
+	                           \\ Threads have their execution object and an object to draw, here the form1
+	                           \\ When thread call sub, sub run on same execution object.
+	                           \\ modules and functions have own execution object
+	                           \\ so subs are light and interest because the see every variable as local
+	                           \\ but we can make temporary anything
+	                           \\ we can also create threads in a sub, without erase them. 
+	                           \\ Threads erased when parent object erased, or when we send erase command
+	                           \\ or when we exit Task.Main
+	                           \\ for the situation of a thread created on a thread we can use Threads Erase
+	                           \\ too remove all, including these. This we need it because, the second level of thread may
+	                           \\ end after the erasing of module, where we create it, so can run code with variables which
+	                           \\ are cleared. So With Threads Erase before exit module we are sure that Threading Pool is empty.
+	                           \\ But this in not an every day situation.
+	                           \\  (an after {}  thread creation in a thread execution is an example for a second level thread)
+	                           Rem 100 :
+	                          If random(100)<4 then  PrintAndRefresh("draw lines")
+	                          refresh
+	                  } Else Thread This Erase
+	                  } as mine
+	            } As OneMore   Interval 30
+	            thread OneMore  execute  static me=i
+	            \\ OneMore is a handler, so we lost first and second handler
+	            \\ but we dont care, we close thread inside using This
+	            \\ or we can let the Main Task erase it at the exit 
+	      }
+	}
+	
+	Thread {     
+	      PrintAndRefresh(Str$(Now,"hh:mm:ss"))
+	} As Inform Interval 1000
+	\\ Inform is the Thread Handler, we don't use it here
+	aaa:
+	\\ Need a thread to run a Main.Task
+	Main.Task 100 {
+	'Every 100 {
+	      \\ using property  \\ 
+	      
+	            
+	            Rem 1 :       Print Type$(Visible), Type$(Form1_1)
+	            If Not visible Then break
+	            threads
+	      
+	}
+	
+	\\  Cleaning;
+	\\ A control has two objects, one in form (a UserControl, one type for all),
+	\\ and the other is the wrapper, which serve as an event publisher,
+	\\ and we can use propertiers and methods
+	\\ When a Form unloaded not only erase UserControls but becaue hold referencse to wrappers
+	\\ send deconstruct command to each one, to break any reference to form
+	\\ and  erase internal collection - just throw references to actual objects
+	\\ So our last references to wrappers are in Controls(i)
+	\\ We can let M2000 to destroy the arrays, so the referecses, or we can do the job
+	\\ and we can reuse it
+	\\ so we check this with a jump to there
+	Goto there
+	For i=0 to N-1 {
+	      For Controls(i) {
+	            Dim .Butt()
+	      }
+	}
+	there:
+	\\ this command unload forms
+	Declare Form1() Nothing
+	'title "End"
+	'Show
+	Threads Erase
+	Smooth off
+	Thread.Plan Sequential  ' set the default again (can be set if no thread exist)
+	Refresh 30
+	Sub PrintAndRefresh(A$)
+	            Print A$
+	            Refresh
+	End Sub
 }
-\\ check this. After 6 second we can unload two forms
-\\ Ttry to close anything. You can without a problem
-\\ and after 3 seconds one more
-\\ just press enter after Rem 1: to make lines ready for execution
-Rem 1: Wait 6000 : PrintAndRefresh("CloseNow") : For i=1 to 2 : Method Form1(i), "CloseNow" : Next i
-Rem 2: Wait 3000 : PrintAndRefresh("Unload") : Refresh  : Declare Form1() Nothing
-Rem 3: Show \\ get the focus back
-Rem 4: Print "ok" : Exit
-
-Form1_1=true
-Controls(1).SetCaption 0, "Click Me"
-Controls(1).SetCaption 1, "ok"
-Controls(2).SetCaption 1, "Test Me"
-\\ we make a variable bound to a property
-With form1(0), "Visible" As visible
-CloseThisForm=0
-CloseThisTitle$=""
-Function CloseAfter {
-
-      If Ask("Close Form?", CloseThisTitle$)=1 Then {
-      If CloseThisForm=1 Then Form1_1=false
-      Method Form1(CloseThisForm), "CloseNow"
-      }
-}
-Function Form1.Unload {
-      Read New index, &Nook
-      Nook=True  \\ no unload now
-      \\ After make an unamed thread
-      \\ we use this of async waiting for user to
-      \\ provide feedback from a message box
-      with Form1(index), "title" as title$
-      CloseThisTitle$=title$
-      CloseThisForm=Index
-      After 50  { Call Local CloseAfter() }
-}
-Function Button1.Click {
-      Read New K, L
-      Print "Form:";L,"Button:";K
-      Print Controls(L).ReadCaption$(K)
-      if k=1 and l=2 then test
-}
-Function Form1.MouseMove {
-      Read New K, Button, Shft, X, Y
-      If Button=1 Then {
-           Layer Form1(K) {    
-                  move X, Y
-                  circle 500, 1, 14-K
-            }
-      }
-}
-Function Form1.MouseDown {
-      Read New K, Button, Shft, X, Y
-      If Button=2 Then {
-            Method Form1(K), "Control", 1 As UserControl
-            \\ we have to use new names if we "call local" a function
-            With UserControl, "Visible" As uVisible
-            uVisible=Not uVisible  \\ we can't use X~ as X = Not X     
-      }
-}
-'goto aaa
-For i=0 to N-1 {
-\\ Threads get current layer as starting layer
-      Layer Form1(i) {
-            \\ so we make the thread inside Form Layer 
-            Thread {
-            part {
-                  If Form1_1 Then {    
-                              if not scale.x then  thread this erase
-                            \\ third parameter is for color, we can use Color(r,g,b) or Colour(r,g,b) 
-                            \\ for rgb value, or we can give an Html number like #FF0000
-                            \\ another way is by using hex 0X80000012 for system colors
-                            \\ Here we use values from the range 0 to 15 (here from 7 to 15)
-                            \\ and these are the standard colors.
-                           Draw To Random(Scale.x), Random(Scale.y), Random(7,15)
-                           \\ sub PrintAndRefresh can be run because all threads are in the same module
-                           \\ Threads have their execution object and an object to draw, here the form1
-                           \\ When thread call sub, sub run on same execution object.
-                           \\ modules and functions have own execution object
-                           \\ so subs are light and interest because the see every variable as local
-                           \\ but we can make temporary anything
-                           \\ we can also create threads in a sub, without erase them. 
-                           \\ Threads erased when parent object erased, or when we send erase command
-                           \\ or when we exit Task.Main
-                           \\ for the situation of a thread created on a thread we can use Threads Erase
-                           \\ too remove all, including these. This we need it because, the second level of thread may
-                           \\ end after the erasing of module, where we create it, so can run code with variables which
-                           \\ are cleared. So With Threads Erase before exit module we are sure that Threading Pool is empty.
-                           \\ But this in not an every day situation.
-                           \\  (an after {}  thread creation in a thread execution is an example for a second level thread)
-                           Rem 100 :
-                          If random(100)<4 then  PrintAndRefresh("draw lines")
-                          refresh
-                  } Else Thread This Erase
-                  } as mine
-            } As OneMore   Interval 30
-            thread OneMore  execute  static me=i
-            \\ OneMore is a handler, so we lost first and second handler
-            \\ but we dont care, we close thread inside using This
-            \\ or we can let the Main Task erase it at the exit 
-      }
-}
-
-Thread {     
-      PrintAndRefresh(Str$(Now,"hh:mm:ss"))
-} As Inform Interval 1000
-\\ Inform is the Thread Handler, we don't use it here
-aaa:
-\\ Need a thread to run a Main.Task
-Main.Task 100 {
-'Every 100 {
-      \\ using property  \\ 
+While inkey$<>"" {}
+Cls ,0
+Report {Form44
+You can:
+      1. draw on Windows using right mouse button.
+      2. slide or click a button to see the response in console.
+      3. hide title using left mouse button.
+      4. click on Test button on Window 2, to open test dialog.
+      5. move the windows
+      6. Use Shif + F4 to close a form (even with hidden title)
       
-            
-            Rem 1 :       Print Type$(Visible), Type$(Form1_1)
-            If Not visible Then break
-            threads
+      Closing form 2 stop threads for line drawing.
+      Closing form 1 close all forms, program exit
       
-}
+      Enjoy
+      George Karras
+      
+      (press any key)
 
-\\  Cleaning;
-\\ A control has two objects, one in form (a UserControl, one type for all),
-\\ and the other is the wrapper, which serve as an event publisher,
-\\ and we can use propertiers and methods
-\\ When a Form unloaded not only erase UserControls but becaue hold referencse to wrappers
-\\ send deconstruct command to each one, to break any reference to form
-\\ and  erase internal collection - just throw references to actual objects
-\\ So our last references to wrappers are in Controls(i)
-\\ We can let M2000 to destroy the arrays, so the referecses, or we can do the job
-\\ and we can reuse it
-\\ so we check this with a jump to there
-Goto there
-For i=0 to N-1 {
-      For Controls(i) {
-            Dim .Butt()
-      }
 }
-there:
-\\ this command unload forms
-Declare Form1() Nothing
-'title "End"
-'Show
-Threads Erase
-Smooth off
-Thread.Plan Sequential  ' set the default again (can be set if no thread exist)
-Refresh 30
-Sub PrintAndRefresh(A$)
-            Print A$
-            Refresh
-End Sub
+push key$ : drop
+TryIt
+Info
 }
 MODULE LIST33 {Declare Simple Form
 With Simple, "Title" As myTitle$
@@ -7047,7 +7090,20 @@ While i<120 {
 SET FAST
 CLS
 }
-MODULE FB {Class BigNum {
+MODULE FB {Cls , 0
+Report {
+	Fibonacci sequence
+	
+	The Fibonacci sequence is a sequence   Fn   of natural numbers defined recursively: 
+				F0 = 0 
+				F1 = 1 
+				Fn = Fn-1 + Fn-2, if n>1 
+
+	We use a BigNum class to get the first 2000 Fibonacci numbers.
+
+}
+Cls, row
+Class BigNum {
       a=stack
       Function Digits {
             =len(.a)*14-(14-len(str$(stackitem(.a,len(.a)) ,"")))
@@ -7934,12 +7990,13 @@ Click me to display Date and Time.</button>
 </body>
 }
 browser "alfa.html",motion.xw+motion.x,motion.yw+motion.y, scale.x,6000
-Print "click, and pres Esc, or use statement Browser"
+Print {click, and pres Esc, or use statement Browser ""}
 }
 MODULE KB {Function CallMe {
-\\      Fkey Clear
+     \\  Fkey Clear  - not used
       \\ Keyboard - can play two or more notes at once
       \\ some keybards can play max 6 notes, some other max 4
+            refresh 5000
       Thread.Plan Sequential
       Play 0 \\ clear music threads
           
@@ -7947,6 +8004,8 @@ MODULE KB {Function CallMe {
       FillArray()
       \\Form ! 60,30      
       back$=""
+      \\ hold previous screen, then draw new one, then copy to back$, then release the old one
+      \\ then call FadeInScreen passing a dummy function as call back, to use the Back$
       hold
       Refresh 5000
       Move 0,0
@@ -7963,7 +8022,7 @@ MODULE KB {Function CallMe {
       -- George Karras --
       
       }
-      Global kb$=" ", tempo=300, org=5, f=0, vol$="V90", voi(18), use(17) ' 0 ..17,
+      Global kb$=" ", dur=300, org=5, f=0, vol$="V90", voi(18), use(17) ' 0 ..17,
       n=1
       For i=1 to 16 { use(i)=True }
       use(10)= false \\ For drum machine
@@ -7977,14 +8036,25 @@ MODULE KB {Function CallMe {
       DisplayNoRefresh(mm, kk, mm2, kk1)
       Move 0,0
       Copy scale.x, scale.y to back$
+      start.at=scale.x*.9
       Function Dummy1 {
-            move 0,0
+            move start.at, 0
+            Image back$
+            start.at-=scale.x/10
+            if start.at<0 then start.at=0
+      }
+      Function Dummy0 {
+            move 0, 0
             Image back$
       }
       Release
+       if random(10)<6 then
+            FadeInScreen2 Lazy$(&Dummy1()),1.3
+      else
+            FadeInScreen Lazy$(&Dummy0()),1.3
+      end if
+      call local Dummy0()
       refresh 5000
-      FadeInScreen Lazy$(&Dummy1()),1.3
-
       Scroll Split  Height/2+1
       Cursor 0, Height/2+1
       Module ClKey {
@@ -7994,7 +8064,7 @@ MODULE KB {Function CallMe {
             Next()
             voi(sel)=f
             Print a$, f
-            Score f, tempo, a$+vol$ : kb$<=kb$+a$+"-": Play f, org
+            Score f, dur, a$+vol$ : kb$<=kb$+a$+"-": Play f, org
             } else {
                   kb$<=Replace$(a$+"-","", kb$)
                   If voi(sel)>0 Then {
@@ -8040,13 +8110,13 @@ MODULE KB {Function CallMe {
             Display(mm, kk, mm2, kk1)
             Refresh 1000
             If KeyPress(asc("1")) Then Exit
-            If KeyPress(asc("3")) Then org<=14 : tempo<=100 
-            If KeyPress(asc("4")) Then org<=5 : tempo<=300
-            If KeyPress(asc("5")) Then org<=65 : tempo<=5000
+            If KeyPress(asc("3")) Then org<=14 : dur<=100 
+            If KeyPress(asc("4")) Then org<=5 : dur<=300
+            If KeyPress(asc("5")) Then org<=65 : dur<=5000
             If KeyPress(asc("8")) Then n=1-n
             If KeyPress(asc("9")) Then Thread L Restart
             If KeyPress(asc("0")) Then Thread L Hold
-            If KeyPress(32) Then { vol$ <= "V127"  } else vol$ <= "V90"
+            If KeyPress(32) Then { vol$ <= "V127"  } else vol$ <=if$(dur=300->"V100", "V110")
             Print "--------"
       }
       Threads Erase
@@ -9184,7 +9254,31 @@ Module FadeInScreen (&Paint(), tempo) {
             sprite Img1,,,,i-1,1
             refresh 100
             wait (100-i) div 40
-            i-=i / tempo
+            i-=i / tempo/2
+      } until i<1
+}
+Module FadeInScreen2 (&Paint(), tempo) {
+      tempo=abs(tempo)
+      move 0,0 
+      if tempo==0 or tempo<1.2 then tempo=2
+      Function GetBack2Buffer  {
+            def b$
+            def pic(x)=(x div twipsx)*twipsx
+            copy pic(scale.x), pic(scale.y) to b$
+            move pic(scale.x) div 2, pic(scale.y) div 2
+            =image(b$)  ' return Buffer
+      }
+      Img1=GetBack2Buffer()
+      release
+      refresh 2000
+      i=400
+      Repeat {
+            Call Paint()
+            move scale.x/2, scale.y/2
+            sprite Img1,,,,min.data(i-1,100),1
+            refresh 1000
+            wait (100-i) div 40
+            i-=i / tempo/4
       } until i<1
 }
 }
@@ -9441,5 +9535,2384 @@ MODULE CL {Class zz {
 Dim A(10)
 A(3)=zz()
 A(3).bb
+}
+MODULE OOP1 {\\ events without using Event objects
+\\ We use weak reference to register events in eventhandler
+\\ if A is a variable a &A is a string contain the actuall name of A, and this is a weak reference
+\\ Normally when we do a Read &B the read instruction get the string as a name for  a variable  and check if exist as variable
+\\ so Read make references from weak references
+\\ M2000 has also the pointer. A pointer is different from the reference, because has nothing to do with name of entities
+\\ For example  a=(1,2,3,4) set a as a pointer to array. Passing by value a we pass the object by a pointer.
+\\ We can pass &a so if we change the array inside a module or funcion, then we get the change back
+\\ A weak reference can be stored as string, and maybe later be invalid, if the storage, an array, passed back as return value,
+\\ or pushed to stack of values, and the module where we defined the refered entitites, terminate, and clear all own variables.
+
+\\for this example we make "static" groups (as named the user objects in M2000).
+\\The word static used for static variables which stay in every call of a module or function, from the same execution object.
+\\ (perhaps a thread which is a separate execution object call a module with specific for the thread static variables)
+\\ Here we don't use threads. We have one loop, which call one function of the EventHandler, the observe()
+\\ if this functions return true then the loop exit, and the program terminate
+
+
+\\we have three classes (they are global functions, which construct groups)
+\\ The mouseListene and the keylistener, and the EventHandler
+\\ Inside EventListener we have one more class (this isn't global)
+\\ The Widdget class
+\\ This class has the state for an event, and used from button function, a member of EventHandler
+\\ So with this EventHandler we can make buttons, with a name. The function button() return a Group
+\\ So for the example we make three buttons to three named groups, B1, B2 and B3
+\\ Each widget has a weak reference to EventHandler and a name, when constructed,
+\\ but has no listeners.
+\\ Also the listeners have to link to EventHandler, and this is the work of EventList() function
+\\ The Eventlist() is a member of EventHandler and get a listener class, and return a handler
+\\ To register an event we have to use register method passing the handler and the weak reference and a  button (widget)
+\\ So buttons and handlers are entities from EventHandler
+\\ The actual events are not part of the EventHandler. They are inside the listeners classes.
+\\ Each listener has a contruction member (same name as the class name),
+\\ a register member to add more widgets to same listener,
+\\ and the  CheckEvent(), which return true if event happen.
+
+\\The EventHandler pass &this  as own weak reference to each new wigdet.
+\\The Listeners added to an array inside the EventHandler with a list of weak references to widgets.
+\\The observe() function cehck all stored listeners, calling the CheckEcent() on listener.
+\\ if an event happen then all subscribers (all widgets) get a call in callback()  function with the name of the event
+\\ each widget then using the weak refrence to EventHandler do a query passig an id, an iinfo string (what$) and a reference of it
+\\ The query method (module in M2000) use id and what$ to display information, and use reference to read the caption of widget
+\\ perhaps the caption may change, so we can't stored this in listener's list in EventHandler.
+
+\\ So from observe(), pressing 1 or 2 keys or mouse key, we can call  one or more  widget's callback(),
+\\ which all  call back the query method, which the later read the widget caption.
+\\ B1 listen 1 and 2 keys, B2 listen 1 key, B3 listen a mouse key (right key)
+
+
+
+Module OOP {
+	Set Fast
+	cls 1, 0
+	pen 14
+	report 2, "Event Listener"
+	report "Use keys 1, 2 and mouse left, and for exit mouse right"
+	cls, 2
+	class mouselistener {
+	      name$="MousePress",  yourkey,  auto
+	      dim ref$()
+	      module mouselistener {
+	            read .yourkey
+	            .name$<=format$("{0}({1})",.name$,.yourkey)
+	      }
+	      module register {
+	            .auto++
+	            dim .ref$(.auto)
+	            read .ref$(.auto-1)   \\ weak reference
+	      }
+	      function CheckEvent {
+	            =Mouse=.yourkey
+	      }
+	}
+	class keylistener {
+	      name$="KeyPress", yourkey, auto
+	      dim ref$()
+	      module keylistener {
+	            read .yourkey
+	            .name$<=format$("{0}({1})",.name$,.yourkey)
+	      }
+	      module register {
+	            .auto++
+	            dim .ref$(.auto)
+	            read .ref$(.auto-1)   \\ weak reference
+	      }
+	      function CheckEvent {
+	            =keypress(.yourkey)
+	      }
+	}
+	class EventHandler {
+	      auto, autoevents, EnableEvents
+	      Dim Events()
+	      class widget {
+	            \\ in classes we can define variables without value
+	            ref$  \\ weak reference
+	            id, caption$, Enabled=True
+	            module linkme {
+	                  read .ref$
+	            }
+	            module widget {  \\ this is used as construction function, but is a module
+	                  read .id
+	                  read .caption$
+	            }
+	            function Callback {
+	                  read some$
+	                  push .ref$ : read &ref  \\ this is the link
+	                  =ref.query(.id, some$, &this)
+	            }
+	      }
+	      function button {    \\ this is the button construction
+	         .auto++
+	         read txt$
+	         makeme =.widget(.auto,txt$)  
+	         makeme.linkme &this
+	         =makeme   \\ we make a group a floating group to export
+	      }
+	      function EventList {
+	            handle=.autoevents  \\ we execute some commands..
+	            .autoevents++
+	            dim .Events(.autoevents)
+	            read .Events(handle)   \\ .. and then we can read function parameter
+	            =handle
+	      }
+	      module register {
+	           read handler, ref$
+	            .Events(handler).register  ref$
+	      }
+	     function observe {
+	     if not .EnableEvents then =true : exit
+	           print "observe for events"
+	           for i=0 to .autoevents-1 {
+	                 for .Events(i) {
+	                        if  .checkevent() then {
+	                              for j=0 to .auto-1 {
+	                                    for this {     \\ we use a for this {} to make temporary variables
+	                                                           \\ because we can't relink a link.  so we make a fresh here
+	\\              the link statement to this:    push  .ref$(j) : read &Link
+	                                          link weak .ref$(j) to &link
+	                                          call link.callback(.name$)
+	                                     }
+	                                }
+	                        }
+	                 }
+	           }
+	     }
+	      function query {
+	            read id, what$, &nicesmallgroup
+	            print under "Inside EventHandler";
+	            print under
+	            print  part "I get a query from a widget object ";id
+	            print
+	            print part "Say:";what$
+	            print
+	            for nicesmallgroup {
+	                  Print part "I get the caption:";.caption$
+	                  print
+	                  =0
+	            }          
+	      }
+	}
+	EventHandler=EventHandler()  \\ create handler
+	B1=EventHandler.button("Button1")  \\ create subjects
+	B2=EventHandler.button("Button2") 
+	B3=EventHandler.button("Button3") 
+	
+	for EventHandler {
+	      PressKeyOne=.Eventlist(keylistener(49))
+	      .Register  PressKeyOne, &B1  \\register event to subject
+	      .Register  PressKeyOne, &B2 
+	      .Register .Eventlist(keylistener(50)) , &B1 
+	      .Register  .Eventlist(Mouselistener(1)) , &B3 
+	      .EnableEvents=True  
+	}
+	every 150 {
+	      if EventHandler.observe() then exit
+	      if mouse=2 then exit
+	} 
+}
+OOP
+info
+}
+MODULE EM {Module Checkit {
+      ' erase stack of values, so we can add data
+      Flush
+      Report "Top rank per group"
+      Report "Find the top   N   salaries in each department,   where   N   is provided as a parameter. "
+10  Input "N%=",N%
+      if N%<1 then 10
+      Enum Departments {D050,D101,D190,D202}
+
+      \\ Inventroy Department need unique keys
+      Inventory Department
+      \\ each item in this inventory should be an inventory too
+      Class Empl {
+            name$, id$, salary
+            Class:
+            Module Empl(.name$, .id$, .salary) {}
+      }
+      Data "Tyler Bennett",		"E10297", 32000, D101
+      Data "John Rappl",		"E21437", 47000, D050
+      Data "George Woltman",	"E00127", 53500, D101
+      Data "Adam Smith",		"E63535", 18000, D202
+      Data "Claire Buckman",		"E39876", 27800, D202
+      Data "David McClellan",		"E04242", 41500, D101
+      Data "Rich Holcomb",		"E01234", 49500, D202
+      Data "Nathan Adams",		"E41298", 21900, D050
+      Data "Richard Potter",		"E43128", 15900, D101
+      Data "David Motsinger",	"E27002", 19250, D202
+      Data "Tim Sampair",		"E03033", 27000, D101
+      Data "Kim Arlich",			"E10001", 57000, D190
+      Data "Timothy Grove",		"E16398", 29900, D190
+      Data ""
+      Read name$
+      While name$<>""  {
+            Read id$, salary, dep
+            Rem : Print name$, id$, salary, dep
+            If Exist(Department, dep) Then {
+                  z=Eval(Department)    ' get pointer to inventory
+                  AppendOne()            
+            } Else {
+                  z=queue
+                  AppendDep()            
+                  AppendOne()
+            }
+            Read name$
+      }
+      Sort Department as number
+      i=each(Department)
+      \\ make depname as type of Departments
+      depname=D050
+      oldtab=tab
+      Print $(4),
+      Print over ~(1, 7),@(10), $(4,6),"Dep." ,@(16), $(4,20), "Employee Name",$(6,8), "Emp. ID", "Salary"
+      Print Under
+      Print $(4),
+      While i {
+            \\ when we pass a number to a enum variable
+            \\ if the number exist, get that enum item else raise error
+            depname=val(eval$(i, i^))
+            \\ z is a pointer to inventory 
+            z=Eval(i)
+            Sort descending z as number
+            k=each(z,1,N%)
+            While k {
+                  Empl=Eval(k)
+                  For Empl {
+                        \\ eval$(depname) return the name of enum variable (like D050)
+'                        Print Format$("{0:6}{1:20}{2:8}{3::-8}",Eval$(depname), .name$, .id$, .salary)
+			Print Part $(4,10),"", $(4,6),~(15,2), Eval$(depname),@(16), $(4,20), ~(14), .name$,$(6, 8), ~(pen,2),.id$, ~(14),.salary
+			Print under
+                  }
+            }
+      }
+      Print $(4),"Done", $(0)
+      Sub AppendDep()
+            Append Department, dep:=z
+      End Sub
+      Sub AppendOne()
+                  Append z, salary:=Empl(name$, id$, salary)
+      End Sub
+}
+Checkit 
+}
+MODULE TRAVERSAL {Report {
+          Tree traversal
+                   1
+                  / \
+                 /   \
+                /     \
+               2       3
+              / \     /
+             4   5   6
+            /       / \
+           7       8   9
+
+} 
+Pen 15 {Print "Using tuple (arrays)"}
+Print
+Module CheckIt {
+      Null=(,)
+      Tree=((((Null,7,Null),4,Null),2,(Null,5,Null)),1,(((Null,8,Null),6,(Null,9,Null)),3,Null))
+      
+      Module preorder (T) {
+            Print "preorder:    ";
+            printtree(T)
+            Print
+            sub printtree(T)
+                  Print T#val(1);" ";      
+                  If len(T#val(0))>0 then printtree(T#val(0))
+                  If len(T#val(2))>0 then printtree(T#val(2))
+            end sub
+      }
+      preorder Tree
+      
+      Module inorder (T) {
+            Print "inorder:     ";
+            printtree(T)
+            Print
+            sub printtree(T)
+                  If len(T#val(0))>0 then printtree(T#val(0))
+                  Print T#val(1);" ";
+                  If len(T#val(2))>0 then printtree(T#val(2))
+            end sub
+      }
+      inorder Tree
+      
+      Module postorder (T) {
+            Print "postorder:   ";
+            printtree(T)
+            Print
+            sub printtree(T)
+                  If len(T#val(0))>0 then printtree(T#val(0))
+                  If len(T#val(2))>0 then printtree(T#val(2))
+                  Print T#val(1);" ";
+            end sub
+      }
+      postorder Tree
+      
+      Module level_order (T) {
+            Print "level-order: ";
+            Stack New {
+                  printtree(T)
+                  if empty then exit
+                  Read T
+                  Loop
+            }
+            Print
+            sub printtree(T)
+                  If Len(T)>0 then
+                        Print T#val(1);" ";
+                        Data T#val(0), T#val(2)
+                  end if
+            end sub
+      }
+      level_order Tree
+      Print
+}
+CheckIt
+Pen 15 {Print "Using OOP - passing objects to modules"}
+Print
+Module OOP {
+      \\ Class is a global function (until this module end)
+      Class Null {
+      }
+      \\ Null is a pointer to an object returned from class Null()
+      Global Null->Null()
+      Class Node {
+      Public:
+            x, Group LeftNode, Group RightNode
+      Class:
+            \\ after class:  anything exist one time,
+            \\ not included in final object
+            Module Node {
+                  .LeftNode<=Null
+                  .RightNode<=Null
+                  Read .x
+                  \\ read ? for optional values
+                  Read ? .LeftNode, .RightNode
+            }
+      }
+      \\ NodeTree return a pointer to a new Node
+      Function NodeTree {
+            \\ ![] pass currrent stack to Node()
+            ->Node(![])
+      }
+ 
+      Tree=NodeTree(1, NodeTree(2,NodeTree(4, NodeTree(7)), NodeTree(5)), NodeTree(3, NodeTree(6, NodeTree(8), NodeTree(9))))
+ 
+      Module preorder (T) {
+            Print "preorder:    ";
+            printtree(T)
+            Print
+            sub printtree(T as pointer)
+                  If T is Null then Exit sub
+                  Print T=>x;" ";
+                  printtree(T=>LeftNode)
+                  printtree(T=>RightNode)
+            end sub
+      }
+      preorder Tree
+      Module inorder (T) {
+            Print "inorder:     ";
+            printtree(T)
+            Print
+            sub printtree(T as pointer)
+                  If T is Null then Exit sub
+                  printtree(T=>LeftNode)
+                  Print T=>x;" ";
+                  printtree(T=>RightNode)
+            end sub
+      }
+      inorder Tree
+      Module postorder (T) {
+            Print "postorder:   ";
+            printtree(T)
+            Print
+            sub printtree(T as pointer)
+                  If T is Null then Exit sub
+                  printtree(T=>LeftNode)
+                  printtree(T=>RightNode)            
+                  Print T=>x;" ";
+            end sub
+      }
+      postorder Tree
+      Module level_order (T) {
+            Print "level-order: ";
+            Stack New {
+                  printtree(T)
+                  if empty then exit
+                  Read T
+                  Loop
+            }
+            Print
+            sub printtree(T as pointer)
+                  If T is Null else
+                        Print T=>x;" ";
+                        Data T=>LeftNode, T=>RightNode
+                  end if
+            end sub
+      }
+      level_order Tree
+      Print
+}
+OOP
+Pen 15 {Print "Using OOP - modules are members of objects "}
+Module OOP {
+      \\ Class is a global function (until this module end)
+      Class Null {
+      }
+      \\ Null is a pointer to an object returned from class Null()
+      Global Null->Null()
+      Class Node {
+      Public:
+            x, Group LeftNode, Group RightNode
+            Module preorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T as pointer)
+                        If T is Null then Exit sub
+                        call visitor(T=>x)
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module inorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T as pointer)
+                        If T is Null then Exit sub
+                        printtree(T=>LeftNode)
+                        call visitor(T=>x)
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module postorder (visitor) {
+                  T->This
+                  printtree(T)
+                  sub printtree(T as pointer)
+                        If T is Null then Exit sub
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)            
+                        call visitor(T=>x)
+                  end sub
+            }
+            Module level_order (visitor){
+                  T->This
+                  Stack New {
+                        printtree(T)
+                        if empty then exit
+                        Read T
+                        Loop
+                  }
+                  sub printtree(T as pointer)
+                        If T is Null else
+                              call visitor(T=>x)
+                              Data T=>LeftNode, T=>RightNode
+                        end if
+                  end sub
+            }
+      Class:
+            \\ after class:  anything exist one time,
+            \\ not included in final object
+            Module Node {
+                  .LeftNode<=Null
+                  .RightNode<=Null
+                  Read .x
+                  \\ read ? for optional values
+                  Read ? .LeftNode, .RightNode
+            }
+      }
+      \\ NodeTree return a pointer to a new Node
+      Function NodeTree {
+            \\ ![] pass currrent stack to Node()
+            ->Node(![])
+      }
+ 
+      Tree=NodeTree(1, NodeTree(2,NodeTree(4, NodeTree(7)), NodeTree(5)), NodeTree(3, NodeTree(6, NodeTree(8), NodeTree(9))))
+ 
+      printnum=lambda (title$) -> {
+            Print
+            Print title$;
+            =lambda (x)-> {
+                  Print x;" ";
+            }
+      }
+      Tree=>preorder printnum("preorder:    ")
+      Tree=>inorder printnum("inorder:     ")
+      Tree=>postorder printnum("postorder:   ")
+      Tree=>level_order printnum("level-order: ")
+      Print
+      Print
+}
+OOP
+Pen 15 {Print "OOP - Event object as visitor"}
+Module OOP {
+      \\ Class is a global function (until this module end)
+      Class Null {
+      }
+      \\ Null is a pointer to an object returned from class Null()
+      Global Null->Null()
+      Class Node {
+      Public:
+            x, Group LeftNode, Group RightNode
+            Module preorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T as pointer)
+                        If T is Null then Exit sub
+                        call event visitor, T=>x
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module inorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T as pointer)
+                        If T is Null then Exit sub
+                        printtree(T=>LeftNode)
+                        call event visitor, T=>x
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module postorder (visitor) {
+                  T->This
+                  printtree(T)
+                  sub printtree(T as pointer)
+                        If T is Null then Exit sub
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)            
+                        call event visitor, T=>x
+                  end sub
+            }
+            Module level_order (visitor){
+                  T->This
+                  Stack New {
+                        printtree(T)
+                        if empty then exit
+                        Read T
+                        Loop
+                  }
+                  sub printtree(T as pointer)
+                        If T is Null else
+                              call event visitor, T=>x
+                              Data T=>LeftNode, T=>RightNode
+                        end if
+                  end sub
+            }
+      Class:
+            \\ after class:  anything exist one time,
+            \\ not included in final object
+            Module Node {
+                  .LeftNode<=Null
+                  .RightNode<=Null
+                  Read .x
+                  \\ read ? for optional values
+                  Read ? .LeftNode, .RightNode
+            }
+      }
+      \\ NodeTree return a pointer to a new Node
+      Function NodeTree {
+            \\ ![] pass currrent stack to Node()
+            ->Node(![])
+      }
+ 
+      Tree=NodeTree(1, NodeTree(2,NodeTree(4, NodeTree(7)), NodeTree(5)), NodeTree(3, NodeTree(6, NodeTree(8), NodeTree(9))))
+      Event PrintAnum {
+            read x
+      }
+      Function PrintThis(x) {
+                Print x;" ";      
+      }
+      Event PrintAnum New PrintThis()
+      printnum=lambda PrintAnum (title$) -> {
+            Print
+            Print title$;
+            =PrintAnum
+      }
+      Tree=>preorder printnum("preorder:    ")
+      Tree=>inorder printnum("inorder:     ")
+      Tree=>postorder printnum("postorder:   ")
+      Tree=>level_order printnum("level-order: ")
+}
+OOP
+}
+MODULE PERM1 {Report "A program that performs a permutation test to judge whether the treatment had a significantly stronger effect than the placebo. "
+Print "Treatment group "
+Print 85, 88, 75, 66, 25, 29, 83, 39, 97
+Print "Control group"
+Print 68, 41, 10, 49, 16, 65, 32, 92, 28, 98
+Print "Please wait  - ctrl-C or Esc to exit"
+Refresh
+Module Checkit {
+      Global data(), treat=0
+      data()=(85, 88, 75, 66, 25, 29, 83, 39, 97,68, 41, 10, 49, 16, 65, 32, 92, 28, 98)
+      Function pick(at, remain, accu) {
+            If remain Else =If(accu>treat->1,0):Exit
+            =pick(at-1,remain-1,accu+data(at-1))+If(at>remain->pick(at-1, remain, accu),0)
+      }
+      total=1
+      For i=0 to 8 {treat+=data(i)}
+      For i=19 to 11 {total*=i}
+      For i=9 to 1 {total/=i}
+      gt=pick(19,9,0)
+      le=total-gt
+      Print Format$("<= : {0:1}% {1}", 100*le/total, le)
+      Print Format$(" > : {0:1}% {1}", 100*gt/total, gt)
+}
+Checkit
+}
+MODULE ITER {Print "Associative array/Iteration"
+Module checkit {
+      \\ Inventories are objects with keys and values, or keys (used as read only values)
+      \\ They use hash function.
+      \\ Function TwoKeys return Inventory object (as a pointer to object)
+      Function TwoKeys {
+            Inventory Alfa="key1":=100, "key2":=200
+            =Alfa
+      }
+      M=TwoKeys()
+      Print Type$(M)="Inventory"
+      \\ Normal Use:
+            \\ Inventories Keys are case sensitive
+            \\ M2000 identifiers are not case sensitive
+      Print M("key1"), m("key2")
+      \\ numeric values can convert to strings
+      Print M$("key1"), m$("key2")
+      \\ Iteration
+      N=Each(M)
+      While N {
+            Print Eval(N)  ' prints 100, 200 as number
+            Print M(N^!)  ' The same using index N^
+      }
+      N=Each(M)
+      While N {
+            Print Eval$(N)  ' prints  100, 200 as strings
+            Print M$(N^!)  ' The same using index N^
+      }
+      N=Each(M)
+      While N {
+            Print Eval$(N, N^)  ' Prints Keys
+      }
+      \\ double iteration
+      Append M, "key3":=500
+      N=Each(M, 1, -1)  ' start to end
+      N1=Each(M, -1, 1) ' end to start
+      \\ 3x3 prints
+      While N {
+            While N1 {
+                  Print format$("{0}*{1}={2}", Eval(N1), Eval(N), Eval(N1)*Eval(N))
+            }
+      }
+      \\ sort results from lower product to greater product (3+2+1, 6 prints only)
+      N=Each(M, 1, -1)  
+      While N {
+            N1=Each(M, N^+1, -1) 
+            While N1 {
+                  Print format$("{0}*{1}={2}", Eval(N1), Eval(N), Eval(N1)*Eval(N))
+            }
+      }
+      N=Each(M)
+      N1=Each(M,-2, 1)  ' from second from end to start
+      \\ print only 2 values. While block ends when one iterator finish
+      While N, N1 {
+            Print Eval(N1)*Eval(N)
+      }         
+}
+Checkit
+}
+MODULE ST {Print "A stack object"
+Module Checkit {
+      a=Stack
+      Stack a {
+            Push 100, 200, 300
+      }
+      Print StackItem(a, 1)=300
+      Stack a {
+            Print StackItem(1)=300
+            While not empty {
+                  Read N
+                  Print N
+            }
+      }
+}
+Checkit
+}
+MODULE ST1 {Print "Current Stack"
+Module Checkit {
+      Read a, b
+      Print a, b
+}
+\\ add parameters in a FIFO, and this FIFO merged to current stack
+Push 100
+Checkit 10, 20
+Print StackItem(1)=100
+Module Checkit {
+      Read a, b
+      Print a=20, b=100
+}
+Checkit 20
+ 
+Function alfa {
+      k=0
+      n=0
+      while not empty {
+            k+=number
+            n++
+      }
+      if n=0 then Error "No parameters found"
+      =k/n
+}
+ 
+Print alfa(1,2,3,4)=2.5
+}
+MODULE MAZE2 {Module Maze2 {
+      \\ depth-first search
+      While Inkey$<>"" {}  ' drop keys
+      Const View as boolean=True
+again:
+      Form 80,50
+      let w=random(2,6)*10, h=random(1,4)*10, slice=w*h div 60
+      let  slice=if(slice=0->1, slice) : counter =1 
+      Double
+      \\center proportional text double size
+      Report 2, Format$("Maze {0}x{1}",w,h)
+      Normal
+      Refresh
+      Set Fast !
+      stack new {
+            Profiler
+            Dim maze$(1 to w+1, 1 to h+1)="#"
+            Include=Lambda w,h (a,b) ->a>=1 and a<=w and b>=1 and b<=h
+            Flush ' empty stack
+            if random(1,2)=1 then
+                  entry=(if(random(1,2)=1->2, w),Random(1, h/2)*2)
+            else
+                  entry=(random(1,w/2)*2,If(Random(1,2)=1->2,h))
+            end if
+            maze$(entry#val(0), entry#val(1))=" "
+            forchoose=(,)
+            Push Entry
+            do
+                  do
+                        NewForChoose(!entry)
+                        status=len(forchoose)
+                        if status>0 then
+                              status--
+                              forchoose=forchoose#val(random(0,status))
+                              if status>0 then Push forchoose
+                              OpenDoor(!Entry, !forchoose)
+                              if view then counter=if(counter=0->slice, counter-1) : if counter=0 then ShowMaze()      
+                        else
+                              exit
+                        end if
+                        entry=forchoose
+                  Always
+                  if empty then exit
+                  Read entry
+            Always
+            ShowMaze()
+            Print timecount/1000
+      }
+      counter=10
+      every 200 {
+            counter--
+            if inkey$<>"" or mouse<>0 then counter=-1 : exit
+            if counter<1 then exit
+      }
+      if counter=0 then goto again
+      End
+      Sub NewForChoose(x,y)
+            Local x1=x-2, x2=x+2, y1=y-2, y2=y+2, arr=(,)
+            Stack New {
+                  if include(x1,y) then if Maze$(x1,y)<>" " Then push (x1, y) 
+                  if include(x2,y) then if Maze$(x2,y)<>" " Then push (x2, y)
+                  if include(x,y1) then if Maze$(x,y1)<>" " Then push (x, y1)
+                  if include(x,y2) then if Maze$(x,y2)<>" " Then push (x, y2)
+                  forchoose= Array([])
+            }
+      End Sub
+      Sub OpenDoor(x1,y1, x2,y2)
+            Local i
+            if x1=x2 then
+                  y1+=y2<=>y1
+                  for i=y1 to y2 {maze$(x1, i)=" " } 
+            Else
+                  x1+=x2<=>x1
+                  for i=x1 to x2 {maze$(i, y1)=" "}                   
+            End if
+      End Sub
+      Sub ShowMaze()
+            Refresh 5000
+            cls ,4  ' split screen - preserve lines form 0 to 3
+            Local i, j, t=40-w div 2
+            For j=1 to h+1 { Print @(t) : for i=1 to w+1 {Print maze$(i,j);}:Print}
+            Print
+            Refresh 100
+      End Sub     
+}
+Maze2
+info
+}
+MODULE MAZE {Module Maze {
+      width% = 40
+      height% = 20
+      \\ we can use DIM maze$(0 to width%,0 to  height%)="#"
+      \\ so we can delete the two For loops
+      DIM maze$(0 to width%,0 to  height%)
+      FOR x% = 0 TO width%
+          FOR y% = 0 TO height%
+              maze$(x%, y%) = "#"
+          NEXT y%
+      NEXT x%
+ 
+      currentx% = INT(RND * (width% - 1))
+      currenty% = INT(RND * (height% - 1))
+ 
+      IF currentx% MOD 2 = 0 THEN currentx%++
+      IF currenty% MOD 2 = 0 THEN currenty%++
+      maze$(currentx%, currenty%) = " "
+ 
+      done% = 0
+      WHILE done% = 0 {
+          FOR i% = 0 TO 99
+              oldx% = currentx%
+              oldy% = currenty%
+              SELECT CASE INT(RND * 4)
+                  CASE 0
+                      IF currentx% + 2 < width% THEN currentx%+=2
+                  CASE 1
+                      IF currenty% + 2 < height% THEN currenty%+=2
+                  CASE 2
+                      IF currentx% - 2 > 0 THEN currentx%-=2
+                  CASE 3
+                      IF currenty% - 2 > 0 THEN currenty%-=2
+              END SELECT
+              IF maze$(currentx%, currenty%) = "#"  Then {
+                  maze$(currentx%, currenty%) = " "
+                  maze$(INT((currentx% + oldx%) / 2), ((currenty% + oldy%) / 2)) = " "
+             }
+          NEXT i%
+          done% = 1
+          FOR x% = 1 TO width% - 1 STEP 2
+              FOR y% = 1 TO height% - 1 STEP 2
+                  IF maze$(x%, y%) = "#" THEN done% = 0
+              NEXT y%
+          NEXT x%
+      }
+ 
+ 
+      FOR y% = 0 TO height%
+          FOR x% = 0 TO width%
+              PRINT maze$(x%, y%);
+          NEXT x%
+          PRINT
+      NEXT y%
+}
+Maze
+}
+MODULE MINESWEEPER {Module Minesweeper {
+      Font "Arial Black"
+      Bold 0
+      Form 60,40
+      Refresh 1000
+      Def com$, com_label$
+      Def x, b_row, b_col, where, top_where
+      Def rows=4, columns=6, swap_first%
+      Def boolean skiptest, end_game, cheat
+      Dim Board$(0 to rows+1, 0 to columns+1)="? "
+      Def mines%, i%, j%, used%, acc%, n%, m%
+      mines%=max.data(random(int(columns*rows*.1),int(columns*rows*.2)-1), 1)
+      For i%=1 to rows:For j%=1 to columns
+            Board$(i%,j%)=". "
+      Next j%:Next i%
+      used%=mines%
+      While used%
+            used%--
+            Do
+                  i%=random(1,rows)
+                  j%=random(1, columns)
+            Until right$(Board$(i%,j%),1)=" "
+            Board$(i%,j%)=".*"
+      End While
+      used%=rows*columns-mines%
+      \\ remove rem so to never loose from first open
+      Rem : 
+      swap_first%=used%
+      \\ when mines%=0 or used%=0 then player win
+      Report {Minesweeper - rosettacode task
+            Commands:
+            -  ? 1 2  flag/unflag 1 2
+            -  1 2   open 1 2
+            -  q  to quit
+            You can pass multiple commands in a line, but q erase all before execute
+      } 
+      top_where=Row
+      While not End_Game {GameLoop()}
+      End
+      Sub PrintBoard()
+      Cls, top_where
+      Print
+      Print "   X  ";
+      For j%=1 to columns {
+            Print format$("{0::-3}  ", j%);
+      }
+      Print
+      For i%=1 to rows {
+            Print format$(" {0::-3}  ", i%);
+            For j%=1 to columns {
+                  Print "  ";Left$(Board$(i%,j%),1);"  ";
+                  \\ rem above and unrem follow line to display mines
+                  Rem: Print "  ";Board$(i%,j%)+" ";
+            }
+            Print
+      }      
+      End Sub
+      Sub PrintMines()
+      Cls, top_where
+      Print
+      Print "   X  ";
+      For j%=1 to columns {
+            Print format$("{0::-3}  ", j%);
+      }
+      Print
+      For i%=1 to rows {
+            Print format$(" {0::-3}  ", i%);
+            For j%=1 to columns {
+                  Print "  ";Right$(Board$(i%,j%),1);"  ";
+            }
+            Print
+      }      
+      End Sub
+      Sub GameLoop()
+            Local com$, loopagain as boolean
+            PrintBoard()
+            InputCommand()
+            do 
+                  loopagain=true
+                  while not empty
+                              \\ process game command
+                        Read com$
+                        if com$="q " Then
+                              Print "Quit" : end_game=True : exit
+                        Else.if com$="o " Then
+                              OpenCell()
+                        Else.if com$="n " Then
+                              OpenCell2()
+                        Else.if com$="? " Then
+                              SwapCell()
+                        Else.if com$="c " Then
+                              Exit Sub                        
+                        End if
+                  End While
+                  If mines%=0 or used%=0 then
+                        PrintBoard(): Print "Player Win": end_game=True: Exit Sub
+                  End if
+                  If mines%=-1 then
+                        if swap_first%=used% then
+                              mines%=rows*columns-used%
+                              Local n%, m%
+                              While mines%
+                                    Let n%=random(1,rows), m%=random(1, columns)
+                                    If Board$(n%, m%)=". " then  Board$(n%, m%)=".*" : mines%=0
+                              End While
+                              Board$(i%, j%)=". "
+                              mines%=rows*columns-used%
+                              swap_first%=-100
+                              Push i%, j%, "o "
+                              loopagain=false
+                        else
+                              PrintMines(): Print "Player Loose": end_game=True : Exit Sub
+                        end if
+                  End If
+            Until loopagain
+            Flush
+            Refresh if(End_Game->10,1000)
+      End Sub
+      Sub InputCommand()
+            where=row
+            While com$=""
+                  cls, where
+                  Print "x x | ? x x | q >";
+                  Refresh 10
+                  Try {
+                        Input "", com$
+                  }
+            End While
+            x=1
+            Flush 
+            While com$<>""
+                  com_label$=""
+                  ParseCommand()
+                  if len(com_label$)<>2 then
+                        com$="" : Print com_label$ : Flush
+                        Refresh 10
+                        push key$ : drop
+                  else
+                        Data com_label$, b_col, b_row
+                  End if
+            End While
+            Refresh 1000
+      End Sub
+      Sub ParseCommand()
+            com_label$="o "
+            skiptest=true
+            ReadColumn()
+            if len(com_label$)<>2 then
+                  com$=""     
+            Else.if x=-1 then
+                  com_label$=lcase$(Left$(com$,1))+" "
+                  com$=mid$(com$, 2)
+                  x=1
+                  if len(com_label$)<>2 then
+                        com_label$="no command found"
+                  else.if com_label$="? " then
+                        ReadColumn()
+                        if x>-1 then ReadRow()
+                  else.if com_label$="c " then
+                        cheat=true  
+                  else.if com_label$="q " then
+                        flush
+                        com$=""                  
+                  else
+                        com_label$="Use q or ? for commands"
+                        com$=""
+                  End if      
+            else
+                  ReadRow()
+                  if x>-1 then com_label$="o "
+            End if 
+      End Sub
+      Sub ReadRow()
+            com$=mid$(com$,x)
+            b_row=val(com$, "??", x)
+            if x=-1 then
+                  com_label$="Need a row"
+            else.if b_row<1 or b_row>rows then
+                  com_label$="Need a row from 1 to "+str$(rows)
+                  x=-1 
+            else
+                  com$=mid$(com$,x+1)
+                  x=1
+            End if
+      End Sub
+      Sub ReadColumn()
+            com$=mid$(com$,x)
+            b_col=val(com$, "??", x)
+            if x=-1 then
+                  if not skiptest then com_label$="Need a column"
+            else.if b_col<1 or b_col>columns then
+                  com_label$="Need a column from 1 to"+str$(columns)
+            else
+                  com$=mid$(com$,x+1)
+                  x=1
+            End if
+            skiptest=false
+      End Sub
+      Sub SwapCell()
+            Read j%, i%
+            If left$(Board$(i%,j%),1)="?" then
+                  Board$(i%,j%) ="."+Right$(Board$(i%,j%),1)
+                  If cheat Then if Right$(Board$(i%,j%),1)="*" then mines%++
+            Else.If left$(Board$(i%,j%),1)="." then
+                  Board$(i%,j%) ="?"+Right$(Board$(i%,j%),1)
+                  If cheat Then if Right$(Board$(i%,j%),1)="*" then mines%--
+            End if
+      End Sub
+      Sub OpenCell()
+            Read j%, i%
+            If left$(Board$(i%,j%),1)="." then {
+                  if Right$(Board$(i%,j%),1)="*" then mines%=-1 : flush : exit
+                  acc%=0
+                  used%--
+                  Local n%, m%
+                  For n%=i%-1 to i%+1 {
+                        For m%=j%-1 to j%+1 {
+                                If Right$(Board$(n%,m%),1)="*" then acc%++
+                        }
+                  }
+                  For n%=i%-1 to i%+1 {
+                        For m%=j%-1 to j%+1 {
+                             if not (n%=i% and m%=j%) then
+                                   if not Right$(Board$(n%,m%),1)="*" then
+                                         If left$(Board$(n%,m%),1)="." then
+                                              Push n%, m%, "n "  ' reverse to stack
+                                              Rem : Print stack.size : Refresh
+                                         End If
+                                   End If
+                             End If
+                        }
+                  }
+                  Board$(i%,j%)=if$(acc%=0->"  ",str$(acc%, "# "))
+            }
+      End Sub
+      Sub OpenCell2()
+            Read J%, i%
+            If left$(Board$(i%,j%),1)="." then {
+                  if Right$(Board$(i%,j%),1)="*" then exit
+                  acc%=0
+                  used%--
+                  For n%=i%-1 to i%+1 {
+                        For m%=j%-1 to j%+1 {
+                                If Right$(Board$(n%,m%),1)="*" then acc%++
+                        }
+                  }
+                  \\ if cell has no mines around then we check all
+                  if acc%=0 then
+                        Local n%, m%
+                        For n%=i%-1 to i%+1
+                              For m%=j%-1 to j%+1
+                                   if not (n%=i% and m%=j%) then
+                                         if not Right$(Board$(n%,m%),1)="*" then
+                                               If left$(Board$(n%,m%),1)="." then
+                                                    Push n%, m%, "o "  ' reverse to stack
+                                                    Rem : Print stack.size : Refresh
+                                               End If
+                                         End If
+                                   End If
+                              Next m%
+                        Next n%
+                  End If
+                  Board$(i%,j%)=if$(acc%=0->"  ",str$(acc%, "# "))
+            }
+      End Sub     
+}
+Minesweeper
+Info   ' call the info module
+}
+MODULE IBAN {\\ IBAN checker
+Function MakeIBANfun$ {
+      Inventory countrylength = "AL" := 28, "AD" := 24, "AT" := 20, "AZ" := 28, "BE" := 16, "BH" := 22, "BA" := 20, "BR" := 29
+      Append  countrylength, "BG" := 22, "CR" := 21, "HR" := 21, "CY" := 28, "CZ" := 24, "DK" := 18, "DO" := 28, "EE" := 20
+      Append  countrylength, "FO" := 18, "FI" := 18, "FR" := 27, "GE" := 22, "DE" := 22, "GI" := 23, "GR" := 27, "GL" := 18
+      Append  countrylength, "GT" := 28, "HU" := 28, "IS" := 26, "IE" := 22, "IL" := 23, "IT" := 27, "KZ" := 20, "KW" := 30
+      Append  countrylength, "LV" := 21, "LB" := 28, "LI" := 21, "LT" := 20, "LU" := 20, "MK" := 19, "MT" := 31, "MR" := 27
+      Append  countrylength, "MU" := 30, "MC" := 27, "MD" := 24, "ME" := 22, "NL" := 18, "NO" := 15, "PK" := 24, "PS" := 29
+      Append  countrylength, "PL" := 28, "PT" := 25, "RO" := 24, "SM" := 27, "SA" := 24, "RS" := 22, "SK" := 24, "SI" := 19
+      Append  countrylength, "ES" := 24, "SE" := 24, "CH" := 21, "TN" := 24, "TR" := 26, "AE" := 23, "GB" := 22, "VG" := 24
+ 
+     =Lambda$ countrylength (Iban0$)->{
+            Iban$=Filter$(Ucase$(Iban0$), " ")
+            Iban$=Filter$(Iban$, Filter$(Iban$,"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
+            Def Decimal ch, c
+            {            
+                  If Not Exist(countrylength, Left$(Iban$,2)) Then Exit
+                  length=Eval(countrylength)
+                  If Not Len(Iban$)=length Then exit
+                  Buffer ScanChar as Integer*length
+                  Return ScanChar, 0:=Mid$(Iban$,5), length-4:=Mid$(Iban$,1,4)
+ 
+                  For i=0 to length-1 {
+                        ch=Eval(ScanChar, i)
+                        if ch>=48 and ch<=57 then {
+                              c = c*10+ch-48    
+                        } else.if ch>=65 and ch<=90 then {
+                              c = c*100+ch-55
+                        } else c=-1: exit
+                  }
+                  c = c mod 97
+            }
+            =Iban0$ + If$(c=1 ->" (Valid)", " (Invalid)")
+      }
+}
+IbanCheck$=MakeIBANfun$()
+Print IbanCheck$("GB82 WEST 1234 5698 7654 32")    ' valid
+Print IbanCheck$("GB82 TEST 1234 5698 7654 32")
+Print IbanCheck$("SA03 8000 0000 6080 1016 7519")   ' valid
+Print IbanCheck$("GR16 0110 1250 0000 0001 2300 695X")
+Print IbanCheck$("MK11 2222 3333 4444 555")
+}
+MODULE HTTP {Module CheckIt  {
+      Declare  xml "Microsoft.XMLHTTP"
+      const testUrl$ = "http://www.rosettacode.org"
+      With  xml, "readyState" as ReadyState
+      Method xml "Open", "Get", testUrl$, True  ' True means Async
+      Method xml "send"
+      \\ We set a thread to count time
+      k=0
+      Thread {
+            k++
+      }  as TimeOut interval 300   ' change thread interval to give more time to collect
+      \\ In main thread we can check ReadyState and Mouse button
+      Task.Main 100 {
+            Print ReadyState
+            If ReadyState=4 then exit
+            if k>20 then exit   ' 20*100= 2 sec
+            if mouse then exit ' exit if mouse click
+      }
+      \\ So now we can read
+      if ReadyState=4 then {
+            With  xml, "responseText" AS AA$
+            \\ break AA$ to lines
+            Document BB$=AA$
+            \\ using line breaks as CRLF
+            Print "Press space or mouse to change page"
+            Report BB$
+      }
+      Declare xml Nothing
+}
+CheckIt
+}
+MODULE CAL {\\ Calendar - for "REAL" programmers
+\\ All statements in UPPERCASE
+\\ Output to 132 characters console - as a line printer
+\\ USE COURIER NEW  (FONT "COURIER NEW")
+MODULE GLOBAL SNOOPY {
+CURSOR 0,ROW
+PRINT $(,8)
+PRINT #-2, {
+					   XXXX
+					  X    XX
+					 X  ***  X		  XXXXX
+					X  *****  X	       XXX     XX
+				     XXXX ******* XXX	   XXXX 	 XX
+				   XX	X ******  XXXXXXXXX    El@	   XX XXX
+				 XX	 X ****  X			     X** X
+				X	 XX    XX     X 		     X***X
+			       X	 //XXXX       X 		     XXXX
+			      X 	//   X				   XX
+			     X	       //    X		XXXXXXXXXXXXXXXXXX/
+			     X	   XXX//    X	       X
+			     X	  X   X     X	      X
+			     X	  X    X    X	     X
+			      X   X    X    X	     X			  XX
+			      X    X   X    X	     X		       XXX  XX
+			       X    XXX      X	      X 	      X  X X  X
+			       X	     X	       X	      XX X  XXXX
+				X	      X 	XXXXXXXX\     XX   XX  X
+				 XX	       XX	       X     X	 @X  XX
+				   XX		 XXXX	XXXXXX/     X	  XXXX
+				     XXX	     XX***	   X	 X
+					XXXXXXXXXXXXX *   *	  X	X
+						     *---* X	 X     X
+						    *-* *   XXX X     X
+						    *- *       XXX   X
+						   *- *X	  XXX
+						   *- *X  X	     XXX
+						  *- *X    X		XX
+						  *- *XX    X		  X
+						 *  *X* X    X		   X
+						 *  *X * X    X 	    X
+						*  * X**  X   XXXX	    X
+						*  * X**  XX	 X	    X
+					       *  ** X** X     XX	   X
+					       *  **  X*  XXX	X	  X
+					      *  **    XX   XXXX       XXX
+					     *	* *	 XXXX	   X	 X
+					    *	* *	     X	   X	 X
+			      =======*******   * *	     X	   X	  XXXXXXXX\
+				     *	       * *	/XXXXX	    XXXXXXXX\	   )
+				=====**********  *     X		     )	\  )
+				  ====* 	*     X 	      \  \   )XXXXX
+			     =========**********       XXXXXXXXXXXXXXXXXXXXXX
+
+}
+}
+MODULE CALENDAR (YEAR, LOCALEID) {
+      FUNCTION GETMAX(YEAR, MONTH) {
+            A=DATE(STR$(YEAR)+"-"+STR$(MONTH)+"-1")
+            MAX=32
+            DO {
+                  MAX--
+                  M=VAL(STR$(CDATE(A,0,0,MAX), "M"))  
+            } UNTIL M=MONTH
+             =MAX+1    
+      }
+      FUNCTION SKIPMO(YEAR, MONTH) {
+            A=DATE(STR$(YEAR)+"-"+STR$(MONTH)+"-1")
+            =(VAL(STR$(A, "W"))-8) MOD 7 +7
+      }
+      FUNCTION TITLE$(A$) {
+            =UCASE$(LEFT$(A$,1))+LCASE$(MID$(A$, 2))
+      }
+      LOCALE LOCALEID
+      CURSOR 0,HEIGHT-1  ' LAST LINE, SO EACH NEW LINE SCROLL ALL LINES UP
+      SNOOPY
+      
+      PRINT UNDER  ' PRINT UNDERLINE
+      PRINT OVER $(2), YEAR
+      PRINT
+      FOR J=0 TO 1 {
+            PRINT
+            FOR I=1 TO 6 {
+                  MONTH=I+J*6
+                  PRINT  PART @((I-1)*22), $(2,21), UCASE$(LOCALE$(55+MONTH))
+            }
+            PRINT
+            DIM SKIP(1 TO 6), COUNT(1 TO 6), D(1 TO 6)=1
+            FOR I=1 TO 6 {
+                  MONTH=I+J*6
+                  IF I>1 THEN PRINT " ";
+                  FOR K=42 TO 48 :PRINT " ";UCASE$(LEFT$(LOCALE$(K),2));:NEXT K 
+                  SKIP(I)=SKIPMO(YEAR, MONTH)
+                  COUNT(I)=GETMAX(YEAR, MONTH)
+            }
+            PRINT 
+            FOR I=1 TO 6 {
+                      IF I>1 THEN PRINT " ";
+                      FOR K=1 TO 7 {
+                        SKIP(I)--
+                        IF  SKIP(I)>0 THEN PRINT "   "; :CONTINUE
+                        COUNT(I)--
+                        PRINT FORMAT$(" {0::-2}", D(I));
+                        D(I)++
+                  }
+            }
+            PRINT
+            PRINT @(0)
+            FOR M=1 TO 5 {
+                  FOR I=1 TO 6 {
+                        IF I>1 THEN PRINT " ";
+                        FOR K=1 TO 7 {
+                              COUNT(I)--
+                              IF COUNT(I)<0 THEN PRINT "   "; : CONTINUE
+                              PRINT FORMAT$(" {0::-2}", D(I));
+                              D(I)++
+                        }
+                  }
+            PRINT 
+            }
+      }     
+}
+WHILE INKEY$<>"" :  END WHILE
+FONT "COURIER NEW"
+PEN 0
+CLS 15, 0
+FORM 132,68      
+CALENDAR 1966, 1032 ' GREEK
+GOSUB WAITKEY_OR_MOUSE
+FOR I=2019 TO 2025
+CALENDAR I, 1033  ' ENGLISH
+GOSUB WAITKEY_OR_MOUSE
+NEXT I
+CLEAR  ' CLEAR VARIABLES FROM THIS MODULE
+KEYBOARD "INFO"+CHR$(13)
+END
+WAITKEY_OR_MOUSE:
+WHILE INKEY$="" AND MOUSE=0
+END WHILE
+RETURN
+}
+MODULE LINKED_LIST {\\ This example use pointers to groups.
+\\ Class Node
+\\ Node type has two pointers to groups: pred and succ
+\\ Class 
+
+Module Checkit {
+      Form 80, 50
+      Class Null {}
+      Global Null->Null()
+      Class Node {
+            group pred, succ
+            dat=0
+            Remove {
+                  Print "destroyed", .dat
+            }
+            class: 
+            module Node {
+                  .pred->Null
+                  .succ->Null
+                  if match("N") Then Read .dat
+            }
+      }
+      Class LList {
+            Group Head, Tail
+            Module PushTail(k as pointer) {
+                  if .Tail is Null then {
+                        .Head<=k
+                        .Tail<=k
+                  } else {
+                        n=.Tail
+                        .Tail<=k
+                        k=>pred=n=>pred
+                        n=>pred=k
+                        k=>succ=n
+                  }
+            }
+            Function RemoveTail {
+                  n=.Tail
+                  if n is .Head then {
+                        .Head->Null
+                        .Tail->Null
+                  } Else { 
+                        .Tail<=n=>succ
+                        .Tail=>pred=n=>pred
+                        n=>pred->Null
+                  }
+                  for n {
+                        .succ->Null
+                        .pred->Null
+                  }
+                  =n
+            }
+            Module PushHead(k as pointer) {
+                  if .head is Null then {
+                        .Head<=k
+                        .Tail<=k
+                  } else {
+                        n=.head
+                        .head<=k
+                        k=>succ=n=>succ
+                        n=>succ=k
+                        k=>pred=n
+                  }
+            }
+            Function RemoveHead {
+                  n=.Head
+                  if n is .Tail then {
+                        .Head->Null
+                        .Tail->Null
+                  } Else { 
+                      .Head<=n=>pred
+                      .Head=>succ=n=>succ
+                       n=>succ->Null    
+                   }
+                  for n {
+                        .succ->Null
+                        .pred->Null
+                  }
+                  =n
+            }
+            Module RemoveNode(k as pointer) {
+                  pred=k=>pred
+                  succ=k=>succ
+                  if pred is succ then {
+                        if .head is k else Error "Can't remove this node"
+                        k=.RemoveHead()
+                        clear k
+                  } else {
+                       pred=>succ=succ
+                       succ=>pred=pred 
+                  }
+            }
+            Module InsertAfter(k as pointer, n as pointer) {
+                  pred=k=>pred
+                  n=>pred=pred
+                  n=>succ=k
+                  pred=>succ=n
+                  k=>pred=n
+            }
+            Function IsEmpty {
+                  = .Head is null or .tail is null
+            }
+      class:
+            Module LList {
+                  .Head->Null
+                  .Tail->Null
+            }
+      }
+      m->Node(100)
+ 
+      L=LList()
+      L.PushTail m
+      If not L.Head is Null then Print L.Head=>dat=100
+      for i=101 to 103 {
+            m->Node(i)
+            L.PushTail m
+            Print "ok....", i
+      }
+      for i=104 to 106 {
+            m->Node(i)
+            L.PushHead m
+            Print "ok....", i
+      }
+ 
+      Print "Use Head to display from last to first"
+      m=L.Head
+      do {
+            Print m=>dat
+            m=m=>pred
+      } Until m is null
+      Print "ok, now find 3rd and remove it"
+      m1=L.Head
+      i=1 
+      Index=3
+      While i<Index {
+            if m1 is null then exit
+            m1=m1=>pred
+            i++
+      }
+      If i<>Index then {
+            Print "List has less than "; Index;" Items"
+      } Else {
+            Print "First add one new node"
+                  newNode->Node(1000)
+                  L.InsertAfter m1, newNode
+                  L.RemoveNode m1
+                  clear m1  ' last time m1 used here
+                  newNode=Null
+            Print "ok.............."
+      }
+      Print "Use Tail to display from first to last"
+      m=L.Tail
+      do {
+            Print m=>dat
+            m=m=>succ
+      } Until m is null
+ 
+ 
+      useother=True
+      While not L.IsEmpty(){
+            For This {
+                  \\ we have to use a temporary variable name, here A
+                         A=If(useother->L.RemoveTail(),L.RemoveHead())
+                         ? A=>dat
+                        useother~
+                        \\ now we can try to perform removing
+                        clear A
+             }
+      }
+      Print "list is empty:"; L.IsEmpty()    
+}
+Checkit
+}
+MODULE LZW {Module FastM2000 {
+      plaintext$="TOBEORNOTTOBEORTOBEORNOT"
+      Function encodeLZW$(i$) {
+            Def long c, d, i, l, o$, w$
+            Inventory dict
+            For i = 0 to 255 {Append dict , Chr$(i):=i}
+            l = i
+            i = 1
+            w$ = LEFT$(i$,1)
+            Repeat{
+                  d = 0
+                  Repeat {
+                        c = d
+                        IF i > Len(i$) Then Exit
+                        if exist(dict, w$) Then { 
+                              d=eval(dict)
+                        } Else  Append dict, w$:=l: Exit
+                        if d<l Then i += 1 : w$ += Mid$(i$, i, 1)  
+                  } Until d >= l
+                  l += 1 : w$ = Right$(w$, 1)
+                  o$ += Chr$(c Mod 256) + Chr$(c div 256)
+            } Until i >= Len(i$)
+            = o$
+      }
+      encodeLZW$ = encodeLZW$(plaintext$)
+      
+      Document Doc$={ Lempel-Ziv-Welch (LZW) compression
+      }
+      For i = 1 to Len(encodeLZW$) STEP 2
+              Doc$= Str$(Asc(Mid$(encodeLZW$,i)) + 256*Asc(Mid$(encodeLZW$,i+1)))
+      Next i
+      insert to 2,1  Doc$=""  ' remove first space
+      
+      Doc$={
+      }+"Compression ration:"+str$((len(encodeLZW$) div 2)/len(encodeLZW$)*100, " ##")+{%
+      }
+      Function decodeLZW$(i$) {
+            Def c, i, l, o$, t$, w$
+            Inventory Dict
+            For i = 0 to 255 {Append dict , i:=chr$(i)}
+            l = i
+            c = Asc(i$) + 256*Asc(Mid$(i$,2))
+            w$ = dict$(c)
+            o$ = w$
+            IF Len(i$) < 4 Then = o$
+            For i = 3 to Len(i$) STEP 2 {
+                  c = Asc(Mid$(i$,i)) + 256*Asc(Mid$(i$,i+1))
+                  IF c < l Then {
+                        t$ = dict$(c)
+                  } Else t$ = w$ + LEFT$(w$,1)
+                  o$ += t$
+                  Append dict, l:=w$ + LEFT$(t$,1)
+                  l += 1 : w$ = t$
+            }
+            = o$
+      }
+      Doc$=decodeLZW$(encodeLZW$)+{
+      }
+      Clipboard Doc$
+      Report Doc$
+}
+FastM2000
+}
+MODULE UTF8 {Module checkit {
+      linespace 60
+      Form ! 60,40
+      Cls,0
+      Report 2, "Read a file character by character/UTF8"
+      \\ prepare a file
+      \\ Save.Doc and Append.Doc  to file, Load.Doc and Merge.Doc from file
+      Report ! 4 ' set 4 to tab size
+      Report {
+            	The task of this module is simple a reading one by one char, from a UTF8 encoded file. We can save and read entire files in UTF8 encoding, but here we want to  save a file as UTF8 and then read one by one all characters as UTF8 encoded, and diplay them (after converted to UTF-16LE, from a ready made function)
+            	We have to read more than one byte to make it one character. But maybe we have less, so we have to stop reading, if that happen. So when we need more we try to get more, and maybe we get error. We use a Try block to get the error in the code, and do something for it.
+            	We use buffers as memory area to get the data at a predefined length. So when we use:
+            	Get #file_Handler, two
+            	intrerpreter check that two is a buffer, get the length and try to get the same length of bytes to that buffer. Each buffer have a base structure and maybe a count value, of how many of them can be stored. The folowwing statement say that the base structure is a byte and we have two of them
+            	Buffer Two as byte*2
+            	The variable Two is a reference to an object. Two(0) is the real address of offset 0, of buffer two.
+            	Here we don't use address, only offsets. We can read using Eval() the byte at any offset, included in the buffer, unless we get an error. So Eval(two, 0) return the byte as an assign value (0 to 255). Also we can use the string reading, Eval$(two,0,2) which return a string with 2 bytes, from offset 0, from buffer referred by two.
+            	The following statement perform a memory copy (twice, one to the string and one to the source), with control over the offsets and lengths.
+            	Return Bytes, 1:=Eval$(three, 0, 3)
+            	So we put from offset 1 (has base structure bytes, so is the second byte), 3 bytes from buffer referred by three.
+            }
+      document a$
+      a$={First Line
+            Second line
+            Third Line
+            Ελληνικά Greek Letters
+            yä®€
+            成长汉
+            }
+      Save.Doc a$, "checkthis.txt", 2  ' 2 for UTF-8
+      b$="*"
+      final$=""
+      buffer Clear bytes as byte*16
+      Buffer One as byte
+      Buffer Two as byte*2
+      Buffer Three as byte*3
+      Locale 1033
+      Fall=100/FileLen("checkthis.txt")
+      open "checkthis.txt" for input as #f
+      seek#f, 4 ' skip BOM
+      While b$<>"" {
+            Print Over $(1), ~(11), seek(#f)/Fall
+            GetOneUtf8Char(&b$)
+            final$+=b$
+      }
+      Print Over $(1), ~(15), "reading done........."
+      close #f
+      Print
+      \\ from cursor settting, Report get the 
+      Cursor 20
+      Report final$, width-20-8
+      Print
+      Sub GetOneUtf8Char(&ch$)
+            ch$=""
+            if Eof(#f) then Exit Sub
+            Get #f, One
+            Return Bytes, 0:=Eval(one, 0)
+            local mrk=Eval(one, 0)
+            Try ok {
+                  If Binary.And(mrk, 0xE0)=0xC0 then {
+                        Get #f,one
+                        Return Bytes, 1:=Eval$(one, 0,1) 
+                        ch$=Eval$(Bytes, 0, 2)
+                  } Else.if Binary.And(mrk, 0xF0)=0xE0 then {
+                        Get #f,two
+                        Return Bytes, 1:=Eval$(two,0,2)
+                        ch$=Eval$(Bytes, 0, 3)
+                  } Else.if Binary.And(mrk, 0xF8)=0xF0 then {
+                        Get #f,three
+                        Return Bytes, 1:=Eval$(three, 0, 3)
+                        ch$=Eval$(Bytes, 0, 4)
+                  } Else ch$=Eval$(Bytes, 0, 1)
+            }
+            if Error or not ok then ch$="" : exit sub
+            ch$=left$(string$(ch$ as Utf8dec),1)
+      End Sub
+}
+checkit
+Italic 1 : Report "Press any key to return to Info": Italic 0
+Push Key$ : Drop
+Info
+}
+MODULE RF {Module checkit {
+      \\ prepare a file
+      \\ Save.Doc and Append.Doc  to file, Load.Doc and Merge.Doc from file
+      document a$
+      a$={First Line
+            Second line
+            Third Line
+            Ελληνικά Greek Letters
+            }
+      Save.Doc a$, "checkthis.txt", 2  ' 2 for UTF-8
+ 
+      Buffer1=Buffer("checkthis.txt")
+      Print Len(Buffer1)=Filelen("checkthis.txt")
+      b$=String$(Eval$(Buffer1, 0) as UTF8Dec)
+      Report b$
+      openfile$=FILE$("text file","txt")
+      Merge.doc a$, openfile$
+      Edit.Doc a$
+}
+checkit
+}
+MODULE RFL {\\ read a file line by line
+Module checkit {
+      \\ prepare a file
+      document a$
+      a$={First Line
+            Second line
+            Third Line
+            }
+      Save.Doc a$, "checkthis.txt", 0  ' 0 for UTF-16LE
+      Flush
+      Open "checkthis.txt" For Wide Input as #F
+      While not Eof(#f) {
+            Data Seek(#f)
+            Line Input #F, b$
+            Print  b$
+      }
+      Close #f
+      Dim  Index()
+      \\ copy stack to index(), flush stack
+      Index()=Array([])
+      \\ change base to base 1
+      Dim  Base 1, Index(len(index()))
+      Open "checkthis.txt" For Wide Input as #F
+            Seek#F, Index(2)
+            Line Input #F, b$
+            Print b$  ' print second line
+      Close #f
+      \\ prepare Ansi file
+      Print "Ansi File"
+      Save.Doc a$, "checkthis.txt",  1033  ' we use specific locale
+      Flush \\ flush the stack to get indexes
+      oldlocale=locale
+      locale 1033
+      \\ no Wide clause
+      Open "checkthis.txt" For  Input as #F
+      While not Eof(#f) {
+            Data Seek(#f)
+            Line Input #F, b$
+            Print  b$
+      }
+      Close #f
+      Dim  Index()
+      \\ copy stack to index(), flush stack
+      Index()=Array([])
+      \\ change base to base 1
+      Dim  Base 1, Index(len(index()))
+      Open "checkthis.txt" For Input as #F
+            Seek#F, Index(2)
+            Line Input #F, b$
+            Print b$  ' print second line
+      Close #f
+      locale oldlocale
+}
+checkit
+}
+MODULE PERMALL {Module Checkit {
+      Global a$
+      Document a$
+      Module Permutations (s){
+            Module Level (n, s, h)   {
+                  If n=1 then {
+                        while Len(s) {
+                              m1=each(h)     
+                              while m1 {
+                                    Print Array$(m1);" ";
+                              }
+                               Print Array$(S)
+                               ToClipBoard()
+                               s=cdr(s)
+                         }
+                  } Else {
+                        for i=1 to len(s) {
+                              call Level n-1, cdr(s),  cons(h, car(s))
+                              s=cons(cdr(s), car(s))
+                        }  
+                  }
+                  Sub ToClipBoard()
+                        local m=each(h)
+                        Local b$=""
+                        While m {
+                              b$+=If$(Len(b$)<>0->" ","")+Array$(m)+" "
+                        }
+                        b$+=If$(Len(b$)<>0->" ","")+Array$(s,0)+" "+{
+                        }
+                        a$<=b$   ' assign to global need <=
+                  End Sub
+            }
+            If len(s)=0 then Error 
+            Head=(,)
+            Call Level Len(s),  s, Head
+      }
+      Clear a$
+      Permutations (1,2,3,4)
+      Permutations (100, 200, 500)
+      Permutations ("A", "B", "C","D")  
+      Permutations ("DOG", "CAT", "BAT")    
+      ClipBoard a$
+}
+Checkit
+}
+MODULE PERMSTEP {Module StepByStep {
+      Function PermutationStep (a) {
+            c1=lambda (&f, a) ->{
+                  =car(a)
+                  f=true
+            }
+            m=len(a)
+            c=c1
+            while m>1 {
+                  c1=lambda c2=c,p, m=(,) (&f, a) ->{
+                        if len(m)=0 then m=a
+                        =cons(car(m),c2(&f, cdr(m)))
+                        if f then f=false:p++:  m=cons(cdr(m), car(m)) : if p=len(m) then p=0 : m=(,):: f=true
+                  }
+                  c=c1  
+                  m--    
+            }
+            =lambda c, a (&f) -> {
+                  =c(&f, a)
+            }
+      }
+      k=false
+      StepA=PermutationStep((1,2,3,4))
+      while not k {
+                 Print StepA(&k) 
+      }
+      k=false
+      StepA=PermutationStep((100,200,300))
+      while not k {
+                 Print StepA(&k) 
+      }
+      k=false
+      StepA=PermutationStep(("A", "B", "C", "D"))
+      while not k {
+                 Print StepA(&k) 
+      }
+      k=false
+      StepA=PermutationStep(("DOG", "CAT", "BAT"))
+      while not k {
+                 Print StepA(&k) 
+      }      
+}
+StepByStep
+}
+MODULE FACT {Cls , 0
+Report {
+	Factorial Task
+	Definitions
+               • The factorial of   0   (zero)   is defined as being   1   (unity).
+               • The   Factorial Function   of a positive integer,   n,   is defined as the product of the sequence:
+                                                                      n,   n-1,   n-2,   ...   1 
+                                                                      
+}
+Cls, row
+Module CheckIt {
+      Locale 1033 ' ensure #,### print with comma
+      Function factorial (n){
+            If n<0 then Error "Factorial Error!"
+            If n>27 then Error "Overflow"
+ 
+            m=1@:While n>1 {m*=n:n--}:=m
+      }
+      Const Proportional=4
+      Const ProportionalLeftJustification=5
+      Const NonProportional=0
+      Const NonProportionalLeftJustification=1
+      For i=1 to 27 
+      \\ we can print over (erasing line first), without new line at the end
+      \\ and we can change how numbers apears, and the with of columns
+      \\ numbers by default have right justification
+      \\ all $() format have temporary use in this kind of print.
+      Print Over $(Proportional),$("\f\a\c\t\o\r\i\a\l\(#\)\=",15), i, $(ProportionalLeftJustification), $("#,###",40), factorial(i)
+      Print        \\ new line
+      Next i
+}
+Checkit
+}
+MODULE TTT {Module Tic.Tac.Toe {
+      Dim Board$(1 to 3, 1 to 3)=" "
+      WinGame=False
+      p=Board$()
+      RandomPosition=lambda -> {
+            =(random(1,3), random(1,3))
+      }
+ 
+      BoardItemEmpty=Lambda p (x, y) -> {
+            =Array$(p, x, y)=" "
+      }
+      BoardSetItem=Lambda p (x, y, w$) -> {
+            link p to a$()
+            a$(x, y)=w$
+      }
+      T=9
+      R=0
+      C=0
+      Repeat {
+            Print "Computer Move:"
+            CompMove()
+            T--
+            DrawBoard()
+            CheckWin()
+            if WinGame Then Print "Computer Win": Exit
+            if T=0 then exit
+            Repeat {
+                  GetRowCol("Input Row", &R)
+                  GetRowCol("Input Column", &C)
+                  If BoardItemEmpty(R,C) then call boardsetitem(R,C,"O") : exit 
+            } Always
+            T--
+            DrawBoard()
+            CheckWin()
+            if WinGame Then Print "You Win": Exit
+      } until T=0 or WinGame
+      Sub DrawBoard()
+      Print "R/C 1 2 3"
+      Print " 1) "; Board$(1,1);"|";Board$(1,2);"|";Board$(1,3)
+      Print "    -+-+-"
+      Print " 2) "; Board$(2,1);"|";Board$(2,2);"|";Board$(2,3)
+      Print "    -+-+-"
+      Print " 3) "; Board$(3,1);"|";Board$(3,2);"|";Board$(3,3)
+      End Sub
+      Sub CheckWin()
+            WinGame=false
+            local i,j,three$
+            For i=1 to 3
+                  three$=""
+                  For j=1 to 3 : three$+=Board$(i,j) : Next j
+                  CheckThree()
+                  three$=""
+                  For j=1 to 3 :  three$+=Board$(j,i) :Next j
+                  CheckThree()
+            Next i
+            three$=""
+            For i=1 to 3 : three$+=Board$(i,i): Next i
+            CheckThree()
+            three$=""
+            For i=1 to 3:three$+=Board$(i,4-i): Next i
+            CheckThree()
+      End Sub
+      Sub CheckThree()
+            if instr(three$," ")=0 then  WinGame=WinGame or Filter$(three$, left$(three$,1))=""
+      End Sub
+      Sub CompMove()
+            if T<9 and Board$(2,2)=" " then {
+                  call boardsetitem(2,2,"X")
+            } Else {
+                  local i=3, j=3, found=false
+                  if T<=6 then {
+                        CompThink("X","X")
+                  } 
+                  let i=3, j=3
+                  If Not found And T<6 then {
+                        CompThink("O","X")    
+                  }
+                  If not found then {
+                        Repeat {
+                              comp=RandomPosition()
+                              If BoardItemEmpty(!comp) then call boardsetitem(!comp, "X") : exit
+                        } Always
+                  }
+            }
+      End Sub
+      Sub CompThink(Bad$, Good$)
+                        While i>0 {
+                              j=3
+                              While j>0 {
+                                    if Board$(i,j)=" " then {
+                                          Board$(i,j)=Bad$
+                                          CheckWin()
+                                          if WinGame then {
+                                                 Board$(i,j)=Good$:i=0:j=0: found=true
+                                          } Else Board$(i,j)=" "
+                                    }
+                                    j--
+                              }
+                              i--
+                        }
+ 
+      End Sub
+      Sub GetRowCol(What$, &W)
+            Print What$;":";
+            Repeat {
+                  W=Val("0"+Key$)
+            } until W>=1 and W<=3
+            Print Str$(W,"")
+      End Sub
+}
+Tic.Tac.Toe
+}
+MODULE GUESS {Module GuessNumber {
+      Read Min, Max
+      chosen = Random(Min, Max)
+      print "guess a whole number between ";Min;" and ";Max
+      do
+                  \\ we use guess so Input get integer value
+                  \\ if we press enter without a number we get error
+                  do
+                        \\ if we get error then we change line, checking the cursor position
+                        If Pos>0 then Print
+                        Try ok {
+                              input "Enter your number " , guess%
+                        }
+                  until ok
+                  Select Case guess%
+                  case  min to chosen-1
+                        print "Sorry, your number was too low"
+                  case chosen+1 to max
+                        print "Sorry, your number was too high"
+                  case chosen 
+                        print "Well guessed!"
+                  else case
+                        print "That was an invalid number"
+                  end select
+      until guess% = chosen
+}
+GuessNumber 5, 15
+}
+MODULE GUESS1 {Module QBASIC_Based {
+      supervisor:
+      GOSUB initialize
+      GOSUB guessing
+      GOTO continue
+ 
+      initialize:
+      \\ Not need to RANDOMIZE TIMER
+      \\ we can use Random(1, 100) to get a number from 1 to 100
+      n = 0: r = INT(RND * 100 + 1): g = 0: c$ = ""
+      RETURN
+ 
+      guessing:
+      WHILE g <> r
+                INPUT "Pick a number between 1 and 100:"; g
+                IF g = r THEN
+                    PRINT "You got it!"
+                    n ++
+                    PRINT "It took "; n; " tries to pick the right number."
+                ELSE.IF g < r THEN
+                    PRINT "Try a larger number."
+                    n ++
+                ELSE
+                    PRINT "Try a smaller number."
+                    n++
+                END IF
+      END WHILE
+      RETURN
+ 
+      continue:
+      WHILE c$ <> "YES" AND c$ <> "NO"
+          INPUT "Do you want to continue? (YES/NO)"; c$
+          c$ = UCASE$(c$)
+      END WHILE
+      IF c$ = "YES" THEN GOTO supervisor
+}
+QBASIC_Based
+}
+MODULE DAY {Print "December 25 is a Sunday in:"
+For Year=2008 to 2121 { 
+      if  Str$(Date("25/12/"+str$(Year,"")),"w")="1" Then {
+            Print Year
+      }
+}
+\\ is the same with this:
+Print "December 25 is a Sunday in:"
+For Year=2008 to 2121 { 
+      if  Str$(Date(str$(Year,"")+"-12-25"),"w")="1" Then {
+            Print Year
+      }
+}
+ 
+}
+MODULE FILETIME {Module CheckIt {
+      \\ without *for wide output*  we open for ANSI (1 byte per character)
+      \\ but here we need it only for the creation of a file
+      Open "afile" for output as #f
+      Close #f
+      Print file.stamp("afile")   'it is a number in VB6 date format.
+      \\ day format as for Greece
+      Print Str$(File.Stamp("afile"),"hh:nn:ss dd/mm/yyyy") , "utc write time - by default"
+      Print Str$(File.Stamp("afile" ,1),"hh:nn:ss dd/mm/yyyy") , "utc write time, 1"
+      Print  Str$(File.Stamp("afile" ,-1),"hh:nn:ss dd/mm/yyyy"), "local write time, -1"
+      Print Str$(File.Stamp("afile" ,2),"hh:nn:ss dd/mm/yyyy"), "utc creation time, 2"
+      Print  Str$(File.Stamp("afile" ,-2),"hh:nn:ss dd/mm/yyyy"), "local creation time, -2"
+}
+Checkit
+}
+MODULE SPEED {Cls,0
+Report {
+	Time a function
+	Using a timer (with the least granularity available) to time how long a function takes to execute
+	
+	The Test function get one type each time
+	
+	10000% is Integer 16bit
+	
+	10000& is Long 32bit
+	
+	10000@ is Decimal
+	
+	10000# is Currency
+	
+	10000~ is Float
+	
+	10000 is Double (default) 
+	
+}
+cls,row
+Module Checkit {
+      Module sumtolimit (limit) {
+           sum=limit-limit
+           n=sum
+           n++
+           while limit {sum+=limit*n:limit--:n-!}
+      }
+      Profiler
+      sumtolimit 10000%
+      Print TimeCount
+      Profiler
+      sumtolimit 10000&
+      Print TimeCount
+      Profiler
+      sumtolimit 10000#
+      Print TimeCount
+      Profiler
+      sumtolimit 10000@
+      Print TimeCount
+      Profiler
+      sumtolimit 10000~
+      Print TimeCount
+      Profiler
+      sumtolimit 10000
+      Print TimeCount
+}
+Print "Set Slow - more screen refresh - more time to OS"
+Set Slow
+Checkit
+Print "Set Fast - the default"
+Set Fast
+Checkit
+Refresh
+Print "Set Fast !  - less screen refresh"
+Set Fast !
+Checkit
+Refresh
+Set Fast
+}
+MODULE STIME {print str$(now,"long time"), time$(now)
+}
+MODULE SDATE {Print str$(today, "yyyy-mm-dd")
+Print str$(today, "dddd, mmm, dd, yyyy")
+Print Date$(today, 1033, "dddd, MMM, dd, yyyy")
+Print Date$(today, 1036, "dddd, MMM dd, yyyy")
+Print Date$(today, 1047, "dddd, MMM dd, yyyy")
+Print Date$(today, 1048, "dddd, MMM dd, yyyy")
+Module Checkit(locale_id, Locale_out) {
+      Enum zones {HAST=-10, HADT,PST, MST, CST, EST, AST, NST=-3.5, UTC=0, WET=0, GMT=0, BST=1,IST=1, CET=1, EET, MSK,MSD}
+      INP$="March 7 2009 7:30pm EST"
+      dim a$()
+      a$()=Piece$(INP$," ")
+      date1=date(leftpart$(INP$, a$(3)), locale_id)
+      zone=UTC
+      Try {
+            zone=Eval(a#val$(4))
+      }
+      date0=date1+time(a$(3))
+      Document doc$="Input date:"+{
+      }
+      doc$= Date$(date0 , Locale_out, "MMMM d, yyyy ")+" "+Lcase$(Time$(date0,1033, "hh:mmtt"))+" "+eval$(zone)+{
+      }+"12 hours later:"+{
+      }
+      m=each(zones)
+      while m {
+            date2=date1+ctime(time(a$(3)),12+eval(m)-zone,frac(eval(m)-zone)*60,0)      
+            doc$=Date$(date2 , Locale_out, "MMMM d, yyyy ")+Lcase$(Time$(date2,1033, "hh:mmtt"))+" "+eval$(m)+{
+            }
+      }
+      Report Doc$
+      Clipboard Doc$
+}
+Checkit 1033, 1036
+Checkit 1033, 1032
+}
+MODULE ENV {Module CheckIt {
+      \\ using read only variablles
+      Print "Platform: ";Platform$
+      Print "Computer Os: "; Os$
+      Print "Type of OS: ";OsBit;" bit"
+      Print "Computer Name:";  Computer$
+      Print "User Name: "; User.Name$
+      \\ using WScript.Shell
+      Declare objShell "WScript.Shell"
+      With  objShell, "Environment" set env ("Process")
+      With env, "item" as Env$()
+      Print Env$("PATH")
+      Print Env$("HOMEPATH")
+      Declare objShell Nothing
+      \\ using internal Information object
+      Declare OsInfo INFORMATION
+      With OsInfo, "build" as build, "NtDllVersion" as NtDllVersion$
+      Method OsInfo, "GetCurrentProcessSID" as PID$
+      Method OsInfo, "IsProcessElevated" as isElevated
+      Print "Os build number: ";build
+      Print "Nr Dll version: ";NtDllVersion$
+      Print "ProcessSID: ";pid$
+      Print "Is Process Eleveted: ";isElevated
+      Declare OsInfo Nothing
+}
+Checkit
+}
+MODULE HELLO {Module CheckIt {
+      Declare Simple Form
+      \\ we can define form before open
+      Layer Simple {
+            \\ center Window with 12pt font, 12000 twips width and 6000 twips height
+            \\ ; at the end command to center the form in current screen
+            Window 12, 12000, 6000;
+            \\ make layer gray and split screen 0
+            Cls #333333, 0
+            \\   set split screen to 3rd line, like Cls ,2 without clear screen
+            Scroll Split 2
+            Cursor 0, 2
+      }
+      With Simple, "Title", "Hello Form"
+      Function Simple.Click {
+            Layer Simple {
+                  \\ open msgbox
+                  Print Ask("Hello World")
+                  Refresh
+            }
+      }
+      \\ now open as modal
+      Method Simple, "Show", 1
+      \\ now form deleted
+      Declare Simple Nothing
+}
+CheckIt
+}
+MODULE BUTTON {Module CheckIt {
+      Declare Form1  Form
+      Declare Label1 Button Form Form1
+      Declare Button1 Button Form Form1
+      Method Label1,"move", 2000, 2000, 4000, 600
+      Method Button1,"move", 2000, 3000, 4000, 600
+      With Label1, "Caption" as caption$, "Locked", true, "Caption" as cap
+      With Button1, "Caption", "click me", "Default", True   ' make this the default control
+      caption$="There have been no clicks yet"
+      m=0
+      Function Button1.Click {
+                  m++
+                  cap=m
+      }
+      Method Form1, "Show",1
+      Declare Form1 Nothing
+}
+Checkit
+}
+MODULE INTERACTION {Module CheckIt {
+      Declare form1 form
+      Declare textbox1 textbox form form1
+      Declare buttonInc Button form form1
+      Declare buttonRND Button form form1
+      Method textbox1, "move", 2000,2000,4000,600
+      Method buttonInc, "move", 2000,3000,2000,600
+      Method buttonRND, "move", 4000,3000,2000,600
+      With form1, "Title", "Rosetta Code: GUI component interaction"
+      With textbox1,"vartext" as textbox1.value$, "Prompt", "Value:", "ShowAlways", true
+      With buttonInc,"Caption","Increment"
+      With buttonRND,"Caption","Random"
+      textbox1.value$="0"
+      Function Local1(new Feed$) {
+            \\ this Function can be used from other Integer 
+            \\ this$ and thispos, exist just before the call of this Function
+            local sgn$
+            if feed$="" and this$="-" then thispos-- :  exit
+            if left$(this$,1)="-" then sgn$="-": this$=mid$(this$, 2)
+            if this$<>Trim$(this$)  then  this$=Feed$ :  thispos-- : exit
+            If Trim$(this$)="" then this$="0" : thispos=2 : exit
+            if instr(this$,"+")>0 and sgn$="-" then this$=filter$(this$, "+") : sgn$=""
+            if instr(this$,"-")>0  and sgn$="" then this$=filter$(this$, "-") : sgn$="-"
+            if filter$(this$,"0123456789")<>"" then this$=Feed$ :  thispos-- : exit
+            if len(this$)>1 then While  left$(this$,1)="0" {this$=mid$(this$, 2)} 
+            this$=sgn$+this$
+            if this$="-0" then this$="-" : thispos=2
+        }
+      Function TextBox1.ValidString {
+                  \\ this Function called direct from textbox
+                  Read  New &this$, &thispos
+                  Call Local local1(textbox1.value$)
+      }
+      Function buttonInc.Click {
+               textbox1.value$=str$(val(textbox1.value$)+1, "")
+      }
+      Function buttonRND.Click {
+            If  AsK$("Change Value with random number", "Question", "Yes", "No")="Yes" Then {
+                      textbox1.value$=str$(Random(0, 10000), "")
+                      After 100 {Try {Method textbox1,"GetFocus"}}
+            }
+      }
+      \\ open modal
+      Method form1, "show", 1
+      Declare form1 nothing
+}
+Checkit
+}
+MODULE INTER2 {\ this is global, but call as local in events, which means with local visibility for identifiers
+\\ so thispos and this$ has to exist in caller 's context
+
+Cls, 0
+Report {
+	You can increment the value if is less from 10
+	You can decrement the value if is higher than 0
+	If value is 0 then you can write a new value
+	You can use enter as click event, or a mouse clik on either button.
+} 
+Function Global Local1(new Feed$) {
+            \\ this function can be used from other Integer 
+            \\ this$ and thispos, exist just before the call of this function
+            local sgn$
+            if feed$="" and this$="-" then thispos-- :  exit
+            if left$(this$,1)="-" then sgn$="-": this$=mid$(this$, 2)
+            if this$<>Trim$(this$)  then  this$=Feed$ :  thispos-- : exit
+            If Trim$(this$)="" then this$="0" : thispos=2 : exit
+            if instr(this$,"+")>0 and sgn$="-" then this$=filter$(this$, "+") : sgn$=""
+            if instr(this$,"-")>0  and sgn$="" then this$=filter$(this$, "-") : sgn$="-"
+            if filter$(this$,"0123456789")<>"" then this$=Feed$ :  thispos-- : exit
+            if len(this$)>1 then While  left$(this$,1)="0" {this$=mid$(this$, 2)} 
+            this$=sgn$+this$
+            if this$="-0" then this$="-" : thispos=2
+        }
+Module CheckIt {
+      Declare form1 form
+      Declare textbox1 textbox form form1
+      Declare buttonInc Button form form1
+      Declare buttonDec Button form form1
+      Method textbox1, "move", 2000,2000,4000,600
+      Method buttonInc, "move", 2000,3000,2000,600
+      Method buttonDec, "move", 4000,3000,2000,600
+      With textbox1,"vartext" as textbox1.value$, "Prompt", "Value:" ', "ShowAlways", True
+      With buttonInc,"Caption","Increment" 
+      With buttonDec,"Caption","Decrement","Locked", True
+      textbox1.value$="0"
+ 
+      Function controlIncDec(what$){
+            With buttonInc, "locked",  not val(what$)<10
+            With buttonDec, "locked", not val(what$)>0
+      }
+      finishEnter=false      
+      Function TextBox1.ValidString {
+                  \\ this function called direct from textbox
+                  Read  New &this$, &thispos
+                  Call Local local1(textbox1.value$)
+                  Call Local controlIncDec(this$)
+      }
+      Function TextBox1.Enable {
+            With TextBox1, "Enabled", true
+            finishEnter=false
+      }
+      Function TextBox1.Disable {
+            With TextBox1, "Enabled", false
+            finishEnter=true
+      }
+      Function TextBox1.Enter {
+            Call Local TextBox1.Disable()
+      }
+      Function buttonInc.Click {
+                if  not finishEnter then Call Local TextBox1.Disable()
+               textbox1.value$=str$(val(textbox1.value$)+1, "")
+                if val(textbox1.value$)=0 then Call Local TextBox1.Enable()
+      }
+      function buttonDec.Click {
+                if  not finishEnter then Call Local TextBox1.Disable()
+                textbox1.value$=str$(val(textbox1.value$)-1, "")     
+                if val(textbox1.value$)=0 then Call Local TextBox1.Enable()
+      }
+      Call Local controlIncDec(textBox1.Value$)
+      Method form1, "show", 1
+      Declare form1 nothing
+}
+Checkit
 }
 INFO

@@ -39,6 +39,7 @@ Public isref As Boolean ' One time use
 Public LastOpen As String
 Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
+Public PointerPtr As Long
 
 Public Property Get Events() As Object
 Set Events = eventlist

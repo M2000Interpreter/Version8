@@ -226,7 +226,7 @@ Loop Until NOEXECUTION Or Not ASKINUSE
  Modalid = mycode
 k1 = 0
  BLOCKkey = True
-While KeyPressed(&H1B) ''And UseEsc
+While KeyPressed(&H1B)
 
 ProcTask2 bstack
 NOEXECUTION = False

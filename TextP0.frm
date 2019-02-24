@@ -394,7 +394,7 @@ UNhookMe
 End Sub
 
 Private Sub Form_GotFocus()
-UseEsc = True
+If Not lockme Then If QRY Or GFQRY Then Form1.KeyPreview = True
 End Sub
 
 Private Sub Form_KeyUp(KeyCode As Integer, shift As Integer)
@@ -430,8 +430,6 @@ If iamactive Then
 iamactive = False
 DestroyCaret
 End If
-
-UseEsc = False
 End Sub
 
 Private Sub Form_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
@@ -992,6 +990,7 @@ End Function
 Private Sub DIS_GotFocus()
 If lockme Then TEXT1.SetFocus: Exit Sub
 clickMe2 = -1
+If QRY Or GFQRY Then Form1.KeyPreview = True
 End Sub
 
 Private Sub DIS_KeyDown(KeyCode As Integer, shift As Integer)
@@ -1378,13 +1377,11 @@ End If
 NOEXECUTION = True
 End If
 Case vbKeyF1 To vbKeyF12
-If FKey >= 0 Then FKey = KeyCode - vbKeyF1 + 1
+If FKey >= 0 Then FKey = (KeyCode - vbKeyF1 + 1) + 12 * (shift And 1)
 If Abs(FKey) = 1 And ctrl And (shift And &H2) = 2 Then
 If lastAboutHTitle <> "" Then abt = True: vH_title$ = vbNullString
 
 FKey = 0: KeyCode = 0: vHelp
-ElseIf FKey = 1 And (shift And 1) Then
-FKey = 13
 ElseIf FKey = 4 And ctrl And QRY Then
 interpret DisStack, "END"
 End If
@@ -2050,14 +2047,21 @@ End Sub
 Private Sub gList1_KeyDown(KeyCode As Integer, shift As Integer)
 Static ctrl As Boolean, noentrance As Boolean, where As Long, noinp As Double
 
-Dim aa$, a$, JJ As Long, ii As Long, gothere As Long
+Dim aa$, a$, JJ As Long, ii As Long, gothere As Long, gocolumn As Long
 If KeyCode = vbKeyEscape Then
 KeyCode = 0
  If Not EditTextWord Then
  ' check if { } is ok...
- If Not blockCheck(TEXT1.Text, DialogLang, gothere) Then
+ If Not blockCheck(TEXT1.Text, DialogLang, gothere, , gocolumn) Then
  On Error Resume Next
- gList1.ListindexPrivateUse = gothere
+ 
+        TEXT1.SelLengthSilent = 0
+        TEXT1.mDoc.MarkParagraphID = TEXT1.mDoc.ParagraphFromOrder(gothere)
+        TEXT1.glistN.enabled = False
+        TEXT1.ParaSelStart = gocolumn
+        TEXT1.glistN.enabled = True
+        TEXT1.ManualInform
+ 
  Exit Sub
  End If
  End If
@@ -2623,6 +2627,12 @@ On Error Resume Next
 End With
 Else
 view1.Move IEX, IEY, IESizeX, IESizeY
+If IsWine Then
+Sleep 1
+view1.Move IEX, IEY
+Sleep 1
+view1.Move IEX, IEY, IESizeX - 1, IESizeY - 1
+End If
 End If
 
 

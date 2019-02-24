@@ -997,10 +997,11 @@ If curitem < 0 Then
 If Not GroupRef Is Nothing Then
     If TypeOf GroupRef Is mHandler Then
         If GroupRef.t1 = 1 Then
-            If GroupRef.objref.Done Then
-                Set GroupRef.objref.ValueObj = item
-                Exit Property
-            End If
+            GroupRef.objref.index = Abs(curitem + 100)
+            GroupRef.objref.Done = True
+            Set GroupRef.objref.ValueObj = item
+            Exit Property
+           
         End If
     ElseIf curitem = -2 Then
     If Typename$(item) = Typename$(GroupRef) Then
