@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 1
+Global Const Revision = 0
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1666,12 +1666,8 @@ contheretoo:
                                              If Not pppp.item(v).IamApointer Then
                                              If pppp.refgroup Is Nothing Then
                                              Set safegroup = pppp.item(v)
-                                            End If
-                                            
-                                             pppp.item(v).PointerPtr = ObjPtr(safegroup)
-                                             
-                                             
-                                              End If
+                                             End If
+                                             End If
                                              End If
                                              If safegroup.LastOpen <> vbNullString Then
                                                 
@@ -1695,7 +1691,6 @@ contheretoo:
                                                 var(y1).lasthere = here$
                                                 safegroup.LastOpen = w$
                                                 safegroup.lasthere = here$
-                                                var(y1).PointerPtr = pppp.item(v).PointerPtr
 cont1010:
                                                 bstack.MoveNameDot myUcase(w$)
                                                 depth = depth + 1
@@ -23706,7 +23701,7 @@ mydpi = mydpi / 2
 GoTo again
 End If
 szFactor = mydpi * dv15 / 1440#
-Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
+Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * (mydpi) + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
 pnum = 0
 End If
 End Sub
@@ -23774,7 +23769,7 @@ mydpi = mydpi / 2
 GoTo again
 End If
 szFactor = mydpi * dv15 / 1440#
-Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * (mydpi) + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
+Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * (mydpi / 4) + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi / 4 + 0.5), 3, 1))
 End If
 If bstack.toprinter Then
     SetText Form1.PrinterDocument1
@@ -23814,7 +23809,7 @@ mydpi = mydpi / 2
 GoTo again
 End If
 szFactor = mydpi * dv15 / 1440#
-Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
+Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * (mydpi / 4) + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi / 4 + 0.5), 3, 1))
 
 End If
 If bstack.toprinter Then
@@ -29644,12 +29639,10 @@ Exit Function
 End Function
 
 Function ProcLayer(basestack As basetask, rest$) As Boolean
-Dim i As Long, p As Variant, x1 As Long, y1 As Long, X As Double, Y As Double
+Dim xp As Printer, i As Long, p As Variant, x1 As Long, y1 As Long, X As Double, Y As Double
 Dim s$, ss$, F As Long, pa$, sX As Double, it As Long, w3 As Long, ya As Long, AddTwipsTopL As Long
-Dim Scr As Object, scr1 As GuiM2000, nd&, oldprintFlag As Boolean
+Dim Scr As Object, scr1 As GuiM2000, nd&
 Dim prive As basket
-oldprintFlag = basestack.toprinter
-If oldprintFlag Then basestack.toprinter = False
 ProcLayer = True
 Set Scr = basestack.Owner
 prive = players(GetCode(Scr))  ' backup
@@ -29764,7 +29757,7 @@ If it = 0 Then
 ProcLayer = False
 End If
 End If
-If oldprintFlag Then basestack.toprinter = True
+
 
 
 
@@ -33088,7 +33081,7 @@ Sub TraceRestore(b As basetask, v As Long)
 End Sub
 Sub ProcBackGround(bstack As basetask, rest$, Lang As Long, afier As Boolean)
 Dim s$, p As Variant, i As Long, x1 As Long, X As Double, Y As Double, F As Long, y1 As Long, sX As Double, ss$, pa$, it As Long
-Dim Scr As Object, frm$, w3 As Long, ya As Long, AddTwipsTopL As Long, once As Boolean, oldprintFlag As Boolean
+Dim Scr As Object, frm$, w3 As Long, ya As Long, AddTwipsTopL As Long, once As Boolean
 Set Scr = bstack.Owner
 afier = True
 Dim prive As basket
@@ -33117,9 +33110,6 @@ Else
 MediaBack1.closeMovie
 End If
 Else
-oldprintFlag = bstack.toprinter
-If oldprintFlag Then bstack.toprinter = False
-
 If Not IsExp(bstack, rest$, p) Then p = 0   '' no change
 
 If FastSymbol(rest$, "{") Then
@@ -33174,8 +33164,6 @@ End If
 it = 1
 End If
 If it <> 1 Then afier = False: rest$ = ss$ + rest$
-oldprintFlag = bstack.toprinter
-If oldprintFlag Then bstack.toprinter = False
 
 End If
 End If

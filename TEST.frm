@@ -218,7 +218,6 @@ If mBtask Is Nothing Then
 Else
 Set MyBaseTask = New basetask
 mBtask.CopyStrip2 MyBaseTask
-
 End If
 End Property
 
@@ -252,8 +251,6 @@ KeyCode = 0
     Else
     bypasstrace = True
         If Compute <> "" Then STbyST = False
-        If Form1.DIS.Visible Then Set MyBaseTask.Owner = Form1.DIS
-        
         If Execute(MyBaseTask, (Compute), False) <> 1 Then
         If Form2.Visible Then
         If pagio$ = "GREEK" Then
