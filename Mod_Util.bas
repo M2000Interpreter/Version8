@@ -1671,14 +1671,15 @@ With mybasket
                             r = r + 1
                End If
               .curpos = 0
-                If PY + 1 = .My Then
+                If PY + 1 >= .My Then
                     If ddd.name = "PrinterDocument1" Then
                         getnextpage
                          With nr
                          .top = PY * pixY + mUAddPixelsTop
                           .Bottom = .top + pixY - p2
                          End With
-                        PY = 1
+                        PY = 0
+                        .currow = 0
                         Else
                         
                         ScrollUpNew ddd, mybasket
@@ -1700,7 +1701,8 @@ With mybasket
                          .top = PY * pixY + mUAddPixelsTop
                           .Bottom = .top + pixY - p2
                          End With
-                        PY = 1
+                        PY = 0
+                        .currow = 0
                         Else
                         
                         ScrollUpNew ddd, mybasket
@@ -1753,7 +1755,8 @@ cont0:
          .top = PY * pixY + mUAddPixelsTop
           .Bottom = .top + pixY - p2
          End With
-        PY = 1
+        PY = 0
+        .currow = 0
         Else
         
         ScrollUpNew ddd, mybasket
@@ -1847,7 +1850,8 @@ r1 = Len(what$) - 1
                          .top = PY * pixY + mUAddPixelsTop
                           .Bottom = .top + pixY - p2
                          End With
-                        PY = 1
+                        PY = 0
+                        .currow = 0
                         Else
                         
                         ScrollUpNew ddd, mybasket
@@ -1863,14 +1867,15 @@ r1 = Len(what$) - 1
                 
             ElseIf c$ = ChrW(10) Then
                 .curpos = 0
-                If PY + 1 = .My Then
+                If PY + 1 >= .My Then
                     If ddd.name = "PrinterDocument1" Then
                         getnextpage
                          With nr
                          .top = PY * pixY + mUAddPixelsTop
                           .Bottom = .top + pixY - p2
                          End With
-                        PY = 1
+                        PY = 0
+                        .currow = 0
                         Else
                         
                         ScrollUpNew ddd, mybasket
@@ -1879,6 +1884,7 @@ r1 = Len(what$) - 1
                     
                 Else
                 .currow = PY + 1
+                
                 End If
                 what$ = Mid$(WHAT1$, r + 2)
                If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
@@ -4549,6 +4555,8 @@ Dim i As Long, mymul As Long
 
 If dd Is Form1.PrinterDocument1 Then
 ' check this please
+dd.Width = X
+dd.Height = Y
 Pr_Back dd, Size
 Exit Sub
 End If
@@ -4689,7 +4697,9 @@ End With
 End Sub
 
 Sub Pr_Back(dd As Object, Optional msize As Single = 0)
+
 SetText dd
+If msize <> 0 Then players(GetCode(dd)).SZ = msize
 If msize > 0 Then
 SetTextSZ dd, msize
 End If
