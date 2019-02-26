@@ -10761,8 +10761,11 @@ MODULE CAL {\\ Calendar - for "REAL" programmers
 \\ All statements in UPPERCASE
 \\ Output to 132 characters console - as a line printer
 \\ USE COURIER NEW  (FONT "COURIER NEW")
-MODULE GLOBAL SNOOPY {
-CURSOR 0,ROW
+
+\\ CHANGE THE 
+GLOBAL CONST PRINT_IT AS BOOLEAN=FALSE
+MODULE GLOBAL SNOOPY  {
+IF NOT PRINT_IT THEN CURSOR 0,ROW ELSE IF ROW>0 THEN PAGE 1 
 PRINT $(,8)
 PRINT #-2, {
 					   XXXX
@@ -10830,7 +10833,7 @@ MODULE CALENDAR (YEAR, LOCALEID) {
             =UCASE$(LEFT$(A$,1))+LCASE$(MID$(A$, 2))
       }
       LOCALE LOCALEID
-      CURSOR 0,HEIGHT-1  ' LAST LINE, SO EACH NEW LINE SCROLL ALL LINES UP
+      IF NOT PRINT_IT THEN CURSOR 0,HEIGHT-1  ' LAST LINE, SO EACH NEW LINE SCROLL ALL LINES UP
       SNOOPY
       
       PRINT UNDER  ' PRINT UNDERLINE
@@ -10879,6 +10882,7 @@ MODULE CALENDAR (YEAR, LOCALEID) {
       }     
 }
 WHILE INKEY$<>"" :  END WHILE
+IF PRINT_IT THEN PRINTING ON
 FONT "COURIER NEW"
 PEN 0
 CLS 15, 0
@@ -10889,10 +10893,12 @@ FOR I=2019 TO 2025
 CALENDAR I, 1033  ' ENGLISH
 GOSUB WAITKEY_OR_MOUSE
 NEXT I
+IF PRINT_IT THEN PRINTING OFF
 CLEAR  ' CLEAR VARIABLES FROM THIS MODULE
 KEYBOARD "INFO"+CHR$(13)
 END
 WAITKEY_OR_MOUSE:
+IF PRINT_IT THEN RETURN
 WHILE INKEY$="" AND MOUSE=0
 END WHILE
 RETURN
@@ -11914,5 +11920,29 @@ Module CheckIt {
       Declare form1 nothing
 }
 Checkit
+}
+MODULE PRTRY {\\ use printer properties to set number of copies
+Printer !
+
+if ask("Is printer on","Printing Test","Yes","No")=1 then
+	set slow
+	\\ use PAGE 1 for new page Portrait or leave it to produce new page if more lines needed.
+	\\  PAGE 0 set page to Landscape
+	
+	printing on
+	
+	\\ don't forget to set pen to black.
+	Pen 0
+	\\ you can define font also
+	font "Courier New"
+	\\ you can define characters by lines, so Mode (size of character) and Linespace produced automatic
+	Form 80, 66
+	For I=1 TO 85
+	Print I
+	Next I
+	
+	printing off
+end if
+set fast
 }
 INFO
