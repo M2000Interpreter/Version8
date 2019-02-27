@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 1
+Global Const Revision = 2
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -10739,13 +10739,14 @@ lit34: '    Case "ERROR$"
 lit36: ' case "MODULE.NAME$", "ΟΝΟΜΑ.ΤΜΗΜΑΤΟΣ$"
             If SecureNames Then
              r$ = GetName(here$)
+             If Len(r$) = 0 Then IsStr1 = True: Exit Function
              If AscW(r$) = 8191 Then
              If InStr(here$, r$) > 0 Then
              r$ = GetName(Left$(here$, Len(here$) - Len(r$)))
              r$ = Left$(r$, Len(r$) - 1)
              Else
              r$ = sbf(val(Mid$(here$, rinstr(here$, "[") + 1))).sbgroup
-             If r$ <> "" Then
+             If Len(r$) > 0 Then
              r$ = Mid$(r$, rinstr(r$, ".", 2) + 1)
              r$ = Left$(r$, Len(r$) - 1)
              End If
@@ -14704,6 +14705,7 @@ Dim x1 As Long, y1 As Long, x2 As Long, y2 As Long, SBB$, nd&, Lang As Long, kol
 Dim temphere$, one As Boolean
 
 If loopthis Then Execute = 2 Else Execute = 1
+againtrace:
 sss = Len(b$): lbl = True
 
 Do While Len(b$) <> LLL
@@ -14949,8 +14951,28 @@ again4:
             End If
             If trace Then
                 If Not bypasstrace Then
-                
+                    
                     If Not TraceThis(bstack, di, b$, ss$, SBB$) Then Execute = 0: Exit Function
+                    If Len(tracecode) > 0 Then
+                    ss$ = tracecode
+                    tracecode = vbNullString
+                    bypasstrace = True
+                    'sp = Len(sbf(lasttracecode).sb)
+                     If executeblock(Execute, bstack, ss$, once, kolpo, , , True) Then bypasstrace = False: Exit Function
+                     'On Error Resume Next
+                     
+                    ' If sp = Len(sbf(lasttracecode).sb) Then
+                     'If Not Mid$(sbf(lasttracecode).sb, Len(sbf(lasttracecode).sb) - bstack.addlen - Len(b$) + 1, Len(b$)) = b$ Then
+                     'Stop
+                     'End If
+                     'Else
+                     'Stop
+                     'End If
+                     bypasstrace = False
+                     tracecode = vbNullString
+                  
+                   
+                    End If
                 End If
             End If
             iscom = False
@@ -14999,7 +15021,7 @@ myerr1:
                         GoTo parsecommand
                     End If
                 ElseIf v <> 0 Then
-                    On v GoTo contif, ContElse, contElseIf, contSelect, ContTry, ForCont, contNext, contRefr, contWhile, ContRepeat, ContGoto, contSub, autogosub, ContOn, contLoop, contBreak, ContContinue, ContRestart, ContReturn, ContEnd, ContExit, ContInline, contUpdate, contThread, contAfter, contPart, contStatic, contEvery, contTask, ContScan, contTarg, BypassGlobalComm, BypassComm, contNegLocal, contNegGlobal, makeconst, VarOnly, contCall, contBinary, contHALT
+                    On v GoTo contif, ContElse, contElseIf, contSelect, ContTry, ForCont, contNext, contRefr, contWhile, ContRepeat, ContGoto, contSub, autogosub, ContOn, contLoop, contBreak, ContContinue, ContRestart, ContReturn, ContEnd, ContExit, ContInline, contUpdate, contThread, contAfter, contPart, contStatic, contEvery, contTask, ContScan, contTarg, BypassGlobalComm, BypassComm, contNegLocal, contNegGlobal, makeconst, VarOnly, contCall, contBinary, contHALT, contSTOP
                     Execute = 0: Exit Function
 BypassGlobalComm:
                     iscom = True
@@ -15018,6 +15040,38 @@ BypassComm:
                 End If
             End If
             Select Case w$
+            Case "STOP", "ΔΙΑΚΟΠΗ"
+contSTOP:
+                If HaltLevel = 0 Then
+                If trace Then GoTo notask
+                
+                If MsgBoxN("[STOP] Μ2000 - Temporary Execution Stop / Προσωρινή Κράτηση Εκτέλεσης" & vbCrLf & "use Exit to Return / χρησιμοποίησε το έξοδος για επιστροφή", vbYesNo, MesTitle$) = vbYes Then
+notask:
+                Set bs = bstack
+                
+                HaltLevel = HaltLevel + 1
+                
+                crNew bstack, players(GetCode(bstack.Owner))
+                Form1.MyPrompt "", username & ">", bstack
+                HaltLevel = HaltLevel - 1
+                Set bstack = bs
+                If ExTarget Then
+                NOEXECUTION = True
+                ElseIf HaltLevel < 0 Then
+                    b$ = "START"
+                    Execute = 1
+                    ok = True
+                    Exit Do
+                Else
+                    ExTarget = False
+                    MOUT = False
+                End If
+                End If
+                Else
+                    
+                  ExTarget = False
+                    MOUT = False
+                End If
             Case "HALT", "ΑΛΤ"
 contHALT:
                 ss$ = here$
@@ -18921,6 +18975,7 @@ On Error Resume Next
 Err.clear
 On Error GoTo 0
 End If
+
  sb2used = subs
  subHash.ReduceHash snames, sbf()
    If UBound(sbf()) / 3 > sb2used And UBound(sbf()) > 499 Then
@@ -31210,12 +31265,13 @@ If Lang <> -1 Then
         Dim what$, WHAT1$
 Do
    
-        If IsLabel(basestack, rest$, what$) = 1 Then
- 
+        If IsLabel(basestack, rest$, what$, True) = 1 Then
+
             
         
             If IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang) Then
-                If IsLabel(basestack, rest$, WHAT1$) <> 1 Then GoTo myerror1
+                If Abs(IsLabelBig(basestack, rest$, WHAT1$)) <> 1 Then GoTo myerror1
+                 MakeThisSub basestack, WHAT1$
             Else
             WHAT1$ = what$
             End If
@@ -31245,7 +31301,6 @@ End If
 Dim exitnow As Boolean
 Dim restart As Boolean
 restart = True
-
  Do
   frm$ = Mid$(sbf(x1).sb, i)
 
@@ -42133,7 +42188,7 @@ ProcItalic = True
 End Function
 Function ProcEditDoc(bstack As basetask, rest$, Lang As Long) As Boolean
 Dim prive As Long, s$, sX As Double, i As Long, DUM As Boolean, frm$
-Dim x1 As Long, y1 As Long, p As Variant, col As Long
+Dim x1 As Long, y1 As Long, p As Variant, col As Long, oldvalue As Boolean
 Dim pppp As mArray
 If Typename(bstack.Owner) Like "Gui*" Then oxiforforms: Exit Function
 prive = GetCode(bstack.Owner)
@@ -42201,9 +42256,12 @@ conteditdoc2:
                                     x1 = sX
                                 End If
                                    Form1.TEXT1.Title = frm$ + " "
-                                    Form1.TEXT1.TabWidth = 8
-                                    Form1.TabControl = 8
+                                    Form1.TEXT1.TabWidth = 8 + 2 * DUM
+                                    Form1.TabControl = 8 + 2 * DUM
+                                      oldvalue = Form1.nobypasscheck
+                                  Form1.nobypasscheck = False
                                   ScreenEditDOC bstack, var(i), 0, .mysplit, .mx - 1, .My - 1, x1, DUM, col
+                                  Form1.nobypasscheck = oldvalue
                                     var(i).LastSelStart = x1
                                     var(i).ColorEvent = False
                                     ProcEditDoc = True
@@ -42225,9 +42283,12 @@ conteditdoc2:
                                     x1 = sX
                                 End If
                                     Form1.TEXT1.Title = frm$ + " "
-                                    Form1.TEXT1.TabWidth = 8
-                                    Form1.TabControl = 8
+                                    Form1.TEXT1.TabWidth = 8 + 2 * DUM
+                                    Form1.TabControl = 8 + 2 * DUM
+                                    oldvalue = Form1.nobypasscheck
+                                  Form1.nobypasscheck = False
                                   ScreenEditDOC bstack, pppp.item(i), 0, .mysplit, .mx - 1, .My - 1, x1, DUM, col
+                                  Form1.nobypasscheck = oldvalue
                                     pppp.item(i).LastSelStart = x1
                                      pppp.item(i).ColorEvent = False
                                     ProcEditDoc = True
@@ -46377,6 +46438,7 @@ conthere:
 If basestack.lastobj Is Nothing Then
 ' error
 Else
+
                 sb2used = subs
                     subHash.ReduceHash snames, sbf()
                      If UBound(sbf()) / 3 > sb2used And UBound(sbf()) > 499 Then

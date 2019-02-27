@@ -2220,34 +2220,25 @@ If kind = 0 Then
   If FastSymbol(a$, "->", , 2) Then
     pos2 = k - Len(a$) - 1
     addone2000 pos2, 11
-        pos2 = pos2 + 2
-        a$ = LTrim$(a$)
+        a$ = NLtrim$(a$)
+        pos2 = k - Len(a$) + 1
+        If MaybeIsSymbolNoSpace(a$, "{") Then
         pos2 = k - Len(a$) + 1
         addone2000 pos2, 14
-       ' pos2 = k - Len(a$) + 1
-        If FastSymbol(a$, "{") Then
-        a$ = LTrim$(a$)
-        pos2 = k - Len(a$) + 2
-        
-localfeedthis = 0
-            If col((UBound(col()) \ 2) * 2) <> 14 Then addone2000 pos2, 14
-                 localfeedthis = 0
-            '
+        a$ = Mid$(a$, 2)
+         localfeedthis = 0
            pos2 = k - Len(a$) + 1
-            addone2000 pos2 - 1, 14
            If pos2 <= k Then
-           If FastSymbol(a$, "{") Then
-            drop$ = block(a$)
-            If Len(drop$) > 0 Then
-           ColorizeInnerStatements drop$, k - Len(a$), pos2, localfeedthis
-           If Len(a$) > 0 Then ColorizeInnerStatements a$, k, pos2, localfeedthis
-              drop$ = vbNullString
-              Else
-              Exit Sub
-              End If
-              Else
-              ColorizeInnerStatements a$, k, pos2, localfeedthis
-              End If
+                drop$ = block(a$)
+                If Len(drop$) > 0 Then
+                    ColorizeInnerStatements drop$, k - Len(a$), pos2, localfeedthis
+           
+                    If Len(a$) > 0 Then ColorizeInnerStatements a$, k, pos2, localfeedthis
+                    drop$ = vbNullString
+                Else
+                ColorizeInnerStatements a$, k, pos2, localfeedthis
+               End If
+
            End If
             kind = 0
             drop$ = vbNullString
@@ -2292,7 +2283,7 @@ If kind > 0 Then
 checklambda:
   Do
   pos1 = 1
-  drop$ = aheadstatus(a$, False, pos1)
+  drop$ = aheadstatus2000(a$, False, pos1)
   If pos1 > 1 Then
   ColorizeExpressions2000 Mid$(a$, 1, pos1 - 1), k - Len(a$) + pos1 - 1, pos2, feedthis
   If feedthis = 14 Or feedthis = 11 Then
@@ -2316,7 +2307,7 @@ lastpar = 14
 FastSymbol a$, "("
 pos2 = k - Len(a$) + 1
   pos1 = 1
-  drop$ = aheadstatus(a$, False, pos1)
+  drop$ = aheadstatus2000(a$, False, pos1)
     thispara1 = thispara
   If pos1 > 1 Then
 
@@ -2343,8 +2334,10 @@ ElseIf MaybeIsSymbol(a$, ")") Then
   Else
   addone2000 pos2, 14
   End If
-  
+  pos2 = k - Len(a$) + 2
+  addone2000 pos2, 14
   FastSymbol a$, ")"
+   
     pos2 = k - Len(a$) + 1
   End If
   End If

@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 1 active-X
+Version 9.8 Revision 2 active-X
 
-Printing now works as excpected. Added to info.gsb a constant in cal module to print calentar to printer.
+STOP statement, and a bug in syntax color procedure removed. Info.gsb changed too, with three more programs.
 
 when fist time run the interpreter do this in M2000 console:
 dir appdir$

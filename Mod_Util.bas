@@ -5,6 +5,7 @@ Const b123 = vbCr + "'\"
 Const b1234 = vbCr + "'\:"
 Public k1 As Long, Kform As Boolean
 Private Const doc = "Document"
+Public tracecode As String, lasttracecode As Long
 Public Declare Function IsWindow Lib "user32" (ByVal hWnd As Long) As Long
 Public Declare Function IsWindowEnabled Lib "user32" (ByVal hWnd As Long) As Long
 Public Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
@@ -20052,8 +20053,10 @@ Public Function TraceThis(bstack As basetask, di As Object, b$, w$, SBB$) As Boo
         If WaitShow = 0 Or Len(b$) < WaitShow Then
             WaitShow = 0
             If bstack.OriginalCode < 0 Then
+            lasttracecode = -bstack.OriginalCode
                 SBB$ = GetNextLine((var(-bstack.OriginalCode).code$))
             Else
+            lasttracecode = bstack.OriginalCode
                 SBB$ = GetNextLine((sbf(Abs(bstack.OriginalCode)).sb))
             End If
             If Left$(SBB$, 10) = "'11001EDIT" Then

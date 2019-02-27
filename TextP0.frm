@@ -267,7 +267,7 @@ Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal 
 Private Declare Function SetWindowTextW Lib "user32" (ByVal hWnd As Long, ByVal lpString As Long) As Long
     Private Const GWL_WNDPROC = -4
     Private m_Caption As String
-Public lastitem As Long
+Public lastitem As Long, nobypasscheck As Boolean
 Public Property Get CaptionW() As String
     If m_Caption = "M2000" Then
         CaptionW = vbNullString
@@ -1495,6 +1495,7 @@ End Sub
 
 Private Sub Form_Load()
 TabControl = 6
+nobypasscheck = True
 Set DisStack = New basetask
 Set MeStack = New basetask
 Debug.Assert (InIDECheck = True)
@@ -1739,9 +1740,16 @@ s_complete = True
 players(DisForm) = mybasket
 
 End Sub
-Public Sub MyPrompt(LoadFileAndSwitches$, Prompt$)
+Public Sub MyPrompt(LoadFileAndSwitches$, Prompt$, Optional thisbs As basetask)
 Static forwine As Long
+Dim oldbs As basetask
+If Not thisbs Is Nothing Then
+Set oldbs = basestack1
+Set basestack1 = New basetask
+thisbs.CopyStrip2 basestack1
+Set basestack1.Owner = basestack1.Owner
 
+End If
 onetime = onetime + 1
 On Error GoTo finale
 elevatestatus = -1
@@ -1848,10 +1856,10 @@ End If
     End If
 conthere:
     
-    If ExTarget = True Then Exit Sub
+    If ExTarget = True Then GoTo nExit
       mybasket = players(DisForm)
 
-      If basestack1.Owner Is Nothing Then Exit Sub
+      If basestack1.Owner Is Nothing Then GoTo nExit
 If basestack1.Owner.Visible = True Then basestack1.Owner.Refresh Else basestack1.Owner.Visible = True
     FKey = 0
     If pagio$ = "GREEK" Then
@@ -1908,7 +1916,21 @@ NOEXECUTION = False
 basestack1.toprinter = False
 MOUT = False
 ClearLabels
+Dim kolpo As Boolean
+If Not thisbs Is Nothing Then
+kolpo = False
+If executeblock((1), basestack1, qq$, False, kolpo, , , True) Then
+GoTo cont123
+Else
+If kolpo Then GoTo nExit
+kolpo = True
+GoTo cont567
+End If
+End If
 If Not interpret(basestack1, qq$) Then
+' clear inuse flag
+
+cont123:
 mybasket = players(DisForm)
 '' ClearLoadedForms  not needed any more
 If NERR Then Exit Do
@@ -1957,6 +1979,9 @@ If NERR Then Exit Do
         End If
         players(DisForm) = mybasket
         End If
+        ' clear inuse flag
+        
+cont567:
         mybasket = players(DisForm)
         
         LCTbasketCur DIS, mybasket
@@ -1967,6 +1992,7 @@ If NERR Then Exit Do
           
          End If
  mybasket.curpos = 0
+ If kolpo Then GoTo nExit
 MOUT = True
 NoAction = False
 If ExTarget Then Exit Do
@@ -1978,10 +2004,15 @@ para$ = vbNullString
 
   Loop
 elevatestatus = 0
-Exit Sub
+GoTo nExit
 finale:
 ExTarget = True
 elevatestatus = 0
+nExit:
+If Not thisbs Is Nothing Then
+    Set basestack1 = oldbs
+End If
+
 End Sub
 
 
@@ -2052,6 +2083,7 @@ If KeyCode = vbKeyEscape Then
 KeyCode = 0
  If Not EditTextWord Then
  ' check if { } is ok...
+ If nobypasscheck Then
  If Not blockCheck(TEXT1.Text, DialogLang, gothere, , gocolumn) Then
  On Error Resume Next
  
@@ -2063,6 +2095,7 @@ KeyCode = 0
         TEXT1.ManualInform
  
  Exit Sub
+ End If
  End If
  End If
  If TEXT1.UsedAsTextBox Then Result = 99
@@ -3031,8 +3064,10 @@ Public Sub mn4sub()
 Dim gothere As Long
  If Not EditTextWord Then
  ' check if { } is ok...
+If nobypasscheck Then
  If Not blockCheck(TEXT1.Text, DialogLang, gothere) Then
  Exit Sub
+ End If
  End If
  End If
 

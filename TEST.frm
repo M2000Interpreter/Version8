@@ -243,6 +243,7 @@ stackshow MyBaseTask
 End Sub
 
 Private Sub compute_KeyDown(KeyCode As Integer, shift As Integer)
+Dim excode As Long
 If KeyCode = 13 Then
 KeyCode = 0
     If Compute.Prompt = "? " Then
@@ -250,22 +251,11 @@ KeyCode = 0
         TestShowCode = False
         stackshow MyBaseTask
     Else
-    bypasstrace = True
-        If Compute <> "" Then STbyST = False
-        If Form1.DIS.Visible Then Set MyBaseTask.Owner = Form1.DIS
+            'bypasstrace = True
+         If Compute <> "" Then STbyST = True
+        tracecode = Compute
         
-        If Execute(MyBaseTask, (Compute), False) <> 1 Then
-        If Form2.Visible Then
-        If pagio$ = "GREEK" Then
-        testpad.Text = "Λάθος " + LastErNameGR
-        Else
-        testpad.Text = "Error " + LastErName
-        End If
-        testpad.Show
-        Else
-        Compute = vbNullString
-        End If
-        End If
+        If False Then
         
           MOUT = False
          NOEXECUTION = False
@@ -278,9 +268,10 @@ KeyCode = 0
         
         KeyCode = 0
         If MyBaseTask.IamChild And sb2used = 0 Then
-        NOEXECUTION = True
-        MOUT = True
-        If Form2.Visible Then Compute = vbNullString: FillAgainLabels
+            NOEXECUTION = True
+            MOUT = True
+            If Form2.Visible Then Compute = vbNullString: FillAgainLabels
+        End If
         End If
     End If
 ElseIf KeyCode = 8 Then
