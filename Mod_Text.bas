@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 2
+Global Const Revision = 3
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1925,7 +1925,12 @@ faultback:
                                                                                 GoTo faultback
                                                                                End If
                                                                              End If
-                                                                            bb$ = Mid$(sbf(S3).sb, i)
+                                                                     
+                                                                             If S3 < 0 Then
+                                                                                bb$ = Mid$(var(-S3).code, i)
+                                                                                Else
+                                                                                bb$ = Mid$(sbf(S3).sb, i)
+                                                                                End If
                                                                             bstack.addlen = 0
                                                                             subspoint = S3 <> bstack.OriginalCode
                                                        
@@ -1939,7 +1944,11 @@ faultback:
                                                                                 GoTo faultback
                                                                                End If
                                                                              End If
-                                                                            bb$ = Mid$(sbf(S3).sb, i)
+                                                                              If S3 < 0 Then
+                                                                                bb$ = Mid$(var(-S3).code, i)
+                                                                                Else
+                                                                                bb$ = Mid$(sbf(S3).sb, i)
+                                                                                End If
                                                                             bstack.addlen = 0
                                                                             kolpo = False
                                                                             GoTo subsentry10
@@ -18731,8 +18740,13 @@ subsentry10:
                                                             
                                                                    bb$ = Mid$(sbf(Abs(mystack.Parent.OriginalCode)).sb, Len(sbf(Abs(mystack.Parent.OriginalCode)).sb) - CLng(p) + 1)
                                                           Else
+                                                          
+                                                                If mystack.OriginalCode < 0 Then
+                                                                bb$ = Mid$(var(-mystack.OriginalCode).code, Len(var(-mystack.OriginalCode).code) - CLng(p) + 1)
+                                                                Else
                                                             
-                                                                 bb$ = Mid$(sbf(Abs(mystack.OriginalCode)).sb, Len(sbf(Abs(mystack.OriginalCode)).sb) - CLng(p) + 1)
+                                                                 bb$ = Mid$(sbf(mystack.OriginalCode).sb, Len(sbf(mystack.OriginalCode).sb) - CLng(p) + 1)
+                                                                 End If
                                                                End If
                                                                End If
                                                               
@@ -18754,23 +18768,36 @@ subsentry10:
                                                                S3 = mystack.OriginalCode
                                                                         If searchsub(S3, bb$, i, S3) Then
                                                                           subspoint = False
+                                                                          If S3 < 0 Then
+                                                                            If bb$ <> "" Then
+                                                                                    bb$ = "Read NEW " + bb$ + vbCrLf + Mid$(var(-S3).code, i)
+                                                                            Else
+                                                                                    bb$ = Mid$(var(-S3).code, i)
+                                                                            End If
+                                                                          Else
                                                                             If bb$ <> "" Then
                                                                                     bb$ = "Read NEW " + bb$ + vbCrLf + Mid$(sbf(S3).sb, i)
                                                                             Else
                                                                                     bb$ = Mid$(sbf(S3).sb, i)
+                                                                            End If
                                                                             End If
                                                                             subspoint = S3 <> mystack.OriginalCode
                                                                             ok = False
                                                                             GoTo subsentry10
                                                                         ElseIf mystack.IamChild Then
-                                                                        If searchsub(FindPrevOriginal(mystack), bb$, i, S3) Then
-                                                                         subspoint = True
-                                                                            If bb$ <> "" Then
-                                                                                    bb$ = "Read NEW " + bb$ + vbCrLf + Mid$(sbf(S3).sb, i)
-                                                                            Else
-                                                                                    bb$ = Mid$(sbf(S3).sb, i)
-                                                                            End If
-                                                       
+                                                                        If mystack.IamLambda Then
+                                                                                          MyEr "Sub Not Found", "Η ρουτίνα δεν βρέθηκε"
+                                                                                                GoTo fastexit
+                                                                        ElseIf searchsub(FindPrevOriginal(mystack), bb$, i, S3) Then
+                                                                                    subspoint = True
+                                                                                    
+                                                                                       If bb$ <> "" Then
+                                                                                               bb$ = "Read NEW " + bb$ + vbCrLf + Mid$(sbf(S3).sb, i)
+                                                                                       Else
+                                                                                               bb$ = Mid$(sbf(S3).sb, i)
+                                                                                       End If
+                              
+                                                                          
                                                                             ok = False
                                                                             GoTo subsentry10
                                                                             
@@ -31591,6 +31618,7 @@ Err.clear
 If Not bs Is Nothing Then GoTo thh
 End If
 End Function
+
 Function PushParamGeneralV7(basestack As basetask, rest$, Optional ByVal temphere$) As Boolean
 PushParamGeneralV7 = True
 

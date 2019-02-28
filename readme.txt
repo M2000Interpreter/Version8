@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 2 active-X
+Version 9.8 Revision 3 active-X
 
-STOP statement, and a bug in syntax color procedure removed. Info.gsb changed too, with three more programs.
+A bug fixed in lambda functions when call a sub in lambda, by another sub
 
 when fist time run the interpreter do this in M2000 console:
 dir appdir$
