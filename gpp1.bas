@@ -130,7 +130,7 @@ End Type
      pDefault As Any) As Long
 
       Private Declare Function DocumentProperties Lib "winspool.drv" _
-      Alias "DocumentPropertiesA" (ByVal hWND As Long, _
+      Alias "DocumentPropertiesA" (ByVal hWnd As Long, _
       ByVal hPrinter As Long, ByVal pDeviceName As String, _
        pDevModeOutput As Any, pDevModeInput As Any, ByVal fMode As Long) As Long
 
@@ -204,7 +204,7 @@ End Sub
       '' Call CopyMemory(adevmode(1), pDevMode, Len(pDevMode))
    End If
          If Not F Is Nothing Then
-          nsize = DocumentProperties(F.hWND, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_IN_BUFFER Or DM_OUT_BUFFER)  '
+          nsize = DocumentProperties(F.hWnd, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_IN_BUFFER Or DM_OUT_BUFFER)  '
          Else
          nsize = DocumentProperties(0, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_IN_BUFFER Or DM_OUT_BUFFER)
         End If
@@ -286,7 +286,7 @@ Function ChangeOrientation(F As Object, szPrinterName As String, adevmode() As B
    
    End If
          If Not F Is Nothing Then
-          nsize = DocumentProperties(F.hWND, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_OUT_BUFFER Or DM_IN_BUFFER)
+          nsize = DocumentProperties(F.hWnd, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_OUT_BUFFER Or DM_IN_BUFFER)
          Else
 
       
@@ -376,9 +376,34 @@ Function signlong(ByVal a As Currency) As Currency
 If a < 0 Then a = 0
 If a > 4294967295@ Then a = 4294967295@
 If a > 2147483647@ Then
-signlong = ((-2147483648@ + a) + -2147483648@)  ' And &HFFFFFFFF
+signlong = ((-2147483648@ + a) - 2147483648@) ' And &HFFFFFFFF
 Else
 signlong = a
+End If
+End Function
+Function signlong2(ByVal a As Double) As Long
+If a < 0 Then a = 0
+If a > 4294967295# Then a = 4294967295#
+If a > 2147483647# Then
+signlong2 = CLng((-2147483648# + a) - 2147483648#)
+Else
+signlong2 = CLng(a)
+End If
+End Function
+Function uintnew3(a As Long) As Double
+If a < 0 Then
+uintnew3 = 4294967296# + CDbl(a)
+Else
+uintnew3 = CDbl(a)
+End If
+End Function
+Function uintnew0(ByVal a As Currency) As Double
+If a > 2147483647@ Then a = 2147483647@
+If a < -2147483648@ Then a = -2147483648@
+If a < 0 Then
+uintnew0 = CDbl(4294967296@ + a)
+Else
+uintnew0 = CDbl(a)
 End If
 End Function
 Function uintnew(ByVal a As Currency) As Currency
@@ -389,6 +414,12 @@ uintnew = 4294967296@ + a
 Else
 uintnew = a
 End If
+End Function
+Function add32(ByVal a As Currency, ByVal b As Currency) As Currency
+If a < 0 Then a = 0 Else If a > 4294967295@ Then a = Int(a / 4294967296@)
+If b < 0 Then b = 0 Else If b > 4294967295@ Then b = Int(b / 4294967296@)
+add32 = a + b
+If add32 > 4294967295@ Then add32 = add32 - 4294967296@
 End Function
 Function HexToUnsigned(s$) As Double
 Dim a As Double
@@ -483,7 +514,11 @@ Function Sput(ByVal Sl As String) As String
 Sput = Chr(2) + Right$("00000000" & Hex$(Len(Sl)), 8) + Sl
 End Function
 Function PACKLNGUnsign$(a As Variant)
+If a < 0 Then
+PACKLNGUnsign$ = Right$("00000000" & Hex$(cUlng2(CDbl(-a))), 8)
+Else
 PACKLNGUnsign$ = Right$("00000000" & Hex$(cUlng2(CDbl(a))), 8)
+End If
 
 End Function
 Function PACKLNG$(ByVal a As Double) ' change to get negative values

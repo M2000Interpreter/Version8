@@ -11,6 +11,7 @@ Public Declare Function IsWindowEnabled Lib "user32" (ByVal hWnd As Long) As Lon
 Public Declare Function IsWindowVisible Lib "user32" (ByVal hWnd As Long) As Long
 Public stackshowonly As Boolean, NoBackFormFirstUse As Boolean
 Private Declare Function IsBadCodePtr Lib "KERNEL32" (ByVal lpfn As Long) As Long
+Public Pow2(33) As Currency, Pow2minusOne(33) As Currency
 Public Enum Ftypes
     FnoUse
     Finput
@@ -11928,7 +11929,7 @@ Function IsBinaryNot(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
   If IsExp(bstack, a$, r, , True) Then
             On Error Resume Next
     If r < 0 Then r = r And &H7FFFFFFF
-             r = SG * (uintnew(-1) - r)
+             r = SG * uintnew3(Not signlong2(r))
         If Err.Number > 0 Then
             
             WrongArgument a$
@@ -11947,7 +11948,7 @@ Function IsBinaryNeg(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
   If IsExp(bstack, a$, r, , True) Then
             On Error Resume Next
        
-             r = SG * (uintnew(-1) - uintnew(r))
+             r = SG * CDbl(Pow2minusOne(32) - uintnew(r))
         If Err.Number > 0 Then
         
             WrongArgument a$
@@ -11967,7 +11968,7 @@ Function IsBinaryOr(bstack As basetask, a$, r As Variant, SG As Variant) As Bool
      If IsExp(bstack, a$, r, , True) Then
         If FastSymbol(a$, ",") Then
         If IsExp(bstack, a$, p) Then
-            r = SG * uintnew((signlong(r) Or signlong(p)))
+            r = SG * uintnew3(signlong2(r) Or signlong2(p))
          IsBinaryOr = FastSymbol(a$, ")", True)
            Else
                 
@@ -11980,12 +11981,39 @@ Function IsBinaryOr(bstack As basetask, a$, r As Variant, SG As Variant) As Bool
                 MissParam a$
        End If
 End Function
+Function IsBinaryAdd(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
+    Dim p As Variant
+    If IsExp(bstack, a$, r, , True) Then
+            If FastSymbol(a$, ",") Then
+                If IsExp(bstack, a$, p, , True) Then
+                    r = CDbl(add32(r, p))
+                    
+                    While FastSymbol(a$, ",")
+                    If Not IsExp(bstack, a$, p, , True) Then MissNumExpr: Exit Function
+                    r = CDbl(add32(r, p))
+                    Wend
+                    If SG < 0 Then r = -r
+                    IsBinaryAdd = FastSymbol(a$, ")", True)
+                Else
+                    
+                    MissParam a$
+                End If
+            Else
+                
+                MissParam a$
+            End If
+        Else
+            
+            MissParam a$
+       
+       End If
+End Function
 Function IsBinaryAnd(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
     Dim p As Variant
     If IsExp(bstack, a$, r, , True) Then
             If FastSymbol(a$, ",") Then
                 If IsExp(bstack, a$, p, , True) Then
-                    r = SG * uintnew((signlong(r) And signlong(p)))
+                    r = SG * uintnew3(signlong2(r) And signlong2(p))
                     
                     IsBinaryAnd = FastSymbol(a$, ")", True)
                 Else
@@ -12007,7 +12035,7 @@ Function IsBinaryXor(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
         If IsExp(bstack, a$, r, True) Then
             If FastSymbol(a$, ",") Then
                 If IsExp(bstack, a$, p) Then
-                    r = SG * uintnew((signlong(r) Xor signlong(p)))
+                    r = SG * uintnew3(signlong2(r) Xor signlong2(p))
                     
                     IsBinaryXor = FastSymbol(a$, ")", True)
                 Else
@@ -12036,12 +12064,14 @@ Dim p As Variant
                          IsBinaryShift = False: Exit Function
                          Else
                                If p > 0 Then
-                              r = SG * uintnew((signlong(r) And signlong(2 ^ (32 - p) - 1))) * 2 ^ p
+                              
+                                 r = SG * CDbl((signlong(r) And signlong(Pow2minusOne(32 - p))) * Pow2(p))
+                              
                               ElseIf p = 0 Then
-                              If SG < 0 Then r = -r
+                              If SG < 0 Then r = -CDbl(r)
                               Else
-                              p = -p
-                               r = SG * uintnew((signlong(r) And signlong(uintnew(-1) - uintnew(2 ^ p - 1)))) / 2 ^ p
+                                    
+                                 r = SG * Int(CCur(r) / Pow2(-p))
                               End If
                               
                             IsBinaryShift = FastSymbol(a$, ")", True)
@@ -12072,14 +12102,13 @@ Dim p As Variant
                              IsBinaryRotate = False: Exit Function
                         Else
                              If p > 0 Then
-                                 r = SG * (uintnew((signlong(r) And signlong(2 ^ (32 - p) - 1))) * 2 ^ p + uintnew((signlong(r) And signlong(uintnew(-1) - uintnew(2 ^ (32 - p) - 1)))) / 2 ^ (32 - p))
-                     
+                          
+                                 r = SG * CDbl((signlong(r) And signlong(Pow2minusOne(32 - p))) * Pow2(p) + Int(CCur(r) / Pow2(32 - p)))
                              ElseIf p = 0 Then
-                                 If SG < 0 Then r = -r
+                                 If SG < 0 Then r = -CDbl(r)
                              Else
-                                 p = 32 + p
-                                 r = SG * (uintnew((signlong(r) And signlong(2 ^ (32 - p) - 1))) * 2 ^ p + uintnew((signlong(r) And signlong(uintnew(-1) - uintnew(2 ^ (32 - p) - 1)))) / 2 ^ (32 - p))
-                                 
+                          
+                                 r = SG * CDbl((signlong(r) And signlong(Pow2minusOne(-p))) * Pow2(32 + p) + Int(CCur(r) / Pow2(-p)))
                              End If
                         End If
                      
@@ -20878,4 +20907,189 @@ If IsLabelSymbolNew(rest$, "ΣΤΟ", "TO", Lang) Then
 End If
 
 End Function
+Sub stackshow(b As basetask)
+Static OldPagio$
+Dim p As Variant, r$, AL$, s$, dl$, dl2$
+Static once As Boolean, ok As Boolean
+If once Then Exit Sub
+once = True
+
+If TestShowCode Then
+With Form2.testpad
+.enabled = True
+.SelectionColor = rgb(255, 64, 128)
+.nowrap = True
+.Text = TestShowSub
+If Len(Form2.label1(1)) > 0 Then
+If AscW(Form2.label1(1)) = 8191 Then
+.SelStartSilent = TestShowStart - 1
+.SelLength = Len(Mid$(Form2.label1(1), 7))
+Else
+.SelStartSilent = TestShowStart - Len(Form2.label1(1)) - 1
+.SelLength = Len(Form2.label1(1))
+End If
+
+
+.enabled = False
+If .SelLength > 1 And Not AscW(Form2.label1(1)) = 8191 Then
+If Not myUcase(.SelText, True) = Form2.label1(1) Then
+End If
+End If
+Else
+.enabled = False
+End If
+''Debug.Print b.addlen
+'MyDoEvents
+End With
+
+once = False
+Exit Sub
+Else
+Form2.testpad.nowrap = False
+End If
+
+If pagio$ <> OldPagio$ Then
+Form2.FillAgainLabels
+OldPagio$ = pagio$
+End If
+
+
+Dim stack As mStiva
+Set stack = b.soros
+
+If Form2.Compute <> "" Then
+If Form2.Compute.Prompt = "? " Then dl$ = Form2.Compute
+With Form2.testpad
+.enabled = True
+.ResetSelColors
+''
+.nowrap = False
+''
+End With
+Do
+dl2 = dl$
+ok = False
+stackshowonly = True
+If FastSymbol(dl$, ")") Then
+ok = True
+ElseIf IsExp(b, dl$, p) Then
+    If AL$ = vbNullString Then
+        If pagio$ = "GREEK" Then
+        AL$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
+        Else
+        AL$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
+        End If
+            
+    Else
+        AL$ = AL$ & "," & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
+    End If
+    ok = True
+    ElseIf IsStrExp(b, dl$, s$) Then
+    If Len(dl2$) - Len(dl$) >= 0 Then
+    
+    
+    If AL$ = vbNullString Then
+        AL$ = Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
+    Else
+        AL$ = AL$ + "," + Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
+    End If
+    ok = True
+    End If
+    ElseIf InStr(dl$, ",") > 0 Then
+       If InStr(dl$, Chr(2)) > 0 Then
+     r$ = GetStrUntil(Chr(2), dl$, False)
+     s$ = "<"
+If ISSTRINGA(dl$, r$) Then If pagio$ <> "GREEK" Then s$ = s$ & r$
+If ISSTRINGA(dl$, r$) Then If pagio$ = "GREEK" Then s$ = s$ & r$
+AL$ = s$ & ">" & AL$
+ok = True
+Else
+AL$ = AL$ & " " & GetStrUntil(",", dl$)
+    
+     dl$ = vbNullString
+  
+End If
+    
+    ok = True
+    ElseIf dl$ <> "" Then
+      If InStr(dl$, Chr(2)) > 0 Then
+     r$ = GetStrUntil(Chr(2), dl$, False)
+     s$ = "<"
+If ISSTRINGA(dl$, r$) Then If pagio$ <> "GREEK" Then s$ = s$ & r$
+If ISSTRINGA(dl$, r$) Then If pagio$ = "GREEK" Then s$ = s$ & r$
+AL$ = s$ & ">" & AL$
+ok = True
+Else
+     AL$ = AL$ & " " & dl$
+     dl$ = vbNullString
+  
+End If
+
+    End If
+    
+DropLeft ",", dl$
+
+Loop Until Not ok
+End If
+stackshowonly = False
+If AL$ <> "" Then AL$ = AL$ & vbCrLf
+    If pagio$ = "GREEK" Then
+    AL$ = AL$ & "Σωρός "
+    Else
+    AL$ = AL$ & "Stack "
+    End If
+If stack.Total = 0 Then
+    If pagio$ = "GREEK" Then
+    AL$ = AL$ & "Αδειος"
+    Else
+    AL$ = AL$ & "Empty"
+    End If
+Else
+    If pagio$ = "GREEK" Then
+    AL$ = AL$ & "Κορυφή "
+    Else
+    AL$ = AL$ & "Top "
+    End If
+
+End If
+Dim i As Long
+
+Do
+i = i + 1
+If stack.Total < i Or Len(AL$) > 400 Then Exit Do
+
+If stack.StackItemType(i) = "N" Or stack.StackItemType(i) = "L" Then
+AL$ = AL$ & MyCStr(stack.StackItem(i)) & " "
+ElseIf stack.StackItemType(i) = "S" Then
+r$ = stack.StackItem(i)
+    If Len(r$) > 78 Then
+    AL$ = AL$ & Chr(34) + Left$(r$, 75) & "..." & Chr(34)
+    Else
+    AL$ = AL$ & Chr(34) + r$ & Chr(34)
+    End If
+ ElseIf stack.StackItemType(i) = ">" Then
+   If pagio$ = "LATIN" Then
+    AL$ = AL$ & "[Optional] "
+    Else
+    AL$ = AL$ & "[Προαιρετικό] "
+    End If
+ElseIf stack.StackItemType(i) = "*" Then
+
+AL$ = AL$ & stack.StackItemTypeObjectType(i) & " "
+Else  '??
+AL$ = AL$ & stack.StackItemTypeObjectType(i) & " "
+End If
+
+Loop
+With Form2
+    .gList1.backcolor = &H3B3B3B
+        .label1(2) = .label1(2)
+    
+        .testpad.enabled = True
+        .testpad.Text = AL$
+        .testpad.SetRowColumn 1, 1
+        .testpad.enabled = False
+End With
+once = False
+End Sub
 

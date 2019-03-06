@@ -1,10 +1,14 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 3 active-X
+Version 9.8 Revision 4 active-X
 
-A bug fixed in lambda functions when call a sub in lambda, by another sub
+- Added Binary.Add() to perform addition modulo 2^32
+- fix Def. In this example all variables are long except c which is boolean.
+Previous d defined as boolean also. This isn't as designed.
+Def long a,b, c as boolean, d
+- fix meditor in Info.gsb (bundled in this setup), when we use control box in form, and choose the help menu item, an error occur. Now is ok (we just put a 0 as parameter. 
 
-when fist time run the interpreter do this in M2000 console:
+When fist time run the interpreter do this in M2000 console:
 dir appdir$
 load info
 then press F1 to save info.gsb to M2000 user directory

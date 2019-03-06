@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 3
+Global Const Revision = 4
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2534,6 +2534,11 @@ End Sub
 Public Sub NeoSubMain()
 ' need to read registry form sub main
 On Error Resume Next
+Dim i As Long
+For i = 0 To 32
+    Pow2(i) = CCur(2 ^ i)
+    Pow2minusOne(i) = Pow2(i) - 1
+Next i
 '' From 9.6 by default we have no round to 13d for double
 EditTabWidth = 6
 tParam.cbSize = LenB(tParam)
@@ -5566,7 +5571,7 @@ End If
 'Select Case v$
 
 findthird:
-On w1 GoTo fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8, fun9, fun10, fun11, fun12, fun13, fun14, fun15, fun16, fun17, fun18, fun19, fun20, fun21, fun22, fun23, fun24, fun25, fun26, fun27, fun28, fun29, fun30, fun31, fun32, fun33, fun34, fun35, fun36, fun37, fun38, fun39, fun40, fun41, fun42, fun43, fun44, fun45, fun46, fun47, fun48, fun49, fun50, fun51, fun52, fun53, fun54, fun55, fun56, fun57, fun58, fun59, fun60, fun61, fun62, fun63, fun64, fun65, fun66, fun67, fun68, fun69, fun70, fun71, fun72, fun73, fun74, fun75, fun76, fun77, fun78, fun79, fun80, fun81, fun82, fun83, fun84, fun85, fun86, fun87, fun88, fun89, fun90, fun91, fun92, fun93, fun94, fun95, fun96, fun97, fun98, fun99, fun100, fun101, fun102, fun103, fun104, fun105, fun106, fun107, fun108
+On w1 GoTo fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8, fun9, fun10, fun11, fun12, fun13, fun14, fun15, fun16, fun17, fun18, fun19, fun20, fun21, fun22, fun23, fun24, fun25, fun26, fun27, fun28, fun29, fun30, fun31, fun32, fun33, fun34, fun35, fun36, fun37, fun38, fun39, fun40, fun41, fun42, fun43, fun44, fun45, fun46, fun47, fun48, fun49, fun50, fun51, fun52, fun53, fun54, fun55, fun56, fun57, fun58, fun59, fun60, fun61, fun62, fun63, fun64, fun65, fun66, fun67, fun68, fun69, fun70, fun71, fun72, fun73, fun74, fun75, fun76, fun77, fun78, fun79, fun80, fun81, fun82, fun83, fun84, fun85, fun86, fun87, fun88, fun89, fun90, fun91, fun92, fun93, fun94, fun95, fun96, fun97, fun98, fun99, fun100, fun101, fun102, fun103, fun104, fun105, fun106, fun107, fun108, fun109
 IsNumberNew = False
 Exit Function
 fun108: '"POINTER(", "ÄÅÉÊÔÇÓ("
@@ -6695,6 +6700,9 @@ fun96: ' "CDR(", "ÅÐÏÌÅÍÁ("
     Exit Function
 fun93: ' "TEST(", "ÄÏÊÉÌÇ("
     IsNumberNew = IsTest(bstack, a$, r, SG)
+    Exit Function
+fun109: ' "BINARY.ADD(", "ÄÕÁÄÉÊÏ.ÐÑÏÓÈÅÓÇ(","ÄÕÁÄÉÊÏ.ÐÑÏ("
+    IsNumberNew = IsBinaryAdd(bstack, a$, r, SG)
     Exit Function
 LOOKFORSUBNUM:
 ''On Error Resume Next
@@ -16712,7 +16720,7 @@ contTask:
                     bs.reflimit = bstack.reflimit
                     Set bs.Parent = bstack
                     bstack.PushThread CLng(sp), "_multi"
-                    sThreadInternal bs, sp, 10, ss$, uintnew(-1), here$, True
+                    sThreadInternal bs, sp, 10, ss$, -1&, here$, True
                     TaskMaster.Message CLng(sp), 3, CLng(uintnew(p))
                     On Error Resume Next
                     bstack.TaskMain = True
@@ -19118,191 +19126,6 @@ Function MyCStr(p) As String
     
         End Select
 End Function
-Sub stackshow(b As basetask)
-Static OldPagio$
-Dim p As Variant, r$, AL$, s$, dl$, dl2$
-Static once As Boolean, ok As Boolean
-If once Then Exit Sub
-once = True
-
-If TestShowCode Then
-With Form2.testpad
-.enabled = True
-.SelectionColor = rgb(255, 64, 128)
-.nowrap = True
-.Text = TestShowSub
-If Len(Form2.label1(1)) > 0 Then
-If AscW(Form2.label1(1)) = 8191 Then
-.SelStartSilent = TestShowStart - 1
-.SelLength = Len(Mid$(Form2.label1(1), 7))
-Else
-.SelStartSilent = TestShowStart - Len(Form2.label1(1)) - 1
-.SelLength = Len(Form2.label1(1))
-End If
-
-
-.enabled = False
-If .SelLength > 1 And Not AscW(Form2.label1(1)) = 8191 Then
-If Not myUcase(.SelText, True) = Form2.label1(1) Then
-End If
-End If
-Else
-.enabled = False
-End If
-''Debug.Print b.addlen
-'MyDoEvents
-End With
-
-once = False
-Exit Sub
-Else
-Form2.testpad.nowrap = False
-End If
-
-If pagio$ <> OldPagio$ Then
-Form2.FillAgainLabels
-OldPagio$ = pagio$
-End If
-
-
-Dim stack As mStiva
-Set stack = b.soros
-
-If Form2.Compute <> "" Then
-If Form2.Compute.Prompt = "? " Then dl$ = Form2.Compute
-With Form2.testpad
-.enabled = True
-.ResetSelColors
-''
-.nowrap = False
-''
-End With
-Do
-dl2 = dl$
-ok = False
-stackshowonly = True
-If FastSymbol(dl$, ")") Then
-ok = True
-ElseIf IsExp(b, dl$, p) Then
-    If AL$ = vbNullString Then
-        If pagio$ = "GREEK" Then
-        AL$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
-        Else
-        AL$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
-        End If
-            
-    Else
-        AL$ = AL$ & "," & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
-    End If
-    ok = True
-    ElseIf IsStrExp(b, dl$, s$) Then
-    If Len(dl2$) - Len(dl$) >= 0 Then
-    
-    
-    If AL$ = vbNullString Then
-        AL$ = Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
-    Else
-        AL$ = AL$ + "," + Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
-    End If
-    ok = True
-    End If
-    ElseIf InStr(dl$, ",") > 0 Then
-       If InStr(dl$, Chr(2)) > 0 Then
-     r$ = GetStrUntil(Chr(2), dl$, False)
-     s$ = "<"
-If ISSTRINGA(dl$, r$) Then If pagio$ <> "GREEK" Then s$ = s$ & r$
-If ISSTRINGA(dl$, r$) Then If pagio$ = "GREEK" Then s$ = s$ & r$
-AL$ = s$ & ">" & AL$
-ok = True
-Else
-AL$ = AL$ & " " & GetStrUntil(",", dl$)
-    
-     dl$ = vbNullString
-  
-End If
-    
-    ok = True
-    ElseIf dl$ <> "" Then
-      If InStr(dl$, Chr(2)) > 0 Then
-     r$ = GetStrUntil(Chr(2), dl$, False)
-     s$ = "<"
-If ISSTRINGA(dl$, r$) Then If pagio$ <> "GREEK" Then s$ = s$ & r$
-If ISSTRINGA(dl$, r$) Then If pagio$ = "GREEK" Then s$ = s$ & r$
-AL$ = s$ & ">" & AL$
-ok = True
-Else
-     AL$ = AL$ & " " & dl$
-     dl$ = vbNullString
-  
-End If
-
-    End If
-    
-DropLeft ",", dl$
-
-Loop Until Not ok
-End If
-stackshowonly = False
-If AL$ <> "" Then AL$ = AL$ & vbCrLf
-    If pagio$ = "GREEK" Then
-    AL$ = AL$ & "Óùñüò "
-    Else
-    AL$ = AL$ & "Stack "
-    End If
-If stack.Total = 0 Then
-    If pagio$ = "GREEK" Then
-    AL$ = AL$ & "Áäåéïò"
-    Else
-    AL$ = AL$ & "Empty"
-    End If
-Else
-    If pagio$ = "GREEK" Then
-    AL$ = AL$ & "ÊïñõöÞ "
-    Else
-    AL$ = AL$ & "Top "
-    End If
-
-End If
-Dim i As Long
-
-Do
-i = i + 1
-If stack.Total < i Or Len(AL$) > 400 Then Exit Do
-
-If stack.StackItemType(i) = "N" Or stack.StackItemType(i) = "L" Then
-AL$ = AL$ & MyCStr(stack.StackItem(i)) & " "
-ElseIf stack.StackItemType(i) = "S" Then
-r$ = stack.StackItem(i)
-    If Len(r$) > 78 Then
-    AL$ = AL$ & Chr(34) + Left$(r$, 75) & "..." & Chr(34)
-    Else
-    AL$ = AL$ & Chr(34) + r$ & Chr(34)
-    End If
- ElseIf stack.StackItemType(i) = ">" Then
-   If pagio$ = "LATIN" Then
-    AL$ = AL$ & "[Optional] "
-    Else
-    AL$ = AL$ & "[Ðñïáéñåôéêü] "
-    End If
-ElseIf stack.StackItemType(i) = "*" Then
-
-AL$ = AL$ & stack.StackItemTypeObjectType(i) & " "
-Else  '??
-AL$ = AL$ & stack.StackItemTypeObjectType(i) & " "
-End If
-
-Loop
-With Form2
-    .gList1.backcolor = &H3B3B3B
-        .label1(2) = .label1(2)
-    
-        .testpad.enabled = True
-        .testpad.Text = AL$
-        .testpad.SetRowColumn 1, 1
-        .testpad.enabled = False
-End With
-once = False
-End Sub
 Function RepPara(basestack As basetask, rest$) As Boolean
 Dim x1 As Long, y1 As Long, i As Long, j As Long
 Dim X As Double, Y As Double, ss$, s$, what$
@@ -35925,7 +35748,7 @@ MyThread = True
       
                         bs.reflimit = bstack.reflimit
                         bstack.PushThread CLng(p), what$  'push thread id and Ifier to threads collection in current basetask
-                        sThreadInternal bs, p, 0, frm$, uintnew(-1), here$, False ' thread construction - also we have a connection to
+                        sThreadInternal bs, p, 0, frm$, -1&, here$, False ' thread construction - also we have a connection to
                         
                         
                         Set bs = Nothing
@@ -46660,6 +46483,12 @@ jumpnow:
     End If
     If Not FastSymbol(rest$, ",") Then Exit Do
     y1 = IsLabel(basestack, rest$, what$)
+    If MyIsObject(that) Then
+    Set that = Nothing
+    that = first
+    Else
+    that = first
+    End If
     Loop
 End If
 If y1 > 4 Then MyEr "Not arrays with def", "¼÷é ðßíáêåò ìå ôçí ÊÜíå": ProcDef = False: Exit Function
@@ -49869,7 +49698,7 @@ Private Function IsUsgn(bstack As basetask, a$, r As Variant, SG As Variant) As 
 If IsExp(bstack, a$, r, , True) Then
  
     On Error Resume Next
-    If r > uintnew(-1) Then r = uintnew(-1)
+    If r > Pow2minusOne(32) Then r = Pow2minusOne(32)
     r = Fix(r)
     If r < 0 Then r = 0
     
