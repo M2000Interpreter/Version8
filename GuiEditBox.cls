@@ -6327,31 +6327,40 @@ s$ = InputBoxN("Αναζήτησε προς τα πάνω:", "Συγγραφή Κειμένου", s$, noinp)
 Else
 s$ = InputBoxN("Search to top:", "Text Editor", s$, noinp)
 End If
-If noinp = 1 Then
-If MyTrim(s$) <> "" Then Searchup s$, shift Mod 2 = 1
-shift = 0
-ElseIf SelText <> "" Or s$ <> "" Then
-supsub
+If Not noinp = 1 Then
+noentrance = False
+KeyCode = 0
+Exit Sub
 End If
+End If
+If noinp = 1 Then
+    If MyTrim(s$) <> "" Then Searchup s$, shift Mod 2 = 1
+    shift = 0
+ElseIf SelText <> "" Or s$ <> "" Then
+    supsub
 End If
 KeyCode = 0
 Case vbKeyF3
 If shift <> 0 Then
-If s$ = vbNullString And SelText <> "" Then s$ = SelText
-If pagio$ = "GREEK" Then
-s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$, noinp)
-Else
-s$ = InputBoxN("Search to down:", "Text Editor", s$, noinp)
-End If
-If noinp = 1 Then
-If MyTrim(s$) <> "" Then SearchDown s$, shift Mod 2 = 1
-shift = 0
-ElseIf SelText <> "" Or s$ <> "" Then
+    If s$ = vbNullString And SelText <> "" Then s$ = SelText
+    If pagio$ = "GREEK" Then
+    s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$, noinp)
+    Else
+    s$ = InputBoxN("Search to down:", "Text Editor", s$, noinp)
+    End If
+    If Not noinp = 1 Then
+    noentrance = False
+    KeyCode = 0
+    Exit Sub
+    End If
+    End If
+    If noinp = 1 Then
+    If MyTrim(s$) <> "" Then SearchDown s$, shift Mod 2 = 1
+    shift = 0
+    ElseIf SelText <> "" Or s$ <> "" Then
 
-sdnSub
-End If
-End If
-KeyCode = 0
+    sdnSub
+    End If
 Case vbKeyF4
 If SelText <> "" Then mscatsub
 KeyCode = 0
