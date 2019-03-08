@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 5 active-X
+Version 9.8 Revision 6 active-X
 
-F2 and F3 restored for editbox (search up and down marked word)
+some fixes in Groups (user object).
 
 
 When fist time run the interpreter do this in M2000 console:

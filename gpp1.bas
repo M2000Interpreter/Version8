@@ -450,13 +450,13 @@ If b < 0 Then b = 0 Else If b > 4294967295@ Then b = Int(b / 4294967296@)
 add32 = a + b
 If add32 > 4294967295@ Then add32 = add32 - 4294967296@
 End Function
-Function HexToUnsigned(s$) As Double
+Function HexToUnsigned(s$) As Currency
 Dim a As Double
 a = CLng("&h" + s$)
 If a < 0 Then
-HexToUnsigned = 4294967296# + a
+HexToUnsigned = 4294967296@ + a
 Else
-HexToUnsigned = a
+HexToUnsigned = CCur(a)
 End If
 End Function
 Function uintnew2(a As Double) As Double

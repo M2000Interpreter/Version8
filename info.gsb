@@ -57,7 +57,8 @@ MODULE B1 {Module FadeScreen  {
 }
 FadeScreen      
 }
-MODULE BB {m=false
+MODULE BB {Print "Press Esc to exit"
+m=false
 Every 100 {
 if mouse.key then { m=true } else m=false
 print not m
@@ -747,7 +748,27 @@ Function  Random2 {
       Call Void CryptReleaseContext(hProv, 0&)
       =Rand
 }
-Print Random2()
+m= Random2()
+mUnsigned=uint(m)
+Print m
+Print mUnsigned
+Print hex$(mUnsigned, 4)
+Print sint(mUnsigned)=m
+
+Print m=eval("0x"+hex$(mUnsigned, 4)+"&")  ' using & at the end we get the signed long 32 bit
+Print type$(mUnsigned)
+m1=sint(mUnsigned)
+Print type$(m1)
+m2=binary.and(m1, 0xFF00FF00)
+Print type$(m2)
+k=0xFF00FF00
+Print type$(k)
+k1=Binary.Shift(k,-8)
+Print type$(k1)
+k2=Binary.Rotate(k,-8)
+Print type$(k2)
+k3=binary.add(0xFF123456,0xF1234567,0xFFFFFFFF)
+Print type$(k3)
 }
 MODULE URL {Module checkit {
       document doc$
@@ -10356,7 +10377,7 @@ again:
       End Sub     
 }
 Maze2
-info
+keyboard "info"+chr$(13)
 }
 MODULE MAZE {Module Maze {
       width% = 40

@@ -71,7 +71,7 @@ Private Type SAFEARRAY1D
     cElements As Long
     lLBound As Long
 End Type
-Public index As Long, final As Boolean, refgroup As Object
+Public index As Long, final As Boolean, refgroup As Object, grouperror As Boolean
 Public Sub Compute0(p As Variant, ss$)
 If final Then CantAssignValue: Exit Sub
 Dim v As Long
@@ -1012,8 +1012,15 @@ If Not GroupRef Is Nothing Then
     End If
 End If
 MyEr "Wrong setting", "Λάθος όρισμα"
-Else
+ElseIf curitem <= maxitems1 Then
 Set actualdata(curitem) = item
+Else
+
+If grouperror Then
+MyEr "Something is wrong with this group", "Κάτι πάει στραβά με αυτή την ομάδα"
+Else
+MyEr "Something is wrong with this array", "Κάτι πάει στραβά με αυτόν τον πίνακα"
+End If
 End If
 End Property
 

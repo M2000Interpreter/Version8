@@ -129,7 +129,7 @@ Sub FeedNonLocal(aName$, val As Variant, v() As Variant)
 Dim where As Long
 If Not myHash.Find(aName$, where) Then
 where = GetFree()
-myHash.ItemCreator aName$, where
+myHash.ItemCreator aName$, where ', , , True
 End If
 If IsObject(val) Then
 '' maybe here we can copy

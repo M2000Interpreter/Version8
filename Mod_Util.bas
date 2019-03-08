@@ -10198,7 +10198,7 @@ Do
                  Set bstack.lastobj = Nothing
                  bstack.FuncValue = p
         Else
-                pppp.SerialItem 0, x1, 9
+                pppp.SerialItem 0, x1 + 1, 9
                 If bstack.lastobj Is Nothing Then
                     pppp.item(x1 - 1) = p
                 Else
@@ -10227,7 +10227,7 @@ Do
                 Set bstack.lastobj = Nothing
                 bstack.FuncValue = ss$
             Else
-                pppp.SerialItem 0, x1, 9
+                pppp.SerialItem 0, x1 + 1, 9
                 If bstack.lastobj Is Nothing Then
                     pppp.item(x1 - 1) = ss$
                 Else
@@ -11929,7 +11929,7 @@ Function IsBinaryNot(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
   If IsExp(bstack, a$, r, , True) Then
             On Error Resume Next
     If r < 0 Then r = r And &H7FFFFFFF
-             r = SG * uintnew3(Not signlong2(r))
+             r = SG * uintnew1(Not signlong2(r))
         If Err.Number > 0 Then
             
             WrongArgument a$
@@ -11968,7 +11968,7 @@ Function IsBinaryOr(bstack As basetask, a$, r As Variant, SG As Variant) As Bool
      If IsExp(bstack, a$, r, , True) Then
         If FastSymbol(a$, ",") Then
         If IsExp(bstack, a$, p) Then
-            r = SG * uintnew3(signlong2(r) Or signlong2(p))
+            r = SG * uintnew1(signlong2(r) Or signlong2(p))
          IsBinaryOr = FastSymbol(a$, ")", True)
            Else
                 
@@ -11986,11 +11986,11 @@ Function IsBinaryAdd(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
     If IsExp(bstack, a$, r, , True) Then
             If FastSymbol(a$, ",") Then
                 If IsExp(bstack, a$, p, , True) Then
-                    r = CDbl(add32(r, p))
+                    r = add32b(r, p)
                     
                     While FastSymbol(a$, ",")
                     If Not IsExp(bstack, a$, p, , True) Then MissNumExpr: Exit Function
-                    r = CDbl(add32(r, p))
+                    r = add32b(r, p)
                     Wend
                     If SG < 0 Then r = -r
                     IsBinaryAdd = FastSymbol(a$, ")", True)
@@ -12013,7 +12013,7 @@ Function IsBinaryAnd(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
     If IsExp(bstack, a$, r, , True) Then
             If FastSymbol(a$, ",") Then
                 If IsExp(bstack, a$, p, , True) Then
-                    r = SG * uintnew3(signlong2(r) And signlong2(p))
+                    r = SG * uintnew1(signlong2(r) And signlong2(p))
                     
                     IsBinaryAnd = FastSymbol(a$, ")", True)
                 Else
@@ -12035,7 +12035,7 @@ Function IsBinaryXor(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
         If IsExp(bstack, a$, r, True) Then
             If FastSymbol(a$, ",") Then
                 If IsExp(bstack, a$, p) Then
-                    r = SG * uintnew3(signlong2(r) Xor signlong2(p))
+                    r = SG * uintnew1(signlong2(r) Xor signlong2(p))
                     
                     IsBinaryXor = FastSymbol(a$, ")", True)
                 Else
@@ -12065,13 +12065,13 @@ Dim p As Variant
                          Else
                                If p > 0 Then
                               
-                                 r = SG * CDbl((signlong(r) And signlong(Pow2minusOne(32 - p))) * Pow2(p))
+                                 r = SG * CCur((signlong(r) And signlong(Pow2minusOne(32 - p))) * Pow2(p))
                               
                               ElseIf p = 0 Then
-                              If SG < 0 Then r = -CDbl(r)
+                              If SG < 0 Then r = -CCur(r) Else r = CCur(r)
                               Else
                                     
-                                 r = SG * Int(CCur(r) / Pow2(-p))
+                                 r = SG * CCur(Int(CCur(r) / Pow2(-p)))
                               End If
                               
                             IsBinaryShift = FastSymbol(a$, ")", True)
@@ -12103,12 +12103,12 @@ Dim p As Variant
                         Else
                              If p > 0 Then
                           
-                                 r = SG * CDbl((signlong(r) And signlong(Pow2minusOne(32 - p))) * Pow2(p) + Int(CCur(r) / Pow2(32 - p)))
+                                 r = SG * CCur((signlong(r) And signlong(Pow2minusOne(32 - p))) * Pow2(p) + Int(CCur(r) / Pow2(32 - p)))
                              ElseIf p = 0 Then
-                                 If SG < 0 Then r = -CDbl(r)
+                                 If SG < 0 Then r = -CCur(r) Else r = CCur(r)
                              Else
                           
-                                 r = SG * CDbl((signlong(r) And signlong(Pow2minusOne(-p))) * Pow2(32 + p) + Int(CCur(r) / Pow2(-p)))
+                                 r = SG * CCur((signlong(r) And signlong(Pow2minusOne(-p))) * Pow2(32 + p) + Int(CCur(r) / Pow2(-p)))
                              End If
                         End If
                      
@@ -21093,3 +21093,55 @@ End With
 once = False
 End Sub
 
+Sub makegroup(bstack As basetask, what$, i As Long)
+Dim it As Long
+it = globalvar(what$, it)
+    MakeitObject2 var(it)
+    If var(i).IamApointer Then
+        If var(i).link.IamFloatGroup Then
+           Set var(it).LinkRef = var(i).link
+            var(it).IamApointer = True
+            var(it).isref = True
+        Else
+            With var(i).link
+            
+                var(it).edittag = .edittag
+                var(it).FuncList = .FuncList
+                var(it).GroupName = myUcase(what$) + "."
+                Set var(it).Sorosref = .soros.Copy
+                var(it).HasValue = .HasValue
+                var(it).HasSet = .HasSet
+                var(it).HasStrValue = .HasStrValue
+                var(it).HasParameters = .HasParameters
+                var(it).HasParametersSet = .HasParametersSet
+            
+                        Set var(it).Events = .Events
+            
+                var(it).highpriorityoper = .highpriorityoper
+                var(it).HasUnary = .HasUnary
+            End With
+        End If
+    
+    Else
+        With var(i)
+            var(it).edittag = .edittag
+            var(it).FuncList = .FuncList
+            var(it).GroupName = myUcase(what$) + "."
+            Set var(it).Sorosref = .soros.Copy
+            var(it).HasValue = .HasValue
+            var(it).HasSet = .HasSet
+            var(it).HasStrValue = .HasStrValue
+            var(it).HasParameters = .HasParameters
+            var(it).HasParametersSet = .HasParametersSet
+            Set var(it).Events = .Events
+            var(it).highpriorityoper = .highpriorityoper
+            var(it).HasUnary = .HasUnary
+        End With
+        var(it).IamRef = Len(bstack.UseGroupname) > 0
+    End If
+    If var(i).HasStrValue Then
+        globalvar what$ + "$", it, True
+    End If
+            
+        
+End Sub

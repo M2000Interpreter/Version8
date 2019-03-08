@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 4
+Global Const Revision = 6
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1048,251 +1048,212 @@ funid.pushtop
 Dim mm As mStiva2, tempRef As Object
 If Prefix = "VAL" Then
 ' we stand as right value...
-If pppp Is Nothing Then GoTo fastexit
-
-ec$ = w$ + ")"
-If v >= 0 Then
-w$ = pppp.CodeName + CStr(v)
-
-
-Else
-w$ = pppp.CodeName + CStr(Abs(v))
-End If
-If Len(pppp.item(v).LastOpen) > 0 Then
-If GetVar(bstack, pppp.item(v).LastOpen, i) Then
-jmp1995:
-Set safegroup = var(i)
-If safegroup.lasthere = here$ Then
-w$ = safegroup.GroupName
-w$ = Left$(w$, Len(w$) - 1)
-Else
-LinkGroup bstack, w$, var(i)
-End If
-bstack.tmpstr = w$ + Left$(b$, 1)
-                  BackPort b$
-            If IsNumberNew(bstack, b$, p, CLng(1), False) Then
-            bstack.LastValue = p
-                        SpeedGroup = 1
-            End If
-            GoTo fastexit
-End If
-End If
-        
-       
-        
-        If Not MyIsObject(pppp.item(v)) Then
-            GoTo fastexit
-        End If
-        
-         
-        Set safegroup = pppp.item(v)
-        If safegroup Is Nothing Then GoTo fastexit
-        If safegroup.IamApointer Then
-        
-        
-        
-        If Len(safegroup.lasthere) > 0 And Len(safegroup.GroupName) > 0 Then
-            w$ = safegroup.lasthere + "." + safegroup.GroupName
-            'b$ = w$ + b$
-            bstack.tmpstr = w$ + Left$(b$, 1)
-            BackPort b$
-            If Not IsNumberNew(bstack, b$, p, CLng(1), False) Then
-                SpeedGroup = 0
-                GoTo fastexit
-                    End If
-                    
-            bstack.LastValue = p
-            
-            'here$ = ohere$
-            SpeedGroup = 1
-            GoTo fastexit
-        End If
-        ' check for iamglobal ??
-If safegroup.link.LastOpen <> vbNullString Then
-If GetVar(bstack, safegroup.link.LastOpen, i) Then GoTo jmp1995
-
-ElseIf safegroup.LastOpen <> vbNullString Then
-        If GetVar(bstack, (safegroup.LastOpen), y1, True) Then
-        If safegroup.lasthere$ = here$ Then
-        w$ = safegroup.LastOpen
-        Else
-        If safegroup.lasthere$ = vbNullString Then
-        w$ = safegroup.LastOpen
-        Else
-        w$ = safegroup.lasthere$ + "." + safegroup.LastOpen
-        End If
-        End If
-
-       ' w$ = safegroup.LastOpen
-        Set safegroup = safegroup.link
-            GoTo cont3030
-    
-        Else
-        safegroup.lasthere = vbNullString
-        safegroup.LastOpen = vbNullString
-        End If
-        End If
-        y1 = globalvarGroup(w$, 0#, , here$ = vbNullString)
-          Set safegroup = safegroup.link
-        UnFloatGroup bstack, w$, y1, safegroup, , True
-        globalvarGroup w$, y1, True, True
-cont3030:
-        Else
-         If Len(safegroup.LastOpen) > 0 Then
-        
-         If Not GetVar(bstack, safegroup.LastOpen, y1, True) Then
-         GoTo fastexit
-         End If
-         GoTo conthere0001
-       End If
-        
-        
-         y1 = globalvarGroup(w$, 0#, , here$ = vbNullString)
-        If Not safegroup.IamFloatGroup Then
-         Set safegroup = CopyGroupObj(safegroup)
-        ElseIf safegroup.IamApointer Then
-         Set safegroup = CopyGroupObj(safegroup.link)
-        End If
-        
-        UnFloatGroup bstack, w$, y1, safegroup, , True
-         var(y1).FloatGroupName = ec$
-        globalvarGroup w$, y1, True, True
-        End If
-        
-      
-        Set safegroup = pppp.item(v)
-      
-        
-conthere0001:
-        
-       
-        
-       Dim r As Variant
-       If Left$(b$, 1) <> "." And Left$(b$, 1) <> "(" And var(y1).HasParameters Then
-                   bstack.tmpstr = w$ + "(" + Left$(b$, 1)
-       Else
-                    bstack.tmpstr = w$ + Left$(b$, 1)
-        End If
-      
-            BackPort b$
-            
-
-         If IsNumberNew(bstack, b$, r, CLng(1), False) Then
-            SpeedGroup = 1
-            If pppp.Arr Then
-                If safegroup.IamApointer Then
-                    Set tempRef = pppp.GroupRef   'pppp.item(v).Link
-                    Set safegroup.LinkRef = CopyGroupObj(var(y1))
-                    Set safegroup.link.LinkRef = pppp.GroupRef
-                Else
-                    Set tempRef = pppp.GroupRef   'pppp.item(v).Link
-                    Set pppp.item(v) = CopyGroupObj(var(y1))
-                    If TypeOf pppp.item(v) Is Group Then Set pppp.item(v).LinkRef = pppp.GroupRef
-                End If
-            Else
-            If safegroup.IamApointer Then
-                 
-                    'Set safegroup.LinkRef = CopyGroupObj(var(y1))
-                   CopyGroup1 var(y1), safegroup.link
-                  'If v <> -100 Then
-                  If v >= 0 Then
-                  Set bstack.lastpointer = safegroup
-                  Set bstack.lastobj = safegroup.link
-                  End If
-            Else
-                CopyGroup1 var(y1), safegroup
-                End If
-            End If
-            
-               If bstack.lastobj Is Nothing Then
-                        bstack.LastValue = r
-                Else
-                        bstack.LastValue = 0#
-                    GoTo fastexit
-                End If
-        End If
-     Set bstack.lastobj = Nothing
-         GoTo fastexit
-
-ElseIf Prefix = "VAL$" Then
+    If pppp Is Nothing Then GoTo fastexit
     ec$ = w$ + ")"
     If v >= 0 Then
-    
-    w$ = pppp.CodeName + CStr(v)
-    
+        w$ = pppp.CodeName + CStr(v)
     Else
-    w$ = pppp.CodeName + CStr(Abs(v))
+        w$ = pppp.CodeName + CStr(Abs(v))
     End If
     If Len(pppp.item(v).LastOpen) > 0 Then
         If GetVar(bstack, pppp.item(v).LastOpen, i) Then
-jmp2000:
-        Set safegroup = var(i)
-        If safegroup.lasthere = here$ Then
-
-        w$ = safegroup.GroupName
-        w$ = Left$(w$, Len(w$) - 1)
-        Else
-        LinkGroup bstack, w$, var(i)
+jmp1995:
+            Set safegroup = var(i)
+            If safegroup.lasthere = here$ Then
+                w$ = safegroup.GroupName
+                w$ = Left$(w$, Len(w$) - 1)
+            Else
+                LinkGroup bstack, w$, var(i)
+                makegroup bstack, w$, i
+            End If
+            bstack.tmpstr = w$ + Left$(b$, 1)
+            BackPort b$
+            If IsNumberNew(bstack, b$, p, CLng(1), False) Then
+                bstack.LastValue = p
+                SpeedGroup = 1
+            End If
+            GoTo fastexit
         End If
-
-        bstack.tmpstr = w$ + Left$(b$, 1)
-                          BackPort b$
-                              If IsStr1(bstack, b$, bb$) Then
-                                bstack.LastValue = bb$
-                                SpeedGroup = 1
-                    End If
-                    GoTo fastexit
-        End If
-       End If
-    y1 = globalvarGroup(w$, 0#)
-    i = globalvarGroup(w$ + "$", y1, True)
+    End If
+    
     If Not MyIsObject(pppp.item(v)) Then
         GoTo fastexit
     End If
     Set safegroup = pppp.item(v)
     If safegroup Is Nothing Then GoTo fastexit
     If safegroup.IamApointer Then
-    
         If Len(safegroup.lasthere) > 0 And Len(safegroup.GroupName) > 0 Then
             w$ = safegroup.lasthere + "." + safegroup.GroupName
-            'b$ = w$ + b$
-                  bstack.tmpstr = w$ + Left$(b$, 1)
-                  BackPort b$
-             If Not IsStr1(bstack, b$, bb$) Then SpeedGroup = 0: GoTo fastexit
+            bstack.tmpstr = w$ + Left$(b$, 1)
+            BackPort b$
+            If Not IsNumberNew(bstack, b$, p, CLng(1), False) Then SpeedGroup = 0: GoTo fastexit
+            bstack.LastValue = p
+            SpeedGroup = 1
+            GoTo fastexit
+        End If
+        If safegroup.link.LastOpen <> vbNullString Then
+            If GetVar(bstack, safegroup.link.LastOpen, i) Then GoTo jmp1995
+        ElseIf safegroup.LastOpen <> vbNullString Then
+            If GetVar(bstack, (safegroup.LastOpen), y1, True) Then
+                If safegroup.lasthere$ = here$ Then
+                    w$ = safegroup.LastOpen
+                Else
+                    If safegroup.lasthere$ = vbNullString Then
+                        w$ = safegroup.LastOpen
+                    Else
+                        w$ = safegroup.lasthere$ + "." + safegroup.LastOpen
+                    End If
+                End If
+                Set safegroup = safegroup.link
+                GoTo cont3030
+            Else
+                safegroup.lasthere = vbNullString
+                safegroup.LastOpen = vbNullString
+            End If
+        End If
+        y1 = globalvarGroup(w$, 0#, , here$ = vbNullString)
+        Set safegroup = safegroup.link
+        UnFloatGroup bstack, w$, y1, safegroup, , True
+        globalvarGroup w$, y1, True, True
+cont3030:
+    Else
+        If Len(safegroup.LastOpen) > 0 Then
+            If Not GetVar(bstack, safegroup.LastOpen, y1, True) Then
+                GoTo fastexit
+            End If
+            GoTo conthere0001
+        End If
+        y1 = globalvarGroup(w$, 0#, , here$ = vbNullString)
+        If Not safegroup.IamFloatGroup Then
+            Set safegroup = CopyGroupObj(safegroup)
+        ElseIf safegroup.IamApointer Then
+            Set safegroup = CopyGroupObj(safegroup.link)
+        End If
+        UnFloatGroup bstack, w$, y1, safegroup, , True
+        var(y1).FloatGroupName = ec$
+        globalvarGroup w$, y1, True, True
+    End If
+    
+    Set safegroup = pppp.item(v)
+
+conthere0001:
+    If Left$(b$, 1) <> "." And Left$(b$, 1) <> "(" And var(y1).HasParameters Then
+        bstack.tmpstr = w$ + "(" + Left$(b$, 1)
+    Else
+        bstack.tmpstr = w$ + Left$(b$, 1)
+    End If
+    BackPort b$
+    If IsNumberNew(bstack, b$, p, CLng(1), False) Then
+        SpeedGroup = 1
+        If pppp.Arr Then
+            If safegroup.IamApointer Then
+                Set tempRef = pppp.GroupRef   'pppp.item(v).Link
+                Set safegroup.LinkRef = CopyGroupObj(var(y1))
+                Set safegroup.link.LinkRef = pppp.GroupRef
+            Else
+                Set tempRef = pppp.GroupRef   'pppp.item(v).Link
+                Set pppp.item(v) = CopyGroupObj(var(y1))
+                If TypeOf pppp.item(v) Is Group Then Set pppp.item(v).LinkRef = pppp.GroupRef
+            End If
+        Else
+            If safegroup.IamApointer Then
+                CopyGroup1 var(y1), safegroup.link
+                If v >= 0 Then
+                    Set bstack.lastpointer = safegroup
+                    Set bstack.lastobj = safegroup.link
+                End If
+            Else
+                CopyGroup1 var(y1), safegroup
+            End If
+        End If
+            
+        If bstack.lastobj Is Nothing Then
+            bstack.LastValue = p
+        Else
+            bstack.LastValue = 0#
+            GoTo fastexit
+        End If
+    End If
+    Set bstack.lastobj = Nothing
+    GoTo fastexit
+    
+ElseIf Prefix = "VAL$" Then
+    ec$ = w$ + ")"
+    If v >= 0 Then
+        w$ = pppp.CodeName + CStr(v)
+    Else
+        w$ = pppp.CodeName + CStr(Abs(v))
+    End If
+    If Len(pppp.item(v).LastOpen) > 0 Then
+        If GetVar(bstack, pppp.item(v).LastOpen, i) Then
+jmp2000:
+            Set safegroup = var(i)
+            If safegroup.lasthere = here$ Then
+                w$ = safegroup.GroupName
+                w$ = Left$(w$, Len(w$) - 1)
+            Else
+                LinkGroup bstack, w$, var(i)
+                makegroup bstack, w$, i
+            End If
+            bstack.tmpstr = w$ + Left$(b$, 1)
+            BackPort b$
+            If IsStr1(bstack, b$, bb$) Then
+                bstack.LastValue = bb$
+                SpeedGroup = 1
+            End If
+            GoTo fastexit
+        End If
+    End If
+  '  y1 = globalvarGroup(w$, 0#)
+   ' i = globalvarGroup(w$ + "$", y1, True)
+    If Not MyIsObject(pppp.item(v)) Then
+        GoTo fastexit
+    End If
+    Set safegroup = pppp.item(v)
+    If safegroup Is Nothing Then GoTo fastexit
+    If safegroup.IamApointer Then
+        If Len(safegroup.lasthere) > 0 And Len(safegroup.GroupName) > 0 Then
+            w$ = safegroup.lasthere + "." + safegroup.GroupName
+            bstack.tmpstr = w$ + Left$(b$, 1)
+            BackPort b$
+            If Not IsStr1(bstack, b$, bb$) Then SpeedGroup = 0: GoTo fastexit
             bstack.LastValue = bb$
             SpeedGroup = 1
             GoTo fastexit
         End If
-    ' check for iamglobal ??
         If safegroup.link.LastOpen <> vbNullString Then
-If GetVar(bstack, safegroup.link.LastOpen, i) Then GoTo jmp2000
-
-ElseIf safegroup.LastOpen <> vbNullString Then
-        If GetVar(bstack, (safegroup.LastOpen), y1, True) Then
-'        w$ = safegroup.LastOpen
+            If GetVar(bstack, safegroup.link.LastOpen, i) Then GoTo jmp2000
+        ElseIf safegroup.LastOpen <> vbNullString Then
+            If GetVar(bstack, (safegroup.LastOpen), y1, True) Then
                 If safegroup.lasthere$ = here$ Then
-        w$ = safegroup.LastOpen
-        Else
-        
-         If safegroup.lasthere$ = vbNullString Then
-        w$ = safegroup.LastOpen
-        Else
-        w$ = safegroup.lasthere$ + "." + safegroup.LastOpen
+                    w$ = safegroup.LastOpen
+                Else
+                    If safegroup.lasthere$ = vbNullString Then
+                        w$ = safegroup.LastOpen
+                    Else
+                        w$ = safegroup.lasthere$ + "." + safegroup.LastOpen
+                    End If
+                End If
+                Set safegroup = safegroup.link  '' ADDED rev 6 ver 9.8
+                GoTo cont5050
+            Else
+                safegroup.lasthere = vbNullString '' ADDED rev 6 ver 9.8
+                safegroup.LastOpen = vbNullString
+            End If
         End If
-        End If
-
-            GoTo cont5050
-        Else
-        safegroup.LastOpen = vbNullString
-        End If
-        End If
-        y1 = globalvarGroup(w$, 0#, , True, here$ = vbNullString)
+        y1 = globalvarGroup(w$, 0#, , here$ = vbNullString) '' fix it rev 6 ver 9.8
         Set safegroup = safegroup.link
         UnFloatGroup bstack, w$, y1, safegroup, , True
         var(y1).FloatGroupName = w$
         globalvarGroup w$, y1, True, True
 cont5050:
     Else
+        If Len(safegroup.LastOpen) > 0 Then
+            If Not GetVar(bstack, safegroup.LastOpen, y1, True) Then
+                GoTo fastexit
+            End If
+            GoTo conthere000
+        End If
         y1 = globalvarGroup(w$, 0#, , here$ = vbNullString)
         If Not safegroup.IamFloatGroup Then
             Set safegroup = CopyGroupObj(safegroup)
@@ -1305,8 +1266,8 @@ cont5050:
     End If
     Set safegroup = pppp.item(v)
     If safegroup Is Nothing Then GoTo fastexit
+conthere000:
     If Left$(b$, 1) = "." Then
-
         bstack.tmpstr = w$ + Left$(b$, 1)
         BackPort b$
         Set bstack.lastpointer = Nothing
@@ -1349,7 +1310,15 @@ conthere:
                 If TypeOf pppp.item(v) Is Group Then Set pppp.item(v).LinkRef = pppp.GroupRef
             End If
         Else
-        CopyGroup1 var(y1), safegroup
+                    If safegroup.IamApointer Then
+                CopyGroup1 var(y1), safegroup.link
+                If v >= 0 Then
+                    Set bstack.lastpointer = safegroup
+                    Set bstack.lastobj = safegroup.link
+                End If
+            Else
+                CopyGroup1 var(y1), safegroup
+            End If
     End If
 
  
@@ -1499,6 +1468,7 @@ jmp1998:
         w$ = Left$(w$, Len(w$) - 1)
         Else
         LinkGroup bstack, w$, var(i)
+        makegroup bstack, w$, i
         End If
             y1 = -1
            Set safegroup = var(i)
@@ -2084,6 +2054,7 @@ jump1991:
         w$ = Left$(w$, Len(w$) - 1)
         Else
         LinkGroup bstack, w$, var(i)
+        makegroup bstack, w$, i
         End If
 
             Set safegroup = Nothing
@@ -2740,47 +2711,51 @@ Set pppp = New mArray: pppp.myarrbase = 0: pppp.PushDim (1): pppp.PushEnd: pppp.
 If skip = 1 Then GoTo firstexp Else If skip = 2 Then GoTo firststr
 If IsStrExp(bstack, b$, s$) Then
 firststr:
-            pppp.SerialItem 0#, x1, 9
+            x1 = x1 + 1
+            pppp.SerialItem 0#, x1, 10
             If bstack.lastobj Is Nothing Then
-                pppp.item(x1 - 1) = s$
+                pppp.item(x1 - 2) = s$
             Else
-                Set pppp.item(x1 - 1) = bstack.lastobj
+                Set pppp.item(x1 - 2) = bstack.lastobj
                 Set bstack.lastobj = Nothing
             End If
-            x1 = x1 + 1
 ElseIf IsExp(bstack, b$, p) Then
 firstexp:
-            pppp.SerialItem 0, x1, 9
+            x1 = x1 + 1
+            pppp.SerialItem 0, x1, 10
             If bstack.lastobj Is Nothing Then
-                pppp.item(x1 - 1) = p
+                pppp.item(x1 - 2) = p
             Else
-                Set pppp.item(x1 - 1) = bstack.lastobj
+                Set pppp.item(x1 - 2) = bstack.lastobj
                 Set bstack.lastobj = Nothing
             End If
-            x1 = x1 + 1
+            
 End If
 Do While MaybeIsSymbol(b$, ",)")
 IsSymbol b$, ","
 If MaybeIsSymbol(b$, ")") Then
-pppp.SerialItem 0, x1, 9: Exit Do
+
+pppp.SerialItem 0, x1 - 1, 10
+Exit Do
 ElseIf IsStrExp(bstack, b$, s$) Then
-            pppp.SerialItem 0, x1, 9
+x1 = x1 + 1
+            pppp.SerialItem 0, x1, 10
             If bstack.lastobj Is Nothing Then
-                pppp.item(x1 - 1) = s$
+                pppp.item(x1 - 2) = s$
             Else
-                Set pppp.item(x1 - 1) = bstack.lastobj
+                Set pppp.item(x1 - 2) = bstack.lastobj
                 Set bstack.lastobj = Nothing
             End If
-            x1 = x1 + 1
+
 ElseIf IsExp(bstack, b$, p) Then
-            pppp.SerialItem 0, x1, 9
+x1 = x1 + 1
+            pppp.SerialItem 0, x1, 10
             If bstack.lastobj Is Nothing Then
-                pppp.item(x1 - 1) = p
+                pppp.item(x1 - 2) = p
             Else
-                Set pppp.item(x1 - 1) = bstack.lastobj
+                Set pppp.item(x1 - 2) = bstack.lastobj
                 Set bstack.lastobj = Nothing
             End If
-            x1 = x1 + 1
 End If
 
 Loop
@@ -7688,11 +7663,11 @@ ElseIf k < 5 Then
              
              If Not IsNumberNew(bstack, (n$), dummy, (1), True) Then
              MyEr "", ""
-             dummy = vbEmpty
+             dummy = Empty
              End If
                 End If
                 body.FeedNonLocal n$, dummy, var()
-        dummy = vbEmpty
+        dummy = Empty
             
         End If
 Else
@@ -20423,9 +20398,9 @@ Dim j As Long
 j = AllocVar() ' var2used
  var(j) = CLng(0)  ' like an empty...
 If here$ = vbNullString Or gl Then
-varhash.ItemCreator myUcase(name$), j, , gl
+varhash.ItemCreator myUcase(name$), j, , gl, True
 Else
-varhash.ItemCreator here$ & "." & myUcase(name$), j, , gl
+varhash.ItemCreator here$ & "." & myUcase(name$), j, , gl, True
 
 End If
 GlobalVarRefOnly = j
@@ -20533,7 +20508,7 @@ Case "lambda"
          GlobalSub name$ + Split(aa$)(0) + "()", "", name$, , v
 Case Else
 
-    varhash.ItemCreator name$ + Split(aa$)(0), CLng(val(v)), True
+    varhash.ItemCreator name$ + Split(aa$)(0), CLng(val(v)), True, , True
 End Select
 
 Next
@@ -25801,18 +25776,19 @@ Case Else
 ' check if we have a class
 conthereplease:
 nm$ = vbNullString
-If uni Then
-    
-Else
-    If prv Then w$ = ChrW(&HFFBF) + w$
-End If
+
 
 If Len(rest$) > 0 Then
 If Not MaybeIsSymbol(rest$, TT$) Then
     If GetSub(w$ + "()", j) Then
         F$ = "=" + w$ + "()"
         
-            If IsLabelA(here$, rest$, w$) <> 1 Then Exit Do
+            If (IsLabelA(here$, rest$, w$) And 3) = 0 Then Exit Do
+             w$ = Replace(w$, "$", "")
+            If uni Then
+            Else
+                If prv Then w$ = ChrW(&HFFBF) + w$
+            End If
             ''w$ = myUcase(w$)
             rest$ = F$ + rest$
             nm$ = w$
@@ -25821,14 +25797,38 @@ If Not MaybeIsSymbol(rest$, TT$) Then
     ElseIf GetSub(bstack.GroupName + w$ + "()", j) Then   '' why not here??
         F$ = "=" + bstack.GroupName + w$ + "()"
         x1 = IsLabelA(here$, rest$, w$)
+        If x1 = 3 Then w$ = Replace(w$, "$", "")
+        If uni Then
+            
+        Else
+            If prv Then w$ = ChrW(&HFFBF) + w$
+        End If
         If x1 <> 1 And x1 <> 3 Then Exit Do
         ''w$ = myUcase(w$)
-        
         rest$ = F$ + rest$
 
         nm$ = Replace(w$, "$", "")
         Set stripstack1 = bstack
+    Else
+        If uni Then
+        
+    Else
+        If prv Then w$ = ChrW(&HFFBF) + w$
     End If
+    End If
+Else
+If uni Then
+    
+Else
+    If prv Then w$ = ChrW(&HFFBF) + w$
+End If
+
+End If
+Else
+If uni Then
+    
+Else
+    If prv Then w$ = ChrW(&HFFBF) + w$
 End If
 End If
 VarOnly:
@@ -26045,7 +26045,12 @@ againgroup:
                     End If
                    
                     If FastSymbol(rest$, ",") Then
-                        If IsLabelA(here$, rest$, nm$) = 1 Then
+                        If (IsLabelA(here$, rest$, nm$) And 3) <> 0 Then
+                            nm$ = Replace(nm$, "$", "")
+                            If uni Then
+                            Else
+                            If prv Then nm$ = ChrW(&HFFBF) + nm$
+                            End If
                             If here$ = vbNullString Then
                                 If Not GetVar(stripstack1, ohere$ & "." & nm$, v) Then v = globalvarGroup(ohere$ & "." & nm$, p)   ': GetVar bstack, nm$, v
                             Else
@@ -26241,14 +26246,20 @@ againgroupstr:
                                 GoTo continuehere
                         End If
                          If FastSymbol(rest$, ",") Then
-                        If IsLabelA(here$, rest$, nm$) = 3 Then
-                        frm$ = Left$(ohere$ & "." & nm$, Len(ohere$ & "." & nm$) - 1)
+                        If (IsLabelA(here$, rest$, nm$) And 3) <> 0 Then
+                        nm$ = Replace(nm$, "$", "")
+                                    If uni Then
+            Else
+                If prv Then nm$ = ChrW(&HFFBF) + nm$
+            End If
+                        frm$ = ohere$ & "." & nm$
                             If here$ = vbNullString Then
                                 If Not GetVar(stripstack1, frm$, v) Then v = globalvar(frm$, p)   ': GetVar bstack, nm$, v
                             Else
                                 If Not GetlocalVar(frm$, v) Then v = globalvar(frm$, p) ': GetlocalVar W$, v
                             End If
                             frm$ = vbNullString
+                             
                             GoTo againgroupstr
                         Else
                             SyntaxError
@@ -37264,9 +37275,6 @@ checkconstant:
                Set var(it).LinkRef = var(i).link
                 var(it).IamApointer = True
                 var(it).isref = True
-         '   MyEr "There is no reference for this pointer", "Δεν υπάρχει αναφορά για αυτόν τον δείκτη"
-          '  MyRead = False
-          '  Exit Function
             Else
             With var(i).link
             

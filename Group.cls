@@ -243,6 +243,7 @@ End Sub
 Public Sub BeginFloat(Total As Long)
 FloatGroup = True
 Set bank = New mArray
+bank.grouperror = True
 'flitems = Total
 bank.PushDim Total * 2
 bank.PushEnd
