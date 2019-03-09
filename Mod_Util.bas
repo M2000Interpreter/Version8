@@ -218,7 +218,13 @@ Public mcd As String
 Public NOEXECUTION As Boolean, RoundDouble As Boolean
 Public QRY As Boolean, GFQRY As Boolean
 Public nomore As Boolean
-
+Private Declare Function CallWindowProc _
+ Lib "user32.dll" Alias "CallWindowProcW" ( _
+ ByVal lpPrevWndFunc As Long, _
+ ByVal hWnd As Long, _
+ ByVal Msg As Long, _
+ ByVal wParam As Long, _
+ ByVal lParam As Long) As Long
 
 '== MCI Wave API Declarations ================================================
 Public ExTarget As Boolean
@@ -6165,15 +6171,16 @@ again22:
         End If
     Else
         Select Case w$
-        Case "%", "$", "0" To "9", vbCr, vbLf
+        Case "%", "$", "0" To "9", vbLf
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbCr, ":"
+again:
             If Len(what$) > 2 Then
                 If Lang = 0 Then
                     If Len(what$) = 7 Or Len(what$) = len1 Then
                         what$ = myUcase(what$)
                         If what$ = "ΕΠΟΜΕΝΟ" Then
-                                aheadstatusSkipParam a$, pos
+                               If MyTrim$(w$) = "" Then aheadstatusSkipParam a$, pos
                                 If level2 = 0 Then
                                     flag = True
                                     Exit Sub
@@ -6198,7 +6205,7 @@ again22:
                     If Len(what$) = 4 Or Len(what$) = len2 Then
                         what$ = myUcase(what$)
                         If what$ = "NEXT" Then
-                            aheadstatusSkipParam a$, pos
+                            If MyTrim$(w$) = "" Then aheadstatusSkipParam a$, pos
                             If level2 = 0 Then
                                 flag = True
                                 Exit Sub
@@ -6262,6 +6269,7 @@ End If
 conthere:
   
 Loop
+If Len(what$) > 2 Then GoTo again
 pos = lenA + 2
 
 End Sub
@@ -21145,3 +21153,54 @@ it = globalvar(what$, it)
             
         
 End Sub
+Function ExecCode(basestack As basetask, rest$) As Boolean ' experimental
+' ver .001
+Dim p As Variant, mm As MemBlock, w2 As Long
+    If IsExp(basestack, rest$, p) Then
+        If Not basestack.lastobj Is Nothing Then
+          If Not TypeOf basestack.lastobj Is mHandler Then
+            Set basestack.lastobj = Nothing
+            Exit Function
+            End If
+            With basestack.lastobj
+                  If Not TypeOf .objref Is MemBlock Then
+                      Set basestack.lastobj = Nothing
+                      Exit Function
+                  ElseIf .objref.NoRun Then
+                       Set basestack.lastobj = Nothing
+                       Exit Function
+                  End If
+            End With
+            Set mm = basestack.lastobj.objref
+            If mm.Status = 0 Then
+            w2 = mm.GetPtr(0)
+            If FastSymbol(rest$, ",") Then
+            If Not IsExp(basestack, rest$, p) Then
+                Set basestack.lastobj = Nothing
+                Set mm = Nothing
+                MissPar
+                Exit Function
+            End If
+            If p < 0 Or p >= mm.SizeByte Then
+                Set basestack.lastobj = Nothing
+                Set mm = Nothing
+                MyEr "Offset out of buffer", "Διεύθυνση εκτός διάρθρωσης"
+                Exit Function
+            End If
+
+            SetUpForExecution w2, mm.SizeByte
+            w2 = cUlng(uintnew(w2) + p)
+            End If
+            Set basestack.lastobj = Nothing
+            Dim what As Long
+            what = CallWindowProc(w2, 0&, 0&, 0&, 0&)
+            If what <> 0 Then MyEr "Error " & what, "Λάθος " & what
+            ReleaseExecution w2, mm.SizeByte
+            ExecCode = what = 0
+            Set mm = Nothing
+            End If
+            End If
+        
+    End If
+    Set basestack.lastobj = Nothing
+End Function

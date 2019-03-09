@@ -27,6 +27,9 @@ Public ShadowMarks As Boolean
 Public OtherSymbols As String
 Public LineComment1 As String
 Public LineComment2 As String
+Public AssignSym As String
+Public StringSep As String
+Public StringSep2 As String
 Public ExtraFront As String
 Public CommentSymbols As String
 Public ComSymbolsWidth As Long
@@ -165,7 +168,7 @@ Private Declare Function CreateRectRgnIndirect Lib "gdi32" (ByRef lpRect As RECT
 Private Declare Function SelectClipRgn Lib "gdi32" (ByVal hDC As Long, ByVal hRgn As Long) As Long
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
-
+Private tmpshow As Boolean
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
@@ -201,10 +204,13 @@ dimm1 = rgb(100, 200, 160)
 dimm2 = rgb(200, 120, 60)
 ' for vb6 coloring &HFFFFFF  - no checking for number of digits
 ColorCollection4 = "|&H|&O|"
+AssignSym = "="
 ExtraFront = "&"
 OtherSymbols = ",;"
 LineComment1 = "\"
 LineComment2 = "'"
+StringSep = Chr$(34)
+StringSep2 = Chr$(0)
 CommentSymbols = "[\][\]"
 ComSymbolsWidth = 2
 MultiLineComment1 = "\*"
@@ -250,7 +256,7 @@ End Sub
 Sub Show()
 If glistN Is Nothing Then Exit Sub
 TextPixelOffset = Int(glistN.TextHeightOffset)
-'glistN.ShowPan
+tmpshow = True
 glistN.PrepareToShow 5
 End Sub
 Public Sub PasteDoc(thisdoc As String)
@@ -649,8 +655,10 @@ End Sub
 Private Sub glistN_getpair(a As String, b As String)
 If EnablePairs Then
 Select Case a
-Case Chr$(34)
-b = Chr$(34)
+Case StringSep
+b = StringSep
+Case Myleft$(StringSep2, 1)
+b = Right$(StringSep2, 1)
 Case "("
 b = ")"
 Case "{"
@@ -859,6 +867,7 @@ pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False
 Charpos = pastchars + glistN.SelStart
 
 If Not glistN.enabled Then Exit Sub
+tmpshow = False
 If glistN.SelStart = 0 Then
 inform glistN.ListIndex + 1, 1
   If mIndex >= 0 Then
@@ -874,9 +883,17 @@ Else
       Callback.Callback mesCtrlName + ".Inform(" + Str(glistN.ListIndex + 1) + ", " + Str(glistN.SelStart) + ")"
       End If
 End If
-''glistN.PrepareToShow
 On Error Resume Next
-If NoCenterLineEdit Then glistN.ShowMe2 Else glistN.ShowMe
+
+If NoCenterLineEdit Then
+If Not tmpshow Then glistN.ShowMe2
+Else
+
+
+glistN.ShowMe
+If Not tmpshow Then glistN.ShowMe2
+End If
+
 End Sub
 
 Private Sub glistN_DragData(ThatData As String)
@@ -2503,9 +2520,9 @@ pos2 = k - Len(a$) + 1
 If feedthis = 15 Then Exit Sub
     GoTo again
 
-ElseIf MaybeIsSymbol(a$, Chr(34)) Then
+ElseIf MaybeIsSymbol(a$, StringSep + Myleft$(StringSep2, 1)) Then
 
-If Not ISSTRINGA(a$, drop$) Then
+If Not ISSTRINGb(a$, drop$) Then
 a$ = vbNullString
 addone pos2, 10
 Else
@@ -2830,6 +2847,9 @@ again1:
      c$ = Myleft$(a$, 1) 'ANYCHAR HERE
     If OtherSymbols <> "" Then
     If InStr(OtherSymbols, c$) > 0 Then a$ = Mid$(a$, 2): rr& = 10: Extra& = 0: Exit Do
+    End If
+     If StringSep2 <> Chr(0) Then
+    If InStr(StringSep2, c$) > 0 Then Exit Do
     End If
     If ExtraFront <> "" And Not use14 Then
     If ExtraYes Then
@@ -3395,8 +3415,6 @@ Case Is < 0, Is > 64 ' >=A and negative
    
 End Function
 
-
-
 Private Function MaybeIsSymbol(a$, c$, Optional tail$ = vbNullString, Optional Remove As Boolean = False) As Boolean
 Dim i As Long, ok As Boolean
 If a$ = vbNullString Or c$ = vbNullString Then Exit Function
@@ -3558,7 +3576,7 @@ If MaybeIsSymbol(a$, ":", "\") Then
 a$ = Mid$(a$, 2)
 If AscW(Myleft$(a$, 1) + " ") = 92 Then
 If pos2 > 1 Then
-    If col(UBound(col())) = 1 Or InStr(" #@.+-~^%$,!({'?|/&)}" + Chr$(34), Mid$(lastdata, pos2 - 1, 1)) > 0 Then
+    If col(UBound(col())) = 1 Or InStr(" #@.+-~^%$,!({'?|/&)}" + StringSep + StringSep2, Mid$(lastdata, pos2 - 1, 1)) > 0 Then
 
     If pos2 > 0 Then
         addone2000 pos2, 14
@@ -4416,7 +4434,8 @@ If FastSymbol(a$, "<=", , 2) Then
     Else
   
 again4:
-  If FastSymbol(a$, "=") Then
+'
+  If FastSymbol(a$, AssignSym, , Len(AssignSym)) Then
   addone pos2, 15
     pos2 = k - Len(a$) + 1
   ElseIf MaybeIsSymbol(a$, "+-*/", "=", True) Then
@@ -5966,7 +5985,7 @@ Do While pos <= Len(a$)
         End If
     End If
 
-    If w$ = Chr(34) Then
+    If w$ = StringSep Then
         If part$ <> "" Then
         b$ = b$ & part$
         End If
@@ -5974,12 +5993,24 @@ Do While pos <= Len(a$)
         part$ = "S"
         pos = pos + 1
         Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = Chr(34) Then Exit Do
+        If Mid$(a$, pos, 1) = StringSep Then Exit Do
     If Asc(Mid$(a$, pos, 1)) < 32 Then Exit Do
    
         pos = pos + 1
         Loop
-
+    ElseIf w$ = Myleft$(StringSep2, 1) Then
+        If part$ <> "" Then
+        b$ = b$ & part$
+        End If
+        If Not (part$ = vbNullString Or part$ = "o") Then Exit Do
+        part$ = "S"
+        pos = pos + 1
+        Do While pos <= Len(a$)
+        If Mid$(a$, pos, 1) = Right$(StringSep2, 1) Then Exit Do
+    If Asc(Mid$(a$, pos, 1)) < 32 Then Exit Do
+   
+        pos = pos + 1
+        Loop
     ElseIf w$ = "(" Then
         If part$ <> "" Then
             ' after
@@ -7412,3 +7443,39 @@ On Error Resume Next
 Set LastGlist = Nothing
 UnHook Callback.hWnd
 End Sub
+Function ISSTRINGb(bb$, r$) As Boolean
+'
+Dim q$, w As Long, a$
+a$ = NLtrim$(bb$)
+r$ = vbNullString
+If a$ = vbNullString Then Exit Function
+Select Case Myleft$(a$, 1)
+Case StringSep
+q$ = StringSep
+Case Myleft$(StringSep2, 1)
+q$ = Right$(StringSep2, 1)
+End Select
+If q$ = vbNullString Or Len(a$) < 2 Then ISSTRINGb = False: Exit Function
+If q$ = Chr(34) Then
+    w = 1
+    Do
+    w = w + 1
+    w = InStr(w, a$, q$)
+    If w > 0 Then
+    If Mid$(a$, w - 1, 1) <> "\" Then Exit Do
+    ElseIf w = 0 Then
+    Exit Do
+    End If
+    Loop
+
+Else
+w = InStr(2, a$, q$, vbBinaryCompare)
+End If
+If w = 0 Then ISSTRINGb = False: Exit Function
+r$ = Mid$(a$, 2, w - 2)
+bb$ = NLtrim$(Mid$(a$, w + 1))
+
+ISSTRINGb = True
+
+End Function
+

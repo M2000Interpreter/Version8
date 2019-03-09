@@ -1,8 +1,12 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 7 active-X
+Version 9.8 Revision 8 active-X
 
-A small fix in color syntax for remark using ' character
+1. A bug fix in For Next when we use Switch "+FOR" to be like the BASIC FOR NEXT
+
+2. We can use NEXT without variable name, in a FOR NEXT.
+
+3. Advanced syntax color adjustment for EditBox
 
 
 When fist time run the interpreter do this in M2000 console:

@@ -2197,7 +2197,7 @@ ElseIf (Y - mHeadlineHeightTwips) < myt / 2 And (topitem + YYT > 0) Then
                 If Not Timer1.enabled Then
                 If Not havefocus Then RaiseEvent DragOverCursor(dragfocus)
                 HideCaretOnexit = False: MovePos X, Y
-                If CBool(shift And 1) Then ShowMe
+                If CBool(shift And 1) Then chooseshow
                 
                 End If
 
@@ -2228,7 +2228,7 @@ If Not ok Then
         Effect = vbDropEffectNone
         HideCaretOnexit = True
         MovePos X, Y
-        If CBool(shift And 1) Then ShowMe
+        If CBool(shift And 1) Then chooseshow
     End If
 ElseIf state = vbEnter Then
 ok = False
@@ -2237,7 +2237,7 @@ If Not ok Then
     If Not Timer1.enabled Then
         HideCaretOnexit = False
         MovePos X, Y
-        If CBool(shift And 1) Then ShowMe
+        If CBool(shift And 1) Then chooseshow
     Else
         dragfocus = False
     End If
@@ -2784,7 +2784,7 @@ If item > 0 And item <= listcount Then
 
     CalcAndShowBar1
     SELECTEDITEM = item
-       ShowMe
+       chooseshow
     End If
    If Not noselect Then If Not Timer1.enabled Then PrepareToShow 10
 Exit Sub
@@ -5098,7 +5098,7 @@ If listcount > 0 Then
             End If
     End If
 End If
-ShowMe
+chooseshow
 End Sub
 
 Public Property Get mousepointer() As Integer
@@ -5319,3 +5319,11 @@ End Sub
 Public Property Get icon()
 Set icon = UserControl.mouseicon
 End Property
+Private Sub chooseshow()
+If MultiLineEditBox Then
+ShowMe2
+Else
+ShowMe
+End If
+End Sub
+

@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 7
+Global Const Revision = 8
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -15613,10 +15613,11 @@ eos:
                                 slct = bstack.addlen
                                 If ForLikeBasic Then
                                     If st > 0 And sp < p Then
-                                        once = False
-                                        ss$ = "NEXT"
-                                        Execute = 2
-                                        GoTo contbasicfor
+                                        'once = False
+                                        ss$ = "NEXT " + w$
+                                        
+                                        'Execute = 2
+                                        'GoTo contbasicfor
                                     End If
                                 End If
                                 GoTo contfor
@@ -15991,9 +15992,15 @@ contNext:
                         Exit Function
                     End If
                 Else
-                    nonext
-                    Execute = 0
-                    Exit Function
+                ' NEW FOR M2000, WE CAN USE NO VARIABLE
+                    If bstack.IsInRetStackString(ss$) Then
+                            With bstack.RetStack
+                               .drop 1
+                               .PushVal Len(b$)
+                               .PushStr ss$
+                           End With
+                        Exit Function
+                    End If
                 End If
             Case "CALL", "ΚΑΛΕΣΕ"
         ' CHECK FOR NUMBER...
@@ -47761,57 +47768,7 @@ Sub refreshGui()
                     Next
                     Set X = Nothing
 End Sub
-Function ExecCode(basestack As basetask, rest$) As Boolean ' experimental
-' ver .001
-Dim p As Variant, mm As MemBlock, w2 As Long
-    If IsExp(basestack, rest$, p) Then
-        If Not basestack.lastobj Is Nothing Then
-          If Not TypeOf basestack.lastobj Is mHandler Then
-            Set basestack.lastobj = Nothing
-            Exit Function
-            End If
-            With basestack.lastobj
-                  If Not TypeOf .objref Is MemBlock Then
-                      Set basestack.lastobj = Nothing
-                      Exit Function
-                  ElseIf .objref.NoRun Then
-                       Set basestack.lastobj = Nothing
-                       Exit Function
-                  End If
-            End With
-            Set mm = basestack.lastobj.objref
-            If mm.Status = 0 Then
-            w2 = mm.GetPtr(0)
-            If FastSymbol(rest$, ",") Then
-            If Not IsExp(basestack, rest$, p) Then
-                Set basestack.lastobj = Nothing
-                Set mm = Nothing
-                MissPar
-                Exit Function
-            End If
-            If p < 0 Or p >= mm.SizeByte Then
-                Set basestack.lastobj = Nothing
-                Set mm = Nothing
-                MyEr "Offset out of buffer", "Διεύθυνση εκτός διάρθρωσης"
-                Exit Function
-            End If
 
-            SetUpForExecution w2, mm.SizeByte
-            w2 = cUlng(uintnew(w2) + p)
-            End If
-            Set basestack.lastobj = Nothing
-            Dim what As Long
-            what = CallWindowProc(w2, 0&, 0&, 0&, 0&)
-            If what <> 0 Then MyEr "Error " & what, "Λάθος " & what
-            ReleaseExecution w2, mm.SizeByte
-            ExecCode = what = 0
-            Set mm = Nothing
-            End If
-            End If
-        
-    End If
-    Set basestack.lastobj = Nothing
-End Function
 Sub MouseShow(Yes As Boolean)
 Dim k As Long, b1 As Boolean
 If Yes Then
