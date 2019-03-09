@@ -2631,7 +2631,7 @@ here1:
 ElseIf MaybeIsSymbol(a$, "'") Then
 
     If pos2 > 1 Then
-         addone pos2 - 1, 7
+         addone pos2, 7
          Else
     
     addone 1, 7

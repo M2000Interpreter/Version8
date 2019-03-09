@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 6 active-X
+Version 9.8 Revision 7 active-X
 
-some fixes in Groups (user object).
+A small fix in color syntax for remark using ' character
 
 
 When fist time run the interpreter do this in M2000 console:
