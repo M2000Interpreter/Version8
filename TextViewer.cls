@@ -4976,7 +4976,7 @@ End If
 'If c$ = Mid$(a$, i, cl) Then
 If InStr(c$, Mid$(a$, i, cl)) > 0 Then
 'a$ = Mid$(a$, MyTrimLi(a$, i + cl))
-a$ = Mid$(a$, cl + 1)
+a$ = Mid$(a$, cl + i)
 'Mid$(a$, i, cl) = space$(cl)
 FastSymbol = True
 ElseIf mis Then
