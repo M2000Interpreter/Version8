@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 9
+Global Const Revision = 10
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -37332,14 +37332,14 @@ checkconstant:
      Else
         If Left$(s$, 1) = "#" Then
         s$ = Mid$(s$, 2)
-        If IsNumber(bstack, (s$), p) Then
+        If IsNumberNew(bstack, (s$), p, 1, False) Then
 
         ss$ = "_" + Str$(var2used)
         
         i = globalvar(s$, 0#)
         If bstack.IamChild Then FeedCopyInOut bstack.Parent, s$, i
         UnFloatGroup bstack, ss$, i, bstack.lastobj, , , True
-        
+        makegroup bstack, ss$, i
         GoTo conthereifglobal
         End If
         Else

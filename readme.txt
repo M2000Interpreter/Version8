@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 9 active-X
+Version 9.8 Revision 10 active-X
 
-A small fix in syntax color procedure
+A small fix in group objects (hard to explain).
 
 
 When fist time run the interpreter do this in M2000 console:
