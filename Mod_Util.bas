@@ -7061,7 +7061,7 @@ again22:
                             End If
                           
                         Else
-                                what$ = myUcase(what$)
+                                what$ = UCase(what$)
                                 If what$ = "ELSE" Then
                                     pos3 = pos
                                     If MaybeIsSymbol3lot(a$, b123, pos3) Then
@@ -7215,7 +7215,7 @@ again22:
                                 aheadstatusSkipParam a$, pos
                                 End If
                             ElseIf what$ = second1$ Then
-                                aheadstatusThen a$, pos, 1, what$
+                                aheadstatusThen a$, pos, 0, what$
                                 If what$ <> vbNullString Then
                                   If MaybeIsSymbol3(a$, "{", pos) Then
                                     aheadstatusSTRUCT a$, pos
@@ -7242,7 +7242,7 @@ again22:
                           
                         Else
                             If Len(what$) = 3 Or Len(what$) = len2 Then
-                                what$ = myUcase(what$)
+                                what$ = UCase(what$)
                                 If what$ = "END" Then
                             
                                 If FastSymbolAt(pos, a$, second2$, len2) Then
