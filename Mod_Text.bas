@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 11
+Global Const Revision = 12
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -37685,7 +37685,7 @@ contwrong:
                     End If
                 ElseIf myobject.t1 = 3 Then
                     If Not Fast2Varl(rest$, "–…Õ¡ ¡”", 7, "ARRAY", 5, 7, F) Then
-                    If Not Fast2Varl(rest$, "”Ÿ—œ”", 7, "STACK", 5, 7, F) Then
+                    If Not Fast2Varl(rest$, "”Ÿ—œ”", 5, "STACK", 5, 5, F) Then
                     
                             WrongObject
                             MyRead = False
@@ -37838,7 +37838,7 @@ contpointer:
                     End If
                 ElseIf myobject.t1 = 3 Then
                     If Not Fast2Varl(rest$, "–…Õ¡ ¡”", 7, "ARRAY", 5, 7, F) Then
-                    If Not Fast2Varl(rest$, "”Ÿ—œ”", 7, "STACK", 5, 7, F) Then
+                    If Not Fast2Varl(rest$, "”Ÿ—œ”", 5, "STACK", 5, 5, F) Then
                     
                             WrongObject
                             MyRead = False
@@ -38148,7 +38148,7 @@ Else
                     End If
                 ElseIf myobject.t1 = 3 Then
                     If Not Fast2Varl(s$, "–…Õ¡ ¡”", 7, "ARRAY", 5, 7, F) Then
-                    If Not Fast2Varl(s$, "”Ÿ—œ”", 7, "STACK", 5, 7, F) Then
+                    If Not Fast2Varl(s$, "”Ÿ—œ”", 5, "STACK", 5, 5, F) Then
                     
                             WrongObject
                             MyRead = False

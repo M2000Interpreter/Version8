@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 11 active-X
+Version 9.8 Revision 12 active-X
 
-Fix greek statement аккиыс when used in separete line without block {}
+Fix  "as stack" in greek statements.
 
 
 When fist time run the interpreter do this in M2000 console:
