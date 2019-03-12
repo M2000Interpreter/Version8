@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 12 active-X
+Version 9.8 Revision 13 active-X
 
-Fix  "as stack" in greek statements.
+Fix  for private functions in groups when the name of function is in  greek language and we use Call to call it.
 
 
 When fist time run the interpreter do this in M2000 console:

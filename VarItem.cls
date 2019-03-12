@@ -96,7 +96,7 @@ On Error Resume Next
 mItem = vbEmpty
 slot = 0
 mTypeName = 0
-If Trush.count = 0 Then Trush.Add Me, Key Else Trush.Add Me, Key
+Trush.Add Me, Key
 End Sub
 
 Private Sub Class_Initialize()

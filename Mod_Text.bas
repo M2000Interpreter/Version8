@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 12
+Global Const Revision = 13
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -35232,7 +35232,7 @@ ElseIf i > 3 Then
  If Len(basestack.UseGroupname) > 0 Then ss$ = basestack.UseGroupname + ChrW(&HFFBF) + Mid$(ss$, Len(basestack.UseGroupname) + 1)
  it = GetSub(ss$, x1)
  Else
- If Left$(what$, 1) = "T" Or Left$(what$, 1) = "а." Then
+ If Left$(what$, 1) = "T" Or Left$(what$, 1) = "а" Then
     If Left$(what$, 5) = "THIS." Or Left$(what$, 5) = "ауто." Then
        ss$ = Left$(what$, 5) + ChrW(&HFFBF) + Mid$(what$, 6) + ")"
        MakeThisSub basestack, ss$
