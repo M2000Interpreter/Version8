@@ -519,7 +519,7 @@ contarr1:
             s$ = NLtrim(s$)
                     If Len(s$) > 0 Then
                         Set pppp = New mArray
-                        pppp.Arr = False
+                        pppp.arr = False
                         Set pppp.GroupRef = vv
                         Set vv = bstackstr.soros
                         Set bstackstr.Sorosref = New mStiva
@@ -543,7 +543,7 @@ contarr1:
                 r$ = "String"
             ElseIf vv.HasValue Then
             Set pppp = New mArray
-            pppp.Arr = False
+            pppp.arr = False
             Set pppp.GroupRef = vv
              If SpeedGroup(bstackstr, pppp, "VAL", "", s$ + ")", -2) = 1 Then
                 If bstackstr.lastobj Is Nothing Then
@@ -9393,7 +9393,7 @@ If TypeOf obj Is mHandler Then
     
 End If
 If Not obj Is Nothing Then
-If TypeOf obj Is mArray Then If obj.Arr Then CheckIsmArray = True: Set oldobj = Nothing: Exit Function
+If TypeOf obj Is mArray Then If obj.arr Then CheckIsmArray = True: Set oldobj = Nothing: Exit Function
 End If
 Set obj = oldobj
 End Function
@@ -9419,7 +9419,7 @@ If TypeOf obj Is mHandler Then
     
 End If
 If Not obj Is Nothing Then
-If TypeOf obj Is mArray Then If obj.Arr Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
+If TypeOf obj Is mArray Then If obj.arr Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
 If TypeOf obj Is mStiva Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
 If TypeOf obj Is FastCollection Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
 End If
@@ -10637,7 +10637,7 @@ Dim a As Group, pppp As mArray
             Set pppp = New mArray
             pppp.PushDim 1
             pppp.PushEnd
-            pppp.Arr = True
+            pppp.arr = True
             Set pppp.item(0) = a
             Set bstack.lastpointer = pppp
             PreparePointer = True
@@ -10649,7 +10649,7 @@ Function BoxGroupVar(aGroup As Variant) As mArray
             Set BoxGroupVar = New mArray
             BoxGroupVar.PushDim 1
             BoxGroupVar.PushEnd
-            BoxGroupVar.Arr = True
+            BoxGroupVar.arr = True
             Set BoxGroupVar.item(0) = aGroup
 End Function
 
@@ -10657,7 +10657,7 @@ Function BoxGroupObj(aGroup As Object) As mArray
             Set BoxGroupObj = New mArray
             BoxGroupObj.PushDim 1
             BoxGroupObj.PushEnd
-            BoxGroupObj.Arr = True
+            BoxGroupObj.arr = True
             Set BoxGroupObj.item(0) = aGroup
 End Function
 
@@ -11092,7 +11092,7 @@ End If
 cont:
 Set pppp = PP
 
-If pppp.Arr Then
+If pppp.arr Then
 dn = 0
 
 pppp.SerialItem (0), dd, 5
@@ -11161,7 +11161,7 @@ Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
 If Not Typename$(PP) = "mArray" Then Exit Function
 Set pppp = PP
 
-If pppp.Arr Then
+If pppp.arr Then
 dn = 0
 
 pppp.SerialItem (0), dd, 5
@@ -13996,7 +13996,7 @@ Else
                         GoTo takeone
 
                     ElseIf Typename(myobject.objref) = myArray Then
-                        If myobject.objref.Arr Then
+                        If myobject.objref.arr Then
                             Set myobject = myobject.objref
                             SwapStrings rest$, bck$
                         'bck$ = rest$
@@ -15127,11 +15127,11 @@ End With
 MyDoEvents1 Scr
 Set Scr = Nothing
 End Function
-Function Matrix(bstack As basetask, a$, Arr As Variant, res As Variant) As Boolean
+Function Matrix(bstack As basetask, a$, arr As Variant, res As Variant) As Boolean
 Dim Pad$, cut As Long, pppp As mArray, pppp1 As mArray, st1 As mStiva, anything As Object, w3 As Long, useHandler As mHandler, r As Variant, p As Variant
 Dim cur As Long, w2 As Long, w4 As Long, retresonly As Boolean
 Dim multi As Boolean
-Set anything = Arr
+Set anything = arr
 If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
 Pad$ = myUcase(Left$(a$, 20))  ' 20??
 cut = InStr(Pad$, "(")
@@ -15999,7 +15999,7 @@ Set anything = aa
 If CheckIsmArray(anything) Then
     Set pppp = anything
     Set anything = Nothing
-    If Not pppp.Arr Then
+    If Not pppp.arr Then
         NotArray
         Exit Function
     End If
@@ -16132,25 +16132,27 @@ there:
 Set anything = Nothing
 Set aa = Nothing
 End Function
-Sub FeedCopyInOut(bstack As basetask, var$, where As Long)
+Sub FeedCopyInOut(bstack As basetask, var$, where As Long, arr$)
 Dim a As New CopyInOut
 a.actualvar = var$
+a.ArrArg = arr$
 a.localvar = where
 If bstack.CopyInOutCol Is Nothing Then Set bstack.CopyInOutCol = New Collection
 bstack.CopyInOutCol.Add a
 End Sub
 Sub CopyBack(bstack As basetask)
 Dim a As CopyInOut, aa As Object, x1 As Long, what$, rest$, oldhere$, w2 As Long
-Dim pppp As mArray, s() As String
+Dim pppp As mArray, s As String
 oldhere$ = here$
 here$ = vbNullString
 For Each a In bstack.CopyInOutCol
-s() = Split(a.actualvar, "(")
-If UBound(s()) = 1 Then
-    s(0) = s(0) + "("
-    If neoGetArray(bstack, s(0), pppp) Then
-        If Not pppp.Arr Then GoTo cont123
-        If Not NeoGetArrayItem(pppp, bstack, s(0), w2, s(1)) Then GoTo cont123
+
+If Len(a.ArrArg) > 0 Then
+x1 = rinstr(a.actualvar, a.ArrArg) + Len(a.ArrArg) - 1
+   
+    If neoGetArray(bstack, Left$(a.actualvar, x1), pppp) Then
+        If Not pppp.arr Then GoTo cont123
+        If Not NeoGetArrayItem(pppp, bstack, Left$(a.actualvar, x1), w2, Mid$(a.actualvar, x1 + 1)) Then GoTo cont123
         If MyIsObject(var(a.localvar)) Then
         If TypeOf pppp.item(w2) Is Group Then
         If pppp.item(w2).IamApointer Then
@@ -17026,7 +17028,7 @@ checkit:
         Else
          Set pppp = New mArray
             Set pppp.GroupRef = useHandler
-            pppp.Arr = False
+            pppp.arr = False
             w2 = -101
             Set v = pppp
         End If
@@ -19173,7 +19175,7 @@ If Not IsExp(bstack, b$, p) Then here$ = ohere$: GoTo there1
             Else
                    If Not bstack.lastobj Is Nothing Then
                           If TypeOf bstack.lastobj Is mArray Then
-                                 If bstack.lastobj.Arr Then
+                                 If bstack.lastobj.arr Then
                                          Set pppp.item(v) = CopyArray(bstack.lastobj)
 
                                  Else
@@ -19197,7 +19199,7 @@ If Not IsExp(bstack, b$, p) Then here$ = ohere$: GoTo there1
      
      Set bstack.lastobj = Nothing
      Else
-     If pppp.Arr Then
+     If pppp.arr Then
      pppp.item(v) = p
      ElseIf Typename(pppp.GroupRef) Like "Pro*" Then
     
@@ -19250,7 +19252,7 @@ If neoGetArray(bstack, w$, pppp) Then
                 If Not bstack.lastobj Is Nothing Then
                 If TypeOf bstack.lastobj Is mHandler Then
                 If bstack.lastobj.t1 = 3 Then
-                If pppp.Arr Then
+                If pppp.arr Then
          
                         bstack.lastobj.objref.CopyArray pppp
                         pppp.final = False
@@ -19277,7 +19279,7 @@ If neoGetArray(bstack, w$, pppp) Then
 againstrarr22:
 If Not NeoGetArrayItem(pppp, bstack, w$, v, b$) Then interpret = False: here$ = ohere$: GoTo there1
 On Error Resume Next
-If Typename(pppp.item(v)) = myArray And pppp.Arr Then
+If Typename(pppp.item(v)) = myArray And pppp.arr Then
 If FastSymbol(b$, "(") Then
 Set pppp = pppp.item(v)
 GoTo againstrarr22
@@ -19331,13 +19333,13 @@ Else
         
         
     If Not MyIsObject(pppp.item(v)) Then
-    If pppp.Arr Then
+    If pppp.arr Then
     If bstack.lastobj Is Nothing Then
         pppp.item(v) = ss$
     
     Else
     If Typename(bstack.lastobj) = myArray Then
-    If bstack.lastobj.Arr Then
+    If bstack.lastobj.arr Then
         Set pppp.item(v) = CopyArray(bstack.lastobj)
     Else
          Set pppp.item(v) = bstack.lastobj.GroupRef
@@ -19393,7 +19395,7 @@ If neoGetArray(bstack, w$, pppp) Then
 againintarr7:
 If Not NeoGetArrayItem(pppp, bstack, w$, v, b$) Then interpret = False: here$ = ohere$: GoTo there1
 On Error Resume Next
-If Typename(pppp.item(v)) = myArray And pppp.Arr Then
+If Typename(pppp.item(v)) = myArray And pppp.arr Then
 If FastSymbol(b$, "(") Then
 Set pppp = pppp.item(v)
 GoTo againintarr7
@@ -19447,7 +19449,7 @@ If Not FastSymbol(b$, "=") Then here$ = ohere$: GoTo there1
 If Not IsExp(bstack, b$, p) Then here$ = ohere$: GoTo there1
 If Not bstack.lastobj Is Nothing Then
     If TypeOf bstack.lastobj Is mArray Then
-                                 If bstack.lastobj.Arr Then
+                                 If bstack.lastobj.arr Then
                                          Set pppp.item(v) = CopyArray(bstack.lastobj)
 
                                  Else
@@ -19909,7 +19911,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
                 End If
             ElseIf i = 5 Or i = 7 Then
                 If neoGetArray(bstack, ss$, pppp) Then
-                If Not pppp.Arr Then NotArray: Exit Function
+                If Not pppp.arr Then NotArray: Exit Function
                     If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$, True) Then Exit Function
                         If MyIsObject(var(F)) Then
                             If TypeOf var(F) Is Constant Then
@@ -19938,7 +19940,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
         End If
     ElseIf col = 2 Then
         If neoGetArray(bstack, s$, pppp) Then
-        If Not pppp.Arr Then NotArray: Exit Function
+        If Not pppp.arr Then NotArray: Exit Function
         If Not NeoGetArrayItem(pppp, bstack, s$, F, rest$) Then Exit Function
             If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
                 i = Abs(IsLabel(bstack, rest$, ss$))
@@ -19966,7 +19968,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
                     End If
             ElseIf i = 5 Or i = 7 Then
                     If neoGetArray(bstack, ss$, pppp1) Then
-                    If Not pppp1.Arr Then NotArray: Exit Function
+                    If Not pppp1.arr Then NotArray: Exit Function
                         If Not NeoGetArrayItem(pppp1, bstack, ss$, x1, rest$) Then Exit Function
                    If pppp.IHaveClass Xor Not pppp1.IHaveClass Then
                             
@@ -20001,7 +20003,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
                 i = Abs(IsLabel(bstack, rest$, ss$))
                  If i = 6 Then
                     If Not neoGetArray(bstack, ss$, pppp) Then MissingStrVar:  Exit Function
-                    If Not pppp.Arr Then NotArray: Exit Function
+                    If Not pppp.arr Then NotArray: Exit Function
                     If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$) Then Exit Function
                      If MyIsObject(var(F)) Then
                         If TypeOf var(F) Is Constant Then
@@ -20033,14 +20035,14 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
             End If
     ElseIf F = 6 Then
             If neoGetArray(bstack, s$, pppp) Then
-            If Not pppp.Arr Then NotArray: Exit Function
+            If Not pppp.arr Then NotArray: Exit Function
                 If Not NeoGetArrayItem(pppp, bstack, s$, x1, rest$) Then Exit Function
                 If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
                 i = Abs(IsLabel(bstack, rest$, ss$))
      
                 If i = 6 Then
                     If Not neoGetArray(bstack, ss$, pppp1) Then MissingStrVar:  Exit Function
-                    If Not pppp.Arr Then NotArray: Exit Function
+                    If Not pppp.arr Then NotArray: Exit Function
                     If Not NeoGetArrayItem(pppp1, bstack, ss$, i, rest$) Then Exit Function
 
                    SwapVariant3 pppp, x1, pppp1, i

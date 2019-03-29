@@ -1,9 +1,11 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 13 active-X
+Version 9.8 Revision 14 active-X
 
-Fix  for private functions in groups when the name of function is in  greek language and we use Call to call it.
-
+Fix for passing by reference array items, inside an inner function
+Fix in Editbox for search up and down when use option for M2000 code.
+Fix Each() for Arrays names with parenthesis and using descriptive names like start and end.
+Added in Help file the missing Hex statement
 
 When fist time run the interpreter do this in M2000 console:
 dir appdir$

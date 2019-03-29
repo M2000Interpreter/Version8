@@ -12,4 +12,5 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Public actualvar As String
+Public ArrArg As String
 Public localvar As Long

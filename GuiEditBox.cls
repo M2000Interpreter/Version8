@@ -3463,10 +3463,12 @@ Public Property Let SetM2000(RHS)
     AutoNumber = True
     AllowInsertBrackets = True
     glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9), "#", "%", "&")
-    glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9), "#")
+    glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9), "#")
     glistN.WordCharRightButIncluded = "(" ' so aaa(sdd) give aaa( as word
     glistN.WordCharLeftButIncluded = "#"
+    
    End If
+   EditTextWord = Not M2000code
 End Property
 Private Sub mDoc_ColorDataEvent(thispara1 As Long, data As String, feedback As Long)
 If M2000code Then
