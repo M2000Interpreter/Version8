@@ -1,11 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 14 active-X
+Version 9.8 Revision 15 active-X
 
-Fix for passing by reference array items, inside an inner function
-Fix in Editbox for search up and down when use option for M2000 code.
-Fix Each() for Arrays names with parenthesis and using descriptive names like start and end.
-Added in Help file the missing Hex statement
+Addition of operator += for sting arrays
+Works when we have a string in specific item (not a document or anything else)
+Dim A$(10) : A$(3)="Hello": A$(3)+=" World": Print A$(3)="Hello World"
+Also work for global arrays
+Global A$(10) : A$(3)="Hello": A$(3)+=" World": Print A$(3)
+
 
 When fist time run the interpreter do this in M2000 console:
 dir appdir$
