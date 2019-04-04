@@ -1,13 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 15 active-X
+Version 9.8 Revision 16 active-X
 
-Addition of operator += for sting arrays
-Works when we have a string in specific item (not a document or anything else)
-Dim A$(10) : A$(3)="Hello": A$(3)+=" World": Print A$(3)="Hello World"
-Also work for global arrays
-Global A$(10) : A$(3)="Hello": A$(3)+=" World": Print A$(3)
-
+Fix the use of constructor Remove { } for groups
 
 When fist time run the interpreter do this in M2000 console:
 dir appdir$

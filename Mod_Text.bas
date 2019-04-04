@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 15
+Global Const Revision = 16
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -38839,11 +38839,9 @@ ElseIf y1 < 5 And y1 > 0 Then
        Dim ok As Boolean
        var(i) = CLng(0)
        ElseIf Typename(var(i)) = "Group" Then
-       If m_bInIDE Then
+
         CallClear bstack, what$, var(i)
-        Else
-        CallClear bstack, what$, var(i), 1
-        End If
+
         
         If var(i).IamApointer Then
         Set var(i) = New Group
@@ -38923,11 +38921,8 @@ ElseIf y1 = 5 Or y1 = 7 Then
                             Set mm = pppp.item(it)
                             Set pppp.item(it) = Nothing
                             EmptyVariantArrayItem pppp, it
-                            If m_bInIDE Then
-                                CallClear bstack, what$, mm
-                            Else
-                                CallClear bstack, what$, mm, 1
-                            End If
+                            CallClear bstack, what$, mm
+
 
                          ElseIf Typename(pppp.item(it)) = "lambda" Then
                          Set pppp.item(it) = Nothing
