@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 16 active-X
+Version 9.8 Revision 17 active-X
 
-Fix the use of constructor Remove { } for groups
+Fix the move method for forms
 
 When fist time run the interpreter do this in M2000 console:
 dir appdir$

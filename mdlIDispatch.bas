@@ -321,8 +321,31 @@ conthere:
     ElseIf items = 0 Then
         CallByName pobjTarget, pstrProcName, VbMethod
     Else
-        CallByName pobjTarget, pstrProcName, VbMethod, varArr()
-        
+        'CallByName pobjTarget, pstrProcName, VbMethod, varArr()
+        Select Case items
+        Case 1
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(0)
+        Case 2
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(1), varArr(0)
+        Case 3
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(2), varArr(1), varArr(0)
+        Case 4
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(3), varArr(2), varArr(1), varArr(0)
+        Case 5
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
+        Case 6
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
+        Case 7
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
+        Case 8
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(7), varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
+        Case 9
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(8), varArr(7), varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
+        Case 10
+            CallByName pobjTarget, pstrProcName, VbMethod, varArr(9), varArr(8), varArr(7), varArr(6), varArr(5), varArr(4), varArr(3), varArr(2), varArr(1), varArr(0)
+        Case Else
+            Err.Raise -2147352567
+        End Select
     End If
 Else
     Err.Raise lngRet
