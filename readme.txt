@@ -1,6 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 17 active-X
+Version 9.8 Revision 17b active-X
+New Installer - with newer help file
 
 Fix the move method for forms
 
