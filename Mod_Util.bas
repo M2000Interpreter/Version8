@@ -154,7 +154,7 @@ Public LastErName As String
 Public LastErNameGR As String
 Public LastErNum As Long
 Public LastErNum1 As Long, LastErNum2 As Long
-
+Private Declare Sub PutMem1 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As Byte)
 
 Type POINTAPI
         X As Long
@@ -519,7 +519,7 @@ contarr1:
             s$ = NLtrim(s$)
                     If Len(s$) > 0 Then
                         Set pppp = New mArray
-                        pppp.arr = False
+                        pppp.Arr = False
                         Set pppp.GroupRef = vv
                         Set vv = bstackstr.soros
                         Set bstackstr.Sorosref = New mStiva
@@ -543,7 +543,7 @@ contarr1:
                 r$ = "String"
             ElseIf vv.HasValue Then
             Set pppp = New mArray
-            pppp.arr = False
+            pppp.Arr = False
             Set pppp.GroupRef = vv
              If SpeedGroup(bstackstr, pppp, "VAL", "", s$ + ")", -2) = 1 Then
                 If bstackstr.lastobj Is Nothing Then
@@ -9393,7 +9393,7 @@ If TypeOf obj Is mHandler Then
     
 End If
 If Not obj Is Nothing Then
-If TypeOf obj Is mArray Then If obj.arr Then CheckIsmArray = True: Set oldobj = Nothing: Exit Function
+If TypeOf obj Is mArray Then If obj.Arr Then CheckIsmArray = True: Set oldobj = Nothing: Exit Function
 End If
 Set obj = oldobj
 End Function
@@ -9419,7 +9419,7 @@ If TypeOf obj Is mHandler Then
     
 End If
 If Not obj Is Nothing Then
-If TypeOf obj Is mArray Then If obj.arr Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
+If TypeOf obj Is mArray Then If obj.Arr Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
 If TypeOf obj Is mStiva Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
 If TypeOf obj Is FastCollection Then CheckIsmArrayOrStackOrCollection = True: Set oldobj = Nothing: Exit Function
 End If
@@ -10637,7 +10637,7 @@ Dim a As Group, pppp As mArray
             Set pppp = New mArray
             pppp.PushDim 1
             pppp.PushEnd
-            pppp.arr = True
+            pppp.Arr = True
             Set pppp.item(0) = a
             Set bstack.lastpointer = pppp
             PreparePointer = True
@@ -10649,7 +10649,7 @@ Function BoxGroupVar(aGroup As Variant) As mArray
             Set BoxGroupVar = New mArray
             BoxGroupVar.PushDim 1
             BoxGroupVar.PushEnd
-            BoxGroupVar.arr = True
+            BoxGroupVar.Arr = True
             Set BoxGroupVar.item(0) = aGroup
 End Function
 
@@ -10657,7 +10657,7 @@ Function BoxGroupObj(aGroup As Object) As mArray
             Set BoxGroupObj = New mArray
             BoxGroupObj.PushDim 1
             BoxGroupObj.PushEnd
-            BoxGroupObj.arr = True
+            BoxGroupObj.Arr = True
             Set BoxGroupObj.item(0) = aGroup
 End Function
 
@@ -11092,7 +11092,7 @@ End If
 cont:
 Set pppp = PP
 
-If pppp.arr Then
+If pppp.Arr Then
 dn = 0
 
 pppp.SerialItem (0), dd, 5
@@ -11161,7 +11161,7 @@ Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
 If Not Typename$(PP) = "mArray" Then Exit Function
 Set pppp = PP
 
-If pppp.arr Then
+If pppp.Arr Then
 dn = 0
 
 pppp.SerialItem (0), dd, 5
@@ -13950,11 +13950,17 @@ Else
                         Set myobject = Nothing
                         GoTo isanumber
                         Else
-                        counter = myobject.index_start
                         Counterend = myobject.index_End
+                        If Counterend = -1 Then
+                        Set myobject = Nothing
+                        GoTo isAstring
+                        Else
+                        counter = myobject.index_start
+                        
+                        
                         If counter <= Counterend Then countDir = 1 Else countDir = -1
                         End If
-                        
+                        End If
                     Else
                         Counterend = -1
                         counter = 0
@@ -13996,7 +14002,7 @@ Else
                         GoTo takeone
 
                     ElseIf Typename(myobject.objref) = myArray Then
-                        If myobject.objref.arr Then
+                        If myobject.objref.Arr Then
                             Set myobject = myobject.objref
                             SwapStrings rest$, bck$
                         'bck$ = rest$
@@ -15127,11 +15133,11 @@ End With
 MyDoEvents1 Scr
 Set Scr = Nothing
 End Function
-Function Matrix(bstack As basetask, a$, arr As Variant, res As Variant) As Boolean
+Function Matrix(bstack As basetask, a$, Arr As Variant, res As Variant) As Boolean
 Dim Pad$, cut As Long, pppp As mArray, pppp1 As mArray, st1 As mStiva, anything As Object, w3 As Long, useHandler As mHandler, r As Variant, p As Variant
 Dim cur As Long, w2 As Long, w4 As Long, retresonly As Boolean
 Dim multi As Boolean
-Set anything = arr
+Set anything = Arr
 If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
 Pad$ = myUcase(Left$(a$, 20))  ' 20??
 cut = InStr(Pad$, "(")
@@ -15999,7 +16005,7 @@ Set anything = aa
 If CheckIsmArray(anything) Then
     Set pppp = anything
     Set anything = Nothing
-    If Not pppp.arr Then
+    If Not pppp.Arr Then
         NotArray
         Exit Function
     End If
@@ -16132,10 +16138,10 @@ there:
 Set anything = Nothing
 Set aa = Nothing
 End Function
-Sub FeedCopyInOut(bstack As basetask, var$, where As Long, arr$)
+Sub FeedCopyInOut(bstack As basetask, var$, where As Long, Arr$)
 Dim a As New CopyInOut
 a.actualvar = var$
-a.ArrArg = arr$
+a.ArrArg = Arr$
 a.localvar = where
 If bstack.CopyInOutCol Is Nothing Then Set bstack.CopyInOutCol = New Collection
 bstack.CopyInOutCol.Add a
@@ -16151,7 +16157,7 @@ If Len(a.ArrArg) > 0 Then
 x1 = rinstr(a.actualvar, a.ArrArg) + Len(a.ArrArg) - 1
    
     If neoGetArray(bstack, Left$(a.actualvar, x1), pppp) Then
-        If Not pppp.arr Then GoTo cont123
+        If Not pppp.Arr Then GoTo cont123
         If Not NeoGetArrayItem(pppp, bstack, Left$(a.actualvar, x1), w2, Mid$(a.actualvar, x1 + 1)) Then GoTo cont123
         If MyIsObject(var(a.localvar)) Then
         If TypeOf pppp.item(w2) Is Group Then
@@ -17028,7 +17034,7 @@ checkit:
         Else
          Set pppp = New mArray
             Set pppp.GroupRef = useHandler
-            pppp.arr = False
+            pppp.Arr = False
             w2 = -101
             Set v = pppp
         End If
@@ -19175,7 +19181,7 @@ If Not IsExp(bstack, b$, p) Then here$ = ohere$: GoTo there1
             Else
                    If Not bstack.lastobj Is Nothing Then
                           If TypeOf bstack.lastobj Is mArray Then
-                                 If bstack.lastobj.arr Then
+                                 If bstack.lastobj.Arr Then
                                          Set pppp.item(v) = CopyArray(bstack.lastobj)
 
                                  Else
@@ -19199,9 +19205,9 @@ If Not IsExp(bstack, b$, p) Then here$ = ohere$: GoTo there1
      
      Set bstack.lastobj = Nothing
      Else
-     If pppp.arr Then
+     If pppp.Arr Then
      pppp.item(v) = p
-     ElseIf Typename(pppp.GroupRef) Like "Pro*" Then
+     ElseIf Typename(pppp.GroupRef) = "PropReference" Then
     
      pppp.GroupRef.Value = p
      End If
@@ -19252,7 +19258,7 @@ If neoGetArray(bstack, w$, pppp) Then
                 If Not bstack.lastobj Is Nothing Then
                 If TypeOf bstack.lastobj Is mHandler Then
                 If bstack.lastobj.t1 = 3 Then
-                If pppp.arr Then
+                If pppp.Arr Then
          
                         bstack.lastobj.objref.CopyArray pppp
                         pppp.final = False
@@ -19279,7 +19285,7 @@ If neoGetArray(bstack, w$, pppp) Then
 againstrarr22:
 If Not NeoGetArrayItem(pppp, bstack, w$, v, b$) Then interpret = False: here$ = ohere$: GoTo there1
 On Error Resume Next
-If Typename(pppp.item(v)) = myArray And pppp.arr Then
+If Typename(pppp.item(v)) = myArray And pppp.Arr Then
 If FastSymbol(b$, "(") Then
 Set pppp = pppp.item(v)
 GoTo againstrarr22
@@ -19333,13 +19339,13 @@ Else
         
         
     If Not MyIsObject(pppp.item(v)) Then
-    If pppp.arr Then
+    If pppp.Arr Then
     If bstack.lastobj Is Nothing Then
         pppp.item(v) = ss$
     
     Else
     If Typename(bstack.lastobj) = myArray Then
-    If bstack.lastobj.arr Then
+    If bstack.lastobj.Arr Then
         Set pppp.item(v) = CopyArray(bstack.lastobj)
     Else
          Set pppp.item(v) = bstack.lastobj.GroupRef
@@ -19395,7 +19401,7 @@ If neoGetArray(bstack, w$, pppp) Then
 againintarr7:
 If Not NeoGetArrayItem(pppp, bstack, w$, v, b$) Then interpret = False: here$ = ohere$: GoTo there1
 On Error Resume Next
-If Typename(pppp.item(v)) = myArray And pppp.arr Then
+If Typename(pppp.item(v)) = myArray And pppp.Arr Then
 If FastSymbol(b$, "(") Then
 Set pppp = pppp.item(v)
 GoTo againintarr7
@@ -19449,7 +19455,7 @@ If Not FastSymbol(b$, "=") Then here$ = ohere$: GoTo there1
 If Not IsExp(bstack, b$, p) Then here$ = ohere$: GoTo there1
 If Not bstack.lastobj Is Nothing Then
     If TypeOf bstack.lastobj Is mArray Then
-                                 If bstack.lastobj.arr Then
+                                 If bstack.lastobj.Arr Then
                                          Set pppp.item(v) = CopyArray(bstack.lastobj)
 
                                  Else
@@ -19911,7 +19917,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
                 End If
             ElseIf i = 5 Or i = 7 Then
                 If neoGetArray(bstack, ss$, pppp) Then
-                If Not pppp.arr Then NotArray: Exit Function
+                If Not pppp.Arr Then NotArray: Exit Function
                     If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$, True) Then Exit Function
                         If MyIsObject(var(F)) Then
                             If TypeOf var(F) Is Constant Then
@@ -19940,7 +19946,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
         End If
     ElseIf col = 2 Then
         If neoGetArray(bstack, s$, pppp) Then
-        If Not pppp.arr Then NotArray: Exit Function
+        If Not pppp.Arr Then NotArray: Exit Function
         If Not NeoGetArrayItem(pppp, bstack, s$, F, rest$) Then Exit Function
             If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
                 i = Abs(IsLabel(bstack, rest$, ss$))
@@ -19968,7 +19974,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
                     End If
             ElseIf i = 5 Or i = 7 Then
                     If neoGetArray(bstack, ss$, pppp1) Then
-                    If Not pppp1.arr Then NotArray: Exit Function
+                    If Not pppp1.Arr Then NotArray: Exit Function
                         If Not NeoGetArrayItem(pppp1, bstack, ss$, x1, rest$) Then Exit Function
                    If pppp.IHaveClass Xor Not pppp1.IHaveClass Then
                             
@@ -20003,7 +20009,7 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
                 i = Abs(IsLabel(bstack, rest$, ss$))
                  If i = 6 Then
                     If Not neoGetArray(bstack, ss$, pppp) Then MissingStrVar:  Exit Function
-                    If Not pppp.arr Then NotArray: Exit Function
+                    If Not pppp.Arr Then NotArray: Exit Function
                     If Not NeoGetArrayItem(pppp, bstack, ss$, x1, rest$) Then Exit Function
                      If MyIsObject(var(F)) Then
                         If TypeOf var(F) Is Constant Then
@@ -20035,14 +20041,14 @@ Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp
             End If
     ElseIf F = 6 Then
             If neoGetArray(bstack, s$, pppp) Then
-            If Not pppp.arr Then NotArray: Exit Function
+            If Not pppp.Arr Then NotArray: Exit Function
                 If Not NeoGetArrayItem(pppp, bstack, s$, x1, rest$) Then Exit Function
                 If Not FastSymbol(rest$, ",") Then MissingnumVar:  Exit Function
                 i = Abs(IsLabel(bstack, rest$, ss$))
      
                 If i = 6 Then
                     If Not neoGetArray(bstack, ss$, pppp1) Then MissingStrVar:  Exit Function
-                    If Not pppp.arr Then NotArray: Exit Function
+                    If Not pppp.Arr Then NotArray: Exit Function
                     If Not NeoGetArrayItem(pppp1, bstack, ss$, i, rest$) Then Exit Function
 
                    SwapVariant3 pppp, x1, pppp1, i
@@ -20219,8 +20225,8 @@ Set Scr = basestack.Owner
 Dim basketcode As Long, mAddTwipsTop As Long
 
 
-If Typename(Scr) Like "Gui*" Then
-If Typename(Scr) Like "GuiM2000" Then FastSymbol rest$, "!": GoTo there1
+If Left$(Typename(Scr), 3) = "Gui" Then
+If Typename(Scr) = "GuiM2000" Then FastSymbol rest$, "!": GoTo there1
 ElseIf Scr.name = "Form1" Then
 
 Else
@@ -21205,4 +21211,186 @@ Dim p As Variant, mm As MemBlock, w2 As Long
         
     End If
     Set basestack.lastobj = Nothing
+End Function
+Sub MyMode(Scr As Object)
+Dim x1 As Long, y1 As Long
+On Error Resume Next
+With players(GetCode(Scr))
+    x1 = Scr.Width
+    y1 = Scr.Height
+    If Left$(Typename(Scr), 3) = "Gui" Then
+    Else
+    If Scr.name = "Form1" Then
+    DisableTargets q(), -1
+    
+    ElseIf Scr.name = "DIS" Then
+    DisableTargets q(), 0
+    
+    ElseIf Scr.name = "dSprite" Then
+    DisableTargets q(), val(Scr.index)
+    End If
+    End If
+    If .SZ < 4 Then .SZ = 4
+        Err.clear
+        Scr.Font.Size = .SZ
+        If Err.Number > 0 Then
+                MYFONT = "ARIAL"
+                Scr.Font.name = MYFONT
+                Scr.Font.charset = .charset
+                Scr.Font.name = MYFONT
+                Scr.Font.charset = .charset
+        End If
+        .uMineLineSpace = .MineLineSpace
+        FrameText Scr, .SZ, x1, y1, .Paper
+    .currow = 0
+    .curpos = 0
+    .XGRAPH = 0
+    .YGRAPH = 0
+End With
+End Sub
+Function ProcSave(basestack As basetask, rest$, Lang As Long) As Boolean
+Dim pa$, w$, s$, col As Long, prg$, x1 As Long, par As Boolean, i As Long, noUse As Long, lcl As Boolean
+On Error Resume Next
+If lckfrm <> 0 Then MyEr "Save is locked", "Η αποθήκευση είναι κλειδωμένη": rest$ = vbNullString: Exit Function
+lcl = IsLabelSymbolNew(rest$, "ΤΟΠΙΚΑ", "LOCAL", Lang) Or basestack.IamChild Or basestack.IamAnEvent
+x1 = Abs(IsLabelFileName(basestack, rest, pa$, , s$))
+
+If x1 <> 1 Then
+rest$ = pa$ + rest$: x1 = IsStrExp(basestack, rest$, pa$)
+Else
+pa$ = s$: s$ = vbNullString
+End If
+
+If x1 <> 0 Then
+        If subHash.count = 0 Or pa$ = vbNullString Then MyEr "Nothing to save", "Δεν υπάρχει κάτι να σώσω":              Exit Function
+        If ExtractType(pa$) = "gsb" Then pa$ = ExtractPath(pa$) + ExtractNameOnly(pa$)
+        If ExtractPath(pa$) <> "" Then
+                If InStr(ExtractPath(pa$), mcd) <> 1 Then pa$ = pa$ & ".gsb" Else pa$ = pa$ & ".gsb"
+        Else
+                pa$ = mcd + pa$ & ".gsb"
+        End If
+        If Not WeCanWrite(pa$) Then Exit Function
+        
+      
+           For i = subHash.count - 1 To 0 Step -1
+       subHash.ReadVar i, s$, col
+                If Right$(s$, 2) = "()" Then
+                If Not InStr(s$, ChrW(&H1FFF)) > 0 Then
+                s$ = Left$(s$, Len(s$) - 2)
+                
+                If Right$(sbf(col).sb, 2) <> vbCrLf Then sbf(col).sb = sbf(col).sb + vbCrLf
+                If Lang Then
+                
+                        If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Function " & s$ + "()" + vbCrLf) Then Exit Function
+                                prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
+                                If lcl Then
+                                    prg$ = "FUNCTION " + prg$
+                                Else
+                                    prg$ = "FUNCTION GLOBAL " + prg$
+                                End If
+                        Else
+                                If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Συνάρτηση " & s$ + "()" + vbCrLf) Then Exit Function
+                                prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
+                                If lcl Then
+                                    prg$ = "ΣΥΝΑΡΤΗΣΗ " + prg$
+                                Else
+                                    prg$ = "ΣΥΝΑΡΤΗΣΗ ΓΕΝΙΚΗ " + prg$
+                                End If
+                        End If
+                End If
+                Else
+                        If Right$(sbf(col).sb, 2) <> vbCrLf Then sbf(col).sb = sbf(col).sb + vbCrLf
+                        If Lang Then
+                                If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Module " & s$ + vbCrLf) Then Exit Function
+                                prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
+                                If lcl Then
+                                    prg$ = "MODULE " + prg$
+                                Else
+                                    prg$ = "MODULE GLOBAL " + prg$
+                                End If
+                        Else
+                                If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Τμήμα " & s$ + vbCrLf) Then Exit Function
+                                prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
+                                If lcl Then
+                                    prg$ = "ΤΜΗΜΑ " + prg$
+                                Else
+                                    prg$ = "ΤΜΗΜΑ ΓΕΝΙΚΟ " + prg$
+                                End If
+                        End If
+                End If
+        Next i
+        w$ = vbNullString
+        If FastSymbol(rest$, "@@", , 2) Then
+            ' default password  - one space only - coder use default internal password
+                If Not IsStrExp(basestack, rest$, w$) Then w$ = " "
+        ElseIf FastSymbol(rest$, "@") Then
+                ' One space only
+                w$ = " "
+        End If
+        par = False
+        If FastSymbol(rest$, ",") Then
+                If Abs(IsLabel(basestack, rest$, s$)) = 1 Then
+                        prg$ = prg$ & s$
+                ElseIf FastSymbol(rest$, "{") Then
+                        prg$ = prg$ & block(rest$)
+                        If Not FastSymbol(rest$, "}") Then Exit Function
+                End If
+        End If
+        ' reuse s$, col$
+        If Len(w$) > 1 Then  'scrable col by George
+                s$ = vbNullString: For col = 1 To Int((33 * Rnd) + 1): s$ = s$ & Chr(65 + Int((23 * Rnd) + 1)): Next col
+                ' insert a variable length label......to make a variable length file
+                prg$ = s$ & ":" & vbCrLf + prg$
+                prg$ = mycoder.encryptline(prg$, w$, Len(prg$) Mod 33)
+                par = True
+        ElseIf Len(w$) = 1 Then   ' I have to check that...
+                s$ = vbNullString:   For col = 1 To Int((33 * Rnd) + 1): s$ = s$ & Chr(65 + Int((23 * Rnd) + 1)): Next col
+                prg$ = s$ & ":" & vbCrLf + prg$
+                prg$ = mycoder.must1(prg$)
+                par = True
+        End If
+        s$ = vbNullString
+        If CFname(pa$) <> "" Then
+                If Lang = 1 Then
+                        If MsgBoxN("Replace " + ExtractNameOnly(pa$), vbOKCancel, MesTitle$) <> vbOK Then
+                        MyEr "File not saved -1005", "Δεν σώθηκε το αρχείο -1005"
+                        ProcSave = True
+                        Exit Function
+                        End If
+                Else
+                        If MsgBoxN("Αλλαγή " + ExtractNameOnly(pa$), vbOKCancel, MesTitle$) <> vbOK Then
+                        MyEr "File not saved -1005", "Δεν σώθηκε το αρχείο -1005"
+                        ProcSave = True
+                        Exit Function
+                        End If
+                End If
+                s$ = "*"
+        End If
+        If Not WeCanWrite(pa$) Then Exit Function
+        If par Then
+                If s$ = "*" Then
+                       '' If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck") <> "" Then killfile GetDosPath(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"): Sleep 30
+                        MakeACopy pa$, ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
+                End If
+                If Not SaveUnicode(pa$, prg$, 0) Then BadFilename
+                Else
+                If s$ <> "" Then
+                        ''If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck") <> "" Then killfile GetDosPath(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"):  Sleep 30
+                        MakeACopy pa$, ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
+                End If
+                ProcSave = SaveUnicode(pa$, prg$, 2)  ' 2 = utf-8 standard save mode for version 7
+                If here$ = vbNullString Then LASTPROG$ = pa$
+        End If
+ ProcSave = True
+Else
+MyEr "A name please or use Ctrl+A to perform SAVE COMMAND$  (the last loading)", "Ένα όνομα παρακαλώ, ή πάτα το ctrl+Α για να αποθηκεύσεις με το όνομα του προγράμματος που φορτώθηκε τελευταία"
+End If
+
+End Function
+
+
+
+Function Infinity() As Double
+PutMem1 VarPtr(Infinity) + 7, &H7F
+PutMem1 VarPtr(Infinity) + 6, &HF0
 End Function

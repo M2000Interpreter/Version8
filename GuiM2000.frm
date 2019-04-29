@@ -1193,7 +1193,7 @@ Dim w As Object
     Else
     mModalid = 0
     For Each w In GuiControls
-    If Typename(w) Like "Gui*" Then
+    If Left$(Typename(w), 3) = "Gui" Then
     w.deconstruct
     End If
 Next w

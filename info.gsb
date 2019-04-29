@@ -1597,17 +1597,22 @@ Module CheckIt {
       \\ from m2000 console use statement Switches without Set.
       \\ use Monitor statement to see all switches.
       Set Switches "+SBL"
-      IF version<9.4 then exit
-      IF version=9.4 and revision<25 then exit
-      Function Infinity(positive=True) {
-            buffer clear inf as byte*8
-            m=0x7F
-            if not positive then m+=128
-            return inf, 7:=m, 6:=0xF0
-            =eval(inf, 0 as double)
+      IF version<9.8 then exit
+      IF version=9.8 and revision<18 then exit
+      rem {
+            \\ from revision 18 there is a constant infinity
+            Function Infinity(positive=True) {
+                  buffer clear inf as byte*8
+                  m=0x7F
+                  if not positive then m+=128
+                  return inf, 7:=m, 6:=0xF0
+                  =eval(inf, 0 as double)
+            }
+            K=Infinity(false)
+            L=Infinity()
       }
-      K=Infinity(false)
-      L=Infinity()
+      K=-Infinity
+      L=Infinity
       Function TestNegativeInfinity(k) {
             =str$(k, 1033) = "-1.#INF"
       }
@@ -1617,7 +1622,7 @@ Module CheckIt {
       Function TestInvalid {
             =str$(Number, 1033) = "-1.#IND"
       }
-      Pen 11 {Print "       True       True"}
+      Pen 11 {Print "       True       True"}    
       Print TestNegativeInfinity(K), TestPositiveInfinity(L)
       Pen 11 {Print "    -1.#INF     1.#INF    -1.#INF     1.#INF    -1.#INF     1.#INF"}
       Print K, L, K*100, L*100, K+K, L+L
@@ -1633,6 +1638,10 @@ Module CheckIt {
       Print K-L
       Pen 11 {Print "     1.#INF"}
       Print L-K
+      Pen 11 {Print "       True       True       True       True"}    
+      Print L<>k, 100>K, 100>K+1, L>K
+      Pen 11 {Print "       True       True          1          0"}
+      Print L+10>100, 100+L>K, L<=>k, L<=>L
 }
 Checkit
 }
@@ -12327,5 +12336,168 @@ rem		Data "52783243c1697bdbe16d37f97f68f08325dc1528", String$("a",1000000)
 	TestHash Prepare_RiPeMd_160()	
 }
 Checkit
+}
+MODULE DIJKSTRA {Module Dijkstra`s_algorithm {
+        const max_number=infinity '1.E+306
+        GetArr=lambda (n, val)->{
+                dim d(n)=val
+                =d()
+        }
+        term=("",0)
+        Edges=(("a", ("b",7),("c",9),("f",14)),("b",("c",10),("d",15)),("c",("d",11),("f",2)),("d",("e",6)),("e",("f", 9)),("f",term))
+        Document Doc$="Graph:"+{
+        }
+        ShowGraph()
+        Doc$="Paths"+{
+        }
+        Print "Paths"
+        For from_here=0 to 5
+                pa=GetArr(len(Edges), -1)
+                d=GetArr(len(Edges), max_number)
+                Inventory S=1,2,3,4,5,6
+                return d, from_here:=0
+                RemoveMin=Lambda S, d, max_number-> {
+                        ss=each(S)
+                        min=max_number
+                        p=0
+                        while ss
+                                val=d#val(eval(S,ss^)-1)
+                                if min>val then let min=val : p=ss^ 
+                        end while
+                        =s(p!)  ' use p as index not key
+                        Delete S, eval(s,p)
+                }
+                Show_Distance_and_Path$=lambda$ d, pa, from_here, max_number (n) -> {
+                        ret1$=chr$(from_here+asc("a"))+" to "+chr$(n+asc("a"))
+                        if d#val(n) =max_number then =ret1$+ "No Path" :exit
+                        let ret$="", mm=n, m=n
+                        repeat
+                                n=m
+                                ret$+=chr$(asc("a")+n)
+                                m=pa#val(n)
+                        until  from_here=n 
+                        =ret1$+format$("{0::-4} {1}",d#val(mm),strrev$(ret$))
+                }
+                while len(s)>0 
+                        u=RemoveMin()
+                        rem Print u, chr$(u-1+asc("a"))
+                        Relaxed()
+                end while
+                For i=0 to len(d)-1
+                        line$=Show_Distance_and_Path$(i)
+                        Print line$
+                        doc$=line$+{
+                        }
+                next
+        next
+        Clipboard Doc$
+        End
+        Sub Relaxed()
+                local vertex=Edges#val(u-1), i
+                local e=Len(vertex)-1, edge=(,), val
+                for i=1 to e
+                        edge=vertex#val(i)
+                        if edge#val$(0)<>"" then
+                                val=Asc(edge#val$(0))-Asc("a")
+                                if d#val(val)>edge#val(1)+d#val(u-1) then  return d, val:=edge#val(1)+d#val(u-1) : Return Pa, val:=u-1
+                        end if
+                next 
+        end sub
+        Sub ShowGraph()
+                Print "Graph"
+                local i
+                for i=1 to len(Edges)
+                        show_edges(i)
+                next
+        end sub
+        Sub show_edges(n)
+                n--
+                local vertex=Edges#val(n), line$
+                local e=each(vertex 2 to end), v2=(,)
+                While e 
+                        v2=array(e)
+                        line$=vertex#val$(0)+if$(v2#val$(0)<>""->"->"+v2#val$(0)+format$(" {0::-2}",v2#val(1)),"")
+                        Print line$
+                        Doc$=line$+{
+                        }
+                end while
+        end sub
+}
+Dijkstra`s_algorithm
+
+}
+MODULE ANT {Flush
+Set Fast !
+Escape off
+Esc=False
+Form 120,102
+Double
+Print "Langton's ant"
+Print "press right mouse button to draw partial image"
+Print "press left mouse button to exit"
+Normal
+N=100
+refresh
+Enum CellColor {black=0,white=#FFFFFF}
+Enum Direction{North=90, West=180, South=270, East=0}
+Function Rotate(cd as Direction, clockwise=true) {
+		cd=(cd+if(clockwise->270,90)) mod 360
+		=cd  ' return a Direction Enum type
+}
+ 
+dim rect(1 to N, 1 to N)=white
+cx=N div 3
+cy=N div 3
+cd=North
+rect(cx,cy)=black
+endmove=False
+m=1
+while not endmove
+	movecell()
+	if m mod 20=0 then if keypress(1) then if ask("Quit")=1 then  Esc=true : exit while
+	m++ : if keypress(2) then Disp()
+end while
+if not Esc then
+	Disp(true)
+	refresh 40
+	a$=key$
+end if
+Escape ON
+Set Fast
+keyboard "INFO"+chr$(13)
+sub movecell()
+	select case rect(cx,cy)
+	case black
+		cd=Rotate(cd, false) : rect(cx, cy)=white
+	case white
+		cd=Rotate(cd) : rect(cx, cy)=black
+	end select
+	select case cd
+	case North
+		cy--
+	case West
+		cx--
+	case South
+		cy++
+	case East
+		cx++
+	end select
+	endmove= cx<1 or cx>N or cy<1 or cy>N
+end sub
+sub disp(clip=false)
+	Local Doc$, i, j
+	Document Doc$
+	for j=1 to N:for i=1 to N
+		Doc$=if$(rect(i, j)=White->"_","#")
+	next
+	Doc$={
+	}
+	next
+	cls
+	Print #-2,Doc$
+	refresh 1000
+	if clip then clipboard Doc$ : Cursor 0, 100 : Print "Done", @(100),"Press any key"
+end sub
+
 }
 INFO

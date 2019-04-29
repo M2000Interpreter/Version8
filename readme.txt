@@ -1,10 +1,34 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 17b active-X
-New Installer - with newer help file
+Version 9.8 Revision 18 active-X
 
-Fix the move method for forms
+New numeric constant Infinity, We can use -Infinty too.
+Print Infinity
+     1.#INF
+Print VAL("1.#INF")=Infinity
+Also comparison operators works with infinity.
 
+A correction in iterators made from each() function.
+When we program from a item outside the range of items,
+now the iterator not entering the while loop
+
+a=(1,2,3)
+' change 4 to 1
+b=each(a, 4)
+while b
+	print "never print that"
+end while
+Print b  ' nothing print 
+\\ print from last to start
+b=each(a, -1, 1)
+while b
+	print "cursor", b^, "item", array(b)
+end while
+Print b  ' print backwards
+Print b  ' print backwards
+
+
+There is a newer Info program - a collection of modules.
 When fist time run the interpreter do this in M2000 console:
 dir appdir$
 load info
@@ -26,7 +50,5 @@ http://georgekarras.blogspot.gr/
 https://github.com/M2000Interpreter/Version9
 
 https://drive.google.com/open?id=0BwSrrDW66vvvdER4bzd0OENvWlU
-
-http://m2000.forumgreek.com/
 
                                                              
