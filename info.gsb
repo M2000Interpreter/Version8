@@ -4526,6 +4526,7 @@ Fkey 7,"Tr 'Three Oscilloscopes"
 Fkey 8,"mEditor ' A window based M2000 Editor"
 Fkey 9,"kb ' A keyboard to play music"
 FKey 10,"Settings"
+FKey 11,"Dijkstra"
 FKey 19,"List33  ' Listbox control Example"
 FKey 18,"Form44  ' Muliple Windows Example"
 FKey 17,"Maze2  ' Maze Drawing in console"
@@ -12055,6 +12056,7 @@ But here we don't have to skip FOR NEXT and no STEP clause used.
 
 Also the code is not the best, because we can move from 4 position to 5 (we can't do that with real puzzle) 
 }
+Escape OFF
 TRY {
             00 BASE 1 : DEF RND(X)=RND
             10 REM 15-PUZZLE GAME
@@ -12499,5 +12501,230 @@ sub disp(clip=false)
 	if clip then clipboard Doc$ : Cursor 0, 100 : Print "Done", @(100),"Press any key"
 end sub
 
+}
+MODULE ANON {\\ Anonymous Functions
+curry=lambda (f)->{
+        \\ get arguments as a stack object and store reference to s
+        \\ f and s are closures to returned anonymous function
+        =lambda f, s=[] -> {
+                \\ pass arguments [] to f() if any
+                \\ pass arguments using a copy of s
+                \\ passing done using ! symbol before a stack object
+                =f(![], !stack(s))
+        }
+}
+sum=lambda -> {
+        s=0   \\ number pop numbers from stack
+        while not empty : s+=number:end while
+        =s
+}
+curried=curry(sum, 5,7,9)
+Print curried(1,2,3)=5+7+9+1+2+3  ' true
+Print curried(10,20,30)=5+7+9+10+20+30 ' true
+Print curried()=5+7+9  ' true
+curried2=curry(sum)
+Print curried2()=0
+curried2=curry(sum, 10,20,30,40)
+Print curried2(1,2,3,4)=110
+\\ make a closure for a lambda function
+disp=lambda title$="my title:" (that$) -> {
+        Print title$;that$
+}
+Call disp("Anonymous Function")
+Dim A(10)
+A(3)=disp
+ret=A(3)("Call from array")
+Inventory Abc="100":=disp
+ret=Abc("100")("Call from inventory")
+ret=lambda title$="another tilte1:" (that$)->{Print title$;that$}("call anonymous function")
+ret=lambda title$="another tilte2:" (that$)->{
+        Print title$;that$
+}("call anonymous function")
+}
+MODULE CHAIN {\\ Chain of Responsibility design pattern 
+\\ a class: part in Class Function removed from object after first copy (when copied from Class function)
+\\ So constructors are not part of Logger Group (Group is the type of a user object in M2000)
+Form 80,50
+Global enum LogLevel    {
+                    None = 0,
+                    Info = 1, 
+                    Debug = 2, 
+                    Warning = 4,
+                    Error = 8,   
+                    FunctionalMessage = 16, 
+                    FunctionalError = 32, 
+                    All = 63              
+             }
+Class Logger {
+Private:
+ logMask=0&
+ Group NextLogger
+Public:
+ Module Final Message(msg$, severity) {
+  if not Valid(.NextLogger=>Null) then
+   .NextLogger=>Message msg$, severity
+  end if
+  if Binary.And(.logMask ,severity)<>0 then
+   .WriteMessage msg$
+  End if
+ }
+ Module WriteMessage (m$) {
+  Print m$
+ }
+ Module Final SetNext ( p as pointer) {
+  .NextLogger<=p
+ }
+ Function Final Dispose {
+  x=valid(.NextLogger=>Dispose())
+  Clear .NextLogger
+ }
+Class:
+ Module Logger (z) {
+  .logMask<=z
+  class EmptyLogger {
+   Null
+  }
+  .NextLogger<=Pointer(EmptyLogger())
+ }
+}
+Class ConsoleLogger {
+ Module  Final WriteMessage (m$) {
+  Print "Writing to console: " + m$
+ }
+class:
+ Module ConsoleLogger {
+  This=Logger(![])
+ }
+}
+Class EmailLogger {
+ Module  Final WriteMessage (m$) {
+  Print "Sending via email: " + m$
+ }
+class:
+ Module EmailLogger {
+  This=Logger(![])
+ }
+}
+Class FileLogger {
+ Module  Final WriteMessage (m$) {
+  Print "Writing to Log File: " + m$
+ }
+class:
+ Module FileLogger {
+  This=Logger(![])
+ }
+}
+A=ConsoleLogger(All)
+B=EmailLogger(FunctionalMessage+FunctionalError)
+C=FileLogger(Warning+Error)
+C.SetNext Pointer(B)
+B.SetNext Pointer(A)
+
+
+C.Message "Entering function ProcessOrder().", Debug
+C.Message "Order record retrieved.", Info
+C.Message "Customer Address details missing in Branch DataBase.", Warning
+C.Message "Customer Address details missing in Organization DataBase.", Error
+C.Message "Unable to Process Order ORD1 Dated D1 For Customer C1.", FunctionalError
+C.Message "Order Dispatched.",FunctionalMessage
+Call C.Dispose()  ' no need we use weak refrences (automatic created if poiner produced for named groups
+}
+MODULE CHAIN2 {\\ Chain of Responsibility design pattern  2
+\\ example from https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
+\\ This example use real pointers to groups
+\\ so we have one group, the logger and two groups inside it in a chain
+Form 80,50
+Global enum LogLevel    {
+                    None = 0,
+                    Info = 1, 
+                    Debug = 2, 
+                    Warning = 4,
+                    Error = 8,   
+                    FunctionalMessage = 16, 
+                    FunctionalError = 32, 
+                    All = 63              
+             }
+Class Logger {
+Private:
+ logMask=0&
+ Group NextLogger
+Public:
+ Module Final Message(msg$, severity) {
+  if Binary.And(.logMask ,severity)<>0 then
+   .WriteMessage msg$
+  End if
+  if not Valid(.NextLogger=>Null) then
+   .NextLogger=>Message msg$, severity
+  end if
+ }
+ Module WriteMessage (m$) {
+  Print m$
+ }
+ Module Final SetNext ( p as pointer) {
+  if  valid(.NextLogger=>Null) then
+   .NextLogger<=p
+  else
+   .NextLogger=>SetNext p
+  end if
+ }
+ Function Final Dispose {
+  x=valid(.NextLogger=>Dispose())
+   Clear .NextLlogger
+ }
+Class:
+ Module Logger (z) {
+  .logMask<=z
+  class EmptyLogger {
+   Null
+  }
+  .NextLogger<=Pointer(EmptyLogger())
+ }
+}
+Class ConsoleLogger {
+ Module  Final WriteMessage (m$) {
+  Print "Writing to console: " + m$
+ }
+class:
+ Module ConsoleLogger {
+  This=Logger(![])    '  ![] pass current stack of values to function Logger()
+ }
+}
+Class EmailLogger {
+ Module  Final WriteMessage (m$) {
+  Print "Sending via email: " + m$
+ }
+class:
+ Module EmailLogger {
+  This=Logger(![])
+ }
+}
+Class FileLogger {
+ Module  Final WriteMessage (m$) {
+  Print "Writing to Log File: " + m$
+ }
+class:
+ Module FileLogger {
+  This=Logger(![])
+ }
+}
+Logger->ConsoleLogger(All)
+
+
+Logger=>SetNext Pointer(EmailLogger(FunctionalMessage+FunctionalError))
+Logger=>SetNext Pointer(FileLogger(Warning+Error))
+
+
+Logger=>Message "Entering function ProcessOrder().", Debug
+\\ better to use a For object {} structure
+For Logger {
+ .Message "Order record retrieved.", Info
+ .Message "Customer Address details missing in Branch DataBase.", Warning
+ .Message "Customer Address details missing in Organization DataBase.", Error
+ .Message "Unable to Process Order ORD1 Dated D1 For Customer C1.", FunctionalError
+ \\ we can use Logger=>Message also
+ Logger=>Message "Order Dispatched.",FunctionalMessage
+ call .Dispose() 
+}
+Logger->0&   ' or Clear Logger
 }
 INFO

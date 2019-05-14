@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 18
+Global Const Revision = 19
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -19325,7 +19325,7 @@ Function IdentifierGroup(basestack As basetask, what$, rest$, Lang As Long, aloc
        IdentifierGroup = MyFunction(2, basestack, rest$, Lang)
         Exit Function
     Case "FUNCTION", "сумаятгсг"
-        IdentifierGroup = MyFunction(0, basestack, rest$, Lang, True)
+        IdentifierGroup = MyFunction(-1, basestack, rest$, Lang, True, alocal)
         Exit Function
     Case "MODULE", "тлгла"
         IdentifierGroup = MyModule(basestack, rest$, Lang, True, alocal)
@@ -25324,16 +25324,18 @@ If x1 <> 0 Then
     End If
   Else
   
-  If alocal Then
-  If Lang = 1 Then
-    rest$ = "NEW " + here$ + "." + bstack.GroupName + F$ & " " & rest$
+  'If alocal Then
+ ' If Lang = 1 Then
+    'rest$ = "NEW " + here$ + "." + bstack.GroupName + F$ & " " & rest$
+ '   rest$ = "NEW " + F$ & " " & rest$
     
-    Else
-     rest$ = "меа " + bstack.GroupName + F$ & " " & rest$
-    End If
-    Else
+  '  Else
+'     rest$ = "меа " + F$ & " " & rest$
+    ' rest$ = "меа " + bstack.GroupName + F$ & " " & rest$
+   ' End If
+   ' Else
     rest$ = F$ & " " & rest$
-  End If
+  'End If
     If w$ = vbNullString Then
       If Lang = 1 Then
     w$ = "FUNCTION"
@@ -40761,6 +40763,8 @@ MyFunction = True
             End If
             rest$ = Mid$(rest$, i + 1)
             GoTo operators
+        ElseIf entrypoint = -1 Then
+        GoTo alocal
         Else
                 y1 = IsLabelSymbolNew(rest$, "цемийг", "GLOBAL", Lang)
                 par = IsLabelSymbolNew(rest$, "меа", "NEW", Lang)
@@ -40805,6 +40809,7 @@ MyFunction = True
                         End If
                 End If
         End If
+alocal:
         x1 = Abs(IsLabelF(rest$, what$))
 If x1 = 1 Or x1 = 3 Or x1 = 4 Then   ' C() C%() C$()
 operators:
