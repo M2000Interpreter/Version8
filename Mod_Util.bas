@@ -19374,8 +19374,19 @@ contarr1:
         Exit Do
         End If
         Loop
-   
-     
+   ElseIf IsOperator(b$, "+=", 2) Then
+    If pppp.IsStringItem(v) Then
+    If Not IsStrExp(bstack, b$, ss$) Then GoTo st1222
+    If bstack.lastobj Is Nothing Then
+        pppp.ItemStr(v) = pppp.item(v) + ss$
+    Else
+st1222:
+        MyEr "Need a string", "Χρειάζομαι ένα αλφαριθμητικό"
+        interpret = False: here$ = ohere$: GoTo there1
+    End If
+    Else
+    GoTo st1222
+    End If
         
     Else
     interpret = False: here$ = ohere$: GoTo there1

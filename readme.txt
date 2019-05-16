@@ -1,20 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 20 active-X
+Version 9.8 Revision 21 active-X
 
 
-1. New function #slice()
-Print (1,2,3,4)#slice(0,1)  ' 1 2
-Print (1,2,3,4)#slice(0,1)#rev() ' 2 1
-
-2. a=(1, a$>"a", 2) now works (no problem with string comparison)
-a$="b"
-a=(1, a$>"a", 2)
-print a  ' 1 True 2
-
-
-3. correction in syntax color procedure for multiline strings in comparisons
-
+Addition of operator += for arrays with string value, in CLI (in modules/function operated)
+in CLI (M2000 command line interface or Repl) execute each statement
+Dim a$(10)="ok"
+a$(3)+="...."
+print a$(3)="ok...."
 
 
 The fist time you run the interpreter do this in M2000 console:

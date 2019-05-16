@@ -12542,77 +12542,77 @@ ret=lambda title$="another tilte2:" (that$)->{
 }("call anonymous function")
 }
 MODULE CHAIN {\\ Chain of Responsibility design pattern 
-\\ a class: part in Class Function removed from object after first copy (when copied from Class function)
+\\ a Class: part in Class Function removed from object after first copy (when copied from Class function)
 \\ So constructors are not part of Logger Group (Group is the type of a user object in M2000)
 Form 80,50
 Global enum LogLevel    {
-                    None = 0,
-                    Info = 1, 
-                    Debug = 2, 
-                    Warning = 4,
-                    Error = 8,   
-                    FunctionalMessage = 16, 
-                    FunctionalError = 32, 
-                    All = 63              
-             }
+		None = 0,
+		Info = 1, 
+		Debug = 2, 
+		Warning = 4,
+		Error = 8,   
+		FunctionalMessage = 16, 
+		FunctionalError = 32, 
+		All = 63
+		}
 Class Logger {
 Private:
- logMask=0&
- Group NextLogger
+logMask=0&
+Group NextLogger
 Public:
- Module Final Message(msg$, severity) {
-  if not Valid(.NextLogger=>Null) then
-   .NextLogger=>Message msg$, severity
-  end if
-  if Binary.And(.logMask ,severity)<>0 then
-   .WriteMessage msg$
-  End if
- }
- Module WriteMessage (m$) {
-  Print m$
- }
- Module Final SetNext ( p as pointer) {
-  .NextLogger<=p
- }
- Function Final Dispose {
-  x=valid(.NextLogger=>Dispose())
-  Clear .NextLogger
- }
+	Module Final Message(msg$, severity) {
+		If not Valid(.NextLogger=>Null) Then
+			.NextLogger=>Message msg$, severity
+		End If
+		If Binary.And(.logMask ,severity)<>0 Then
+			.WriteMessage msg$
+		End If
+	}
+	Module WriteMessage (m$) {
+		Print m$
+	}
+	Module Final SetNext ( p as pointer) {
+		.NextLogger<=p
+	}
+	Function Final Dispose {
+		x=valid(.NextLogger=>Dispose())
+		Clear .NextLogger
+	}
 Class:
- Module Logger (z) {
-  .logMask<=z
-  class EmptyLogger {
-   Null
-  }
-  .NextLogger<=Pointer(EmptyLogger())
- }
+	Module Logger (z) {
+		.logMask<=z
+		Class EmptyLogger {
+			Null
+		}
+		.NextLogger<=Pointer(EmptyLogger())
+	}
 }
 Class ConsoleLogger {
- Module  Final WriteMessage (m$) {
-  Print "Writing to console: " + m$
- }
-class:
- Module ConsoleLogger {
-  This=Logger(![])
- }
+	Module  Final WriteMessage (m$) {
+		Print "Writing to console: " + m$
+	}
+Class:
+	Module ConsoleLogger {
+		This=Logger(![])
+	}
 }
 Class EmailLogger {
- Module  Final WriteMessage (m$) {
-  Print "Sending via email: " + m$
- }
-class:
- Module EmailLogger {
-  This=Logger(![])
- }
+	Module  Final WriteMessage (m$) {
+		Print "Sending via email: " + m$
+	}
+Class:
+	Module EmailLogger {
+		This=Logger(![])
+	}
 }
 Class FileLogger {
- Module  Final WriteMessage (m$) {
-  Print "Writing to Log File: " + m$
- }
-class:
- Module FileLogger {
-  This=Logger(![])
- }
+	Module  Final WriteMessage (m$) {
+		Print "Writing to Log File: " + m$
+	}
+Class:
+	Module FileLogger {
+		This=Logger(![])
+	}
 }
 A=ConsoleLogger(All)
 B=EmailLogger(FunctionalMessage+FunctionalError)
@@ -12627,7 +12627,7 @@ C.Message "Customer Address details missing in Branch DataBase.", Warning
 C.Message "Customer Address details missing in Organization DataBase.", Error
 C.Message "Unable to Process Order ORD1 Dated D1 For Customer C1.", FunctionalError
 C.Message "Order Dispatched.",FunctionalMessage
-Call C.Dispose()  ' no need we use weak refrences (automatic created if poiner produced for named groups
+Call C.Dispose()  ' no need we use weak refrences (automatic created If poiner produced for named groups
 }
 MODULE CHAIN2 {\\ Chain of Responsibility design pattern  2
 \\ example from https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
@@ -12635,77 +12635,77 @@ MODULE CHAIN2 {\\ Chain of Responsibility design pattern  2
 \\ so we have one group, the logger and two groups inside it in a chain
 Form 80,50
 Global enum LogLevel    {
-                    None = 0,
-                    Info = 1, 
-                    Debug = 2, 
-                    Warning = 4,
-                    Error = 8,   
-                    FunctionalMessage = 16, 
-                    FunctionalError = 32, 
-                    All = 63              
-             }
+		None = 0,
+		Info = 1, 
+		Debug = 2, 
+		Warning = 4,
+		Error = 8,   
+		FunctionalMessage = 16, 
+		FunctionalError = 32, 
+		All = 63
+}
 Class Logger {
 Private:
- logMask=0&
- Group NextLogger
+	logMask=0&
+	Group NextLogger
 Public:
- Module Final Message(msg$, severity) {
-  if Binary.And(.logMask ,severity)<>0 then
-   .WriteMessage msg$
-  End if
-  if not Valid(.NextLogger=>Null) then
-   .NextLogger=>Message msg$, severity
-  end if
- }
- Module WriteMessage (m$) {
-  Print m$
- }
+	Module Final Message(msg$, severity) {
+	If Binary.And(.logMask ,severity)<>0 Then
+		.WriteMessage msg$
+	End If
+	If not Valid(.NextLogger=>Null) Then
+		.NextLogger=>Message msg$, severity
+	End If
+}
+Module WriteMessage (m$) {
+	Print m$
+}
  Module Final SetNext ( p as pointer) {
-  if  valid(.NextLogger=>Null) then
-   .NextLogger<=p
-  else
-   .NextLogger=>SetNext p
-  end if
- }
- Function Final Dispose {
-  x=valid(.NextLogger=>Dispose())
-   Clear .NextLlogger
- }
+	If  valid(.NextLogger=>Null) Then
+		.NextLogger<=p
+	else
+		.NextLogger=>SetNext p
+	End If
+}
+Function Final Dispose {
+	x=valid(.NextLogger=>Dispose())
+	Clear .NextLlogger
+}
 Class:
- Module Logger (z) {
-  .logMask<=z
-  class EmptyLogger {
-   Null
-  }
-  .NextLogger<=Pointer(EmptyLogger())
- }
+	Module Logger (z) {
+		.logMask<=z
+		Class EmptyLogger {
+			Null
+		}
+		.NextLogger<=Pointer(EmptyLogger())
+	}
 }
 Class ConsoleLogger {
- Module  Final WriteMessage (m$) {
-  Print "Writing to console: " + m$
- }
-class:
- Module ConsoleLogger {
-  This=Logger(![])    '  ![] pass current stack of values to function Logger()
- }
+	Module  Final WriteMessage (m$) {
+		Print "Writing to console: " + m$
+	}
+Class:
+	Module ConsoleLogger {
+		This=Logger(![])	'  ![] pass current stack of values to function Logger()
+	}
 }
 Class EmailLogger {
- Module  Final WriteMessage (m$) {
-  Print "Sending via email: " + m$
- }
-class:
- Module EmailLogger {
-  This=Logger(![])
- }
+Module  Final WriteMessage (m$) {
+Print "Sending via email: " + m$
+}
+Class:
+	Module EmailLogger {
+		This=Logger(![])
+	}
 }
 Class FileLogger {
- Module  Final WriteMessage (m$) {
-  Print "Writing to Log File: " + m$
- }
-class:
- Module FileLogger {
-  This=Logger(![])
- }
+	Module  Final WriteMessage (m$) {
+		Print "Writing to Log File: " + m$
+	}
+Class:
+	Module FileLogger {
+		This=Logger(![])
+	}
 }
 Logger->ConsoleLogger(All)
 
@@ -12717,13 +12717,13 @@ Logger=>SetNext Pointer(FileLogger(Warning+Error))
 Logger=>Message "Entering function ProcessOrder().", Debug
 \\ better to use a For object {} structure
 For Logger {
- .Message "Order record retrieved.", Info
- .Message "Customer Address details missing in Branch DataBase.", Warning
- .Message "Customer Address details missing in Organization DataBase.", Error
- .Message "Unable to Process Order ORD1 Dated D1 For Customer C1.", FunctionalError
- \\ we can use Logger=>Message also
- Logger=>Message "Order Dispatched.",FunctionalMessage
- call .Dispose() 
+	.Message "Order record retrieved.", Info
+	.Message "Customer Address details missing in Branch DataBase.", Warning
+	.Message "Customer Address details missing in Organization DataBase.", Error
+	.Message "Unable to Process Order ORD1 Dated D1 For Customer C1.", FunctionalError
+	\\ we can use Logger=>Message also
+	Logger=>Message "Order Dispatched.",FunctionalMessage
+	call .Dispose() 
 }
 Logger->0&   ' or Clear Logger
 }
