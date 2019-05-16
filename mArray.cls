@@ -609,6 +609,139 @@ k.IHaveGui = Me.IHaveGui
 k.IHaveClass = Me.IHaveClass
 k.final = Me.final
 End Sub
+Public Sub CopyArrayRevFast(k As mArray)
+'copy this to k
+If k Is Me Then Exit Sub
+Dim v As Variant, i As Long, obj As Object, obj2 As Object, spare As lambda
+Dim mm As Long, M1 As Long
+k.SerialItem v, Me.UpperMonoLimit, 8
+k.myarrbase = myarrbase
+k.RevOrder = False
+k.StartResize
+For i = 0 To dnum - 1
+k.PushDim limit(i), limBase(i)
+Next i
+
+k.PushEnd
+k.RevOrder = RevOrder
+Set k.GroupRef = Me.GroupRef
+mm = Me.UpperMonoLimit
+For i = 0 To Me.UpperMonoLimit
+M1 = mm - i
+If IsObject(Me.item(M1)) Then
+Set k.item(i) = Me.item(M1)
+Else
+k.item(i) = Me.item(M1)
+End If
+Next i
+'' new
+k.Arr = Me.Arr
+k.IHaveGui = Me.IHaveGui
+k.IHaveClass = Me.IHaveClass
+k.final = Me.final
+End Sub
+Public Sub CopyArraySlice(k As mArray, fromS As Long, toS As Long)
+'copy this to k
+' make one dimemsion only
+If k Is Me Then Exit Sub
+If k Is Nothing Then Set k = New mArray
+Dim v As Variant, i As Long, obj As Object, obj2 As Object, spare As lambda
+k.SerialItem v, toS - fromS + 1, 8
+k.myarrbase = myarrbase
+k.RevOrder = False
+k.StartResize
+For i = 0 To 0
+    k.PushDim toS - fromS + 1, 0
+Next i
+k.PushEnd
+k.RevOrder = RevOrder
+Set k.GroupRef = Me.GroupRef
+If Right$(k.arrname, 2) = "%(" Then
+For i = fromS To toS
+If IsObject(Me.item(i)) Then
+Select Case Typename(Me.item(i))
+Case "Group"
+Set obj = Me.item(i)
+CopyGroupObj obj, obj2
+Set k.item(i - fromS) = obj2
+Set obj2 = Nothing
+Case "lambda"
+Dim actualdata()
+With Me.item(i)
+.CopyTo spare, actualdata()
+End With
+Set k.item(i - fromS) = spare
+Set spare = Nothing
+
+Case Else
+Set k.item(i - fromS) = Me.item(i)
+End Select
+Else
+k.item(i - fromS) = Int(Me.item(i))
+End If
+Next i
+Else
+''''''''''****************************
+For i = fromS To toS
+
+If IsObject(Me.item(i)) Then
+Select Case Typename(Me.item(i))
+Case "Group"
+Set obj = Me.item(i)
+CopyGroupObj obj, obj2
+Set k.item(i - fromS) = obj2
+Set obj2 = Nothing
+Case "lambda"
+Dim actualdata1()
+With Me.item(i)
+.CopyTo spare, actualdata1()
+End With
+Set k.item(i - fromS) = spare
+Set spare = Nothing
+Case Else
+Set k.item(i - fromS) = Me.item(i)
+End Select
+Else
+k.item(i - fromS) = Me.item(i)
+End If
+Next i
+End If
+'' new
+
+k.Arr = Me.Arr
+k.IHaveGui = Me.IHaveGui
+k.IHaveClass = Me.IHaveClass
+k.final = Me.final
+End Sub
+Public Sub CopyArraySliceFast(k As mArray, fromS As Long, toS As Long)
+'copy this to k
+' make one dimemsion only
+If k Is Me Then Exit Sub
+If k Is Nothing Then Set k = New mArray
+Dim v As Variant, i As Long, obj As Object, obj2 As Object, spare As lambda
+k.SerialItem v, toS - fromS + 1, 8
+k.myarrbase = myarrbase
+k.RevOrder = False
+k.StartResize
+For i = 0 To 0
+    k.PushDim toS - fromS + 1, 0
+Next i
+k.PushEnd
+k.RevOrder = RevOrder
+Set k.GroupRef = Me.GroupRef
+For i = fromS To toS
+If IsObject(Me.item(i)) Then
+    Set k.item(i - fromS) = Me.item(i)
+Else
+    k.item(i - fromS) = Me.item(i)
+End If
+Next i
+
+k.Arr = Me.Arr
+k.IHaveGui = Me.IHaveGui
+k.IHaveClass = Me.IHaveClass
+k.final = Me.final
+End Sub
 
 Public Function UpperMonoLimit()
 UpperMonoLimit = maxitems1

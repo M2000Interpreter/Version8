@@ -15136,7 +15136,7 @@ End Function
 Function Matrix(bstack As basetask, a$, Arr As Variant, res As Variant) As Boolean
 Dim Pad$, cut As Long, pppp As mArray, pppp1 As mArray, st1 As mStiva, anything As Object, w3 As Long, useHandler As mHandler, r As Variant, p As Variant
 Dim cur As Long, w2 As Long, w4 As Long, retresonly As Boolean
-Dim multi As Boolean
+Dim multi As Boolean, original As Long
 Set anything = Arr
 If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
 Pad$ = myUcase(Left$(a$, 20))  ' 20??
@@ -15147,6 +15147,7 @@ Mid$(a$, 1, cut) = space$(cut)
 Set useHandler = anything
 If TypeOf useHandler.objref Is mArray Then
 Set pppp = useHandler.objref
+If Left$(Pad$, 1) = Chr$(1) Then LSet Pad$ = Mid$(Pad$, 2): cut = cut - 1
 Do
 multi = False
 Select Case Left$(Pad$, cut - 1)
@@ -15263,7 +15264,44 @@ Else
 res = pppp.item(w2)
 End If
 End If
-Case "EXIST", "ΥΠΑΡΧΕΙ"
+Case "SLICE", "ΜΕΡΟΣ"
+If IsExp(bstack, a$, p, , True) Then
+If p < 0 Or p >= pppp.count Then
+    MyEr "start offset out of limits", "Δείκτης αρχής εκτός ορίων"
+    Matrix = False
+    Exit Function
+End If
+Else
+p = 0
+End If
+If FastSymbol(a$, ",") Then
+If IsExp(bstack, a$, r, , True) Then
+    If r >= pppp.count Or r < p Then
+    MyEr "end offset out of limits", "Δείκτης τέλους εκτός ορίων"
+    Matrix = False
+    Exit Function
+    End If
+Else
+r = pppp.count - 1
+End If
+Else
+r = pppp.count - 1
+End If
+If original > 0 Then
+pppp.CopyArraySliceFast pppp1, CLng(p), CLng(r)
+Else
+pppp.CopyArraySlice pppp1, CLng(p), CLng(r)
+End If
+original = original + 1
+Set pppp = pppp1
+Set pppp1 = Nothing
+multi = True
+Matrix = True
+Set useHandler = New mHandler
+useHandler.t1 = 3
+Set useHandler.objref = pppp
+Set bstack.lastobj = useHandler
+
 
 Case "FOLD", "ΠΑΚ", "FOLD$", "ΠΑΚ$"
 If IsExp(bstack, a$, p) Then
@@ -15295,8 +15333,14 @@ Else
 End If
 Case "REV", "ΑΝΑΠ"
 Set pppp1 = New mArray
-pppp.CopyArrayRev pppp1
+If original > 0 Then
+    pppp.CopyArrayRevFast pppp1
+Else
+    pppp.CopyArrayRev pppp1
+End If
+original = original + 1
 Set pppp = pppp1
+Set pppp1 = Nothing
 res = 0
 multi = True
 Matrix = True
@@ -15320,6 +15364,7 @@ Else
 Set pppp1 = New mArray
 pppp.CopyArray pppp1
 Set pppp = pppp1
+original = original + 1
 End If
 res = 0
 If FastSymbol(a$, ",") Then
@@ -15362,6 +15407,7 @@ Else
 Set pppp1 = New mArray
 pppp.CopyArray pppp1
 Set pppp = pppp1
+original = original + 1
 End If
 res = 0
 If FastSymbol(a$, ",") Then

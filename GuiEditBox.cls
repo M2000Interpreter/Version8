@@ -2158,7 +2158,7 @@ End Sub
 
 Private Sub addone2000(ByVal thispos As Long, ByVal thiscolor As Long)
 Dim k As Long
-
+If thiscolor = 0 Then thiscolor = 14
 k = UBound(col())
 If VarType(col(0)) = 0 Then
 makebase 14
@@ -3809,7 +3809,11 @@ If FastSymbol(a$, ",") Then
   End If
 
     If FastSymbol(a$, ")") Then
+    If lastcol = 0 Then
+    addone2000 pos2, 14
+    Else
   addone2000 pos2, lastcol
+  End If
     pos2 = k - Len(a$) + 1
   End If
   End If
@@ -3979,7 +3983,26 @@ pos2 = k - Len(a$) + 1
 End If
 feedback = 0 'lastcol
 feedthis = 0
- 
+If MaybeIsSymbol(a$, "<>=~") Then
+    onetime = False
+            pos2 = k - Len(a$) + 1
+            addone2000 pos2, 14
+
+    If FastSymbol(a$, "<") Then
+        If FastSymbol(a$, ">") Then
+        ElseIf FastSymbol(a$, "=") Then
+        End If
+    ElseIf FastSymbol(a$, ">") Then
+        
+        If FastSymbol(a$, "=") Then
+        End If
+        
+        
+    ElseIf FastSymbol(a$, "=") Then
+    ElseIf FastSymbol(a$, "~") Then
+    End If
+    
+End If
 Else
     GoTo nextline
 
@@ -4021,7 +4044,22 @@ again112:
          addone2000 pos2, 14
     pos2 = k - Len(a$) + 1
     onetime = True
-    If MaybeIsSymbol(a$, ".;+(") Then
+   If MaybeIsSymbol(a$, ".;+(<>=~") Then
+    onetime = False
+    If FastSymbol(a$, "<") Then
+        
+        If FastSymbol(a$, ">") Then
+        ElseIf FastSymbol(a$, "=") Then
+        End If
+    ElseIf FastSymbol(a$, ">") Then
+        
+        If FastSymbol(a$, "=") Then
+        End If
+
+    ElseIf FastSymbol(a$, "=") Then
+    ElseIf FastSymbol(a$, "~") Then
+    End If
+
 GoTo CheckThis
 End If
     GoTo again112

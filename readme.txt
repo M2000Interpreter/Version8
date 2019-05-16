@@ -1,20 +1,22 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 19 active-X
-
-Correction in functions in local groups when we use
-a local group definition (always Local make a new group):
-
-local group a {
-	function b {
-		=100
-	}
-}
-Print a.b()=100
+Version 9.8 Revision 20 active-X
 
 
+1. New function #slice()
+Print (1,2,3,4)#slice(0,1)  ' 1 2
+Print (1,2,3,4)#slice(0,1)#rev() ' 2 1
 
-There is a newer Info program - a collection of modules.
+2. a=(1, a$>"a", 2) now works (no problem with string comparison)
+a$="b"
+a=(1, a$>"a", 2)
+print a  ' 1 True 2
+
+
+3. correction in syntax color procedure for multiline strings in comparisons
+
+
+
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
 load info

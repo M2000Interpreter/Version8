@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 19
+Global Const Revision = 20
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2532,17 +2532,7 @@ Dim pppp As mArray, x1 As Long
 x1 = 1
 Set pppp = New mArray: pppp.myarrbase = 0: pppp.PushDim (1): pppp.PushEnd: pppp.Arr = True
 If skip = 1 Then GoTo firstexp Else If skip = 2 Then GoTo firststr
-If IsStrExp(bstack, b$, s$) Then
-firststr:
-            x1 = x1 + 1
-            pppp.SerialItem 0#, x1, 10
-            If bstack.lastobj Is Nothing Then
-                pppp.item(x1 - 2) = s$
-            Else
-                Set pppp.item(x1 - 2) = bstack.lastobj
-                Set bstack.lastobj = Nothing
-            End If
-ElseIf IsExp(bstack, b$, p) Then
+If IsExp(bstack, b$, p) Then
 firstexp:
             x1 = x1 + 1
             pppp.SerialItem 0, x1, 10
@@ -2552,7 +2542,16 @@ firstexp:
                 Set pppp.item(x1 - 2) = bstack.lastobj
                 Set bstack.lastobj = Nothing
             End If
-            
+ElseIf IsStrExp(bstack, b$, s$) Then
+firststr:
+            x1 = x1 + 1
+            pppp.SerialItem 0#, x1, 10
+            If bstack.lastobj Is Nothing Then
+                pppp.item(x1 - 2) = s$
+            Else
+                Set pppp.item(x1 - 2) = bstack.lastobj
+                Set bstack.lastobj = Nothing
+            End If
 End If
 Do While MaybeIsSymbol(b$, ",)")
 IsSymbol b$, ","
@@ -2560,6 +2559,15 @@ If MaybeIsSymbol(b$, ")") Then
 
 pppp.SerialItem 0, x1 - 1, 10
 Exit Do
+ElseIf IsExp(bstack, b$, p) Then
+x1 = x1 + 1
+            pppp.SerialItem 0, x1, 10
+            If bstack.lastobj Is Nothing Then
+                pppp.item(x1 - 2) = p
+            Else
+                Set pppp.item(x1 - 2) = bstack.lastobj
+                Set bstack.lastobj = Nothing
+            End If
 ElseIf IsStrExp(bstack, b$, s$) Then
 x1 = x1 + 1
             pppp.SerialItem 0, x1, 10
@@ -2570,15 +2578,7 @@ x1 = x1 + 1
                 Set bstack.lastobj = Nothing
             End If
 
-ElseIf IsExp(bstack, b$, p) Then
-x1 = x1 + 1
-            pppp.SerialItem 0, x1, 10
-            If bstack.lastobj Is Nothing Then
-                pppp.item(x1 - 2) = p
-            Else
-                Set pppp.item(x1 - 2) = bstack.lastobj
-                Set bstack.lastobj = Nothing
-            End If
+
 End If
 
 Loop
@@ -6778,9 +6778,19 @@ Else
         If Not nbstack.StaticCollection Is Nothing Then
       bstack.Parent.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
         End If
-        If FastSymbol(a$, "#") Then
+        If MaybeIsSymbol(a$, "#") Then
         Set nbstack.lastobj = Nothing
+        If Typename(bstack.lastobj) = "Group" Then
+        Mid$(a$, 1, 1) = "."
+         Set pppp = New mArray
+        pppp.Arr = False
+        Set pppp.GroupRef = bstack.lastobj
+        w2 = -2
+        GoTo contgroup3
+        Else
+        Mid$(a$, 1, 1) = Chr$(1)
         GoTo comehere
+        End If
         ElseIf InStr(v$, "%") > 0 Then
             If SG = 1 Then
                 r = MyRound(p)
