@@ -1,14 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 21 active-X
+Version 9.8 Revision 21b active-X
 
 
-Addition of operator += for arrays with string value, in CLI (in modules/function operated)
-in CLI (M2000 command line interface or Repl) execute each statement
-Dim a$(10)="ok"
-a$(3)+="...."
-print a$(3)="ok...."
-
+21b has A change in lzw module in info.gsb
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
