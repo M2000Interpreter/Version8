@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 21
+Global Const Revision = 22
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -19328,17 +19328,17 @@ RepPara = True
             End If
         End If
 End Function
-Function IdentifierGroup(basestack As basetask, what$, rest$, Lang As Long, alocal As Boolean) As Boolean
+Function IdentifierGroup(basestack As basetask, what$, rest$, Lang As Long, alocal As Boolean, addlen As Long) As Boolean
     IdentifierGroup = True
     Select Case what$
     Case "&"
-       IdentifierGroup = MyFunction(2, basestack, rest$, Lang)
+       IdentifierGroup = MyFunction(2, basestack, rest$, Lang, addlen)
         Exit Function
     Case "FUNCTION", "”’Õ¡—‘«”«"
-        IdentifierGroup = MyFunction(-1, basestack, rest$, Lang, True, alocal)
+        IdentifierGroup = MyFunction(-1, basestack, rest$, Lang, True, alocal, addlen)
         Exit Function
     Case "MODULE", "‘Ã«Ã¡"
-        IdentifierGroup = MyModule(basestack, rest$, Lang, True, alocal)
+        IdentifierGroup = MyModule(basestack, rest$, Lang, True, alocal, addlen, True)
         Exit Function
     Case "SUPERCLASS", "’–≈— À¡”«"
         IdentifierGroup = ProcClass(basestack, rest$, Lang, True)
@@ -20498,11 +20498,12 @@ s() = Split(subname$, Chr$(1))
 For i = LBound(s$()) + 1 To UBound(s$())
 If s(i) <> "" Then
 mm = val(Split(s(i))(1))
+
 als = AllocSub()
-sbf(als) = sbf(mm)
+sbf(als) = sbf(Abs(mm))
+
  subHash.ItemCreator CStr(Split(s(i))(0)), als, True
- 
- ''sbf(als).sbgroup = name$
+
  
  End If
 Next i
@@ -24678,7 +24679,7 @@ End If
 var(vvv).edittag = vbNullString
 End Sub
 
-Function ExecuteGroupStruct(bstack As basetask, ohere$, vvv As Long, rest$, Lang As Long, Optional glob As Boolean = False, Optional alocal As Boolean = False) As Long
+Function ExecuteGroupStruct(bstack As basetask, ohere$, vvv As Long, rest$, ByVal addlen As Long, Lang As Long, Optional glob As Boolean = False, Optional alocal As Boolean = False) As Long
 Dim w$, w1$, p As Variant, v As Long, s$, ss$, b$, i As Long, lcl As Boolean, j As Long, nm$, x1 As Long, y1 As Long, frm$, skip As Boolean
 Dim uni As Boolean, prv As Boolean, stripstack1 As New basetask, hlp As String, vl As String, NoRec As Boolean, final As Boolean
 Dim highpriority As Boolean, ThisGroup As Group, RightAssociative As Boolean, removebypass As Boolean, c As Constant
@@ -25236,17 +25237,17 @@ If x1 <> 0 Then
                           End If
              End If
  
-   If here$ <> "" Then
-             If Lang = 1 Then
-                rest$ = "GLOBAL " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " { " + ss$ + "} " + rest$
-            Else
-                  rest$ = "√≈Õ… « " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " { " + ss$ + "} " + rest$
-            End If
-       GoTo BYPASS3
-   Else
-   
+   'If here$ <> "" Then
+    '         If Lang = 1 Then
+     '           rest$ = "GLOBAL " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " { " + ss$ + "} " + rest$
+      '      Else
+       '           rest$ = "√≈Õ… « " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " { " + ss$ + "} " + rest$
+        '    End If
+      ' GoTo BYPASS3
+   'Else
+        MyEr "group struct error1", "ÒÔ‚ÎÁÏ· ÛÙÁ ‰ÔÏﬁ1"
         ExecuteGroupStruct = 0: Exit Function
-   End If
+   'End If
    End If
   End If
   End If
@@ -25317,21 +25318,22 @@ If x1 <> 0 Then
   End If
   If here$ = vbNullString Then
   If w$ = vbNullString Then
-  If Lang = 1 Then
-    rest$ = "NEW " + F$ & " " & rest$
+  'If Lang = 1 Then
+    'rest$ = "NEW " + F$ & " " & rest$
+    rest$ = F$ & " " & rest$
     w$ = "FUNCTION"
-    Else
-     rest$ = "Õ≈¡ " + F$ & " " & rest$
-     w$ = "”’Õ¡—‘«”«"
-    End If
+   ' Else
+    ' rest$ = "Õ≈¡ " + F$ & " " & rest$
+    ' w$ = "”’Õ¡—‘«”«"
+    'End If
   Else
-  If Lang = 1 Then
-    rest$ = "NEW " + bstack.GroupName + F$ & " " & rest$
-    
-    Else
-     rest$ = "Õ≈¡ " + bstack.GroupName + F$ & " " & rest$
-    End If
-    End If
+  'If Lang = 1 Then
+   ' rest$ = "NEW " + bstack.GroupName + F$ & " " & rest$
+    rest$ = bstack.GroupName + F$ & " " & rest$
+   ' Else
+    ' rest$ = "Õ≈¡ " + bstack.GroupName + F$ & " " & rest$
+    'End If
+   End If
   Else
   
   'If alocal Then
@@ -25356,7 +25358,7 @@ If x1 <> 0 Then
   End If
   
 BYPASS3:
-ExecuteGroupStruct = Abs(IdentifierGroup(bstack, w$, rest$, Lang, alocal))
+ExecuteGroupStruct = Abs(IdentifierGroup(bstack, w$, rest$, Lang, alocal, addlen))
 
   If GetSub(bstack.GroupName + F$ + "()", i) Then
    If sbf(i).locked Then final = True
@@ -25443,18 +25445,18 @@ If x1 <> 0 Then
              End If
 
  
-   If here$ <> "" Then
-v = 123
-             If Lang = 1 Then
-                rest$ = "GLOBAL " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " {'11001EDIT " + CStr(bstack.OriginalCode) + ", 3" + vbCrLf + ss$ + "} " + rest$
-                  Else
-                  rest$ = "√≈Õ… œ " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " {'11001EDIT " + CStr(bstack.OriginalCode) + ", 3" + vbCrLf + ss$ + "} " + rest$
-                  End If
-   GoTo BYPASS4
-   Else
-   
+  ' If here$ <> "" Then
+'v = 123
+ '            If Lang = 1 Then
+  '              rest$ = "GLOBAL " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " {'11001EDIT " + CStr(bstack.OriginalCode) + ", 3" + vbCrLf + ss$ + "} " + rest$
+   '               Else
+    '              rest$ = "√≈Õ… œ " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " {'11001EDIT " + CStr(bstack.OriginalCode) + ", 3" + vbCrLf + ss$ + "} " + rest$
+     '             End If
+   'GoTo BYPASS4
+   'Else
+        MyEr "group struct error2", "ÒÔ‚ÎÁÏ· ÛÙÁ ‰ÔÏﬁ2"
         ExecuteGroupStruct = 0: Exit Function
-   End If
+   'End If
    End If
   End If
   Else
@@ -25565,15 +25567,15 @@ Else
   
   rest$ = F$ & " " & rest$
   End If
-  If glob Then
-  If Lang = 1 Then
-  rest$ = "NEW " + rest$
-  Else
-  rest$ = "Õ≈œ " + rest$
-  End If
-  End If
+  'If glob Then
+ ' If Lang = 1 Then
+  'rest$ = "NEW " + rest$
+ ' Else
+ ' rest$ = "Õ≈œ " + rest$
+  'End If
+  'End If
 BYPASS4:
- ExecuteGroupStruct = Abs(IdentifierGroup(bstack, w$, rest$, Lang, alocal))
+ ExecuteGroupStruct = Abs(IdentifierGroup(bstack, w$, rest$, Lang, alocal Or glob, addlen))
   If GetSub(bstack.GroupName + F$, i) Then
   If sbf(i).locked Then final = True
   If final Then sbf(i).locked = True
@@ -25636,7 +25638,7 @@ Else
 bstack.priveflag = prv
 bstack.uniflag = uni
 bstack.finalFlag = final
-   ExecuteGroupStruct = Abs(IdentifierGroup(bstack, w$, rest$, Lang, alocal))
+   ExecuteGroupStruct = Abs(IdentifierGroup(bstack, w$, rest$, Lang, alocal, addlen))
   bstack.priveflag = False
   bstack.uniflag = False
   bstack.finalFlag = False
@@ -25675,7 +25677,7 @@ If final Then
                                             LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
                                             
                                             bstack.priveflag = prv
-                                             ExecuteGroupStruct = Abs(ExecuteGroupStruct(bstack, bstack.GroupName & w$, y1, ss$, Lang, glob, alocal))
+                                             ExecuteGroupStruct = Abs(ExecuteGroupStruct(bstack, bstack.GroupName & w$, y1, ss$, 0, Lang, glob, alocal))
                                             bstack.priveflag = False
                                                 OvarnameLen = varhash.count + 1 'Len(VarName$) + 1   'we record ...
                                           
@@ -25689,8 +25691,11 @@ If final Then
                                           frm$ = bstack.GroupName
                                           prepareGroup bstack, w$, y1, glob, Len(hlp) > 0, alocal
                                         LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, uni
-                                        
-                                        If Not Abs(ExecuteGroupStruct(bstack, bstack.GroupName & w$, y1, rest$, Lang, glob, alocal)) = 0 Then
+                                            addlen = Len(rest$)
+                                            s$ = block(rest$)
+                                            addlen = addlen - Len(s$)
+               
+                                        If Not Abs(ExecuteGroupStruct(bstack, bstack.GroupName & w$, y1, s$, addlen, Lang, glob, alocal)) = 0 Then
                                             ExecuteGroupStruct = FastSymbol(rest$, "}")
                                         End If
                                             OvarnameLen = varhash.count + 1  'we record ...
@@ -28111,7 +28116,7 @@ cont1010:
      
               If Trim$(vvl) <> "" Then
               s$ = CStr(vvl)
-                 ExecuteGroupStruct bstack, what$, (i), s$, 1
+                 ExecuteGroupStruct bstack, what$, (i), s$, 0, 1
               End If
                 .PeekItem x1 + 1, vvl
                ' save definitions
@@ -28433,7 +28438,7 @@ cont1010:
                 .PeekItem x1, vvl
                 If Trim$(vvl) <> "" Then
                     s$ = CStr(vvl)
-                    ExecuteGroupStruct bstack, what$, (i), s$, 1
+                    ExecuteGroupStruct bstack, what$, (i), s$, 0, 1
                 End If
                 .PeekItem x1 + 1, vvl
               
@@ -40753,7 +40758,7 @@ End If
 Set mDir = Nothing
 RepPlain bstack, bstack.Owner, ss$
 End Function
-Function MyFunction(entrypoint As Long, bstack As basetask, rest$, Lang As Long, Optional noskipcommand = False, Optional MakeNew As Boolean) As Boolean
+Function MyFunction(entrypoint As Long, bstack As basetask, rest$, Lang As Long, Optional noskipcommand = False, Optional MakeNew As Boolean, Optional addlen As Long = 0) As Boolean
 Dim y1 As Long, par As Boolean, what$, s$, ss$, pa$, x1 As Long, i As Long, frm$
 Dim ohere$
 ohere$ = here$
@@ -40774,6 +40779,7 @@ MyFunction = True
             rest$ = Mid$(rest$, i + 1)
             GoTo operators
         ElseIf entrypoint = -1 Then
+        par = Len(ohere$) = 0
         GoTo alocal
         Else
                 y1 = IsLabelSymbolNew(rest$, "√≈Õ… «", "GLOBAL", Lang)
@@ -40793,7 +40799,10 @@ MyFunction = True
                         what$ = what$ & "()"
                         If FastSymbolNoTrimAfter(rest$, "{") Then
                                 ss$ = block(rest$)
-                                i = Len(rest$)
+                                If Len(ss$) = 0 Then
+                                    ss$ = blockString(rest$, Asc("}"))
+                                End If
+                                i = Len(rest$) + addlen
                                 If Not FastSymbol(rest$, "}") Then
                                         MyFunction = False
                                 Else
@@ -40810,7 +40819,7 @@ MyFunction = True
                                                         End If
                                                 ElseIf Not bstack.LoadOnly Then
                                                         If Left$(ss$, 10) <> "'11001EDIT" Then
-                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i - 2) + vbCrLf
+                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i + addlen - 2) + vbCrLf
                                                         End If
                                                 End If
                                         bstack.IndexSub = ModuleSub(what$, s$ + ss$)
@@ -40850,7 +40859,10 @@ operators:
                                     End If
                                 If FastSymbolNoTrimAfter(rest$, "{") Then
                                         ss$ = block(rest$)
-                                        y1 = Len(rest$)
+                                        If Len(ss$) = 0 Then
+                                            ss$ = blockString(rest$, Asc("}"))
+                                        End If
+                                        y1 = Len(rest$) + addlen
                                         If Not FastSymbol(rest$, "}") Then
                                                 MyFunction = False
                                         Else
@@ -40861,12 +40873,12 @@ operators:
                                                         Else
                                                                 pa$ = sbf(Abs(bstack.OriginalCode)).sb
                                                                 If Not Left$(ss$, 10) = "'11001EDIT" Then
-                                                                         s$ = GetNextLine(pa$) & "-" & CStr(y1 - 2) + vbCrLf
+                                                                         s$ = GetNextLine(pa$) & "-" & CStr(y1 - 2 + addlen) + vbCrLf
                                                                 End If
                                                         End If
                                                 ElseIf bstack.OriginalCode > 0 And Not bstack.LoadOnly And here$ <> "" Then
                                                         If Left$(ss$, 10) <> "'11001EDIT" Then
-                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(y1 - 2) + vbCrLf
+                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(y1 - 2 + addlen) + vbCrLf
                                                         End If
                                                 End If
                                                 If frm$ <> "" Then
@@ -40899,14 +40911,17 @@ operators:
                                 End If
                                 If FastSymbolNoTrimAfter(rest$, "{") Then
                                         what$ = block(rest$)
-                                            If Len(frm$) <> 0 Then
-                                                    If Lang = 1 Then
-                                                        what$ = "Read " + frm$ + vbCrLf + what$
-                                                    Else
-                                                        what$ = "ƒÈ‹‚·ÛÂ " + frm$ + vbCrLf + what$
-                                                    End If
-                                                    frm$ = vbNullString
-                                                End If
+                                        If Len(what$) = 0 Then
+                                            what$ = blockString(rest$, Asc("}"))
+                                        End If
+                                        If Len(frm$) <> 0 Then
+                                            If Lang = 1 Then
+                                                what$ = "Read " + frm$ + vbCrLf + what$
+                                            Else
+                                                what$ = "ƒÈ‹‚·ÛÂ " + frm$ + vbCrLf + what$
+                                            End If
+                                            frm$ = vbNullString
+                                        End If
                                         If Not FastSymbol(rest$, "}") Then
                                                 MyFunction = False
                                         Else
@@ -40926,7 +40941,7 @@ operators:
                 x1 = ModuleSub(what$, "")
                 Else
                 If Len(here$) = 0 Then
-                x1 = ModuleSub(bstack.GroupName & what$, "")
+                x1 = ModuleSub(what$, "")   'bstack.GroupName &
                 Else
                 x1 = ModuleSub(here$ & "." & bstack.GroupName & what$, "")
                 End If
@@ -40955,6 +40970,9 @@ JUMP1:
                                 If FastSymbolNoTrimAfter(rest$, "{") Then
                                 
                                             what$ = block(rest$) + " "
+                                            If Len(what$) = 1 Then
+                                                what$ = blockString(rest$, Asc("}")) + " "
+                                            End If
                                                 If Len(frm$) <> 0 Then
                                                     If Lang = 1 Then
                                                         what$ = "Read " + frm$ + vbCrLf + what$
@@ -40991,6 +41009,9 @@ JUMP1:
                                     If FastSymbolNoTrimAfter(rest$, "{") Then
                                            If sbf(x1).locked Or sbf(x1).Extern > 0 Then
                                          what$ = block(rest$)
+                                        If Len(what$) = 0 Then
+                                            what$ = blockString(rest$, Asc("}"))
+                                        End If
                                         bstack.IndexSub = x1
                                        FastSymbol rest$, "}", True
                                      Exit Function
@@ -41017,11 +41038,14 @@ JUMP1:
                                         i = Len(rest$)
                                         
                                         what$ = block(rest$) + " "
+                                        If Len(what$) = 1 Then
+                                            what$ = blockString(rest$, Asc("}")) + " "
+                                        End If
                                         While Left$(what$, 10) = "'11001EDIT"
                                                 SetNextLine what$
                                         Wend
                                         If Right$(what$, 2) <> vbCrLf Then what$ = what$ + vbCrLf
-                                        what$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i - 2) + vbCrLf + what$
+                                        what$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i - 2 + addlen) + vbCrLf + what$
                                         If Not FastSymbol(rest$, "}") Then
                                                 MyFunction = False
                                         Else
@@ -41052,6 +41076,9 @@ jumpheretoo:
                         
                                     If here$ = vbNullString Then
                                                 s$ = block(rest$)
+                                                If Len(s$) = 0 Then
+                                                    s$ = blockString(rest$, Asc("}"))
+                                                End If
                                                  If frm$ <> "" Then
 
                                                     s = "READ " + frm$ + vbCrLf + s$
@@ -41061,6 +41088,9 @@ jumpheretoo:
                                                 bstack.IndexSub = ModuleSub(what$, s$)
                                     Else
                                                 ss$ = block(rest$)
+                                                    If Len(ss$) = 0 Then
+                                                        ss$ = blockString(rest$, Asc("}"))
+                                                    End If
                                                 i = Len(rest$)
                                              '   If Right$(ss$, 2) <> vbCrLf Then ss$ = ss$ + vbCrLf
                                                 If Left$(sbf(Abs(bstack.OriginalCode)).sb, 10) = "'11001EDIT" Then
@@ -41076,7 +41106,7 @@ jumpheretoo:
                                                         End If
                                                 ElseIf Not bstack.LoadOnly Then
                                                         If Left$(ss$, 10) <> "'11001EDIT" Then
-                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i + 2 * (bstack.UseGroupname <> "")) + vbCrLf
+                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i + addlen + 2 * (bstack.UseGroupname <> "")) + vbCrLf
                                                         End If
                                                 End If
                                                 If frm$ <> "" Then
@@ -44918,7 +44948,7 @@ Locale:
 End Function
 Function ProcGroup(entrypoint As Long, basestack As basetask, rest$, Lang As Long) As Boolean
 Dim s$, x1 As Long, y1 As Long, what$, flag As Boolean, ss$, i As Long, par As Boolean
-Dim p As Variant, HasStrName As Boolean, strName$, NewStat As Boolean
+Dim p As Variant, HasStrName As Boolean, strName$, NewStat As Boolean, addlen As Long
 ProcGroup = True
 
 
@@ -45014,7 +45044,7 @@ If x1 = 1 Then
             s$ = basestack.GroupName
             prepareGroup basestack, what$, y1, flag, HasStrName
             var(y1).IamGlobal = flag
-            ProcGroup = ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, ss$, Lang) <> 0
+            ProcGroup = ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, ss$, 0, Lang) <> 0
             basestack.GroupName = s$
         End If
         
@@ -45030,8 +45060,10 @@ If x1 = 1 Then
                 var(y1).IamGlobal = flag
                 
                 If flag Then ss$ = here$: here$ = vbNullString
-                
-                If ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, rest$, Lang, flag, NewStat) = 0 Then
+                addlen = Len(rest$)
+                s$ = block(rest$)
+                addlen = addlen - Len(s$)
+                If ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, s$, addlen, Lang, flag, NewStat) = 0 Then
                     If flag Then here$ = ss$
                     var(y1).edittag = "'11001EDIT " + here$ + ", " + CStr(Len(rest$))
                 End If
@@ -45053,7 +45085,7 @@ If x1 = 1 Then
                     
                     prepareGroup basestack, what$, y1, flag, HasStrName
                     var(y1).IamGlobal = flag
-                    If ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, ss$, Lang, flag) = 0 Then
+                    If ExecuteGroupStruct(basestack, basestack.GroupName & what$, y1, ss$, 0, Lang, flag) = 0 Then
                        rest$ = ss$ + rest$
                     Else
                         ProcGroup = FastSymbol(rest$, "}")
@@ -45185,12 +45217,16 @@ With EventObj
     .Done = False
 End With
 End Sub
-Function MyModule(basestack As basetask, rest$, Lang As Long, Optional noskipcommand = False, Optional MakeNew As Boolean) As Boolean
+Function MyModule(basestack As basetask, rest$, Lang As Long, Optional noskipcommand = False, Optional MakeNew As Boolean, Optional addlen As Long = 0, Optional skipglob As Boolean = False) As Boolean
 Dim s$, pa$, ss$, x1 As Long, par As Boolean, what$, ohere$, i As Long, X3 As Long, frm$
 ohere$ = here$
 MyModule = True
-x1 = IsLabelSymbolNew(rest$, "√≈Õ… œ", "GLOBAL", Lang)
+If skipglob Then
+        par = Len(ohere$) = 0
+Else
+        x1 = IsLabelSymbolNew(rest$, "√≈Õ… œ", "GLOBAL", Lang)
         par = IsLabelSymbolNew(rest$, "Õ≈œ", "NEW", Lang)
+End If
 If x1 <> 0 Then
         If MaybeIsSymbol(rest$, Chr(34)) Then
                 ISSTRINGA rest$, what$
@@ -45228,7 +45264,9 @@ BYPASS1:
                         
                 If FastSymbolNoTrimAfter(rest$, "{") Then
                 ss$ = block(rest$)
-                
+                If Len(ss$) = 0 Then
+                    ss$ = blockString(rest$, Asc("}"))
+                End If
                 i = Len(rest$)
                 
                 'If Right$(ss$, 2) <> vbCrLf Then ss$ = ss$ + vbCrLf
@@ -45245,7 +45283,7 @@ BYPASS1:
                         If Left$(ss$, 10) <> "'11001EDIT" Then
                                 If LenB(here$) = 0 Then
                                 ElseIf basestack.OriginalCode > 0 And Not basestack.LoadOnly Then
-                                s$ = "'11001EDIT " & GetModuleName(basestack, ohere$) & ",-" & CStr(i - 2) + vbCrLf
+                                s$ = "'11001EDIT " & GetModuleName(basestack, ohere$) & ",-" & CStr(i + addlen - 2) + vbCrLf
                                 End If
                         End If
                 End If
@@ -45289,6 +45327,9 @@ JUMP0:
                         End If
                         If FastSymbolNoTrimAfter(rest$, "{") Then
                             what$ = block(rest$)
+                            If Len(what$) = 0 Then
+                                what$ = blockString(rest$, Asc("}"))
+                            End If
                         If Right$(what$, 2) <> vbCrLf Then what$ = what$ + vbCrLf
                                    If Not FastSymbol(rest$, "}") Then
                                            MyModule = False
@@ -45309,6 +45350,9 @@ JUMP0:
 JUMP1:
                  If FastSymbol(rest$, "(") Then
                                 frm$ = BlockParam(rest$)
+                                If Len(frm$) = 0 Then
+                                    frm$ = blockString(rest$, Asc("}"))
+                                End If
                              If frm$ <> "" Then Mid$(rest$, 1, Len(frm$)) = space$(Len(frm$)) ': If InStr(frm$, "=") > 0 Then frm$ = "? " + frm$
                             If Not FastSymbol(rest$, ")") Then
                        
@@ -45331,13 +45375,16 @@ JUMP1:
                         End If
                                 i = Len(rest$) ''
                                 what$ = block(rest$) + " "
+                                  If Len(what$) = 1 Then
+                                    what$ = blockString(rest$, Asc("}")) + " "
+                                End If
                                 ' here for locked
                                 If Not sbf(x1).locked Then
                                 While Left$(what$, 10) = "'11001EDIT"
                                         SetNextLine what$
                                 Wend
                                 If Right$(what$, 2) <> vbCrLf Then what$ = what$ + vbCrLf
-                                s$ = "'11001EDIT " & GetModuleName(basestack, ohere$) & ",-" & CStr(i - 2)
+                                s$ = "'11001EDIT " & GetModuleName(basestack, ohere$) & ",-" & CStr(i + addlen - 2)
                                   If frm$ <> "" Then
                                 If Lang = 1 Then
                                 what$ = s$ + vbCrLf + "Read " + frm$ + vbCrLf + what$
@@ -45379,6 +45426,9 @@ JUMP1:
 jumpheretoo:
                         If here$ = vbNullString Then
                                 pa$ = block(rest$)
+                            If Len(pa$) = 0 Then
+                                pa$ = blockString(rest$, Asc("}"))
+                            End If
                                 ' Call preProcessor(basestack, pa$)
                                 If frm$ <> "" Then pa$ = "READ " + frm$ + vbCrLf + pa$
                                 If Right$(pa$, 2) <> vbCrLf Then pa$ = pa$ + vbCrLf
@@ -45390,6 +45440,9 @@ jumpheretoo:
                                 End If
                         Else
                                 ss$ = block(rest$)
+                                If Len(ss$) = 0 Then
+                                    ss$ = blockString(rest$, Asc("}"))
+                                End If
                                 ' Call preProcessor(basestack, ss$)
                                 i = Len(rest$)
                               '  If Right$(ss$, 2) <> vbCrLf Then ss$ = ss$ + vbCrLf
@@ -45404,7 +45457,7 @@ jumpheretoo:
                                         End If
                                 ElseIf Not basestack.LoadOnly Then
                                         If Left$(ss$, 10) <> "'11001EDIT" Then
-                                                s$ = "'11001EDIT " & GetModuleName(basestack, ohere$) & ",-" & CStr(i - 2) + IIf(Right$(ss$, 2) <> vbCrLf, vbCrLf, "")
+                                                s$ = "'11001EDIT " & GetModuleName(basestack, ohere$) & ",-" & CStr(i + addlen) + IIf(Right$(ss$, 2) <> vbCrLf, vbCrLf, "")
                                         End If
                                 End If
                                 If frm$ <> "" Then

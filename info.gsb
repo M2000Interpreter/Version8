@@ -5595,6 +5595,7 @@ Declare Alfa Nothing
 Declare Math Nothing
 Print counter1, counter2
 Title "Demo Complete"
+Set Fast   ' return to normal
 }
 MODULE UPDATE {dir appdir$
 save info, info
@@ -7692,7 +7693,7 @@ INFO
 }
 MODULE SH {hide
 wait 100
-Desktop  ' copy dedcktop to background
+Desktop  ' copy desktop to background
 BackGround {
 	img$=""
 	move 0,0
@@ -12726,5 +12727,823 @@ For Logger {
 	call .Dispose() 
 }
 Logger->0&   ' or Clear Logger
+}
+MODULE PYTH {MODULE Pythagoras_tree {
+	CLS 5, 0  ' MAGENTA, NO SPLIT SCREEN
+	PEN 14   ' YELLOW
+	\\ code from zkl/Free Basic
+	LET w = scale.x, h = w * 11 div 16
+	LET w2 = w div 2, diff = w div 12
+	LET TreeOrder = 6
+	pythagoras_tree(w2 - diff, h -10, w2 + diff, h -10, 0)
+ 
+	SUB pythagoras_tree(x1, y1, x2, y2, depth)
+ 
+	    IF depth > TreeOrder THEN EXIT SUB
+ 
+	    LOCAL dx = x2 - x1, dy = y1 - y2
+	    LOCAL x3 = x2 - dy, y3 = y2 - dx
+	    LOCAL x4 = x1 - dy, y4 = y1 - dx
+	    LOCAL x5 = x4 + (dx - dy) / 2
+	    LOCAL y5 = y4 - (dx + dy) / 2
+	    MOVE x1, y1
+	    DRAW TO x2, y2
+	    DRAW TO x3, y3
+	    DRAW TO x4, y4
+	    DRAW TO x1, y1
+	    pythagoras_tree(x4, y4, x5, y5, depth +1)
+	    pythagoras_tree(x5, y5, x3, y3, depth +1)
+ 
+	END SUB
+}
+Pythagoras_tree
+}
+MODULE PYTH1 {MODULE Pythagoras_Example{
+	CLS 5, 0  ' MAGENTA, split line = 0  
+	PEN 14  ' YELLOW
+	\\ Linux smoothing not work (we can use the statement but without effect)
+	IF ISWINE ELSE SMOOTH ON
+	\\ PYTHAGORAS TREE
+	\\ by definition all variables ar type of a double
+	GLOBAL p=7, p4=PI/4, p2=PI/2, s2=SQRT(2)/2
+	MODULE center_p (r, t){
+		MODULE pythagoras_tree (r, dx, depth) {
+			r2=r-p2
+			DRAW ANGLE r, dx
+			DRAW ANGLE r2, dx
+			DRAW ANGLE r, -dx
+			DRAW ANGLE r2, -dx
+			IF depth>10 THEN EXIT
+			s3=dx*s2
+			depth++
+			STEP ANGLE r+p4, s3*2
+			CALL pythagoras_tree r-p4,  s3, depth
+			STEP ANGLE r, -dx-s3
+			STEP ANGLE r, s3
+			STEP ANGLE r+p4, -s3
+			CALL pythagoras_tree r+p4,  s3, depth
+			STEP ANGLE r-p4, s3		
+		}	
+		MOVE SCALE.X/2, SCALE.Y/2	
+		STEP ANGLE PI-p4+r, t*s2
+		CALL pythagoras_tree r, t, 1
+	}
+	r=PI/3
+	pixels=100
+	center_p r, 100*TWIPSX
+	center_p r+PI, 100*TWIPSX
+	CopyImageToClipboard()
+ 
+	Sub CopyImageToClipboard()
+		LOCAL Scr$=""
+		MOVE 0,0
+		COPY SCALE.X, SCALE.Y TO Scr$
+		CLIPBOARD Scr$
+	END SUB
+}
+Pythagoras_Example
+}
+MODULE RPN {Module Rpn_Calc {  
+
+	\\ insert a new line after rem to use hidden statements 
+	Rem Form 80,60
+	function rpn_calc(a$) {
+		Print "Calc RPN:"+a$
+		def m=0
+		dim token$()
+		token$()=piece$(a$," ")
+		l=len(token$())
+		dim type(l)=0, reg(l)
+		where=-1
+		for i=0 to  l-1
+			c=val(token$(i),"",m)
+			if m>-1 then
+				where++
+				reg(where)=c
+			else
+				reg(where-1)=eval(str$(reg(where-1))+token$(i)+str$(reg(where)))
+				where--
+			end if
+			inf=each(reg(),1, where+1)
+			while inf
+				export$<=token$(i)+" ["+str$(inf^,"")+"] "+ str$(array(inf))+{
+				}
+				token$(i)=" "
+			end while
+		next i
+		=reg(0)
+	}
+	Global export$
+	document export$
+	example1=rpn_calc("3 4 2 * 1 5 - 2 3 ^ ^ / +")
+	example2=rpn_calc("1 2 + 3 4 + ^ 5 6 + ^")
+	Print example1, example2
+	Rem	Print #-2, Export$
+	ClipBoard Export$
+}
+Rpn_Calc
+}
+MODULE BANKER {\\ First publish in Rosetta.org
+\\ http://www.rosettacode.org/wiki/Banker%27s_algorithm#M2000_Interpreter
+Module BankerAlgo {
+      Form 80, 44
+      Cls 5
+      Pen 14
+      Function Request(FromWhere as Inventory, What$, Many as long)  {
+            =FromWhere(What$)-FromWhere(What$+"_Request")-Many>=0
+      }
+      Function RequestPreset(FromWhere as Inventory, What$, Many as long)  {
+            =FromWhere(What$+"_Request")-Many>=0
+      }
+      Function Need(FromWhere as Inventory, What$, Many) { 
+            =FromWhere(What$ + "_max")-FromWhere(What$)-Many>=0
+      }
+      Function AllProcessEnd(Where as Inventory) {
+            Def Ok As Boolean=True
+            M=Each(Where)
+            While M {
+                  If Instr(Eval$(M, M^),"_")=0 Then Ok = Ok And Where(Eval$(M, M^)+"_max")=Where(Eval$(M, M^)+"_Request")
+            }
+            =Ok
+      }
+      Inventory System 
+      \\ Recource, Max, Available
+      ApplyResources(System, "A", 6, 3,"B", 5,1,"C", 7, 1, "D", 6, 2)
+      \\ code for sub can be found from parent module/function (here parent as in code, not as in call)
+      Function NewProcess {
+            Inventory Process
+            ApplyResources(Process)   ' sub need more arguments and read from current stack
+            =Process
+      }
+      \\ Recource, Max, Available
+      Inventory Processes = "P1":=NewProcess("A", 3, 1, "B", 3, 2, "C", 2, 2, "D", 2,1)
+      Append Processes, "P2":=NewProcess("A", 1, 1, "B", 2, 0, "C", 3, 3, "D", 4,3)
+      Append Processes, "P3":=NewProcess("A", 1, 1, "B", 3, 2, "C", 5, 1, "D", 0,0)
+      Status(True) ' show all process, available resource and max
+      SafeState=True
+      Print "Current Status"
+      RequestResource() ' display Safe State
+      RequestResource("P2", "D", 1) ' display Safe State
+      RequestResource("P1", "A", 1, "D", 1) ' display Safe State
+      RequestResource("P1", "C", 1, "D", 1) ' display Too many resources ...
+      RequestResource("P2", "B", 1) ' display Unsafe State
+      RequestResource("P3", "C", 1)  ' display Safe State
+      Status()
+ 
+      Sub Respond()
+            If SafeState Then {
+                  Pen 15 {Print "Safe State"}
+            } Else Pen 13 {Print "Unsafe State"}
+      End Sub
+      Sub RequestResource(ProcessName$="" )
+            SafeState=True
+            If ProcessName$="" Then CheckNewState(&SafeState) : Respond() : Print :Exit Sub
+            Local pro=Processes(ProcessName$), ResourceName$, many as long
+            ClearAllRequest(pro)
+            Local skip=False
+            While Match("SN") {
+                  Read ResourceName$, many
+                  Print  Format$("Claim {1} for type {0} resource ",ResourceName$, many)
+                  If skip Then Continue
+                  If Request(System, ResourceName$, many) Then {
+                        If Need(pro, ResourceName$, many) Then { 
+                              Return pro, ResourceName$+"_Request":=many
+                              Return System, ResourceName$+"_Request":=-many
+                        } Else {
+                              Print "Too many Recources "+ResourceName$+" for Process "+ProcessName$  : Skip=True
+                        }
+                  } Else Print "Too many Recources for System" : Skip=True
+            } 
+            If skip Else  CheckNewState(&SafeState) : Respond()
+            Print  ' just a new line
+      End Sub
+      Sub ApplyResources(Where as Inventory, What$, MaxValue, InitialValue)
+            Repeat {
+                  If Not Exist(Where, What$) Then {
+                        Append Where, What$:=InitialValue, What$+"_max":=MaxValue, What$+"_Request":=0
+                  }
+                  If not Match("SNN") Then Exit
+                  Read What$, MaxValue, InitialValue
+            }  Always
+      End Sub
+      Sub ClearAllRequest(Where  as Inventory)
+            Local M=Each(Where)
+            While M {
+                  If Instr(Eval$(M, M^),"_")=0 Then {
+                        Return Where, Eval$(M,M^)+"_Request":=0
+                  }
+            }
+      End Sub
+      Sub SetAllRequest(Where  as Inventory)
+            Local M=Each(Where)
+            While M {
+                  If Instr(Eval$(M, M^),"_")=0 Then {
+                  Return Where, Eval$(M,M^)+"_Request":=Where(Eval$(M,M^))+Where(Eval$(M,M^)+"_Request")
+                  }
+            }
+      End Sub
+      Sub PrintResources(Where  as Inventory)
+            Local M=Each(Where)
+            While M {
+                  If Instr(Eval$(M, M^),"_")=0 Then Print Eval$(M, M^)+"="+Eval$(M),
+            }
+            Print
+      Exit Sub
+      Sub PrintEstimatedResources(Where  as Inventory)
+            Local M=Each(Where)
+            While M {
+                  If Instr(Eval$(M, M^),"_")=0 Then Print Eval$(M, M^)+"="+Str$(Where(Eval$(M, M^)+"_Request"),""),
+            }
+            Print
+      Exit Sub
+      Sub PrintMax(Where  as Inventory)
+            Local M=Each(Where)
+            While M {
+                  If Instr(Eval$(M, M^),"_max")>0 Then Print LeftPart$(Eval$(M, M^), "_")+"="+Eval$(M),
+            }
+            Print
+      Exit Sub
+      Sub Status(Ok as boolean=False)
+            Print "Total System Resources"
+            PrintMax(System)
+            Print "Available Resources in System"
+            PrintResources(System)
+            If Not Ok Then Exit Sub
+            Local  M=Each(Processes)
+            While M {
+                  Print "Process "+Eval$(M, M^)
+                  PrintResources(Processes(M^!))  ' give index M^ as Key index number (using !)
+                  Print "Maximum Resources for "+Eval$(M, M^)
+                  PrintMax(Processes(M^!))
+            }
+      End Sub
+      Sub CheckNewState(&Ok)
+            local M=Each(Processes), M1
+            Local Z, Recource$
+            SetAllRequest(System)
+            While M {
+                  Z=Processes(M^!)
+                  M1=Each(Z) 
+                  Ok=True 
+                  While M1 {
+                        Recource$=Eval$(M1, M1^)
+                        If Instr(Recource$,"_")=0 Then {
+                              Ok=Ok And RequestPreset(System,  Recource$, Z(Recource$ + "_max") - Z(Recource$)-Z(Recource$ + "_Request"))
+                        }
+                  }
+                  if Ok then {
+                        M1=Each(Z) 
+                        While M1 {
+                              Recource$=Eval$(M1, M1^)
+                              If Instr(Recource$,"_")=0 Then {
+                                    Return System, Recource$+"_Request":= System(Recource$+"_Request") + Z(Recource$) + Z(Recource$+"_Request")
+                                    Return Z, Recource$+"_Request":=0
+                              }
+                        }
+                  } Else ClearAllRequest(Z)
+            }
+            If Ok Then Ok=AllProcessEnd(System)
+            ClearAllRequest(System)
+      End Sub
+}
+BankerAlgo
+}
+MODULE MATMUL {\\ http://www.rosettacode.org/wiki/Matrix_multiplication#M2000_Interpreter
+Module CheckMatMult2 {
+	\\ Matrix Multiplication
+	\\ pass arrays by reference
+	\\ if we change a passed array here, to a new array then this change also the reference array.
+	Function MatMul(&a(),&b()) {
+		if dimension(a())<>2 or dimension(b())<>2 then Error "Need two 2D arrays "
+		let a2=dimension(a(),2), b1=dimension(b(),1)
+		if a2<>b1 then Error "Need columns of first array equal to rows of second array"
+		let a1=dimension(a(),1), b2=dimension(b(),2)
+		let aBase=dimension(a(),1,0)-1, bBase=dimension(b(),1,0)-1
+		let aBase1=dimension(a(),2,0)-1, bBase1=dimension(b(),2,0)-1
+		dim base 1, c(a1, b2)
+		for i=1 to a1 : let ia=i+abase : for j=1 to b2 : let jb=j+bBase1 : for k=1 to a2
+		c(i,j)+=a(ia,k+aBase1)*b(k+bBase,jb)
+		next k : next j : next i
+		\\ redim to base 0
+		dim base 0, c(a1, b2)
+		=c()
+	}
+	\\ define arrays with different base per dimension
+	\\ res() defined as empty array
+	dim a(10 to 13, 4), b(4, 2 to 5), res()
+	\\ numbers from ADA task
+	a(10,0)= 1, 1, 1, 1, 2, 4, 8, 16, 3, 9, 27, 81, 4, 16, 64, 256
+	b(0,2)= 4, -3, 4/3, -1/4, -13/3, 19/4, -7/3, 11/24, 3/2, -2, 7/6, -1/4, -1/6, 1/4, -1/6, 1/24
+	res()=MatMul(&a(), &b())
+	for i=0 to 3 :for j=0 to 3
+	Print res(i,j),
+	next j : Print : next i
+}
+CheckMatMult2
+}
+MODULE MATEXP {\\http://www.rosettacode.org/wiki/Matrix-exponentiation_operator#M2000_Interpreter
+Module CheckIt {
+	Class cArray {
+		a=(,)
+		Function Power(n as integer){
+			cArr=This     ' create a copy
+			dim new()
+			new()=cArr.a   ' get a pointer from a to new()
+			Let cArr.a=new()    ' now new() return a copy
+			cArr.a*=0  ' make zero all elements
+			link cArr.a to v()
+			for i=dimension(cArr.a,1,0) to dimension(cArr.a, 1,1) : v(i,i)=1: next i
+			while n>0
+				let cArr=cArr*this    ' * is the operator "*"
+				n--
+			end while
+			=cArr
+		}
+		Operator "*"{
+			Read cArr
+			b=cArr.a
+			if dimension(.a)<>2 or dimension(b)<>2 then Error "Need two 2D arrays "
+			let a2=dimension(.a,2), b1=dimension(b,1)
+			if a2<>b1 then Error "Need columns of first array equal to rows of second array"
+			let a1=dimension(.a,1), b2=dimension(b,2)
+			let aBase=dimension(.a,1,0)-1, bBase=dimension(b,1,0)-1
+			let aBase1=dimension(.a,2,0)-1, bBase1=dimension(b,2,0)-1
+			link .a,b to a(), b()  ' change interface for arrays
+			dim base 1, c(a1, b2)
+			for i=1 to a1 : let ia=i+abase : for j=1 to b2 : let jb=j+bBase1 : for k=1 to a2
+			c(i,j)+=a(ia,k+aBase1)*b(k+bBase,jb)
+			next k : next j : next i
+			\\ redim to base 0
+			dim base 0, c(a1, b2)
+			.a<=c()
+			}
+		Module Print {
+			link .a to v()
+			for i=dimension(.a,1,0) to dimension(.a, 1,1) 
+			for j=dimension(.a,2,0) to dimension(.a, 2,1) 
+			print  v(i,j),: next j: print : next i
+ 
+		}
+	Class:
+		\\ this module used as constructor, and not returned to final group (user object in M2000)
+		Module cArray (r) {
+			c=r
+			Dim a(r,c)
+			For i=0 to r-1 : For j=0 to c-1: Read a(i,j): Next j : Next i
+			.a<=a()
+		}
+	}
+	Print "matrix():"
+	P=cArray(2,3,2,2,1)
+	P.Print
+	For i=0 to 9 
+		Print "matrix()^"+str$(i,0)+"="
+		K=P.Power(i)
+		K.Print
+	next i
+}
+Checkit
+}
+MODULE NQ {Module N_queens {
+Const l = 9  'number of queens)
+Const b = true  'print option
+Dim a(0 to  l), s(0 to l), u(0 to 4 * l - 2)
+Def long n, m, i, j, p, q, r, k, t
+For i = 1 To l: a(i) = i: Next
+For n = 1 To l
+	m = 0 : i = 1:j=0:r=2*n-1
+	Do
+		i-- :j++:p=0:q=-r
+		Do :i++ :u(p)=1:u(q+r)=1:Swap a(i), a(j):p=i-a(i)+n:q=i+a(i)-1:s(i)=j:j=i+1:Until j > n Or u(p) Or u(q + r)
+		If u(p)=0 Then If u(q+r)=0 Then m++ : If b Then Disp()
+		j = s(i)
+		While j >= n And i <> 0
+			Do :Swap a(i), a(j) :j--:Until j < i
+			i--:p=i-a(i)+n :q=i+a(i)-1:j = s(i):u(p)=0:u(q+r)=0
+		End While
+	Until i=0
+	Print n, m  'number of queens, number of solutions
+Next
+Sub Disp()
+	Pen 14 {Print "n="; n; "m="; m}
+	For k=1 To n  :For t=1 To n
+		Print If$(a(n-k+1)=t-> "♛", ".");
+	Next :Print : Next
+End Sub
+}
+Double
+Pen 15{N_queens}
+Normal
+}
+MODULE MOUSEPOS {Module Checkit {
+	\\ works when console is the active window
+	\\ pressing right mouse button exit the loop
+	While mouse<>2
+		Print mouse.x, mouse.y
+	End While
+	\\ end of part one, now we make a form with title Form1 (same name as the variable name)
+	Declare Form1 Form
+	Layer Form1 {
+		window 16, 10000,8000  ' 16pt font at maximum 10000 twips x 8000 twips
+		cls #335522,0
+		cls , 2 \\ from 3rd line start the split screen (for form's layer)
+		pen 15 ' white
+	}
+	Function Form1.MouseMove {
+		Read new button, shift, x, y  ' we use new because call is local, same scope as Checkit.
+		Layer Form1 {
+			print
+			print part x, y, button
+			refresh
+		}
+	}
+	Function Form1.MouseDown {
+		Read new button, shift, x, y
+		\\ when we press mouse button we print in console
+		\\ but only the first time
+		print x, y, button
+		refresh
+	}
+	\\ open Form1 as modal window above console
+	Method Form1, "Show", 1
+	Declare Form1 Nothing
+}
+CheckIt
+}
+MODULE PRI {Module  Prime_decomposition    {
+	Inventory Known1=2@, 3@
+	IsPrime=lambda  Known1 (x as decimal) -> {
+		=0=1
+		If exist(Known1, x) Then =1=1 : Exit
+		If x<=5 OR frac(x) Then {If x == 2 OR x == 3 OR x == 5 Then Append Known1, x  : =1=1
+		Break}
+		If frac(x/2) Else Exit
+		If frac(x/3) Else Exit
+		x1=sqrt(x):d = 5@
+		{If  frac(x/d ) Else Exit
+		d += 2: If d>x1 Then Append Known1, x : =1=1 : Exit
+		If frac(x/d) Else Exit
+		d += 4: If d<= x1 Else Append Known1, x :  =1=1: Exit
+		Loop}
+	}
+	decompose=lambda IsPrime (n as decimal) -> {
+	Inventory queue Factors
+	k=2@
+	While frac(n/k)=0:n/=k:Append Factors, k:End While
+	If n=1 Then =Factors : Exit
+	k++ 
+	While frac(n/k)=0:n/=k: Append Factors, k:End While
+	If n=1 Then =Factors : Exit
+	do
+		k+=2
+		While not isprime(k) :k+=2:End While
+		While frac(n/k)=0 :n/=k: Append Factors, k:End While
+	until n=1
+	=Factors
+	}
+	Data 10, 100, 12, 144, 496, 842,1000, 1122, 5555, 9999, 1212454, 10242048
+	Data  22819637
+	Back {cls #666666}
+	Mode 8
+	gradient #666666,#666666
+	olinespace=linespace
+	linespace twipsy*6
+	oPen=Pen
+	oBold=Bold
+	Bold 1
+	Pen=14
+	Print $(0,width div 6-1),
+	tab1=width -tab
+	oBold=Bold
+	bb=#123612
+	cc=#16A2A8
+	Cursor 0, (height-Stack.Size-4) div 2
+	Scroll Split 0
+	Bold 0 : Italic : double
+	Print Part $(6, 6), ~(0,7),"Number" , $(6, tab1 div 2),~(oPen,3,3), "Prime decomposition"
+	Bold oBold : Italic : Normal
+	Print
+	Pen 15 {Print Under}
+	While not empty
+		Over  ' make a copy
+		Print Over  ~(oPen,cc)
+		Print Part $(4,12), ~(15,bb),Number,$(6,5),~(oPen),Decompose(Number) : Refresh
+		Pen 15 {Print Under}
+	End While
+	Bold oBold
+	Scroll Split 0  ' reset without clear
+	Linespace olinespace
+	a$=key$
+	keyboard "info"+chr$(13)
+}
+Prime_decomposition
+}
+MODULE ECHELON {\\ http://www.rosettacode.org/wiki/Reduced_row_echelon_form#M2000_Interpreter
+\\ Reduced row echelon form
+Module base0 {
+      dim base 0, A(3, 4)
+      A(0, 0)= 1,    2,   -1,   -4,  2 ,   3,   -1,   -11,  -2  ,  0 ,  -3,    22
+      lead=0
+      rowcount=3
+      columncount=4
+      gosub disp()   \\ we can use gosub if an array has the same name as a sub,
+      for r=0 to rowcount-1 {
+            if columncount<=lead then exit
+            i=r
+            while A(i,lead)=0 {
+                  i++
+                  if rowcount=i then i=r : lead++ : if columncount<lead then exit
+            }
+            for c =0 to columncount-1 {
+                  swap A(i, c), A(r, c)
+            }
+              if A(r, lead)<>0 then {
+                  div1=A(r,lead)
+                  For c =0 to columncount-1 {
+                      A( r, c)/=div1
+                  } 
+            }
+            for i=0 to rowcount-1 {
+                  if i<>r then {
+                        mult=A(i,lead)
+                        for j=0 to columncount-1 {
+                                 A(i,j)-=A(r,j)*mult
+                        }
+                  }
+            } 
+            lead=lead+1
+      }
+      Print "Solution"
+      disp()
+      sub disp()
+            local i, j
+            for i=0 to rowcount-1
+                  for j=0 to columncount-1
+                        Print A(i, j),
+                  Next j
+                  if pos>0 then print
+            Next i
+      End sub
+}
+base0
+}
+MODULE ERATO {Module EratosthenesSieve (x) {
+      \\ Κόσκινο του Ερατοσθένη
+      If x>200000 Then Exit
+      Dim i(x+1)
+      k=2
+      k2=x div 2
+      While k<=k2 {
+            m=k+k
+            While m<=x {
+                  i(m)=1
+                  m+=k
+            }
+            k++
+      }
+      For i=2 to x {
+      If i(i)=0 Then Print i,
+      }
+      Print
+}
+EratosthenesSieve 1000
+}
+MODULE BUB {Module Bubble {
+      function bubblesort {
+                  dim a()    
+                  \\ []  is a stack object,  interpreter pass current stack pointer, and set a new stack for current stack
+                  \\ array( stackobject ) get a stack object and return an array
+                  a()=array([])
+                  itemcount=len(a())
+                   repeat {
+                        haschange=false
+                        if itemcount>1 then {
+                              for index=0 to itemcount-2 {
+                                  if a(index)>a(index+1) then swap a(index), a(index+1) : haschange=true
+                              }
+                        }
+                       itemcount-- 
+                   } until not haschange
+                   =a()
+      }
+      \\ function can take parameters
+      Print bubblesort(5,3,2,7,6,1)
+      A=(2, 10, 17, 13, 20, 14, 3, 17, 16, 16)
+ 
+      \\ !A copy values from array A to function stack
+      B=bubblesort(!A)
+      Print Len(A)=10 
+      Print B
+      \\ Print array  in descending order
+      k=each(b, -1, 1)
+      While k {
+            Print Array(k),
+      }
+      \\ sort two arrays in one
+      Print BubbleSort(!A, !B)
+      \\ We can use a stack object,  and values pop from object
+      Z=Stack:=2, 10, 17, 13, 20, 14, 3, 17, 16, 16
+      Print Len(Z)=10
+      Def GetStack(x)=Stack(x)
+      Z1=GetStack(BubbleSort(!Z))
+      Print Type$(Z1)="mStiva"
+      Print Z1
+      Print Len(Z1)
+      Print Len(Z)=0  ' now Z is empty
+}
+Bubble
+}
+MODULE SHELL {Module ShellSortExample {
+	Module shellsort(&a()) {
+		DEf h%, i%, j%, k, n%
+		n%= LEN(a())
+		h% = n%
+		WHILE h%
+			IF h% = 2  THEN h% = 1 ELSE h%= h% DIV 2.2
+			FOR i% = h% TO n% - 1
+				k = a(i%)
+				j% = i%
+				WHILE j% >= h% AND k < a(ABS(j% - h%))
+					a(j%) = a(j% - h%)
+					j% -= h%
+				END WHILE
+				a(j%) = k
+			NEXT
+		END WHILE
+	}
+	
+	DIM BASE 0,  numbers(20)
+	numbers(0)=4, 65, 2, -31, 0, 99, 2, 83, 782, 1, 4, 65, 2, -31, 0, 99, 2, 83, 782, 1   ' first item must be number
+	REM numbers(0):=4, 65, 2, -31, 0, 99, 2, 83, 782, 1, 4, 65, 2, -31, 0, 99, 2, 83, 782, 1  ' first item can be anything (using := an operator for arrays)
+	\\ Pass array by reference
+	shellsort &numbers()
+	\\ Print all items using columns (automatic append lines)
+	PRINT numbers()
+}
+ShellSortExample
+}
+MODULE TOWERS {Module Hanoi {
+      Rem HANOI TOWERS
+      Print "Three disks" : Print
+      move(3, 1, 2, 3)
+      Print 
+      Print "Four disks" : Print
+      move(4, 1, 2, 3)
+ 
+ 
+      Sub move(n, from, to, via)
+            If n <=0 Then Exit Sub
+            move(n - 1, from, via, to)
+            Print "Move disk"; n; " from pole"; from; " to pole"; to
+            move(n - 1, via, to, from)
+      End Sub
+}
+Hanoi
+}
+MODULE VARIAD {Module CheckIt {
+      \\ Works for numbers and strings (letters in M2000)
+      Function Variadic {
+            \\ print a letter for each type in function stack
+            Print Envelope$()
+            \\Check types using Match
+            Print Match("NNSNNS")
+            =stack.size
+            While not Empty {
+                  if islet then {print letter$} else print number
+            }
+      }
+      M=Variadic(1,2,"Hello",3,4,"Bye")
+      Print M
+      \\ K is a poiner to Array
+      K=(1,2,"Hello 2",3,4,"Bye 2")
+      \\ !K pass all items to function's stack
+      M=Variadic(!K)
+}
+Checkit
+ 
+ 
+Module CheckIt2 {
+      Function Variadic {
+            \\ [] return a pointer to stack, and leave a new stack as function's stack
+            a=[]
+            \\ a is a pointer to stack
+            \\ objects just leave a space, and cursor move to next column (spread on lines)
+            Print a
+      }
+      M=Variadic(1,2,"Hello",3,4,"Bye")
+      Print M
+      \\ K is a poiner to Array
+      K=(1,2,"Hello 2",3,4,"Bye 2")
+      \\ !K pass all items to function stack
+      \\ ! operator unpack the array (place copies)
+      M=Variadic(!K, "another one")
+      S=Stack:=1,2,"Hello 2",3,4,"Bye 3"
+      \\ ! operator remove items from S and place them to function's stack
+      M=Variadic(!S, "from a stack object, removing items")
+      Print Len(S)=0
+      S=Stack:=1,2,"Hello 2",3,4,"Bye 3"
+      \\ we use Stack() to get a copy of S (can be used for a list of stack objects)
+      M=Variadic(!Stack(S), "from a stack object, without removing itmes")
+      Print Len(S)=6
+      Stack S {Flush}  ' we can use Flush when attach the S stack as a current stack preserving the old one (which we can't use in the block)
+}
+Checkit2
+}
+MODULE CREATEWINDOW {\\ simple code to create a window - and open as modal
+\\ for fun we have a thread running in the background, each 1/60 of second  (1000mSec/60)
+Profiler
+Thread {
+	Print format$("running in the background {0::-10}, {1:2:-10}", tick, timecount)
+	refresh  ' need to refresh manualy because console window has lost focus when form open
+} as k interval 1000/60
+Module DisplayWindow (a$){
+      Declare MyForm Form
+      \\ split statement from rem to see the change in form's title
+      Rem With MyForm,"Title", a$
+      Method MyForm,"Show",1    ' wait to close
+      Print "close now"
+}
+DisplayWindow "Window 1"
+DisplayWindow "Window 2"
+DisplayWindow "Window 3"
+Thread k Erase
+}
+MODULE KNUTH {\\ Trabb Pardo–Knuth algorithm
+\\ We use stack (a collection, which we add to top or to bottom and read from top)
+\\ Each call place the arguents on top of stack (this isn't the return stack, we say this as Stack of Values)
+\\ A module call another module placing the same stack
+\\ A User function begin with a fresh stack with any number of arguments we pass
+\\ M2000 Interpreter except for Events Objects, has no use of "signature" as an automatic tool
+\\ Singature can be checked before reading from stack using Match() function
+\\ and that we did in Run module.
+\\ If we try to Read a number but a string is on top of stack then we get error
+\\ Also Interpreter has to give a value to a variable in Read statement and if nothing found raise an error.
+\\ We can give a value say Read X=10 so if no value found then X get value 10
+\\ For Stack of Values between Module's calls (and the same if we call a function using Call like a statement)
+\\ we have to make proper pops (also we can pusj to return values). The callee has to clean the stack for a proper state.
+
+\\ Each module has own scope (it is like  a program). Variables, Modules, Functions can be defined on the fly (at run time). So we can use an If structure to choose definition for a function.
+\\ We can see Globals, but a local or a global defined in module shadow the previous global. At the return from module, any new identifier erased (including local modules and functions).
+
+
+Report {	ask for 11 numbers to be read into a sequence S
+      reverse sequence S
+      for each item in sequence S
+          result := call a function to do an operation
+          if result overflows
+              alert user
+          else
+              print result
+      
+      The task is to implement the algorithm:
+                  
+            Use the function:     f ( x ) = | x | 0.5 + 5 x 3 {\displaystyle f(x)=|x|^{0.5}+5x^{3}}
+            The overflow condition is an answer of greater than 400.
+            The 'user alert' should not stop processing of other items of the sequence.
+            Print a prompt before accepting eleven, textual, numeric inputs.
+            You may optionally print the item as well as its associated result, but the results must be in reverse order of input.
+            The sequence   S   may be 'implied' and so not shown explicitly.
+            Print and show the program in action from a typical run here. (If the output is graphical rather than text then either add a screendump or describe textually what is displayed).
+            }
+Module Input11 {
+      Flush ' empty stack
+      For I=1 to 11 {
+            Do : Print : Try ok {Input "Give me a number ", a} : Until ok
+            \\ using Push a we do the reverse here, but ge have to indicate somehow in module Run to not reverse again then stack
+            Data a   ' add to bottom of stack, use: Push a to add to top, to get reverse order here
+            Print if$(i<11->format$("need {0} more number{1}", 11-I, if$(i<10->"s","")),"ok")
+      }
+}
+Module Run {
+      Module Msg {Drop}  ' not used if we pass a decoration
+      Msg  "Trabb Pardo–Knuth algorithm"
+      Msg "f(x)=Sqrt(Abs(x))+5*x^3"
+      if not match("NNNNNNNNN") then Error "Need 11 numbers" 
+      Shiftback 1, -11 ' reverse  order 11 elements of stack of values
+      Def f(x)=Sqrt(Abs(x))+5*x^3
+      For i=1 to 11 {
+            Read pop
+            y=f(pop)
+            if y>400 Then {
+                  Pen Pen {Print ~(12), format$("f({0}) = Overflow!", pop)}
+            }  Else {
+                  Print format$("f({0}) = {1}", pop, y)
+            }
+      }
+}
+Global Counter
+Module Msg (a$) {
+	Pen 15 {Print a$}
+	Counter++
+}
+\\ we can pass a module (only for modules when we call them by name, not using CALL)
+\\ so we can't use an external module for recursion in module
+\\ a module can't call his name, except we use Call statement
+\\ The Msg is a decorator for Run 
+Run 10, -1, 1, 2, 3, 4, 4.3, 4.305, 4.303, 4.302, 4.301 ; Msg
+Run 1, 2, 3, -4.55,5.1111, 6, -7, 8, 9, 10, 11  ' ; Msg  ' drop first ' to use external  Msg
+Input11
+Run ; Msg
+Print "You use Msg ";Counter;" times"
 }
 INFO

@@ -1,9 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 21b active-X
+Version 9.8 Revision 22 active-X
 
 
-21b has A change in lzw module in info.gsb
+Some optimizations. Also some demo modules added to info.gsb
+
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
