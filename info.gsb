@@ -4433,13 +4433,12 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version"
-If Version=9.8 and revision<4 then Error "No proper M2000 revision for version 9.8"
-FONT "ARIA"
+If Version=9.8 and revision<22 then Error "No proper M2000 revision for version 9.8"
+Font "Verdana"
 PEN 14
 CLS,0
 Set Fast
-Title "Info"   ' open a window in task bar with name info (if  you run Demo, at the exit you get no window in task bar, so we can restore it)
-If IsWine Then Font "Verdana"
+Title "Info"   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
 Player 0  ' erase any layer
 back {
@@ -4462,7 +4461,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 3"
+	Report " A collection of modules for tests version 4"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4475,7 +4474,7 @@ pen oldpen
 Clear ' clear local variables
 title("Modules ?")
 Report {
-	Modules ?    (or control+N, display all loaded modules, if nothing loaded display files)
+	Modules ?    (or control+N, display all loaded modules, If nothing loaded display files)
 	You can call any module by name, try Info
 	Modules (Show every loaded module, plus files on user folder)
 	}
@@ -4485,13 +4484,13 @@ Pen if(pen=7->8,7){
 }
 title("List")
 Report {
-	You can see the global variables, if any exist, defined in console
+	You can see the global variables, If any exist, defined in console
 	Use statement Clear to clear all variables
 	}
 List
 title("Stack")
 Report {
-	You can see the stack of values, if has any value
+	You can see the stack of values, If has any value
 	Use statement Flush to empty the stack
 	}
 Stack
@@ -4505,7 +4504,7 @@ Report {
 	Edit info  (press esc to exit editor)
 	Edit "disk_file.gsb"  (to edit from disk - saved at exit)
 	Edit  (no argument) open command editor (we pick in console line using up/down arrows)
-	Save filename   (without quotes, except if we want spaces)
+	Save filename   (without quotes, except If we want spaces)
 	load filename
 	Settings (open dialog for setting environment), 	Start  ' restart console
 	Use filename  (use info open another info in another console)
@@ -4533,6 +4532,8 @@ FKey 17,"Maze2  ' Maze Drawing in console"
 FKey 16,"Cal  ' Snoopy Calendar"
 FKey 15,"OOP1  ' EventHandler Class"
 FKey 14,"Pend  ' Pendulum Animation"
+FKey 20,"Pong  ' SoloPong - for one player"
+
 Title("Fkey")
 Fkey
 \\title("M2000 Writer")
@@ -13545,5 +13546,338 @@ Run 1, 2, 3, -4.55,5.1111, 6, -7, 8, 9, 10, 11  ' ; Msg  ' drop first ' to use e
 Input11
 Run ; Msg
 Print "You use Msg ";Counter;" times"
+}
+MODULE PONG {IF IsWine Else Smooth On
+\\ Program SoloPong
+oldfont$=FontName$
+'Font "Tahoma"
+Hard=2 \\ 3 for more
+Hide
+Mode 18, 8000,2400
+Motion Center
+Module Hit {
+              Score 2, 100,"g"
+              Play 2, 127
+}
+Gosub Functions
+Background 12 { 
+Refresh 5000
+Dim D$()
+D$()=Nu$()
+Cls 5,0
+Pen 14
+a$=""
+b$=""
+b1$=""
+Move 0,0
+Fill 300,Scale.Y, 15
+Move 0,0
+Copy 300,300 To a$
+Copy 300,1800 To b$
+Copy 300,Scale.Y To b1$
+Again:
+Cls 0,0
+Refresh 5000
+Mouse.Icon Hide
+Cls #222222,0
+Print @(5,5),
+Pen 7 {
+      Report {Game SoloPong
+            Press P for pause
+            Press space...
+            ...to end the game
+            }
+      }
+For i=0 to Scale.Y Step twipsY*2 { Move 0,i : Draw scale.X, 0, #555555 }
+xk=Int(scale.X/2-150)
+xk0=scale.X/2
+xk03=scale.X/3
+xk1=xk-300*7
+xk2=xk+900
+xa0=850
+xa00=0
+xa2=xa0+150
+xa1=400
+Refresh 50
+xd1=scale.X-1000
+xd2=xd1+600
+For i=0 to scale.Y-300 Step 600 { Copy xk, i Use a$ }
+Score1=0
+Score2=0
+Copy xk1, 900 Use D$(Score1)
+Copy xk2, 900 Use D$(Score2)
+yo=-900
+yo1=yo-Scale.Y/4
+yo2=yo1+Scale.Y/2
+yb=Scale.Y+900
+Yab=30
+Player 1, 850,yo  Use b1$
+Player 2, xd1,10000  Use b$
+Player 3,  850,yb  Use b1$
+y2=scale.Y-900-1000
+xm=xk
+ym=3000+Random(2,5)*300
+Player 4, xm,ym  Use a$,1,0, 45size 2
+For i=1 To 4 { Player i Show }
+y3=Scale.Y-300
+x3=scale.X-300
+y4=Scale.Y/2
+tx=120
+tm=120
+yp=Mouse.X
+y=yp
+Thread {
+      yp=y : y=Mouse.Y
+} As nm Interval 25
+Wait 100
+Refresh 50
+Score=False
+Thread {
+      If y<1900 Then { y=1900: yp=1900   } Else.If y>y2 Then y=y2: yp=y2
+      If ym<300 Then { tm-! : ym+=tm  } Else.If ym>y3 Then tm-! : ym+=tm
+      If Collide(4, 80, xa1,yo+y4, xa2, yb-y4) or Score Then {
+            Score=True
+      } Else.If collide(4, 100, xa1,yo-y4, xa2, yo+y4) Then {
+            tx-! : xm=xa2+500
+            tx*=1.5
+            Hit
+       } Else.If collide(4, 100, xa1,yb-y4, xa2, yb+y4) Then {     
+            tx-! : xm=xa2+500
+            tx*=1.5
+            Hit
+       } Else.If collide(4, 100, xd1,y-900, xd2, y+900) Then {
+       tx=-Abs(tx) : xm+=tx*Hard
+       tx=min.data(-Int(Log(Abs(y-yp)+2))*45*Hard, tx/2, -120) 
+       tm=Sgn(ym-y)*Abs(Int((ym-y)/10))+Sgn(tm)*30*Hard
+       Hit
+      }
+      Rem 1 : Cursor 0,Height-1 : Print Over $(,8),xm, ym , Abs(y-yp), tx, tm
+      Player 2,,y
+      'Player 4, xm,ym     
+      Player 4, xm,ym Use a$,1,0, xm mod 360 size (2*xk-Abs(xm-xk))/xk
+      xm+=tx       
+      ym+=tm
+      } As mp Interval 10
+Thread {
+Pen 7 {
+      Cursor 0,0 : Print Part $(6,8),@(Width -8), ~(Pen,#555555),Str$(Now,"hh:mm:ss")
+}
+} As tt Interval 1000
+Thread {
+If xm>xk0 And xa00=0 Then {
+      xa00=twipsX*20
+}
+} As dd Interval 10000
+Refresh 50
+kr=True
+finish=False
+Main.Task 100 {
+      If kr Then {
+            yo+=Yab
+            yb+=Yab
+            If yo>yo2 Then Yab-! Else.If yo<yo1 Then Yab-!
+            xa0+=xa00
+            If xa0>xk03 Then {
+                  If tx>0  or xk0 <xm Then {
+                  Thread dd Hold
+                  xa00=0 
+                  }  Else xa00=-twipsX*20 : Thread dd Restart
+            }
+            If xa0<850 Then xa0=850 : xa00=0
+            xa2=xa0+150
+            Player 1,xa0,yo
+            Player 3,xa0,yb
+            Rem 2 : Cursor 0,Height-1 : Print Over $(,8), yo, yb, Score
+      }
+      If xm>x3  or xm<850  Then {
+            Score=False
+            tx=0
+            tm=0
+            If xm>x3 Then {
+                  Score1++
+                  Copy xk1, 900 Use D$(Score1)
+            } Else {
+                  Score2++
+                  Copy xk2, 900 Use D$(Score2)
+            }
+            If Score1=10 or Score2=10 Then Break
+            xm=xk
+            ym=3000+Random(2,5)*150
+            Player 4, xm,ym
+            yp=ym
+            tx=60*Random(2,5)/3+120
+            tm=tx-60
+            Score=False
+      }
+      Select Case Inkey$
+      Case "p","P"
+            {
+                  If kr Then { 
+                        Thread mp Hold
+                        Layer {
+                              Cls 0, 0
+                              Pen 15 {
+                                    Cursor 0, Height/2-1
+                                    Print Over $(6),"Press P or p to continue.."
+                                    Print Under
+                                    Print Over $(6)," or press space to end the game"
+                              }
+                              Show
+                        }
+                  } Else {
+                        Layer {
+                              Hide
+                              Cls 5
+                        }
+                        Thread mp Restart
+                  }
+                  kr~
+            }
+      Case " "
+            {  If Not kr Then Layer {Hide }: kr~
+                  Thread mp Hold
+                  Mouse.icon Show 
+                  If Ask("Stop this game","SoloPong","Yes","No")=1 Then { 
+                  Layer {Cls 5}
+                        finish=True
+                  } Else Mouse.icon Hide
+                  Thread mp Restart
+            }
+      End Select
+      If finish Then Exit
+}
+Threads Erase
+If kr Else { Layer {Hide : Cls 5} : kr~ }
+Mouse.icon Show 
+If Ask("New Game","SoloPong","Yes","No")=1 Then Goto Again
+Player 0
+Cls 5
+}
+Font oldfont$
+Form 60,30
+Show
+Keyboard "Info"+chr$(13)
+End
+Functions:
+Function Nu$ {
+x=0
+y=0
+Zero$={_***_
+                  *___*
+                  *___*
+                  *___*
+                  *___*
+                  *___*
+                  _***_
+                  }
+One$={__*__
+                  _**__
+                  *_*__
+                  __*__
+                  __*__
+                  __*__
+                  *****
+                  }
+Two$={_***_
+                  *___*
+                  ____*
+                  _***_
+                  *____
+                  *____
+                  *****
+                  }
+Three$={_***_
+                  *___*
+                  ____*
+                  __**_
+                  ____*
+                  *___*
+                  _***_
+                  }
+Four$={___*_
+                  __**_
+                  _*_*_
+                  *__*_
+                  *****
+                  ___*_
+                  ___*_
+                  }
+Five$={*****
+                  *____
+                  ****_
+                  ____*
+                  ____*
+                  *___*
+                  _***_
+                  }
+Six$={_***_
+                  *___*
+                  *____
+                  ****_
+                  *___*
+                  *___*
+                  _***_
+                  }
+Seven$={*****
+                  ____*
+                  ___*_
+                  __*__
+                  __*__
+                  __*__
+                  __*__
+                  }
+Eight$={_***_
+                  *___*
+                  *___*
+                  _***_
+                  *___*
+                  *___*
+                  _***_
+                  } 
+Nine$={_***_
+                  *___*
+                  *___*
+                  _****
+                  ____*
+                  *___*
+                  _***_
+                  } 
+Ten$={*__*_
+                  *_*_*
+                  *_*_*
+                  *_*_*
+                  *_*_*
+                  *_*_*
+                  *__*_
+                  }   
+Dim D$(11), D1$(11)
+W1=300
+H1=300
+D$(0)=Zero$,One$, Two$, Three$, Four$,Five$, Six$, Seven$, Eight$, Nine$, Ten$
+      For D=0 to 10 {
+      Cls #222222,0
+      For i=0 to 7*H1 Step twipsY*2 {
+      Move 0,i
+      Draw scale.X, 0, #555555
+      }
+      L=1
+      Move x,y
+      For k=0 to 7 {
+            For i=0 to 4 {
+                       If Mid$(D$(D),L,1)="*" Then { Fill W1, H1,15 }  Else Step W1, H1
+                       Step 0, -H1
+                  L++
+            }
+            Step -5*W1, H1
+            L+=2
+      }
+      a$=""
+      Move x,y
+      Copy W1*5,H1*7 To a$
+      D1$(D)=a$
+      }
+=D1$()
+}
+Return
 }
 INFO

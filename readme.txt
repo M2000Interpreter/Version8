@@ -1,9 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 22 active-X
+Version 9.8 Revision 23 active-X
 
 
-Some optimizations. Also some demo modules added to info.gsb
+Some optimizations. A pong variant game (solopong) added to info.gsb
 
 
 The fist time you run the interpreter do this in M2000 console:

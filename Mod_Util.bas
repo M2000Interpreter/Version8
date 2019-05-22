@@ -1,6 +1,7 @@
 Attribute VB_Name = "Module2"
 Option Explicit
-Public Trush As New Collection
+Public Trush() As VarItem
+Public TrushCount As Long, TrushWait As Boolean
 Const b123 = vbCr + "'\"
 Const b1234 = vbCr + "'\:"
 Public k1 As Long, Kform As Boolean
@@ -10335,20 +10336,20 @@ MergeOperators = b$
 End If
 End Function
 Public Sub GarbageFlush()
-Set Trush = New Collection
-Dim i As Long, aa As VarItem
+ReDim Trush(500) As VarItem
+Dim i As Long
 For i = 1 To 500
-Set aa = New VarItem
-Trush.Add aa, Str$(ObjPtr(aa))
+   Set Trush(i) = New VarItem
 Next i
+TrushCount = 500
 End Sub
 Public Sub GarbageFlush2()
-Set Trush = New Collection
-Dim i As Long, aa As VarItem
+ReDim Trush(500) As VarItem
+Dim i As Long
 For i = 1 To 500
-Set aa = New VarItem
-Trush.Add aa, Str$(ObjPtr(aa))
+   Set Trush(i) = New VarItem
 Next i
+TrushCount = 500
 End Sub
 Function PointPos(F$) As Long
 Dim er As Long, er2 As Long
@@ -16256,12 +16257,13 @@ Dim ss$
     
 End Function
 Function NewVarItem() As VarItem
-    If Trush.count = 0 Then
+    If TrushCount = 0 Then
     Set NewVarItem = New VarItem
       Exit Function
     End If
-    Set NewVarItem = Trush(1)
-    Trush.Remove 1
+    Set NewVarItem = Trush(TrushCount)
+    Set Trush(TrushCount) = Nothing
+    TrushCount = TrushCount - 1
 End Function
 Function ExpMatrix(bstack As basetask, a$, r) As Boolean
 Dim useHandler As mHandler

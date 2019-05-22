@@ -764,6 +764,7 @@ Set .item(i - 1) = aa.ObjectRef
 End Select
 Next i
 End With
+Set aa = Nothing
 drop items
 
 End Function

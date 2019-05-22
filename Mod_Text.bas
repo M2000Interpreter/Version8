@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 22
+Global Const Revision = 23
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -42230,7 +42230,7 @@ Dim prive As Long, x1 As Long, s$
  ProcFont = True
 End Function
 Function ProcStack(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim ss$, frm$, ps As mStiva, it As Long, X As Variant, x0 As Double, s$, once As Boolean, prive As Boolean
+Dim ss$, frm$, ps As mStiva, it As Long, X As Variant, x0 As Double, s$, once As Boolean, prive As Long
 Dim x1 As Long, pa$, what$, i As Long, pppp As mArray, F As Long, myobject As Object, nd&
 ProcStack = True
    If IsLabelSymbolNew(rest$, "меос", "NEW", Lang) Then
@@ -42574,6 +42574,8 @@ End If
     prive = GetCode(bstack.Owner)
     PlainBaSket bstack.Owner, players(prive), s$
     crNew bstack, players(prive)
+   ' PlainBaSket bstack.Owner, players(prive), "cash:" + Str$(TrushCount)
+    'crNew bstack, players(prive)
     Exit Function
     End If
 End If
@@ -49020,7 +49022,7 @@ ElseIf IsExp(bstack, a$, r, , True) Then
 
 End Function
 Private Function IsArrayFun(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
-Dim s$, w1 As Long, pppp As mArray, anything As Object, p As Variant
+Dim s$, w1 As Long, pppp As mArray, anything As Object, p As Variant, mS As mStiva
 If IsStrExp(bstack, a$, s$) Then
         If bstack.lastobj Is Nothing Then
             If Right$("!!" & s$, 2) = "()" Then
@@ -49106,17 +49108,17 @@ checkIterator:
                     GoTo check123678
                     End If
                 ElseIf TypeOf bstack.lastobj.objref Is mStiva Then
-                    Set anything = bstack.lastobj.objref
+                    Set mS = bstack.lastobj.objref
                     Set bstack.lastobj = Nothing
                     If FastSymbol(a$, ",") Then
                     If IsExp(bstack, a$, p) Then
-                    Set bstack.lastobj = anything.ExportArray(CLng(MyRound(p)))
+                    Set bstack.lastobj = mS.ExportArray(CLng(MyRound(p)))
                     End If
                     Else
-                        Set bstack.lastobj = anything.ExportArray(anything.count)
+                        Set bstack.lastobj = mS.ExportArray(mS.count)
                         
                     End If
-                    Set anything = Nothing
+                    Set mS = Nothing
                     IsArrayFun = FastSymbol(a$, ")", True)
                     Exit Function
                 Else
