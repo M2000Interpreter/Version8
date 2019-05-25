@@ -57,7 +57,7 @@ Private Sub ExpandHash()
 End Sub
 Friend Sub ReduceHash(newTop As Long)
     Dim i As Long
-If newTop = 0 Then Exit Sub
+If newTop = 0 Or newTop > toplim Then Exit Sub
     For i = toplim To newTop Step -1
        
        With PriveSpace(i)

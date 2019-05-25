@@ -25,8 +25,8 @@ Public nokillvars As Boolean
 Public finalFlag As Boolean
 Public UseofIf As Integer
 Public IFCTRL As Boolean, jump As Boolean
-Public Vars As Long, ByName As Long
-Public ErrVars As Long
+Public Vars As Long, Vname As Long, ByName As Long
+Public ErrVars As Long, ErrVname As Long
 Public usestack As Boolean
 Public commnum As Long
 Public strnum As Long
@@ -82,6 +82,22 @@ Public CopyInOutCol As Collection
 Public CallLocalLast As Boolean
 Public IamGlobal As Boolean
 Public numnumlimit As Long
+Public SkipClear As Long
+Public Sub SetSkip()
+    SkipClear = SkipClear + 1
+End Sub
+Public Sub ResetSkip()
+    SkipClear = SkipClear - 1
+End Sub
+
+Public Sub SetV()
+Vars = var2used  ' these are globals
+Vname = varhash.count
+End Sub
+Public Sub SetV2()
+Vars = var2used + ByName
+Vname = varhash.count + ByName
+End Sub
 Public Sub CopyStrip(bst As basetask)
 With bst
 .StaticInUse = StaticInUse
@@ -387,7 +403,7 @@ Public Function GetDotNew(a$, dotnum&, Optional clear As Boolean = False) As Boo
 If Look2Parent Then GetDotNew = Parent.GetDotNew(a$, dotnum&): Exit Function
 
 If curdotcol = 0 Then
-If UseGroupname <> "" Then
+If Len(UseGroupname) > 0 Then
  If InStr(a$, "(") > 0 Then
  If AscW(Left$(a$, 1)) > 255 Then
  a$ = "ауто." + a$
@@ -414,7 +430,7 @@ Else
 Else
 
   If dotcol(dotnum) = "THIS" Then
-    If UseGroupname <> "" Then
+    If Len(UseGroupname) > 0 Then
       a$ = UseGroupname + a$
     Else
     a$ = "THIS." + a$

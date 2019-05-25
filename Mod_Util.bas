@@ -11769,7 +11769,7 @@ If IsLabelSymbolNew(b$, "ΩΣ", "AS", Lang) Then
             w$ = Funcweak(bstack, b$, x1, label1$)
             If LastErNum1 = -1 And x1 < 5 Then Exit Function
             If LenB(w$) = 0 Then
-            If bstack.UseGroupname <> "" Then
+            If Len(bstack.UseGroupname) > 0 Then
                 If Len(label1$) > Len(bstack.UseGroupname) Then
                     If bstack.UseGroupname = Left$(label1$, Len(bstack.UseGroupname)) Then
                         MyEr "No such member in this group", "Δεν υπάρχει τέτοιο μέλος σε αυτή την ομάδα"
@@ -19648,6 +19648,7 @@ jumphere:
             sb2used = CLng(.PopVal)
             varhash.ReduceHash CLng(.PopVal), var()
             subHash.ReduceHash CLng(.PopVal), sbf()
+            basestack.ResetSkip
             Else
             .drop 4
             End If
@@ -19693,6 +19694,7 @@ jumphere:
             sb2used = CLng(.PopVal)
             varhash.ReduceHash CLng(.PopVal), var()
             subHash.ReduceHash CLng(.PopVal), sbf()
+            basestack.ResetSkip
             Else
             .drop 4
             End If
@@ -19703,6 +19705,7 @@ jumphere:
         Case -1
             nok = True
         .drop 7
+        basestack.ResetSkip
         Case -2
             nok = True
             .drop 5  ' never happen???
@@ -19733,6 +19736,7 @@ jumphere:
             sb2used = CLng(.PopVal)
             varhash.ReduceHash CLng(.PopVal), var()
             subHash.ReduceHash CLng(.PopVal), sbf()
+            basestack.ResetSkip
             Else
             .drop 4
             End If
@@ -19743,6 +19747,7 @@ jumphere:
         Case -1
             nok = True
         .drop 7
+        basestack.ResetSkip
         Case -2
             nok = True
             .drop 5  ' never happen???

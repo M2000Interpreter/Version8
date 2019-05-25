@@ -15,7 +15,6 @@ Option Explicit
 Public mItem As Variant
 Public slot As Byte
 Public mTypeName As Byte
-'Private Key As String * 8
 Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 
@@ -104,6 +103,3 @@ End If
 Set Trush(TrushCount) = Me
 End Sub
 
-Private Sub Class_Initialize()
-'Key = Hex$(ObjPtr(Me))
-End Sub

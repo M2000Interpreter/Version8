@@ -150,7 +150,7 @@ Private Sub ExpandHash()
 End Sub
 Friend Sub ReduceHash(newTop As Long)
     Dim i As Long
-    
+    If toplim < newTop Then Exit Sub
     For i = toplim To newTop Step -1
        With PriveSpace(i)
         If .Pleft > 0 Then

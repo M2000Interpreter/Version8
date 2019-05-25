@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 23
+Global Const Revision = 24
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -718,6 +718,7 @@ Public Sub PushStage(basestack As basetask, dummy As Boolean)
                             strfunid.pushtop
                             funid.pushtop
                         basestack.ErrVars = var2used
+                        basestack.SetSkip
                 End If
         End With
        
@@ -732,6 +733,7 @@ Public Sub PopStage(basestack As basetask)
             sb2used = CLng(.PopVal)
             varhash.ReduceHash CLng(.PopVal), var()
             subHash.ReduceHash CLng(.PopVal), sbf()
+            basestack.ResetSkip
             numid.poptop
             funid.poptop
             strfunid.poptop
@@ -858,11 +860,12 @@ Dim r2 As Variant, r3 As Variant
 End Function
 
 Public Function SpeedGroup(bstack As basetask, pppp As mArray, Prefix$, ByVal w$, b$, v As Long) As Long
-Dim Vars As Long, VName As Long, y1 As Long, subs As Long, snames As Long, i As Long, ec$, ohere$, p As Variant
+Dim Vars As Long, Vname As Long, y1 As Long, subs As Long, snames As Long, i As Long, ec$, ohere$, p As Variant
 Dim depth As Long, loopthis As Boolean, subspoint As Boolean, RetStackSize As Long, S3 As Long, rest1$, vvv As Long
 Dim safegroup As Group
 Dim kolpo As Boolean, bb$, once As Boolean, dd As Variant, subsfc As FastCollection
-Vars = var2used: VName = varhash.count
+bstack.SetSkip
+Vars = var2used: Vname = varhash.count
 subs = sb2used: snames = subHash.count
 numid.pushtop
 funid.pushtop
@@ -1163,14 +1166,9 @@ RetStackSize = bstack.RetStackTotal
     w$ = myUcase(w$)
         y1 = 0
         If w$ = "THIS" Or w$ = "¡’‘œ" Then
-        If bstack.UseGroupname <> "" Then
-        'w$ = Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1)
-        Else
-        
-        End If
         w$ = "THIS"  ' look this other time..
         ElseIf Len(w$) > 5 Then
-        If bstack.UseGroupname <> "" Then
+        If Len(bstack.UseGroupname) > 0 Then
         If w$ = "SUPERCLASS" Or w$ = "’–≈— À¡”«" Then
         Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd: pppp.Arr = True
         v = 0
@@ -1517,7 +1515,7 @@ w$ = myUcase(w$)
             w$ = "THIS"
             If bstack.GroupName = vbNullString Then w$ = vbNullString
         Else 'If Len(w$) > 5 Then
-        If bstack.UseGroupname <> "" Then
+        If Len(bstack.UseGroupname) > 0 Then
         If w$ = "SUPERCLASS" Or w$ = "’–≈— À¡”«" Then
         Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd: pppp.Arr = True
         v = 0
@@ -2047,9 +2045,9 @@ ElseIf Vars < y1 Then
 End If
 
 fastexit:
-
+bstack.ResetSkip
 var2used = Vars
-varhash.ReduceHash VName, var()
+varhash.ReduceHash Vname, var()
 
  sb2used = subs
  subHash.ReduceHash snames, sbf()
@@ -5253,6 +5251,7 @@ foundprivate:
                     Set nbstack.Owner = bstack.Owner
                     nbstack.OriginalCode = v1&
                     nbstack.UseGroupname = sbf(v1&).sbgroup
+                    nbstack.SetV
                     If GoFunc(nbstack, s1$, ")", p) Then
                         If Not nbstack.StaticCollection Is Nothing Then
                             bstack.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -6684,7 +6683,7 @@ ElseIf GetSub(s1$, v1&) Then
 GoTo contAr1
 Else
 skiphere:
-If bstack.UseGroupname <> "" Then
+If Len(bstack.UseGroupname) > 0 Then
 If InStr(s1$, bstack.UseGroupname) = 1 Then
 
 s1$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(s1$, Len(bstack.UseGroupname) + 1)
@@ -6774,6 +6773,7 @@ Else
     Set nbstack.Owner = bstack.Owner
     nbstack.OriginalCode = v1&
     nbstack.UseGroupname = sbf(v1&).sbgroup
+    nbstack.SetV
     If GoFunc(nbstack, s1$, a$, p) Then
         If Not nbstack.StaticCollection Is Nothing Then
       bstack.Parent.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -7360,6 +7360,7 @@ conthere102030:
                         Set nbstack.Owner = bstack.Owner
                         nbstack.OriginalCode = v1&
                         nbstack.UseGroupname = sbf(v1&).sbgroup
+                        nbstack.SetV
                         If GoFunc(nbstack, s1$, a$, p) Then
                             If Not nbstack.StaticCollection Is Nothing Then
                                 bstack.Parent.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -8110,7 +8111,7 @@ again2134:
                         rr& = 2
                         Exit Do
                     ElseIf Left$(r$, 5) = "¡’‘œ." Or Left$(r$, 5) = "THIS." Then
-                        If bstack.UseGroupname <> "" Then
+                        If Len(bstack.UseGroupname) > 0 Then
                                  c$ = bstack.UseGroupname + Mid$(r$, 6)
                                  
                          Else
@@ -8177,11 +8178,9 @@ again2134:
                                    rr& = 3
                                 End If
                                  If rr& > 0 Then
-                                 If rr& = 2 Then
-                                 If bstack.UseGroupname <> "" Then
-                                 r$ = bstack.UseGroupname + Mid$(r$, 6)
-                                 End If
-                                 End If
+                                    If rr& = 2 Then
+                                        If Len(bstack.UseGroupname) > 0 Then r$ = bstack.UseGroupname + Mid$(r$, 6)
+                                    End If
                                  rr& = 1
                                  If GetSub(r$ + ")", rr&) Then
                                  If sbf(rr&).Extern > 0 Then
@@ -8582,7 +8581,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                     If GetlocalVar(r$, i) Then
                         a$ = Chr(34) + here$ & "." & r$ & Chr(34) + a$
                     ElseIf Left$(r$, 5) = "¡’‘œ." Or Left$(r$, 5) = "THIS." Then
-                        If bstack.UseGroupname <> "" Then
+                        If Len(bstack.UseGroupname) > 0 Then
                                  c$ = bstack.UseGroupname + Mid$(r$, 6)
                                  
                          Else
@@ -8634,7 +8633,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                                 End If
                                  If rr& > 0 Then
                                  If rr& = 2 Then
-                                 If bstack.UseGroupname <> "" Then
+                                 If Len(bstack.UseGroupname) > 0 Then
                                  r$ = bstack.UseGroupname + Mid$(r$, 6)
                                  End If
                                  End If
@@ -8936,7 +8935,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                     If GetlocalVar(r$, i) Then
                         a$ = Chr(34) + here$ & "." & r$ & Chr(34) + a$
                     ElseIf Left$(r$, 5) = "¡’‘œ." Or Left$(r$, 5) = "THIS." Then
-                        If bstack.UseGroupname <> "" Then
+                        If Len(bstack.UseGroupname) > 0 Then
                                  c$ = bstack.UseGroupname + Mid$(r$, 6)
                                  
                          Else
@@ -8990,7 +8989,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                                 End If
                                 If rr& > 0 Then
                                  If rr& = 2 Then
-                                 If bstack.UseGroupname <> "" Then
+                                 If Len(bstack.UseGroupname) > 0 Then
                                  r$ = bstack.UseGroupname + Mid$(r$, 6)
                                  End If
                                  End If
@@ -9248,7 +9247,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                     If GetlocalVar(r$, i) Then
                         a$ = Chr(34) + here$ & "." & r$ & Chr(34) + a$
                     ElseIf Left$(r$, 5) = "¡’‘œ." Or Left$(r$, 5) = "THIS." Then
-                        If bstack.UseGroupname <> "" Then
+                        If Len(bstack.UseGroupname) > 0 Then
                                  c$ = bstack.UseGroupname + Mid$(r$, 6)
                                  
                          Else
@@ -9297,7 +9296,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                                    rr& = 1
                                 End If
                                  If rr& = 1 Then
-                                 If bstack.UseGroupname <> "" Then
+                                 If Len(bstack.UseGroupname) > 0 Then
                                  r$ = bstack.UseGroupname + Mid$(r$, 6)
                                  Else
                                  End If
@@ -10214,7 +10213,7 @@ If w1& = -100 Then
       If bstackstr.GetDotNew(r$, 1, True) Then
       If r$ = "THIS." Then
       r$ = Left$(bstackstr.UseGroupname, Len(bstackstr.UseGroupname) - 1)
-       ElseIf bstackstr.UseGroupname <> "" Then
+       ElseIf Len(bstackstr.UseGroupname) > 0 Then
            If Len(r$) = 0 Then IsStr1 = False: Exit Function
            r$ = Left$(r$, Len(r$) - 1)
            If r$ + "." = bstackstr.UseGroupname Then
@@ -10261,7 +10260,7 @@ Exit Do
            IsStr1 = True
   
         Exit Function
-    ElseIf bstackstr.UseGroupname <> "" Then
+    ElseIf Len(bstackstr.UseGroupname) > 0 Then
         r$ = Left$(bstackstr.UseGroupname, Len(bstackstr.UseGroupname) - 1)
          IsStr1 = True
          Exit Function
@@ -10400,6 +10399,7 @@ enteragain:
                             Set nbstack.Owner = bstackstr.Owner
                             nbstack.OriginalCode = w1
                             nbstack.UseGroupname = sbf(w1).sbgroup
+                            nbstack.SetV
                             If GoFunc(nbstack, q1$, q$ + ")", r$) Then
                                 If Not nbstack.StaticCollection Is Nothing Then
                                     bstackstr.Parent.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -10504,6 +10504,7 @@ groupstrvalue:
                 Set nbstack.Owner = bstackstr.Owner
                 nbstack.UseGroupname = sbf(w1&).sbgroup
                 nbstack.OriginalCode = w1&
+                nbstack.SetV
                 If GoFunc(nbstack, q1$, a$, s$, , , True) Then
                     If Not nbstack.StaticCollection Is Nothing Then
                         bstackstr.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -10899,6 +10900,7 @@ foundprivate:
                                 Set nbstack.Owner = bstackstr.Owner
                                 nbstack.OriginalCode = w1
                                 nbstack.UseGroupname = sbf(w1).sbgroup
+                                nbstack.SetV
                                 If GoFunc(nbstack, q1$, ")", r$) Then
                                     If Not nbstack.StaticCollection Is Nothing Then
                                         bstackstr.Parent.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -13480,7 +13482,7 @@ itisarrayorfunction:
             ElseIf GetSub(q1$, w1&) Then
                 GoTo contStrFun
             Else
-            If bstackstr.UseGroupname <> "" Then
+            If Len(bstackstr.UseGroupname) > 0 Then
             If InStr(q1$, bstackstr.UseGroupname) = 1 Then
             
             
@@ -13516,6 +13518,7 @@ contStrFun:
                 Set nbstack.Owner = bstackstr.Owner
                 nbstack.UseGroupname = sbf(w1&).sbgroup
                 nbstack.OriginalCode = w1&
+                nbstack.SetV
                 If GoFunc(nbstack, q1$, a$, s$, , , True) Then
                     If Not nbstack.StaticCollection Is Nothing Then
                         bstackstr.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -13769,6 +13772,7 @@ contrightstrpar:
                                 Set nbstack.Owner = bstackstr.Owner
                                 nbstack.OriginalCode = w1
                                 nbstack.UseGroupname = sbf(w1).sbgroup
+                                nbstack.SetV
                                 If GoFunc(nbstack, q1$, a$, r$) Then
                                     If Not nbstack.StaticCollection Is Nothing Then
                                         bstackstr.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -15324,6 +15328,7 @@ ContExit:
                     Exit Function
                 ElseIf IsLabelSymbolNewExp(b$, "√…¡", "FOR", Lang, Us$) Then
 exitfor:
+
                     once = False
                     PopStagePartContinue2 bstack, bstack.RetStackTotal
                     i = Abs(IsLabelOnly(b$, w$))
@@ -15340,6 +15345,13 @@ exitfor:
                         b$ = w$
                         Execute = 12
                     Else
+                    
+                    
+                    If Execute <> 2 Then Execute = 1 Else Execute = 3
+                   restartmodule = False
+                     b$ = vbNullString
+                    once = True
+                    Exit Function
                         b$ = "NEXT"
                         Execute = 2
                     End If
@@ -15626,31 +15638,6 @@ contfor:
                                                     bstack.addlen = nd&
                                                     If Execute = 2 And ss$ <> "" And Not ok Then
                                                         If y1 And ss$ = "NEXT" Then
-                                                            If sX = p Then
-contbasicfor:
-                                                                If Lang Then ss$ = "NEXT " + SBB$ Else ss$ = "≈–ºÃ≈Õœ " + SBB$
-                                                                If search2KIND(b$, ss$, x1, True) Then
-                                                                    b$ = Mid$(b$, x1 + Len(w$))
-                                                                    bstack.RetStack.drop 2
-                                                                    sp = 0
-                                                                    y1 = 0
-                                                                    v = -1
-                                                                    GoTo again1
-                                                                ElseIf Not Lang Then ss$ = "≈–œÃ≈Õœ " + SBB$
-                                                                    If search2KIND(b$, ss$, x1, True) Then
-                                                                        b$ = Mid$(b$, x1 + Len(w$))
-                                                                        bstack.RetStack.drop 2
-                                                                        sp = 0
-                                                                        y1 = 0
-                                                                        v = -1
-                                                                        GoTo again1
-                                                                    Else
-                                                                        Execute = 0
-                                                                        CantFind w$
-                                                                        Exit Function
-                                                                    End If
-                                                                End If
-                                                            End If
                                                             Execute = 1: Exit Do
                                                         End If
                                                         b$ = ss$
@@ -16021,7 +16008,7 @@ ContInline:
                 End If
             Case "UPDATE", "≈–… ¡…—œ"
 contUpdate:
-                If bstack.UseGroupname <> "" Then
+                If Len(bstack.UseGroupname) > 0 Then
                     b$ = ": set " + Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1) + "=" + Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1) + vbCrLf + b$
                     sss = Len(b$)
                 Else
@@ -16517,7 +16504,12 @@ contWhile1:
                                     SwapStrings sw$, here$
                                     TraceRestore bstack, x1
                                     If Execute = 2 And ss$ <> "" And Not ok Then
-                                        b$ = ss$: Exit Function
+                                        b$ = ss$
+                                        Exit Function
+                                    ElseIf Execute = 12 Then
+                                        Execute = 2
+                                        b$ = ss$
+                                        Exit Function
                                     End If
                                 End If
                                 If Execute = 3 Then ok = False
@@ -18428,7 +18420,7 @@ End Function
 Function GoFunc(mystack As basetask, what$, rest$, vl As Variant, Optional recursive As Long, Optional ByVal choosethis As Long = -1, Optional ByVal strg As Boolean = False, Optional ByVal usesamestack As Boolean = False) As Boolean
 Dim p As Variant, i As Long, F As Long, it As Long, pa$
 Dim x1 As Long, frm$, par As Boolean, ohere$, w$, bb$, loopthis As Boolean, S3 As Long, ec$
-Dim Vars As Long, VName As Long, subs As Long, snames As Long, once As Boolean, RetStackSize As Long, subspoint As Boolean, subsfc As FastCollection
+Dim Vars As Long, Vname As Long, subs As Long, snames As Long, once As Boolean, RetStackSize As Long, subspoint As Boolean, subsfc As FastCollection
 Dim threads As Long, vvv As Variant, c As Constant, myl As lambda
 
 Dim basestack As basetask
@@ -18451,7 +18443,7 @@ mystack.UseGroupname = basestack.UseGroupname
 mystack.Look2Parent = True
 mystack.strg = strg
 mystack.fHere = here$
-VName = varhash.count
+Vname = varhash.count
 Vars = var2used
 
 If usesamestack Then
@@ -18845,7 +18837,7 @@ Set mystack.FuncObj = Nothing
             FK$(13) = "EDIT " + sbf(myl.OriginalCode).goodname + ", " + CStr(-myl.lastlen - Len(rest$))
               GoTo there1234
     End If
-            If mystack.UseGroupname <> "" Then
+            If Len(mystack.UseGroupname) > 0 Then
 If InStr(mystack.UseGroupname, ChrW(&H1FFF)) > 0 Then
 pa$ = GetNextLine((sbf(Abs(mystack.OriginalCode)).sb))
 If InStr(pa$, ",") = 0 Then
@@ -18950,16 +18942,20 @@ there1234:
         End If
     End If
     End If
-    var2used = Vars
-         varhash.ReduceHash VName, var()
-If UBound(var()) / 3 >= var2used And UBound(var()) > 2999 Then
-On Error Resume Next
-    
-    ReDim Preserve var(UBound(var()) / 2 + 1) As Variant
-Err.clear
-On Error GoTo 0
-End If
-
+    If var2used > Vars Then var2used = Vars
+    varhash.ReduceHash Vname, var()
+    If varhash.count > Vname Then
+     
+         If UBound(var()) > 2999& Then
+            If UBound(var()) / 3 >= var2used Then
+                On Error Resume Next
+        
+                ReDim Preserve var(UBound(var()) / 2 + 1) As Variant
+                Err.clear
+                On Error GoTo 0
+            End If
+        End If
+    End If
  sb2used = subs
  subHash.ReduceHash snames, sbf()
    If UBound(sbf()) / 3 > sb2used And UBound(sbf()) > 499 Then
@@ -19005,13 +19001,19 @@ Set mystack.FuncObj = Nothing
     End With
     End If
     If Not nokillvars Then
-        var2used = Vars
-        varhash.ReduceHash VName, var()
-        If UBound(var()) / 3 >= var2used And UBound(var()) > 2999 Then
-            On Error Resume Next
-            ReDim Preserve var(UBound(var()) / 2 + 1) As Variant
-            Err.clear
-            On Error GoTo 0
+        If var2used > Vars Then var2used = Vars
+        varhash.ReduceHash Vname, var()
+        If varhash.count > Vname Then
+         
+             If UBound(var()) > 2999& Then
+                If UBound(var()) / 3 >= var2used Then
+                    On Error Resume Next
+            
+                    ReDim Preserve var(UBound(var()) / 2 + 1) As Variant
+                    Err.clear
+                    On Error GoTo 0
+                End If
+            End If
         End If
         sb2used = subs
         subHash.ReduceHash snames, sbf()
@@ -20020,8 +20022,8 @@ JUMPHEREFORMODULESFAST:
                it = 0
             ElseIf GetSub(here$ & "." & what$, y1) Then
                     it = 1
-            ElseIf basestack.UseGroupname <> "" Then
-            ' If what$ Like basestack.UseGroupname + "*" Then
+            ElseIf Len(basestack.UseGroupname) > 0 Then
+
             If InStr(what$, basestack.UseGroupname) = 1 Then
             what$ = basestack.UseGroupname + ChrW(&HFFBF) + Mid$(what$, Len(basestack.UseGroupname) + 1)
             If GetSub(what$, y1) Then
@@ -20411,7 +20413,7 @@ If Not usefinal Then
 If here$ = vbNullString Then
 name$ = myUcase(name$) + "."
 Else
-If bstack.UseGroupname <> "" Then
+If Len(bstack.UseGroupname) > 0 Then
 If q.IamFloatGroup Then
     name$ = myUcase(name$) + "."
 Else
@@ -20685,7 +20687,7 @@ End If
 If Left$(nm$, 5) = "¡’‘œ." Or Left$(nm$, 5) = "THIS." Then
 here12:
     If useLocalOnly Then Exit Function
-    If bstack.UseGroupname <> "" Then
+    If Len(bstack.UseGroupname) > 0 Then
     n$ = bstack.UseGroupname + Mid$(nm$, 6)
      If Not varhash.Find3(n$, k, feedback) Then
      n$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(nm$, 6)
@@ -20741,7 +20743,7 @@ here12:
 
 ElseIf varhash.Find(n$, k) = False Then
 If useLocalOnly Then
-If bstack.UseGroupname <> "" Then
+If Len(bstack.UseGroupname) > 0 Then
         If InStr(nm$, bstack.UseGroupname) = 1 Then
         n$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(nm$, Len(bstack.UseGroupname) + 1)
         varhash.Find3 n$, k, feedback
@@ -20937,7 +20939,7 @@ If n$ = vbNullString Then Exit Function
         nm$ = Mid$(n$, 1, Len(n$) - 1)
         If Left$(nm$, 5) = "¡’‘œ." Or Left$(nm$, 5) = "THIS." Then
     If useLocalOnly Then Exit Function
-    If bstack.UseGroupname <> "" Then
+    If Len(bstack.UseGroupname) > 0 Then
     n$ = bstack.UseGroupname + Mid$(nm$, 6)
      If Not varhash.Find(n$, k) Then
      n$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(nm$, 6)
@@ -20999,7 +21001,7 @@ End If
 End If
 End If
 
-If varhash.Find(n$, k) = False And bstack.UseGroupname <> "" Then
+If varhash.Find(n$, k) = False And Len(bstack.UseGroupname) > 0 Then
     If Left$(nm$, 5) = "¡’‘œ." Or Left$(nm$, 5) = "THIS." Then
         If useLocalOnly Then Exit Function
         If StripThis2(bstack.UseGroupname) = vbNullString Then
@@ -21188,7 +21190,7 @@ If cc > 5 Then
     GoTo cont1
     ElseIf Left$(nm$, 5) = "THIS." Then
 cont1:
-        If bstack.UseGroupname <> "" Then
+        If Len(bstack.UseGroupname) > 0 Then
             feedback = False
             n$ = bstack.UseGroupname + Mid$(nm$, 6)
             If varhash.Find2(n$, cc, checktype) Then finalname = n$: GoTo there12
@@ -21251,7 +21253,7 @@ there12:
     i = cc
 ElseIf Not looklocalonly Then
     n$ = nm$
-    If bstack.UseGroupname <> "" Then
+    If Len(bstack.UseGroupname) > 0 Then
         If InStr(n$, bstack.UseGroupname) = 1 Then
             n$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(n$, Len(bstack.UseGroupname) + 1)
             If varhash.Find(n$, cc) Then
@@ -21275,7 +21277,7 @@ ElseIf Not looklocalonly Then
             GetVar3 = True
         ElseIf nosearch Then
             Exit Function
-        ElseIf bstack.UseGroupname <> vbNullString Then
+        ElseIf Len(bstack.UseGroupname) > 0 Then
             Exit Function
         ElseIf wide Then
             If SecureNames Then
@@ -21348,7 +21350,7 @@ If cc > 5 And i >= 0 Then
     GoTo cont1
     ElseIf Left$(nm$, 5) = "THIS." Then
 cont1:
-        If bstack.UseGroupname <> "" Then
+        If Len(bstack.UseGroupname) > 0 Then
             feedback = False
             n$ = bstack.UseGroupname + Mid$(nm$, 6)
             If varhash.Find2(n$, cc, checktype) Then finalname = n$: GoTo there12
@@ -21392,7 +21394,7 @@ there12:
     i = cc
 ElseIf Not looklocalonly Then
     n$ = nm$
-    If bstack.UseGroupname <> "" Then
+    If Len(bstack.UseGroupname) > 0 Then
         If InStr(n$, bstack.UseGroupname) = 1 Then
             n$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(n$, Len(bstack.UseGroupname) + 1)
             If varhash.Find(n$, cc) Then
@@ -21419,7 +21421,7 @@ ElseIf Not looklocalonly Then
             GetVar = True
         ElseIf nosearch Then
             Exit Function
-        ElseIf bstack.UseGroupname <> vbNullString Then
+        ElseIf Len(bstack.UseGroupname) > 0 Then
             Exit Function
         ElseIf wide Then
             If SecureNames Then
@@ -21492,7 +21494,7 @@ If cc > 5 Then
     GoTo cont1
     ElseIf Left$(nm$, 5) = "THIS." Then
 cont1:
-        If bstack.UseGroupname <> "" Then
+        If Len(bstack.UseGroupname) > 0 Then
                   n$ = bstack.UseGroupname + Mid$(nm$, 6)
                 If varhash.Find(n$, cc) Then GoTo there12
                 
@@ -21556,7 +21558,7 @@ ElseIf Not looklocalonly Then
     If varhash.Find(nm$, cc) Then
     i = cc
     getvar2 = True
-    ElseIf bstack.UseGroupname <> "" Then
+    ElseIf Len(bstack.UseGroupname) > 0 Then
         If InStr(nm$, bstack.UseGroupname) = 1 Then
         n$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(nm$, Len(bstack.UseGroupname) + 1)
         If varhash.Find(n$, cc) Then
@@ -25994,7 +25996,7 @@ againgroup:
                             If TypeOf var(v) Is Group Then
                              If nm$ <> "" Then
                                 UnFloatGroupReWriteVars stripstack1, nm$, v, myobject
-                            ElseIf stripstack1.UseGroupname = vbNullString Then
+                            ElseIf Len(stripstack1.UseGroupname) = 0 Then
                                         UnFloatGroupReWriteVars stripstack1, w$, v, myobject
                             Else
                                 UnFloatGroupReWriteVars stripstack1, Mid$(w$, Len(ohere$ & ". ")), v, myobject
@@ -26009,7 +26011,7 @@ againgroup:
                     
                         If nm$ <> "" Then
                         UnFloatGroup stripstack1, nm$, v, myobject
-                        ElseIf stripstack1.UseGroupname = vbNullString Then
+                        ElseIf Len(stripstack1.UseGroupname) = 0 Then
                         UnFloatGroup stripstack1, w$, v, myobject
                         Else
                         UnFloatGroup stripstack1, Mid$(w$, Len(ohere$ & ". ")), v, myobject
@@ -26212,7 +26214,7 @@ againgroupstr:
                                                
                                               If nm$ <> "" Then
                         UnFloatGroup stripstack1, nm$, v, myobject
-                        ElseIf stripstack1.UseGroupname = vbNullString Then
+                        ElseIf Len(stripstack1.UseGroupname) = 0 Then
                         UnFloatGroup stripstack1, w$, v, myobject
                         Else
                         UnFloatGroup stripstack1, bstack.GroupName + Mid$(w$, Len(ohere$ & ". ")), v, myobject
@@ -27414,7 +27416,7 @@ End Sub
 Sub MakeThisSubNum(ThatStack As basetask, rest$)
 If Left$(rest$, 1) = "T" Then
 If Left$(rest$, 5) = "THIS." Then
-    If ThatStack.UseGroupname <> "" Then
+    If Len(ThatStack.UseGroupname) > 0 Then
         rest$ = ThatStack.UseGroupname & Mid$(rest$, 6)
     Else
         rest$ = ThatStack.GroupName & Mid$(rest$, 6)
@@ -27422,7 +27424,7 @@ If Left$(rest$, 5) = "THIS." Then
     End If
 ElseIf Left$(rest$, 1) = "¡" Then
 If Left$(rest$, 5) = "¡’‘œ." Then
-    If ThatStack.UseGroupname <> "" Then
+    If Len(ThatStack.UseGroupname) > 0 Then
        rest$ = ThatStack.UseGroupname & Mid$(rest$, 6)
     Else
         rest$ = ThatStack.GroupName & Mid$(rest$, 6)
@@ -27975,7 +27977,7 @@ If Not TypeOf myobject Is Group Then Exit Sub
  Dim ohere$, oldgroupname$
  ohere$ = here$
 
-If bstack.UseGroupname <> "" Or glob Then
+If Len(bstack.UseGroupname) > 0 Or glob Then
 'If globl Then
 here$ = vbNullString
 End If
@@ -28106,7 +28108,7 @@ conthere2:
 cont1010:
                  Next x1
 
-                        If ohere$ = vbNullString Or bstack.UseGroupname <> "" Or glob Then
+                        If ohere$ = vbNullString Or Len(bstack.UseGroupname) > 0 Or glob Then
                         here$ = vbNullString
                         Else
                         here$ = ohere$
@@ -28127,7 +28129,7 @@ cont1010:
            
                 bstack.GroupName = vbNullString
               While s$ <> ""
-                 If ohere$ = vbNullString Or bstack.UseGroupname <> "" Or glob Then
+                 If ohere$ = vbNullString Or Len(bstack.UseGroupname) > 0 Or glob Then
                here$ = oldgroupname$ + what$
               Else
               here$ = ohere$ + "." + oldgroupname$ + what$
@@ -28213,7 +28215,7 @@ cont1010:
                     SetNextLine sss$
                     sss$ = NLtrim$(sss$) + " "
                 Wend
-                    If bstack.UseGroupname <> "" Or glob Then
+                    If Len(bstack.UseGroupname) > 0 Or glob Then
                                 here$ = vbNullString
                     Else
                             here$ = ohere$
@@ -28309,7 +28311,7 @@ If Not TypeOf myobject Is Group Then Exit Sub
  
   If myobject.IamSuperClass Then Set myobject = myobject.SuperClassList
  End If
-If bstack.UseGroupname <> "" Or glob Then
+If Len(bstack.UseGroupname) > 0 Or glob Then
     If Not glob Then
 Else
 here$ = vbNullString
@@ -28357,7 +28359,7 @@ If myobject Is Nothing Then GoTo exithere1
                             If Typename(vvl) = myArray Then
                                 s$ = Left$(s$, Len(s$) - 1)
                                 ss$ = vbNullString
-                                If here$ = vbNullString And bstack.UseGroupname <> vbNullString Then
+                                If here$ = vbNullString And Len(bstack.UseGroupname) > 0 Then
                                     If neoGetArrayLinkOnly(bstack, bstack.UseGroupname + s$, j) Then GoTo conthere1111
                                 End If
                                 If Not neoGetArrayLinkOnly(bstack, s$, j) Then  ''
@@ -28517,7 +28519,7 @@ cont1010:
                     SetNextLine sss$
                     sss$ = NLtrim$(sss$) + " "
                 Wend
-                        If bstack.UseGroupname <> "" Or glob Then
+                        If Len(bstack.UseGroupname) > 0 Or glob Then
                     here$ = vbNullString
                     Else
                                   here$ = ohere$
@@ -31041,7 +31043,7 @@ Function ProcModuleEntry(basestack As basetask, ohere$, x1 As Long, rest$, Optio
 On Error GoTo there22
   If LastErNum = -1 Then GoTo there22
 Dim frm$, bs As basetask, i As Long, pa$, p As Variant, loopthis As Boolean
-Dim subs As Long, snames As Long, VName As Long, vvv As Variant, S3 As Long
+Dim subs As Long, snames As Long, Vname As Long, vvv As Variant, S3 As Long
 Dim subspoint As Boolean
 'LastErName = VbNullString: LastErNameGR = VbNullString
 If CurrentStackSize > stacksize Then
@@ -31061,7 +31063,8 @@ i = 1
         Set .Sorosref = basestack.soros   'same stack
         Set .Owner = .Parent.Owner
         .OriginalName$ = ohere$
-        .Vars = var2used + basestack.ByName: VName = varhash.count + basestack.ByName
+        .SetV2
+        Vname = .Vname
         .ErrVars = .Vars
         basestack.ByName = 0
         
@@ -31162,7 +31165,7 @@ If MOUT And Not NOEXECUTION Then
     Exit Do
 End If
                     If sb2used <> 0 And Not NERR Then
-        If bs.UseGroupname <> "" Then
+        If Len(bs.UseGroupname) > 0 Then
 If InStr(bs.UseGroupname, ChrW(&H1FFF)) > 0 Then
 
 pa$ = GetNextLine((sbf(Abs(bs.OriginalCode)).sb))
@@ -31236,6 +31239,7 @@ thh:
     End If
     If LastErNum <> 0 Then
                    rest$ = vbNullString
+                   bs.UseofIf = 0
                     End If
                If Not exitnow Then If bs.UseofIf > 0 Then MissENDIF: ProcModuleEntry = False
 thh1:
@@ -31247,11 +31251,12 @@ thh1:
                     .ThrowThreads
                   MOUT = False
                     var2used = .Vars
-                    varhash.ReduceHash VName, var()
-                    If UBound(var()) / 3 >= var2used And UBound(var()) > 2999 Then
+                    varhash.ReduceHash Vname, var()
+                    If UBound(var()) > 2999 Then
+                    If UBound(var()) / 3 >= var2used Then
                         ReDim Preserve var(UBound(var()) / 2) As Variant
                     End If
-                    
+                    End If
                         
                   
                     
@@ -32032,8 +32037,16 @@ ALFA12:
             Exit Function
         ElseIf bb$ = "NEXT" Then
             b$ = bb$
+              
+              If RetStackSize < bstack.RetStackTotal Then
               Exec = 2
-              If RetStackSize < bstack.RetStackTotal Then PopStagePartContinue bstack, bstack.RetStackTotal - RetStackSize
+              PopStagePartContinue bstack, bstack.RetStackTotal - RetStackSize
+              Else
+              Exec = 2
+           '   b$ = vbNullString
+             ' If Exec <> 2 Then Exec = 3 Else Exec = 1
+              'once = True
+              End If
               Exit Do
         End If
         
@@ -32196,6 +32209,9 @@ subsub02:
                                         ElseIf x2 = 0 Then
                                                 b$ = bb$
                                                 Exec = 0
+                                                'If RetStackSize < bstack.RetStackTotal Then
+                                                '
+                                                'End If
                                                 Exit Function
                                         End If
                                     Else
@@ -34679,11 +34695,12 @@ End If
              If flag Then
              bs.UseGroupname = basestack.UseGroupname
              bs.GroupName = basestack.GroupName
-            
+             bs.SetV
              Call GoFunc(bs, ss$, rest$, vvl, , x1)
             
              Else
              bs.UseGroupname = sbf(x1).sbgroup
+             bs.SetV
         Call GoFunc(bs, ss$, rest$, vvl)
         End If
             If Not bs.StaticCollection Is Nothing Then
@@ -34861,7 +34878,7 @@ ElseIf IsLabelSymbolNew(rest$, "√≈√œÕœ”", "EVENT", Lang) Then
                 Set op = Nothing
                 If Not a.EventFuncPos(s$, ss$, x1) Then
                     ' check parent
-                    If basestack.UseGroupname <> "" Then
+                    If Len(basestack.UseGroupname) > 0 Then
                         what$ = Mid$(basestack.UseGroupname, 1, Len(basestack.UseGroupname) - 1)
                         If GetVar(basestack, what$, x1) Then
                             what$ = Left$(what$, Len(what$) - Len(var(x1).GroupName))
@@ -34909,6 +34926,7 @@ contcallhere:
                 here$ = bs.fHere
                 bs.Look2Parent = False
                 PushStage basestack, False
+                bs.SetSkip
                 executeblock i, bs, (sbf(x1).sb), (False), (flag)
                 PopStage basestack
                 here$ = s$
@@ -34960,6 +34978,7 @@ x1 = ModuleSubAsap("A_()", ss$, Trim$(s$))
         Set bs.Owner = basestack.Owner
         bs.UseGroupname = sbf(x1).sbgroup
         bs.OriginalCode = x1
+        bs.SetV
     If par Then
     
        Call GoFunc(bs, what$, rest$, vvl, , x1)
@@ -35097,7 +35116,7 @@ If Not it Then
         Set bs.Owner = basestack.Owner
         bs.UseGroupname = sbf(x1).sbgroup
         bs.OriginalCode = x1
- 
+        bs.SetV
         If here$ = vbNullString Then
             here$ = what$
             Call GoFunc(bs, what$, rest$, vvl, , x1)
@@ -35244,30 +35263,29 @@ GoTo again111
         bs.IamAnEvent = basestack.IamAnEvent
         If basestack.IamThread Then Set bs.Process = basestack.Process
         If Not TheSame(here$, ss$) Then Set bs.Sorosref = basestack.soros
-        Set bs.Owner = basestack.Owner
+            Set bs.Owner = basestack.Owner
              bs.OriginalCode = x1
+             bs.SetV
              If flag Then
-             bs.UseGroupname = basestack.UseGroupname
-             bs.GroupName = basestack.GroupName
-             bs.CallLocalLast = True
-             bs.strfunnum = basestack.strfunnum
-             bs.strnum = basestack.strnum
-             bs.numnum = basestack.numnum
-             bs.numfunnum = basestack.numfunnum
-             bs.commnum = basestack.commnum
-
-             Call GoFunc(bs, ss$, rest$, vvl, , x1)
-             
+                 bs.UseGroupname = basestack.UseGroupname
+                 bs.GroupName = basestack.GroupName
+                 bs.CallLocalLast = True
+                 bs.strfunnum = basestack.strfunnum
+                 bs.strnum = basestack.strnum
+                 bs.numnum = basestack.numnum
+                 bs.numfunnum = basestack.numfunnum
+                 bs.commnum = basestack.commnum
+    
+                 Call GoFunc(bs, ss$, rest$, vvl, , x1)
              Else
-             bs.UseGroupname = sbf(x1).sbgroup
+                 bs.UseGroupname = sbf(x1).sbgroup
             
-            Call GoFunc(bs, ss$, rest$, vvl, True, x1)
-            
-        End If
+                Call GoFunc(bs, ss$, rest$, vvl, True, x1)
+            End If
             If Not bs.StaticCollection Is Nothing Then
-        basestack.Parent.SetVarobJ "%_" + bs.StaticInUse, bs.StaticCollection
-        End If
-        Set bs = Nothing
+                basestack.Parent.SetVarobJ "%_" + bs.StaticInUse, bs.StaticCollection
+            End If
+            Set bs = Nothing
         If Not par Then
         If InStr(ss$, "$") > 0 Then
             If vvl <> "" Then  ' no zero we have error
@@ -35393,6 +35411,7 @@ jumphere:
         Set bs.Owner = basestack.Owner
         bs.UseGroupname = sbf(x1).sbgroup
         bs.OriginalCode = x1
+        bs.SetV
         If LenB(here$) = 0 Then
             here$ = what$
             Call GoFunc(bs, what$, rest$, vvl, , x1)
@@ -36581,7 +36600,7 @@ look = jump = 1 Or jump = 7
 On jump GoTo read, refer, commit, readnew, readlocal, readlet, readfromsub, link
 Exit Function
 commit:
-If bstack.UseGroupname <> "" Then
+If Len(bstack.UseGroupname) > 0 Then
 F = True
 col = 1
 Set bs = bstack
@@ -36621,7 +36640,7 @@ Case 1
                                     ss$ = bstack.GroupName
                                     If s$ <> "" Then what$ = s$
                                      If Len(var(i).GroupName) > Len(what$) Then
-                                        If var(i).IamRef Then ' Or bstack.UseGroupname <> ""
+                                        If var(i).IamRef Then
                                     
                                          s$ = here$
                                           here$ = vbNullString
@@ -36712,7 +36731,7 @@ Case 1
                
                 Set var(i) = myobject
                 Else
-               UnFloatGroup bstack, bstack.GroupName & what$, i, myobject, here$ = vbNullString Or bstack.UseGroupname <> "", , True
+               UnFloatGroup bstack, bstack.GroupName & what$, i, myobject, here$ = vbNullString Or Len(bstack.UseGroupname) > 0, , True
                End If
                  ElseIf Typename$(myobject) = "mEvent" Then
                 Set var(i) = myobject
@@ -37039,7 +37058,7 @@ If x1 = 1 Then
         If Typename(var(i)) <> "Group" Then MyRead = True: Exit Function
         Set ps = New mStiva
         If ohere$ <> "" Then
-                If bstack.UseGroupname <> "" Then
+                If Len(bstack.UseGroupname) > 0 Then
                     Set myobject = var(i).PrepareSoros(var(), "")
                 Else
                     If par Then
@@ -37525,7 +37544,7 @@ contread123:
                                 ss$ = bstack.GroupName
                                 If s$ <> "" Then what$ = s$
                                  If Len(var(i).GroupName) > Len(what$) Then
-                                    If var(i).IamRef Then ' Or bstack.UseGroupname <> ""
+                                    If var(i).IamRef Then
                                 
                                      s$ = here$
                                       here$ = vbNullString
@@ -37717,13 +37736,13 @@ comehere:
                     If myobject.IamApointer Then
                     If myobject.link.IamFloatGroup Then
                     
-                    UnFloatGroup bstack, bstack.GroupName & what$, i, myobject.link, here$ = vbNullString Or bstack.UseGroupname <> ""
+                    UnFloatGroup bstack, bstack.GroupName & what$, i, myobject.link, here$ = vbNullString Or Len(bstack.UseGroupname) > 0
                     Else
                     CopyPointerRef bstack, myobject
-                    UnFloatGroup bstack, bstack.GroupName & what$, i, bstack.lastobj, here$ = vbNullString Or bstack.UseGroupname <> ""
+                    UnFloatGroup bstack, bstack.GroupName & what$, i, bstack.lastobj, here$ = vbNullString Or Len(bstack.UseGroupname) > 0
                     End If
                 Else
-               UnFloatGroup bstack, bstack.GroupName & what$, i, myobject, here$ = vbNullString Or bstack.UseGroupname <> "", , True
+               UnFloatGroup bstack, bstack.GroupName & what$, i, myobject, here$ = vbNullString Or Len(bstack.UseGroupname) > 0, , True
                End If
                     
                     Else
@@ -37732,7 +37751,7 @@ contpointer:
                
                 Set var(i) = myobject
                 Else
-               UnFloatGroup bstack, bstack.GroupName & what$, i, myobject, here$ = vbNullString Or bstack.UseGroupname <> "", , True
+               UnFloatGroup bstack, bstack.GroupName & what$, i, myobject, here$ = vbNullString Or Len(bstack.UseGroupname) > 0, , True
                End If
                End If
                ' var(i).IamRef = Len(bstack.UseGroupname) > 0
@@ -38936,16 +38955,16 @@ Form1.List1.clear
 If bstack.IamThread Then
 If Not bstack.StaticCollection Is Nothing Then
 Set bstack.StaticCollection = Nothing
-Else
- MyEr "Can't Clear all variables in a thread", "ƒÂÌ ÏÔÒ˛ Ì· Û‚ﬁÛ˘ ¸ÎÂÚ ÙÈÚ ÏÂÙ·‚ÎÁÙ›Ú ÛÂ ›Ì· ÌﬁÏ·"
  End If
 ElseIf bstack.IamAnEvent Then
 
  
 If Not bstack.StaticCollection Is Nothing Then
+If Not bstack.Parent Is Nothing Then
     If Not bstack.Parent.StaticCollection Is Nothing Then
     If bstack.Parent.StaticCollection.ExistKey("%_" + here$) Then
             bstack.Parent.StaticCollection.RemoveWithNoFind
+    End If
     End If
     End If
     Set bstack.StaticCollection = Nothing
@@ -38960,19 +38979,26 @@ again1234:
 
  If curbstack.IamChild Then
  If curbstack.IamThread Then Set curbstack = Nothing: Exit Function
+
+ If Not curbstack.Parent.IamChild And Not curbstack.Parent.IamAnEvent Then
+        Set EventStaticCollection = New FastCollection
+ End If
+ If curbstack.IamAnEvent Then Set curbstack = Nothing: Exit Function
  With curbstack
    Set .StaticCollection = Nothing
-        If .Vars <> 0 Then Set curbstack = Nothing: Exit Function
+      If .SkipClear > 0 Then Set curbstack = Nothing: Exit Function
+      
+      var2used = curbstack.Vars
+      varhash.ReduceHash curbstack.Vname, var()
       
    End With
-If Not curbstack.Parent.IamChild And Not curbstack.Parent.IamAnEvent Then
-Set EventStaticCollection = New FastCollection
-End If
-Set curbstack = curbstack.Parent
-If here$ = vbNullString Then GoTo again1234
-varhash.ReduceHash curbstack.Vars, var()
-var2used = curbstack.Vars
 
+'Set curbstack = curbstack.Parent
+'If here$ = vbNullString Then GoTo again1234
+'If curbstack.SkipClear = 0 Then
+'var2used = curbstack.Vars
+'varhash.ReduceHash curbstack.Vname, var()
+'End If
 Exit Function
 End If
 GarbageFlush
@@ -41106,7 +41132,7 @@ jumpheretoo:
                                                         End If
                                                 ElseIf Not bstack.LoadOnly Then
                                                         If Left$(ss$, 10) <> "'11001EDIT" Then
-                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i + addlen + 2 * (bstack.UseGroupname <> "")) + vbCrLf
+                                                                s$ = "'11001EDIT " & GetModuleName(bstack, ohere$) & ",-" & CStr(i + addlen + 2 * (Len(bstack.UseGroupname) > 0)) + vbCrLf
                                                         End If
                                                 End If
                                                 If frm$ <> "" Then
@@ -44961,7 +44987,7 @@ If entrypoint < 199 Then
 If entrypoint = 1 Then flag = True
 y3 = IsLabelSymbolNew(rest$, "Ã≈√≈√œÕœ‘¡", "WITHEVENTS", Lang)
 If IsLabelSymbolNew(rest$, "¡’‘œ", "THIS", Lang) Then
-    If basestack.UseGroupname <> "" Then
+    If Len(basestack.UseGroupname) > 0 Then
         MyEr "Not in a Group Definition: Remove Group This { }", "º˜È ÛÂ ÔÒÈÛÏ¸ ÔÏ‹‰·Ú: ¡ˆ·ﬂÒÂÛÂ ÙÁÌ œÏ‹‰· ¡ıÙ¸ {} "
         Exit Function
     Else
@@ -45364,12 +45390,6 @@ JUMP1:
 
                         End If
                         If FastSymbolNoTrimAfter(rest$, "{") Then
-                       ' If basestack.OriginalCode > x1 Then
-                        ' we have collision so we need a new one
-                        'If sbf(Abs(basestack.OriginalCode)).sbgroup <> sbf(x1).sbgroup Then
-                       ' GoTo jumpheretoo
-                        'End If
-                       ' End If
                         If x1 >= lckfrm And lckfrm <> 0 Then
                                 MyEr what$ & " is locked", what$ & " ÂﬂÌ·È ÍÎÂÈ‰˘Ï›ÌÔ"
                                 rest$ = vbNullString
@@ -46890,7 +46910,7 @@ Do
         Exit Function
     ElseIf IsLabelSymbolNew(rest$, "√œÕ… œ", "PARENT", Lang) Then
     
-        If basestack.UseGroupname <> "" Then
+        If Len(basestack.UseGroupname) > 0 Then
             ss$ = Mid$(basestack.UseGroupname, 1, Len(basestack.UseGroupname) - 1)
             
             If GetVar(basestack, ss$, x1) Then
@@ -47169,7 +47189,7 @@ ArrBase = usethisbase
 
     If basestack.priveflag Then
     w$ = ChrW(&HFFBF) + w$
-    ElseIf basestack.UseGroupname <> "" Then
+    ElseIf Len(basestack.UseGroupname) > 0 Then
     If it = 6 Then
         If strfunid.Find(w$, i) Then
             If i > 0 Then strfunid.ItemCreator w$, -i
@@ -48124,7 +48144,7 @@ End Function
 Function ThisPointer(bstack As basetask, w3 As Long) As Boolean ' return var(r)
 Dim s1$
     Set bstack.lastobj = Nothing
-     If bstack.UseGroupname <> "" Then
+     If Len(bstack.UseGroupname) > 0 Then
      s1$ = Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1)
      If GetVar(bstack, s1$, w3) Then
           ThisPointer = True
@@ -48154,7 +48174,7 @@ End Function
 Function This1(bstack As basetask, original$, r As Variant) As Boolean  ' return a copy
 Dim s1$, w3 As Long
     Set bstack.lastobj = Nothing
-     If bstack.UseGroupname <> "" Then
+     If Len(bstack.UseGroupname) > 0 Then
      s1$ = Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1)
      If GetVar(bstack, s1$, w3) Then
           Set bstack.lastobj = CopyGroupObj(var(w3))
@@ -48614,7 +48634,7 @@ If Len(w$) > 3 Then
                         If GetGlobalVar(w$, v) Then GoTo found
                     End If
                 ElseIf Mid$(w$, 5, 1) = "." Then
-                    If bstack.UseGroupname <> "" Then
+                    If Len(bstack.UseGroupname) > 0 Then
                         bb$ = bstack.UseGroupname + Mid$(w$, 6)
                         If varhash.Find(bb$, v) Then SwapStrings w$, bb$: GoTo found
                         bb$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(w$, 6)
@@ -48645,7 +48665,7 @@ If Len(w$) > 3 Then
                         If GetGlobalVar(w$, v) Then GoTo found
                     End If
                 ElseIf Mid$(w$, 5, 1) = "." Then
-                     If bstack.UseGroupname <> "" Then
+                     If Len(bstack.UseGroupname) > 0 Then
                         bb$ = bstack.UseGroupname + Mid$(w$, 6)
                         If varhash.Find(bb$, v) Then SwapStrings w$, bb$: GoTo found
                         bb$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(w$, 6)
@@ -51740,6 +51760,7 @@ If GetSub(s$ + ")", w2) Then
                     Set nbstack.Owner = bstack.Owner
                     nbstack.OriginalCode = w2
                     nbstack.UseGroupname = sbf(w2).sbgroup
+                    nbstack.SetV
                     If GoFunc(nbstack, s$ + ")", a$, p) Then
                         If Not nbstack.StaticCollection Is Nothing Then
                             bstack.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
@@ -51855,7 +51876,7 @@ End If
 jmp1478:
 If s$ = "THIS" Or s$ = "¡’‘œ" Then
  
- If bstack.UseGroupname <> "" Then
+ If Len(bstack.UseGroupname) > 0 Then
  s$ = Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1)
 If GetVar(bstack, s$, w1) Then
 If IsBadCodePtr(var(w1).PointerPtr) = 0 Then
@@ -52525,7 +52546,7 @@ assigngroup:
                                 Exit Function
                                 Else
                                 If Len(var(v).GroupName) > Len(w$) Then
-                                    If var(v).IamRef Then ' Or bstack.UseGroupname <> ""
+                                    If var(v).IamRef Then ' Or Len(bstack.UseGroupname ) > 0
                                 
                                      sw$ = here$
                                       here$ = vbNullString
