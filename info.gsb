@@ -4432,8 +4432,8 @@ Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
 }
-MODULE INFO {If Version<9.8 then Error "No proper M2000 version"
-If Version=9.8 and revision<22 then Error "No proper M2000 revision for version 9.8"
+MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
+If Version=9.8 and revision<24 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4461,7 +4461,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 4"
+	Report " A collection of modules for tests version 5"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4840,8 +4840,7 @@ MODULE FORM44 {Module TryIt {
 	                  If Form1_1 Then {    
 	                              if not scale.x then  thread this erase
 	                            \\ third parameter is for color, we can use Color(r,g,b) or Colour(r,g,b) 
-	                            \\ for rgb value, or we can give an Html number like #FF0000
-	                            \\ another way is by using hex 0X80000012 for system colors
+	                            \\ for rgb value, or we can give an Html number like #FF0000	                            \\ another way is by using hex 0X80000012 for system colors
 	                            \\ Here we use values from the range 0 to 15 (here from 7 to 15)
 	                            \\ and these are the standard colors.
 	                           Draw To Random(Scale.x), Random(Scale.y), Random(7,15)
@@ -4943,7 +4942,7 @@ You can:
 }
 push key$ : drop
 TryIt
-Info
+Keyboard "info"+chr$(13)
 }
 MODULE LIST33 {Declare Simple Form
 With Simple, "Title" As myTitle$
@@ -7268,68 +7267,57 @@ End While
 Print strrev$(rev3$)
 print timecount
 }
-MODULE DI {Function ProDiv$ {
-      Read a$, b$, pp
-      Let v$="", gg=len(b$), p=pp,  mm=0
-      {
-            s=len(b$)
-            c$=left$(a$,s)
-            if c$<b$ then  s++: c$=left$(a$, s) : if s=len(b$) then exit
-            d1=val(c$) div val(b$)
-            if gg<s-1 then { 
-                  if v$="0" then mm=-s+gg
-                  v$=v$+string$("0",s-1-gg) 
-            }
-            v$=v$+str$(d1,"0")
-            r$=str$(val(c$)-val(b$)*d1,"0")
-            gg=len(r$)
-            a$ =r$+mid$(a$,s+1)
-            cc=false
-            if len(a$)=len(b$) then {
-                  if a$>b$ then cc=true
-            }  else cc=len(a$)>len(b$) and a$<>"0" 
-            if cc else if p=0 then  exit
-            if p>0  and not cc then {
-                  mm=len(v$)+1
-                  a$=a$+string$("0",p) : p=0 
-            }
-            loop
-      }
-      \\ scientific notation
-      if mm<>0 then {
-            if mm>1 then {
-                  =Left$(v$,1)+"."+mid$(v$,2,mm-2)+mid$(v$,mm+1)+"E+"+str$(mm-2,"00")
-            } else.if mm<0 then {
-                  =Mid$(v$,-mm+1,1)+"."+Mid$(v$,-mm+2)+"E-"+str$(abs(mm),"00")
-            }
-      } else {
-            mm=len(v$)
-            if mm>1 then {
-              =Left$(v$,1)+"."+mid$(v$,2)+"E+"+str$(mm-1,"00")
-            } else =V$
-      }
-}
-Def ExpStr$(x)= str$(X,"0.00000000000000000E-00")
+MODULE DI {inline code libdiv
+op=Pen
+Def ExpStr$(x)= str$(X,"0.00000000000000E-00")
+\\ using old style subs - no local variables
 a$="57645834674367349573945793457359374512154545412313137868768787874738942834756234896582946937658926582565"
 b$="3224241711"
-op=Pen
-Pen 11{
-      Print "Calculation for ";
-}
-Print a$;~(12);"/";~(op);b$
-Print ExpStr$(val(a$)/val(b$))
-Print
-Print "Expanded:", ProDiv$(a$, b$, 100)
+Gosub calc
 a$="1"
 b$="3224241711"
-Print
-Pen 11 {
-      Print "Calculation for ";
-}
-Print a$;~(12);"/";~(op);b$
-Print ExpStr$(val(a$)/val(b$))
-Print
-Print "Expanded:", ProDiv$(a$, b$, 100)
+Gosub calc
+a$="23200"
+b$="58"
+Gosub calc
+a$="1"
+b$="58"
+Gosub calc
+a$="1"
+b$="3"
+Gosub calc
+a$="100"
+b$="30"
+Gosub calc2
+Gosub calc
+a$="57645834674367349573945793457359374512154545412313137868768787874738942834756234896582946937658926582565"
+b$="5235"
+Gosub calc2
+b$="17"
+Gosub calc2
+Gosub calc
+end
+
+calc:
+      Print
+      Pen 11 {
+            Print "Calculation for ";
+      }
+      Print a$;~(12);"/";~(op);b$
+      Print ExpStr$(val(a$)/val(b$))
+      Print
+      Print "Expanded:", ProDiv$(a$, b$, 100)
+Return
+calc2:
+      Print
+      Pen 11 {
+            Print "Calculation for ";
+      }
+      Print a$;~(13);" div ";~(op);b$
+      Print val(a$) div val(b$)
+      Print
+      Print "Expanded:", ProDiv$(a$, b$,0)
+Return
 }
 MODULE HU {Module Huffman {
       comp=lambda (a, b) ->{
@@ -7690,7 +7678,7 @@ MODULE CO {Module Check {
 Check
 a$=KEY$
 \\ CALL INFO NOW \\ DELETE THIS LINE IF INFO NOT EXIST IN MODULE'S LIST
-INFO
+Keyboard "info"+chr$(13)
 }
 MODULE SH {hide
 wait 100
@@ -9329,7 +9317,6 @@ MODULE COMP {\\ compose lambda functions
 
 \\ In M2000, there are: Values, Pointers, Refereneces.  Pointers hold Objects. Values maybe objects too. References are just names with no own value or poiner, but refer to another variable
 \\ We can use reference to array items, with an internal copy in copy out, method. First interpreter make a hidden variable, copy the item to that variable, then pass the variable to function or module by reference, and at return copy back the variable to the array item (checking if it can be done, maybe the array has change). We can't pass values to references, except of a string. A reference passed as week reference, a string with the a proper name for the variable, to stack of values (as a value), so a Read statement which has & before a name, search for a string, and then resolve it or not. If not raise error. We can read the string (the weakr reference) and read it any other time (a copy of it), if we know that this variable exist. Also there are "string pointer"
-
 \\Arrays can passed by reference without copy in copy out (by using a weak reference too)
 
 X=10
@@ -9748,7 +9735,7 @@ Module OOP {
 	} 
 }
 OOP
-info
+Keyboard "info"+chr$(13)
 }
 MODULE EM {Module Checkit {
       ' erase stack of values, so we can add data
@@ -10715,7 +10702,7 @@ MODULE MINESWEEPER {Module Minesweeper {
       End Sub     
 }
 Minesweeper
-Info   ' call the info module
+Keyboard "info"+chr$(13)   ' call the info module
 }
 MODULE IBAN {\\ IBAN checker
 Function MakeIBANfun$ {
@@ -11252,7 +11239,7 @@ MODULE UTF8 {Module checkit {
 checkit
 Italic 1 : Report "Press any key to return to Info": Italic 0
 Push Key$ : Drop
-Info
+Keyboard "info"+chr$(13)
 }
 MODULE RF {Module checkit {
       \\ prepare a file
@@ -13879,5 +13866,139 @@ D$(0)=Zero$,One$, Two$, Three$, Four$,Five$, Six$, Seven$, Eight$, Nine$, Ten$
 =D1$()
 }
 Return
+}
+MODULE DI2 {inline code libDiv
+'Form 80, 40
+flush
+def r(x, p)=int(x*10^p)/10^p
+Data ProDiv$("1","580000",16, true), 1 / 580000
+Data ProDiv$("1","580000000",16), 1 / 580000000
+Data ProDiv$("1","5800",16), 1 / 5800
+Data ProDiv$("1","58",16), 1 / 58
+Data ProDiv$("632010","58",0), 632010 div 58
+Data ProDiv$("2320","58",0),2320 div 58
+Data ProDiv$("324200","203",16), 324200 / 203
+Data ProDiv$("32420","23",16), 32420 / 23
+Data ProDiv$("32420","23",15, true), 32420 / 23
+Data ProDiv$("32420","23",15), 32420 / 23
+Data ProDiv$("100","1",1), 100/1
+Data ProDiv$("1025","2",0), 1025 div 2
+Data ProDiv$("3242","23",0), 3242 div 23
+Data ProDiv$("324300","23",0), 324300 div 23
+
+Data ProDiv$("232","58",0), 232 div 58
+Data ProDiv$("3243","23",0), 3243 div 23
+Data ProDiv$("23200","58",0), 23200 div 58
+Data ProDiv$("2320","58",0), 2320 div 58
+Data ProDiv$("632010","123",16), 632010 / 123
+Data ProDiv$("100","1",1), 100/1
+Data ProDiv$("100","2",1), 100/2
+Data ProDiv$("632010","123",16), 632010 / 123
+
+Data ProDiv$("1000","15",16), 1000 / 15
+Data ProDiv$("1500","25000",1), r(1500 / 25000, 1)
+
+Data ProDiv$("1500","25000",2), r(1500 / 25000, 2)
+Data ProDiv$("1500","25000",3), r(1500 / 25000, 3)
+
+Data ProDiv$("1500","22000",16), r(1500 / 22000, 16)
+Data ProDiv$("1500","22000",14, true), 1500 / 22000
+Data ProDiv$("1500","2500",16), 1500/2500
+
+Data ProDiv$("1500","250",16), 1500/250
+
+Data ProDiv$("15000","25",16), 15000/25
+
+Data ProDiv$("15000000000","25",0), 15000000000/25
+Data ProDiv$("15000000000","245",14), 15000000000/245
+
+while not empty
+read a$, a
+print val(a$)==a , @(12), a$,@(50), a
+end while
+}
+MODULE LIBDIV {Function ProDiv$ {
+	Read a$, b$, pp, rd=false
+	if pp<0 then error "decimal digits>=0 "
+	if rd then pp++
+	Let v$="", gg=len(b$), p=pp,  mm=0, tz=0
+	{
+		s=len(b$)
+		c$=left$(a$,s)
+		if c$<b$ then  s++: c$=left$(a$, s) :if s=len(b$) then exit
+		d1=val(c$) div val(b$)
+		r$=str$(val(c$)-val(b$)*d1,"0")
+		if gg<s-1  then
+			if v$="0" then mm=-s+gg : if p+mm<17 then  a$+=string$("0", p+mm)
+			v$+=string$("0",s-1-gg) 
+		end if
+		if d1=0 then
+			if tz>0 then
+				if  len(v$)=tz then  tz++ else.if   len(v$)>tz+1 then  exit
+			end if
+		end if
+		
+		v$+=str$(d1,"0")
+		gg=len(r$)
+		a$ =r$+mid$(a$,s+1)
+		cc=false
+		if len(a$)=len(b$) then
+			if a$>=b$ then cc=true
+		else
+			cc=len(a$)>len(b$) and a$<>"0"
+		end if
+		if mm<0 then if tz>=pp then v$="0" :mm=0:  exit
+		
+		if cc else if p=0 then  exit
+		
+		if p>0  and not cc then
+			mm=len(v$)+1
+			a$+=string$("0", p) : p=0 
+		end if
+		loop
+	}
+	\\ round id we choose
+	if rd then
+		bb$=strrev$(v$) :v$="":cc=5
+		for i=1 to len(bb$)
+			if cc=0 then v$+=mid$(bb$, i) : exit for
+			dd=val(mid$(bb$, i,1))+cc  
+			if dd>9 then  cc=1 else  cc=0
+			v$+=str$(dd mod 10, 0) 
+		next i
+		v$=strrev$(mid$(v$,2))
+	end if
+	if len(a$)>gg and len(a$)>=len(b$) then v$+=string$("0",gg)
+	if mm>=0 then
+		if tz>mm then mm=0: v$="0"
+	else
+		tz+=mm+3
+		if tz>=pp then mm=0: v$="0"
+	end if
+	if mm<>0else =v$ : exit
+	if mm>1 then
+		n$=mid$(v$,mm+1)
+		if len(n$)<16 then  if val(n$)=0 then n$="" : v$=left$(v$,mm)
+		if mm<>len(v$) then
+			=left$(v$,1)+"."+mid$(v$,2)+"E+"+str$(mm-2,"00")
+		else.if  mm<16 then
+			if val(mid$(v$,mm))=0 then
+				=left$(v$,mm-1)
+			else
+				=left$(v$,mm-1)+"."+mid$(v$,mm)
+			end if
+		else
+			=Left$(v$,1)+"."+n$
+		end if
+	else.if mm<0 then
+		if  len(v$)-tz<=pp then
+			="0."+mid$(v$,2, len(v$)-gg)
+		else
+			=Mid$(v$,-mm+1,1)+"."+Mid$(v$,-mm+2)+"E-"+str$(abs(mm),"00")
+		end if
+	else
+		=v$
+	end if
+}
 }
 INFO
