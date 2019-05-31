@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 24 active-X
+Version 9.8 Revision 25 active-X
 
-New info file
+Fix Legend statement for XP and Wine.
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
