@@ -2162,7 +2162,8 @@ ruller& = wi&
 For ttt = 1 To Len(what)
     b$ = Mid$(what, ttt, 1)
    ' If nounder32(b$) Then
-   If Not b$ = vbCr Then
+   
+   If Not (b$ = vbCr Or b$ = vbLf) Then
     If TextWidth(ddd, buf$ & b$) <= (wi& * .Xt) Then
     buf$ = buf$ & b$
     End If

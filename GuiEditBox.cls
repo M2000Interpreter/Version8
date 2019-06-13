@@ -4219,9 +4219,13 @@ End If
         pos2 = k - Len(a$) + 1
         GoTo again
 
-ElseIf pos2 = 0 Then
+Else
 If IsNumberLabel(a$, drop$) Then
-        addone2000 k - Len(a$) - Len(drop$) + 1, 15
+    If pos2 > 0 Then
+        addone k - Len(a$) - Len(drop$) + 1, 14
+    Else
+        addone k - Len(a$) - Len(drop$) + 1, 15
+        End If
         pos2 = k - Len(a$) + 1
         GoTo again
  End If

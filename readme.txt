@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 25 active-X
+Version 9.8 Revision 26 active-X
 
-Fix Legend statement for XP and Wine.
+Fix syntax color when after Then and Else is a number label.
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

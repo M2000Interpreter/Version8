@@ -2764,12 +2764,17 @@ End If
         pos2 = k - Len(a$) + 1
         GoTo again
 
-ElseIf pos2 = 0 Then
+Else
 If IsNumberLabel(a$, drop$) Then
+    If pos2 > 0 Then
+        addone k - Len(a$) - Len(drop$) + 1, 14
+    Else
         addone k - Len(a$) - Len(drop$) + 1, 15
+        End If
         pos2 = k - Len(a$) + 1
         GoTo again
  End If
+ 
  End If
 If pos2 > 0 Then addone pos2, 14
 
