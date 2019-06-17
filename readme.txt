@@ -1,8 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 26 active-X
+Version 9.8 Revision 27 active-X
 
-Fix syntax color when after Then and Else is a number label.
+Fix in Print when we place an iterator of an enumeration type.
+example:
+enum b {one, two, three}
+bb=each(b)  ' this is the iterator of enum b
+Print bb   ´ now print 1 2 3
+
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

@@ -13919,8 +13919,14 @@ Else
                 counter = counter + countDir
                 GoTo isAstring
             Else
+                If TypeOf myobject Is Enumeration Then
+                p = myobject.Value
+                Else
+                On Error Resume Next
                 If Not myobject.IsEnum(p) Then
                 p = myobject.Value
+                End If
+                If Err.Number > 0 Then p = myobject.Value
                 End If
                 counter = counter + countDir
                 GoTo isanumber
@@ -14013,9 +14019,9 @@ Else
                         End If
                    ElseIf Typename(myobject.objref) = "Enumeration" Then
                  
-                 Set myobject = myobject.objref
+                            Set myobject = myobject.objref
                  
-                            rest$ = bck$
+                            SwapStrings rest$, bck$
                        GoTo takeone
                         End If
                 ElseIf TypeOf basestack.lastobj Is VarItem Then
