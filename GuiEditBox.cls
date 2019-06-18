@@ -3809,6 +3809,7 @@ If FastSymbol(a$, ",") Then
   End If
 
     If FastSymbol(a$, ")") Then
+    pos2 = k - Len(a$)
     If lastcol = 0 Then
     addone2000 pos2, 14
     Else

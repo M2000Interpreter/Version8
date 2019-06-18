@@ -1,12 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 27 active-X
+Version 9.8 Revision 28 active-X
 
-Fix in Print when we place an iterator of an enumeration type.
-example:
-enum b {one, two, three}
-bb=each(b)  ' this is the iterator of enum b
-Print bb   ´ now print 1 2 3
+Fix in syntax color (at edit) for parenthesis
+look at info.gsb  module maze  line 37
+maze$(INT((currentx% + oldx%) / 2), ((currenty% + oldy%) / 2)) = " "
+The two last ) must have different color, but in previus revisions have the same. Now is ok
+
+Syntax color also fixed for the same for EditBox (a control of M2000 GUI internal system)
 
 
 The fist time you run the interpreter do this in M2000 console:
