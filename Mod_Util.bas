@@ -13306,116 +13306,117 @@ Dim q$, p As Variant, p1 As Integer, pd$
 If IsStrExp(bstack, rest$, final$) Then
   If FastSymbol(rest$, ",") Then
     Do
-    pl2 = 1
-        pat$ = "{" + CStr(counter)
-       pat1$ = pat$ + ":"
-        pat$ = pat$ + "}"
-        If IsStrExp(bstack, rest$, q$) Then
-fromboolean:
-            final$ = Replace$(final$, pat$, q$)
-AGAIN0:
-        pl2 = InStr(pl2, final$, pat1$)
-          If pl2 > 0 Then
-           pl1 = InStr(pl2, final$, "}")
-           pl3 = val(Mid$(final$, pl2 + Len(pat1$)) + "}")
-           If pl3 <> 0 Then
-        If pl3 > 0 Then
-            pd$ = Left$(q$ + space$(pl3), pl3)
-            Else
-            pd$ = Right$(space$(Abs(pl3)) + q$, Abs(pl3))
-            End If
-      End If
-            final$ = Replace$(final$, Mid$(final$, pl2, pl1 - pl2 + 1), pd$)
-            GoTo AGAIN0
-          End If
-            If Not FastSymbol(rest$, ",") Then Exit Do
-        ElseIf IsExp(bstack, rest$, p, , True) Then
-        If VarType(p) = vbBoolean Then q$ = Format$(p, DefBooleanString): GoTo fromboolean
+                pl2 = 1
+                    pat$ = "{" + CStr(counter)
+                   pat1$ = pat$ + ":"
+                    pat$ = pat$ + "}"
+                    If IsExp(bstack, rest$, p, , True) Then
+                    If VarType(p) = vbBoolean Then q$ = Format$(p, DefBooleanString): GoTo fromboolean
 again1:
-        pl2 = InStr(pl2, final$, pat1$)
-        If pl2 > 0 Then
-        pl1 = InStr(pl2, final$, "}")
-        If Mid$(final$, pl2 + Len(pat1$), 1) = ":" Then
-        p1 = 0
-        pl3 = val(Mid$(final$, pl2 + Len(pat1$) + 1) + "}")
-        Else
-        p1 = val("0" + Mid$(final$, pl2 + Len(pat1$)))
-        
-        pl3 = val(Mid$(final$, pl2 + Len(pat1$) + Len(Str$(p1))) + "}")
-        If p1 < 0 Then p1 = 13 '22
-        If p1 > 13 Then p1 = 13
-      p = MyRound(p, p1)
-      End If
-      pd$ = LTrim$(Str(p))
-      
-      If InStr(pd$, "E") > 0 Or InStr(pd$, "e") > 0 Then '' we can change e to greek å
-      pd$ = Format$(p, "0." + String$(p1, "0") + "E+####")
-           If Not NoUseDec Then
-                   If OverideDec Then
-                    pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_SDECIMAL), Chr(2))
-                    pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_STHOUSAND), Chr(3))
-                    pd$ = Replace$(pd$, Chr(2), NowDec$)
-                    pd$ = Replace$(pd$, Chr(3), NowThou$)
+                    pl2 = InStr(pl2, final$, pat1$)
+                    If pl2 > 0 Then
+                    pl1 = InStr(pl2, final$, "}")
+                    If Mid$(final$, pl2 + Len(pat1$), 1) = ":" Then
+                    p1 = 0
+                    pl3 = val(Mid$(final$, pl2 + Len(pat1$) + 1) + "}")
+                    Else
+                    p1 = val("0" + Mid$(final$, pl2 + Len(pat1$)))
                     
-                ElseIf InStr(pd$, NowDec$) > 0 Then
-                pd$ = Replace$(pd$, NowDec$, Chr(2))
-                pd$ = Replace$(pd$, NowThou$, Chr(3))
-                pd$ = Replace$(pd$, Chr(2), ".")
-                pd$ = Replace$(pd$, Chr(3), ",")
-                
-                End If
-            End If
-      ElseIf p1 <> 0 Then
-       pd$ = Format$(p, "0." + String$(p1, "0"))
-               If Not NoUseDec Then
-                If OverideDec Then
-                    pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_SDECIMAL), Chr(2))
-                    pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_STHOUSAND), Chr(3))
-                    pd$ = Replace$(pd$, Chr(2), NowDec$)
-                    pd$ = Replace$(pd$, Chr(3), NowThou$)
-                ElseIf InStr(pd$, NowDec$) > 0 Then
-                pd$ = Replace$(pd$, NowDec$, Chr(2))
-                pd$ = Replace$(pd$, NowThou$, Chr(3))
-                pd$ = Replace$(pd$, Chr(2), ".")
-                pd$ = Replace$(pd$, Chr(3), ",")
-                
-                End If
-            End If
-      End If
-   
-      If pl3 <> 0 Then
-        If pl3 > 0 Then
-            pd$ = Left$(pd$ + space$(pl3), pl3)
-            Else
-            pd$ = Right$(space$(Abs(pl3)) + pd$, Abs(pl3))
-            End If
-      End If
-            final$ = Replace$(final$, Mid$(final$, pl2, pl1 - pl2 + 1), pd$)
-            GoTo again1
-        Else
-        
-        If NoUseDec Then
-            final$ = Replace$(final$, pat$, CStr(p))
-        Else
-        pd$ = LTrim$(Str$(p))
-         If Left$(pd$, 1) = "." Then
-        pd$ = "0" + pd$
-        ElseIf Left$(pd$, 2) = "-." Then pd$ = "-0" + Mid$(pd$, 2)
-        End If
-        If OverideDec Then
-        final$ = Replace$(final$, pat$, Replace(pd$, ".", NowDec$))
-        Else
-        final$ = Replace$(final$, pat$, pd$)
-        End If
-        End If
-        
-        
-            End If
-            If Not FastSymbol(rest$, ",") Then Exit Do
-        Else
-            Exit Do
-        End If
-        counter = counter + 1
+                    pl3 = val(Mid$(final$, pl2 + Len(pat1$) + Len(Str$(p1))) + "}")
+                    If p1 < 0 Then p1 = 13 '22
+                    If p1 > 13 Then p1 = 13
+                  p = MyRound(p, p1)
+                  End If
+                  pd$ = LTrim$(Str(p))
+                  
+                  If InStr(pd$, "E") > 0 Or InStr(pd$, "e") > 0 Then '' we can change e to greek å
+                  pd$ = Format$(p, "0." + String$(p1, "0") + "E+####")
+                       If Not NoUseDec Then
+                               If OverideDec Then
+                                pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_SDECIMAL), Chr(2))
+                                pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_STHOUSAND), Chr(3))
+                                pd$ = Replace$(pd$, Chr(2), NowDec$)
+                                pd$ = Replace$(pd$, Chr(3), NowThou$)
+                                
+                            ElseIf InStr(pd$, NowDec$) > 0 Then
+                            pd$ = Replace$(pd$, NowDec$, Chr(2))
+                            pd$ = Replace$(pd$, NowThou$, Chr(3))
+                            pd$ = Replace$(pd$, Chr(2), ".")
+                            pd$ = Replace$(pd$, Chr(3), ",")
+                            
+                            End If
+                        End If
+                  ElseIf p1 <> 0 Then
+                   pd$ = Format$(p, "0." + String$(p1, "0"))
+                           If Not NoUseDec Then
+                            If OverideDec Then
+                                pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_SDECIMAL), Chr(2))
+                                pd$ = Replace$(pd$, GetDeflocaleString(LOCALE_STHOUSAND), Chr(3))
+                                pd$ = Replace$(pd$, Chr(2), NowDec$)
+                                pd$ = Replace$(pd$, Chr(3), NowThou$)
+                            ElseIf InStr(pd$, NowDec$) > 0 Then
+                            pd$ = Replace$(pd$, NowDec$, Chr(2))
+                            pd$ = Replace$(pd$, NowThou$, Chr(3))
+                            pd$ = Replace$(pd$, Chr(2), ".")
+                            pd$ = Replace$(pd$, Chr(3), ",")
+                            
+                            End If
+                        End If
+                  End If
+               
+                  If pl3 <> 0 Then
+                    If pl3 > 0 Then
+                        pd$ = Left$(pd$ + space$(pl3), pl3)
+                        Else
+                        pd$ = Right$(space$(Abs(pl3)) + pd$, Abs(pl3))
+                        End If
+                  End If
+                        final$ = Replace$(final$, Mid$(final$, pl2, pl1 - pl2 + 1), pd$)
+                        GoTo again1
+                    Else
+                    
+                    If NoUseDec Then
+                        final$ = Replace$(final$, pat$, CStr(p))
+                    Else
+                    pd$ = LTrim$(Str$(p))
+                     If Left$(pd$, 1) = "." Then
+                    pd$ = "0" + pd$
+                    ElseIf Left$(pd$, 2) = "-." Then pd$ = "-0" + Mid$(pd$, 2)
+                    End If
+                    If OverideDec Then
+                    final$ = Replace$(final$, pat$, Replace(pd$, ".", NowDec$))
+                    Else
+                    final$ = Replace$(final$, pat$, pd$)
+                    End If
+                    End If
+                    
+                    
+                        End If
+                        If Not FastSymbol(rest$, ",") Then Exit Do
+                    
+                    ElseIf IsStrExp(bstack, rest$, q$) Then
+fromboolean:
+                        final$ = Replace$(final$, pat$, q$)
+AGAIN0:
+                    pl2 = InStr(pl2, final$, pat1$)
+                      If pl2 > 0 Then
+                       pl1 = InStr(pl2, final$, "}")
+                       pl3 = val(Mid$(final$, pl2 + Len(pat1$)) + "}")
+                       If pl3 <> 0 Then
+                    If pl3 > 0 Then
+                        pd$ = Left$(q$ + space$(pl3), pl3)
+                        Else
+                        pd$ = Right$(space$(Abs(pl3)) + q$, Abs(pl3))
+                        End If
+                  End If
+                        final$ = Replace$(final$, Mid$(final$, pl2, pl1 - pl2 + 1), pd$)
+                        GoTo AGAIN0
+                      End If
+                        If Not FastSymbol(rest$, ",") Then Exit Do
+                    Else
+                        Exit Do
+                    End If
+                    counter = counter + 1
     Loop
     Else
     enthesi = EscapeStrToString(final$)
