@@ -42,11 +42,11 @@ dwReserved1 As Long
 cFileName(MAX_PATH * 2 - 1) As Byte
 cAlternate(14 * 2 - 1) As Byte
 End Type
-Private Declare Function CompareString Lib "Kernel32" Alias "CompareStringW" (ByVal Locale As Long, ByVal dwCmpFlags As Long, ByVal lpString1 As Long, ByVal cchCount1 As Long, ByVal lpString2 As Long, ByVal cchCount2 As Long) As Long
+Private Declare Function CompareString Lib "KERNEL32" Alias "CompareStringW" (ByVal Locale As Long, ByVal dwCmpFlags As Long, ByVal lpString1 As Long, ByVal cchCount1 As Long, ByVal lpString2 As Long, ByVal cchCount2 As Long) As Long
 
-Private Declare Function FindFirstFile Lib "Kernel32" Alias "FindFirstFileW" (ByVal lpFileName As Long, lpFindFileData As WIN32_FIND_DATA) As Long
+Private Declare Function FindFirstFile Lib "KERNEL32" Alias "FindFirstFileW" (ByVal lpFileName As Long, lpFindFileData As WIN32_FIND_DATA) As Long
 
-Private Declare Function FindNextFile Lib "Kernel32" Alias "FindNextFileW" (ByVal hFindFile As Long, lpFindFileData As WIN32_FIND_DATA) As Long
+Private Declare Function FindNextFile Lib "KERNEL32" Alias "FindNextFileW" (ByVal hFindFile As Long, lpFindFileData As WIN32_FIND_DATA) As Long
 Private Declare Function FindClose Lib "kernel32.dll" (ByVal hFindFile As Long) As Long
 
 Dim myfile$(), myLevel() As Integer
@@ -63,24 +63,24 @@ Private mTopFolder As String
 Dim InUseItems As Long
 Public LevelStop As Long
 
-Private Declare Function GetDiskFreeSpace Lib "Kernel32" _
+Private Declare Function GetDiskFreeSpace Lib "KERNEL32" _
  Alias "GetDiskFreeSpaceA" (ByVal lpRootPathName As String, _
  lpSectorsPerCluster As Long, lpBytesPerSector As Long, _
  lpNumberOfFreeClusters As Long, lpTtoalNumberOfClusters As Long) _
  As Long
-Private Declare Function GetLogicalDriveStrings Lib "Kernel32" _
+Private Declare Function GetLogicalDriveStrings Lib "KERNEL32" _
   Alias "GetLogicalDriveStringsW" _
   (ByVal nBufferLength As Long, ByVal lpBuffer As Long) As Long
 
-Private Declare Function GetLongPathName Lib "Kernel32" _
+Private Declare Function GetLongPathName Lib "KERNEL32" _
    Alias "GetLongPathNameW" _
   (ByVal lpszShortPath As Long, _
    ByVal lpszLongPath As Long, _
    ByVal cchBuffer As Long) As Long
 Public lastTimeStamp As Date
 Public lastTimeStamp2 As Date
-Private Declare Function FileTimeToSystemTime Lib "Kernel32" (lpFileTime As FILETIME, lpSystemTime As SYSTEMTIME) As Long
-Private Declare Function FileTimeToLocalFileTime Lib "Kernel32" (lpFileTime As FILETIME, lpLocalFileTime As FILETIME) As Long
+Private Declare Function FileTimeToSystemTime Lib "KERNEL32" (lpFileTime As FILETIME, lpSystemTime As SYSTEMTIME) As Long
+Private Declare Function FileTimeToLocalFileTime Lib "KERNEL32" (lpFileTime As FILETIME, lpLocalFileTime As FILETIME) As Long
 Public UseUTC As Boolean
 Private Function FileTimeToDate(File_Time As FILETIME) As Date
 Dim System_Time As SYSTEMTIME
@@ -113,15 +113,15 @@ Public Function GetLongName(strTest As String) As String
    Dim sLongPath As String
    Dim buff As String
    Dim cbbuff As Long
-   Dim Result As Long
+   Dim result As Long
  
-   buff = Space$(MAX_PATH_UNICODE)
+   buff = space$(MAX_PATH_UNICODE)
    cbbuff = Len(buff)
  
-   Result = GetLongPathName(StrPtr(strTest), StrPtr(buff), cbbuff)
+   result = GetLongPathName(StrPtr(strTest), StrPtr(buff), cbbuff)
  
-   If Result > 0 Then
-      sLongPath = Left$(buff, Result)
+   If result > 0 Then
+      sLongPath = Left$(buff, result)
    End If
  
    GetLongName = sLongPath
@@ -858,7 +858,7 @@ End Function
 Public Function isReadOnly(ByVal F$) As Boolean
 Dim v&
 
-Err.Clear
+Err.clear
 On Error Resume Next
 If Right$(F$, 1) = "\" Then F$ = Mid$(F$, 1, Len(F$) - 1)
 If F$ <> "" Then
@@ -874,7 +874,7 @@ isdirP = (wfd.dwFileAttributes And 16) > 0
 End Function
 Public Function isdir(F$) As Boolean
 Dim v&
-Err.Clear
+Err.clear
 If F$ = vbNullString Then Exit Function
 On Error Resume Next
 If FileAttr(F$, v&) Then
@@ -888,29 +888,29 @@ Sub once()
 ReDim myfile$(100)
 ReDim myLevel(100) As Integer
 End Sub
-Public Function GetStrUntil(ByVal sStr As String, fromStr As String, Optional RemoveSstr As Boolean = True) As String
+Public Function GetStrUntil(ByVal sStr As String, fromstr As String, Optional RemoveSstr As Boolean = True) As String
 Dim i As Long
-If fromStr = vbNullString Then GetStrUntil = vbNullString: Exit Function
-i = InStr(fromStr, sStr)
+If fromstr = vbNullString Then GetStrUntil = vbNullString: Exit Function
+i = InStr(fromstr, sStr)
 If (i < 2) And Not ((i > 0) And RemoveSstr) Then
 GetStrUntil = vbNullString
-fromStr = vbNullString
+fromstr = vbNullString
 Else
-GetStrUntil = Left$(fromStr, i - 1)
+GetStrUntil = Left$(fromstr, i - 1)
 If RemoveSstr Then
-fromStr = Mid$(fromStr, Len(sStr) + i)
+fromstr = Mid$(fromstr, Len(sStr) + i)
 Else
-fromStr = Mid$(fromStr, i)
+fromstr = Mid$(fromstr, i)
 End If
 End If
 End Function
-Public Sub DropLeft(ByVal uStr As String, fromStr As String)
+Public Sub DropLeft(ByVal uStr As String, fromstr As String)
 Dim i As Long
-i = InStr(fromStr, uStr)
+i = InStr(fromstr, uStr)
 If i > 0 Then
-fromStr = Mid$(fromStr, i + Len(uStr))
+fromstr = Mid$(fromstr, i + Len(uStr))
 Else
-fromStr = vbNullString
+fromstr = vbNullString
 End If
 End Sub
 Private Function StripNulls(ByVal OriginalStr As String) As String
@@ -1276,4 +1276,22 @@ End If
 End Function
 
 
-
+Public Function FindItemStartWidth(ByVal Key As String, NoCase As Boolean, ByVal offset) As Long
+Dim i As Long, j As Long
+j = Len(Key)
+i = -1
+FindItemStartWidth = -1
+If j = 0 Then Exit Function
+If NoCase Then
+For i = offset To listcount - 1
+If StrComp(Left$(list(i), j), Key, vbTextCompare) = 0 Then Exit For
+Next i
+Else
+For i = offset To listcount - 1
+If StrComp(Left$(list(i), j), Key, vbBinaryCompare) = 0 Then Exit For
+Next i
+End If
+If i < listcount Then
+FindItemStartWidth = i
+End If
+End Function
