@@ -2,7 +2,8 @@ M2000 Interpreter and Environment
 
 Version 9.8 Revision 29 active-X
 
-Fix format$() when we pass a boolean expression starting with a string (like type$(k)="Double"). Now no need parenthesis.
+New version for Info.gsb (new banker algorithm)
+New sign key for binaries
  
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
