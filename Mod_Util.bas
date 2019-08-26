@@ -1,5 +1,6 @@
 Attribute VB_Name = "Module2"
 Option Explicit
+Dim FontList As FastCollection
 Public Trush() As VarItem
 Public TrushCount As Long, TrushWait As Boolean
 Const b123 = vbCr + "'\"
@@ -319,8 +320,8 @@ Private Declare Function SetRect Lib "user32" (lpRect As RECT, ByVal x1 As Long,
 Private Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal X As Long, ByVal Y As Long) As Long
 ''API declarations
 ' old api..
-'Private Declare Function AddFontResource Lib "gdi32" Alias "AddFontResourceA" (ByVal lpFileName As String) As Long
-'Private Declare Function RemoveFontResource Lib "gdi32" Alias "RemoveFontResourceA" (ByVal lpFileName As String) As Long
+Private Declare Function AddFontResource Lib "gdi32" Alias "AddFontResourceW" (ByVal lpFileName As Long) As Long
+Private Declare Function RemoveFontResource Lib "gdi32" Alias "RemoveFontResourceW" (ByVal lpFileName As Long) As Long
 Public Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
 Private Declare Function GetAsyncKeyState Lib "user32" _
     (ByVal vKey As Long) As Long
@@ -748,24 +749,56 @@ End Sub
 Sub InternalError()
  MyEr "Internal Error", "≈Û˘ÙÂÒÈÍ¸ –Ò¸‚ÎÁÏ·"
 End Sub
-Public Function LoadFont(FntFileName As String) As Boolean
+Public Function LoadFont(ByVal FntFileName As String) As Boolean
     Dim FntRC As Long
-      '  FntRC = AddFontResource(FntFileName)
+    If FontList Is Nothing Then
+    Set FontList = New FastCollection
+    End If
+    FntFileName = mylcasefILE(FntFileName)
+    If FontList.ExistKey(FntFileName) Then
+        LoadFont = True
+    Else
+        FntRC = AddFontResource(StrPtr(FntFileName))
         If FntRC = 0 Then 'no success
          LoadFont = False
         Else 'success
-         LoadFont = True
+        FontList.AddKey FntFileName
+     LoadFont = True
+    End If
         End If
 End Function
 'FntFileName includes also path
-Public Function RemoveFont(FntFileName As String) As Boolean
-     Dim rc As Long
-
+Public Function RemoveFont(ByVal FntFileName As String) As Boolean
+     Dim rc As Long, inc As Integer
+     If FontList Is Nothing Then Exit Function
+        FntFileName = mylcasefILE(FntFileName)
+     If FontList.ExistKey(FntFileName) Then
      Do
-     '  rc = RemoveFontResource(FntFileName)
-     Loop Until rc = 0
-
+       rc = RemoveFontResource(StrPtr(FntFileName))
+       inc = inc + 1
+     Loop Until rc = 0 Or inc > 10
+     If rc = 0 Then
+        FontList.Remove (FntFileName)
+        RemoveFont = True
+     End If
+    End If
 End Function
+Public Sub RemoveAllFonts()
+Dim i As Long, FntFileName As String, inc As Integer, rc As Long
+If FontList Is Nothing Then Exit Sub
+For i = 0 To FontList.count - 1
+    FontList.index = i
+    FntFileName = FontList.KeyToString
+    inc = 0
+    FntFileName = mylcasefILE(FntFileName)
+    Do
+      rc = RemoveFontResource(StrPtr(FntFileName))
+      inc = inc + 1
+    Loop Until rc = 0 Or inc > 10
+Next i
+Set FontList = Nothing
+End Sub
+
 
 
 Sub myform(m As Object, X As Long, Y As Long, x1 As Long, y1 As Long, Optional t As Boolean = False, Optional factor As Single = 1)
@@ -4045,14 +4078,14 @@ escok = oldesc
 Set d = Nothing
 End Sub
 
-Function blockCheck(ByVal s$, ByVal Lang As Long, countlines As Long, Optional ByVal sbname$ = vbNullString, Optional Column As Long) As Boolean
+Function blockCheck(ByVal s$, ByVal lang As Long, countlines As Long, Optional ByVal sbname$ = vbNullString, Optional Column As Long) As Boolean
 If s$ = vbNullString Then blockCheck = True: Exit Function
 Dim i As Long, j As Long, c As Long, b$, resp&
 Dim openpar As Long, oldi As Long, lastlabel$, oldjump As Boolean, st As Long, stc As Long
 Dim paren As New mStiva2
 countlines = 1
 Column = 0
-Lang = Not Lang
+lang = Not lang
 Dim a1 As Boolean
 Dim jump As Boolean
 If Trim$(s$) = vbNullString Then Exit Function
@@ -4110,7 +4143,7 @@ Exit Do
 Case 13
 
 checkit:
-    If Not Lang Then
+    If Not lang Then
         b$ = sbname$ + "Problem in string in paragraph " + CStr(countlines)
     Else
         b$ = sbname$ + "–Ò¸‚ÎÁÏ· ÏÂ ÙÔ ·Îˆ·ÒÈËÏÁÙÈÍ¸ ÛÙÁ ·Ò‹„Ò·ˆÔ " + CStr(countlines)
@@ -4213,7 +4246,7 @@ Case 125
 If openpar <> 0 And j > 0 Then
 pareprob:
 If paren.count > 0 Then countlines = paren.PopVal
-If Not Lang Then
+If Not lang Then
         b$ = sbname$ + "Problem in parenthesis in paragraph" + Str$(countlines)
     Else
         b$ = sbname$ + "–Ò¸‚ÎÁÏ· ÏÂ ÙÈÚ ·ÒÂÌË›ÛÂÈÚ ÛÙÁ ·Ò‹„Ò·ˆÔ" + Str$(countlines)
@@ -4248,14 +4281,14 @@ End If
 If j = 0 Then
 
 ElseIf j < 0 Then
-    If Not Lang Then
+    If Not lang Then
         b$ = sbname$ + "Problem in blocks - look } are less " + CStr(Abs(j))
     Else
         b$ = sbname$ + "–Ò¸‚ÎÁÏ· ÏÂ Ù· ÙÏﬁÏ·Ù· - ‰ÂÚ Ù· } ÂﬂÌ·È ÎÈ„¸ÙÂÒ· " + CStr(Abs(j))
     End If
 resp& = ask(b$, True)
 Else
-If Not Lang Then
+If Not lang Then
 b$ = sbname$ + "Problem in blocks - look { are less " + CStr(j)
 Else
 b$ = sbname$ + "–Ò¸‚ÎÁÏ· ÏÂ Ù· ÙÏﬁÏ·Ù· - ‰ÂÚ Ù· { ÂﬂÌ·È ÎÈ„¸ÙÂÒ· " + CStr(j)
@@ -5579,9 +5612,6 @@ If s$ <> "" Then
             ' + LOAD NEW
                 cc.ValueKey = "FONT"
                     cc.ValueType = REG_SZ
-                 ''   LoadFont (mcd & "TT6492M_.TTF")
-                 ' LoadFont (mcd & "TITUSCBZ.TTF")
-                    
                cc.Value = "Monospac821Greek BT"
             ElseIf d$ = "SEC" Then
                     cc.ValueKey = "NEWSECURENAMES"
@@ -6130,7 +6160,7 @@ Loop
 
 End Sub
 
-Public Sub aheadstatusNext(a$, pos As Long, Lang As Long, flag As Boolean)
+Public Sub aheadstatusNext(a$, pos As Long, lang As Long, flag As Boolean)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 Const second1$ = "√…¡", len1 = 3
 Const second2$ = "FOR", len2 = 3
@@ -6178,7 +6208,7 @@ again22:
         Case " ", ChrW(160), vbCr, ":"
 again:
             If Len(what$) > 2 Then
-                If Lang = 0 Then
+                If lang = 0 Then
                     If Len(what$) = 7 Or Len(what$) = len1 Then
                         what$ = myUcase(what$)
                         If what$ = "≈–œÃ≈Õœ" Then
@@ -6276,7 +6306,7 @@ pos = lenA + 2
 
 End Sub
 
-Public Sub aheadstatusDO(a$, pos As Long, Lang As Long, flag As Boolean)
+Public Sub aheadstatusDO(a$, pos As Long, lang As Long, flag As Boolean)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 Const second1$ = "≈–¡Õ≈À¡¬≈", len1 = 9
 Const second11$ = "≈–¡Õ¡À¡¬≈", len11 = 9
@@ -6325,7 +6355,7 @@ again22:
             If Len(what$) > 0 Then what$ = vbNullString
         Case " ", ChrW(160), vbCr
             If Len(what$) > 1 Then
-                If Lang = 0 Then
+                If lang = 0 Then
                     v1 = Len(what$)
                     If Len(what$) = 5 Or v1 = len1 Then
                         what$ = myUcase(what$)
@@ -6534,7 +6564,7 @@ Loop
         Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
 
 End Sub
-Public Sub aheadstatusIFthen(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusIFthen(a$, pos As Long, lang As Long, w$)
 Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
@@ -6575,7 +6605,7 @@ again22:
                 If Len(what$) > 3 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
-                        If Lang = 0 Then
+                        If lang = 0 Then
                              If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
                              pos2 = pos
                                     If MaybeIsSymbol3lot(a$, b123, pos2) Then
@@ -6640,7 +6670,7 @@ Loop
 w$ = vbNullString
 If Len(what$) > 0 Then
       what$ = myUcase(what$)
-      If Lang = 0 Then
+      If lang = 0 Then
          If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
             w$ = what$
         ElseIf what$ = "THEN" Or what$ = "ELSE" Then
@@ -6650,7 +6680,7 @@ If Len(what$) > 0 Then
         
 End If
 End Sub
-Public Sub aheadstatusIF(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusIF(a$, pos As Long, lang As Long, w$)
 Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
@@ -6691,7 +6721,7 @@ again22:
                 If Len(what$) > 3 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
-                        If Lang = 0 Then
+                        If lang = 0 Then
                              If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
                                 w$ = what$
                                 Exit Sub
@@ -6740,7 +6770,7 @@ Loop
 w$ = vbNullString
 If Len(what$) > 0 Then
       what$ = myUcase(what$)
-      If Lang = 0 Then
+      If lang = 0 Then
          If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
             w$ = what$
         ElseIf what$ = "THEN" Or what$ = "ELSE" Then
@@ -6750,7 +6780,7 @@ If Len(what$) > 0 Then
         
 End If
 End Sub
-Public Sub aheadstatusELSE(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusELSE(a$, pos As Long, lang As Long, w$)
 Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
@@ -6789,7 +6819,7 @@ again22:
                 If Len(what$) > 1 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
-                        If Lang = 0 Then
+                        If lang = 0 Then
                         If what$ = "¡Õ" Or what$ = "¡ÀÀ…Ÿ”" Or what$ = "¡ÀÀ…Ÿ”.¡Õ" Then 'Or what$ = "‘œ‘≈"
                             w$ = what$
                                 Exit Sub
@@ -6841,7 +6871,7 @@ Loop
 w$ = vbNullString
 If Len(what$) > 1 Then
       what$ = myUcase(what$)
-      If Lang = 0 Then
+      If lang = 0 Then
                         If what$ = "¡Õ" Or what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Or what$ = "¡ÀÀ…Ÿ”.¡Õ" Then
                             w$ = what$
                                 Exit Sub
@@ -6855,7 +6885,7 @@ If Len(what$) > 1 Then
         
 End If
 End Sub
-Public Sub aheadstatusThen(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusThen(a$, pos As Long, lang As Long, w$)
 Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
@@ -6901,7 +6931,7 @@ again22:
                 If Len(what$) > 1 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
-                        If Lang = 0 Then
+                        If lang = 0 Then
                         If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
                             w$ = what$
                                 Exit Sub
@@ -6944,7 +6974,7 @@ Loop
 w$ = vbNullString
 If Len(what$) > 1 Then
       what$ = myUcase(what$)
-      If Lang = 0 Then
+      If lang = 0 Then
                         If what$ = "‘œ‘≈" Or what$ = "¡ÀÀ…Ÿ”" Then
                             w$ = what$
                                 Exit Sub
@@ -6958,7 +6988,7 @@ If Len(what$) > 1 Then
         
 End If
 End Sub
-Public Sub aheadstatusELSEIF(a$, pos As Long, Lang As Long, jump As Boolean, IFCTRL As Long, flag As Boolean)
+Public Sub aheadstatusELSEIF(a$, pos As Long, lang As Long, jump As Boolean, IFCTRL As Long, flag As Boolean)
 Dim what$, w$, lenA As Long, level2 As Integer, pos3 As Long
 Const second1$ = "¡Õ", len1 = 2
 Const second2$ = "IF", len2 = 2
@@ -7008,7 +7038,7 @@ again22:
         Case " ", ChrW(160), vbCr ',  Check Else and IF
                 If Len(what$) > 1 Then
                         
-                        If Lang = 0 Then
+                        If lang = 0 Then
                         
                         
                             what$ = myUcase(what$)
@@ -7157,7 +7187,7 @@ pos = lenA + 2
 End Sub
 
 '
-Public Sub aheadstatusENDIF(a$, pos As Long, Lang As Long, flag As Boolean)
+Public Sub aheadstatusENDIF(a$, pos As Long, lang As Long, flag As Boolean)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 Const second1$ = "¡Õ", len1 = 2
 Const second2$ = "IF", len2 = 2
@@ -7205,7 +7235,7 @@ again22:
         Case " ", ChrW(160)
                 If Len(what$) > 1 Then
                         
-                        If Lang = 0 Then
+                        If lang = 0 Then
                         If Len(what$) = 5 Or Len(what$) = len1 Then
                             what$ = myUcase(what$)
                             If what$ = "‘≈Àœ”" Then
@@ -7324,7 +7354,7 @@ pos = lenA + 2
 End Sub
 
 
-Public Sub aheadstatusEND(a$, pos As Long, Lang As Long, second1$, len1 As Long, second2$, len2 As Long, flag As Boolean, v1 As Long)
+Public Sub aheadstatusEND(a$, pos As Long, lang As Long, second1$, len1 As Long, second2$, len2 As Long, flag As Boolean, v1 As Long)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 flag = False
 
@@ -7370,7 +7400,7 @@ again22:
         Case " ", ChrW(160)
                 If Len(what$) > 1 Then
                         
-                        If Lang = 0 Then
+                        If lang = 0 Then
                         If Len(what$) = 5 Or Len(what$) = len1 Then
                             what$ = myUcase(what$)
                             If what$ = "‘≈Àœ”" Then
@@ -10663,10 +10693,10 @@ Function BoxGroupObj(aGroup As Object) As mArray
             Set BoxGroupObj.item(0) = aGroup
 End Function
 
-Sub monitor(bstack As basetask, prive As basket, Lang As Long)
+Sub monitor(bstack As basetask, prive As basket, lang As Long)
     Dim ss$, di As Object
     Set di = bstack.Owner
-    If Lang = 0 Then
+    If lang = 0 Then
         wwPlain bstack, prive, "≈Ó ÔÒÈÛÏÔ˝ Í˘‰ÈÍÔÛÂÎﬂ‰·: " & GetACP, bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, "÷‹ÍÂÎÔÚ Âˆ·ÒÏÔ„ﬁÚ", bstack.Owner.Width, 1000, True
         wwPlain bstack, prive, PathFromApp("m2000"), bstack.Owner.Width, 1000, True
@@ -10743,32 +10773,32 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         wwPlain bstack, prive, "Console is in screen:" + Str$(Console + 1), bstack.Owner.Width, 1000, True
     End If
 End Sub
-Sub NeoSwap(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MySwap(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoSwap(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MySwap(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoComm(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyRead(3, ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoComm(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyRead(3, ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoRef(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyRead(2, ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoRef(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyRead(2, ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoRead(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyRead(1, ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoRead(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyRead(1, ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoReport(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyReport(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoReport(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyReport(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoDeclare(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyDeclare(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoDeclare(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyDeclare(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoMethod(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyMethod(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoMethod(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyMethod(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoWith(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyWith(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoWith(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyWith(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoSprite(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoSprite(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 Dim s$, p
 If IsStrExp(ObjFromPtr(basestackLP), rest$, s$) Then
 sprite ObjFromPtr(basestackLP), s$, rest$
@@ -10778,34 +10808,34 @@ End If
 resp = LastErNum1 = 0
 End Sub
 
-Sub NeoPlayer(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcPlayer(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoPlayer(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcPlayer(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoPrinter(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoPrinter(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcPrinter(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoPage(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-ProcPage ObjFromPtr(basestackLP), rest$, Lang
+Sub NeoPage(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+ProcPage ObjFromPtr(basestackLP), rest$, lang
 resp = True
 End Sub
-Sub NeoCompact(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoCompact(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 BaseCompact ObjFromPtr(basestackLP), rest$
 resp = True
 End Sub
-Sub NeoLayer(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoLayer(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcLayer(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoOrder(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoOrder(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 MyOrder ObjFromPtr(basestackLP), rest$
 resp = True
 End Sub
 
-Sub NeoDelete(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoDelete(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = DELfields(ObjFromPtr(basestackLP), rest$)
 'resp = True  '' maybe this can be change
 End Sub
-Sub NeoAppend(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoAppend(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 Dim s$, p As Variant
 resp = True
 If IsExp(ObjFromPtr(basestackLP), rest$, p) Then
@@ -10817,16 +10847,16 @@ SyntaxError
 resp = False
 End If
 End Sub
-Sub NeoSearch(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-getrow ObjFromPtr(basestackLP), rest$, , "", Lang
+Sub NeoSearch(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+getrow ObjFromPtr(basestackLP), rest$, , "", lang
 resp = True
 End Sub
-Sub NeoRetr(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-getrow ObjFromPtr(basestackLP), rest$, , , Lang
+Sub NeoRetr(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+getrow ObjFromPtr(basestackLP), rest$, , , lang
 resp = True
 End Sub
-Sub NeoExecute(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-If IsLabelSymbolNew(rest$, " Ÿƒ… ¡", "CODE", Lang) Then
+Sub NeoExecute(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+If IsLabelSymbolNew(rest$, " Ÿƒ… ¡", "CODE", lang) Then
  resp = ExecCode(ObjFromPtr(basestackLP), rest$)
  Else
 CommExecAndTimeOut ObjFromPtr(basestackLP), rest$
@@ -10835,181 +10865,181 @@ End If
 
 End Sub
 
-Sub NeoTable(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoTable(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 NewTable ObjFromPtr(basestackLP), rest$
 resp = True
 End Sub
-Sub NeoBase(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoBase(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 NewBase ObjFromPtr(basestackLP), rest$
 resp = True
 End Sub
-Sub NeoHold(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoHold(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcHold(ObjFromPtr(basestackLP))
 End Sub
-Sub NeoRelease(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoRelease(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcRelease(ObjFromPtr(basestackLP))
 End Sub
-Sub NeoSuperClass(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcClass(ObjFromPtr(basestackLP), rest$, Lang, True)
+Sub NeoSuperClass(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcClass(ObjFromPtr(basestackLP), rest$, lang, True)
 End Sub
-Sub NeoClass(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcClass(ObjFromPtr(basestackLP), rest$, Lang, False)
+Sub NeoClass(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcClass(ObjFromPtr(basestackLP), rest$, lang, False)
 End Sub
-Sub NeoDIM(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyDim(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoDIM(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyDim(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoPathDraw(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcPath(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoPathDraw(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcPath(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoDrawings(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyDrawings(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoDrawings(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyDrawings(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoFill(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoFill(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcFill(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoFloodFill(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcFLOODFILL(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoFloodFill(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcFLOODFILL(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoTextCursor(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoTextCursor(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = MyCursor(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoMouseIcon(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-i3MouseIcon ObjFromPtr(basestackLP), rest$, Lang
+Sub NeoMouseIcon(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+i3MouseIcon ObjFromPtr(basestackLP), rest$, lang
 resp = True
 End Sub
-Sub NeoDouble(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoDouble(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 Dim bstack As basetask
 Set bstack = ObjFromPtr(basestackLP)
 SetDouble bstack.Owner
 Set bstack = Nothing
 resp = True
 End Sub
-Sub NeoNormal(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoNormal(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 Dim bstack As basetask
 Set bstack = ObjFromPtr(basestackLP)
 SetNormal bstack.Owner
 Set bstack = Nothing
 resp = True
 End Sub
-Sub NeoSort(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcSort(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoSort(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcSort(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoImage(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcImage(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoImage(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcImage(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoBitmaps(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyBitmaps(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoBitmaps(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyBitmaps(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoDef(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcDef(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoDef(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcDef(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoMovies(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyMovies(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoMovies(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyMovies(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoSounds(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MySounds(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoSounds(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MySounds(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoPen(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoPen(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcPen(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoCls(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoCls(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcCls(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoStructure(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = myStructure(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoStructure(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = myStructure(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoInput(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyInput(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoInput(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyInput(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoEvent(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = myEvent(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoEvent(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = myEvent(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoProto(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcProto(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoProto(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcProto(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoEnum(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoEnum(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcEnum(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoPset(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoPset(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = MyPset(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoModule(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyModule(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoModule(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyModule(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoModules(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyModules(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoModules(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyModules(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoGroup(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcGroup(0, ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoGroup(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcGroup(0, ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoBack(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-ProcBackGround ObjFromPtr(basestackLP), rest$, Lang, resp
+Sub NeoBack(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+ProcBackGround ObjFromPtr(basestackLP), rest$, lang, resp
 End Sub
-Sub NeoOver(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoOver(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcOver(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoDrop(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcDrop(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoDrop(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcDrop(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoShift(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoShift(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcShift(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoShiftBack(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoShiftBack(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcShiftBack(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoLoad(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcLoad(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoLoad(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcLoad(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoText(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoText(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcText(ObjFromPtr(basestackLP), False, rest$)
 End Sub
-Sub NeoHtml(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoHtml(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcText(ObjFromPtr(basestackLP), True, rest$)
 End Sub
 
-Sub NeoCurve(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcCurve(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoCurve(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcCurve(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoPoly(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcPoly(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoPoly(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcPoly(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoCircle(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcCircle(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoCircle(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcCircle(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoNew(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyNew(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoNew(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyNew(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoTitle(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcTitle(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoTitle(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcTitle(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoDraw(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcDraw(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoDraw(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcDraw(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoWidth(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoWidth(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcDrawWidth(ObjFromPtr(basestackLP), rest$)
 End Sub
 
-Sub NeoMove(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoMove(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcMove(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoStep(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcStep(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoStep(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcStep(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoPrint(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = RevisionPrint(ObjFromPtr(basestackLP), rest$, 0, Lang)
+Sub NeoPrint(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = RevisionPrint(ObjFromPtr(basestackLP), rest$, 0, lang)
 End Sub
-Sub NeoCopy(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyCopy(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoCopy(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyCopy(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoPrinthEX(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = RevisionPrint(ObjFromPtr(basestackLP), rest$, 1, Lang)
+Sub NeoPrinthEX(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = RevisionPrint(ObjFromPtr(basestackLP), rest$, 1, lang)
 End Sub
-Sub NeoRem(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoRem(basestackLP As Long, rest$, lang As Long, resp As Boolean)
     Dim i As Long
     If FastSymbol(rest$, "{") Then
     i = blockLen(rest$)
@@ -11019,19 +11049,19 @@ Sub NeoRem(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
     End If
     resp = True
 End Sub
-Sub NeoPush(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoPush(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = MyPush(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoData(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoData(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = MyData(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoClear(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoClear(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = MyClear(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoLinespace(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoLinespace(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = procLineSpace(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoSet(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoSet(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 Dim i As Long, s$
 aheadstatusANY rest$, i
 s$ = Left$(rest$, i - 1)
@@ -11044,45 +11074,45 @@ End If
 End Sub
 
 
-Sub NeoBold(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoBold(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 ProcBold ObjFromPtr(basestackLP), rest$
 resp = True
 End Sub
-Sub NeoChooseObj(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-    resp = ProcChooseObj(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoChooseObj(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+    resp = ProcChooseObj(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoChooseFont(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-    ProcChooseFont ObjFromPtr(basestackLP), Lang
+Sub NeoChooseFont(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+    ProcChooseFont ObjFromPtr(basestackLP), lang
     resp = True
 End Sub
-Sub NeoFont(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-    ProcChooseFont ObjFromPtr(basestackLP), Lang
+Sub NeoFont(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+    ProcChooseFont ObjFromPtr(basestackLP), lang
     resp = True
 End Sub
-Sub NeoScore(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoScore(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = MyScore(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoPlayScore(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoPlayScore(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = MyPlayScore(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoMode(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoMode(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcMode(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoGradient(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
+Sub NeoGradient(basestackLP As Long, rest$, lang As Long, resp As Boolean)
 resp = ProcGradient(ObjFromPtr(basestackLP), rest$)
 End Sub
-Sub NeoFunction(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyFunction(0, ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoFunction(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyFunction(0, ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 
-Sub NeoFiles(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcFiles(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoFiles(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcFiles(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoCat(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = ProcCat(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoCat(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = ProcCat(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
-Sub NeoLet(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-resp = MyLet(ObjFromPtr(basestackLP), rest$, Lang)
+Sub NeoLet(basestackLP As Long, rest$, lang As Long, resp As Boolean)
+resp = MyLet(ObjFromPtr(basestackLP), rest$, lang)
 End Sub
 Function GetArrayReference(bstack As basetask, a$, v$, PP, Result As mArray, index As Long) As Boolean
 Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
@@ -11764,9 +11794,9 @@ End If
 End If
 End Function
 
-Function GetRes(bstack As basetask, b$, Lang As Long, data$) As Boolean
+Function GetRes(bstack As basetask, b$, lang As Long, data$) As Boolean
 Dim w$, x1 As Long, label1$, useHandler As mHandler, par As Boolean, pppp As mArray, p As Variant
-If IsLabelSymbolNew(b$, "Ÿ”", "AS", Lang) Then
+If IsLabelSymbolNew(b$, "Ÿ”", "AS", lang) Then
             w$ = Funcweak(bstack, b$, x1, label1$)
             If LastErNum1 = -1 And x1 < 5 Then Exit Function
             If LenB(w$) = 0 Then
@@ -13437,7 +13467,7 @@ On Error GoTo 1234
 1234:
     
 End Function
-Function RevisionPrint(basestack As basetask, rest1$, xa As Long, Lang As Long) As Boolean
+Function RevisionPrint(basestack As basetask, rest1$, xa As Long, lang As Long) As Boolean
 Dim Scr As Object, oldCol As Long, oldFTEXT As Long, oldFTXT As String, oldpen As Long
 Dim par As Boolean, i As Long, F As Long, p As Variant, w4 As Boolean, pn&, s$, dlen As Long
 Dim o As Long, w3 As Long, x1 As Long, y1 As Long, X As Double, ColOffset As Long
@@ -13507,7 +13537,7 @@ If Not IsLabelSYMB3(ss$, s$) Then
                     F = 0
                     
 Else
-Select Case Lang
+Select Case lang
 Case 1
 If Len(s$) > 3 Then
 If InStr("BOUP", UCase(Left$(s$, 1))) > 0 Then
@@ -13585,7 +13615,7 @@ Select Case myUcase(s$)
         Else
         F = 0
         End If
-        Lang = 0
+        lang = 0
         End Select
         
         If F > 0 And .lastprint Then
@@ -16355,7 +16385,7 @@ err123:
                 End If
 End Sub
 
-Function ProcUSE(basestack As basetask, rest$, Lang As Long) As Boolean
+Function ProcUSE(basestack As basetask, rest$, lang As Long) As Boolean
 Dim ss$, ML As Long, X As Double, pa$, s$, stac1$, p As Variant, frm$, i As Long, w$, pppp As mArray
 Dim it As Long, what$
 If IsStrExp(basestack, rest$, ss$) Then   'gsb
@@ -16404,7 +16434,7 @@ If ML <> 1 Then
     End If
 End If
 
-If Not IsLabelSymbolNew(rest$, "”‘œ", "TO", Lang) Then
+If Not IsLabelSymbolNew(rest$, "”‘œ", "TO", lang) Then
 
 w$ = "S" & CStr(Int(Rnd(12) * 100000))
 
@@ -16456,7 +16486,7 @@ Case 6
    If Left$(w$, 1) <> "S" Then
 
 p = GetTaskId + 10000 ' starts from 10000
-If Not IsLabelSymbolNew(rest$, "Ÿ”", "AS", Lang) Then
+If Not IsLabelSymbolNew(rest$, "Ÿ”", "AS", lang) Then
 's$ = validpipename(ss$)
 
 If frm$ <> "" Then
@@ -17095,14 +17125,14 @@ checkit:
             Set v = pppp
         End If
 End Function
-Public Function exeSelect(ExecuteLong, once As Boolean, bstack As basetask, b$, v As Long, Lang As Long) As Boolean
+Public Function exeSelect(ExecuteLong, once As Boolean, bstack As basetask, b$, v As Long, lang As Long) As Boolean
 Dim ok As Boolean, x1 As Long, y1 As Long, sp As Variant, st As Variant, sw$, slct As Long, ss$
 Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
         exeSelect = True
                 x1 = 0 ' mode numbers using p, sp and st
                 ' x1=2 using sw$ w$ ss$
 
-            If IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang) Then
+            If IsLabelSymbolNew(b$, "Ã≈", "CASE", lang) Then
             
                         If IsExp(bstack, b$, sp, , True) Then
                         x1 = 1
@@ -17125,7 +17155,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
                
                             Exit Do
                         End If
-                                If IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang) Then  ' WE HAVE CASE
+                                If IsLabelSymbolNew(b$, "Ã≈", "CASE", lang) Then  ' WE HAVE CASE
                                 If ok Then
                                 ExpectedEndSelect
                                 ExecuteLong = 0
@@ -17142,7 +17172,7 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&
                                 If IsStrExp(bstack, b$, w$) Then x2 = 2
                                 End If
                                        If x2 > 0 Then 'WE HAVE NUMBER OR STRING
-                                            If IsLabelSymbolNew(b$, "≈Ÿ”", "TO", Lang) Then   ' range ?
+                                            If IsLabelSymbolNew(b$, "≈Ÿ”", "TO", lang) Then   ' range ?
                                             y1 = 0
                                                If x1 = 1 Then
                                                     If IsExp(bstack, b$, st, , True) Then y1 = 1
@@ -17247,7 +17277,7 @@ conthere:
                                                         
                                                             i = 1
                                                             
-                                                            While IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang)
+                                                            While IsLabelSymbolNew(b$, "Ã≈", "CASE", lang)
                                                            SetNextLine b$
                                                             Wend
                                                             ' #4 call one command
@@ -17308,11 +17338,11 @@ conthere:
                                                                 End If
                                 ' drop case
                                 
-                                If IsLabelSymbolNew(b$, "Ã≈", "CASE", Lang, , , True) Then
+                                If IsLabelSymbolNew(b$, "Ã≈", "CASE", lang, , , True) Then
          
-                                ElseIf IsLabelSymbolNew(b$, "¡ÀÀ…Ÿ”", "ELSE", Lang, , , True) Then
+                                ElseIf IsLabelSymbolNew(b$, "¡ÀÀ…Ÿ”", "ELSE", lang, , , True) Then
    
-                                ElseIf IsLabelSymbolNew(b$, "‘≈Àœ”", "END", Lang, , , True) Then
+                                ElseIf IsLabelSymbolNew(b$, "‘≈Àœ”", "END", lang, , , True) Then
                              
                                 Else
                                     If FastSymbol(b$, "{") Then
@@ -17410,8 +17440,8 @@ conthere:
                                     
                                 End If
                                 
-                                ElseIf IsLabelSymbolNew(b$, "¡ÀÀ…Ÿ”", "ELSE", Lang) Then
-                                        IsLabelSymbolNew b$, "Ã≈", "CASE", Lang
+                                ElseIf IsLabelSymbolNew(b$, "¡ÀÀ…Ÿ”", "ELSE", lang) Then
+                                        IsLabelSymbolNew b$, "Ã≈", "CASE", lang
                                            If ok Then
                                 ExpectedEndSelect
                                 ExecuteLong = 0
@@ -17511,8 +17541,8 @@ conthere:
                                 End If
                                 SetNextLine b$
                                 slct = 0
-                        ElseIf IsLabelSymbolNew(b$, "‘≈Àœ”", "END", Lang) Then
-                            If IsLabelSymbolNew(b$, "≈–…Àœ√«”", "SELECT", Lang) Then
+                        ElseIf IsLabelSymbolNew(b$, "‘≈Àœ”", "END", lang) Then
+                            If IsLabelSymbolNew(b$, "≈–…Àœ√«”", "SELECT", lang) Then
                                 slct = 0
                                 Exit Do
                             Else
@@ -17826,7 +17856,7 @@ Set di = bstack.Owner
 Dim prive As basket
 'b$ = Trim$(b$)
 Dim w$, ww#, LLL As Long, sss As Long, v As Long, p As Variant, ss$, sw$, ohere$
-Dim pppp As mArray, i1 As Long, Lang As Long
+Dim pppp As mArray, i1 As Long, lang As Long
 Dim r1 As Long, r2 As Long
 ' uink$ = VbNullString
 di.FontTransparent = True
@@ -17872,11 +17902,11 @@ If NOEXECUTION Then interpret = False: here$ = ohere$: GoTo there1
 
 If NocharsInLine(b$) Then interpret = True: here$ = ohere$: GoTo there1
 If IsSymbol(b$, "@") Then
-i1 = IsLabelAnew("", b$, w$, Lang)  '' NO FORM AA@BBB ALLOWED HERE
+i1 = IsLabelAnew("", b$, w$, lang)  '' NO FORM AA@BBB ALLOWED HERE
 w$ = "@" + w$
 GoTo PROCESSCOMMAND   'IS A COMMAND
 Else
-i1 = IsLabelAnew("", b$, w$, Lang) '' NO FORM AA@BBB ALLOWED HERE
+i1 = IsLabelAnew("", b$, w$, lang) '' NO FORM AA@BBB ALLOWED HERE
 End If
   If trace And (bstack.Process Is Nothing) And Not bypasstrace Then
   If bstack.IamLambda Then
@@ -18548,7 +18578,7 @@ PROCESSCOMMAND:
             SetNextLineNL b$
         Else
          If lckfrm > 0 Then lckfrm = sb2used + 1
-        NeoCall ObjPtr(bstack), b$, Lang, ok
+        NeoCall ObjPtr(bstack), b$, lang, ok
         If Not ok Then
             interpret = 0
             GoTo there1
@@ -18668,7 +18698,7 @@ err123456:
                     If IsSupervisor Then
                     prive = players(GetCode(di))
                     
-                    monitor bstack, prive, Lang
+                    monitor bstack, prive, lang
                     players(GetCode(di)) = prive
                     Else
                     BadCommand
@@ -18698,13 +18728,13 @@ Case "RETURN", "≈–…”‘—œ÷«"
                                   If ChangeValues(bstack, b$) Then GoTo loopcontinue1
                                   
                            Case 2
-                                    If ChangeValuesMem(bstack, b$, Lang) Then GoTo loopcontinue1
+                                    If ChangeValuesMem(bstack, b$, lang) Then GoTo loopcontinue1
                            Case 3
                                     If ChangeValuesArray(bstack, b$) Then GoTo loopcontinue1
                            End Select
                 End If
             ElseIf IsStrExp(bstack, b$, ss$) Then
-                    append_table bstack, ss$, b$, True, Lang
+                    append_table bstack, ss$, b$, True, lang
                 GoTo loopcontinue1
                  End If
   BadUseofReturn
@@ -18719,7 +18749,7 @@ Case "RETURN", "≈–…”‘—œ÷«"
             GoTo contnoproper
             End If
             Case "CONST", "”‘¡»≈—«", "”‘¡»≈—≈”"
-            ConstNew bstack, b$, w$, True, Lang
+            ConstNew bstack, b$, w$, True, lang
                     If LastErNum = -1 Then
                     interpret = False
                     GoTo there1
@@ -18736,7 +18766,7 @@ Case "RETURN", "≈–…”‘—œ÷«"
                     If comhash.Find2(w$, i, v) Then
                         If v <> 0 Then
                             If v = 32 Then
-                                If Not Identifier(bstack, w$, b$, True, Lang) Then
+                                If Not Identifier(bstack, w$, b$, True, lang) Then
                                     If NOEXECUTION Then
                                             MyEr "", ""
                                             interpret = False
@@ -18749,7 +18779,7 @@ Case "RETURN", "≈–…”‘—œ÷«"
                               bstack.callohere = vbNullString
                               b$ = NLtrim(b$)
                               SetNextLineNL b$
-                              ElseIf Not ProcModuleEntry(bstack, "", 0, b$, Lang) Then
+                              ElseIf Not ProcModuleEntry(bstack, "", 0, b$, lang) Then
                                     If MOUT And b$ = vbNullString Then
                                     Else
                                         MyErMacro b$, "unknown identifier " & w$, "¢„Ì˘ÛÙÔ ·Ì·„Ì˘ÒÈÛÙÈÍ¸ " & w$
@@ -18773,7 +18803,7 @@ contnoproper:
                     
                     If i <> 0 Then
                      If IsBadCodePtr(i) = 0 Then
-                        If Not CallByPtr(i, bstack, b$, Lang) Then
+                        If Not CallByPtr(i, bstack, b$, lang) Then
                                If NOEXECUTION Then
                                     MyEr "", ""
                                     interpret = False
@@ -18782,7 +18812,7 @@ contnoproper:
                         End If
                         End If
                     Else
-                            If Not Identifier(bstack, w$, b$, Not comhash.Find(w$, i1), Lang) Then
+                            If Not Identifier(bstack, w$, b$, Not comhash.Find(w$, i1), lang) Then
                             
                                     If NOEXECUTION Then
                                     MyEr "", ""
@@ -18792,7 +18822,7 @@ contnoproper:
                             End If
                     End If
                     
-                    ElseIf Not Identifier(bstack, w$, b$, Not comhash.Find(w$, i1), Lang) Then
+                    ElseIf Not Identifier(bstack, w$, b$, Not comhash.Find(w$, i1), lang) Then
                     
                             If NOEXECUTION Then
                             MyEr "", ""
@@ -18806,7 +18836,7 @@ contnoproper:
                               bstack.callohere = vbNullString
                               b$ = NLtrim(b$)
                               SetNextLineNL b$
-                              ElseIf Not ProcModuleEntry(bstack, "", 0, b$, Lang) Then
+                              ElseIf Not ProcModuleEntry(bstack, "", 0, b$, lang) Then
                                           If MOUT And b$ = vbNullString Then
                                 Else
                                     MyErMacro b$, "unknown identifier " & w$, "¢„Ì˘ÛÙÔ ·Ì·„Ì˘ÒÈÛÙÈÍ¸ " & w$
@@ -19952,7 +19982,7 @@ ExistNum = False
 
     
 End Function
-Function MySwap(bstack As basetask, rest$, Lang As Long) As Boolean
+Function MySwap(bstack As basetask, rest$, lang As Long) As Boolean
 Dim s$, ss$, F As Long, col As Long, x1 As Long, i As Long, pppp As mArray, pppp1 As mArray
     F = Abs(IsLabel(bstack, rest$, s$))
     MySwap = True
@@ -20547,7 +20577,7 @@ Set mycol = var(i)
 End If
 Set getSafeFormList = mycol.mylist
 End Function
-Function ProcBrowser(bstack As basetask, rest$, Lang As Long) As Boolean
+Function ProcBrowser(bstack As basetask, rest$, lang As Long) As Boolean
 Dim s$, w$, X As Double
 ProcBrowser = True
 If Not IsStrExp(bstack, rest$, s$) Then
@@ -20685,7 +20715,7 @@ MyPlayScore = False
 End If
 End Function
 
-Function IdPara(basestack As basetask, rest$, Lang As Long) As Boolean
+Function IdPara(basestack As basetask, rest$, lang As Long) As Boolean
 Dim x1 As Long, y1 As Long, i As Long, it As Long, vvl As Variant
 Dim X As Double, Y As Double, s$, what$, w3 As Long, w4 As Long, z As Double
 Dim xa As Long, ya As Long
@@ -20693,7 +20723,7 @@ Dim pppp As mArray
 
 
 IdPara = True
-If IsLabelSymbolNew(rest$, "”‘œ", "TO", Lang) Then
+If IsLabelSymbolNew(rest$, "”‘œ", "TO", lang) Then
         If Not IsExp(basestack, rest$, Y) Then
             MissNumExpr
             IdPara = False
@@ -21320,11 +21350,11 @@ With players(GetCode(Scr))
     .YGRAPH = 0
 End With
 End Sub
-Function ProcSave(basestack As basetask, rest$, Lang As Long) As Boolean
+Function ProcSave(basestack As basetask, rest$, lang As Long) As Boolean
 Dim pa$, w$, s$, col As Long, prg$, x1 As Long, par As Boolean, i As Long, noUse As Long, lcl As Boolean
 On Error Resume Next
 If lckfrm <> 0 Then MyEr "Save is locked", "« ·ÔËﬁÍÂıÛÁ ÂﬂÌ·È ÍÎÂÈ‰˘Ï›ÌÁ": rest$ = vbNullString: Exit Function
-lcl = IsLabelSymbolNew(rest$, "‘œ–… ¡", "LOCAL", Lang) Or basestack.IamChild Or basestack.IamAnEvent
+lcl = IsLabelSymbolNew(rest$, "‘œ–… ¡", "LOCAL", lang) Or basestack.IamChild Or basestack.IamAnEvent
 x1 = Abs(IsLabelFileName(basestack, rest, pa$, , s$))
 
 If x1 <> 1 Then
@@ -21351,7 +21381,7 @@ If x1 <> 0 Then
                 s$ = Left$(s$, Len(s$) - 2)
                 
                 If Right$(sbf(col).sb, 2) <> vbCrLf Then sbf(col).sb = sbf(col).sb + vbCrLf
-                If Lang Then
+                If lang Then
                 
                         If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Function " & s$ + "()" + vbCrLf) Then Exit Function
                                 prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
@@ -21372,7 +21402,7 @@ If x1 <> 0 Then
                 End If
                 Else
                         If Right$(sbf(col).sb, 2) <> vbCrLf Then sbf(col).sb = sbf(col).sb + vbCrLf
-                        If Lang Then
+                        If lang Then
                                 If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Module " & s$ + vbCrLf) Then Exit Function
                                 prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
                                 If lcl Then
@@ -21423,7 +21453,7 @@ If x1 <> 0 Then
         End If
         s$ = vbNullString
         If CFname(pa$) <> "" Then
-                If Lang = 1 Then
+                If lang = 1 Then
                         If MsgBoxN("Replace " + ExtractNameOnly(pa$), vbOKCancel, MesTitle$) <> vbOK Then
                         MyEr "File not saved -1005", "ƒÂÌ Û˛ËÁÍÂ ÙÔ ·Ò˜ÂﬂÔ -1005"
                         ProcSave = True

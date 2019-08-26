@@ -124,6 +124,12 @@ RGBToHLS mr, mg, mb, hh, ss, LL
 satconv = CLng(LL * 255)
 
 End Function
+Public Function HSL(ByVal h, ByVal s, ByVal l) As Double
+Dim r As Long, g As Long, b As Long
+HLSToRGB CSng((h * 100&) Mod 36000) / 6000!, s / 100, l / 100, r, g, b
+HSL = r + (g + b * 256#) * 256#
+End Function
+
 Public Sub HLSToRGB( _
       ByVal h As Single, ByVal s As Single, ByVal l As Single, _
       r As Long, g As Long, b As Long _

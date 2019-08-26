@@ -1,6 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 29 active-X
+Version 9.8 Revision 30 active-X
+1. Font Load/Remove see Help Font
+2. HSL() function.  see Help HSL(
 
 New version for Info.gsb (new banker algorithm)
 New sign key for binaries

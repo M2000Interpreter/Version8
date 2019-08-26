@@ -1542,15 +1542,11 @@ port = Printer.port
 End If
 
 dset
-'If LoadFont(GetCurDir(True) & "TT6492M_.TTF") Then
-'defFontname = "monospace 821 greek bt"
-'MYFONT = defFontname
-'myBold = True
-'Else
+
 MYFONT = "Verdana"
 defFontname = MYFONT
 myBold = False
-'End If
+
 myCharSet = 0
 With Form1
 .Font.name = MYFONT

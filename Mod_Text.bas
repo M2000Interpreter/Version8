@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 29
+Global Const Revision = 30
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2504,6 +2504,7 @@ If form5iamloaded Then
 End If
 End Sub
 Public Sub terminatefinal()
+RemoveAllFonts
 Set globalstack = Nothing
 Set basestack1 = Nothing
 CloseAllConnections  ' new for ADO we keep objects not the connections
@@ -5502,7 +5503,7 @@ End If
 'Select Case v$
 
 findthird:
-On w1 GoTo fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8, fun9, fun10, fun11, fun12, fun13, fun14, fun15, fun16, fun17, fun18, fun19, fun20, fun21, fun22, fun23, fun24, fun25, fun26, fun27, fun28, fun29, fun30, fun31, fun32, fun33, fun34, fun35, fun36, fun37, fun38, fun39, fun40, fun41, fun42, fun43, fun44, fun45, fun46, fun47, fun48, fun49, fun50, fun51, fun52, fun53, fun54, fun55, fun56, fun57, fun58, fun59, fun60, fun61, fun62, fun63, fun64, fun65, fun66, fun67, fun68, fun69, fun70, fun71, fun72, fun73, fun74, fun75, fun76, fun77, fun78, fun79, fun80, fun81, fun82, fun83, fun84, fun85, fun86, fun87, fun88, fun89, fun90, fun91, fun92, fun93, fun94, fun95, fun96, fun97, fun98, fun99, fun100, fun101, fun102, fun103, fun104, fun105, fun106, fun107, fun108, fun109
+On w1 GoTo fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8, fun9, fun10, fun11, fun12, fun13, fun14, fun15, fun16, fun17, fun18, fun19, fun20, fun21, fun22, fun23, fun24, fun25, fun26, fun27, fun28, fun29, fun30, fun31, fun32, fun33, fun34, fun35, fun36, fun37, fun38, fun39, fun40, fun41, fun42, fun43, fun44, fun45, fun46, fun47, fun48, fun49, fun50, fun51, fun52, fun53, fun54, fun55, fun56, fun57, fun58, fun59, fun60, fun61, fun62, fun63, fun64, fun65, fun66, fun67, fun68, fun69, fun70, fun71, fun72, fun73, fun74, fun75, fun76, fun77, fun78, fun79, fun80, fun81, fun82, fun83, fun84, fun85, fun86, fun87, fun88, fun89, fun90, fun91, fun92, fun93, fun94, fun95, fun96, fun97, fun98, fun99, fun100, fun101, fun102, fun103, fun104, fun105, fun106, fun107, fun108, fun109, fun110
 IsNumberNew = False
 Exit Function
 fun108: '"POINTER(", "ƒ≈… ‘«”("
@@ -5953,11 +5954,17 @@ fun17: ' "WRITABLE(", "≈√√—¡ÿ…Ãœ("  ' ·Ì ÏÔÒ˛ Ì· „Ò‹¯˘ ÛÙÔ ˆ‹ÍÂÎÔ
     End If
     IsNumberNew = False
     Exit Function
+fun110:  '"HSL(","◊ ÷("
+
+    If Not ColorHSL(bstack, a$, r) Then Exit Function
+    r = SG * -r
+
+        IsNumberNew = FastSymbol(a$, ")", True)
+        Exit Function
 fun18: ' "COLOR(", "COLOUR(", "◊—ŸÃ¡("
     
-            
-    If Not ColorRGB(bstack, a$, r) Then Exit Function
-     
+   If Not ColorRGB(bstack, a$, r) Then Exit Function
+
     r = SG * -r
 
         IsNumberNew = FastSymbol(a$, ")", True)
@@ -19944,8 +19951,11 @@ Case "STACK", "”Ÿ—œ”"
 Case "≈ ƒœ”«", "VERSION"
     Identifier = ProcVersion(basestack)
     Exit Function
-Case "FONT", "√—¡ÃÃ¡‘œ”≈…—¡"
-    Identifier = ProcFont(basestack, rest$)
+Case "√—¡ÃÃ¡‘œ”≈…—¡"
+    Identifier = ProcFont(basestack, rest$, 0&)
+    Exit Function
+Case "FONT"
+    Identifier = ProcFont(basestack, rest$, 1&)
     Exit Function
 Case "SCROLL", " ’À…”«"
     Identifier = ProcSrcoll(basestack, rest$, Lang)
@@ -27432,16 +27442,36 @@ If Left$(rest$, 5) = "¡’‘œ." Then
 End If
 End If
 End Sub
-
+Function ColorHSL(bstack As basetask, n$, r As Variant) As Boolean
+    Dim r2 As Variant, r3 As Variant, ss$, par As Boolean
+    ColorHSL = True
+    If IsExp(bstack, n$, r, , True) Then
+        If FastSymbol(n$, ",") Then
+            If IsExp(bstack, n$, r2, , True) Then
+                If r2 < 0 Then r2 = 0
+                If r2 > 100 Then r2 = 100
+                If FastSymbol(n$, ",") Then
+                    If IsExp(bstack, n$, r3, , True) Then
+                        If r3 < 0 Then r3 = 0
+                        If r3 > 100 Then r3 = 100
+                        par = True
+                        r = HSL(r, r2, r3)
+                    End If
+                End If
+            End If
+        End If
+    End If
+    If Not par Then ColorHSL = False: MissNumExpr: Exit Function
+End Function
 Function ColorRGB(bstack As basetask, n$, r As Variant) As Boolean
 Dim r2 As Variant, r3 As Variant, ss$, par As Boolean
 ColorRGB = True
-    If IsExp(bstack, n$, r) Then
+    If IsExp(bstack, n$, r, , True) Then
             par = True
             If FastSymbol(n$, ",") Then
-            par = IsExp(bstack, n$, r2)
+            par = IsExp(bstack, n$, r2, , True)
             If par And FastSymbol(n$, ",") Then
-            par = IsExp(bstack, n$, r3)
+            par = IsExp(bstack, n$, r3, , True)
             End If
             r = rgb(Abs(r Mod 256), Abs(r2 Mod 256), Abs(r3 Mod 256))
             Else
@@ -42232,8 +42262,36 @@ End If
 End If
 
 End Function
-Function ProcFont(bstack As basetask, rest$) As Boolean
+Function ProcFont(bstack As basetask, rest$, Lang As Long) As Boolean
 Dim prive As Long, x1 As Long, s$
+If IsLabelSymbolNew(rest$, "÷œ—‘Ÿ”≈", "LOAD", Lang) Then
+Do
+If IsStrExp(bstack, rest$, s$) Then
+    s$ = CFname$(s$)
+    If s$ <> "" Then
+        ProcFont = LoadFont(s$)
+    End If
+Else
+    MissStringExpr
+    ProcFont = False
+    Exit Function
+End If
+Loop Until Not FastSymbol(rest$, ",")
+ElseIf IsLabelSymbolNew(rest$, "ƒ…¡√—¡÷«", "REMOVE", Lang) Then
+Do
+If IsStrExp(bstack, rest$, s$) Then
+    s$ = CFname$(s$)
+    If s$ <> "" Then
+        ProcFont = RemoveFont(s$)
+    End If
+Else
+    MissStringExpr
+    ProcFont = False
+    Exit Function
+End If
+Loop Until Not FastSymbol(rest$, ",")
+Else
+
     prive = GetCode(bstack.Owner)
     If IsStrExp(bstack, rest$, s$) Then
         On Error Resume Next
@@ -42253,6 +42311,7 @@ Dim prive As Long, x1 As Long, s$
         players(prive).FontName = bstack.Owner.Font.name
         SetText bstack.Owner
         GetXYb bstack.Owner, players(prive), players(prive).curpos, players(prive).currow
+End If
  ProcFont = True
 End Function
 Function ProcStack(bstack As basetask, rest$, Lang As Long) As Boolean
