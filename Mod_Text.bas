@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 30
+Global Const Revision = 31
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2620,21 +2620,23 @@ Function IsExp(basestack As basetask, a$, r As Variant, Optional ByVal noand1 As
 Dim par As Long, parin As Long
 If LastErNum = -2 Then LastErNum = 0
 If a$ = vbNullString Or a$ = vbCrLf Then Exit Function
-parin = par
-
 IsExp = IsExpA(basestack, a$, r, par, noand1, Comp)
 
 again:
 If par > 0 Then
 If MaybeIsSymbol(a$, ",") Then
-parin = par
+'parin = par
 IsExp = GetArr(basestack, a$, r, "", 1)
-If LastErNum = -2 Then IsExp = False Else
+If LastErNum = -2 Then IsExp = False
 
 If IsExp Then
-par = par - 1: If par > 0 Then GoTo again
+par = par - 1
+
 If basestack.lastobj Is Nothing Then
 IsExp = IsExpA(basestack, a$, r, par, noand1, Comp, True)
+End If
+If par > 0 Then
+GoTo again
 End If
 End If
 End If
@@ -22008,9 +22010,9 @@ End Function
 Function logical(basestack As basetask, s$, d As Variant, Optional par As Long = 0, Optional flatobject As Boolean = False, Optional ByPass As Boolean = False) As Boolean
 Dim b$, s2$, S3$ ' , OSTAC$
 Dim ah As String
+again11:
 If ByPass Then
 ah = aheadstatusFast(basestack.tmpstr)
- 
 Else
     ah = aheadstatusFast(s$)
 End If
@@ -22030,11 +22032,9 @@ Else
     If Len(s$) > 0 Then
     If AscW(s$) = 8 Then
     par = par - 1
-    If ah = "S" Then Exit Function
-    IsStr1 basestack, s$, b$
-    s2$ = s$
-
-   GoTo conthere
+    ' what ????
+    ByPass = True
+    GoTo again11
    End If
     End If
     logical = True
@@ -22050,14 +22050,14 @@ End If
 End If
 s$ = NLtrim$(s$)
 Exit Function
+Else
+If InStr(ah, "SN") > 0 Then Exit Function
 End If
 On Error Resume Next
 
 If Err.Number > 0 Then Exit Function
-s2$ = s$
-
 If Left$(ah, 1) <> "N" Then
- IsStrExp basestack, s$, b$
+ IsStrExp basestack, s$, b$, False
 conthere:
 logical = False
 If Not mTextCompare Then
@@ -22235,11 +22235,10 @@ ElseIf FastSymbol(s$, "~") Then
 End If
 
 End If
-If LastErNum <> -2 Then s$ = s2$
 
 Else
-
-s$ = s2$
+'If s$ <> s2$ Then Stop
+'s$ = s2$
 cont145:
 If IsNumber(basestack, s$, d, flatobject) Then
 logical = True
@@ -41949,9 +41948,9 @@ Function ProcWriter(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim prive As Long
 prive = GetCode(basestack.Owner)
 If Lang = 1 Then
-PlainBaSket basestack.Owner, players(prive), "George Karras (C), Preveza, Greece 1999-2018"
+PlainBaSket basestack.Owner, players(prive), "George Karras (C), Kallithea Attikis, Greece 1999-2019"
 Else
-PlainBaSket basestack.Owner, players(prive), ListenUnicode(915, 953, 974, 961, 947, 959, 962, 32, 922, 945, 961, 961, 940, 962, 32, 40, 67, 41, 44, 32, 928, 961, 941, 946, 949, 950, 945, 44, 32, 917, 955, 955, 940, 948, 945, 32, 49, 57, 57, 57, 45, 50, 48, 49, 56)
+PlainBaSket basestack.Owner, players(prive), ListenUnicode(915, 953, 974, 961, 947, 959, 962, 32, 922, 945, 961, 961, 940, 962, 32, 40, 67, 41, 44, 32, 922, 945, 955, 955, 953, 952, 941, 945, 32, 913, 964, 964, 953, 954, 942, 962, 44, 32, 917, 955, 955, 940, 948, 945, 32, 49, 57, 57, 57, 45, 50, 48, 49, 57)
 End If
 crNew basestack, players(prive)
 ProcWriter = True

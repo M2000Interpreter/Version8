@@ -1,11 +1,17 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 30 active-X
-1. Font Load/Remove see Help Font
-2. HSL() function.  see Help HSL(
+Version 9.8 Revision 31 active-X
+1. Improving interpreter I
+Removing an internal copy process on evaluator, to gain speed.
 
-New version for Info.gsb (new banker algorithm)
-New sign key for binaries
+2. Improving interpreter II
+Test sample (all expressions return True)
+print ("a","b")#val$(1)="b", ("a","b")#val$(1)>="b"
+print (("a","b")#val$(1)="b"), (("a","b")#val$(1)>="b")
+print (1,"b")#val$(1)="b", (1,"b")#val$(1)>="b"
+print ((1,"b")#val$(1)="b"), ((1,"b")#val$(1)>="b")
+print "b"=("a","b")#val$(1), "b">=("a","b")#val$(1)
+print "b"=(1,"b")#val$(1), "b">=(1,"b")#val$(1)
  
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
