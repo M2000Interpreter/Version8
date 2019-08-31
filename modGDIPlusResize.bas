@@ -733,7 +733,7 @@ Private Sub FillInWmfHeader(WmfHeader As wmfPlaceableFileHeader, Width As Long, 
     WmfHeader.Inch = 1440
     WmfHeader.Key = GDIP_WMF_PLACEABLEKEY
 End Sub
-Public Function ReadSizeImageFromBuffer(ResData() As Byte, Width As Long, Height) As Boolean
+Public Function ReadSizeImageFromBuffer(ResData() As Byte, Width As Long, Height As Long) As Boolean
     
     On Error GoTo PROC_ERR
     Dim Stream As IUnknown

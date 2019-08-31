@@ -1,4 +1,124 @@
-﻿MODULE A {Superclass alfa {
+﻿MODULE GEORGE {Binary {
+      /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQIBAQEBAQIB
+      AQECAgICAgICAgIDAwQDAwMDAwICAwQDAwQEBAQEAgMFBQQEBQQEBAT/2wBDAQEB
+      AQEBAQIBAQIEAwIDBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE
+      BAQEBAQEBAQEBAQEBAT/wAARCABQAFADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEA
+      AAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIh
+      MUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6
+      Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZ
+      mqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx
+      8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA
+      AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAV
+      YnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hp
+      anN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPE
+      xcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD+
+      2GymJXCnLLzjJAOP6/410FtdEZUsM5yFAIzzgnP51zdqrfKT24xnBOOn9K2IA2VY
+      KAMfeAyOuOfyrdSqJaLc3ioydt/vOkiutqBjkcZPzdc9K+fPjN+2D+z7+z3byj4o
+      /ErQ9D1GOMSjw9DIdW8ROGVmU/Y4Q0gBCk7nCjpyK8N/b8/aP8R/s7fBaC6+H8LX
+      nxU+I/iOHwH8O7eO2W+nsriaKWe6vxCQVb7NbwSsu8FBK8O7KkivzW/Z1/4J8weO
+      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
+} As A
+
+Gradient 13,5
+ImgRenderX=scale.x div 2
+For ImgRenderX=ImgRenderX to ImgRenderX/4 step 150
+	TopMargin=(scale.y-(ImgRenderX)*image.y(A)/image.x(A)) div 2
+	LeftMargin=(scale.x-ImgRenderX) div 2
+	move LeftMargin, TopMargin
+	Image A, ImgRenderX
+Next
+cursor 12, height-2
+Writer
+Escape Off
+while mouse=0 and inkey$=""
+	refresh
+End While
+Escape On
+cls 
+}
+MODULE A {Superclass alfa {
       Unique:
             counter=1
       Public:
@@ -4433,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<29 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<32 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4461,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.2"
+	Report " A collection of modules for tests version 5.3"
 	
 	Pen 5{
 		cursor 0, row-1

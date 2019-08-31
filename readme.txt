@@ -1,17 +1,11 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 31 active-X
-1. Improving interpreter I
-Removing an internal copy process on evaluator, to gain speed.
-
-2. Improving interpreter II
-Test sample (all expressions return True)
-print ("a","b")#val$(1)="b", ("a","b")#val$(1)>="b"
-print (("a","b")#val$(1)="b"), (("a","b")#val$(1)>="b")
-print (1,"b")#val$(1)="b", (1,"b")#val$(1)>="b"
-print ((1,"b")#val$(1)="b"), ((1,"b")#val$(1)>="b")
-print "b"=("a","b")#val$(1), "b">=("a","b")#val$(1)
-print "b"=(1,"b")#val$(1), "b">=(1,"b")#val$(1)
+Version 9.8 Revision 32 active-X
+1. Fix image.Y()  for gdi images
+2. Set paper to magenta and pen to yellow as default
+(previous was blue and white)
+you can change this using Settings or Ctrl+U from M2000 console
+3. Info.gsb ver 5.3 - new module george
  
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
