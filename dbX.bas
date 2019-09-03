@@ -515,7 +515,7 @@ End If
          cnt = 1
                      rs.Open "Select * From [" & TBL.name & "] ;", myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
                                          stac1.Flush
-                                        stac1.DataVal CDbl(rs.FIELDS.count)
+                                        stac1.DataVal CDbl(rs.fields.count)
                                         If TBL.indexes.count > 0 Then
                                          For j = 0 To TBL.indexes.count - 1
                                                    With TBL.indexes(j)
@@ -534,8 +534,8 @@ End If
                                             Else
                                             stac1.DataVal CDbl(0)
                                         End If
-                     For i = 0 To rs.FIELDS.count - 1
-                     With rs.FIELDS(i)
+                     For i = 0 To rs.fields.count - 1
+                     With rs.fields(i)
                              stac1.DataStr .name
                              If .Type = 203 And .DEFINEDSIZE >= 536870910# Then
                              
@@ -724,10 +724,10 @@ If ED Then
     Wend
 End If
 If IsStrExp(bstackstr, r$, par$) Then
-    rec.FIELDS(i&) = par$
+    rec.fields(i&) = par$
 ElseIf IsExp(bstackstr, r$, t) Then
 
-    rec.FIELDS(i&) = CStr(t)   '??? convert to a standard format
+    rec.fields(i&) = CStr(t)   '??? convert to a standard format
 End If
 
 i& = i& + 1
@@ -935,34 +935,34 @@ If from >= 0 Then
   rec.Move from - 1
   End If
 End If
-    For i& = rec.FIELDS.count - 1 To 0 Step -1
+    For i& = rec.fields.count - 1 To 0 Step -1
 
-   Select Case rec.FIELDS(i&).Type
+   Select Case rec.fields(i&).Type
 Case 1, 2, 3, 4, 5, 6
 
- If IsNull(rec.FIELDS(i&)) Then
+ If IsNull(rec.fields(i&)) Then
         bstackstr.soros.PushUndefine          '.PushStr "0"
     Else
-        bstackstr.soros.PushVal CDbl(rec.FIELDS(i&))
+        bstackstr.soros.PushVal CDbl(rec.fields(i&))
     
 End If
 Case 7
-If IsNull(rec.FIELDS(i&)) Then
+If IsNull(rec.fields(i&)) Then
     
      bstackstr.soros.PushStr ""
  Else
   
-   bstackstr.soros.PushStr CStr(CDate(rec.FIELDS(i&)))
+   bstackstr.soros.PushStr CStr(CDate(rec.fields(i&)))
   End If
 
 
 Case 130, 8, 203, 202
-If IsNull(rec.FIELDS(i&)) Then
+If IsNull(rec.fields(i&)) Then
     
      bstackstr.soros.PushStr ""
  Else
   
-   bstackstr.soros.PushStr CStr(rec.FIELDS(i&))
+   bstackstr.soros.PushStr CStr(rec.fields(i&))
   End If
 Case 11, 12 ' this is the binary field so we can save unicode there
    Case Else
@@ -1136,7 +1136,7 @@ bstackstr.soros.PushVal CDbl(ii)
 ''''''''''''''''' stack$(BASESTACK) = " " & Trim$(Str$(II)) + stack$(BASESTACK)
 
     For i& = 1 To many
-    bv.additemFast CStr(rec.FIELDS(0))   ' USING gList
+    bv.additemFast CStr(rec.fields(0))   ' USING gList
     
     If i& < many Then rec.MoveNext
     Next
@@ -1210,13 +1210,44 @@ Dim myBase
                 End If
                 PushOne base, myBase
     End If
+        Dim erdesc$, rs As Object
            Err.clear
            If comTimeOut >= 10 Then myBase.CommandTimeout = CLng(comTimeOut)
            If Err.Number > 0 Then Err.clear: myBase.errors.clear
-            myBase.Execute com2execute
-
+           com2execute = Replace(com2execute, Chr(9), " ")
+           com2execute = Replace(com2execute, vbCrLf, "")
+           com2execute = Replace(com2execute, ";", vbCrLf)
+           If InStr(com2execute, vbCrLf) > 0 Then
+            Dim commands() As String, i As Long
+            commands() = Split(com2execute, vbCrLf)
+            For i = LBound(commands()) To UBound(commands())
+            If Len(MyTrim(commands(i))) > 0 Then
+            Set rs = myBase.Execute(commands(i))
+            If Typename(rs) = "Recordset" Then
+            If rs.fields.count > 0 Then
+            
+            End If
+            End If
+            If myBase.errors.count <> 0 Then
+            
+            Exit For
+            End If
+            End If
+            Next i
+           Else
+            Set rs = myBase.Execute(com2execute)
+            If Typename(rs) = "Recordset" Then
+            If rs.fields.count > 0 Then
+            bstackstr.soros.PushObj rs
+            Set rs = Nothing
+            End If
+            End If
+            End If
 If myBase.errors.count <> 0 Then
-MyEr "Can't execute command", "Δεν μπορώ εκτελέσω εντολή"
+For i = 0 To myBase.errors.count - 1
+erdesc$ = erdesc$ + myBase.errors(i)
+Next i
+MyEr "Can't execute command:" + erdesc$, "Δεν μπορώ να εκτελέσω την εντολή:" + erdesc$
  myBase.errors.clear
 End If
 

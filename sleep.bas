@@ -448,7 +448,7 @@ If k1 = 0 Then k1 = uintnew(timeGetTime): RRCOUNTER = 1
                             Kform = False
                             .k1 = 0
                             TaskMaster.rest
-                            UpdateWindow obj.hWND
+                            UpdateWindow obj.hWnd
                             DoEvents
                             TaskMaster.RestEnd
                         Else
@@ -695,14 +695,14 @@ End If
                             lastpopup = Screen.ActiveForm.hDC
                             handlepopup = True
                             End If
-                       ElseIf GetForegroundWindow <> Screen.ActiveForm.hWND Then
+                       ElseIf GetForegroundWindow <> Screen.ActiveForm.hWnd Then
        If handlepopup Then
                         handlepopup = False
                         SetVisibleByHDC lastpopup, False
                         End If
                         End If
 Else
-                        If GetForegroundWindow <> Screen.ActiveForm.hWND Then Exit Do
+                        If GetForegroundWindow <> Screen.ActiveForm.hWnd Then Exit Do
                         End If
       
 

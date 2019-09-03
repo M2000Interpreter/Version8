@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 32
+Global Const Revision = 33
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2057,6 +2057,7 @@ varhash.ReduceHash Vname, var()
  funid.poptop
 
 End Function
+
 
 
 Public Sub Thing(w$, v$)
@@ -13803,7 +13804,19 @@ contrightstrpar:
 contreadprop:
             If IsExp(bstackstr, a$, p) Then
                 pppp.GroupRef.index = p
+                On Error Resume Next
                 r$ = pppp.GroupRef.Value
+                If Err.Number > 0 Then
+                If Typename(pppp.GroupRef.Value) = "Null" Then
+                    r$ = ""
+                    Err.clear
+                Else
+                    InStr = False
+                    MyEr Err.Description, Err.Description
+                    Err.clear
+                    Exit Function
+                End If
+                End If
             ElseIf IsStrExp(bstackstr, a$, r$) Then
                 pppp.GroupRef.index = r$
                 r$ = pppp.GroupRef.Value
@@ -13880,8 +13893,6 @@ If a$ = vbNullString Then IsStr1 = False: Exit Function
 IsStr1 = True
 
 End Function
-
-
 
 Function ISSTRINGA(bb$, r$) As Boolean
 '
@@ -14929,17 +14940,9 @@ again4:
                     ss$ = tracecode
                     tracecode = vbNullString
                     bypasstrace = True
-                    'sp = Len(sbf(lasttracecode).sb)
+
                      If executeblock(Execute, bstack, ss$, once, kolpo, , , True) Then bypasstrace = False: Exit Function
-                     'On Error Resume Next
-                     
-                    ' If sp = Len(sbf(lasttracecode).sb) Then
-                     'If Not Mid$(sbf(lasttracecode).sb, Len(sbf(lasttracecode).sb) - bstack.addlen - Len(b$) + 1, Len(b$)) = b$ Then
-                     'Stop
-                     'End If
-                     'Else
-                     'Stop
-                     'End If
+
                      bypasstrace = False
                      tracecode = vbNullString
                   
@@ -18426,6 +18429,7 @@ GoTo again4
 
 
 End Function
+
 Function GoFunc(mystack As basetask, what$, rest$, vl As Variant, Optional recursive As Long, Optional ByVal choosethis As Long = -1, Optional ByVal strg As Boolean = False, Optional ByVal usesamestack As Boolean = False) As Boolean
 Dim p As Variant, i As Long, F As Long, it As Long, pa$
 Dim x1 As Long, frm$, par As Boolean, ohere$, w$, bb$, loopthis As Boolean, S3 As Long, ec$
@@ -22989,7 +22993,17 @@ GoTo LOOPNEXT
 ElseIf Right$(s$, 1) = "(" Then
     If MyIsObject(var(h&)) Then
         Set myobject = var(h&)
-        If Not CheckIsmArray(myobject) Then GoTo LOOPNEXT
+        If Not CheckIsmArray(myobject) Then
+        If Not myobject Is Nothing Then
+        If TypeOf myobject Is mArray Then
+        If Typename(myobject.GroupRef) = "PropReference" Then
+        s$ = s$ + ")*[PropReference]"
+        GoTo conthere
+        End If
+        End If
+        End If
+        GoTo LOOPNEXT
+        End If
         Set pppp = myobject
             Set myobject = Nothing
        F = pppp.bDnum
@@ -23233,6 +23247,7 @@ Select Case VarType(var(h&))
         End Select
 End If
 End If
+conthere:
 If pn& < virtualtop Then s$ = s$ & ", "
 If tofile < 0 Then
    If tofile = -1 Then
@@ -37898,12 +37913,13 @@ contpointer:
                     MyRead = False
                     Exit Function
                     End If
-                End If
+                
                 If LCase(Typename(myobject)) <> LCase(ss$) Then
                         WrongObject
                         MyRead = False
                         Exit Function
                 End If
+            End If
                 Set var(i) = myobject
             
             End If
@@ -39444,6 +39460,7 @@ If x1 = 1 Or x1 = 3 Then
                     ElseIf IsExp(bstack, rest$, Id) Then
                     If Not ss$ = vbNullString Then ss$ = vbNullString
                     ProcProperty bstack, var(), i, ss$, rest$, Lang, , CLng(Id)
+                    If LastErNum <> 0 Then MyWith = False: Exit Do
                     Else
                     MissStringNumber
                     MyWith = False
@@ -39482,7 +39499,7 @@ ElseIf x1 = 5 Or x1 = 6 Then
                    ElseIf IsExp(bstack, rest$, Id) Then
                     If Not ss$ = vbNullString Then ss$ = vbNullString
                      ProcPropertyArray bstack, pppp, i, ss$, rest$, Lang, MyWith
-                    
+                    If LastErNum <> 0 Then MyWith = False: Exit Do
                     Else
                     MissStringNumber
                     MyWith = False
@@ -39522,6 +39539,7 @@ If i = 1 Or i = 3 Then
                 End If
             End If
         Else
+            MyMethod = False
             MissingObjRef
         End If
         Exit Function
@@ -39552,6 +39570,7 @@ again11:
               End If
      End If
   Else
+   MyMethod = False
       MissingObj
   End If
 

@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<32 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<33 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.3"
+	Report " A collection of modules for tests version 5.4"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -14189,5 +14189,129 @@ MODULE ADDER4BIT {Module  FourBitAdder {
 	Print "A+B",v, k, k_low   ' print 1 1 0 0 0 0 1 0 1
 }
 FourBitAdder
+}
+MODULE BASEG {\\ remove base if exist in current directory
+base "gSQL"
+\\ Make a new table and insert values (M2000 use ADOdb with a special connection string)
+\\ data taken from example's of MOSH HAMEDANI for SQL, see this video
+\\ https://www.youtube.com/watch?v=7S_tz1z_5bA
+
+\\ Create table changed from original to be used here, but the schema is the same.
+\\ Maybe integer definition maybe not the same with original int(11).
+
+\\ We use 3 times execute. One return nothing, but the other two return a record set each
+\\ recordset saved to stack of values (as top value each time)
+\\ so we call subroutine passing just the stack of values, so we read from there.
+
+\\ Inside each subroutine we make some local variables, using a way to link recordset with properties
+\\ property fields of recordset used 3 times, to produce different items. One is the actual object, and the
+\\ other two by using an index value we get field value (the default property), one as numeric and
+\\ the other as string.
+
+\\ So we have to see about NULL. A NULL can exist if table schema allow it. When a field has NULL value
+\\ we get it as numeric type of NULL (we can't use it as a value in expressions, always return NULL),
+\\ but if we read it as string value we get empty string. 
+
+\\ Here we see two rows, one with a NULL phone and one with empty string (which isn't Null)
+\\ To examine if we have NULL we have to check the numeric variant of field.
+
+\\ for checking the NULL we have a string function which return "NULL" or the string value,
+\\ including empty string.
+
+
+execute "gSQL", {
+	CREATE TABLE customers (
+		customer_id AUTOINCREMENT PRIMARY KEY,
+		first_name VARCHAR(50) NOT NULL,
+		last_name VARCHAR(50) NOT NULL,
+		birth_date date DEFAULT NULL,
+		phone VARCHAR(50) DEFAULT NULL,
+		address VARCHAR(50) NOT NULL,
+		city VARCHAR(50) NOT NULL,
+		state char(2) NOT NULL,
+		points integer NOT NULL DEFAULT 0
+	);
+	INSERT INTO `customers` VALUES (1,'Babara','MacCaffrey','1986-03-28','781-932-9754','0 Sage Terrace','Waltham','MA',2273);
+	INSERT INTO `customers` VALUES (2,'Ines','Brushfield','1986-04-13','804-427-9456','14187 Commercial Trail','Hampton','VA',947);
+	INSERT INTO `customers` VALUES (3,'Freddi','Boagey','1985-02-07','719-724-7869','251 Springs Junction','Colorado Springs','CO',2967);
+	INSERT INTO `customers` VALUES (4,'Ambur','Roseburgh','1974-04-14','407-231-8017','30 Arapahoe Terrace','Orlando','FL',457);
+	INSERT INTO `customers` VALUES (5,'Clemmie','Betchley','1973-11-07',NULL,'5 Spohn Circle','Arlington','TX',3675);
+	INSERT INTO `customers` VALUES (6,'Elka','Twiddell','1991-09-04','312-480-8498','7 Manley Drive','Chicago','IL',3073);
+	INSERT INTO `customers` VALUES (7,'Ilene','Dowson','1964-08-30','615-641-4759','50 Lillian Crossing','Nashville','TN',1672);
+	INSERT INTO `customers` VALUES (8,'Thacher','Naseby','1993-07-17','941-527-3977','538 Mosinee Center','Sarasota','FL',205);
+	INSERT INTO `customers` VALUES (9,'Romola','Rumgay','1992-05-23','559-181-3744','3520 Ohio Trail','Visalia','CA',1486);
+	INSERT INTO `customers` VALUES (10,'Levy','Mynett','1969-10-13','','68 Lawn Avenue','Atlanta','GA',796);
+}
+
+\\ id 10 has no Null phone, has no phone (is an empty string)
+\\ Null means "no information yet"
+report "customers created"
+\\ execute a SE`LECT query to get a Recordset
+report "Selected customers where Points<1000 in descending order"
+execute "gSQL",{
+	SELECT 	customer_id,
+			last_name,
+			first_name,
+			phone,
+			points
+	FROM `customers`
+	WHERE 	Points<1000 
+	ORDER BY 	Points DESC,
+			last_name,
+			first_name
+}
+Def CheckNull$(a, a$)=If$(type$(a)="Null"->"NULL", a$)
+
+GetListA() ' value is already in stack
+
+report  "Select customers id where phone is null"
+execute "gSQL",{
+	SELECT 	customer_id,
+			phone
+	FROM `customers`
+	WHERE 	phone IS Null 
+	ORDER BY 	customer_id 
+}
+GetIDwithNullPhone()    ' value is already in stack
+
+
+\\ using list to check the variable names
+list
+\\ there are no variables in module, at this moment.
+\\ All variables was local to subs, and they erased at the exit of subs
+\\ we can use dots in names, like a normal variable.
+\\ so rs.fields is a norma variable name. This variable is a PropReference type.
+\\ This type of variable is an object which link a property to an object
+\\ We can't use these variables as return values, because the use a hard link,
+\\ and not a standard reference to object. So PropReference can't hold alive a linked object.
+\\ So if we return the PropReference from where we make it then became invalid, and we have
+\\ to use it to raise the error.
+
+
+sub GetListA(RS)
+if type$(RS)="Recordset" then
+	with RS, "EOF" as new rs.eof, "fields" as new fields(), "fields" as new fields$(), "fields" as new rs.fields
+	with rs.fields, "count" as new rs.fields.count
+	print  "Test number of fields:", rs.fields.count
+	while not rs.eof
+		print $(6),fields(0),
+		print $(9)," ";fields$(1);" ";fields$(2);@(32); CheckNull$(fields(3), fields$(3));@(42), fields(4)
+		method rs, "movenext"
+	end while
+	print $(0),,
+end if
+end sub
+sub GetIDwithNullPhone(RS)
+if type$(RS)="Recordset" then
+	with RS, "EOF" as new rs.eof, "fields" as new fields(), "fields" as new fields$(), "fields" as new rs.fields
+	with rs.fields, "count" as new rs.fields.count
+	print  "Test number of fields:", rs.fields.count	
+	while not rs.eof
+		print $(4), fields(0), $(7), CheckNull$(fields(1), fields$(1)), $(0)
+		method rs, "movenext"
+	end while
+	print
+end if
+end sub
 }
 INFO

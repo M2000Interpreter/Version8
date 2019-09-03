@@ -1,11 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 32 active-X
-1. Fix image.Y()  for gdi images
-2. Set paper to magenta and pen to yellow as default
-(previous was blue and white)
-you can change this using Settings or Ctrl+U from M2000 console
-3. Info.gsb ver 5.3 - new module george
+Version 9.8 Revision 33 active-X
+1. Execute (for databases) now return recordset in stack of values
+2. List now show com object properties with arguments 
+3. Info.gsb ver 5.4 - new module BaseG
  
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

@@ -750,7 +750,7 @@ Public Function ReadSizeImageFromBuffer(ResData() As Byte, Width As Long, Height
                     GdipGetImageWidth Img, Width
                     GdipGetImageHeight Img, Height
             
-            
+            GdipDisposeImage Img
 
     
             ReadSizeImageFromBuffer = True

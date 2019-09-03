@@ -9591,7 +9591,7 @@ Public Sub BadObjectDecl()
   MyEr "Bad object declaration - use Clear Command for Gui Elements", "Λάθος όρισμα αντικειμένου - χρησιμοποίησε Καθαρό για να καθαρίσεις τυχόν στοιχεία του γραφικού περιβάλλοντος"
 End Sub
 Public Sub NoEnumaretor()
-  MyEr "No enumarator found for this object", "Δεν βρήκα δρομέα συλλογής για αυτό το αντικείμενο"
+  MyEr " - No enumarator found for this object", " - Δεν βρήκα δρομέα συλλογής για αυτό το αντικείμενο"
 End Sub
 Public Sub AssigntoNothing()
   MyEr "Bad object declaration - use Declare command", "Λάθος όρισμα αντικειμένου - χρησιμοποίησε την Όρισε"
@@ -14212,8 +14212,20 @@ If NoUseDec Then
             GoTo contboolean
         End If
     Else
+        On Error Resume Next
         s$ = CStr(p)
+        If Err.Number > 0 Then
+                If Typename(p) = "Null" Then
+                    s$ = "NULL"
+                    Err.clear
+                Else
+                    s$ = Typename(p)
+                    Err.clear
+                End If
+        End If
+        On Error GoTo 0
     End If
+    
 Else
 
 If isboolean Then
