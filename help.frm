@@ -288,10 +288,20 @@ End Sub
 Private Sub ffhelp(a$)
 If a$ = "цемийа" Then a$ = "ока"
 If a$ = "GENERAL" Then a$ = "ALL"
+If Left$(a$, 1) = "#" Then
+If Mid$(a$, 2) < "а" Then
+fHelp basestack1, a$, True
+Else
+fHelp basestack1, a$
+End If
+
+Else
+
 If Left$(a$, 1) < "а" Then
 fHelp basestack1, a$, True
 Else
 fHelp basestack1, a$
+End If
 End If
 End Sub
 

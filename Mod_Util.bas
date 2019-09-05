@@ -21508,3 +21508,195 @@ Function Infinity() As Double
 PutMem1 VarPtr(Infinity) + 7, &H7F
 PutMem1 VarPtr(Infinity) + 6, &HF0
 End Function
+Function ProcAbout(basestack As basetask, rest$, Lang As Long) As Boolean
+
+Dim par As Boolean, s$, ss$, X As Double, Y As Double, i As Long
+Dim kk As New Document
+Dim UAddPixelsTop As Long  ' just not used
+If IsLabelSymbolNewExp(rest$, "ƒ≈…Œ≈", "SHOW", Lang, ss$) Then
+If lastAboutHTitle <> "" Then abt = True: vH_title$ = vbNullString
+If IsStrExp(basestack, rest$, ss$) Then
+    feedback$ = ss$
+feednow$ = FeedbackExec$
+CallGlobal feednow$
+Else
+    vHelp
+ End If
+ProcAbout = True
+Exit Function
+ElseIf FastSymbol(rest$, "!") Then
+'*******
+vH_title$ = vbNullString
+par = True
+par = par And IsStrExp(basestack, rest$, s$)
+
+If par Then
+If s$ = vbNullString Then
+mHelp = False
+abt = False
+lastAboutHTitle = vbNullString
+sHelp "", "", 0, 0
+GoTo conthere
+Else
+par = par And FastSymbol(rest$, ",")
+par = par And IsExp(basestack, rest$, X)
+par = par And FastSymbol(rest$, ",")
+par = par And IsExp(basestack, rest$, Y)
+par = par And FastSymbol(rest$, ",")
+par = par And IsStrExp(basestack, rest$, ss$)
+If par Then
+abt = True
+kk.EmptyDoc
+kk.textDoc = ReplaceSpace(s$)
+s$ = kk.textFormat(vbCrLf)
+kk.EmptyDoc
+kk.textDoc = ReplaceSpace(s$)
+s$ = kk.TextParagraph(1)
+kk.EmptyDoc
+kk.textDoc = ReplaceSpace(ss$)
+' save to
+lastAboutHTitle = s$
+LastAboutText = kk.textFormat(vbCrLf)
+sHelp lastAboutHTitle, LastAboutText, CLng(X), CLng(Y)
+End If
+End If
+End If
+'*******
+ElseIf IsLabelSymbolNew(rest$, " ¡À≈”≈", "CALL", Lang) Then
+mHelp = True
+abt = True
+If IsStrExp(basestack, rest$, ss$) Then
+
+kk.textDoc = ReplaceSpace(ss$)
+FeedbackExec$ = kk.textFormat(vbCrLf)
+End If
+Else
+If IsStrExp(basestack, rest$, s$) Then
+mHelp = True
+If s$ = vbNullString Then
+If Lang = 0 Then
+lastAboutHTitle = "¬ÔﬁËÂÈ· ≈ˆ·ÒÏÔ„ﬁÚ"
+LastAboutText = vbNullString
+Else
+lastAboutHTitle = "Application Help"
+LastAboutText = vbNullString
+End If
+GoTo conthere
+End If
+kk.EmptyDoc
+kk.textDoc = ReplaceSpace(s$)
+s$ = kk.textFormat(vbCrLf)
+kk.EmptyDoc
+kk.textDoc = ReplaceSpace(s$)
+s$ = kk.TextParagraph(1)
+
+        i = 0
+       
+        X = (ScrInfo(Console).Width - 1) * 2 / 5
+        Y = (ScrInfo(Console).Height - 1) / 7
+        vH_title$ = s$
+        If FastSymbol(rest$, ",") Then
+                par = True
+                    If Not IsExp(basestack, rest$, X) Then
+                    X = (ScrInfo(Console).Width - 1) * 2 / 5: par = False
+                    Else
+                    i = 1
+                    End If
+                    If FastSymbol(rest$, ",") Then
+                        par = True
+                        If Not IsExp(basestack, rest$, Y) Then
+                        Y = (ScrInfo(Console).Height - 1) / 7: par = False
+                        Else
+                        i = 2
+                        End If
+                    End If
+        End If
+
+        If Not Form4.Visible Then
+        Helplastfactor = 1
+       helpSizeDialog = 1
+           vH_x = CLng(X * Helplastfactor)
+           vH_y = CLng(Y * Helplastfactor)
+           
+            If Screen.ActiveForm Is Nothing Then
+                        Form4.Show
+            Else
+                            Form4.Show , Screen.ActiveForm
+       
+          End If
+               
+           
+                myform Form4, ScrInfo(Console).Width - CLng(X * Helplastfactor), ScrInfo(Console).Height - CLng(Y * Helplastfactor), CLng(X * Helplastfactor), CLng(Y * Helplastfactor), True, 1  'Helplastfactor
+                  MoveFormToOtherMonitorOnly Form4, True
+                HelpLastWidth = X
+        ElseIf i <> 0 Then
+            '    Form4.Show , Form1
+            If Screen.ActiveForm Is Nothing Then
+                        Form4.Show
+                        
+            ElseIf Form4 Is Screen.ActiveForm Then
+            Form4.Show
+            Else
+                            Form4.Show , Screen.ActiveForm
+       
+            End If
+                myform Form4, Form4.Left, Form4.top, CLng(X * Helplastfactor), CLng(Y * Helplastfactor), True, Helplastfactor
+                MoveFormToOtherMonitorOnly Form4
+                
+        End If
+Form4.Hide
+            If Screen.ActiveForm Is Nothing Then
+                        Form4.Show
+            ElseIf Form4 Is Screen.ActiveForm Then
+            Form4.Show
+            Else
+                            Form4.Show , Screen.ActiveForm
+       
+            End If
+
+        Form4.Line (0, 0)-(Form4.ScaleWidth - dv15, Form4.ScaleHeight - dv15), Form4.backcolor, BF
+        Form4.moveMe
+        If FastSymbol(rest$, ",") Or Not par Then
+        If IsStrExp(basestack, rest$, ss$) Then
+        kk.EmptyDoc
+        kk.textDoc = ReplaceSpace(ss$)
+        Form4.label1.Text = kk.textFormat(vbCrLf)
+        End If
+        End If
+        
+With Form4.label1
+
+.EditDoc = False
+.NoMark = True
+.enabled = True
+.NewTitle s$, 4 + UAddPixelsTop
+.glistN.DragEnabled = False
+.glistN.WordCharLeft = "["
+.glistN.WordCharRight = "]"
+.glistN.WordCharRightButIncluded = vbNullString
+End With
+Else
+conthere:
+'vH_title$ = vbNullString
+If Not (basestack.IamChild Or basestack.IamAnEvent) Then
+abt = False
+End If
+If Form4.Visible Then
+Form4.Visible = False
+If Form1.Visible Then
+    If Form1.TEXT1.Visible Then
+        Form1.TEXT1.SetFocus
+    Else
+        Form1.SetFocus
+    End If
+    End If
+End If
+Helplastfactor = 1
+helpSizeDialog = 1
+
+Unload Form4
+End If
+End If
+Exit Function
+End Function
+

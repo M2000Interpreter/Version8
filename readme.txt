@@ -1,9 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 33 active-X
-1. Execute (for databases) now return recordset in stack of values
-2. List now show com object properties with arguments 
-3. Info.gsb ver 5.4 - new module BaseG
+Version 9.8 Revision 34 active-X
+1. A bug fix in help form.
  
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

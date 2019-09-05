@@ -68,7 +68,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-'m2000 ver 9.3 rev 1
+'m2000 ver 9.3 rev 2
 ' repair undo for continous keystroke
 Option Explicit
 Dim waitforparent As Boolean
@@ -1990,7 +1990,10 @@ If (Button And 3) > 0 And myEnabled Then
         secreset = False
          If Not ListSep(topitem + YYT) Then
          If MarkNext = 0 And (EditFlag Or MultiLineEditBox) Then
-         
+         If MultiLineEditBox And Not EditFlag Then
+         REALCUR list(SELECTEDITEM - 1), cX - scrollme, dummy, mSelstart, True
+         mSelstart = mSelstart + 1
+         End If
       MarkWord
       
       Else

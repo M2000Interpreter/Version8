@@ -156,10 +156,18 @@ p$ = Chr(34)
 c$ = ","
 d$ = doriginal$
 If Right$(d$, 2) = "()" Then d$ = Left$(d$, Len(d$) - 1)
-If AscW(d$) < 128 Then
+If Left$(d$, 1) = "#" Then
+If AscW(Mid$(d$, 2, 1) + " ") < 128 Then
 sql$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
 Else
 sql$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
+End If
+Else
+If AscW(d$ + " ") < 128 Then
+sql$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
+Else
+sql$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
+End If
 End If
 b$ = mylcasefILE(cd & "help2000")
 getrow bstack, p$ & b$ & p$ & c$ & p$ & sql$ & p$ & ",1," & p$ & p$ & c$ & p$ & p$, False, , , True
