@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.4"
+	Report " A collection of modules for tests version 5.5"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -9120,8 +9120,7 @@ MODULE COMPILER {Module CompilerExample {
 	        Sub Load_Ast()
 	                        If i>=lim then Push (,) : exit sub
 	                        do
-	                        line$=Trim$(lines$(i))
-	                        I++
+	                        line$=Trim$(lines$(i))	                        I++
 	                        tok$=piece$(line$," ")(0)
 	                        until line$<>"" or i>=lim
 	                        If tok$="Identifier" then
@@ -14313,5 +14312,948 @@ if type$(RS)="Recordset" then
 	print
 end if
 end sub
+}
+MODULE EN1 {Module Checkit {
+      \\ need revision 15, version 9.4
+      Enum Fruit  {apple, banana, cherry}
+      Enum Fruit2  {apple2=10, banana2=20, cherry2=30}
+      Print apple, banana, cherry
+      Print apple2, banana2, cherry2
+      Print Len(apple)=0
+      Print Len(banana)=1
+      Print Len(cherry)=2
+      Print Len(cherry2)=2, Cherry2=30, Type$(Cherry2)="Fruit2"
+ 
+      k=each(Fruit) 
+      While k {
+            \\ name of variable, value, length from first (0, 1, 2)
+            Print Eval$(k), Eval(k), k^
+      }
+      m=apple
+      Print Eval$(m)="apple"
+      Print Eval(m)=m
+      m++
+      Print Eval$(m)="banana"
+      Try {
+            \\ error, m is an object
+            m=100
+      }
+      Try {
+            \\ error not the same type
+            m=apple2
+      }
+      Try {
+            \\ read only can't change
+            apple2++
+      }
+      m++
+      Print Eval$(m)="cherry", m
+      k=Each(Fruit2 end to start) 
+      While k {
+             Print Eval$(k), Eval(k) , k^   
+             CheckByValue(Eval(k))
+      }
+      m2=apple2
+      Print "-------------------------"
+      CheckByValue(m2)
+      CheckByReference(&m2)
+      Print m2
+ 
+      Sub CheckByValue(z as Fruit2)
+            Print Eval$(z), z
+      End Sub
+ 
+      Sub CheckByReference(&z as Fruit2)
+            z++
+            Print Eval$(z), z
+      End Sub
+}
+Checkit
+}
+MODULE WUMPUS {Module WumpusGame {
+      Print "Game: Hunt The Wumpus"
+      Arrows=5
+      Dim Room(1 to 20)
+      Room(1)=(2,6,5),(3,8,1),(4,10,2),(5,2,3),(1,14,4)
+      Room(6)=(15,1,7),(17,6,8),(7,2,9),(18,8,10),(9,3,11)
+      Room(11)=(19,10,12),(11,4,13),(20,12,14),(5,11,13), (6,16,14)
+      Room(16)=(20,15,17),(16,7,18),(17,9,19),(18,11,20),(19,13,16)
+      Enum Things {EmptyRoom, Bat1, Bat2, Pit1, Pit2, Wumpus}
+      Dim Content(1 to 20)=EmptyRoom
+      i=each(Things,2)  ' from 2 to End
+      While i {
+            r=random(1,20)
+            if Content(r)<>EmptyRoom then restart
+            Content(r)=Eval(i)
+      }
+      WumpusPos=r
+      PlayerPos=-1
+      TranspotPlayer()
+      Done=False
+      \\ Help is statement but here used as variable
+      Help=False
+      While Arrows>0 And Not Done {
+            Sense()
+            Print "W- Walk, T - Throw Arrow, G - Give up or H for Help"
+            a$=Ucase$(Key$)
+            If a$="W" Then {
+                  Print "Choose Tunnel to Walk: 1, 2 or 3"
+                  r=Val("0"+Key$)-1
+                  if r>=0 and r<=2 then {
+                        PlayerPos=Array(room(PlayerPos), r)
+                        Select Case Content(PlayerPos)
+                        Case Wumpus
+                        Eaten()
+                        Case Pit1, Pit2
+                        {
+                              Arrows=0
+                              Print "You fall to a bottomless pit;"
+                        }
+                        Case Bat1, Bat2
+                        {
+                              Print "A giant bat takes you in another room;"
+                              TranspotPlayer()
+                        }
+                        End Select
+                  }
+            } Else.if a$="T" Then {
+                  Arrows--
+                  Print "Choose Tunnel to Throw Arrow: 1, 2  or 3"      
+                  r=Val("0"+Key$)-1
+                  if r>=0 and r<=2 then {
+                        i=room(PlayerPos)
+                        If Content(Array(i, r))=Wumpus then {
+                              Done=True
+                      } Else.if random(1,4)<4 then WakeWumpus()
+                  }            
+            } Else.if a$="G" Then {
+                   Arrows=0
+            } Else.if a$="H" Then Help~
+      }
+      If Done then Print "You kill the Monster Wumpus; You Win.": Exit
+      Print "You loose."
+ 
+      Sub TranspotPlayer()
+            local r=random(1,20)
+            While Content(r)<>EmptyRoom {r=random(1,20)}
+            PlayerPos=r
+      End Sub
+      Sub WakeWumpus()
+            local j=array(room(WumpusPos),random(0,2))
+            If content(j)=EmptyRoom Then {
+                  swap content(j), content(WumpusPos)
+                  WumpusPos=j
+                  If WumpusPos=PlayerPos then Eaten()
+            }
+      End Sub
+      Sub Eaten()
+            Arrows=0
+            Print "You eaten by Wumpus;"
+      End Sub
+      Sub Sense()
+            local k=Room(PlayerPos)
+            local j=each(k), Wumpus_near, bat_near, pit_near
+            Print "Player Room:";PlayerPos,
+            If Help then Print "Wumpus Room:";WumpusPos
+            While j {
+                  If Help Then Print "Tunnel:";j^+1, "Room:";Array(j), "Content:";eval$(content(array(j)))
+                  Select Case content(array(j))
+                  Case Bat1, Bat2
+                  bat_near=True
+                  Case Pit1, Pit2
+                  pit_near=True
+                  Case Wumpus
+                  Wumpus_near=True
+                  End Select
+            }
+            If Wumpus_near Then Print "You smell something terrible nearby."
+            If bat_near Then Print "You hear a rustling."
+            if pit_near Then Print "You feel a cold wind blowing from a nearby cavern."
+      End Sub    
+}
+cls,0
+WumpusGame
+}
+MODULE FORTH {\\ https://rosettacode.org/wiki/Fixed_length_records#Forth_Blocks
+\\ A Forth block is 1024 bytes. Source code is stored as 16 lines of 64 characters each (no newline character or sequence to mark the end of a line).
+
+Form 80,50
+Print "Forth's Blocks"
+\\ Forth Blocks
+Structure Line16 {
+      a`Line as byte*64
+}
+NewBlock=lambda Line16 -> {
+      Buffer a`Block as Line16*16
+      \\ fill spaces
+      Return a`Block, 0:=str$(string$(" ",1024))
+      =a`Block
+}
+\\ Events are value types, but for closures and groups are reference types
+Event Doit {
+      Read something$
+}
+Header=Doit
+DisplayBlock= Lambda NewBlock, Line16, Doit, Header (Blocks`File$,Block`Number, UseLocale=1033)->{
+      Page1=NewBlock()
+      Open Blocks`File$ for input as #f
+            Seek #f, 1024*(Block`Number-1)+1
+            Get #f,Page1
+      Close #f
+      Document NewDoc$
+      \\ need to convert from Ansi
+      Call Event Header, "Block:"+Str$(Block`Number)
+      oldlocale=locale
+      locale UseLocale
+      For i=0 to 15
+            lineAny$=chr$(Eval$(Page1,i, Len(Line16)))
+            Call Event Doit, format$("{0::-2} {1}",i,chr$(Eval$(Page1,i, Len(Line16))))
+      Next i
+      locale oldlocale
+}
+Document ForthCode$={( Large letter F) 
+      : STAR    [CHAR] * EMIT ;
+      : STARS   0 DO  STAR  LOOP ;
+      : MARGIN  CR 30 SPACES ;
+      : BLIP    MARGIN STAR ;
+      : BAR     MARGIN 5 STARS ;
+      : F       BAR BLIP BAR BLIP BLIP CR ;
+      }
+\\ Make Document bigger than 16 lines
+\\ doc.par(ForthCode$)  return paragraphs (here we have no wrap)
+\\ actuall lines per layer can be found from Report (the renderer)
+\\ using Reportlines. layer can be the printer page.
+ForthCode$=string$(ForthCode$,5)
+Print "Make Block"
+Page1=NewBlock()
+Locale 1033
+Blocks`File$="Forth Blocks"
+Block`Number=1
+\\ Apppend three times same blocks
+For Pass=1 to 3
+      If Doc.Len(ForthCode$)>0 then
+            For i=1 to Doc.par(ForthCode$)-1
+            \\ we give order number but Paragraph$ use unique number for paragraphs
+            \\ if we didn't delete or insert lines, then these two are the same
+                  Print Paragraph$(ForthCode$, Paragraph(ForthCode$,i))
+                  \\ convert to Ansi using Locale
+                  \\ offset from 0, so minus 1
+                  \\ offset 1 is at len(Line16)
+                  \\ Page1(0) is the real address, but here doesn't matter
+                  Return Page1, (i-1) mod 16:=Str$(Paragraph$(ForthCode$, Paragraph(ForthCode$,i)))
+                  if i mod 16=0 then Gosub SaveBlock
+            Next i
+            i--
+            if Not i mod 16=0 then  Gosub SaveBlock
+      End if
+Next Pass
+\\ now we read from disk
+Class DocumentKeeper {
+      Document Text$
+      Function AppendLine(aline$) {
+            \\ right trim$
+            .Text$<=Mid$(Trim$("*"+aline$),2)+{
+            }
+      }
+}
+Function Disp(aline$) {
+      Print aline$
+}
+DocumentKeeper=DocumentKeeper()
+Event Doit New Disp()
+Event Header New Disp()
+For i=1 to Block`Number-1
+      Call DisplayBlock(Blocks`File$, i)
+      Print "Press any key"
+      Push key$ : Drop
+Next i
+Event Doit Drop Disp()
+Event Doit New DocumentKeeper.AppendLine()
+Event Header Hold
+For i=1 to Block`Number-1
+      Call DisplayBlock(Blocks`File$, i)
+Next i
+Report DocumentKeeper.Text$
+ 
+End 
+SaveBlock:
+      Print "Save as Number ";Block`Number
+      If Exist(Blocks`File$) then 
+            \\ check if there is space for this block
+            If Not filelen(Blocks`File$) div 1024>=Block`Number-1 Then
+                  Error "Wrong Block Number"
+            End if
+      Else
+            Print "not exist"
+            Open Blocks`File$ for output as #f
+            Close #f
+            Wait 100
+            \\ or Error "Empty File" if we wish only read
+            If Block`Number<>1 then Error "Wrong Block Number"
+      End if
+      Open Blocks`File$ for append as #f
+      Seek #f, Block`Number*1024-1023 ' so we seek to first byte
+      Put #f, Page1
+      Close #f
+      Block`Number++
+      Page1=NewBlock()
+Return
+}
+MODULE FIXLENGTH {Module FixedFile {
+      Read fixed$
+      OldLocale=Locale
+      \\ chr$(string_argument$)
+      \\ use Locale to convert from Ansi to Utf-16LE
+      \\ Read Ansi form files also use Locale
+      Locale 1032
+      Try ok {
+            \\ Make the file first
+            Const Center=2
+            Font "Courier New"
+            Bold 0
+            Italic 0
+            Def long m, z=1, f
+            Def text2read$,test3write$
+            Form 100, 50  ' 100 by 60 characters
+            Document txt$={Line 1...1.........2.........3.........4.........5.........6.........7.........8
+                  Line 2
+                  Line 3
+                  Line 4
+ 
+                  Line 6
+                  Line 7
+                       Indented line 8............................................................
+                  Line 9                                                                 RT MARGIN
+                  }
+            \\ use Help Open in M2000 console for details
+            \\ Method one
+            Report Center,  "Make file"
+            \\ for WIDE Random \\  for Utf-16
+            Open fixed$ for Random Exclusive as #f len=80
+            m=Paragraph(txt$, 0)
+            z=1
+            If forward(txt$, m) then
+                  while m, z<10
+                        text2write$=Paragraph$(txt$,(m))
+                        Print format$("Len:{0}, Data: {1}",Len(text2write$),text2write$)
+                        Put #f, text2write$ , z
+                        \\ record number from 1
+                        \\ if number is total records plus one
+                        \\ we append a record
+                        z++     
+                  End while
+            End If
+            Print "Press any key"
+            Push Key$ : Drop
+            Form 80, 40
+            Report Center,  "Method1"
+            For z=1 to 9
+                  Get #f, text2read$, z
+                  text2read$=StrRev$(text2read$)
+                  Put #f, text2read$, z
+                  Print text2read$
+            Next z
+            Close #f
+            Report Center,  "Method2"
+            \\ Method2
+            \\ Buffer Clear Line80 ... \\ to clear memory
+            \\ here we write all bytes so not needed
+            Buffer Line80 as byte*80
+            m=filelen(fixed$)
+            If m mod 80=0 Then
+                  m=1
+                  \\ now Get/Put read write at byte position
+                  \\ we have to use seek to move to byte position
+                  \\ This way used for Binary files
+                  Open fixed$ for Input as #f1
+                  Open fixed$ for Append as #f2
+                  while not eof(#f1)
+                        seek #f1, m
+                        Rem Print seek(#f)
+                        Get #f1, Line80
+                        Return line80,0:=Str$(StrRev$(Chr$(Eval$(line80,0,80))))
+                        seek #f2, m
+                        Put #f2, Line80
+                        seek #f1, m
+                        Get #f1, Line80
+                        Print Chr$(Eval$(line80,0,80))
+                        m+=80
+                  End While
+                  Close #f1
+                  Close #f2
+            End if
+      }
+      \\ use Close with no parameters for close all files if something happen
+      If error then Close: Print Error$
+      Locale OldLocale    
+}
+FixedFile "fixed.random"
+Print "Press F3 to display info page"
+}
+MODULE EERTREE {\\ https://rosettacode.org/wiki/Eertree
+\\ https://en.wikipedia.org/wiki/Trie
+\\ https://en.wikipedia.org/wiki/Suffix_tree
+\\ Construct an eertree for the string "eertree", then output all sub-palindromes by traversing the tree.
+Class Node {
+      inventory myedges
+      length, suffix=0
+      Function edges(s$) {
+            =-1 : if exist(.myedges, s$) then =eval(.myedges)
+      }
+      Module edges_append (a$, where) {
+            Append .myedges, a$:=where
+      }
+Class:
+      Module Node(.length) {
+            Read ? .suffix, .myedges
+      }     
+}
+function eertree(s$) {
+      Const evenRoot=0, oddRoot=1
+      Inventory Tree= oddRoot:=Node(-1,1),evenRoot:=Node(0,1)
+      k=0
+      suffix=oddRoot
+      for i=0 to len(s$)-1 {
+            c$=mid$(s$,i+1,1)
+            n=suffix
+            Do {
+                 k=tree(n).length
+                 b=i-k-1
+                  if b>=0 then if mid$(s$,b+1,1)=c$ Then exit
+                  n =tree(n).suffix  
+            } Always
+            e=tree(n).edges(c$)
+            if e>=0 then suffix=e :continue
+            suffix=len(Tree)
+ 
+            Append Tree, len(Tree):=Node(k+2)
+            Tree(n).edges_append c$, suffix
+            If tree(suffix).length=1 then tree(suffix).suffix=0 : continue
+            Do {
+                  n=tree(n).suffix
+                  b=i-tree(n).length-1
+                  if b>0 Then If  mid$(s$, b+1,1)=c$ then exit
+            } Always
+            e=tree(n).edges(c$)
+            if e>=0 then tree(suffix).suffix=e
+ 
+      } 
+      =tree
+}
+children=lambda (s, tree,  n, root$="")->{
+            L=Len(tree(n).myEdges)
+            if L=0 then =s : exit
+            L--
+            For i=0 to L {
+                  c=tree(n).myEdges
+                  c$=Eval$(c, i)  ' read keys at position i
+                  nxt=c(i!)   '  read value using position 
+                  p$ = if$(n=1 -> c$, c$+root$+c$)
+                  append s, (p$,)
+                  \\ better use lambda() and not children()
+                  \\ for recursion when we copy this lambda to other identifier.
+                  s = lambda(s, tree, nxt, p$)
+            }
+         = s
+      }
+aString=Lambda ->{
+          Push Quote$(Letter$)
+}
+aLine=Lambda ->{
+      Shift 2  ' swap two top stack items
+      if stackitem$()="" then  { Drop}  Else Push letter$+", "+Letter$
+}
+Palindromes$=Lambda$ children, aString, aLine (Tree)-> {
+            ="("+children(children((,), Tree, 0), Tree, 1)#Map(aString)#Fold$(aline,"")+")"
+ }
+ 
+Print Palindromes$(eertree("eertree"))
+}
+MODULE COMMON {thread.plan sequential   ' can run as concurrent too
+linespace twipsY*2
+' Mode as read only value return the height of layer form in pt. Using Mode we set to the same Mode but we cut extra space (use linespace also)
+Mode 12
+double  
+backcolor=point
+oldpen=pen
+Refresh 500
+Print Part $(6,Width+1),~(15, 7,pen),"Greatest common divisor"
+Print under
+gcd=lambda (u as long, v as long) -> {
+           =if(v=0&->abs(u), lambda(v, u mod v))
+}
+gcd_Iterative= lambda (m as long, n as long) -> {
+   while m  {
+       let old_m = m
+       m = n mod m
+       n = old_m
+   }
+   =abs(n)
+}
+Module CheckGCD (f){
+      Print Over  ~(#FFCCFF);"Calc gcd for 49865, 69811 = "; f(49865, 69811)  '=9973
+      Print Under
+      Def ExpType$(x)=Type$(x)
+      Print Over "Return type:"; ExpType$(f(49865, 69811)) '="Long"
+      Print Under
+}
+Print Part "Using a lambda function working with ";~(#AACCFF);"recursion"
+Print Under
+CheckGCD gcd
+Print Part  "Using a lambda function working ";~(#AACCFF);"iterative"
+Print Under
+CheckGCD gcd_Iterative
+normal
+Print
+Print
+Press()
+Keyboard "info"+chr$(13)
+End  ' we can omit this
+Sub title(a$)
+Pen #ffeeff {
+	cursor 0
+	Italic 1
+	a$=replace$(chr$(9),"      ", a$)
+	Report a$
+	Italic 0
+	cursor 6, row-1
+}
+End Sub
+Sub Press()
+	wait 200
+	local col=15,  col2=backcolor, threadid
+	Input End  ' empty buffer too
+	Print @(0,Height);
+	Thread {
+		Pen col {
+		Print Over $(3), "Press space bar or mouse key" 
+		}
+		swap col, col2
+	} as threadid interval 250	
+	Main.Task 10 {
+		if keypress(1) or keypress(32) then exit
+	rem		if mouse>0 or inkey$<>"" then exit
+	}
+	Threads Erase
+End Sub
+}
+MODULE CLOCK {ΤΜΗΜΑ Α {\\ Αναλογικό ρολόι-ξυπνητήρι
+ομαλά ναί
+Ανανέωση 5000
+Οθόνη 5,0
+Πενα 14
+Περιθώριο {Πένα 14}
+Επιφάνεια 220, 5
+\\ ανοίγει με ctrl+f1
+Περί ! "Μ2000 Ρολόι", 10000, 6000,{Ρολόι 12 ωρών, και ξυπνητήρι 12 ωρών
+      Πλήκτρα:
+            Μεσαίο πλήκτρο του ποντικιού βάζει/βγάζει το ξυπνητήρι/ σταματάει το κουδούνισμα
+            Αριστερό/Δεξί πλήκτρο αλλάζει το ξυπνητήρι ανά λεπτό
+            Μαζί με το μεσαίο αλλαζει το ξυπνητήρι ανά 10 λεπτά
+            Τα βελάκια αριστερά - δεξιά αλλάζει επίσης το ξυπνητήρι
+            Μαζί με το άνω βελάκι αλλάζει το ξυπνητήρι ανά 10 λεπτά
+            Το κάτω βελάκι βάζει/βγάζει το ξυπνητήρι/ σταματάει το κουδούνισμα
+            Το Enter αλλάζει τους δείκτες σε εμφάνιση (ανά ολόκληρες ώρες ή αναλογικά)
+            Το διάστημα κλείνει το πρόγραμμα
+      }
+κχ=χ.σημεία-4000
+κυ=4000
+απ1=3000
+απ2=600
+απ3=απ1-απ2
+κυκλ=πι*2
+κυκλ60=κυκλ/60
+Ξυπνητήρι=0
+ΞυπνητήριΟκ=Ψευδής
+ΠαίξεΉχο=Ψευδής
+ΟλόκληρεςΏρες=Ψευδές
+Αναβοσβήνει=Ψευδής
+ΑρχικόςΧρόνος=20*10 \\ 20 δευτερόπλεπτα
+ΧρόνοςΜπιπ=ΑρχικόςΧρόνος
+Ωρα=0
+Ωρα12=0
+λεπτό=υπωρα(0,0,1,0)
+Θέση κχ, κυ
+\\ η χρώμα { } ; φτιάχνει περιοχή μόνο για εμφάνιση
+Χρώμα { Κύκλος Γέμισμα 2, απ2+απ1 } ;
+Θέση κχ-απ2-απ1, κυ-απ2-απ1
+Βάψε 2*(απ2+απ1),2*(απ2+απ1), 7,1,1
+Θέση κχ, κυ-απ1*3/4
+Τίτλος "Μ2000 Ρολόι"
+Επιγραφή "Μ2000 Ρολόι","Arial Black",18,0,2
+Θέση κχ, κυ
+\\ με χρώμα 5 αντί για #2277ff γίνεται διάφανο
+\\ έχουμε δηλώσει το 5 (ματζέντα) στην εντολή Επιφάνεια
+Πένα #2277ff {Κύκλος Γέμισμα #2277ff, απ3/2}
+π=2
+ι=0
+Για ν=0 εως 59 
+      Αν ν υπολ 5 = 0 τότε {π=4} αλλιώς π=1
+      Πάχος π {
+            Βήμα γωνια ι, απ1
+            Χάραξε γωνία ι, απ2
+            Βήμα γωνια ι, -απ2-απ1
+      }
+            ι+=κυκλ60
+Επόμενο ν
+Κράτησε
+Μετακίνηση=Ψευδές
+Ανανέωση 1000
+Μετά 200 {Άναψε : Τίτλος "Μ2000 Ρολόϊ"}
+Κάθε 100  {
+Αναβοσβήνει~   \\ αντιστροφή λογικής  (Αναβοσβήνει = Δεν Αναβοσβήνει)
+Άφησε
+Ωρα=Τώρα
+Ωρα12=(τιμη(γραφη$(Ωρα,"h")) υπολ 12) *60+τιμη(γραφη$(Ωρα,"n"))
+Θέση κχ, κυ+απ1/2
+      Αν Ωρα12<60 τότε {
+            Επιγραφή Γραφη$(υπωρα(0,12,Ωρα12,τιμη(γραφη$(Ωρα,"s"))), "hh:nn:ss"), "Verdana", 18,0,2
+      } Αλλιώς {
+            Επιγραφή Γραφη$(υπωρα(0,0,Ωρα12,τιμη(γραφη$(Ωρα,"s"))), "hh:nn:ss"), "Verdana", 18,0,2
+      }
+Πένα -ΞυπνητήριΟκ*8+4 {      
+      Βήμα , +απ1/8
+      Επιγραφή "+"+Γραφη$(υπωρα(0,0,(ξυπνητήρι-Ωρα12+720) υπολ 720,0), "hh:nn "), "Verdana", 18,0,2
+      Βήμα , +απ1/8
+
+      Αν ξυπνητήρι<60 τότε {
+            Επιγραφή Γραφη$(υπωρα(0,12,ξυπνητήρι,0), "hh:nn"), "Verdana", 18,0,2
+      } Αλλιώς {
+            Επιγραφή Γραφη$(υπωρα(0,0,ξυπνητήρι,0), "hh:nn"), "Verdana", 18,0,2
+      }
+}
+Θέση κχ, κυ
+γωνία_ξυπν=-ξυπνητήρι*πι/360+πι/2
+Αν  Αναβοσβήνει ή όχι ΞυπνητήριΟκ τότε {
+      Πάχος 2 {
+            Βήμα Γωνία γωνία_ξυπν, απ3
+            Χάραξε Γωνία γωνία_ξυπν, απ2, 13
+                  Βήμα Γωνία γωνία_ξυπν, -απ2
+            Βήμα Γωνία γωνία_ξυπν, -απ3
+      }
+}
+Αν ΟλόκληρεςΏρες Τότε {
+       γωνια_ώρα=-(τιμη(γραφη$(Ωρα,"h")) υπολ 12)*πι/6+πι/2
+} Αλλιώς  γωνια_ώρα=-(τιμη(γραφη$(Ωρα,"h")) υπολ 12+τιμη(γραφη$(Ωρα,"n"))/60)*πι/6+πι/2
+Πάχος 2 {
+      Χάραξε Γωνία γωνία_ώρα+πι/20, απ3/2
+      Χάραξε Γωνία γωνία_ώρα-πι/20, απ3/2
+      Χάραξε Γωνία γωνία_ώρα+πι/20, -απ3/2
+      Χάραξε Γωνία γωνία_ώρα-πι/20, -απ3/2
+}
+Αν ΟλόκληρεςΏρες Τότε {
+      γωνία_λεπτά=-τιμη(γραφη$(Ωρα,"n"))*πι/30+πι/2
+} Αλλιώς {
+      γωνία_λεπτά=-(τιμη(γραφη$(Ωρα,"n"))+τιμη(γραφη$(Ωρα,"s"))/60)*πι/30+πι/2
+}
+Πάχος 2 {
+      Χάραξε Γωνία γωνία_λεπτά+πι/20, απ1/2
+      Χάραξε Γωνία γωνία_λεπτά-πι/20, απ1/2
+      Χάραξε Γωνία γωνία_λεπτά+πι/20, -απ1/2
+      Χάραξε Γωνία γωνία_λεπτά-πι/20, -απ1/2
+}
+γωνία_δευτ=-τιμη(γραφη$(Ωρα,"s"))*πι/30+πι/2
+Πάχος 2 {
+      Χάραξε Γωνία γωνία_δευτ, απ3, 15
+      Βήμα Γωνία γωνία_δευτ, -απ3
+}
+
+Αν Πατημένο(1) ή Πατημένο(0x25) ή μετακίνηση τότε {
+
+Αν Πατημένο(1) και ((Απολ(δείκτης.χ-κχ)<1000 και απολ(δείκτης.υ-κυ)<1000) ή Μετακίνηση)  τότε {
+	κίνηση.π κίνηση.πχ+δείκτης.χ-κχ, κίνηση.πυ+δείκτης.υ-κυ
+	Δείκτη.Μορφή 5
+	Μετακίνηση=Αληθές
+} Αλλιώς {
+	Μετακίνηση=ψευδές
+	Δείκτη.Μορφή 1
+	Αν Πατημένο(4) ή Πατημένο(0x26) τότε {ξυπνητήρι-=10: ΞυπνητήριΟκ=Αληθής} αλλιώς ξυπνητήρι-- 
+      ξυπνητήρι=(ξυπνητήρι+720) υπολ 720
+}
+} Αλλιως.Αν Πατημένο(2) ή Πατημένο(0x27) τότε {
+	Μετακίνηση=ψευδές
+	Δείκτη.Μορφή 1
+
+Αν Πατημένο(4)  ή Πατημένο(0x26) τότε {ξυπνητήρι+=10: ΞυπνητήριΟκ=Αληθής} αλλιώς ξυπνητήρι++ 
+      ξυπνητήρι=(ξυπνητήρι+720) υπολ 720
+} Αλλιώς Μετακίνηση=Ψευδές: Δείκτη.Μορφή 1
+Αν Πατημένο(32) τότε Έξοδος
+Ανανέωση 1000
+Αν ΞυπνητήριΟκ και ΧρόνοςΜπιπ>0 Τότε {
+      Αν (τιμη(γραφη$(Ωρα,"h")) υπολ 12 )*60+τιμη(γραφη$(Ωρα,"n"))=ξυπνητήρι τότε {
+            ΠαίξεΉχο=Αληθής
+      }
+}
+Αν ΞυπνητήριΟκ και όχι (Πατημένο(2) ή Πατημένο(1)) Τότε {
+      Αν Πατημένο(4) ή Πατημένο(0x28) Τότε ΠαίξεΉχο=Ψευδής: ΞυπνητήριΟκ=Ψευδής : ΧρόνοςΜπιπ=ΑρχικόςΧρόνος
+} Αλλιώς.Αν Πατημένο(4) ή Πατημένο(0x28) Τότε {
+            ΞυπνητήριΟκ=Αληθής
+            ΧρόνοςΜπιπ=ΑρχικόςΧρόνος
+}
+Αν ΠαίξεΉχο Τότε {
+      Αν ΧρόνοςΜπιπ υπολ 3 =0 τότε Μπιπ
+      ΧρόνοςΜπιπ-- 
+      Αν ΧρόνοςΜπιπ=0 Τότε ΠαίξεΉχο=Ψευδής: ΞυπνητήριΟκ=Ψευδής
+}
+
+Αν Πατημένο(13) τότε ΟλόκληρεςΏρες~  \\ αντιστροφή αληθές<>ψευδές
+}
+Οθόνη \\ επαναφορά από το περιορισμό περιοχής της Χρώμα
+Επιφάνεια 255
+
+}
+Φόρμα
+Α
+KEYBOARD "INFO"+CHR$(13)
+}
+MODULE BOOK {Class Book {
+      \\ these are public but can get value one time
+      Final title$, des$, price, pback
+      \\ we use a class part, which means a part that exist only at contruction time
+Class:
+      Module Book (a$, b$, c as decimal, d as boolean) {
+\\ we use fresh variables to catch a missin value
+            .title$<=a$
+            .des$<=b$
+            .price<=c
+            .pback<=d
+}
+}
+m=Book("a","b", 10, true)
+Rem z=m.price
+Rem Print type$(z)="Decimal"
+try ok {
+      m.price++
+      Print "ok"
+}
+Rem Print Error$
+Rem Print type$(m.price)="Constant"
+Class BookDB {
+Private:
+      countme=0
+      dim p()
+Public:
+      module final AddBook {
+            newdim =.countme+1
+            dim .p(newdim)
+            read .p(.countme)
+            .countme++
+      }
+      module final ProcessPaperbackBooks (&ProcessBookDelegate) {
+            if .countme<1 then break
+            for i=0 to .countme-1 {  
+                  if .p(i).pback then call  ProcessBookDelegate.processBook(.p(i)) 
+            }
+
+      }
+}
+group PrintTitle {
+      function final processBook(AnyBook) { Report format$("    {0}", AnyBook.title$)} 
+}
+group PriceTotaller {
+      items, total
+      function final processBook(AnyBook) {.items++ :  .total+=AnyBook.price }
+      \\  look the <= operator, if we use = then we define local variables. Items and total are like global but for group only
+      module final zero { .total<=0 : .items<=0   }
+      function final AveragePrice { if .items>0 then =.total/.items }
+}
+bookDB=bookDB()
+report "First Book DB"
+
+      bookDB.AddBook Book("The C Programming Language",  "Brian W. Kernighan and Dennis M. Ritchie", 19.95, true)
+      bookDB.AddBook Book("The Unicode Standard 2.0",  "The Unicode Consortium", 39.95, true)
+      bookDB.AddBook Book("The MS-DOS Encyclopedia", "Ray Duncan", 129.95, false)
+      bookDB.AddBook Book("Dogbert's Clues for the Clueless", "Scott Adams", 12.00, true)
+      bookDB.ProcessPaperbackBooks &PriceTotaller
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      bookDB.ProcessPaperbackBooks &PrintTitle
+
+report "Second Book DB"    \\report prints text  proportionally with justifiation
+PriceTotaller.zero
+SecondbookDB=bookDB()
+
+      SecondbookDB.AddBook Book("Any Big Big and Big Tilte",  "Any Author", 3.45, true)
+      SecondbookDB.ProcessPaperbackBooks &PriceTotaller
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      SecondbookDB.ProcessPaperbackBooks &PrintTitle
+}
+MODULE BOOK1 {booktype$={
+      local countme=0
+      dim t$(), a$(), p(), pb()
+      function AddBook {
+
+                   for this {
+                  newdim =.countme+1
+                  dim .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
+                  read .t$(.countme), .a$(.countme), .p(.countme), .pb(.countme)
+                  .countme++
+            }
+      }
+      module ProcessPaperbackBooks {
+            read &ProcessBookDelegate 
+                        if .countme<1 then exit
+                        for i=0 to .countme-1 {  
+                              if .pb(i) then call  ProcessBookDelegate.processBook(&this, i) 
+                        }
+      }
+}
+group PrintTitle {
+      function processBook { read &AnyBook, i : Report format$("    {0}", AnyBook.t$(i) )} 
+}
+group PriceTotaller {
+      local items, total
+      function processBook { read &AnyBook, i : for this {.items++ : for Anybook {.total+=..p(i)  } }}
+      \\  look the <= operator, if we use = then we define local variables. Items and total are like global but for group only
+      module zero { .total<=0 : .items<=0 }  
+      function  AveragePrice { if .items>0 then =.total/.items }
+}
+group bookDB type booktype$      
+report "First Book DB"
+for bookDB {
+      call .AddBook("The C Programming Language",  "Brian W. Kernighan and Dennis M. Ritchie", 19.95, true)
+      call .AddBook("The Unicode Standard 2.0",  "The Unicode Consortium", 39.95, true)
+      call .AddBook("The MS-DOS Encyclopedia", "Ray Duncan", 129.95, false)
+      call .AddBook("Dogbert's Clues for the Clueless", "Scott Adams", 12.00, true)
+      call .ProcessPaperbackBooks &PriceTotaller
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      call .ProcessPaperbackBooks &PrintTitle
+}
+report "Second Book DB"    \\report prints text  proportionally with justification
+PriceTotaller.zero
+group SecondbookDB type booktype$
+for SecondbookDB {
+      call .AddBook("Any Big Big and Big Tilte",  "Any Author", 3.45, true)
+      call .ProcessPaperbackBooks &PriceTotaller
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      call .ProcessPaperbackBooks &PrintTitle
+}
+}
+MODULE BOOK2 {Class BookDB {
+      countme=0
+      dim t$(), a$(), p(), pb()
+      module AddBook {
+            newdim =.countme+1
+            dim .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
+            read .t$(.countme), .a$(.countme), .p(.countme), .pb(.countme)
+            .countme++
+      }
+      module ProcessPaperbackBooks (&ProcessBookDelegate) {
+            if .countme<1 then break
+            for i=0 to .countme-1 {  
+                  if .pb(i) then call  ProcessBookDelegate.processBook(&this, i) 
+            }
+
+      }
+}
+group PrintTitle {
+      function processBook (&AnyBook, i) { Report format$("    {0}", AnyBook.t$(i) )} 
+}
+group PriceTotaller {
+      items, total
+      function processBook (&AnyBook, i) {for this {.items++ : for Anybook {.total+=..p(i)  } }}
+      \\  look the <= operator, if we use = then we define local variables. Items and total are like global but for group only
+      module zero { .total<=0 : .items<=0   }
+      function  AveragePrice { if .items>0 then =.total/.items }
+}
+bookDB=bookDB()
+report "First Book DB"
+
+      bookDB.AddBook "The C Programming Language",  "Brian W. Kernighan and Dennis M. Ritchie", 19.95, true
+      bookDB.AddBook "The Unicode Standard 2.0",  "The Unicode Consortium", 39.95, true
+      bookDB.AddBook "The MS-DOS Encyclopedia", "Ray Duncan", 129.95, false
+      bookDB.AddBook "Dogbert's Clues for the Clueless", "Scott Adams", 12.00, true
+      bookDB.ProcessPaperbackBooks &PriceTotaller
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      bookDB.ProcessPaperbackBooks &PrintTitle
+
+report "Second Book DB"    \\report prints text  proportionally with justifiation
+PriceTotaller.zero
+SecondbookDB=bookDB()
+
+      SecondbookDB.AddBook "Any Big Big and Big Tilte",  "Any Author", 3.45, true
+      SecondbookDB.ProcessPaperbackBooks &PriceTotaller
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      SecondbookDB.ProcessPaperbackBooks &PrintTitle
+}
+MODULE BOOK3 {Class Book {
+      \\ read only properties -- we change value using private variables any time.
+      property title$ {value}
+      property des$ {value}
+      property price {value} =0@	\\ a decimal value
+      property pback {value} =1=1	\\ this is a boolean value, True is -1 double
+      \\ we use a class part, which means a part that exist only at contruction time
+Class:
+      Module Book (a$, b$, c, d) {
+      \\ we use fresh variables to catch a missin value
+            .[title]$<=a$
+            .[des]$<=b$
+            .[price]<=c
+            .[pback]<=d
+      }
+}
+Class BookDB {
+Private:
+      p=(,)
+Public:
+      module final AddBook {
+            \\ group return a float pointer
+            \\ use of (group) inside pointer to return a real pointer, else we get error, we can't get a weak pointer from stack.
+            \\ a weak pointer is a pointer to an identifier, which has to exist when we have to use it.
+            \\ (1,)  is an one item array
+            \\ append to an array a series of arrays. here we add an array with one item
+            append .p, (pointer((group)),)
+      }
+      module final ProcessPaperbackBooks (&ProcessBookDelegate) {
+            m=each(.p)
+            \\ m is iterator for .p
+            while m
+                  aBook=array(m)
+                  \\ aBook get a pointer to a group
+                  if aBook=>pback then
+                        call  ProcessBookDelegate.processBook(aBook)
+                  end if
+            end while
+      }
+}
+group PrintTitle {
+      function final processBook (AnyBook as pointer) { Report format$("    {0}", AnyBook=>title$)} 
+}
+group PriceTotaller {
+      items, total
+      function final processBook (AnyBook as pointer) {.items++ :  .total+=AnyBook=>price }
+      \\  look the <= operator, if we use = then we define local variables. Items and total are like global but for group only
+      module final zero { .total<=0 : .items<=0   }
+      function final AveragePrice { if .items>0 then =.total/.items }
+}
+\\ bookDB is a pointer to a float group (a float group is a closed type group)
+\\  -> is same as pointer()
+\\ a class always return a float group
+\\ from float groups we get real pointers
+bookDB->bookDB()
+report "First Book DB"
+
+      For bookDB {
+            \\ a non float group prepared with values from the float group
+            \\ any new definition deleted after the end of a for object block
+            .AddBook Book("The C Programming Language",  "Brian W. Kernighan and Dennis M. Ritchie", 19.95, true)
+            .AddBook Book("The Unicode Standard 2.0",  "The Unicode Consortium", 39.95, true)
+            .AddBook Book("The MS-DOS Encyclopedia", "Ray Duncan", 129.95, false)
+            .AddBook Book("Dogbert's Clues for the Clueless", "Scott Adams", 12.00, true)
+            .ProcessPaperbackBooks &PriceTotaller
+            report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+            .ProcessPaperbackBooks &PrintTitle
+      }
+
+report "Second Book DB"    \\report prints text  proportionally with justifiation
+PriceTotaller.zero
+\\ the SecondbookDB  is a non float group.
+SecondbookDB=bookDB()
+
+      SecondbookDB.AddBook Book("Any Big Big and Big Tilte",  "Any Author", 3.45, true)
+      SecondbookDB.ProcessPaperbackBooks &PriceTotaller
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+PointerA->SecondbookDB
+      PointerA=>ProcessPaperbackBooks &PrintTitle
+\\ PointerA is not a real pointer. Is a weak pointer to a non float group.
 }
 INFO

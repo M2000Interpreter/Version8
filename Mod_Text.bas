@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 34
+Global Const Revision = 35
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2621,7 +2621,7 @@ Function IsExp(basestack As basetask, a$, r As Variant, Optional ByVal noand1 As
 Dim par As Long, parin As Long
 If LastErNum = -2 Then LastErNum = 0
 If a$ = vbNullString Or a$ = vbCrLf Then Exit Function
-IsExp = IsExpA(basestack, a$, r, par, noand1, Comp)
+IsExp = IsExpA(basestack, a$, r, par, noand1, (Comp))
 
 again:
 If par > 0 Then
@@ -2754,7 +2754,7 @@ Do
         End If
 Loop
 End Function
-Function IsExpA(bstack As basetask, aa$, rr As Variant, parenthesis As Long, Optional ByVal noand As Boolean = True, Optional Comp As Boolean = True, Optional ByPass As Boolean = False) As Boolean
+Function IsExpA(bstack As basetask, aa$, rr As Variant, parenthesis As Long, Optional ByVal noand As Boolean = True, Optional ByVal Comp As Boolean = True, Optional ByPass As Boolean = False) As Boolean
 Dim r As Variant, ac As Variant, po As Variant, MUL As Long, r1 As Variant, ut$, back As Variant
 Dim logic As Boolean, l As Boolean, park As Object, objlist As mStiva, rightlevel As Long
 On Error Resume Next
@@ -10520,6 +10520,7 @@ groupstrvalue:
                         bstackstr.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
                     End If
                     Set bstackstr.lastobj = nbstack.lastobj
+                    Set nbstack = Nothing
                     SwapStrings r$, s$
                     s$ = vbNullString
                     GoTo final
@@ -10566,6 +10567,7 @@ final:
                 Set bstackstr.lastobj = Nothing
             IsStr1 = Matrix(bstackstr, a$, PP, p)
             SwapString2Variant r$, p
+
             Exit Function
             End If
             End If
@@ -22246,8 +22248,6 @@ Else
 cont145:
 If IsNumber(basestack, s$, d, flatobject) Then
 logical = True
-Else
-
 End If
 End If
 End Function
@@ -25241,7 +25241,7 @@ If x1 <> 0 Then
     ss$ = block(rest$)
     If FastSymbol(rest$, "}") Then
              If GetSub(bstack.GroupName + F$ + "()", i) Then
-                         If rinstr(sbf(i).sbgroup, bstack.GroupName) + Len(bstack.GroupName) - 1 = Len(sbf(i).sbgroup) Then
+                       ' If rinstr(sbf(i).sbgroup, bstack.GroupName) + Len(bstack.GroupName) - 1 = Len(sbf(i).sbgroup) Then
                          bstack.IndexSub = i
                          
                          If Not sbf(i).locked Then
@@ -25260,20 +25260,12 @@ If x1 <> 0 Then
                          
                              GoTo continuehere22
                           Else
-                          End If
+                       '   End If
              End If
  
-   'If here$ <> "" Then
-    '         If Lang = 1 Then
-     '           rest$ = "GLOBAL " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " { " + ss$ + "} " + rest$
-      '      Else
-       '           rest$ = "ΓΕΝΙΚΗ " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " { " + ss$ + "} " + rest$
-        '    End If
-      ' GoTo BYPASS3
-   'Else
+
         MyEr "group struct error1", "προβλημα στη δομή1"
         ExecuteGroupStruct = 0: Exit Function
-   'End If
    End If
   End If
   End If
@@ -44970,7 +44962,7 @@ If x1 = 1 Then
         If FastSymbol(rest$, "{") Then
             If par Then
             '' GROUP
-                s$ = basestack.GroupName
+              
                 
                 prepareGroup basestack, what$, y1, flag, HasStrName, NewStat
 
