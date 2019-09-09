@@ -4039,7 +4039,7 @@ style_status=True
 \\ Just for beginnig we make a function to alter the first letter of a name, to be a title
 Def TitleStr$(a$)=ucase$(left$(a$,1))+mid$(a$,2)
 Filename$=Dir$+"Untitled.gsb"
-\\ Caption$ is the Title property of form. This is the forumla to display proper the filename$ (excluding path)
+\\ Caption$ is the Title property of form. This is the formula to display proper the filename$ (excluding path)
 Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
 \\ The form is hidden, but we can move it
 Method NotePad,"move", 2000, 4000, 8000, 4000
@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<33 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<36 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.5"
+	Report " A collection of modules for tests version 5.6"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -5719,6 +5719,11 @@ Set Fast   ' return to normal
 }
 MODULE UPDATE {dir appdir$
 save info, info
+if isnum then {
+	drop
+	open "info.bck" for output as #N
+	close #N
+}
 dir user
 save info, info
 }
@@ -15255,5 +15260,476 @@ SecondbookDB=bookDB()
 PointerA->SecondbookDB
       PointerA=>ProcessPaperbackBooks &PrintTitle
 \\ PointerA is not a real pointer. Is a weak pointer to a non float group.
+}
+MODULE CS {Clear \\ Clear all variables/objects
+Flush \\ Empty the stack
+first$={using System;
+            using System.Drawing;
+            using System.Windows.Forms;
+             
+            class CSharpPendulum
+            {
+                Form _form;
+                Timer _timer;
+             
+                double _angle = Math.PI / 2, 
+                       _angleAccel, 
+                       _angleVelocity = 0, 
+                       _dt = 0.1;
+             
+                int _length = 50;
+             
+                [STAThread]
+                static void Main()
+                {
+                    var p = new CSharpPendulum();
+                }
+             
+                public CSharpPendulum()
+                {
+                    _form = new Form() { Text = "Pendulum -  Γιώργος", Width = 400, Height = 200 };
+                    _timer = new Timer() { Interval = 30 };
+             
+                    _timer.Tick += delegate(object sender, EventArgs e)
+                    {
+                        int anchorX = (_form.Width / 2) - 12,
+                            anchorY = _form.Height / 4,
+                            ballX = anchorX + (int)(Math.Sin(_angle) * _length),
+                            ballY = anchorY + (int)(Math.Cos(_angle) * _length);
+             
+                        _angleAccel = -9.81 / _length * Math.Sin(_angle);
+                        _angleVelocity += _angleAccel * _dt;
+                        _angle += _angleVelocity * _dt;
+             
+                        Bitmap dblBuffer = new Bitmap(_form.Width, _form.Height);
+                        Graphics g = Graphics.FromImage(dblBuffer);
+                        Graphics f = Graphics.FromHwnd(_form.Handle);
+             
+                        g.DrawLine(Pens.Black, new Point(anchorX, anchorY), new Point(ballX, ballY));
+                        g.FillEllipse(Brushes.Black, anchorX - 3, anchorY - 4, 7, 7);
+                        g.FillEllipse(Brushes.DarkGoldenrod, ballX - 7, ballY - 7, 14, 14);
+             
+                        f.Clear(Color.White);
+                        f.DrawImage(dblBuffer, new Point(0, 0));    
+                    };
+             
+                    _timer.Start();
+                    Application.Run(_form);
+                }     
+            }
+            }
+title$="C# Editor"
+typ$="cs"
+W$=""
+path$=""
+Dir User
+lookpath$=dir$
+Declare NotePad Form
+Declare Pad EditBox Form NotePad
+Declare Inform1 Button Form NotePad
+With Inform1, "Caption" as Informe$
+Method Inform1, "Colors", 15, #FFA000
+With Inform1, "Locked", True
+Declare File1 Combobox Form NotePad
+Declare Edit1 Combobox Form NotePad
+Declare Run1 Combobox Form NotePad
+Declare Help1 Combobox Form NotePad
+With File1,"label","File", "listtext" As list$, "list" As list$() '
+With Edit1,"label","Edit",  "Mark", Color(255,100,0)
+With Run1,"label","Run",  "Mark", Color(255,100,0)
+With Help1,"label","Help",  "Mark", Color(255,100,0)
+
+With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
+With NotePad, "UseIcon", True, "UseReverse", True
+With Pad, "Text" As Pad.text$, "ShowAlways", True,"NoColor", True,"SelLength" as SelLength
+With Pad, "SearchWords", True, "nowrap", True
+Def TitleStr$(a$)=Ucase$(Left$(a$,1))+Mid$(a$,2)
+Filename$=Dir$+"pendulum.cs"
+
+Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+Title caption$
+Method NotePad,"MakeStandardInfo", 1
+Method NotePad,"move", 2000, 4000, 8000, 4000
+Layer NotePad {Cls #FFA000}
+With File1,"MenuStyle", True, "MenuWidth", 3000 
+With Edit1,"MenuStyle", True, "MenuWidth", 3000,"menuEnabled" as Enabled() 
+With Run1,"MenuStyle", True, "MenuWidth", 3000,"menuEnabled" as Comp.Enabled()
+With Help1,"MenuStyle", True, "MenuWidth", 3000 
+With File1, "MenuEnabled" As mEnable()
+For This {
+      mi$="MenuItem"  \\ is a temporary variable only for For This Block
+      With File1, "MenuGroup","This"
+      Method File1, mi$,"Open",True
+      Method File1, mi$,"Save",True
+      Method File1, mi$,""    \\  only  a line here
+      Method File1,"MenuRadio","txt files",True,False
+      Method File1,"MenuRadio","cs files",True,True
+      
+      Method File1, mi$,""
+      Method File1, mi$,"Close",True
+      Method File1, mi$,""
+      Method File1, mi$,"Quit",True
+           
+      
+      With Edit1, "MenuGroup","This"
+      Method Edit1, mi$,"Cut",False
+      Method Edit1, mi$,"Copy",False
+      Method Edit1, mi$,"Paste",True
+      Method Edit1, mi$,""
+      Method Edit1, mi$,"Less Indent",True
+      Method Edit1, mi$,"More Indent",True  
+      
+      With Run1, "MenuGroup","This"
+      Method Run1, mi$,"Compile test",true
+      Method Run1, mi$,"Run test > out",False
+      Method Run1, mi$,"Run test",False
+      Method Run1, mi$,"Show Out.Txt",False
+      Method Run1, mi$,""
+      Method Run1, mi$,"Compile Final",true
+      Method Run1, mi$,"Open Cmd.exe",true
+    
+      With Help1, "MenuGroup","This"
+      Method Help1, mi$, "About", True
+}
+
+if exist(Filename$) then
+Document BackUp$
+Load.Doc BackUp$, filename$
+else
+Document BackUp$=first$
+end if
+Pad.text$=BackUp$
+Function NotePad.Unload {
+      Read New &Ok
+      After 30 {Call local File1.DblClick(8) }
+      Ok=True
+
+}
+Function Notepad.Resize {
+      Layer NotePad { Cls Color(255, 160, 0) ,0}
+      With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
+      tHeight1=theight*2
+      Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
+      Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
+      Method Run1,"move", twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
+      Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*160, tHeight
+      Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*240, tHeight
+      If NP.height>1000 Then {
+            Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
+            With Pad, "NoWrap" As NoWrap
+            If Not NoWrap Then Method Pad,"Resize"
+      }
+}
+Function Edit1.OpenMenu {
+            Local X
+            X=SelLength>0
+            Enabled(0)=X
+            Enabled(1)=X
+}
+
+Function Edit1.DblClick {
+      Read Local Edit1index
+      Select Case Edit1index
+      Case 0
+            {
+            Method Pad,"mn1sub"
+            Method Pad,"Resize"
+            }
+      Case 1
+            Method Pad,"mn2sub"
+      Case 2
+            {
+                 Method Pad, "mn3sub"
+                 Method Pad,"GetFocus"
+                 Method Pad,"Resize"
+           }
+        Case 4
+           {
+                  Method Pad,"PressKey", 9, 1
+            }
+        Case 5
+           {
+                  Method Pad,"PressKey", 9, 0
+            }
+      End Select
+
+}
+Function Pad.Inform {
+      Read New L, P
+      Informe$=format$("{0}-{1}", L,P)
+      Method Pad,"Show"
+}
+Function Pad.PopUp {
+      Read Local X, Y
+      Method Pad,"PopUpMenu", "",X , Y
+}
+function cs_choose{
+	 With Pad, "ColorCollection1", lcase$("abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", ""
+	      With Pad, "WordCharLeft"," .,+=/*^()[];", "WordCharRight"," .,+=/*^()[];","OtherSymbols","@"
+	      With Pad,"StartSymbols", "+-&|*=></,.", "StringSep2","'"
+	      Method Pad, "ReColor"
+	      Method Pad, "Show"
+}
+Function Run1Status() {
+      if file.type$(filename$)="cs" then
+            Comp.Enabled(0)=True
+            Comp.Enabled(1)=False
+            Comp.Enabled(2)=False
+            Comp.Enabled(5)=True        
+      else
+            Comp.Enabled(0)=False
+            Comp.Enabled(1)=False
+            Comp.Enabled(2)=False
+            Comp.Enabled(5)=False            
+      end if
+}
+Function File1.MenuChecked {
+Read New RadioIndex \\ 3 or 4
+If RadioIndex =3 Then {
+      After 30 { Static a$="."+File.type$(Filename$), b$=File.name$(Filename$)
+      Filename$=File.path$(Filename$)+Left$(b$,Len(b$)-Len(a$))+".txt"
+      Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+      typ$="txt"
+      Call local Run1Status()
+      With Pad, "ColorCollection1", "","NoColor", True,  "UseCase", False
+      Method Pad, "Show"
+      }
+} Else.If RadioIndex =4 Then {
+     After 30 { local a$="."+File.type$(Filename$), b$=File.name$(Filename$)
+      Filename$=File.path$(Filename$)+Left$(b$,Len(b$)-Len(a$))+".cs"
+      Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+      typ$="cs"
+      Call local cs_choose()
+      Call local Run1Status()
+      }      
+}
+
+}
+Function File1.DblClick {
+\\ we use functions As subs here
+\\ each function and each module have a name (define a namespace)
+\\ but here real module name is the File1.DblClick() host module
+\\ this is done because is a Gui Event Service Function
+\\ and is Call With Local tag (Call Local)
+      Read New File1index
+      Local cont, cont2, f$, NL$={
+      }
+      File1index++
+      \\ Because we want some jumps..we use  On Goto
+      \\ on Goto need here a block
+      {
+      On File1index Goto Open1, Save1, ExitNow, ExitNow, ExitNow, ExitNow, Save2, ExitNow,  Unload
+Exitnow:
+      Exit
+Open1:
+      If Pad.text$<>BackUp$ Then {
+            If Ask("Save Changes first?",title$, "Yes","No")=1 Then Goto Save1
+      }
+     Layer NotePad {
+           Open.file filename$,,"Load Text ("+typ$+") File",typ$
+     }
+     
+     Method Pad,"GetFocus"
+     Read f$
+     If f$<>"" Then {
+           Filename$=f$
+           If Exist(F$) Then {
+           Clear BackUp$
+           Call Local Run1Status()
+           Load.Doc BackUp$, f$
+           
+           Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+           lookpath$=file.path$(Filename$)
+           Title caption$
+           \\ silent means here without refresh
+           With Pad, "SelStartSilent", 0, "SellengthSilent",0 
+           Pad.text$=BackUp$
+           } Else Pad.text$="": Clear BackUp$
+           Method Pad, "ReColor"
+      }
+      Exit
+Save1:
+      Layer NotePad {
+            Save.As Filename$,,"Save Text ("+typ$+") File",typ$
+      }
+      If Not cont2 Then Method Pad,"GetFocus"
+      Read f$   ' from save.as we get a value
+      If f$="" Then Exit 
+      If Lcase$(File.type$(f$))<>typ$ Then f$=f$+"."+typ$
+      If Exist(f$) Then  If Ask(NL$+"Overwrite"+NL$+f$,title$, "Yes","No")<>1 Then Exit
+      Try ok {
+        Clear BackUp$
+        BackUp$=Pad.text$
+        Save.Doc BackUp$, f$
+        filename$=f$
+        lookpath$=file.path$(Filename$)
+        Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+      }
+     If ok Else Beep
+     If Not cont Then Exit
+Save2:
+      cont=True
+      If Pad.text$<>BackUp$ Then {
+            If Ask("Save Changes?",title$, "Yes","No")=1 Then Goto Save1
+      }
+      Clear BackUp$
+      Pad.text$=""
+      If Cont2 Then {
+            Method NotePad, "CloseNow"
+      } Else {
+            FileName$=Dir$+"Untitled."+typ$
+            Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+            Method Pad, "Resize"
+      }
+      Exit
+Unload:
+      Cont2=True : Goto Save2
+      }
+}
+function gecsc_folder {
+             dir path$(0x24)+"Microsoft.NET\Framework\"
+             dir ? 
+             path$=dir$
+             dir user
+}
+
+thread {
+	if exist(lookpath$+"test.exe") then Comp.Enabled(1)=true: Comp.Enabled(2)=true
+} as lookEXE interval 5000
+thread lookEXE hold
+Function Run1.DblClick {
+      Read New Run1index
+      select case Run1index
+      case 0
+      {            
+            Comp.Enabled(0)=False
+            Comp.Enabled(1)=False
+            Comp.Enabled(2)=False
+            Comp.Enabled(3)=False
+            Informe$=""
+            Call local gecsc_folder()
+            if  path$="" then exit
+            if not exist(path$+"csc.exe") then beep : Comp.Enabled(0)=true : exit 
+            try {
+                   if exist(dir$+"test.bat") then dos "del "+quote$(dir$+"test.bat");
+                  if exist(dir$+"test.exe") then dos "del "+quote$(dir$+"test.exe");
+            }
+            Comp.Enabled(1)=False
+            local aa$
+            Document aa$=Pad.text$
+            dir user
+            Save.doc aa$, "test.cs", 3
+            
+            if instr(aa$,"System.Windows.Forms")>9 then w$="win" else w$=""
+            clear aa$
+            aa$={setlocal
+                        set PATH=}+Path$+{;
+                        set LIB=%WINDIR%\Microsoft.NET\Framework\;
+                        csc.exe  /target:}+w$+{exe /out:test.exe test.cs
+                        endlocal
+                        }
+            Save.doc aa$, "test.bat", 3
+            wait 100
+            dir user
+            dos "cd "+dir$+" && test.bat  > out.txt";
+            wait 200                 
+            if exist(dir$+"test.bat") then
+                  Informe$="Compiled"
+                  Comp.Enabled(3)=True 
+                  Method Pad,"Show"
+                  Thread lookEXE interval 100
+                  Thread lookEXE Restart
+                  Comp.Enabled(0)=True
+            end if
+            Method Pad,"GetFocus"
+      }
+      case 1
+            {
+                  thread lookEXE Hold
+                  After 40 {
+                  if w$="" then
+                         dos "cd "+dir$+" && test.exe > out.txt";
+                        Comp.Enabled(3)=True 
+                   else
+                         win dir$+"test.exe"
+                   end if
+                  }
+            }
+      case 2
+            {
+                  thread lookEXE Hold
+                  After 40 {
+                  if w$="" then
+                         dos "cd "+dir$+" && test.exe"
+                        Comp.Enabled(3)=False
+                   else
+                         win dir$+"test.exe"
+                   end if
+                  }
+            }
+      case 3
+        {
+            try {win "out.txt"}
+      }
+      case 5
+      {
+            local aa$
+            Document aa$
+            try {
+                  Call local gecsc_folder()
+                  if  path$="" then exit
+                  if not exist(Filename$) then 
+                        Call local File1.DblClick(1)
+                  else
+                        Load.doc aa$, Filename$
+                        if aa$<>Pad.text$ then Call local File1.DblClick(1)
+                        if instr(aa$,"System.Windows.Forms")>9 then w$="win" else w$=""
+                        clear aa$
+                  end if
+                  aa$={setlocal
+      			set PATH=}+Path$+{;
+      			set LIB=%WINDIR%\Microsoft.NET\Framework\;
+      			csc.exe  /target:}+w$+{exe /out:}+quote$(File.Name.only$(Filename$)+".exe")+" "+quote$(File.Name$(Filename$))+{
+      			endlocal
+                  }
+                  Save.doc aa$, "final.bat", 3
+                  After 40 {
+                        dos "cd "+dir$+" && final.bat";
+                  }
+      
+            }      }   
+      case 6
+      dos "cd "+quote$(dir$)+" && cls "   
+      end select
+}
+Function Help1.DblClick {
+      Read New Help1index
+      Local A, info$
+      Info$={
+            This is an example
+            of an editor for c#
+            written for M2000 Environment
+            use F1 to change wrap
+            }
+      A=Ask(info$,title$,"","")
+      Method Pad, "GetFocus"
+
+}
+Function Notepad.InfoClick {
+	Read New X
+	If X=0 Then Call Local Help1.DblClick(0)  ' 0 for first menu item
+}
+Call Local Notepad.Resize()
+\\ open As moda
+Title title$, 0
+after 200 {
+	Call local cs_choose()
+}
+After 100 {Title title$}
+Method NotePad,"Show" , 1
+Declare Pad Nothing
+Declare NotePad Nothing 
+Print "Done"
+keyboard "INFO"+chr$(13)
 }
 INFO

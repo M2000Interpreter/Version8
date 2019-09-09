@@ -59,6 +59,7 @@ Public busy As Boolean
 Private mSortstyle As VbCompareMethod
 Public ColorEvent As Boolean, ForEditBox As Boolean
 Public Switchon As Boolean
+Public NoIgnoreCase As Boolean
 Function IsLast(ByVal ParaNum As Long) As Boolean
 ' for MarkParagraphID
 IsLast = (DocParaNext(ParaNum) = 0)
@@ -2552,8 +2553,8 @@ unique = CountWords2(words$, uLCID)
 UniqueWords = unique
 End Function
 Private Function CountWords2(a$, uLCID As Long) As Long
-Dim l As Long
-Const NORM_IGNORECASE = &H1001
+Dim l As Long, NORM_IGNORECASE As Long
+If Not NoIgnoreCase Then NORM_IGNORECASE = &H1001 Else NORM_IGNORECASE = &H1000
 Dim top As Long
 l = Len(a$)
 If l = 1 Then
@@ -2912,8 +2913,8 @@ GetMem2 VarPtr(Buffer(location - bufOffset)), b
 SeekBuf = location + 2
 End Sub
 Function InstrTextCompareAnyLocale(position As Long, from$, this$, Optional uLCID As Long = 1033) As Long
-
-Const NORM_IGNORECASE = &H1
+Dim NORM_IGNORECASE As Long
+If Not NoIgnoreCase Then NORM_IGNORECASE = &H1
 Dim p1 As Long, p2 As Long, l1 As Long, l2 As Long, cu As Long
 l1 = (Len(from$) - Len(this$)) * 2 - (position - 1) * 2
 If l1 < 0 Then Exit Function
@@ -2928,8 +2929,8 @@ End If
 Next cu
 End Function
 Function InstrRevTextCompareAnyLocale(from$, this$, Optional position As Long = -1, Optional uLCID As Long = 1033) As Long
-
-Const NORM_IGNORECASE = &H1
+Dim NORM_IGNORECASE As Long
+If Not NoIgnoreCase Then NORM_IGNORECASE = &H1
 Dim p1 As Long, p2 As Long, l1 As Long, l2 As Long, cu As Long
 If Len(from$) < position Then position = -1
 If position > 0 Then

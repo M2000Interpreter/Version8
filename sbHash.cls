@@ -10,7 +10,7 @@ Attribute VB_Name = "sbHash"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
+Attribute VB_Exposed = True
 Option Explicit
  Private Type item
  Key As String

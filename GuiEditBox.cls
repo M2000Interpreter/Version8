@@ -24,6 +24,7 @@ Private TabControl As Long
 Public NoCenterLineEdit As Boolean
 Public SeekNextLine As Boolean
 Public ShadowMarks As Boolean
+Public StartSymbols As String
 Public OtherSymbols As String
 Public LineComment1 As String
 Public LineComment2 As String
@@ -43,6 +44,7 @@ Public Form1supEnabled As Boolean
 Public Form1mscatEnabled As Boolean
 Public Form1rthisEnabled As Boolean
 Private mColorCollection1 As String
+Private mUseCase As Boolean
 Public ColorCollection2 As String
 Public ColorCollection3 As String
 Public ColorCollection4 As String
@@ -169,6 +171,7 @@ Private Declare Function SelectClipRgn Lib "gdi32" (ByVal hDC As Long, ByVal hRg
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
 Private tmpshow As Boolean
+Private WordOnly As Boolean
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
@@ -359,6 +362,7 @@ End Property
 Sub NewTitle(RHS As String, addpixelstoo As Long, Optional factor As Single = 1)
 Title = RHS
 Set mDoc1 = New Document
+mDoc.NoIgnoreCase = Not mUseCase
 If Title = vbNullString Then
 Else
 NoHeadwrap = False
@@ -391,6 +395,7 @@ myfilename = RHS
 onelineheight = 0
 Dim thisdoc As New Document, header As New Document
 Set mDoc = thisdoc
+mDoc.NoIgnoreCase = Not mUseCase
 mDoc.ColorEvent = True
 Set mDoc1 = header
 para1 = 0
@@ -458,6 +463,7 @@ tParam.cbSize = LenB(tParam)
 tParam.iTabLength = 4
 
 Set mDoc = New Document
+mDoc.NoIgnoreCase = Not mUseCase
 mDoc.ColorEvent = True
 Set mDoc1 = New Document
 ResetSelColors
@@ -468,6 +474,7 @@ BlockStartPos = BlockEndPos
 undopara = -1
 Redopara = -1
 mIndex = -1
+mUseCase = True
 End Sub
 Private Sub Class_Terminate()
 Quit = True
@@ -2474,6 +2481,12 @@ If kind > 0 Then
   addone pos2, lastcol
     pos2 = k - Len(a$) + 1
   End If
+  If WordOnly Then
+    If FastSymbol(a$, "]") Then
+  addone pos2, lastcol
+    pos2 = k - Len(a$) + 1
+  End If
+  End If
   End If
 
 GoTo again
@@ -2605,6 +2618,7 @@ a$ = NLtrim$(a$)
             a$ = Mid$(a$, 2)
             End If
        Case 64, 91 To 94, 123 To 126
+       
         Exit Do
 
         Case 48 To 57
@@ -2647,7 +2661,7 @@ a$ = NLtrim$(a$)
             Exit Do
             End If
         Case 40 ' "("
-            If r$ <> "" Then
+            If r$ <> "" And Not WordOnly Then
                                        Select Case rr&
                                        Case 1, 3, 4
                                        rr& = 5
@@ -2678,7 +2692,11 @@ a$ = NLtrim$(a$)
         End If
 
     Loop
+    If mUseCase Then
        r$ = firstdot$ + myUcase(r$, gr)
+       Else
+       r$ = firstdot$ + r$
+       End If
     IsLabelDot = rr&
    'a$ = LTrim$(a$)
 
@@ -3026,7 +3044,7 @@ checkexp:
             Exit Do
             End If
         Case 40 ' "("
-            If r$ <> "" And Not (Len(r$) = 1 And ExtraYes) Then
+            If r$ <> "" And Not ((Len(r$) = 1 And ExtraYes) Or WordOnly) Then
             ' m2000 specific
                 'If Mid$(a$, 2, 2) = ")@" Then
                 ' r$ = r$ & "()."
@@ -4327,7 +4345,9 @@ kind = IsLabelDot("", a$, drop$)
 
 'If kind = 0 Then drop$ = "$(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 'If kind = 0 Then drop$ = "~(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
-If kind = 0 Then drop$ = vbNullString
+If kind = 0 Then
+drop$ = vbNullString
+End If
 If kind > 0 Then
     If IsmineHere(drop$) Then
                 lastcol = 11
@@ -4408,7 +4428,7 @@ marvel2:
   drop$ = mDoc.NextTextParagraph(oldpara, thispara)
   If thispara <> 0 Then
   ' for java
-  If MaybeIsSymbol(drop$, ";,+-*/&|!=)" + Chr(34)) Then
+  If MaybeIsSymbol(drop$, ";,+-*/&|!=)]" + Chr(34)) Then
   mDoc.Paracolordata(oldpara) = col()
     
     a$ = drop$
@@ -4468,6 +4488,15 @@ End If
   addone pos2, lastcol ' 'lastcol
     pos2 = k - Len(a$) + 1
   End If
+  If WordOnly Then
+    If FastSymbol(a$, "]") Then
+  addone pos2, lastcol
+    pos2 = k - Len(a$) + 1
+  End If
+  End If
+  
+  
+  
   End If
 If FastSymbol(a$, ".") Then
   addone pos2, lastcol
@@ -4512,6 +4541,14 @@ feedback = 0
  If drop$ = "(" Then
 If feedback = 100 Then
     lastcol = 14
+End If
+Else
+If WordOnly Then
+If drop$ = "[" Then
+If feedback = 100 Then
+    lastcol = 14
+End If
+End If
 End If
 End If
  If feedback = 1 Then
@@ -4605,6 +4642,12 @@ addone k - Len(a$), 11
 pos2 = k - Len(a$) + 1
 GoTo again2
 Else
+If WordOnly Then
+    If FastSymbol(a$, "]") Then
+  addone pos2, lastcol
+    pos2 = k - Len(a$) + 1
+  End If
+  End If
 addone pos2, lastcol
 mDoc.Paracolordata(thispara) = col()
 Exit Sub
@@ -4652,6 +4695,15 @@ End If
         GoTo again
 
 ElseIf pos2 = 0 Then
+If Myleft$(a$, 1) <> "" Then
+If InStr(StartSymbols + Chr$(0), Myleft$(a$, 1)) > 0 Then
+pos1 = 1
+ drop$ = aheadstatus(a$, False, pos1)
+ pos2 = k - Len(a$) + 1
+If drop$ <> "" Then GoTo marvel
+
+End If
+End If
 If AutoNumber Then
 If IsNumberLabel(a$, drop$) Then
         addone k - Len(a$) - Len(drop$) + 1, 15
@@ -4851,6 +4903,7 @@ Set mDoc = New Document
 mDoc.ColorEvent = True
 mDoc.final = mMultiLineComment2
 mDoc.textDoc = RHS
+mDoc.NoIgnoreCase = Not mUseCase
 glistN.ListindexPrivateUse = 0
 para1 = 0
 PosPara1 = 0
@@ -6029,8 +6082,11 @@ Do While pos <= Len(a$)
             End If
         End If
     End If
+        If InStr(StartSymbols + Chr$(0), w$) > 0 Then
+                  b$ = "N"
+         
 
-    If w$ = StringSep Then
+         ElseIf w$ = StringSep Then
         If part$ <> "" Then
         b$ = b$ & part$
         End If
@@ -6056,7 +6112,9 @@ Do While pos <= Len(a$)
    
         pos = pos + 1
         Loop
-    ElseIf w$ = "(" Then
+   
+    ElseIf w$ = "(" Or w$ = "[" Then
+        
         If part$ <> "" Then
             ' after
             ElseIf Right$(b$, 1) = "a" Then
@@ -6066,9 +6124,8 @@ Do While pos <= Len(a$)
             part$ = "N"
               
         End If
-      pos = pos + 1
-        If Not BlockParam2(a$, pos) Then Exit Do
-        
+      
+        If Not BlockParam4(a$, pos, Asc(w$)) Then pos = Len(a$) + 1: Exit Do
        If Mid$(a$, pos + 1, 1) <> "." Then b$ = b$ & part$
         part$ = vbNullString
         
@@ -6141,22 +6198,6 @@ Do While pos <= Len(a$)
             End If
             part$ = "o"
         Case " ", ChrW(160)
-'If word$ <> "" Then
- ' Select Case myUcase(word$, True)
-  'Case "THEN", "ELSE", "тоте"
-  'pos = pos - 4
-  'Exit Do
-  'Case "ELSE.IF"
-  'pos = pos - 7
-  'Exit Do
-  'Case "аккиыс"
-  'pos = pos - 6
-  'Exit Do
-  'Case "аккиыс.ам"
-  'pos = pos - 9
-  'Exit Do
-  'End Select
-  'End If
         word$ = vbNullString
             If part$ <> "" Then
             b$ = b$ & part$
@@ -6190,6 +6231,12 @@ Do While pos <= Len(a$)
             'part$ = "N"
             End If
         Case "=", ">", "<", "~"
+         If b$ & part$ = "" And InStr(StartSymbols + Chr$(0), w$) > 0 Then
+         pos = pos + 1
+         b$ = "N"
+         
+         Exit Do
+         End If
                 If b$ & part$ <> "" Then
                 w$ = Replace(b$ & part$, "a", "")
             part$ = vbNullString
@@ -6225,10 +6272,11 @@ Do While pos <= Len(a$)
                 Exit Do
                 End If
         
-        Case ")", "}", Is < " ", ":", ";", LineComment1, LineComment2
+        Case ")", "}", Is < " ", ":", ";", LineComment1, LineComment2, "]"
         Exit Do
         Case Else
-        If part$ = "N" Then
+    
+         If part$ = "N" Then
         word$ = word$ + w$
         ElseIf part$ = "S" Then
        
@@ -6698,7 +6746,11 @@ If EditTextWord Or anystr Then
     If Not mDoc.FindWord(s$, True, w, l) Then GoTo sdnOut
     End If
 Else
+    If WordOnly Then
+    If Not mDoc.FindWord(s$, True, w, l) Then GoTo sdnOut
+    Else
     If Not mDoc.FindIdentifier(s$, True, w, l) Then GoTo sdnOut
+    End If
 End If
 SelLengthSilent = 0
 mDoc.MarkParagraphID = w
@@ -6724,7 +6776,11 @@ If EditTextWord Or anystr Then
        If Not mDoc.FindWord(s$, False, w, l) Then GoTo sdupOut
     End If
 Else
-    If Not mDoc.FindIdentifier(s$, False, w, l) Then GoTo sdupOut
+    If WordOnly Then
+        If Not mDoc.FindWord(s$, False, w, l) Then GoTo sdupOut
+    Else
+        If Not mDoc.FindIdentifier(s$, False, w, l) Then GoTo sdupOut
+    End If
 End If
 SelLengthSilent = 0
 mDoc.MarkParagraphID = w
@@ -6833,11 +6889,13 @@ TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then mDoc.lcid = TempLcid
 If Len(neo$) >= Len(s$) Then
     Set mDoc10 = New Document
+    
     mDoc10 = neo$
+    mDoc10.NoIgnoreCase = Not mUseCase
     w1 = 0
     i1 = 0
     
-    If EditTextWord Then
+    If EditTextWord Or WordOnly Then
         If mDoc10.FindWord(s$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
     Else
         If mDoc10.FindIdentifier(s$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
@@ -6848,7 +6906,7 @@ End If
 i1 = el
 l = i1 + addthat
 w1 = w
-If EditTextWord Then
+If EditTextWord Or WordOnly Then
 glistN.dropkey = True
 Do
 If mDoc.FindWord(s$, True, w, l) Then
@@ -7008,16 +7066,32 @@ End Select
 mDoc.ColorEvent = Not NoColor
 End Sub
 Private Function IsmineHere(a$) As Boolean
+If mUseCase Then
 IsmineHere = InStr(mColorCollection1, "|" + UCase(a$) + "|") > 0
+Else
+IsmineHere = InStr(mColorCollection1, "|" + a$ + "|") > 0
+End If
 End Function
 Private Function IsmineHere1(a$) As Boolean
+If mUseCase Then
 IsmineHere1 = InStr(ColorCollection2, "|" + UCase(a$) + "|") > 0
+Else
+IsmineHere1 = InStr(ColorCollection2, "|" + a$ + "|") > 0
+End If
 End Function
 Private Function IsmineHere2(a$) As Boolean
+If mUseCase Then
 IsmineHere2 = InStr(ColorCollection3, "|" + UCase(a$) + "|") > 0
+Else
+IsmineHere2 = InStr(ColorCollection3, "|" + a$ + "|") > 0
+End If
 End Function
 Private Function IsmineHere3(a$) As Boolean
+If mUseCase Then
 IsmineHere3 = InStr(ColorCollection4, "|" + UCase(a$) + "|") > 0
+Else
+IsmineHere3 = InStr(ColorCollection4, "|" + a$ + "|") > 0
+End If
 End Function
 
 
@@ -7524,3 +7598,59 @@ ISSTRINGb = True
 
 End Function
 
+
+Public Property Let UseCase(ByVal RHS As Boolean)
+mUseCase = Not RHS
+mDoc.NoIgnoreCase = RHS
+End Property
+
+
+Public Property Let SearchWords(ByVal RHS As Boolean)
+WordOnly = RHS
+End Property
+Function BlockParam4(s$, pos As Long, what As Long) As Boolean
+' need to be open
+Dim i As Long, j As Long, ii As Long
+If what = 91 Then
+j = 1000
+Else
+j = 1
+End If
+For i = pos To Len(s$)
+Select Case AscW(Mid$(s$, i, 1))
+Case 0
+Exit For
+Case 34
+again:
+ii = InStr(i + 1, s$, """")
+
+If ii = 0 Then Exit Function
+
+ i = ii
+If Mid$(s$, ii - 1, 1) = Chr$(34) Then GoTo again
+If Mid$(s$, ii - 1, 1) = "\" Then GoTo again
+Case 91
+If WordOnly Then
+j = j + 1000
+End If
+Case 93
+If WordOnly Then
+j = j - 1000
+If j = 0 Then Exit For
+End If
+Case 40
+j = j + 1
+Case 41
+j = j - 1
+If j = 0 Then Exit For
+Case 123
+i = i + 1
+If blockStringPOS(s$, i) Then
+Else
+i = 0
+End If
+If i = 0 Then Exit Function
+End Select
+Next i
+If j = 0 Then pos = i: BlockParam4 = True
+End Function

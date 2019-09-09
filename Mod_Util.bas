@@ -5895,6 +5895,7 @@ pos = Len(s$)
 End If
 
 End Function
+
 Function BlockParam2(s$, pos As Long) As Boolean
 ' need to be open
 Dim i As Long, j As Long, ii As Long
@@ -12379,7 +12380,7 @@ End If
 End If
 End Function
 Function IsNumberQuery(a$, fr As Long, r As Double, lr As Long) As Boolean
-Dim SG As Long, sng As Long, n$, ig$, DE$, sg1 As Long, ex$, rr As Double
+Dim SG As Long, sng As Long, n$, Ig$, DE$, sg1 As Long, ex$, rr As Double
 ' ti kanei to e$
 If a$ = vbNullString Then IsNumberQuery = False: Exit Function
 SG = 1
@@ -12403,7 +12404,7 @@ Else
 'compute ig$
     If Mid$(a$, sng, 1) = "." Then
     ' no long part
-    ig$ = "0"
+    Ig$ = "0"
     DE$ = "."
 
     Else
@@ -12411,7 +12412,7 @@ Else
         
         Select Case Mid$(a$, sng, 1)
         Case "0" To "9"
-        ig$ = ig$ & Mid$(a$, sng, 1)
+        Ig$ = Ig$ & Mid$(a$, sng, 1)
         Case "."
         DE$ = "."
         Exit Do
@@ -12466,16 +12467,16 @@ Else
             End If
         End If
     End If
-    If ig$ = vbNullString Then
+    If Ig$ = vbNullString Then
     IsNumberQuery = False
     lr = 1
     Else
-    If SG < 0 Then ig$ = "-" & ig$
+    If SG < 0 Then Ig$ = "-" & Ig$
     Err.clear
     On Error Resume Next
-    n$ = ig$ & DE$ & ex$
-    sng = Len(ig$ & DE$ & ex$)
-    rr = val(ig$ & DE$ & ex$)
+    n$ = Ig$ & DE$ & ex$
+    sng = Len(Ig$ & DE$ & ex$)
+    rr = val(Ig$ & DE$ & ex$)
     If Err.Number > 0 Then
          lr = 0
     Else
@@ -12492,7 +12493,7 @@ End Function
 
 
 Function IsNumberOnly(a$, fr As Long, r As Variant, lr As Long, Optional useRtypeOnly As Boolean = False, Optional usespecial As Boolean = False) As Boolean
-Dim SG As Long, sng As Long, ig$, DE$, sg1 As Long, ex$, foundsign As Boolean
+Dim SG As Long, sng As Long, Ig$, DE$, sg1 As Long, ex$, foundsign As Boolean
 ' ti kanei to e$
 If a$ = vbNullString Then IsNumberOnly = False: Exit Function
 SG = 1
@@ -12516,7 +12517,7 @@ If LCase(Mid$(a$, sng, 2)) Like "0[xχ]" Then
     IsNumberOnly = False
     GoTo er111
     End If
-    ig$ = vbNullString
+    Ig$ = vbNullString
     DE$ = vbNullString
     sng = sng + 1
     Do While MaybeIsSymbolNoSpace(Mid$(a$, sng + 1, 1), "[0-9A-Fa-f]")
@@ -12534,10 +12535,10 @@ If LCase(Mid$(a$, sng, 2)) Like "0[xχ]" Then
     If MaybeIsSymbolNoSpace(Mid$(a$, sng, 1), "[&%]") Then
     
         sng = sng + 1
-        ig$ = "&H" + DE$
+        Ig$ = "&H" + DE$
         DE$ = vbNullString
         If Mid$(a$, sng - 1, 1) = "%" Then
-        If Len(ig$) > 6 Then
+        If Len(Ig$) > 6 Then
         OverflowLong True
         IsNumberOnly = False
         GoTo er111
@@ -12550,7 +12551,7 @@ If LCase(Mid$(a$, sng, 2)) Like "0[xχ]" Then
         GoTo conthere1
     ElseIf useRtypeOnly Then
         If VarType(r) = vbLong Or VarType(r) = vbInteger Then
-        ig$ = "&H" + DE$
+        Ig$ = "&H" + DE$
         DE$ = vbNullString
         GoTo conthere1
         End If
@@ -12566,7 +12567,7 @@ Else
 'compute ig$
     If Mid$(a$, sng, 1) = "." Then
     ' no long part
-    ig$ = "0"
+    Ig$ = "0"
     DE$ = "."
 
     Else
@@ -12574,7 +12575,7 @@ Else
         
         Select Case Mid$(a$, sng, 1)
         Case "0" To "9"
-        ig$ = ig$ & Mid$(a$, sng, 1)
+        Ig$ = Ig$ & Mid$(a$, sng, 1)
         Case "."
         DE$ = "."
         Exit Do
@@ -12628,30 +12629,30 @@ Else
                 End If
                 End If
     End If
-    If ig$ = vbNullString Then
+    If Ig$ = vbNullString Then
     IsNumberOnly = False
     lr = 1
     Else
-    If SG < 0 Then ig$ = "-" & ig$
+    If SG < 0 Then Ig$ = "-" & Ig$
     On Error GoTo er111
      If useRtypeOnly Then GoTo conthere1
     If sng <= Len(a$) Then
     If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
     Select Case Mid$(a$, sng, 1)
     Case "@"
-    r = CDec(ig$ & DE$)
+    r = CDec(Ig$ & DE$)
     sng = sng + 1
     Case "&"
-    r = CLng(ig$)
+    r = CLng(Ig$)
     sng = sng + 1
     Case "%"
-    r = CInt(ig$)
+    r = CInt(Ig$)
     sng = sng + 1
     Case "~"
-    r = CSng(ig$ & DE$ & ex$)
+    r = CSng(Ig$ & DE$ & ex$)
     sng = sng + 1
     Case "#"
-    r = CCur(ig$ & DE$)
+    r = CCur(Ig$ & DE$)
     sng = sng + 1
     Case Else
 GoTo conthere
@@ -12684,23 +12685,23 @@ conthere1:
          If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
         Select Case VarType(r)
         Case vbDecimal
-        r = CDec(ig$ & DE$)
+        r = CDec(Ig$ & DE$)
         Case vbLong
-        r = CLng(ig$)
+        r = CLng(Ig$)
         Case vbInteger
-        r = CInt(ig$)
+        r = CInt(Ig$)
         Case vbSingle
-        r = CSng(ig$ & DE$ & ex$)
+        r = CSng(Ig$ & DE$ & ex$)
         Case vbCurrency
-        r = CCur(ig$ & DE$)
+        r = CCur(Ig$ & DE$)
         Case vbBoolean
-        r = CBool(ig$ & DE$)
+        r = CBool(Ig$ & DE$)
         Case Else
-        r = CDbl(ig$ & DE$ & ex$)
+        r = CDbl(Ig$ & DE$ & ex$)
         End Select
         Else
         If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-        r = val(ig$ & DE$ & ex$)
+        r = val(Ig$ & DE$ & ex$)
         End If
     End If
 contfinal:
@@ -12798,7 +12799,7 @@ Debug.Print l
 Wend
 End Sub
 Function IsNumberCheck(a$, r As Variant, Optional mydec$ = " ") As Boolean
-Dim sng&, SG As Variant, ig$, DE$, sg1 As Boolean, ex$, s$
+Dim sng&, SG As Variant, Ig$, DE$, sg1 As Boolean, ex$, s$
 If mydec$ = " " Then mydec$ = "."
 SG = 1
 Do While sng& < Len(a$)
@@ -12844,10 +12845,10 @@ Else
 
     If Mid$(a$, sng&, 1) = mydec$ Then
 
-    ig$ = "0"
+    Ig$ = "0"
     DE$ = mydec$
     ElseIf LCase(Mid$(a$, sng&, 2)) Like "0[xχ]" Then
-    ig$ = "0"
+    Ig$ = "0"
     DE$ = "0x"
   sng& = sng& + 1
 Else
@@ -12855,7 +12856,7 @@ Else
         
         Select Case Mid$(a$, sng&, 1)
         Case "0" To "9"
-        ig$ = ig$ & Mid$(a$, sng&, 1)
+        Ig$ = Ig$ & Mid$(a$, sng&, 1)
         Case mydec$
         DE$ = mydec$
         Exit Do
@@ -12925,7 +12926,7 @@ Else
                 End If
                 End If
     End If
-    If ig$ = vbNullString Then
+    If Ig$ = vbNullString Then
     IsNumberCheck = False
     Else
 
@@ -12938,7 +12939,7 @@ Else
             r = CDbl(UNPACKLNG(Left$(DE$, 4)) * 65536#) + CDbl(UNPACKLNG(Right$(DE$, 4)))
             End If
     Else
-        If SG < 0 Then ig$ = "-" & ig$
+        If SG < 0 Then Ig$ = "-" & Ig$
                    On Error Resume Next
                         If ex$ <> "" Then
                         If Len(ex$) < 3 Then
@@ -12951,12 +12952,12 @@ Else
                                If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                                If val(Mid$(ex$, 2)) > 308 Or val(Mid$(ex$, 2)) < -324 Then
                                
-                                   r = val(ig$ & DE$)
+                                   r = val(Ig$ & DE$)
                                    sng = sng - Len(ex$)
                                    ex$ = vbNullString
                                    
                                Else
-                                   r = val(ig$ & DE$ & ex$)
+                                   r = val(Ig$ & DE$ & ex$)
                                End If
                            Else
                        If sng <= Len(a$) Then
@@ -12964,52 +12965,52 @@ Else
             Case 64
                 Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CDec(ig$ & DE$)
+                r = CDec(Ig$ & DE$)
                 If Err.Number = 6 Then
                 Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(ig$ & DE$)
+                r = val(Ig$ & DE$)
                 End If
             Case 35
             Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CCur(ig$ & DE$)
+                r = CCur(Ig$ & DE$)
                 If Err.Number = 6 Then
                 Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(ig$ & DE$)
+                r = val(Ig$ & DE$)
                 End If
            Case 37
                 Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CInt(ig$)
+                r = CInt(Ig$)
                 If Err.Number = 6 Then
                 Err.clear
-                r = val(ig$)
+                r = val(Ig$)
                 End If
            Case 38
                 Mid$(a$, sng, 1) = " "
-                r = CLng(ig$)
+                r = CLng(Ig$)
                 If Err.Number = 6 Then
                     Err.clear
-                    r = val(ig$)
+                    r = val(Ig$)
                 End If
             Case 126
                 Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CSng(ig$ & DE$)
+                r = CSng(Ig$ & DE$)
                 If Err.Number = 6 Then
                 Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(ig$ & DE$)
+                r = val(Ig$ & DE$)
                 End If
             Case Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(ig$ & DE$)
+                r = val(Ig$ & DE$)
             End Select
             Else
             If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-            r = val(ig$ & DE$)
+            r = val(Ig$ & DE$)
             End If
                            End If
                      If Err.Number = 6 Then
@@ -13018,11 +13019,11 @@ Else
                              sng = sng - 1
                              Err.clear
                              If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                             r = val(ig$ & DE$ & ex$)
+                             r = val(Ig$ & DE$ & ex$)
                              If Err.Number = 6 Then
                                  sng = sng - Len(ex$)
                                  If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                                  r = val(ig$ & DE$)
+                                  r = val(Ig$ & DE$)
                              End If
                          End If
                        MyEr "Error in exponet", "Λάθος στον εκθέτη"

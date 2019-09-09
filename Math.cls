@@ -8,9 +8,9 @@ BEGIN
 END
 Attribute VB_Name = "Math"
 Attribute VB_GlobalNameSpace = False
-Attribute VB_Creatable = True
+Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = True
+Attribute VB_Exposed = False
 Option Explicit
 ' Original code made by Elroy Sullivan, PhD (User in VbForums)
 ' Was a module and now is a Class, by George Karras

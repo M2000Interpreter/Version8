@@ -1,8 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 35 active-X
-1. Minor bugs removed. 
-2. A new info file versiom 5..5
+Version 9.8 Revision 36 active-X
+1. some internal objects can be declared from m2000 code.
+2. Update EditBox to handle color for C#
+3. New info (ver 5.6), a greek program Clock  as gadget for screen, some oop programs, and a C# editor (module cs).
+
  
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

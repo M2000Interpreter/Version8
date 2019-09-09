@@ -10,7 +10,7 @@ Attribute VB_Name = "RecordMci"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
+Attribute VB_Exposed = True
 Option Explicit
 Private Declare Function mciGetErrorString Lib "winmm.dll" Alias "mciGetErrorStringA" (ByVal dwError As Long, ByVal lpstrBuffer As String, ByVal uLength As Long) As Long 'Get the error message of the mcidevice if any
 Private Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal lpstrReturnString As String, ByVal uReturnLength As Long, ByVal hwndCallback As Long) As Long 'Send command strings to the mci device
@@ -155,7 +155,7 @@ End Function
 Public Function checkError() As String
     'A very useful function for getting any errors
     'associated with the mci device
-    checkError = Space$(255)
+    checkError = space$(255)
     mciGetErrorString error, checkError, Len(checkError)
 End Function
 Sub SaveAs(fnm As String)

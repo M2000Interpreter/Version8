@@ -10,7 +10,7 @@ Attribute VB_Name = "cRegistry"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
+Attribute VB_Exposed = True
 Option Explicit
 
 ' =========================================================
@@ -163,7 +163,7 @@ Public Enum ERegistryValueTypes
 'Predefined Value Types
     REG_NONE = (0)                         'No value type
     REG_SZ = (1)                           'Unicode nul terminated string
-    REG_EXPAND_SZ = (2)                    'Unicode nul terminated string w/enviornment var
+    REG_EXPAND_SZ = (2)                    'Unicode nul terminated string w/environment var
     REG_BINARY = (3)                       'Free form binary
     REG_DWORD = (4)                        '32-bit number
     REG_DWORD_LITTLE_ENDIAN = (4)          '32-bit number (same as REG_DWORD)
@@ -354,7 +354,7 @@ Dim nulla$
         If Not e Then
             m_vValue = vValue
         Else
-        Err.Clear
+        Err.clear
         '            Err.Raise vbObjectError + 1048 + 26001, App.EXEName & ".cRegistry", "Failed to set registry value Key: '" & m_hClassKey & "',Section: '" & m_sSectionKey & "',Key: '" & m_sValueKey & "' to value: '" & m_vValue & "'"
         End If
         
@@ -592,12 +592,12 @@ Private Function SwapEndian(ByVal dw As Long) As Long
     CopyMemory SwapEndian, ByVal VarPtr(dw) + 3, 1
 End Function
 Private Function ExpandEnvStr(strInput) As String
-Dim result As Long
+Dim Result As Long
 Dim strOutput As String
-strOutput = Space$(1000)
-result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), result)
-strOutput = Space$(result)
-result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), result)
+strOutput = space$(1000)
+Result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), Result)
+strOutput = space$(Result)
+Result = ExpandEnvironmentStrings(StrPtr(strInput), StrPtr(strOutput), Result)
 ExpandEnvStr = StripTerminator(strOutput)
 End Function
 Function StripTerminator(ByVal strString As String) As String
@@ -611,6 +611,6 @@ Function StripTerminator(ByVal strString As String) As String
     End If
 End Function
 
-Public Property Let Temp(ByVal vNewValue As Variant)
+Public Property Let temp(ByVal vNewValue As Variant)
 mTemp = CBool(vNewValue)
 End Property

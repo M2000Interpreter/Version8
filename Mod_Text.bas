@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 35
+Global Const Revision = 36
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -25442,9 +25442,7 @@ If x1 <> 0 Then
   '  If Right$(ss$, 2) <> vbCrLf Then ss$ = ss$ + vbCrLf
     If FastSymbol(rest$, "}") Then
              If GetSub(bstack.GroupName + F$, i) Then
-            '' IF sbf(I).sbGROUP
-                         If rinstr(sbf(i).sbgroup, bstack.GroupName) + Len(bstack.GroupName) - 1 = Len(sbf(i).sbgroup) Then
-                          bstack.IndexSub = i
+                           bstack.IndexSub = i
                           If sbf(bstack.IndexSub).locked Then
                           Else
                           If frm$ <> "" Then
@@ -25460,21 +25458,13 @@ If x1 <> 0 Then
                           Set sbf(i).subs = Nothing
                           GoTo continuehere22 'there12345
                           End If
-             End If
+
 
  
-  ' If here$ <> "" Then
-'v = 123
- '            If Lang = 1 Then
-  '              rest$ = "GLOBAL " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " {'11001EDIT " + CStr(bstack.OriginalCode) + ", 3" + vbCrLf + ss$ + "} " + rest$
-   '               Else
-    '              rest$ = "ΓΕΝΙΚΟ " + Chr(34) + here$ + "." + bstack.GroupName + F$ + Chr(34) + " {'11001EDIT " + CStr(bstack.OriginalCode) + ", 3" + vbCrLf + ss$ + "} " + rest$
-     '             End If
-   'GoTo BYPASS4
-   'Else
-        MyEr "group struct error2", "προβλημα στη δομή2"
-        ExecuteGroupStruct = 0: Exit Function
-   'End If
+    Rem never happen
+     Rem   MyEr "group struct error2", "προβλημα στη δομή2"
+     Rem    ExecuteGroupStruct = 0: Exit Function
+
    End If
   End If
   Else
