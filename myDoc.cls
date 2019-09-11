@@ -333,11 +333,14 @@ If count = 0 Then laststart = para(mNum).startfrom
 If ColorEvent Then
 mNum1 = mNum
 ColorThis1 mNum, count, True
-If Not mNum1 = mNum Then
-If laststart <> para(mNum).startfrom Then
-If count = 0 Then
-laststart = para(mNum).startfrom
-mNum1 = DocParaNext(mNum)
+
+If Not mNum1 = mNum And mNum <> 0 Then
+
+If laststart <> para(mNum).startfrom Or para(mNum1).colordata(UBound(para(mNum1).colordata) - 1) <> 15 Then
+If count = 0 And laststart <> 0 Then
+
+laststart = para(mNum1).startfrom
+mNum1 = DocParaNext(mNum1)
 Do While mNum1 <> 0
 If para(mNum1).startfrom = laststart Then
 para(mNum1).startfrom = 0
@@ -370,7 +373,13 @@ data$ = TextParagraph(mNum1)
 RaiseEvent ColorDataEvent(mNum1, data$, lookthis)
 If mNum1 = mNum Then
 If lookthis = 0 Then
+If para(mNum).startfrom = 0 Then
+lookthis = mNum
+mNum = DocParaNext(mNum1)
+Else
 lookthis = para(mNum).startfrom
+End If
+
 mNum1 = mNum
 Do While mNum1 <> 0
     If para(mNum1).startfrom = lookthis Then
@@ -383,8 +392,9 @@ Do While mNum1 <> 0
     mNum1 = DocParaNext(mNum1)
     
 Loop
-
+mNum = mNum1
 End If
+
 count = -1
 Else
 

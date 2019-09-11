@@ -15464,7 +15464,7 @@ Function Pad.PopUp {
       Method Pad,"PopUpMenu", "",X , Y
 }
 function cs_choose{
-	 With Pad, "ColorCollection1", lcase$("abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", ""
+	 With Pad, "ColorCollection1", lcase$("abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", True, "MultiLineComment1", "/*","MultiLineComment2", "*/"
 	      With Pad, "WordCharLeft"," .,+=/*^()[];", "WordCharRight"," .,+=/*^()[];","OtherSymbols","@"
 	      With Pad,"StartSymbols", "+-&|*=></,.", "StringSep2","'"
 	      Method Pad, "ReColor"
@@ -15492,6 +15492,7 @@ If RadioIndex =3 Then {
       typ$="txt"
       Call local Run1Status()
       With Pad, "ColorCollection1", "","NoColor", True,  "UseCase", False
+      Pad.text$=Pad.text$
       Method Pad, "Show"
       }
 } Else.If RadioIndex =4 Then {
@@ -15588,13 +15589,29 @@ Unload:
 }
 function gecsc_folder {
              dir path$(0x24)+"Microsoft.NET\Framework\"
-             dir ? 
+             dir ? dir$, "Choose Framework"
              path$=dir$
              dir user
 }
 
 thread {
-	if exist(lookpath$+"test.exe") then Comp.Enabled(1)=true: Comp.Enabled(2)=true
+      If not Comp.Enabled(3) then {
+            if exist(dir$+"test.bat") then {
+                  Informe$="ready to compile"
+                  Comp.Enabled(3)=True 
+                  Method Pad,"Show"
+                  
+                  Comp.Enabled(0)=True
+            }
+      } else.if exist(lookpath$+"test.exe") then {
+             Comp.Enabled(1)=true
+             Comp.Enabled(2)=true
+             informe$="Compiled"
+             thread this hold
+      } else {
+            informe$=if$((tick mod 4 +1) ->"|", "/","-","\")
+      }
+
 } as lookEXE interval 5000
 thread lookEXE hold
 Function Run1.DblClick {
@@ -15608,13 +15625,12 @@ Function Run1.DblClick {
             Comp.Enabled(3)=False
             Informe$=""
             Call local gecsc_folder()
-            if  path$="" then exit
+            if  path$="" then Beep:Comp.Enabled(0)=True :exit
             if not exist(path$+"csc.exe") then beep : Comp.Enabled(0)=true : exit 
             try {
                    if exist(dir$+"test.bat") then dos "del "+quote$(dir$+"test.bat");
                   if exist(dir$+"test.exe") then dos "del "+quote$(dir$+"test.exe");
             }
-            Comp.Enabled(1)=False
             local aa$
             Document aa$=Pad.text$
             dir user
@@ -15629,19 +15645,15 @@ Function Run1.DblClick {
                         endlocal
                         }
             Save.doc aa$, "test.bat", 3
-            wait 100
-            dir user
-            dos "cd "+dir$+" && test.bat  > out.txt";
-            wait 200                 
-            if exist(dir$+"test.bat") then
-                  Informe$="Compiled"
-                  Comp.Enabled(3)=True 
-                  Method Pad,"Show"
+            after 300 {
+                  
+                  dir user
+                  dos "cd "+dir$+" && test.bat  > out.txt";
+                  wait 200
                   Thread lookEXE interval 100
-                  Thread lookEXE Restart
-                  Comp.Enabled(0)=True
-            end if
-            Method Pad,"GetFocus"
+                  Thread lookEXE Restart                 
+                  'Method Pad,"GetFocus"
+            }
       }
       case 1
             {
@@ -15669,7 +15681,10 @@ Function Run1.DblClick {
             }
       case 3
         {
-            try {win "out.txt"}
+            try {win "out.txt"
+            Thread lookEXE hold
+            }
+            informe$=""
       }
       case 5
       {
@@ -15725,7 +15740,7 @@ Title title$, 0
 after 200 {
 	Call local cs_choose()
 }
-After 100 {Title title$}
+After 100 {Title "", 0}
 Method NotePad,"Show" , 1
 Declare Pad Nothing
 Declare NotePad Nothing 

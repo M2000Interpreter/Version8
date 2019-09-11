@@ -33,7 +33,7 @@ Public StringSep As String
 Public StringSep2 As String
 Public ExtraFront As String
 Public CommentSymbols As String
-Public ComSymbolsWidth As Long
+Public ComSymbolsWidth As Long, CommentLineLight As Boolean
 Public MultiLineComment1 As String
 Private mMultiLineComment2 As String
 Public Form1mn1Enabled As Boolean
@@ -216,7 +216,8 @@ StringSep = Chr$(34)
 StringSep2 = Chr$(0)
 CommentSymbols = "[\][\]"
 ComSymbolsWidth = 2
-MultiLineComment1 = "\*"
+CommentLineLight = False
+MultiLineComment1 = "/*"
 MultiLineComment2 = "*/"
 Dim ff As New StdFont
 With Callback
@@ -2409,7 +2410,7 @@ End Sub
 
 
 
-Private Sub ColorizeExpressions(ByVal a$, k As Long, pos2 As Long, feedthis As Long)
+Private Sub ColorizeExpressions(a$, k As Long, pos2 As Long, feedthis As Long)
 Dim drop$, pos1 As Long, kind As Long
 Dim lastcol As Long
 again:
@@ -2511,28 +2512,35 @@ feedthis = 1
 ElseIf MaybeIsSymbol2(a$, ComSymbolsWidth, CommentSymbols) Then
 drop$ = "  "
 If pos2 > 0 Then
- addone pos2, 7
+ addone pos2, CLng(IIf(CommentLineLight, 14, 7))
 
 Else
-addone 1, 7
+addone 1, CLng(IIf(CommentLineLight, 14, 7))
 End If
 feedthis = 1
   Exit Sub
-ElseIf FastSymbol(a$, MultiLineComment1, , Len(MultiLineComment1)) Then
-addone pos2, 15
-
-drop$ = blockString(a$)
-If drop$ <> "" Or (drop$ = vbNullString And Myleft$(a$, 1) = mMultiLineComment2) Then
-feedthis = 0
-If Not MaybeIsSymbol(a$, mMultiLineComment2, , True) Then feedthis = 15
-Else
-feedthis = 15
-End If
-drop$ = vbNullString
+ElseIf FastSymbolNoRemove(a$, MultiLineComment1, , Len(MultiLineComment1)) Then
+If MultiLineComment1 <> "{" Then
+feedthis = -15
 pos2 = k - Len(a$) + 1
-If feedthis = 15 Then Exit Sub
+   Exit Sub
+   
+Else
+    FastSymbol a$, MultiLineComment1, , Len(MultiLineComment1)
+    addone pos2, 15
+    
+    drop$ = blockString(a$)
+    If drop$ <> "" Or (drop$ = vbNullString And Myleft$(a$, 1) = mMultiLineComment2) Then
+        feedthis = 0
+        If Not MaybeIsSymbol(a$, mMultiLineComment2, , True) Then feedthis = 15
+    Else
+        feedthis = 15
+    End If
+    drop$ = vbNullString
+    pos2 = k - Len(a$) + 1
+    If feedthis = 15 Then Exit Sub
     GoTo again
-
+End If
 ElseIf MaybeIsSymbol(a$, StringSep + Myleft$(StringSep2, 1)) Then
 
 If Not ISSTRINGb(a$, drop$) Then
@@ -3108,7 +3116,6 @@ Else
 End Function
 Function FastSymbol(a$, c$, Optional mis As Boolean = False, Optional cl As Long = 1) As Boolean
 Dim i As Long, j As Long
-'If Len(c$) <> cl Then Stop  ; only for check
 j = Len(a$)
 If j = 0 Then Exit Function
 i = MyTrimL(a$)
@@ -3117,17 +3124,22 @@ If j - i < cl - 1 Then
 If mis Then MyEr "missing " & c$, "λείπει " & c$
 Exit Function
 End If
-'If c$ = Mid$(a$, i, cl) Then
 If InStr(c$, Mid$(a$, i, cl)) > 0 Then
-'a$ = Mid$(a$, MyTrimLi(a$, i + cl))
 a$ = Mid$(a$, cl + i)
-'Mid$(a$, i, cl) = space$(cl)
 FastSymbol = True
 ElseIf mis Then
 MyEr "missing " & c$, "λείπει " & c$
 End If
 End Function
-
+Function FastSymbolNoRemove(a$, c$, Optional mis As Boolean = False, Optional cl As Long = 1) As Boolean
+Dim i As Long, j As Long
+j = Len(a$)
+If j = 0 Then Exit Function
+i = MyTrimL(a$)
+If i > j Then Exit Function  ' this is not good
+If j - i < cl - 1 Then Exit Function
+If InStr(c$, Mid$(a$, i, cl)) > 0 Then FastSymbolNoRemove = True
+End Function
 Function IsLabelOnly2000(a$, r$) As Long 'ok
 
 Dim rr&, one As Boolean, c$, dot&, Extra&, num As Boolean
@@ -4256,10 +4268,17 @@ End Sub
 
 Private Sub mDoc_ColorDataEvent1(thispara As Long, data1 As String, feedback As Long)
 col() = mDoc.Paracolordata(thispara)
-Dim data As String
+Dim drop$, data As String
 data = Replace(data1, vbTab, " ")
 Dim feedthis As Long, oldpara As Long
 oldpara = thispara
+
+If mDoc.startfrom(thispara) <> 0 Then
+If mDoc.startfrom(thispara) <> thispara Then
+drop$ = data
+GoTo entry100
+End If
+End If
 If OtherSymbols = vbNullString Then OtherSymbols = ";"
 
 If mNoColor Then
@@ -4270,7 +4289,7 @@ End If
 Exit Sub
 End If
 ReDim col(1)
-Dim a$, k As Long, drop$, pos1 As Long, pos2 As Long, onetime As Boolean, kind As Long
+Dim a$, k As Long, pos1 As Long, pos2 As Long, onetime As Boolean, kind As Long
 Dim lastcol As Long
 a$ = data
 onetime = True
@@ -4280,21 +4299,72 @@ makebase 14
 mDoc.Paracolordata(thispara) = col()
 Exit Sub
 End If
+entry001:
 If feedback > 0 Then
 lastcol = 15
 GoTo marvel
 ElseIf MultiLineComment1 <> "{" Then
+If FastSymbol(a$, mMultiLineComment2, , Len(mMultiLineComment2)) Then
+GoTo entry3
+End If
+entry2:
+
 If FastSymbol(a$, MultiLineComment1, , Len(MultiLineComment1)) Then
 If pos2 > 0 Then
   addone pos2, 15
   
   Else
   makebase 15
-  addone 1, 15
+  'addone 1, 15
   End If
 feedback = 15
-mDoc.Paracolordata(thispara) = col()
-Exit Sub
+
+
+If InStr(a$, mMultiLineComment2) > 0 Then
+'mDoc.Paracolordata(thispara) = col()
+a$ = Mid$(a$, InStr(a$, mMultiLineComment2) + 2)
+entry3:
+pos2 = k - Len(a$) + 1
+If mDoc.startfrom(thispara) <> 0 Then
+If mDoc.startfrom(thispara) = thispara Then mDoc.startfrom(thispara) = 0
+End If
+feedback = 0
+pos1 = 1
+GoTo marvel
+Else
+   If mDoc.startfrom(thispara) = 0 Then mDoc.startfrom(thispara) = thispara
+entry100:
+    Do While thispara <> 0
+  If oldpara <> thispara Then mDoc.startfrom(thispara) = mDoc.startfrom(oldpara)
+  k = InStr(drop$, mMultiLineComment2)
+  
+
+    kind = 0
+   oldpara = thispara
+  If k > 0 Then
+  a$ = Mid$(drop$, k + 2)
+     k = Len(drop$)
+    feedback = 0
+    pos2 = k - Len(a$) + 1
+    drop$ = vbNullString
+    Exit Do
+  
+
+  End If
+  mDoc.Paracolordata(oldpara) = col()
+  thispara = 0
+  drop$ = mDoc.NextTextParagraph(oldpara, thispara)
+  If thispara <> 0 Then
+    pos2 = 1
+    makebase 15
+  End If
+  Loop
+  mDoc.Paracolordata(oldpara) = col()
+  If thispara = 0 Then thispara = oldpara
+  If a$ = vbNullString Then Exit Sub
+  pos1 = 1
+ GoTo marvel
+End If
 End If
 lastcol = 14
 Else
@@ -4329,8 +4399,7 @@ addone 1, 14
 End If
  pos2 = k - Len(a$) + 1
 Wend
-' these ~(), @(), $() are M2000 specific
-'drop$ = "@(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
+
 If kind = 0 Then
 If IsSymbol(a$, "@") Then
         If pos2 > 0 Then
@@ -4343,8 +4412,6 @@ End If
 End If
 kind = IsLabelDot("", a$, drop$)
 
-'If kind = 0 Then drop$ = "$(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
-'If kind = 0 Then drop$ = "~(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 If kind = 0 Then
 drop$ = vbNullString
 End If
@@ -4555,8 +4622,16 @@ End If
  feedthis = 0
  mDoc.Paracolordata(thispara) = col()
  Exit Sub
+ ElseIf feedback = -15 Then
+  If Len(a$) - k + pos2 > 0 Then a$ = Mid$(a$, Len(a$) - k + pos2) Else a$ = vbNullString
+  pos2 = k - Len(a$) + 1
+  drop$ = ""
+ feedback = 0
+ GoTo entry2
+ Else
+ a$ = Mid$(a$, pos1)
  End If
-  a$ = Mid$(a$, pos1)   '''was pos1
+   '''was pos1
     If SeekNextLine And a$ = vbNullString Then
   thispara = 0
   drop$ = mDoc.NextTextParagraph(oldpara, thispara)
@@ -4608,10 +4683,10 @@ End If
  Exit Sub
 ElseIf MaybeIsSymbol2(a$, ComSymbolsWidth, CommentSymbols) Then
 If pos2 > 0 Then
- addone pos2, 7
+ addone pos2, CLng(IIf(CommentLineLight, 14, 7))
 
 Else
-addone 1, 7
+addone 1, CLng(IIf(CommentLineLight, 14, 7))
 End If
  pos2 = k - Len(a$) + 1
  mDoc.Paracolordata(thispara) = col()
@@ -5542,7 +5617,12 @@ On Error Resume Next
     Dim b As RECT
     Dim ww$(), items&, i, rleft, cuts()
     If UBound(col()) <= 1 Or mNoColor Then
+    If UBound(col()) = 1 And Not mNoColor Then
+    SetTextColor mHdc, M2000(col(0))
+    PrintItem1 mHdc, c, r
+    Else
         PrintItem1 mHdc, c, r
+        End If
         Exit Sub
     End If
     rleft = r.Left
