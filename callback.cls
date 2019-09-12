@@ -22,6 +22,7 @@ Public finished As Boolean
 Private hTimer As Long, hTimer2
 Dim locked As Boolean
 Dim ExtForm As Object
+Private lasttitle As String
 
 Friend Sub NoPublic(bstack As basetask, where$)
 
@@ -58,6 +59,7 @@ Hide
 Form1.CaptionW = ExtForm.CaptionW
 Else
 Show
+lasttitle = a$
 ExtForm.CaptionW = a$
 End If
 End Sub
@@ -468,3 +470,8 @@ Else
 End If
 
 End Property
+
+Public Property Get AppTitle() As Variant
+AppTitle = lasttitle
+End Property
+

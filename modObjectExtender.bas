@@ -258,8 +258,8 @@ ObjSetAddRef ResolveObjPtr, Ptr
 End Function
 ' ObjSetAddRef ObjectFromPtr, Ptr
 
-Public Function GetEnumarator(uOnk As IUnknown) As Boolean
-GetEnumarator = True
+Public Function Getenumerator(uOnk As IUnknown) As Boolean
+Getenumerator = True
 End Function
 
 

@@ -21,11 +21,13 @@ Private col() As Variant, lastdata As String, thispara As Long
 Private TextPixelOffset As Long
 Private nochange As Boolean
 Private TabControl As Long
+Private LineCommandSep As String
 Public NoCenterLineEdit As Boolean
 Public SeekNextLine As Boolean
 Public ShadowMarks As Boolean
 Public StartSymbols As String
 Public OtherSymbols As String
+Private mSplitExpr As String
 Public LineComment1 As String
 Public LineComment2 As String
 Public AssignSym As String
@@ -476,6 +478,7 @@ undopara = -1
 Redopara = -1
 mIndex = -1
 mUseCase = True
+LineCommandSep = ":"
 End Sub
 Private Sub Class_Terminate()
 Quit = True
@@ -580,6 +583,32 @@ Else
 End If
 End Sub
 
+Private Sub glistN_AddSelStart(val As Long)
+Dim w As Long, a$
+If Charpos > 0 Then
+a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos, 1)
+If Len(a$) > 0 Then
+w = AscW(a$)
+If w > -10241 And w < -9984 Then
+val = 2
+End If
+End If
+End If
+End Sub
+
+Private Sub glistN_SubSelStart(val As Long)
+Dim w As Long, a$
+If Charpos < 2 Then Exit Sub
+a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos - 1, 1)
+If Len(a$) > 0 Then
+w = AscW(a$)
+If w > -9215 And w < -8960 Then
+
+val = 2
+
+End If
+End If
+End Sub
 
 Private Sub glistN_CheckGotFocus()
 If Not locked Then
@@ -1454,7 +1483,7 @@ If mIndex >= 0 Then
    Else
       Callback.Callback mesCtrlName + ".MarkNo(" + ")"
       End If
-
+glistN.RefreshNow
 
 ElseIf (shift And 1) = 1 Then
 
@@ -2468,7 +2497,7 @@ If kind > 0 Then
   feedthis = 0
    a$ = Mid$(a$, pos1)
    End If
-   If FastSymbol(a$, ",") Then
+   If FastSymbol(a$, mSplitExpr) Then
      addone pos2, 14
     pos2 = k - Len(a$) + 1
    ElseIf MaybeIsSymbol(a$, OtherSymbols, , True) Then
@@ -2491,7 +2520,7 @@ If kind > 0 Then
   End If
 
 GoTo again
-ElseIf IsSymbol(a$, ",") Then
+ElseIf IsSymbol(a$, mSplitExpr) Then
 addone pos2, 14
 pos2 = k - Len(a$) + 1
     GoTo again
@@ -4391,13 +4420,16 @@ Exit Sub
   Next k
   
 End If
-While FastSymbol(a$, ":")
+'pos2 = k - Len(a$) + 1
+While FastSymbol(a$, LineCommandSep)
+
 If pos2 > 0 Then
 addone pos2, 14
 Else
 addone 1, 14
 End If
  pos2 = k - Len(a$) + 1
+ 
 Wend
 
 If kind = 0 Then
@@ -4469,6 +4501,7 @@ If kind > 0 Then
                  addone k - Len(a$) - Len(drop$) + 1, 10
                 
                  End If
+                 
   End If
   pos2 = k - Len(a$) + 1
   If kind > 3 Then
@@ -4512,6 +4545,12 @@ marvel2:
 
   If FastSymbol(a$, ",") Then
        addone pos2, 14
+    pos2 = k - Len(a$) + 1
+  pos1 = 1
+  drop$ = aheadstatus(a$, False, pos1)
+GoTo marvel2
+ElseIf MaybeIsSymbol(a$, mSplitExpr, , True) Then
+addone pos2, 14
     pos2 = k - Len(a$) + 1
   pos1 = 1
   drop$ = aheadstatus(a$, False, pos1)
@@ -4579,6 +4618,7 @@ again4:
   If FastSymbol(a$, AssignSym, , Len(AssignSym)) Then
   addone pos2, 15
     pos2 = k - Len(a$) + 1
+    onetime = False
   ElseIf MaybeIsSymbol(a$, "+-*/", "=", True) Then
   addone pos2, 14
     pos2 = k - Len(a$) + 1
@@ -4601,11 +4641,48 @@ a$ = NLtrim$(a$)
   pos1 = Len(a$) + 1
   Else
   drop$ = Mid$(a$, 1, pos1 - 1)
+  If WordOnly Then
+  If onetime And kind = 1 Then
+  If Myleft$(a$, 1) = "(" Or Myleft$(a$, 1) = "[" Then
+  pos1 = 1
+  drop$ = Mid$(drop$, 2)
+  a$ = Mid$(a$, 2)
+  addone pos2, 14
+  pos2 = pos2 + 1
+  aheadstatus drop$, False, pos1
+  drop$ = Mid$(a$, 1, pos1 - 1)
+ 
+  
+  
+  'pos2 = k - Len(a$)
+  kind = 40
+  End If
+  End If
+  End If
   If drop$ = vbNullString Then drop$ = " "
   End If
 feedback = 0
  ColorizeExpressions drop$, k - Len(a$) + pos1 - 1, pos2, feedback
- If drop$ = "(" Then
+ If kind = 40 Then
+    kind = 1
+    a$ = NLtrim$(Mid$(a$, pos1))
+    
+    pos2 = k - Len(a$) + 1
+    
+    If a$ = vbNullString Then
+    ElseIf Myleft(a$, 1) = "," Then
+        kind = 40
+        addone pos2, 14
+        a$ = Mid$(a$, 2)
+        pos2 = pos2 + 1
+         GoTo again3
+    ElseIf MaybeIsSymbol(a$, ")]", , True) Then
+    kind = 0
+        addone pos2, 14
+        pos2 = k - Len(a$) + 1
+        GoTo again4
+    End If
+ ElseIf drop$ = "(" Then
 If feedback = 100 Then
     lastcol = 14
 End If
@@ -4653,7 +4730,14 @@ End If
   End If
   End If
 ''  If InStr(DROP$, " ") = 0 Then
-If InStr(drop$, " ") = 0 Or kind >= 0 Then GoTo again3
+If InStr(drop$, " ") = 0 Or kind >= 0 Then
+If MaybeIsSymbol(a$, mSplitExpr, , True) Then
+     addone pos2, 14
+    pos2 = k - Len(a$) + 1
+    onetime = False
+    End If
+GoTo again3
+End If
   End If
     If MaybeIsSymbol(a$, OtherSymbols, , True) Then
      addone pos2, 14
@@ -4693,7 +4777,7 @@ End If
  Exit Sub
 ElseIf Not onetime Then
 If FastSymbol(a$, ",") Then
-ElseIf FastSymbol(a$, ":") Then
+ElseIf FastSymbol(a$, LineCommandSep) Then
 onetime = True
 ElseIf FastSymbol(a$, ")") Then
 addone pos2, lastcol
@@ -4945,7 +5029,7 @@ Else
 glistN.SelStartEventAlways = Column
 End If
 If glistN.enabled Then
-If Not noShow Then glistN.ShowMe
+If Not noShow Then glistN.ShowMe2
 End If
 End Sub
 Public Function TextFormatBreak(lineBreaker As String) As String
@@ -6352,7 +6436,7 @@ Do While pos <= Len(a$)
                 Exit Do
                 End If
         
-        Case ")", "}", Is < " ", ":", ";", LineComment1, LineComment2, "]"
+        Case ")", "}", Is < " ", LineCommandSep, ";", LineComment1, LineComment2, "]"
         Exit Do
         Case Else
     
@@ -7734,3 +7818,18 @@ End Select
 Next i
 If j = 0 Then pos = i: BlockParam4 = True
 End Function
+Public Property Let SplitExpr(ByVal RHS As String)
+If RHS = "" Then
+mSplitExpr = ","
+Else
+mSplitExpr = Myleft$(RHS, 1)
+End If
+End Property
+
+Public Property Let UseColon(ByVal RHS As String)
+If RHS = "" Then
+LineCommandSep = Chr$(0)
+Else
+LineCommandSep = Myleft$(RHS, 1)
+End If
+End Property

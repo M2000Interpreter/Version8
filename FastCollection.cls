@@ -1284,3 +1284,9 @@ Private Sub InsertionSort(Arr() As item, ByVal iMin As Long, ByVal iMax As Long,
     Wend
 End Sub
 
+Public Property Get KeyToString3(there As Long) As String
+
+    KeyToString3 = PriveSpace(there).Key
+
+End Property
+

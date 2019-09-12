@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 37
+Global Const Revision = 38
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -12620,32 +12620,31 @@ fstr41: '"PATH$(", "топос$("
     If Not FastSymbol(a$, ")") Then IsStr1 = False
     Exit Function
 fstr42: '"UCASE$(", "йеж$("
-    If IsStrExp(bstackstr, a$, q$) Then
+    If IsStrExp(bstackstr, a$, r$) Then
       IsStr1 = True
       If FastSymbol(a$, ",") And IsExp(bstackstr, a$, p) Then
             If Fix(p) <> 0 Then
-            r$ = kUpper(Convert3(q$, CLng(Fix(p))), Fix(p))
+            r$ = kUpper(Convert3(r$, CLng(Fix(p))), Fix(p))
             Else
-            r$ = kUpper(Convert3(q$, CLng(cLid)), CDbl(cLid))
+            r$ = kUpper(Convert3(r$, CLng(cLid)), CDbl(cLid))
             End If
       Else
-     r$ = myUcase$(q$)
-     
+      myUcase2 r$
      End If
     End If
     If Not FastSymbol(a$, ")") Then IsStr1 = False
     Exit Function
 fstr43: '"LCASE$(", "пеф$("
-     If IsStrExp(bstackstr, a$, q$) Then
+     If IsStrExp(bstackstr, a$, r$) Then
    IsStr1 = True
       If FastSymbol(a$, ",") And IsExp(bstackstr, a$, p) Then
       If Fix(p) <> 0 Then
-      r$ = klower(Convert3(q$, CLng(Fix(p))), Fix(p))
+      r$ = klower(Convert3(r$, CLng(Fix(p))), Fix(p))
       Else
-      r$ = klower(Convert3(q$, CLng(cLid)), CDbl(cLid))
+      r$ = klower(Convert3(r$, CLng(cLid)), CDbl(cLid))
       End If
       Else
-     r$ = myLcase$(q$)
+      myLcase2 r$
      
      End If
     
@@ -13269,7 +13268,7 @@ fstr60: '"STR$(", "цяажг$("
             If PP = 0 Then
                 If VarType(p) = vbBoolean Then
                 If cLid = 1032 Then
-                    r$ = Format$(p, ";\а\К\Г\Х\щ\Р;\ь\Е\У\Д\щ\Р")
+                    r$ = Format$(p, ";\а\К\Г\Х\ч\Р;\ь\Е\У\Д\ч\Р")
                 ElseIf cLid = 1033 Then
                 r$ = Format$(p, ";\T\r\u\e;\F\a\l\s\e")
                 Else
@@ -13283,7 +13282,7 @@ fstr60: '"STR$(", "цяажг$("
                 q$ = GetlocaleString2(14, PP)
                 If VarType(p) = vbBoolean Then
                 If PP = 1032 Then
-                    r$ = Format$(p, ";\а\К\Г\Х\щ\Р;\ь\Е\У\Д\щ\Р")
+                    r$ = Format$(p, ";\а\К\Г\Х\ч\Р;\ь\Е\У\Д\ч\Р")
                 ElseIf PP = 1033 Then
                 r$ = Format$(p, ";\T\r\u\e;\F\a\l\s\e")
                 Else
@@ -13383,7 +13382,13 @@ contstrhere:
    
 fstr61: '"CHRCODE$(", "ваяйыд$("
     If IsExp(bstackstr, a$, p) Then
+        w3 = UINT(p)
+    If w3 >= &H10000 And w3 <= &H10FFFF Then
+        w3 = w3 - &H10000
+        r$ = ChrW(UINT(w3 \ &H400& + &HD800&)) + ChrW(UINT((w3 And &H3FF&) + &HDC00&))
+        Else
     r$ = ChrW$(cUint(p))
+    End If
     If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
     IsStr1 = True
     Else
@@ -25223,7 +25228,7 @@ final = IsLabelSymbolNew(rest$, "текийг", "FINAL", Lang)
 classcontclass:
 x1 = Abs(IsLabelF(rest$, F$))
     If prv Then F$ = ChrW(&HFFBF) + F$
-''f$ = myUcase$(f$)
+''f$ = myucase(f$)
 funcoperator:
 If x1 <> 0 Then
   If Len(ThisGroup.FuncList) = 0 And Not alocal Then ' maybe we have it
@@ -26833,7 +26838,7 @@ If ReadPropObj(vv, -4, sp) Then
     Set var(newref) = New mHandler
     var(newref).ConstructEnumerator sp
  Else
- NoEnumaretor
+ NoEnumerator
 End If
 
 Else
@@ -30169,7 +30174,7 @@ ss$ = "*"
 ElseIf Not IsStrExp(bstack, rest$, ss$) Then
 ss$ = vbNullString
 Else
-ss$ = myUcase$(ss$)
+ss$ = myUcase(ss$)
 End If
 ''stac1 = VbNullString
 
@@ -30553,7 +30558,7 @@ ss$ = "*"
 ElseIf Not IsStrExp(bstack, rest$, ss$) Then
 ss$ = "TXT"
 Else
-ss$ = myUcase$(ss$)
+ss$ = myUcase(ss$)
 End If
 stac1 = vbNullString
 If FastSymbol(rest$, ",") Then
@@ -32731,7 +32736,9 @@ Else
     players(DisForm).ReportTab = ReportTabWidth
     Form1.Cls
     
-    original basestack1, "NEW:CLEAR"
+    original basestack1, ""
+    MyNew basestack1, "", 1
+    MyClear basestack1, ""
 
     basestack.soros.Flush
 
@@ -34514,7 +34521,7 @@ End If
      If FastSymbol(rest$, ",") Then
     
     End If
-    ''ss$ = myUcase$(ss$)
+    ''ss$ = myucase(ss$)
 
     resp = True
     MakeThisSub basestack, ss$
@@ -35044,7 +35051,7 @@ ElseIf i > 3 Then
      If FastSymbol(rest$, ",") Then
     
     End If
-    ''ss$ = myUcase$(ss$)
+    ''ss$ = myucase(ss$)
 
     
     MakeThisSub basestack, ss$
@@ -37019,7 +37026,7 @@ conthereifglobal:
    
    Else
 contpush12:
-       what$ = myUcase$(what$)
+       what$ = myUcase(what$)
 backfromstr:
                 If Fast2VarNoTrim(rest$, "ыс", 2, "AS", 2, 2, F) Then
                    If Not MyIsObject(var(i)) Then
@@ -38881,7 +38888,7 @@ y1 = IsLabelSymbolNew(rest$, "цемийо", "GLOBAL", Lang)
 y3 = IsLabelSymbolNew(rest$, "лецецомота", "WITHEVENTS", Lang)
 x1 = Abs(innerIsLabel(bstack, rest$, what$, , True, True))
 
-w$ = myUcase$(what$)
+w$ = myUcase(what$)
 gohere:
     If x1 = 1 Or x1 = 3 Then
         If x1 = 1 Then
@@ -51839,12 +51846,22 @@ End If
 End Function
 
 Private Function IsChrCode(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
-Dim s$
+Dim s$, w As Long
    If IsStrExp(bstack, a$, s$) Then
     If s$ = vbNullString Then
         r = -1
     Else
-        r = SG * AscW(s$)
+        w = AscW(s$)
+        If w > -10241 And w < -9984 Then
+            If Len(s$) > 1 Then
+            r = SG * (&H10000 + (UINT(w) - &HD800&) * &H400 + UINT(AscW(Mid$(s$, 2, 1))) - &HDC00&)
+            Else
+            r = SG * w
+            End If
+        Else
+        r = SG * w
+        End If
+        
     End If
     IsChrCode = FastSymbol(a$, ")", True)
     Else
@@ -51858,7 +51875,6 @@ Dim s$
     r = -1
     Else
     'cLid
-    
     r = SG * Asc(StrConv(StrConv(s$, vbFromUnicode, cLid), vbUnicode))
     End If
         IsAsc = FastSymbol(a$, ")", True)

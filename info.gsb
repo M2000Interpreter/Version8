@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<36 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<38 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.6"
+	Report " A collection of modules for tests version 5.7"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4669,7 +4669,8 @@ Pen #ffeeff {
 }
 End Sub
 }
-MODULE SAVEME {dir user
+MODULE SAVEME {Title "Info"
+dir user
 save info, info
 Print "Done"
 }
@@ -5717,7 +5718,8 @@ Print counter1, counter2
 Title "Demo Complete"
 Set Fast   ' return to normal
 }
-MODULE UPDATE {dir appdir$
+MODULE UPDATE {Title "Info"
+dir appdir$
 save info, info
 if isnum then {
 	drop
@@ -8531,620 +8533,621 @@ FadeScreen &Dummy(), 1.7
 MODULE COMPILER {Module CompilerExample {
 	Set Fast !
 	Module lexical_analyzer (a$){
-	        lim=Len(a$)
-	        LineNo=1
-	        ColumnNo=1
-	        Document Output$
-	        Buffer Scanner as Integer*lim
-	        Return Scanner, 0:=a$
-	        offset=0
-	        buffer1$=""
-	        flag_rem=true
-	        Ahead=lambda Scanner (a$, offset)->{
-	                =false
-	                Try {
-	                        \\ second parameter is the offset in buffer units
-	                        \\ third parameter is length in bytes
-	                        =Eval$(Scanner, offset,2*len(a$))=a$
-	                }
-	        }
-	        Ahead2=lambda Scanner (a$, offset)->{
-	                =false
-	                Try {
-	                        =Eval$(Scanner, offset,2) ~ a$
-	                }
-	        }
-	        const nl$=chr$(13)+chr$(10), quo$="""", er$="@", Ansi=3
-	        Try {
-	                Do
-	                If Ahead("/*", offset) Then {
-	                        offset+=2 :     ColumnNo+=2
-	                        While not Ahead("*/", offset)
-	                                If Ahead(nl$, offset) Then
-	                                        lineNo++: ColumnNo=1 : offset+=2
-	                                Else
-	                                        offset++ : ColumnNo++
-	                                End If
-	                                if offset>lim then
-	                                        Error "End-of-file in comment. Closing comment characters not found"+er$
-	                                End if
-	                        End While
-	                        offset+=2 : ColumnNo+=2
-	                } Else.if Ahead(nl$, offset) Then{
-	                        LineNo++: ColumnNo=1
-	                        offset+=2
-	                } Else.if Ahead(quo$, offset) Then {
-	                        Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)
-	                        offset++ : ColumnNo++
-	                        strin=offset
-	                        While not Ahead(quo$, offset)
-	                                If Ahead("/", offset) Then
-	                                        offset+=2 : ColumnNo+=2
-	                                else
-	                                        offset++ : ColumnNo++
-	                                End if
-	                                checkerror()
-	                        End While
-	                        Output$="String "+quote$(Eval$(Scanner, strin, (offset-strin)*2))+nl$
-	                        offset++ : ColumnNo++
-	                } Else.if Ahead("'", offset) Then {
-	                        Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)
-	                        offset++ : ColumnNo++
-	                        strin=offset
-	                        While not Ahead("'", offset)
-	                                If Ahead("/", offset) Then
-	                                        offset+=2 : ColumnNo+=2
-	                                else
-	                                        offset++ : ColumnNo++
-	                                End if
-	                                checkerror()
-	                        End While
-	                        lit$=format$(Eval$(Scanner, strin, (offset-strin)*2))
-	                        select case len(lit$)
-	                        case 1
-	                                Output$="Integer "+str$(asc(lit$),0)+nl$
-	                        case >1
-	                                {Error "Multi-character constant."+er$}
-	                        case 0
-	                                {Error "Empty character constant."+er$}
-	                        end select
-	                        offset++ : ColumnNo++
-	                } Else.if Ahead2("[a-z]", offset) Then {
-	                        strin=offset
-	                        Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)
-	                        offset++ : ColumnNo++
-	                        While Ahead2("[a-zA-Z0-9_]", offset)
-	                                        offset++ : ColumnNo++
-	                        End While
-	                        Keywords(Eval$(Scanner, strin, (offset-strin)*2))
-	                } Else.if Ahead2("[0-9]", offset) Then {
-	                        strin=offset
-	                        Output$=format$("{0::-10}{1::-10} Integer ", LineNo, ColumnNo)
-	                        offset++ : ColumnNo++
-	                        While Ahead2("[0-9]", offset)
-	                                        offset++ : ColumnNo++
-	                        End While
-	                        if Ahead2("[a-zA-Z_]", offset) then  
-	                                {Error " Invalid number. Starts like a number, but ends in non-numeric characters."+er$}
-	                        else
-	                                Output$=Eval$(Scanner, strin, (offset-strin)*2)+nl$
-	                        end if
-	                } Else {
-	                        Symbols(Eval$(Scanner, Offset, 2))              
-	                        offset++ : ColumnNo++
-	                }
-	                Until offset>=lim
-	        }
-	        er1$=leftpart$(error$,er$)
-	        if er1$<>"" then
-	                Print
-	                Report "Error:"+er1$
-	                Output$="(Error)"+nl$+"Error:"+er1$
-	        else
-	                Output$=format$("{0::-10}{1::-10}", LineNo, ColumnNo)+" End_of_Input"+nl$
-	        end if
-	        Push Output$
-	        Exit
-	        Clipboard Output$
-	        Save.Doc Output$, "lex.t", Ansi
-	        document lex$
-	        Load.Doc lex$,"lex.t", Ansi
-	        Report lex$
+		lim=Len(a$)
+		LineNo=1
+		ColumnNo=1
+		Document Output$
+		Buffer Scanner as Integer*lim
+		Return Scanner, 0:=a$
+		offset=0
+		buffer1$=""
+		flag_rem=true
+		Ahead=lambda Scanner (a$, offset)->{
+			=false
+			Try {
+				\\ second parameter is the offset in buffer units
+				\\ third parameter is length in bytes
+				=Eval$(Scanner, offset,2*len(a$))=a$
+			}
+		}
+		Ahead2=lambda Scanner (a$, offset)->{
+			=false
+			Try {
+				=Eval$(Scanner, offset,2) ~ a$
+			}
+		}
+		const nl$=chr$(13)+chr$(10), quo$="""", er$="@", Ansi=3
+		Try {
+			Do
+			If Ahead("/*", offset) Then {
+				offset+=2 : ColumnNo+=2
+				While not Ahead("*/", offset)
+					If Ahead(nl$, offset) Then
+						lineNo++: ColumnNo=1 : offset+=2
+					Else
+						offset++ : ColumnNo++
+					End If
+					if offset>lim then
+						Error "End-of-file in comment. Closing comment characters not found"+er$
+					End if
+				End While
+				offset+=2 : ColumnNo+=2
+			} Else.if Ahead(nl$, offset) Then{
+				LineNo++: ColumnNo=1
+				offset+=2
+			} Else.if Ahead(quo$, offset) Then {
+				Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)
+				offset++ : ColumnNo++
+				strin=offset
+				While not Ahead(quo$, offset)
+					If Ahead("/", offset) Then
+						offset+=2 : ColumnNo+=2
+					else
+						offset++ : ColumnNo++
+					End if
+					checkerror()
+				End While
+				Output$="String "+quote$(Eval$(Scanner, strin, (offset-strin)*2))+nl$
+				offset++ : ColumnNo++
+			} Else.if Ahead("'", offset) Then {
+				Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)
+				offset++ : ColumnNo++
+				strin=offset
+				While not Ahead("'", offset)
+					If Ahead("/", offset) Then
+						offset+=2 : ColumnNo+=2
+					else
+						offset++ : ColumnNo++
+					End if
+					checkerror()
+				End While
+				lit$=format$(Eval$(Scanner, strin, (offset-strin)*2))
+				select case len(lit$)
+				case 1
+					Output$="Integer "+str$(asc(lit$),0)+nl$
+				case >1
+					{Error "Multi-character constant."+er$}
+				case 0
+					{Error "Empty character constant."+er$}
+				end select
+				offset++ : ColumnNo++
+			} Else.if Ahead2("[a-z]", offset) Then {
+				strin=offset
+				Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)
+				offset++ : ColumnNo++
+				While Ahead2("[a-zA-Z0-9_]", offset)
+					offset++ : ColumnNo++
+				End While
+				Keywords(Eval$(Scanner, strin, (offset-strin)*2))
+			} Else.if Ahead2("[0-9]", offset) Then {
+				strin=offset
+				Output$=format$("{0::-10}{1::-10} Integer ", LineNo, ColumnNo)
+				offset++ : ColumnNo++
+				While Ahead2("[0-9]", offset)
+					offset++ : ColumnNo++
+				End While
+				if Ahead2("[a-zA-Z_]", offset) then  
+					{Error " Invalid number. Starts like a number, but ends in non-numeric characters."+er$}
+				else
+					Output$=Eval$(Scanner, strin, (offset-strin)*2)+nl$
+				end if
+			} Else {
+				Symbols(Eval$(Scanner, Offset, 2))	      
+				offset++ : ColumnNo++
+			}
+			Until offset>=lim
+		}
+		er1$=leftpart$(error$,er$)
+		if er1$<>"" then
+			Print
+			Report "Error:"+er1$
+			Output$="(Error)"+nl$+"Error:"+er1$
+		else
+			Output$=format$("{0::-10}{1::-10}", LineNo, ColumnNo)+" End_of_Input"+nl$
+		end if
+		Push Output$
+		Exit
+		Clipboard Output$
+		Save.Doc Output$, "lex.t", Ansi
+		document lex$
+		Load.Doc lex$,"lex.t", Ansi
+		Report lex$
  
-	        Sub Keywords(a$)
-	                select case a$
-	                case "if"
-	                        a$="Keyword_if"
-	                case "else"
-	                        a$="Keyword_else"
-	                case "while"
-	                        a$="Keyword_while"
-	                case "print"
-	                        a$="Keyword_print"
-	                case "putc"
-	                        a$="Keyword_putc"
-	                else case
-	                        a$="Identifier "+a$
-	                end select
-	                Output$=a$+nl$
-	        End sub
-	        Sub Symbols(a$)
-	                select case a$
-	                case " ", chr$(9)
-	                        a$=""
-	                case "("
-	                        a$="LeftParen"
-	                case ")"
-	                        a$="RightParen"
-	                case "{"
-	                        a$="LeftBrace"
-	                case "}"
-	                        a$="RightBrace"
-	                case ";"
-	                        a$="Semicolon"
-	                case ","
-	                        a$="Comma"
-	                case "*"
-	                        a$="Op_multiply"
-	                case "/"
-	                        a$="Op_divide"
-	                case "+"
-	                        a$="Op_add"
-	                case "-"
-	                        a$="Op_subtract"
-	                case "%"
-	                        a$="Op_mod"
-	                case "<"
-	                {       if Ahead("=", offset+1) Then
-	                                offset++
-	                                a$="Op_lessequal"
-	                                ColumnNo++
-	                        else
-	                                a$="Op_less"
-	                        end if
-	                }
-	                case ">"
-	                {       if Ahead("=", offset+1) Then
-	                                offset++
-	                                ColumnNo++
-	                                a$="Op_greaterequal"
-	                        else
-	                                a$="Op_greater"
-	                        end if
-	                }
-	                case "="
-	                {       if Ahead("=", offset+1) Then
-	                                offset++
-	                                ColumnNo++
-	                                a$="Op_equal"
-	                        else
-	                                a$="Op_assign"
-	                        end if
-	                }
-	                case "!"
-	                {       if Ahead("=", offset+1) Then
-	                                offset++
-	                                ColumnNo++
-	                                a$="Op_notequal"
-	                        else
-	                                a$="Op_not"
-	                        end if
-	                }
-	                case "&"
-	                {       if Ahead("&", offset+1) Then
-	                                offset++
-	                                ColumnNo++
-	                                a$="Op_and"
-	                        else
-	                                a$=""
-	                        end if
-	                }
-	                case "|"
-	                {       if Ahead("|", offset+1) Then
-	                                offset++
-	                                ColumnNo++
-	                                a$="Op_or"
-	                        else
-	                                a$=""
-	                        end if
-	                }
-	                else case
-	                        {Error "Unrecognized character."+er$}
-	                end select
-	                if a$<>"" then
-	                Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)+a$+nl$
-	                end if
-	        End Sub
-	        Sub checkerror()
-	                if offset>lim then {
-	                        Error "End-of-line while scanning string literal. Closing string character not found before end-of-line."+er$
-	                } else.if  Ahead(nl$,offset) then {
-	                        Error "End-of-file while scanning string literal. Closing string character not found."+er$
-	                }
-	        End Sub
+		Sub Keywords(a$)
+			select case a$
+			case "if"
+				a$="Keyword_if"
+			case "else"
+				a$="Keyword_else"
+			case "while"
+				a$="Keyword_while"
+			case "print"
+				a$="Keyword_print"
+			case "putc"
+				a$="Keyword_putc"
+			else case
+				a$="Identifier "+a$
+			end select
+			Output$=a$+nl$
+		End sub
+		Sub Symbols(a$)
+			select case a$
+			case " ", chr$(9)
+				a$=""
+			case "("
+				a$="LeftParen"
+			case ")"
+				a$="RightParen"
+			case "{"
+				a$="LeftBrace"
+			case "}"
+				a$="RightBrace"
+			case ";"
+				a$="Semicolon"
+			case ","
+				a$="Comma"
+			case "*"
+				a$="Op_multiply"
+			case "/"
+				a$="Op_divide"
+			case "+"
+				a$="Op_add"
+			case "-"
+				a$="Op_subtract"
+			case "%"
+				a$="Op_mod"
+			case "<"
+			{	if Ahead("=", offset+1) Then
+					offset++
+					a$="Op_lessequal"
+					ColumnNo++
+				else
+					a$="Op_less"
+				end if
+			}
+			case ">"
+			{	if Ahead("=", offset+1) Then
+					offset++
+					ColumnNo++
+					a$="Op_greaterequal"
+				else
+					a$="Op_greater"
+				end if
+			}
+			case "="
+			{	if Ahead("=", offset+1) Then
+					offset++
+					ColumnNo++
+					a$="Op_equal"
+				else
+					a$="Op_assign"
+				end if
+			}
+			case "!"
+			{	if Ahead("=", offset+1) Then
+					offset++
+					ColumnNo++
+					a$="Op_notequal"
+				else
+					a$="Op_not"
+				end if
+			}
+			case "&"
+			{	if Ahead("&", offset+1) Then
+					offset++
+					ColumnNo++
+					a$="Op_and"
+				else
+					a$=""
+				end if
+			}
+			case "|"
+			{	if Ahead("|", offset+1) Then
+					offset++
+					ColumnNo++
+					a$="Op_or"
+				else
+					a$=""
+				end if
+			}
+			else case
+				{Error "Unrecognized character."+er$}
+			end select
+			if a$<>"" then
+			Output$=format$("{0::-10}{1::-10} ", LineNo, ColumnNo)+a$+nl$
+			end if
+		End Sub
+		Sub checkerror()
+			if offset>lim then {
+				Error "End-of-line while scanning string literal. Closing string character not found before end-of-line."+er$
+			} else.if  Ahead(nl$,offset) then {
+				Error "End-of-file while scanning string literal. Closing string character not found."+er$
+			}
+		End Sub
 	}
 	Module syntax_analyzer (b$){
-	        enum tokens {
-	                Op_add, Op_subtract, Op_not=5, Op_multiply=10, Op_divide, Op_mod, 
-	                Op_negate,  Op_less, Op_lessequal, Op_greater, Op_greaterequal,
-	                Op_equal, Op_notequal, Op_and, Op_or, Op_assign=100, Keyword_if=110,
-	                Keyword_else, Keyword_while, Keyword_print, Keyword_putc, LeftParen, RightParen,
-	                LeftBrace, RightBrace, Semicolon, Comma, Identifier, Integer, String, End_of_input
-	        }
+		enum tokens {
+			Op_add, Op_subtract, Op_not=5, Op_multiply=10, Op_divide, Op_mod, 
+			Op_negate,  Op_less, Op_lessequal, Op_greater, Op_greaterequal,
+			Op_equal, Op_notequal, Op_and, Op_or, Op_assign=100, Keyword_if=110,
+			Keyword_else, Keyword_while, Keyword_print, Keyword_putc, LeftParen, RightParen,
+			LeftBrace, RightBrace, Semicolon, Comma, Identifier, Integer, String, End_of_input
+		}
  
-	        Inventory precedence=Op_multiply:=13, Op_divide:=13, Op_mod:=13, Op_add:=12, Op_subtract:=12
-	        Append  precedence, Op_negate:=14, Op_not:=14, Op_less:=10, Op_lessequal:=10, Op_greater:=10 
-	        Append  precedence, Op_greaterequal:=10, Op_equal:=9, Op_notequal:=9, Op_assign:=-1, Op_and:=5
-	        Append  precedence, Op_or:=4
+		Inventory precedence=Op_multiply:=13, Op_divide:=13, Op_mod:=13, Op_add:=12, Op_subtract:=12
+		Append  precedence, Op_negate:=14, Op_not:=14, Op_less:=10, Op_lessequal:=10, Op_greater:=10 
+		Append  precedence, Op_greaterequal:=10, Op_equal:=9, Op_notequal:=9, Op_assign:=-1, Op_and:=5
+		Append  precedence, Op_or:=4
  
-	        Inventory symbols=Op_multiply:="Multiply", Op_divide:="Divide", Op_mod:="Mod", Op_add:="Add"
-	        Append  symbols, Op_negate:="Negate", Op_not:="Not", Op_less:="Less", Op_subtract:="Subtract"
-	        Append  symbols, Op_lessequal:="LessEqual", Op_greater:="Greater", Op_greaterequal:="GreaterEqual"
-	        Append  symbols, Op_equal:="Equal", Op_notequal:="NotEqual",  Op_and:="And", Op_or:="Or" 
+		Inventory symbols=Op_multiply:="Multiply", Op_divide:="Divide", Op_mod:="Mod", Op_add:="Add"
+		Append  symbols, Op_negate:="Negate", Op_not:="Not", Op_less:="Less", Op_subtract:="Subtract"
+		Append  symbols, Op_lessequal:="LessEqual", Op_greater:="Greater", Op_greaterequal:="GreaterEqual"
+		Append  symbols, Op_equal:="Equal", Op_notequal:="NotEqual",  Op_and:="And", Op_or:="Or" 
  
-	        def lineNo, ColumnNo, m, line$, a, lim, cur=-1
-	        const nl$=chr$(13)+chr$(10), Ansi=3
-	        Dim lex$()
-	        lex$()=piece$(b$,chr$(13)+chr$(10)) 
-	        lim=dimension(lex$(),1)-1
-	        op=End_of_input
-	        flush
-	        k=0
-	        Try {
-	                push (,)   ' Null
-	                getone(&op)
-	                repeat
-	                stmt(&op)
-	                shift 2  ' swap two top items
-	                push ("Sequence", array, array)
-	                k++
-	                until op=End_of_Input
-	        }
-	        er$=error$
-	        if er$<>"" then print er$ : flush: break
-	        Print "Ast"
-	        Document Output$
-	        prt_ast()
-	        Push Output$
-	        exit
-	        clipboard Output$
-	        Save.Doc Output$, "parse.t", Ansi
-	        document parse$
-	        Load.Doc parse$,"parse.t", Ansi
-	        Report parse$
+		def lineNo, ColumnNo, m, line$, a, lim, cur=-1
+		const nl$=chr$(13)+chr$(10), Ansi=3
+		Dim lex$()
+		lex$()=piece$(b$,chr$(13)+chr$(10)) 
+		lim=dimension(lex$(),1)-1
+		op=End_of_input
+		flush
+		k=0
+		Try {
+			push (,)   ' Null
+			getone(&op)
+			repeat
+			stmt(&op)
+			shift 2  ' swap two top items
+			push ("Sequence", array, array)
+			k++
+			until op=End_of_Input
+		}
+		er$=error$
+		if er$<>"" then print er$ : flush: break
+		Print "Ast"
+		Document Output$
+		prt_ast()
+		Push Output$
+		exit
+		clipboard Output$
+		Save.Doc Output$, "parse.t", Ansi
+		document parse$
+		Load.Doc parse$,"parse.t", Ansi
+		Report parse$
  
-	        sub prt_ast(t)
-	                if len(t)<1 then
-	                        Output$=";"+nl$
-	                else.if len(t)=3 then
-	                        Output$=t#val$(0) +nl$
-	                        prt_ast(t#val(1)) : prt_ast(t#val(2))
-	                else
-	                        Output$=t#val$(0) +nl$
-	                end if
-	        end sub
-	        sub expr(p)   ' only a number
-	                local x=(,), prev=op
-	                if  op>=Identifier then
-	                        x=(line$,)
-	                        getone(&op)
-	                else.if op=LeftParen then
-	                        paren_exp()
-	                        x=array
-	                else.if op<10 then
-	                        getone(&op)
-	                        expr(precedence(int(Op_negate)))
-	                        read local y
-	                        if prev=Op_add then
-	                                x=y
-	                        else
-	                                if prev=Op_subtract then prev=Op_negate
-	                                x=(symbols(prev), y,(,))
-	                        End if
-	                else
-	                         {error "??? "+eval$(op)}
-	                end if
-	                local prec
-	                while exist(precedence, int(op))
-	                        prev=op : prec=eval(precedence)
-	                        if prec<14 and prec>=p else exit
-	                        getone(&op)
-	                        expr(prec+1)  ' all operators are left associative (use prec for right a.)
-	                        x=(symbols(int(prev)), x, array)
-	                End While
-	                Push x
-	        end sub
-	        sub paren_exp()
-	                expected(LeftParen)
-	                getone(&op)
-	                expr(0)
-	                expected(RightParen)
-	                getone(&op)
-	        end sub
-	        sub stmt(&op)
-	                local t=(,)
-	                if op=Identifier then
-	                        t=(line$)
-	                        getone(&op)
-	                        expected(Op_assign)
-	                        getone(&op) 
-	                        expr(0)
-	                        read local rightnode
-	                        Push ("Assign",t,rightnode)
-	                        expected(Semicolon)
-	                        getone(&op)
-	                else.if op=Semicolon then
-	                        getone(&op)
-	                        Push (";",)
-	                else.if op=Keyword_print then
-	                        getone(&op)
-	                        expected(LeftParen)
-	                        repeat
-	                                getone(&op)
-	                                if op=String then
-	                                        Push ("Prts",(line$,),(,))
-	                                        getone(&op)
-	                                else
-	                                        expr(0)
-	                                        Push ("Prti", array,(,))
-	                                end if
-	                                t=("Sequence", t, array)
-	                        until op<>Comma
-	                        expected(RightParen)
-	                        getone(&op)
-	                        expected(Semicolon)
-	                        getone(&op)
-	                        push t
-	                else.if op=Keyword_while then
-	                        getone(&op)
-	                        paren_exp()
-	                        stmt(&op)
-	                        shift 2
-	                        Push ("While",array, array)
-	                else.if op=Keyword_if then
-	                        getone(&op)
-	                        paren_exp()
-	                        stmt(&op)
-	                        local s2=(,)
-	                        if op=Keyword_else then
-	                                getone(&op)
-	                                stmt(&op)
-	                                read s2
-	                        end if
-	                        shift 2
-	                        Push ("If",array ,("If",array,s2))
-	                else.if op=Keyword_putc then
-	                        getone(&op)
-	                        paren_exp()
-	                        Push ("Prtc",array,t)
-	                        expected(Semicolon)
-	                        getone(&op)
-	                else.if op=LeftBrace then
-	                        Brace()
-	                else
-	                        error "Unkown Op"       
-	                end if
-	        end sub
-	        Sub Brace()
-	                        getone(&op)
-	                        while op<>RightBrace and op<>End_of_input
-	                                stmt(&op)
-	                                t=("Sequence", t, array)
-	                        end while
-	                        expected(RightBrace)
-	                        getone(&op)
-	                        push t
-	        End Sub
-	        Sub expected(what)
-	                if not op=what then {Error "Expected "+eval$(what)+str$(LineNo)+","+Str$(ColumnNo)}
-	        End Sub
-	        sub getone(&op)
-	                op=End_of_input
-	                while cur<lim
-	                cur++
-	                line$=trim$(lex$(cur))
-	                if line$<>"" then exit
-	                end while
-	                if cur=lim then exit sub
-	                LineNo=Val(line$,"int",m)
-	                line$=mid$(line$, m)
-	                ColumnNo=Val(line$,"int",m)
-	                line$=trim$(mid$(line$, m))
-	                Rem : Print LineNo, ColumnNo
-	                m=instr(line$," ")
-	                if m>0 then op=Eval("."+leftpart$(line$, " ")) else op=Eval("."+line$)
-	        end sub
+		sub prt_ast(t)
+			if len(t)<1 then
+				Output$=";"+nl$
+			else.if len(t)=3 then
+				Output$=t#val$(0) +nl$
+				prt_ast(t#val(1)) : prt_ast(t#val(2))
+			else
+				Output$=t#val$(0) +nl$
+			end if
+		end sub
+		sub expr(p)   ' only a number
+			local x=(,), prev=op
+			if  op>=Identifier then
+				x=(line$,)
+				getone(&op)
+			else.if op=LeftParen then
+				paren_exp()
+				x=array
+			else.if op<10 then
+				getone(&op)
+				expr(precedence(int(Op_negate)))
+				read local y
+				if prev=Op_add then
+					x=y
+				else
+					if prev=Op_subtract then prev=Op_negate
+					x=(symbols(prev), y,(,))
+				End if
+			else
+				 {error "??? "+eval$(op)}
+			end if
+			local prec
+			while exist(precedence, int(op))
+				prev=op : prec=eval(precedence)
+				if prec<14 and prec>=p else exit
+				getone(&op)
+				expr(prec+1)  ' all operators are left associative (use prec for right a.)
+				x=(symbols(int(prev)), x, array)
+			End While
+			Push x
+		end sub
+		sub paren_exp()
+			expected(LeftParen)
+			getone(&op)
+			expr(0)
+			expected(RightParen)
+			getone(&op)
+		end sub
+		sub stmt(&op)
+			local t=(,)
+			if op=Identifier then
+				t=(line$)
+				getone(&op)
+				expected(Op_assign)
+				getone(&op) 
+				expr(0)
+				read local rightnode
+				Push ("Assign",t,rightnode)
+				expected(Semicolon)
+				getone(&op)
+			else.if op=Semicolon then
+				getone(&op)
+				Push (";",)
+			else.if op=Keyword_print then
+				getone(&op)
+				expected(LeftParen)
+				repeat
+					getone(&op)
+					if op=String then
+						Push ("Prts",(line$,),(,))
+						getone(&op)
+					else
+						expr(0)
+						Push ("Prti", array,(,))
+					end if
+					t=("Sequence", t, array)
+				until op<>Comma
+				expected(RightParen)
+				getone(&op)
+				expected(Semicolon)
+				getone(&op)
+				push t
+			else.if op=Keyword_while then
+				getone(&op)
+				paren_exp()
+				stmt(&op)
+				shift 2
+				Push ("While",array, array)
+			else.if op=Keyword_if then
+				getone(&op)
+				paren_exp()
+				stmt(&op)
+				local s2=(,)
+				if op=Keyword_else then
+					getone(&op)
+					stmt(&op)
+					read s2
+				end if
+				shift 2
+				Push ("If",array ,("If",array,s2))
+			else.if op=Keyword_putc then
+				getone(&op)
+				paren_exp()
+				Push ("Prtc",array,t)
+				expected(Semicolon)
+				getone(&op)
+			else.if op=LeftBrace then
+				Brace()
+			else
+				error "Unkown Op"
+			end if
+		end sub
+		Sub Brace()
+				getone(&op)
+				while op<>RightBrace and op<>End_of_input
+					stmt(&op)
+					t=("Sequence", t, array)
+				end while
+				expected(RightBrace)
+				getone(&op)
+				push t
+		End Sub
+		Sub expected(what)
+			if not op=what then {Error "Expected "+eval$(what)+str$(LineNo)+","+Str$(ColumnNo)}
+		End Sub
+		sub getone(&op)
+			op=End_of_input
+			while cur<lim
+			cur++
+			line$=trim$(lex$(cur))
+			if line$<>"" then exit
+			end while
+			if cur=lim then exit sub
+			LineNo=Val(line$,"int",m)
+			line$=mid$(line$, m)
+			ColumnNo=Val(line$,"int",m)
+			line$=trim$(mid$(line$, m))
+			Rem : Print LineNo, ColumnNo
+			m=instr(line$," ")
+			if m>0 then op=Eval("."+leftpart$(line$, " ")) else op=Eval("."+line$)
+		end sub
 	}
 	Module CodeGenerator (s$){
-	        Function code$(op$) {
-	                =format$("{0::-6} {1}", pc, op$)
-	                pc++
-	        }
-	        Function code2$(op$, n$) {
-	                =format$("{0::-6} {1} {2}", pc, op$, n$)
-	                pc+=5
-	        }
-	        Function code3$(op$,pc, st, ed) {
-	                =format$("{0::-6} {1} ({2}) {3}", pc, op$, ed-st-1, ed)
-	        }
+		Function code$(op$) {
+			=format$("{0::-6} {1}", pc, op$)
+			pc++
+		}
+		Function code2$(op$, n$) {
+			=format$("{0::-6} {1} {2}", pc, op$, n$)
+			pc+=5
+		}
+		Function code3$(op$,pc, st, ed) {
+			=format$("{0::-6} {1} ({2}) {3}", pc, op$, ed-st-1, ed)
+		}
  
-	        Enum tok {
-	                gneg, gnot, gmul, gdiv, gmod, gadd, gle, gsub, glt
-	                gle, ggt, gge, geq, gne, gand, gor, gprtc, gprti, gprts,
-	                gif, gwhile, gAssign, gSeq, gstring, gidentifier, gint, gnone
-	        }
+		Enum tok {
+			gneg, gnot, gmul, gdiv, gmod, gadd, gle, gsub, glt
+			gle, ggt, gge, geq, gne, gand, gor, gprtc, gprti, gprts,
+			gif, gwhile, gAssign, gSeq, gstring, gidentifier, gint, gnone
+		}
  
-	        \\ Inventories are lists with keys, or keys/data (key must be unique)
-	        \\ there is one type more the Invetory Queue which get same keys.
-	        \\ But here not used.
-	        Inventory symb="Multiply":=gmul, "Divide":=gdiv, "Mod":=gmod, "Add":=gadd
-	        Append  symb, "Negate":=gneg, "Not":=gnot,"Less":=glt,"Subtract":=gsub
-	        Append  symb, "LessEqual":=gle, "Greater":=ggt, "GreaterEqual":=gge, "Sequence":=gSeq
-	        Append  symb, "Equal":=geq, "NotEqual":=gne,  "And":=gand, "Or":=gor, "While":=gwhile
-	        Append  symb, "Prtc":=gprtc,"Prti":=gprti,"Prts":=gprts, "Assign":=gAssign, "If":=gif
-	        Append  symb, "String":=gstring, "Identifier":=gidentifier, "Integer":=gint, ";", gnone
+		\\ Inventories are lists with keys, or keys/data (key must be unique)
+		\\ there is one type more the Invetory Queue which get same keys.
+		\\ But here not used.
+		Inventory symb="Multiply":=gmul, "Divide":=gdiv, "Mod":=gmod, "Add":=gadd
+		Append  symb, "Negate":=gneg, "Not":=gnot,"Less":=glt,"Subtract":=gsub
+		Append  symb, "LessEqual":=gle, "Greater":=ggt, "GreaterEqual":=gge, "Sequence":=gSeq
+		Append  symb, "Equal":=geq, "NotEqual":=gne,  "And":=gand, "Or":=gor, "While":=gwhile
+		Append  symb, "Prtc":=gprtc,"Prti":=gprti,"Prts":=gprts, "Assign":=gAssign, "If":=gif
+		Append  symb, "String":=gstring, "Identifier":=gidentifier, "Integer":=gint, ";", gnone
  
-	        Inventory DataSet
-	        \\ We set string as key. key maybe an empty string, a string or a number.
-	        \\ so we want eash string to saved one time only.
-	        Inventory Strings
+		Inventory DataSet
+		\\ We set string as key. key maybe an empty string, a string or a number.
+		\\ so we want eash string to saved one time only.
+		Inventory Strings
  
-	        Const nl$=chr$(13)+chr$(10), Ansi=3
-	        Def z$, lim, line$, newvar_ok, i=0
-	        Document message$=nl$
-	        Global pc     \\ functions have own scope, so we make it global, for this module, and childs.
+		Const nl$=chr$(13)+chr$(10), Ansi=3
+		Def z$, lim, line$, newvar_ok, i=0
+		Document message$=nl$
+		Global pc     \\ functions have own scope, so we make it global, for this module, and childs.
  
-	        Dim lines$()
-	        s$=filter$(s$,chr$(9))   \\ exclude tabs
-	        Lines$()=piece$(s$,nl$) \\ break to lines
-	        lim=len(Lines$())
-	        Flush ' empty stack (there is a current stack of values which we use here)
+		Dim lines$()
+		s$=filter$(s$,chr$(9))   \\ exclude tabs
+		Lines$()=piece$(s$,nl$) \\ break to lines
+		lim=len(Lines$())
+		Flush ' empty stack (there is a current stack of values which we use here)
  
-	        Load_Ast()
-	        If not stack.size=1 Then Flush : Error "Ast not loaded"
-	        AST=array   \\ pop the array from stack
-	        Document Assembly$, Header$
+		Load_Ast()
+		If not stack.size=1 Then Flush : Error "Ast not loaded"
+		AST=array   \\ pop the array from stack
+		Document Assembly$, Header$
  
-	        \\ all lines of assembly goes to stack. Maybe not in right order.
-	        \\ Push statement push to top, Data statement push to bottom of stack
+		\\ all lines of assembly goes to stack. Maybe not in right order.
+		\\ Push statement push to top, Data statement push to bottom of stack
  
-	        CodeGenerator(Ast)
-	        Data  code$("halt") ' append to end of stack
-	        \\ So now we get all data (letters) from stack
-	        While not empty
-	                Assembly$=letter$+nl$
-	        end while
-	        \\ So now we have to place them in order
-	        Sort Assembly$
+		CodeGenerator(Ast)
+		Data  code$("halt") ' append to end of stack
+		\\ So now we get all data (letters) from stack
+		While not empty
+			Assembly$=letter$+nl$
+		end while
+		\\ So now we have to place them in order
+		Sort Assembly$
  
-	        \\ Let's make the header
-	        Header$=format$("Datasize: {0} Strings: {1}", Len(Dataset),Len(strings))
-	        \\ we use an iterator object, str^ is the counter, readonly, but Eval$() use it from object.
-	        str=each(strings)    
-	        While str
-	                Header$=nl$+Eval$(str)
-	        End while
-	        Assembly$=nl$
-	        \\ insert to line 1 the Header
-	        Insert 1 Assembly$=Header$
-	        \\ Also we check for warnings
-	        If len(message$)>2 then Assembly$="Warnings: "+nl$+message$
-	        \\ So now we get a report
-	        \\ (at each 3/4 of window's lines, the printing stop and wait for user response, any key)
-	        Push Assembly$
-	        Exit
-	        Report Assembly$
-	        Clipboard Assembly$
-	        Save.Doc Assembly$, "code.t", Ansi
-	        End
-	        \\ subs have 10000 limit for recursion but can be extended to 1000000 or more.
-	        Sub CodeGenerator(t)
+		\\ Let's make the header
+		Header$=format$("Datasize: {0} Strings: {1}", Len(Dataset),Len(strings))
+		\\ we use an iterator object, str^ is the counter, readonly, but Eval$() use it from object.
+		str=each(strings)    
+		While str
+			Header$=nl$+Eval$(str)
+		End while
+		Assembly$=nl$
+		\\ insert to line 1 the Header
+		Insert 1 Assembly$=Header$
+		\\ Also we check for warnings
+		If len(message$)>2 then Assembly$="Warnings: "+nl$+message$
+		\\ So now we get a report
+		\\ (at each 3/4 of window's lines, the printing stop and wait for user response, any key)
+		Push Assembly$
+		Exit
+		Report Assembly$
+		Clipboard Assembly$
+		Save.Doc Assembly$, "code.t", Ansi
+		End
+		\\ subs have 10000 limit for recursion but can be extended to 1000000 or more.
+		Sub CodeGenerator(t)
  
-	                If len(t)=3 then
-	                        select case  t#val(0)
-	                        Case gSeq
-	                                CodeGenerator(t#val(1)) : CodeGenerator(t#val(2))
-	                        Case gwhile
-	                        {
-	                                local spc=pc
-	                                CodeGenerator(t#val(1)) 
-	                                local pc1=pc
-	                                pc+=5 ' room for jz
-	                                CodeGenerator(t#val(2))
-	                                data code3$("jz",pc1, pc1, pc+5)
-	                                data code3$("jmp",pc,  pc, spc)
-	                                pc+=5  ' room for jmp
-	                        }
-	                        Case gif
-	                        {
-	                                CodeGenerator(t#val(1)) 
-	                                local pc1=pc, pc2
-	                                pc+=5
-	                                CodeGenerator(t#val(2)#val(1)) 
-	                                If len(t#val(2)#val(2))>0 then
-	                                        pc2=pc
-	                                        pc+=5
-	                                        data code3$("jz",pc1, pc1, pc)
-	                                        CodeGenerator(t#val(2)#val(2))
-	                                        data code3$("jmp",pc2, pc2, pc)
-	                                else
-	                                        data code3$("jz",pc1, pc1, pc)
-	                                end If          
-	                        }
-	                        Case gAssign
-	                        {
-	                                CodeGenerator(t#val(2))
-	                                local newvar_ok=true
-	                                CodeGenerator(t#val(1))
-	                        }
-	                        case gneg to gnot, gprtc to gprts
-	                                CodeGenerator(t#val(1)) : data code$(mid$(eval$(t#val(0)),2))
-	                        case gmul to gor
-	                        {
-	                                CodeGenerator(t#val(1))
-	                                CodeGenerator(t#val(2))
-	                                data code$(mid$(eval$(t#val(0)),2))
-	                        }
-	                        End select
-	                Else.if len(t)=2 then
-	                        select case  t#val(0)
-	                        Case gString
-	                        {
-	                                local spos
-	                                If exist(strings,t#val$(1)) then
-	                                        spos=eval(strings!)
-	                                else
-	                                        append strings, t#val$(1)               
-	                                        spos=len(strings)-1
-	                                end If
-	                                Push code2$("push",str$(spos,0))
-	                        }
-	                        Case gInt
-	                                Push code2$("push",t#val$(1), pc)
-	                        Case gIdentifier
-	                        {
-	                                local ipos
-	                                If exist(dataset,t#val$(1)) then
-	                                        ipos=Eval(dataset!)  ' return position
-	                                else.if newvar_ok then
-	                                        Append dataset, t#val$(1)
-	                                        ipos=len(dataset)-1
-	                                else
-	                                        message$="Variable "+t#val$(1)+" not initialized"+nl$
+			If len(t)=3 then
+				select case  t#val(0)
+				Case gSeq
+					CodeGenerator(t#val(1)) : CodeGenerator(t#val(2))
+				Case gwhile
+				{
+					local spc=pc
+					CodeGenerator(t#val(1)) 
+					local pc1=pc
+					pc+=5 ' room for jz
+					CodeGenerator(t#val(2))
+					data code3$("jz",pc1, pc1, pc+5)
+					data code3$("jmp",pc,  pc, spc)
+					pc+=5  ' room for jmp
+				}
+				Case gif
+				{
+					CodeGenerator(t#val(1)) 
+					local pc1=pc, pc2
+					pc+=5
+					CodeGenerator(t#val(2)#val(1)) 
+					If len(t#val(2)#val(2))>0 then
+						pc2=pc
+						pc+=5
+						data code3$("jz",pc1, pc1, pc)
+						CodeGenerator(t#val(2)#val(2))
+						data code3$("jmp",pc2, pc2, pc)
+					else
+						data code3$("jz",pc1, pc1, pc)
+					end If	  
+				}
+				Case gAssign
+				{
+					CodeGenerator(t#val(2))
+					local newvar_ok=true
+					CodeGenerator(t#val(1))
+				}
+				case gneg to gnot, gprtc to gprts
+					CodeGenerator(t#val(1)) : data code$(mid$(eval$(t#val(0)),2))
+				case gmul to gor
+				{
+					CodeGenerator(t#val(1))
+					CodeGenerator(t#val(2))
+					data code$(mid$(eval$(t#val(0)),2))
+				}
+				End select
+			Else.if len(t)=2 then
+				select case  t#val(0)
+				Case gString
+				{
+					local spos
+					If exist(strings,t#val$(1)) then
+						spos=eval(strings!)
+					else
+						append strings, t#val$(1)	       
+						spos=len(strings)-1
+					end If
+					Push code2$("push",str$(spos,0))
+				}
+				Case gInt
+					Push code2$("push",t#val$(1), pc)
+				Case gIdentifier
+				{
+					local ipos
+					If exist(dataset,t#val$(1)) then
+						ipos=Eval(dataset!)  ' return position
+					else.if newvar_ok then
+						Append dataset, t#val$(1)
+						ipos=len(dataset)-1
+					else
+						message$="Variable "+t#val$(1)+" not initialized"+nl$
  
-	                                end If
-	                                If newvar_ok then
-	                                        Push code2$("store","["+str$(ipos, 0)+"]")
-	                                else
-	                                        Push code2$("fetch","["+str$(ipos, 0)+"]")
-	                                end If
-	                        }
-	                        end select
-	                End If
-	        End Sub
-	        Sub Load_Ast()
-	                        If i>=lim then Push (,) : exit sub
-	                        do
-	                        line$=Trim$(lines$(i))	                        I++
-	                        tok$=piece$(line$," ")(0)
-	                        until line$<>"" or i>=lim
-	                        If tok$="Identifier" then
-	                                Push (gidentifier,trim$(Mid$(line$,11)))
-	                        else.if tok$="Integer" then
-	                                long n=Val(Mid$(line$,8))  ' check overflow
-	                                Push (gint, Trim$(Mid$(line$,8)))
-	                        else.if tok$="String" then
-	                                Push (gstring,Trim$(Mid$(line$,7)))
-	                        else.if tok$=";" then
-	                                Push (,)
-	                        Else
-	                                local otok=symb(tok$)
-	                                Load_Ast() 
-	                                Load_Ast()
-	                                Shift 2
-	                                Push (otok,array, array)
-	                        End If
-	        End Sub
+					end If
+					If newvar_ok then
+						Push code2$("store","["+str$(ipos, 0)+"]")
+					else
+						Push code2$("fetch","["+str$(ipos, 0)+"]")
+					end If
+				}
+				end select
+			End If
+		End Sub
+		Sub Load_Ast()
+				If i>=lim then Push (,) : exit sub
+				do
+				line$=Trim$(lines$(i))
+				I++
+				tok$=piece$(line$," ")(0)
+				until line$<>"" or i>=lim
+				If tok$="Identifier" then
+					Push (gidentifier,trim$(Mid$(line$,11)))
+				else.if tok$="Integer" then
+					long n=Val(Mid$(line$,8))  ' check overflow
+					Push (gint, Trim$(Mid$(line$,8)))
+				else.if tok$="String" then
+					Push (gstring,Trim$(Mid$(line$,7)))
+				else.if tok$=";" then
+					Push (,)
+				Else
+					local otok=symb(tok$)
+					Load_Ast() 
+					Load_Ast()
+					Shift 2
+					Push (otok,array, array)
+				End If
+		End Sub
 	}
 	Module Virtual_Machine_Interpreter (a$){
 		\\ function to extract string, replacing escape codes.
@@ -9255,46 +9258,46 @@ MODULE COMPILER {Module CompilerExample {
 	}
 	Push {
 	{
-	        /*
-	        This is an integer ascii Mandelbrot generator
-	        */
-	        left_edge= -420;
-	        right_edge=300;
-	        top_edge=300;
-	        bottom_edge = -300;
-	        x_step=7;
-	        y_step=15;
+		/*
+		This is an integer ascii Mandelbrot generator
+		*/
+		left_edge= -420;
+		right_edge=300;
+		top_edge=300;
+		bottom_edge = -300;
+		x_step=7;
+		y_step=15;
  
-	        max_iter=200;
+		max_iter=200;
  
-	        y0 = top_edge;
-	        while (y0 > bottom_edge) {
-	                x0 = left_edge;
-	                while (x0 < right_edge) {
-	                        y = 0;
-	                        x = 0;
-	                        the_char = ' ';
-	                        i = 0;
-	                        while (i < max_iter) {
-	                                x_x = (x * x) / 200;
-	                                y_y = (y * y) / 200;
-	                                if (x_x + y_y > 800 ) {
-	                                        the_char = '0' + i;
-	                                        if (i > 9) {
-	                                                the_char = '@';
-	                                        }
-	                                        i = max_iter;
-	                                }
-	                                y = x * y / 100 + y0;
-	                                x = x_x - y_y + x0;
-	                                i = i + 1;
-	                        }
-	                        putc(the_char);
-	                        x0 = x0 + x_step;
-	                }
-	                putc('\n');
-	                y0 = y0 - y_step;
-	        }
+		y0 = top_edge;
+		while (y0 > bottom_edge) {
+			x0 = left_edge;
+			while (x0 < right_edge) {
+				y = 0;
+				x = 0;
+				the_char = ' ';
+				i = 0;
+				while (i < max_iter) {
+					x_x = (x * x) / 200;
+					y_y = (y * y) / 200;
+					if (x_x + y_y > 800 ) {
+						the_char = '0' + i;
+						if (i > 9) {
+							the_char = '@';
+						}
+						i = max_iter;
+					}
+					y = x * y / 100 + y0;
+					x = x_x - y_y + x0;
+					i = i + 1;
+				}
+				putc(the_char);
+				x0 = x0 + x_step;
+			}
+			putc('\n');
+			y0 = y0 - y_step;
+		}
 	}
 	} 
  
@@ -9310,6 +9313,7 @@ MODULE COMPILER {Module CompilerExample {
 	Set Fast 'restore speed setting
 }
 CompilerExample
+
 }
 MODULE CC {move scale.x/2, scale.y/2
 legend "This is centered", "Arial", 22,pi/6,2 , 0
@@ -15393,10 +15397,10 @@ For This {
 }
 
 if exist(Filename$) then
-Document BackUp$
-Load.Doc BackUp$, filename$
+      Document BackUp$
+      Load.Doc BackUp$, filename$
 else
-Document BackUp$=first$
+      Document BackUp$=first$
 end if
 Pad.text$=BackUp$
 Function NotePad.Unload {
@@ -15746,5 +15750,398 @@ Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
 keyboard "INFO"+chr$(13)
+}
+MODULE POPUP {Declare Form1 Form
+Declare aPopUpForm Form
+With Form1, "Title", "Hello There"
+With aPopUpForm, "Title", "This is a PopUp Form", "Visible" as PopUpVisible
+Declare Text1 TextBox Form aPopUpForm
+Method Text1,"Move", 2000,2000,6000,600
+With Text1,"Text" as txt$
+txt$="U+10437 (𐐷) in UTF-16"
+Function Text1.Enter {
+      \\ If we press enter in textbox in popup form
+      \\ we change title in form1
+      With Form1, "Title", txt$
+      With form1, "GetFocus"
+}
+X=1000
+Function Form1.MouseDown {
+\* Use STACK to see stack in console...
+\* ...before you decide what to do with the values
+\* Stack is cleared by you or by system, if stack isn't empty
+      Rem 1 : Stack
+      Read button
+      If button<>2 Then Exit
+      Drop  \\ drop shift
+      Local X, Y : Read X, Y
+      
+      Method Form1, "PopUp", aPopUpForm, X, Y
+}
+Method Form1,"Show", 1  \\ modal  means wait to return
+\\ we return focus to console
+Show
+Declare Form1 Nothing
+Print X
+end
+}
+MODULE SURROGATE {\\ pressing alt press INS or + on keypad and 10437 on keypad or number keys and release alt to get 𐐷
+
+Print "𐐷"
+Print hex$(chrcode("𐐷"),2.5)="10437"
+Print chrcode$(0x10437)="𐐷"
+
+keyboard "𐐷"
+print inkey$
+keyboard "𐐷"
+Print key$
+keyboard "1𐐷2"+chr$(13)
+Input "surrogate=",a$
+Print a$
+Print $(4), "surrogate=";
+Input ! a$, 30
+Print a$, $(0)   ' return to normal text
+if random(1,2)=1 then Print else Print Under
+Report a$
+}
+MODULE ΓΛΩΣΣΑ {\\ `notepad for educational school language ΓΛΩΣΣΑ
+Greek  ' this make the popup menu of edit boc as 
+Show
+Clear
+Flush
+first$={ΠΡΟΓΡΑΜΜΑ Κυκλική_Ουρά
+ΣΤΑΘΕΡΕΣ
+  ΛάθοςΕξ = "Λάθος Εξαγωγής, Η ουρά είναι άδεια"
+  Εξ = "Εξαγωγή "
+ΜΕΤΑΒΛΗΤΕΣ
+  ΑΚΕΡΑΙΕΣ: Πίσω, Μπροστά, Ουρα[10], ι, Τιμή
+ΑΡΧΗ
+  Τιμή <- 0
+  Πίσω <- 1
+  Μπροστά <- 0
+  ΓΙΑ ι ΑΠΟ 1 ΜΕΧΡΙ 10
+    Ουρα[ι] <- 0
+  ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+  ΚΑΛΕΣΕ Δείξε(Πίσω, Μπροστά, Ουρα) 
+!! Προσθήκη 10 στοιχεία 1 έως 10
+  ΓΙΑ ι ΑΠΟ 1 ΜΕΧΡΙ 10
+    ΚΑΛΕΣΕ Εισαγωγή_Στοιχείου(ι, Πίσω, Μπροστά, Ουρα) 
+  ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+  ΚΑΛΕΣΕ Δείξε(Πίσω, Μπροστά, Ουρα) 
+!! Αφαίρεση 5 στοιχείων
+  ΓΙΑ ι ΑΠΟ 1 ΜΕΧΡΙ 5
+    ΑΝ Μπροστά <> 0 ΤΟΤΕ
+      ΚΑΛΕΣΕ Εξαγωγή_Στοιχείου(Τιμή, Πίσω, Μπροστά, Ουρα) 
+      ΓΡΑΨΕ Εξ, Τιμή
+    ΑΛΛΙΩΣ
+      ΓΡΑΨΕ ΛάθοςΕξ
+    ΤΕΛΟΣ_ΑΝ
+  ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+  ΚΑΛΕΣΕ Δείξε(Πίσω, Μπροστά, Ουρα) 
+!! Προσθήκη 5 στοιχεία 11 έως 15
+  ΓΙΑ ι ΑΠΟ 1 ΜΕΧΡΙ 5
+    ΚΑΛΕΣΕ Εισαγωγή_Στοιχείου(ι + 10, Πίσω, Μπροστά, Ουρα) 
+  ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+  ΚΑΛΕΣΕ Δείξε(Πίσω, Μπροστά, Ουρα) 
+!! Αφαίρεση 10 στοιχείων
+  ΓΙΑ ι ΑΠΟ 1 ΜΕΧΡΙ 10
+    ΑΝ Μπροστά <> 0 ΤΟΤΕ
+      ΚΑΛΕΣΕ Εξαγωγή_Στοιχείου(Τιμή, Πίσω, Μπροστά, Ουρα) 
+      ΓΡΑΨΕ Εξ, Τιμή
+    ΑΛΛΙΩΣ
+      ΓΡΑΨΕ ΛάθοςΕξ
+    ΤΕΛΟΣ_ΑΝ
+  ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+  ΚΑΛΕΣΕ Δείξε(Πίσω, Μπροστά, Ουρα) 
+!! Προσθήκη 2 στοιχεία 16 έως 17
+  ΓΙΑ ι ΑΠΟ 1 ΜΕΧΡΙ 2
+    ΚΑΛΕΣΕ Εισαγωγή_Στοιχείου(ι + 15, Πίσω, Μπροστά, Ουρα) 
+  ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+  ΚΑΛΕΣΕ Δείξε(Πίσω, Μπροστά, Ουρα) 
+!! Αφαίρεση 3 στοιχείων
+  ΓΙΑ ι ΑΠΟ 1 ΜΕΧΡΙ 3
+    ΑΝ Μπροστά <> 0 ΤΟΤΕ
+      ΚΑΛΕΣΕ Εξαγωγή_Στοιχείου(Τιμή, Πίσω, Μπροστά, Ουρα) 
+      ΓΡΑΨΕ Εξ, Τιμή
+    ΑΛΛΙΩΣ
+      ΓΡΑΨΕ ΛάθοςΕξ
+    ΤΕΛΟΣ_ΑΝ
+  ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+  ΚΑΛΕΣΕ Δείξε(Πίσω, Μπροστά, Ουρα) 
+ΤΕΛΟΣ_ΠΡΟΓΡΑΜΜΑΤΟΣ
+
+ΔΙΑΔΙΚΑΣΙΑ Εισαγωγή_Στοιχείου(Α, Πίσω, Μπροστά, Ουρα) 
+ΜΕΤΑΒΛΗΤΕΣ
+  ΑΚΕΡΑΙΕΣ: Α, Πίσω, Μπροστά, Ουρα[10] 
+ΑΡΧΗ
+  ΑΝ Πίσω = Μπροστά ΤΟΤΕ
+    ΓΡΑΨΕ "Η ουρά γέμισε, δεν θα βάλω το ", Α
+  ΑΛΛΙΩΣ
+    ΑΝ Μπροστά = 0 ΤΟΤΕ
+      Μπροστά <- Πίσω
+    ΤΕΛΟΣ_ΑΝ
+    Ουρα[Πίσω] <- Α
+    Πίσω <- Πίσω mod 10 + 1
+  ΤΕΛΟΣ_ΑΝ
+ΤΕΛΟΣ_ΔΙΑΔΙΚΑΣΙΑΣ
+ΔΙΑΔΙΚΑΣΙΑ Εξαγωγή_Στοιχείου(Α, Πίσω, Μπροστά, Ουρα) 
+ΜΕΤΑΒΛΗΤΕΣ
+  ΑΚΕΡΑΙΕΣ: Α, Πίσω, Μπροστά, Ουρα[10] 
+ΑΡΧΗ
+  ΑΝ Μπροστά > 0 ΤΟΤΕ
+    Α <- Ουρα[Μπροστά] 
+    Μπροστά <- Μπροστά mod 10 + 1
+    ΑΝ Μπροστά = Πίσω ΤΟΤΕ
+      Μπροστά <- 0
+    ΤΕΛΟΣ_ΑΝ
+  ΤΕΛΟΣ_ΑΝ
+ΤΕΛΟΣ_ΔΙΑΔΙΚΑΣΙΑΣ
+ΔΙΑΔΙΚΑΣΙΑ Δείξε(Πίσω, Μπροστά, Ουρα) 
+ΜΕΤΑΒΛΗΤΕΣ
+  ΑΚΕΡΑΙΕΣ: Πίσω, Μπροστά, Ουρα[10], ι
+ΑΡΧΗ
+  ΑΝ Μπροστά = 0 ΤΟΤΕ
+    ΓΡΑΨΕ "Η ουρά είναι άδεια"
+  ΑΛΛΙΩΣ
+    ΓΡΑΨΕ "Αρχή Ουράς ", Μπροστά
+    ΑΝ Μπροστά = Πίσω ΤΟΤΕ
+      ΓΡΑΨΕ Ουρα[Μπροστά] 
+      ι <- Μπροστά mod 10 + 1
+    ΑΛΛΙΩΣ
+      ι <- Μπροστά
+    ΤΕΛΟΣ_ΑΝ
+    ΟΣΟ ι <> Πίσω ΕΠΑΝΑΛΑΒΕ
+      ΓΡΑΨΕ Ουρα[ι] 
+      ι <- ι mod 10 + 1
+    ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ
+    ΓΡΑΨΕ "Τέλος ουράς ", Πίσω
+  ΤΕΛΟΣ_ΑΝ
+ΤΕΛΟΣ_ΔΙΑΔΙΚΑΣΙΑΣ
+}
+Title$="Πρόχειρο Γλώσσας"
+Dir User
+Declare NotePad Form
+Declare Pad EditBox Form NotePad
+Declare Inform1 Button Form NotePad
+With Inform1, "Caption" as Informe$
+Method Inform1, "Colors", 15, #FFA000
+With Inform1, "Locked", True
+Declare File1 Combobox Form NotePad
+Declare Edit1 Combobox Form NotePad
+Declare Help1 Combobox Form NotePad
+With NotePad, "UseIcon", True, "UseReverse", True
+Method Pad, "FontAttr", "COURIER NEW", 14, true
+identifiers$="<-|ΠΡΟΓΡΑΜΜΑ|ΜΕΤΑΒΛΗΤΕΣ|ΠΡΑΓΜΑΤΙΚΕΣ|ΑΚΕΡΑΙΕΣ|ΛΟΓΙΚΕΣ|ΧΑΡΑΚΤΗΡΕΣ|ΣΤΑΘΕΡΕΣ|ΑΡΧΗ|ΓΡΑΨΕ|ΔΙΑΒΑΣΕ|ΤΕΛΟΣ_ΠΡΟΓΡΑΜΜΑΤΟΣ|DIV|MOD|ΑΝ|ΤΟΤΕ|ΑΛΛΙΩΣ|ΑΛΛΙΩΣ_ΑΝ|ΤΕΛΟΣ_ΑΝ|ΓΙΑ|ΑΠΟ|ΜΕΧΡΙ|ΜΕ_ΒΗΜΑ|ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ|ΕΠΙΛΕΞΕ|ΠΕΡΙΠΤΩΣΗ|ΤΕΛΟΣ_ΕΠΙΛΟΓΩΝ|ΟΣΟ|ΕΠΑΝΑΛΑΒΕ|ΑΡΧΗ_ΕΠΑΝΑΛΗΨΗΣ|ΜΕΧΡΙΣ_ΟΤΟΥ|ΚΑΙ|Η|ΟΧΙ|ΑΛΗΘΗΣ|ΨΕΥΔΗΣ|ΚΑΛΕΣΕ|ΔΙΑΔΙΚΑΣΙΑ|ΤΕΛΟΣ_ΔΙΑΔΙΚΑΣΙΑΣ|Α_Μ(|Α_Τ(|Ε|ΕΦ(|ΗΜ(|ΛΟΓ(|ΣΥΝ(|Τ_Ρ(|ΣΥΝΑΡΤΗΣΗ|ΤΕΛΟΣ_ΣΥΝΑΡΤΗΣΗΣ|"
+With Pad, "NoWrap", True, "ColorCollection1", identifiers$, "LineComment1", "!!", "OtherSymbols","@", "CommentSymbols", "!", "ComSymbolsWidth", 1, "WordCharRight", ": ,[]+-*/)}≤≥≠"+chr$(9), "WordCharleft", " :,[]+*/({≤≥≠"+chr$(9)
+With Pad, "LineComment2",CHR$(0), "StringSep2","'", "AssignSym","<-", "SearchWords",True, "UseColon","","SplitExpr",",", "CommentLineLight", True
+With Pad, "Sellength" as Pad.SelLength
+With File1,"label","Αρχείο", "listtext" As list$, "list" As list$() '
+With Edit1,"label","Επεξεργασία",  "Mark", Color(255,100,0)
+With Help1,"label","Βοήθεια",  "Mark", Color(255,100,0)
+With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
+With Pad, "Text" As Pad.Text$, "NoColor", False, "ShowAlways", True, "SpaceIndent", 2, "NoCenterLineEdit", true
+Def TitleStr$(a$)=ucase$(left$(a$,1))+mid$(a$,2)
+LastWord$=""
+Filename$=Dir$+"κυκλική_ουρά.glo"
+Caption$=TitleStr$(File.Name$(Filename$)) +" - ΓΛΩΣΣΑ"
+Method NotePad,"MakeStandardInfo", 0
+Method NotePad,"move", 2000, 4000, 8000, 4000
+Layer NotePad {Cls #FFA000}
+With File1,"MenuStyle", True, "MenuWidth", 3000 
+With Edit1,"MenuStyle", True, "MenuWidth", 4000
+With Help1,"MenuStyle", True, "MenuWidth", 3000 , "List" as Help.List$()
+With File1, "MenuEnabled" As mEnable()
+For This {
+      mi$="MenuItem"  \\ is a temporary variable only for For This Block
+      Method File1, mi$,"Φόρτωσε",True
+      Method File1, mi$,"Σώσε",True
+      Method File1, mi$,""    \\  only  a line here
+      Method File1, mi$,"Κλείσε",True
+      Method File1, mi$,"Έξοδος",True
+      
+      Method Edit1, mi$,"Αποκοπή",True
+      Method Edit1, mi$,"Αντιγραφή",True
+      Method Edit1, mi$,"Επικόληση",True
+      Method Edit1, mi$,"",True
+      Method Edit1, mi$,"Λιγότερη εσοχή",True
+      Method Edit1, mi$,"Περισσότερη εσοχή",True
+      Method Edit1, mi$,"",True
+      Method Edit1, mi$,"Άνοιγμα στη Γλώσσα", exist(filename$)
+      
+      Method Help1, mi$,"Περί",True
+      Method Help1, mi$,"Βοήθεια",True
+}
+
+if exist(Filename$) then
+	Document BackUp$
+	Load.Doc BackUp$, filename$
+else
+	Document BackUp$=first$
+end if
+Pad.text$=BackUp$
+Function NotePad.Unload {
+      Read New &Ok
+      After 30 {Call local File1.DblClick(4) }
+      Ok=True
+}
+\\ called when we press ctrl+f1 and not text selected
+Function Pad.About {
+      Pad.SelLength=0
+      Method Pad,"Show"
+      call local Help1.DblClick(if(lastword$=""->0,1))
+}
+\\ normaly send a string, but here we drop it
+Function Pad.Help {
+      call local Help1.DblClick(if(lastword$=""->0,1))
+}
+Function Notepad.Resize {
+      Layer NotePad { Cls Color(255, 160, 0) ,0}
+      With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
+      tHeight1=theight*2
+      Method File1,"move", twipsX*2, tHeight,  twipsX*100, tHeight
+      Method Edit1,"move", twipsX*2+twipsX*100, tHeight,  twipsX*160, tHeight
+      Method Help1,"move", twipsX*2+twipsX*260, tHeight,  twipsX*120, tHeight
+      Method Inform1,"move", twipsX*2+twipsX*360, tHeight,  twipsX*120, tHeight
+      If NP.height>2000 Then {
+            Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
+            With Pad, "NoWrap" As NoWrap
+            If Not NoWrap Then Method Pad,"Resize"
+      }
+}
+Function Edit1.DblClick {
+      Read Local Edit1index
+      Select Case Edit1index
+      Case 0
+            {
+            Method Pad,"mn1sub"
+            Method Pad,"Resize"
+            }
+      Case 1
+            Method Pad,"mn2sub"
+      Case 2
+            {
+                 Method Pad, "mn3sub"
+                 Method Pad,"GetFocus"
+                 Method Pad,"Resize"
+           }
+      Case 4
+            Method Pad,"PressKey", 9, 1
+      Case 5
+            Method Pad,"PressKey", 9, 0
+      Case 7
+            {
+                  If Pad.Text$<>BackUp$ then
+                        call local File1.DblClick(1)
+                  end if
+                  if exist(filename$) then Win "Γλώσσα.exe", filename$
+            }
+      End Select
+}
+Function Pad.PopUp {
+      Read Local X, Y
+      Method Pad,"PopUpMenu", "",X , Y
+}
+Function Pad.Inform {
+      Read New L, P
+      Informe$=format$("{0}-{1}", L,P)
+      Method Pad,"Show"
+}
+informe$="Έτοιμο"
+Function File1.DblClick {
+      Read New File1index
+      Local cont, cont2, f$, NL$={
+      }
+      File1index++
+      {
+      On File1index Goto Open1, Save1, ExitNow, Save2, Unload
+      Exitnow:
+      Exit
+Open1:
+      If Pad.Text$<>BackUp$ Then {
+            If Ask("Να σωθούν οι αλλαγές;",Title$, "ΝΑΙ", "ΟΧΙ")=1 Then Goto Save1
+      }
+     Layer NotePad {
+           Open.file filename$,"c:\","Φόρτωσε Αρχείο","glo"
+     }
+     Method Pad,"GetFocus"
+     Read f$
+     If f$<>"" Then {
+           Filename$=f$
+           If exist(F$) then {
+           Clear BackUp$
+           Load.Doc BackUp$, f$
+           Caption$=TitleStr$(File.Name$(Filename$)) +" - ΓΛΩΣΣΑ"
+           Pad.Text$=BackUp$
+           } else Pad.text$="": Clear BackUp$
+           Method Pad, "Resize"
+      }
+      Exit
+Save1:
+      Layer NotePad {
+            Save.As Filename$,"c:\","Σώσε αρχείο","glo"
+      }
+      if not cont2 then Method Pad,"GetFocus"
+      Read f$
+      If f$="" Then Exit 
+      If lcase$(file.type$(f$))<>"glo" then f$=f$+".glo"
+      If Exist(f$) Then  If Ask(NL$+"Να αλλάξω το αρχείο"+NL$+f$,Title$, "ΝΑΙ", "ΟΧΙ")<>1 Then Exit
+      Try ok {
+        Clear BackUp$
+        BackUp$=Pad.Text$
+        Save.Doc BackUp$, f$
+        filename$=f$
+        Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+      }
+     If ok else beep
+     If not cont then Exit
+Save2:
+      cont=True
+      If Pad.Text$<>BackUp$ Then {
+            If Ask("Να σωθούν οι αλλαγές;",Title$, "ΝΑΙ", "ΟΧΙ")=1 Then Goto Save1
+      }
+      Clear BackUp$
+      Pad.Text$=""
+      If Cont2 then {
+           Method NotePad, "CloseNow"
+      } Else {
+            FileName$=Dir$+"νεο.glo"
+            Caption$=TitleStr$(File.Name$(Filename$)) +" - ΓΛΩΣΣΑ"
+            Method Pad, "Resize"
+      }
+      Exit
+Unload:
+      Cont2=True : Goto Save2
+      }
+}
+Function Help1.DblClick(new index) {
+if index=0 then
+      Local A, info$
+      Info$={
+            Πρόχειρο για συγγραφή προγραμμάτων σε ΓΛΩΣΣΑ για το μάθημα της ΑΕΠΠ
+            }
+      A=Ask(info$,Title$,"ΝΑΙ","")  ' one button only
+else.if lastword$<>"" then
+      If not exist(lastword$+".txt") then local a$ : Document a$ : Save.Doc a$, lastword$+".txt"
+      win "notepad", dir$+lastword$+".txt"
+end if
+
+}
+Function Pad.Word(new alfa$) {
+      if instr(identifiers$, "|"+alfa$+"|")>0 then
+            Lastword$=alfa$	
+            Help.list$(1)="Βοήθεια για "+alfa$
+            With Help1,"MenuWidth", Max.data(Size.X(Help.list$(1), "Verdana",12 )+1000, 3000)
+      end if
+}
+Call Local Notepad.Resize()
+
+After 100 {Title "", 0}
+Method NotePad,"Show" , 1
+
+Declare Pad Nothing
+Declare NotePad Nothing 
+Print "Τέλος"
+Title "Done..", 0
+Latin
 }
 INFO

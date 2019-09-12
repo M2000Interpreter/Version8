@@ -2153,6 +2153,9 @@ If mode2save > 0 And Not Append Then
         End If
      ''   Put #W, , Utf16toUtf8(buf)
             iPos = DocParaNext(0)
+            If iPos = 0 Then
+            ElseIf DocParaNext(0) = DocParaBack(0) And Me.TextParagraphLen(iPos) = 0 Then
+            Else
             maxmw = 327680
         While iPos <> 0
             a() = textArray(lf$, iPos, maxmw)
@@ -2161,7 +2164,7 @@ If mode2save > 0 And Not Append Then
             iLen = WideCharToMultiByte(Utf8CodePage, 0, VarPtr(a(0)), CLng(UBound(a) - LBound(a) + 1) \ 2, VarPtr(bbBuf(0)), iLen, 0, 0)
             Put #w, , bbBuf()
         Wend
-     
+     End If
      
         Close w
     SaveUnicodeOrAnsi = True

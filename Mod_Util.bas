@@ -1623,7 +1623,7 @@ End Sub
 
 
 Public Sub PlainBaSket(ddd As Object, mybasket As basket, ByVal what As String, Optional ONELINE As Boolean = False, Optional nocr As Boolean = False, Optional plusone As Long = 2, Optional clearline As Boolean = False, Optional processcr As Boolean = False)
-Dim PX As Long, PY As Long, r As Long, p$, c$, LEAVEME As Boolean, nr As RECT, nr2 As RECT
+Dim PX As Long, PY As Long, r As Long, p$, c$, LEAVEME As Boolean, nr As RECT, nr2 As RECT, w As Integer
 Dim p2 As Long, mUAddPixelsTop As Long
 Dim pixX As Long, pixY As Long
 Dim rTop As Long, rBottom As Long
@@ -1679,7 +1679,11 @@ With mybasket
 
             If ONELINE And nocr And PX > .mx Then what = vbNullString: Exit Do
             c$ = Mid$(WHAT1$, r + 1, 1)
-      
+                w = AscW(c$)
+                If w > -10241 And w < -9984 Then
+                c$ = Mid$(WHAT1$, r + 1, 2)
+                r = r + 1
+                End If
                 If nounder32(c$) Then
             
                 If Not skip Then
@@ -1852,6 +1856,11 @@ realR& = 0
 r1 = Len(what$) - 1
     For r = r To r1
         c$ = Mid$(WHAT1$, r + 1, 1)
+                        w = AscW(c$)
+                If w > -10241 And w < -9984 Then
+                c$ = Mid$(WHAT1$, r + 1, 2)
+                r = r + 1
+                End If
         If nounder32(c$) Then
        ' skip = True
              If Not skip Then
@@ -3373,7 +3382,7 @@ End Sub
 Sub original(bstack As basetask, COM$)
 Dim d As Object, b$
 
-If COM$ <> "" Then QUERYLIST = vbNullString
+If Len(COM$) > 0 Then QUERYLIST = vbNullString
 If Form1.Visible Then REFRESHRATE = 25: ResetPrefresh
 If bstack.toprinter Then
 bstack.toprinter = False
@@ -3533,11 +3542,13 @@ SetNormal d
             players(basketcode).currow = BAR
     End If
 If Not skipthat Then
- dummy = interpret(bstack, "PEN " & CStr(mPen) & ":CLS ," & CStr(BAR))
+ProcPen bstack, CStr(mPen)
+ProcCls bstack, "," + CStr(BAR)
+' dummy = interpret(bstack, "PEN " & CStr(mPen) & ":CLS ," & CStr(BAR))
 End If
 End If
 If Not skipthat Then
-dummy = interpret(bstack, COM$)
+    If Len(COM$) > 0 Then dummy = interpret(bstack, COM$)
 End If
 'cr bstack
 End Sub
@@ -4749,22 +4760,20 @@ End If
 
 End Sub
 Function INKEY$()
-' αυτή η συνάρτηση θα αδειάσει τον προσωρινό χώρο πληκτρολογίσεων, που μπορεί να είναι πολλά πλήκτρα..
-' θα επιστρέψει το πρώτο από αυτά ή τίποτα.
-' Χρησιμοποιείται παντού όπου διαβάζουμε το πληκτρολόγιο
-
-If MKEY$ <> "" Then ' κοιτάει να αδειάσει τον προσωρινό χώρο MKEY$
-' αν έχει κάτι τότε το λαμβάνει τον αδείαζε βάζοντας τον στο τέλος του INK$
-' και αδείαζουμε το MKEY$
+Dim w As Long
+If MKEY$ <> "" Then
     INK$ = MKEY$ & INK$
     MKEY$ = vbNullString
 End If
-' τώρα θα ασχοληθούμε με το INK$ αν έχει τίποτα
 If INK$ <> "" Then
 ' ειδική περίπτωση αν έχουμε 0 στο πρώτο Byte, έχουμε ειδικό κ
-    If Asc(INK$) = 0 Then
+        w = AscW(INK$)
+    If w = 0 Then
         INKEY$ = Left$(INK$, 2)
         INK$ = Mid$(INK$, 3)
+    ElseIf w > -10241 And w < -9984 Then
+    INKEY$ = Left$(INK$, 2)
+    INK$ = Mid$(INK$, 3)
     Else
     ' αλλιώς σηκώνουμε ένα χαρακτήρα με ότι έχει ακόμα
     INKEY$ = PopOne(INK$)
@@ -4779,11 +4788,16 @@ End If
 
 End Function
 Function UINKEY$()
+Dim w As Long
 ' mink$ used for reinput keystrokes
 ' MINK$ = MINK$ & UINK$
 If UKEY$ <> "" Then MINK$ = MINK$ + UKEY$: UKEY$ = vbNullString
 If MINK$ <> "" Then
-If AscW(MINK$) = 0 Then
+w = AscW(MINK$)
+If w = 0 Then
+    UINKEY$ = Left$(MINK$, 2)
+    MINK$ = Mid$(MINK$, 3)
+ElseIf w > -10241 And w < -9984 Then
     UINKEY$ = Left$(MINK$, 2)
     MINK$ = Mid$(MINK$, 3)
 Else
@@ -5027,6 +5041,7 @@ If RealLen(a$) = 1 Or Len(a$) = 1 Or (RealLen(a$) = 0 And Len(a$) = 1 And Len(s$
      If a$ <> Left$(endchars, 1) Then
     
     a$ = Left$(endchars, 1)
+    
      Else
       LCTCB dq, prive, -1: DestroyCaret
  oldLCTCB dq, prive, 0
@@ -5035,8 +5050,6 @@ If RealLen(a$) = 1 Or Len(a$) = 1 Or (RealLen(a$) = 0 And Len(a$) = 1 And Len(s$
 End If
      End If
      End If
-     ElseIf a$ = vbCr Then
-     a$ = Left$(endchars, 1)
      End If
     If Asc(a$) = 27 And escok Then
         
@@ -5052,6 +5065,7 @@ End If
 If a$ = Chr(8) Then
 DE$ = " "
     If Len(s$) > 0 Then
+    
     ExcludeOne s$
 
              LCTCB dq, prive, -1: DestroyCaret
@@ -5084,19 +5098,22 @@ End If
 If safe$ <> "" Then
         a$ = 65
 End If
-If AscW(a$) > 31 And (RealLen(s$) < m& Or RealLen(a$, True) = 0) Then
-If RealLen(a$, True) = 0 Then
-If Asc(a$) = 63 And s$ <> "" Then
-s$ = s$ & a$: a$ = s$: ExcludeOne s$: a$ = Mid$(a$, Len(s$) + 1)
-s$ = s$ + a$
-MKEY$ = vbNullString
-'UINK = VbNullString
-safe$ = a$
-INK = Chr$(8)
-Else
-If s$ = vbNullString Then a$ = " "
+w = AscW(a$)
+If w < 0 Then
 GoTo cont12345
-End If
+ElseIf w > 31 And (RealLen(s$) < m& Or RealLen(a$, True) = 0) Then
+If RealLen(a$, True) = 0 Then
+    If Asc(a$) = 63 And s$ <> "" Then
+        s$ = s$ & a$: a$ = s$: ExcludeOne s$: a$ = Mid$(a$, Len(s$) + 1)
+        s$ = s$ + a$
+        MKEY$ = vbNullString
+        'UINK = VbNullString
+        safe$ = a$
+        INK = Chr$(8)
+    Else
+        If s$ = vbNullString Then a$ = " "
+        GoTo cont12345
+    End If
 Else
 cont12345:
     If InStr(excludechars, a$) > 0 Then
@@ -5448,13 +5465,14 @@ Else
  End If
 
 End Function
-
 Function myUcase(ByVal a$, Optional convert As Boolean = False) As String
-Dim i As Long
+Dim i As Long, w As Integer
 If a$ = vbNullString Then Exit Function
  If AscW(a$) > 255 Or convert Then
  For i = 1 To Len(a$)
- Select Case AscW(Mid$(a$, i, 1))
+ w = AscW(Mid$(a$, i, 1))
+ If w > 901 And w < 975 Then
+ Select Case w
 Case 902
 Mid$(a$, i, 1) = ChrW(913)
 Case 904
@@ -5488,16 +5506,162 @@ Mid$(a$, i, 1) = ChrW(933)
 Case 962
 Mid$(a$, i, 1) = ChrW(931)
 End Select
+End If
 Next i
 End If
 myUcase = UCase(a$)
 End Function
 
+Function myUcase1(ByVal a$, Optional convert As Boolean = False) As String
+Dim i As Long, w As Integer
+If a$ = vbNullString Then Exit Function
+ 
+ For i = 1 To Len(a$)
+ w = AscW(Mid$(a$, i, 1))
+ If w >= 0 And (w < 65 Or w > 974) Then
+ ElseIf w < 0 Then
+ If w > -10241 And w < -9984 Then
+ i = i + 1
+ End If
+ ElseIf w > 901 Or convert Then
+ Select Case w
+Case 902
+Mid$(a$, i, 1) = ChrW(913)
+Case 904
+Mid$(a$, i, 1) = ChrW(917)
+Case 906
+Mid$(a$, i, 1) = ChrW(921)
+Case 912
+Mid$(a$, i, 1) = ChrW(921)
+Case 905
+Mid$(a$, i, 1) = ChrW(919)
+Case 908
+Mid$(a$, i, 1) = ChrW(927)
+Case 911
+Mid$(a$, i, 1) = ChrW(937)
+Case 910
+Mid$(a$, i, 1) = ChrW(933)
+Case 940
+Mid$(a$, i, 1) = ChrW(913)
+Case 941
+Mid$(a$, i, 1) = ChrW(917)
+Case 943
+Mid$(a$, i, 1) = ChrW(921)
+Case 942
+Mid$(a$, i, 1) = ChrW(919)
+Case 972
+Mid$(a$, i, 1) = ChrW(927)
+Case 974
+Mid$(a$, i, 1) = ChrW(937)
+Case 973
+Mid$(a$, i, 1) = ChrW(933)
+Case 962
+Mid$(a$, i, 1) = ChrW(931)
+End Select
+ElseIf Not convert Then
+Exit For
+End If
+Next i
+
+myUcase1 = UCase(a$)
+End Function
+Sub myUcase2(a$)
+Dim i As Long, w As Integer
+If a$ = vbNullString Then Exit Sub
+ 
+ For i = 1 To Len(a$)
+ w = AscW(Mid$(a$, i, 1))
+  If w > 901 Or w < 975 Then
+ Select Case w
+Case 902
+Mid$(a$, i, 1) = ChrW(913)
+Case 904
+Mid$(a$, i, 1) = ChrW(917)
+Case 906
+Mid$(a$, i, 1) = ChrW(921)
+Case 912
+Mid$(a$, i, 1) = ChrW(921)
+Case 905
+Mid$(a$, i, 1) = ChrW(919)
+Case 908
+Mid$(a$, i, 1) = ChrW(927)
+Case 911
+Mid$(a$, i, 1) = ChrW(937)
+Case 910
+Mid$(a$, i, 1) = ChrW(933)
+Case 940
+Mid$(a$, i, 1) = ChrW(913)
+Case 941
+Mid$(a$, i, 1) = ChrW(917)
+Case 943
+Mid$(a$, i, 1) = ChrW(921)
+Case 942
+Mid$(a$, i, 1) = ChrW(919)
+Case 972
+Mid$(a$, i, 1) = ChrW(927)
+Case 974
+Mid$(a$, i, 1) = ChrW(937)
+Case 973
+Mid$(a$, i, 1) = ChrW(933)
+Case 962
+Mid$(a$, i, 1) = ChrW(931)
+End Select
+ ElseIf w > -10241 And w < -9984 Then
+ i = i + 1
+End If
+Next i
+LSet a$ = UCase(a$)
+End Sub
 Function myLcase(ByVal a$) As String
 If a$ = vbNullString Then Exit Function
+
 a$ = LCase(a$)
-If a$ = vbNullString Then Exit Function
- If AscW(a$) > 255 Then
+Dim i As Long, ok As Boolean, w As Integer
+For i = 1 To Len(a$)
+w = AscW(Mid$(a$, i, 1))
+If w > -10241 And w < -9984 Then
+i = i + 1
+ElseIf w = 963 Then
+ok = True
+Exit For
+End If
+Next i
+ If ok Then
+a$ = a$ & Chr(0)
+' Here are greek letters for proper case conversion
+a$ = Replace(a$, "σ" & Chr(0), "ς")
+a$ = Replace(a$, Chr(0), "")
+a$ = Replace(a$, "σ ", "ς ")
+a$ = Replace(a$, "σ$", "ς$")
+a$ = Replace(a$, "σ&", "ς&")
+a$ = Replace(a$, "σ.", "ς.")
+a$ = Replace(a$, "σ(", "ς(")
+a$ = Replace(a$, "σ_", "ς_")
+a$ = Replace(a$, "σ/", "ς/")
+a$ = Replace(a$, "σ\", "ς\")
+a$ = Replace(a$, "σ-", "ς-")
+a$ = Replace(a$, "σ+", "ς+")
+a$ = Replace(a$, "σ*", "ς*")
+a$ = Replace(a$, "σ" & vbCr, "ς" & vbCr)
+a$ = Replace(a$, "σ" & vbLf, "ς" & vbLf)
+End If
+myLcase = a$
+End Function
+Sub myLcase2(a$)
+If a$ = vbNullString Then Exit Sub
+
+a$ = LCase(a$)
+Dim i As Long, ok As Boolean, w As Integer
+For i = 1 To Len(a$)
+w = AscW(Mid$(a$, i, 1))
+If w > -10241 And w < -9984 Then
+i = i + 1
+ElseIf w = 963 Then
+ok = True
+Exit For
+End If
+Next i
+ If ok Then
 a$ = a$ & Chr(0)
 ' Here are greek letters for proper case conversion
 a$ = Replace(a$, "σ" & Chr(0), "ς")
@@ -5517,8 +5681,7 @@ a$ = Replace(a$, "σ" & vbCr, "ς" & vbCr)
 a$ = Replace(a$, "σ" & vbLf, "ς" & vbLf)
 End If
 
-myLcase = a$
-End Function
+End Sub
 Function MesTitle$()
 On Error Resume Next
 If ttl Then
@@ -5537,13 +5700,22 @@ Else
 MesTitle$ = Form1.Caption
 End If
 Else
+
 If Typename$(Screen.ActiveForm) = "GuiM2000" Then
 MesTitle$ = Screen.ActiveForm.Title
 Else
 If here$ = vbNullString Or LASTPROG$ = vbNullString Then
 MesTitle$ = "M2000"
 Else
+If Not UseMe Is Nothing Then
+If UseMe.AppTitle <> vbNullString Then
+MesTitle$ = UseMe.AppTitle & " " & here$
+Else
 MesTitle$ = ExtractNameOnly(LASTPROG$) & " " & here$
+End If
+Else
+MesTitle$ = ExtractNameOnly(LASTPROG$) & " " & here$
+End If
 End If
 End If
 End If
@@ -5971,7 +6143,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6084,7 +6256,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6132,7 +6304,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6180,7 +6352,7 @@ Do While pos <= lenA
         pos = pos + 1
         Do While pos <= lenA
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6328,7 +6500,7 @@ Do While pos <= lenA
         pos = pos + 1
         Do While pos <= lenA
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6477,7 +6649,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6525,7 +6697,7 @@ Do While pos <= lenA
         pos = pos + 1
         Do While pos <= lenA
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6581,7 +6753,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6697,7 +6869,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6797,7 +6969,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -6902,7 +7074,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -7008,7 +7180,7 @@ Do While pos <= lenA
         pos = pos + 1
         Do While pos <= lenA
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -7207,7 +7379,7 @@ Do While pos <= lenA
         pos = pos + 1
         Do While pos <= lenA
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -7372,7 +7544,7 @@ Do While pos <= lenA
         pos = pos + 1
         Do While pos <= lenA
         If Mid$(a$, pos, 1) = """" Then Exit Do
-        If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
         pos = pos + 1
         Loop
     ElseIf w$ = "(" Then
@@ -7604,7 +7776,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-    If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+    If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
    
         pos = pos + 1
         Loop
@@ -7881,7 +8053,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-    If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+    If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
    
         pos = pos + 1
         Loop
@@ -8149,7 +8321,7 @@ Do While pos <= Len(a$)
         pos = pos + 1
         Do While pos <= Len(a$)
         If Mid$(a$, pos, 1) = """" Then Exit Do
-    If AscW(Mid$(a$, pos, 1)) < 32 Then Exit Do
+    If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
    
         pos = pos + 1
         Loop
@@ -9254,7 +9426,7 @@ RealLenOLD = LL
 End If
 End Function
 Public Function RealLen(s$, Optional checkone As Boolean = False) As Long
-Dim a() As Byte, a1() As Byte, s1$, i As Long, LL As Long, ii As Long, l$, LLL$
+Dim a() As Byte, a1() As Byte, s1$, i As Long, LL As Long, ii As Long, l$, LLL$, w As Integer
 LL = Len(s$)
    If LL Then
       ReDim a(Len(s$) * 2 + 20), a1(Len(s$) * 2 + 20)
@@ -9270,6 +9442,12 @@ LL = Len(s$)
                     s1$ = Mid$(s$, ii, 1)
                     
                     If (AscW(s1$) And &HFFFF0000) = &HFFFF0000 Then
+                    w = AscW(Mid$(s$, ii - 1, 1))
+                    If w > -10241 And w < -9984 Then
+                    LL = LL - 1
+                    i = i + 2
+                    ii = ii + 2
+                    End If
                     Else
                     If l$ = s1$ Then
                         If LLL$ = vbNullString Then LL = LL + 1
@@ -9296,7 +9474,7 @@ LL = Len(s$)
 RealLen = LL
 End Function
 Public Function PopOne(s$) As String
-Dim a() As Byte, ctype As Long, s1$, i As Long, LL As Long, mm As Long
+Dim a() As Byte, ctype As Long, s1$, i As Long, LL As Long, mm As Long, w As Long, ii As Long
 ctype = CT_CTYPE3
 Dim one As Boolean
 LL = Len(s$)
@@ -9305,10 +9483,13 @@ mm = LL
       ReDim a(Len(s$) * 2 + 20)
       If GetStringTypeExW(&HB, ctype, StrPtr(s$), Len(s$), a(0)) <> 0 Then
       For i = 1 To Len(s$) * 2 - 1 Step 2
+      ii = ii + 1
       If a(i - 1) > 0 Then
             If a(i) = 0 Then
-            
-            If a(i - 1) < 8 Then LL = LL - 1
+                   
+   If a(i - 1) < 8 Then
+                    LL = LL - 1
+                    End If
             Else
             If Not one Then Exit For
             
@@ -9332,10 +9513,14 @@ End If
 
 End Function
 Public Sub ExcludeOne(s$)
-Dim a() As Byte, ctype As Long, s1$, i As Long, LL As Long
+Dim a() As Byte, ctype As Long, s1$, i As Long, LL As Long, w As Long
 LL = Len(s$)
 ctype = CT_CTYPE3
    If LL > 1 Then
+      w = AscW(Right$(s$, 1))
+      If w > -9215 And w < -8960 And Len(s$) > 1 Then
+      LL = LL - 1
+      End If
       ReDim a(Len(s$) * 2 + 20)
       If GetStringTypeExW(&HB, ctype, StrPtr(s$), -1, a(0)) <> 0 Then
       For i = LL * 2 - 1 To 1 Step -2
@@ -9591,8 +9776,8 @@ End Sub
 Public Sub BadObjectDecl()
   MyEr "Bad object declaration - use Clear Command for Gui Elements", "Λάθος όρισμα αντικειμένου - χρησιμοποίησε Καθαρό για να καθαρίσεις τυχόν στοιχεία του γραφικού περιβάλλοντος"
 End Sub
-Public Sub NoEnumaretor()
-  MyEr " - No enumarator found for this object", " - Δεν βρήκα δρομέα συλλογής για αυτό το αντικείμενο"
+Public Sub NoEnumerator()
+  MyEr " - No enumerator found for this object", " - Δεν βρήκα δρομέα συλλογής για αυτό το αντικείμενο"
 End Sub
 Public Sub AssigntoNothing()
   MyEr "Bad object declaration - use Declare command", "Λάθος όρισμα αντικειμένου - χρησιμοποίησε την Όρισε"
@@ -12380,7 +12565,7 @@ End If
 End If
 End Function
 Function IsNumberQuery(a$, fr As Long, r As Double, lr As Long) As Boolean
-Dim SG As Long, sng As Long, n$, Ig$, DE$, sg1 As Long, ex$, rr As Double
+Dim SG As Long, sng As Long, n$, ig$, DE$, sg1 As Long, ex$, rr As Double
 ' ti kanei to e$
 If a$ = vbNullString Then IsNumberQuery = False: Exit Function
 SG = 1
@@ -12404,7 +12589,7 @@ Else
 'compute ig$
     If Mid$(a$, sng, 1) = "." Then
     ' no long part
-    Ig$ = "0"
+    ig$ = "0"
     DE$ = "."
 
     Else
@@ -12412,7 +12597,7 @@ Else
         
         Select Case Mid$(a$, sng, 1)
         Case "0" To "9"
-        Ig$ = Ig$ & Mid$(a$, sng, 1)
+        ig$ = ig$ & Mid$(a$, sng, 1)
         Case "."
         DE$ = "."
         Exit Do
@@ -12467,16 +12652,16 @@ Else
             End If
         End If
     End If
-    If Ig$ = vbNullString Then
+    If ig$ = vbNullString Then
     IsNumberQuery = False
     lr = 1
     Else
-    If SG < 0 Then Ig$ = "-" & Ig$
+    If SG < 0 Then ig$ = "-" & ig$
     Err.clear
     On Error Resume Next
-    n$ = Ig$ & DE$ & ex$
-    sng = Len(Ig$ & DE$ & ex$)
-    rr = val(Ig$ & DE$ & ex$)
+    n$ = ig$ & DE$ & ex$
+    sng = Len(ig$ & DE$ & ex$)
+    rr = val(ig$ & DE$ & ex$)
     If Err.Number > 0 Then
          lr = 0
     Else
@@ -12493,7 +12678,7 @@ End Function
 
 
 Function IsNumberOnly(a$, fr As Long, r As Variant, lr As Long, Optional useRtypeOnly As Boolean = False, Optional usespecial As Boolean = False) As Boolean
-Dim SG As Long, sng As Long, Ig$, DE$, sg1 As Long, ex$, foundsign As Boolean
+Dim SG As Long, sng As Long, ig$, DE$, sg1 As Long, ex$, foundsign As Boolean
 ' ti kanei to e$
 If a$ = vbNullString Then IsNumberOnly = False: Exit Function
 SG = 1
@@ -12517,7 +12702,7 @@ If LCase(Mid$(a$, sng, 2)) Like "0[xχ]" Then
     IsNumberOnly = False
     GoTo er111
     End If
-    Ig$ = vbNullString
+    ig$ = vbNullString
     DE$ = vbNullString
     sng = sng + 1
     Do While MaybeIsSymbolNoSpace(Mid$(a$, sng + 1, 1), "[0-9A-Fa-f]")
@@ -12535,10 +12720,10 @@ If LCase(Mid$(a$, sng, 2)) Like "0[xχ]" Then
     If MaybeIsSymbolNoSpace(Mid$(a$, sng, 1), "[&%]") Then
     
         sng = sng + 1
-        Ig$ = "&H" + DE$
+        ig$ = "&H" + DE$
         DE$ = vbNullString
         If Mid$(a$, sng - 1, 1) = "%" Then
-        If Len(Ig$) > 6 Then
+        If Len(ig$) > 6 Then
         OverflowLong True
         IsNumberOnly = False
         GoTo er111
@@ -12551,7 +12736,7 @@ If LCase(Mid$(a$, sng, 2)) Like "0[xχ]" Then
         GoTo conthere1
     ElseIf useRtypeOnly Then
         If VarType(r) = vbLong Or VarType(r) = vbInteger Then
-        Ig$ = "&H" + DE$
+        ig$ = "&H" + DE$
         DE$ = vbNullString
         GoTo conthere1
         End If
@@ -12567,7 +12752,7 @@ Else
 'compute ig$
     If Mid$(a$, sng, 1) = "." Then
     ' no long part
-    Ig$ = "0"
+    ig$ = "0"
     DE$ = "."
 
     Else
@@ -12575,7 +12760,7 @@ Else
         
         Select Case Mid$(a$, sng, 1)
         Case "0" To "9"
-        Ig$ = Ig$ & Mid$(a$, sng, 1)
+        ig$ = ig$ & Mid$(a$, sng, 1)
         Case "."
         DE$ = "."
         Exit Do
@@ -12629,30 +12814,30 @@ Else
                 End If
                 End If
     End If
-    If Ig$ = vbNullString Then
+    If ig$ = vbNullString Then
     IsNumberOnly = False
     lr = 1
     Else
-    If SG < 0 Then Ig$ = "-" & Ig$
+    If SG < 0 Then ig$ = "-" & ig$
     On Error GoTo er111
      If useRtypeOnly Then GoTo conthere1
     If sng <= Len(a$) Then
     If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
     Select Case Mid$(a$, sng, 1)
     Case "@"
-    r = CDec(Ig$ & DE$)
+    r = CDec(ig$ & DE$)
     sng = sng + 1
     Case "&"
-    r = CLng(Ig$)
+    r = CLng(ig$)
     sng = sng + 1
     Case "%"
-    r = CInt(Ig$)
+    r = CInt(ig$)
     sng = sng + 1
     Case "~"
-    r = CSng(Ig$ & DE$ & ex$)
+    r = CSng(ig$ & DE$ & ex$)
     sng = sng + 1
     Case "#"
-    r = CCur(Ig$ & DE$)
+    r = CCur(ig$ & DE$)
     sng = sng + 1
     Case Else
 GoTo conthere
@@ -12685,23 +12870,23 @@ conthere1:
          If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
         Select Case VarType(r)
         Case vbDecimal
-        r = CDec(Ig$ & DE$)
+        r = CDec(ig$ & DE$)
         Case vbLong
-        r = CLng(Ig$)
+        r = CLng(ig$)
         Case vbInteger
-        r = CInt(Ig$)
+        r = CInt(ig$)
         Case vbSingle
-        r = CSng(Ig$ & DE$ & ex$)
+        r = CSng(ig$ & DE$ & ex$)
         Case vbCurrency
-        r = CCur(Ig$ & DE$)
+        r = CCur(ig$ & DE$)
         Case vbBoolean
-        r = CBool(Ig$ & DE$)
+        r = CBool(ig$ & DE$)
         Case Else
-        r = CDbl(Ig$ & DE$ & ex$)
+        r = CDbl(ig$ & DE$ & ex$)
         End Select
         Else
         If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-        r = val(Ig$ & DE$ & ex$)
+        r = val(ig$ & DE$ & ex$)
         End If
     End If
 contfinal:
@@ -12799,7 +12984,7 @@ Debug.Print l
 Wend
 End Sub
 Function IsNumberCheck(a$, r As Variant, Optional mydec$ = " ") As Boolean
-Dim sng&, SG As Variant, Ig$, DE$, sg1 As Boolean, ex$, s$
+Dim sng&, SG As Variant, ig$, DE$, sg1 As Boolean, ex$, s$
 If mydec$ = " " Then mydec$ = "."
 SG = 1
 Do While sng& < Len(a$)
@@ -12845,10 +13030,10 @@ Else
 
     If Mid$(a$, sng&, 1) = mydec$ Then
 
-    Ig$ = "0"
+    ig$ = "0"
     DE$ = mydec$
     ElseIf LCase(Mid$(a$, sng&, 2)) Like "0[xχ]" Then
-    Ig$ = "0"
+    ig$ = "0"
     DE$ = "0x"
   sng& = sng& + 1
 Else
@@ -12856,7 +13041,7 @@ Else
         
         Select Case Mid$(a$, sng&, 1)
         Case "0" To "9"
-        Ig$ = Ig$ & Mid$(a$, sng&, 1)
+        ig$ = ig$ & Mid$(a$, sng&, 1)
         Case mydec$
         DE$ = mydec$
         Exit Do
@@ -12926,7 +13111,7 @@ Else
                 End If
                 End If
     End If
-    If Ig$ = vbNullString Then
+    If ig$ = vbNullString Then
     IsNumberCheck = False
     Else
 
@@ -12939,7 +13124,7 @@ Else
             r = CDbl(UNPACKLNG(Left$(DE$, 4)) * 65536#) + CDbl(UNPACKLNG(Right$(DE$, 4)))
             End If
     Else
-        If SG < 0 Then Ig$ = "-" & Ig$
+        If SG < 0 Then ig$ = "-" & ig$
                    On Error Resume Next
                         If ex$ <> "" Then
                         If Len(ex$) < 3 Then
@@ -12952,12 +13137,12 @@ Else
                                If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                                If val(Mid$(ex$, 2)) > 308 Or val(Mid$(ex$, 2)) < -324 Then
                                
-                                   r = val(Ig$ & DE$)
+                                   r = val(ig$ & DE$)
                                    sng = sng - Len(ex$)
                                    ex$ = vbNullString
                                    
                                Else
-                                   r = val(Ig$ & DE$ & ex$)
+                                   r = val(ig$ & DE$ & ex$)
                                End If
                            Else
                        If sng <= Len(a$) Then
@@ -12965,52 +13150,52 @@ Else
             Case 64
                 Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CDec(Ig$ & DE$)
+                r = CDec(ig$ & DE$)
                 If Err.Number = 6 Then
                 Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(Ig$ & DE$)
+                r = val(ig$ & DE$)
                 End If
             Case 35
             Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CCur(Ig$ & DE$)
+                r = CCur(ig$ & DE$)
                 If Err.Number = 6 Then
                 Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(Ig$ & DE$)
+                r = val(ig$ & DE$)
                 End If
            Case 37
                 Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CInt(Ig$)
+                r = CInt(ig$)
                 If Err.Number = 6 Then
                 Err.clear
-                r = val(Ig$)
+                r = val(ig$)
                 End If
            Case 38
                 Mid$(a$, sng, 1) = " "
-                r = CLng(Ig$)
+                r = CLng(ig$)
                 If Err.Number = 6 Then
                     Err.clear
-                    r = val(Ig$)
+                    r = val(ig$)
                 End If
             Case 126
                 Mid$(a$, sng, 1) = " "
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CSng(Ig$ & DE$)
+                r = CSng(ig$ & DE$)
                 If Err.Number = 6 Then
                 Err.clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(Ig$ & DE$)
+                r = val(ig$ & DE$)
                 End If
             Case Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                r = val(Ig$ & DE$)
+                r = val(ig$ & DE$)
             End Select
             Else
             If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-            r = val(Ig$ & DE$)
+            r = val(ig$ & DE$)
             End If
                            End If
                      If Err.Number = 6 Then
@@ -13019,11 +13204,11 @@ Else
                              sng = sng - 1
                              Err.clear
                              If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                             r = val(Ig$ & DE$ & ex$)
+                             r = val(ig$ & DE$ & ex$)
                              If Err.Number = 6 Then
                                  sng = sng - Len(ex$)
                                  If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
-                                  r = val(Ig$ & DE$)
+                                  r = val(ig$ & DE$)
                              End If
                          End If
                        MyEr "Error in exponet", "Λάθος στον εκθέτη"
@@ -14061,7 +14246,23 @@ Else
                 End If
                 Set basestack.lastobj = Nothing
             ElseIf VarType(p) = vbBoolean Then
-            isboolean = True
+            If opn& = 5 Then
+                If ShowBooleanAsString Then
+                    If cLid = 1032 Then
+                        s$ = Format$(p, ";\Α\λ\η\θ\ή\ς;\Ψ\ε\υ\δ\ή\ς")
+                    ElseIf cLid = 1033 Then
+                        s$ = Format$(p, ";\T\r\u\e;\F\a\l\s\e")
+                    Else
+                        s$ = Format$(p, DefBooleanString)
+                    End If
+                    GoTo isAstring
+                Else
+                    p = p * 1
+                End If
+            
+            Else
+                isboolean = True
+            End If
             End If
 isanumber:
         If par Then
@@ -14199,7 +14400,7 @@ If NoUseDec Then
     If isboolean Then
         If ShowBooleanAsString Then
             If cLid = 1032 Then
-                s$ = Format$(p, ";\Α\λ\η\θ\έ\ς;\Ψ\ε\υ\δ\έ\ς")
+                s$ = Format$(p, ";\Α\λ\η\θ\ή\ς;\Ψ\ε\υ\δ\ή\ς")
             ElseIf cLid = 1033 Then
                 s$ = Format$(p, ";\T\r\u\e;\F\a\l\s\e")
             Else
@@ -14232,7 +14433,7 @@ Else
 If isboolean Then
     If ShowBooleanAsString Then
         If cLid = 1032 Then
-            s$ = Format$(p, ";\Α\λ\η\θ\έ\ς;\Ψ\ε\υ\δ\έ\ς")
+            s$ = Format$(p, ";\Α\λ\η\θ\ή\ς;\Ψ\ε\υ\δ\ή\ς")
         ElseIf cLid = 1033 Then
             s$ = Format$(p, ";\T\r\u\e;\F\a\l\s\e")
         Else
@@ -14913,8 +15114,8 @@ Function ProcEnumGroup(bstack As basetask, rest$, Optional glob As Boolean = Fal
     Dim s$, w1$, v As Long, enumvalue As Long, myenum As Enumeration, mh As mHandler, v1 As Long
     enumvalue = 0
     If IsLabelOnly(rest$, w1$) = 1 Then
-       ' w1$ = myUcase$(w1$)
-        v = globalvar(bstack.GroupName + myUcase$(w1$), v, , glob)
+
+        v = globalvar(bstack.GroupName + myUcase(w1$), v, , glob)
         Set myenum = New Enumeration
         
         myenum.EnumName = w1$
@@ -14970,8 +15171,8 @@ Function ProcEnum(bstack As basetask, rest$, Optional glob As Boolean = False) A
     Dim s$, w1$, v As Long, enumvalue As Variant, myenum As Enumeration, mh As mHandler, v1 As Long, i As Long
     enumvalue = 0#
     If IsLabelOnly(rest$, w1$) = 1 Then
-       ' w1$ = myUcase$(w1$)
-        v = globalvar(myUcase$(w1$), v, , glob)
+       ' w1$ = myucase(w1$)
+        v = globalvar(myUcase(w1$), v, , glob)
         Set myenum = New Enumeration
         
         myenum.EnumName = w1$
@@ -18576,12 +18777,12 @@ Else
             
           '**********************************************************
 PROCESSCOMMAND:
-      
+        Dim y1 As Long
+        Dim x2 As Long, y2 As Long, SBR$, nd&
             If Trim$(w$) <> "" Then
       
             Select Case w$
-        Dim y1 As Long
-        Dim x2 As Long, y2 As Long, SBR$, nd&
+
           Case "CALL", "ΚΑΛΕΣΕ"
         ' CHECK FOR NUMBER...
         If bstack.NoRun Then

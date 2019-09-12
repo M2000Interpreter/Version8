@@ -1,9 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 37 active-X
-1. Update EditBox to handle color for C#
-2. New info (ver 5.7), update C# editor (module cs).
-
+Version 9.8 Revision 38 active-X
+1. Handle of Utf-16le surrogates. 
+1.1. Chrcode() and Chrcode$() return then proper number and string.
+1.2 Console can display surrogates at text positions.
+1.3  Update all editors (console, Editbox, TextBox) to use surrogates.
+1.4 Easy keyboard input for surrogats. Hold down alt and then press in success the plus sign or insert key and the numbers (including those on numpad) for hexadecimal values or alt and numbers only for decimal value.
+2. Advanced Color Procedures for EditBox. C# editor now use /**/ in any place with any number of lines inside.
+3. New info.gsb (ver 5.8), all new versions plus a surrogate using example amd a second editor for a simple greek school language with greek commands.
  
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

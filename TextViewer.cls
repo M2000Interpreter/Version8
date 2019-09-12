@@ -464,10 +464,23 @@ RaiseEvent inform(glistN.ListIndex + 1, 1)
 Else
 RaiseEvent inform(glistN.ListIndex + 1, (glistN.SelStart))
 End If
-glistN.ShowMe
+glistN.ShowMe2
 End Sub
 
 
+
+Private Sub glistN_AddSelStart(val As Long)
+Dim w As Long, a$
+If Charpos > 0 Then
+a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos, 1)
+If Len(a$) > 0 Then
+w = AscW(a$)
+If w > -10241 And w < -9984 Then
+val = 2
+End If
+End If
+End If
+End Sub
 
 Private Sub glistN_CorrectCursorAfterDrag()
     If Not mDoc.InvalidPara(OldPar) Then
@@ -1366,6 +1379,7 @@ If shift = 0 Then
 glistN.MarkNext = 0
 BlockStartPara = BlockEndPara
 BlockStartPos = BlockEndPos
+glistN.RefreshNow
 ElseIf (shift And 1) = 1 Then
 
 If KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyDown Or KeyCode = vbKeyRight Or KeyCode = vbKeyEnd Or KeyCode = vbKeyHome Or KeyCode = vbKeyPageUp Or KeyCode = vbKeyPageDown Then
@@ -1975,6 +1989,20 @@ End If
 End If
 End Sub
 
+
+Private Sub glistN_SubSelStart(val As Long)
+Dim w As Long, a$
+If Charpos < 2 Then Exit Sub
+a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos - 1, 1)
+If Len(a$) > 0 Then
+w = AscW(a$)
+If w > -9215 And w < -8960 Then
+
+val = 2
+
+End If
+End If
+End Sub
 
 Private Sub glistN_SyncKeyboard(item As Integer)
 If NoMark Then item = 0
@@ -3664,7 +3692,7 @@ Else
 glistN.SelStartEventAlways = Column
 End If
 If glistN.enabled Then
-If Not noShow Then glistN.ShowMe
+If Not noShow Then glistN.ShowMe2
 End If
 End Sub
 Public Function TextFormatBreak(lineBreaker As String) As String

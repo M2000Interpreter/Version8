@@ -262,6 +262,8 @@ Event CorrectCursorAfterDrag()
 Event DragOverNow(a As Boolean)
 Event DragOverDone(a As Boolean)
 Event HeadLineChange(a$)
+Event AddSelStart(val As Long)
+Event SubSelStart(val As Long)
 Private state As Boolean
 Private secreset As Boolean
 Private scrollme As Long
@@ -938,28 +940,29 @@ Else
                 secreset = False
                  RaiseEvent Selected2(-2)
              End If
-     Else
-        If myEnabled Then
-        If maxchar = 0 Or (maxchar > Len(list(SELECTEDITEM - 1)) Or MultiLineEditBox) Then
-         RaiseEvent SyncKeyboard(KeyAscii)
-         If KeyAscii = 9 And UseTab Then
+        Else
+            If myEnabled Then
+                If maxchar = 0 Or (maxchar > Len(list(SELECTEDITEM - 1)) Or MultiLineEditBox) Then
+                   'If Len(UKEY$) <> 2 Then
+                   RaiseEvent SyncKeyboard(KeyAscii)
+                    If KeyAscii = 9 And UseTab Then
          
-         If Len(UKEY$) = 0 Then
-         KeyAscii = 0
-         Else
-         RaiseEvent KeyDown(KeyAscii, lastshift)
-         End If
-         If KeyAscii = 0 Then Exit Sub
-         End If
-        If ((KeyAscii = 9 And UseTab) Or (KeyAscii > 31) And SELECTEDITEM > 0) Then
-                    If EditFlag Then
+                        If Len(UKEY$) = 0 Then
+                            KeyAscii = 0
+                        Else
+                            RaiseEvent KeyDown(KeyAscii, lastshift)
+                        End If
+                        If KeyAscii = 0 Then Exit Sub
+                    End If
+                     If ((KeyAscii = 9 And UseTab) Or (KeyAscii > 31) And SELECTEDITEM > 0) Then
+                     If EditFlag Then
                     bb = enabled
                     enabled = False
                     RaiseEvent HaveMark(b1)
                     RaiseEvent PushUndoIfMarked
                     RaiseEvent MarkDelete(False)
                     enabled = bb
-                    End If
+                End If
                     If EditFlag And ((KeyAscii > 32 And KeyAscii <> 127) Or (KeyAscii = 9 And UseTab)) Then
                     If UKEY$ <> "" Then
                     kk$ = UKEY$
@@ -993,12 +996,18 @@ Exit Sub
            End If
            RaiseEvent RemoveOne(kk$)
            
-         
+         If KeyAscii = 44 And Len(kk$) = 2 Then
+         SelStartEventAlways = SelStart + 2
+         list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 3) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 2)
+          
+         Else
             SelStartEventAlways = SelStart + 1
+            list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
+          
+            End If
             RaiseEvent PureListOn
       
-               list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
-          
+               
         
             RaiseEvent PureListOff
             Else
@@ -1191,7 +1200,18 @@ NoPanLeft = True
 NoPanRight = True
 
 End Sub
+Public Sub RefreshNow()
+    If NoFreeMoveUpDown Then
+    If ListIndex < topitem Then topitem = ListIndex Else topitem = topitem - 1
+    If ListIndex - topitem > lines Then topitem = ListIndex - lines
+    If topitem < 0 Then topitem = 0
+       ShowMe2
+    Else
 
+If ListIndex < topitem Then topitem = ListIndex
+      PrepareToShow 5
+    End If
+End Sub
 Public Sub PressKey(KeyCode As Integer, shift As Integer, Optional NoEvents As Boolean = False)
 
 If shift <> 0 And KeyCode = 16 Then Exit Sub
@@ -1199,7 +1219,7 @@ If shift <> 0 And KeyCode = 16 Then Exit Sub
 Timer1.enabled = False
 If BlinkON Then BlinkTimer.enabled = True
 'Timer1.Interval = 1000
-Dim LastListIndex As Long, bb As Boolean
+Dim LastListIndex As Long, bb As Boolean, val As Long
 LastListIndex = ListIndex
 If KeyCode = vbKeyLeft Or KeyCode = vbKeyUp Or KeyCode = vbKeyDown Or KeyCode = vbKeyRight Or KeyCode = vbKeyEnd Or KeyCode = vbKeyHome Or KeyCode = vbKeyPageUp Or KeyCode = vbKeyPageDown Then
 If MarkNext = 0 Then RaiseEvent KeyDownAfter(KeyCode, shift)
@@ -1425,10 +1445,11 @@ End If
 End If
 Case vbKeyLeft
 If EditFlag Then
-
+val = 1
+RaiseEvent SubSelStart(val)
 If MultiLineEditBox Then
-If SelStart > 1 Then
-mSelstart = SelStart - 1
+If SelStart > val Then
+mSelstart = SelStart - val
 RaiseEvent MayRefresh(bb)
 If bb Then ShowMe2
 ElseIf ListIndex > 0 Then
@@ -1436,15 +1457,18 @@ ShowThis SELECTEDITEM - 1
 If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 mSelstart = Len(list(ListIndex)) + 1
 End If
-ElseIf SelStart > 1 Then
-mSelstart = SelStart - 1
+ElseIf SelStart > val Then
+mSelstart = SelStart - val
 End If
 End If
 Case vbKeyRight
 If EditFlag Then
+val = 1
+RaiseEvent AddSelStart(val)
 If MultiLineEditBox Then
-If SelStart <= Len(list(SELECTEDITEM - 1)) Then
-mSelstart = SelStart + 1
+If SelStart <= Len(list(SELECTEDITEM - 1)) - val + 1 Then
+
+mSelstart = SelStart + val
 RaiseEvent MayRefresh(bb)
 If bb Then ShowMe2
 ElseIf ListIndex < listcount - 1 Then
@@ -1456,7 +1480,7 @@ If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 
 End If
 Else
-If SelStart <= Len(list(SELECTEDITEM - 1)) Then mSelstart = SelStart + 1
+If SelStart <= Len(list(SELECTEDITEM - 1)) - val + 1 Then mSelstart = SelStart + val
 End If
 End If
 Case vbKeyDelete
@@ -1554,6 +1578,18 @@ Else
 i = val(mynum$)
 End If
 mynum$ = vbNullString
+If i > 32 Then
+If i >= &H10000 And i <= &H10FFFF Then
+i = i - &H10000
+UKEY$ = ChrW(UINT(i \ &H400& + &HD800&)) + ChrW(UINT((i And &H3FF&) + &HDC00&))
+Else
+UKEY$ = ChrW(i)
+End If
+UserControl_KeyPress 44
+RefreshNow
+Exit Sub
+End If
+i = -1
 Else
 i = GetLastKeyPressed
 End If
@@ -4230,7 +4266,7 @@ KeyCode = 0
 Exit Sub
 End If
 Select Case KeyCode
-Case vbKeyAdd
+Case vbKeyAdd, vbKeyInsert
 mynum$ = "&h"
 Case vbKey0 To vbKey9
 mynum$ = mynum$ + Chr$(KeyCode - vbKey0 + 48)
@@ -4629,7 +4665,7 @@ Public Sub REALCUR(ByVal s$, ByVal probeX As Single, realpos As Long, usedCharLe
 ' for a probeX (maybe a cursor position or a wrapping point) we want to know for a S$, what is the real posistion in realpos,
 ' and how match is the length of S$ in the left side of that position
 
-Dim n As Long, st As Long, st1 As Long, st0 As Long
+Dim n As Long, st As Long, st1 As Long, st0 As Long, w As Integer
 
 RaiseEvent RealCurReplace(s$)
 n = UserControlTextWidth(s$)
@@ -4659,12 +4695,23 @@ st1 = st + 1
 st0 = 1
 While st > st0 + 1
 st1 = (st + st0) \ 2
+w = AscW(Mid$(s$, 1, st1))
+If w > -10241 And w < -9984 Then
+If probeX >= UserControlTextWidth(Mid$(s$, 1, st1 + 1)) Then
+st0 = st1
+Else
+st = st1
+End If
+Else
 If probeX >= UserControlTextWidth(Mid$(s$, 1, st1)) Then
 st0 = st1
 Else
 st = st1
 End If
+End If
 Wend
+
+
 If probeX > UserControlTextWidth(Mid$(s$, 1, st1)) Then
 
 st1 = st1 + 1

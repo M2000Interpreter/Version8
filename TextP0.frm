@@ -413,6 +413,18 @@ Else
 i = val(mynum$)
 End If
 mynum$ = vbNullString
+If i > 32 Then
+
+If i >= &H10000 And i <= &H10FFFF Then
+i = i - &H10000
+UKEY$ = ChrW(UINT(i \ &H400& + &HD800&)) + ChrW(UINT((i And &H3FF&) + &HDC00&))
+Else
+UKEY$ = ChrW(i)
+End If
+Form_KeyPress 44
+Refresh
+Exit Sub
+End If
 Else
 i = GetLastKeyPressed
 End If
@@ -1143,8 +1155,10 @@ KeyCode = 0
 Exit Sub
 End If
 Select Case KeyCode
-Case vbKeyAdd
+Case vbKeyAdd, vbKeyInsert
 mynum$ = "&h"
+Case vbKey0 To vbKey9
+mynum$ = mynum$ + Chr$(KeyCode - vbKey0 + 48)
 Case vbKey0 To vbKey9
 mynum$ = mynum$ + Chr$(KeyCode - vbKey0 + 48)
 Case vbKeyNumpad0 To vbKeyNumpad9
