@@ -1485,6 +1485,7 @@ End If
 End If
 Case vbKeyDelete
 If EditFlag Then
+
 If mSelstart = 0 Then mSelstart = 1
 If SelStart > Len(list(SELECTEDITEM - 1)) Then
 If listcount > SELECTEDITEM Then
@@ -1496,8 +1497,10 @@ End If
 End If
 Else
  RaiseEvent PureListOn
- RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, 1))
-list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + 1)
+ val = 1
+RaiseEvent AddSelStart(val)
+ RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))
+list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + val)
 RaiseEvent PureListOff
 ShowMe2
 End If
@@ -1507,12 +1510,14 @@ Case vbKeyBack
 
 If EditFlag Then
     If SelStart > 1 Then
-        SelStart = SelStart - 1  ' make it a delete because we want selstart to take place before list() take value
+        val = 1
+        RaiseEvent SubSelStart(val)
+        SelStart = SelStart - val  ' make it a delete because we want selstart to take place before list() take value
      RaiseEvent PureListOn
-        RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, 1))
-      
+        RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))
 
-        list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + 1)
+        list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + val)
+
         RaiseEvent PureListOff
         ShowMe2  'refresh now
     Else

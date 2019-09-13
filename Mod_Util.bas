@@ -7,6 +7,8 @@ Const b123 = vbCr + "'\"
 Const b1234 = vbCr + "'\:"
 Public k1 As Long, Kform As Boolean
 Private Const doc = "Document"
+Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
+
 Public tracecode As String, lasttracecode As Long
 Public Declare Function IsWindow Lib "user32" (ByVal hWnd As Long) As Long
 Public Declare Function IsWindowEnabled Lib "user32" (ByVal hWnd As Long) As Long
@@ -1651,7 +1653,7 @@ With mybasket
     
     rTop = PY * pixY
     rBottom = rTop + pixY - plusone
-    lenw& = Len(what)
+    lenw& = RealLen(what)
     WHAT1$ = what + " "
      ReDim a(Len(WHAT1$) * 2 + 20)
        ReDim a1(Len(WHAT1$) * 2 + 20)
@@ -4813,7 +4815,7 @@ End Function
 Function QUERY(bstack As basetask, Prompt$, s$, m&, Optional USELIST As Boolean = True, Optional endchars As String = vbCr, Optional excludechars As String = vbNullString, Optional checknumber As Boolean = False) As String
 'NoAction = True
 On Error Resume Next
-Dim dX As Long, dY As Long, safe$, oldREFRESHRATE As Double
+Dim dX As Long, dY As Long, safe$, oldREFRESHRATE As Double, AUX As Long
 oldREFRESHRATE = REFRESHRATE
 
 If excludechars = vbNullString Then excludechars = Chr$(0)
@@ -5065,9 +5067,9 @@ End If
 If a$ = Chr(8) Then
 DE$ = " "
     If Len(s$) > 0 Then
+    AUX = RealLen(s$)
     
-    ExcludeOne s$
-
+        ExcludeOne s$
              LCTCB dq, prive, -1: DestroyCaret
             oldLCTCB dq, prive, 0
 
@@ -5078,7 +5080,8 @@ DE$ = " "
 
             If .currow < .mysplit Then
                 ScrollDownNew dq, prive
-                PlainBaSket dq, prive, Right$(Prompt$ & s$, .mx - 1), , , 0
+                
+                PlainBaSket dq, prive, RealRight(Prompt$ & s$, .mx - 1), , , 0
                 DE$ = vbNullString
             End If
         End If
@@ -5101,6 +5104,7 @@ End If
 w = AscW(a$)
 If w < 0 Then
 GoTo cont12345
+
 ElseIf w > 31 And (RealLen(s$) < m& Or RealLen(a$, True) = 0) Then
 If RealLen(a$, True) = 0 Then
     If Asc(a$) = 63 And s$ <> "" Then
@@ -9398,155 +9402,102 @@ a112:
 
 
 End Sub
-Public Function RealLenOLD(s$, Optional checkone As Boolean = False) As Long
-Dim a() As Byte, ctype As Long, s1$, i As Long, LL As Long, ii As Long
-If IsWine Then
-RealLenOLD = Len(s$)
-Else
-ctype = CT_CTYPE3
-LL = Len(s$)
-   If LL Then
-      ReDim a(Len(s$) * 2 + 20)
-      If GetStringTypeExW(&HB, ctype, StrPtr(s$), Len(s$), a(0)) <> 0 Then
-      ii = 0
-      For i = 1 To Len(s$) * 2 - 1 Step 2
-      ii = ii + 1
-      If a(i - 1) > 0 Then
-      If a(i) = 0 Then
-      If ii > 1 Then If a(i - 1) < 8 Then LL = LL - 1
-      End If
-      ElseIf a(i) = 0 Then
-      LL = LL - 1
-      End If
-      
-          Next i
-      End If
-   End If
-RealLenOLD = LL
-End If
-End Function
 Public Function RealLen(s$, Optional checkone As Boolean = False) As Long
-Dim a() As Byte, a1() As Byte, s1$, i As Long, LL As Long, ii As Long, l$, LLL$, w As Integer
-LL = Len(s$)
-   If LL Then
-      ReDim a(Len(s$) * 2 + 20), a1(Len(s$) * 2 + 20)
-         If GetStringTypeExW(&HB, 1, StrPtr(s$), Len(s$), a(0)) <> 0 And GetStringTypeExW(&HB, 4, StrPtr(s$), Len(s$), a1(0)) <> 0 Then
-         
-        ii = 0
-      For i = 1 To Len(s$) * 2 - 1 Step 2
-        ii = ii + 1
-        If a(i - 1) = 0 Then
-        If a(i) = 2 And a1(2) < 8 Then
-        
-                 If ii > 1 Then
-                    s1$ = Mid$(s$, ii, 1)
-                    
-                    If (AscW(s1$) And &HFFFF0000) = &HFFFF0000 Then
-                    w = AscW(Mid$(s$, ii - 1, 1))
-                    If w > -10241 And w < -9984 Then
-                    LL = LL - 1
-                    i = i + 2
-                    ii = ii + 2
-                    End If
-                    Else
-                    If l$ = s1$ Then
-                        If LLL$ = vbNullString Then LL = LL + 1
-                        LLL$ = l$
-                    Else
-                        l$ = Mid$(s$, ii, 1)
-                        LL = LL - 1
-                    End If
-                    End If
-                 Else
-                 If checkone Then LL = LL - 1
-                 End If
-            
-        Else
-        LLL$ = vbNullString
-        End If
-       
-        
-        End If
-           l$ = Mid$(s$, ii, 1)
-          Next i
-      End If
-   End If
-RealLen = LL
+Dim i&, LL As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  LL = Len(s): If LL = 0 Then Exit Function
+  p2 = StrPtr(s):
+  p4 = p2 + (LL - 1) * 2
+  LL = LL * 2
+  If checkone Then p4 = p2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case -10240 To -9985, -9214 To -8959
+    LL = LL - 1
+    Case 768 To 879
+    LL = LL - 2
+     End Select
+  Next i
+
+RealLen = LL \ 2
 End Function
 Public Function PopOne(s$) As String
-Dim a() As Byte, ctype As Long, s1$, i As Long, LL As Long, mm As Long, w As Long, ii As Long
-ctype = CT_CTYPE3
-Dim one As Boolean
-LL = Len(s$)
-mm = LL
-   If LL Then
-      ReDim a(Len(s$) * 2 + 20)
-      If GetStringTypeExW(&HB, ctype, StrPtr(s$), Len(s$), a(0)) <> 0 Then
-      For i = 1 To Len(s$) * 2 - 1 Step 2
-      ii = ii + 1
-      If a(i - 1) > 0 Then
-            If a(i) = 0 Then
-                   
-   If a(i - 1) < 8 Then
-                    LL = LL - 1
-                    End If
-            Else
-            If Not one Then Exit For
-            
-            End If
-            Else
-            If one Then Exit For
-            one = Not one
-            End If
-      Next i
-      End If
-        LL = LL - 1
-      mm = mm - LL
-   End If
-If LL < 0 Then
-PopOne = s$
-s$ = vbNullString
-ElseIf mm > 0 Then
-    PopOne = Left$(s$, mm)
-    s$ = Right$(s$, LL)
-End If
-
+Dim i&, l As Long, LL As Long, l2 As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then Exit Function
+  p2 = StrPtr(s)
+  p4 = p2 + (l - 1) * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case -10240 To -9985, -9214 To -8959
+    LL = LL + 1
+    If LL = 2 Then Exit For
+    Case 768 To 879
+    If LL < 2 Then
+    PopOne = " " + ChrW(p1)
+    s$ = Mid$(s$, LL + 1)
+    Exit Function
+    ' nothing
+    End If
+    Case Else
+    If LL = 1 Then
+    PopOne = "?"
+    s$ = Mid$(s$, 3)
+    Exit Function
+    End If
+    Exit For
+     End Select
+  Next i
+  If LL < 2 Then LL = 1 Else LL = LL \ 2
+ PopOne = Left$(s$, LL)
+s$ = Mid$(s$, LL + 1)
 End Function
 Public Sub ExcludeOne(s$)
-Dim a() As Byte, ctype As Long, s1$, i As Long, LL As Long, w As Long
-LL = Len(s$)
-ctype = CT_CTYPE3
-   If LL > 1 Then
-      w = AscW(Right$(s$, 1))
-      If w > -9215 And w < -8960 And Len(s$) > 1 Then
-      LL = LL - 1
-      End If
-      ReDim a(Len(s$) * 2 + 20)
-      If GetStringTypeExW(&HB, ctype, StrPtr(s$), -1, a(0)) <> 0 Then
-      For i = LL * 2 - 1 To 1 Step -2
-      If a(i) = 0 Then
-      If a(i - 1) > 0 Then
-      If a(i - 1) < 8 Then LL = LL - 1
-      Else
-      Exit For
-      End If
-      Else
-      Exit For
-      End If
-          Next i
-      End If
-       LL = LL - 1
-       If LL <= 0 Then
-       s$ = vbNullString
-       Else
-       
-        s$ = Left$(s$, LL)
-        End If
-      Else
-      s$ = vbNullString
-      
-   End If
+Dim i&, LL As Long
+Dim p2 As Long, p1 As Integer, p4 As Long, many
+  LL = Len(s): If LL = 0 Then Exit Sub
+ 
+  p2 = StrPtr(s):
+  p4 = p2 + (LL - 1) * 2
+  many = 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case -10240 To -9985, -9214 To -8959
+    many = many - 1
+    Case 768 To 879
+    Case Else
+    many = many - 2
+     End Select
+     If many <= 0 Then Exit For
+  Next i
+  s$ = Mid$(s$, 1, (i - p2) \ 2)
 End Sub
+Function RealRight(s$, ByVal many As Long) As String
+Dim i&, LL As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  LL = Len(s): If LL = 0 Or many <= 0 Then Exit Function
+  If many >= LL Then RealRight = s$: Exit Function
+  p2 = StrPtr(s):
+  p4 = p2 + (LL - 1) * 2
+  many = many * 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case -10240 To -9985, -9214 To -8959
+    many = many - 1
+    Case 768 To 879
+    Case Else
+    many = many - 2
+     End Select
+     If many <= 0 Then Exit For
+  Next i
+  RealRight = Mid$(s$, (i - p2 + 2) \ 2)
+End Function
+
+
 Function Tcase(s$) As String
 Dim a() As String, i As Long
 If s$ = vbNullString Then Exit Function
