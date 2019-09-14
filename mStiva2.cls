@@ -32,6 +32,11 @@ If mstack.count > 0 Then
 LookTopVal = mstack.item(1)
 End If
 End Property
+Public Property Get LookSecondVal() As Variant
+If mstack.count > 1 Then
+LookSecondVal = mstack.item(2)
+End If
+End Property
 Public Property Get PopVal() As Variant
 If mstack.count > 0 Then
 PopVal = mstack.item(1)

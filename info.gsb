@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<38 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<40 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.7"
+	Report " A collection of modules for tests version 5.8"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -15565,7 +15565,7 @@ Save1:
       Try ok {
         Clear BackUp$
         BackUp$=Pad.text$
-        Save.Doc BackUp$, f$
+        Save.Doc BackUp$, f$  ' by default 2 - Utf-8
         filename$=f$
         lookpath$=file.path$(Filename$)
         Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
@@ -15616,7 +15616,7 @@ thread {
             informe$=if$((tick mod 4 +1) ->"|", "/","-","\")
       }
 
-} as lookEXE interval 5000
+} as lookEXE interval 1000
 thread lookEXE hold
 Function Run1.DblClick {
       Read New Run1index
@@ -15638,7 +15638,7 @@ Function Run1.DblClick {
             local aa$
             Document aa$=Pad.text$
             dir user
-            Save.doc aa$, "test.cs", 3
+            Save.doc aa$, "test.cs", 2   ' for UTF-8  see help
             
             if instr(aa$,"System.Windows.Forms")>9 then w$="win" else w$=""
             clear aa$
@@ -15648,7 +15648,7 @@ Function Run1.DblClick {
                         csc.exe  /target:}+w$+{exe /out:test.exe test.cs
                         endlocal
                         }
-            Save.doc aa$, "test.bat", 3
+            Save.doc aa$, "test.bat", 3  ' Ansi for bat
             after 300 {
                   
                   dir user
@@ -15713,7 +15713,7 @@ Function Run1.DblClick {
                   }
                   Save.doc aa$, "final.bat", 3
                   After 40 {
-                        dos "cd "+dir$+" && final.bat";
+                        dos "cd "+shortdir$(dir$)+" && final.bat";
                   }
       
             }      }   

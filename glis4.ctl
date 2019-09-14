@@ -972,7 +972,7 @@ Else
           End If
           
   RaiseEvent getpair(kk$, pair$)
-             '
+            If Len(kk$) = 0 Then Exit Sub
              
             If SelStart = 0 Then mSelstart = 1
            

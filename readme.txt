@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 39 active-X
-Optimizations mostly.
+Version 9.8 Revision 40 active-X
+Two bugs removed.
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
