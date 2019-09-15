@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<40 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<41 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.8"
+	Report " A collection of modules for tests version 5.9"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -15932,8 +15932,8 @@ Declare Help1 Combobox Form NotePad
 With NotePad, "UseIcon", True, "UseReverse", True
 Method Pad, "FontAttr", "COURIER NEW", 14, true
 identifiers$="<-|ΠΡΟΓΡΑΜΜΑ|ΜΕΤΑΒΛΗΤΕΣ|ΠΡΑΓΜΑΤΙΚΕΣ|ΑΚΕΡΑΙΕΣ|ΛΟΓΙΚΕΣ|ΧΑΡΑΚΤΗΡΕΣ|ΣΤΑΘΕΡΕΣ|ΑΡΧΗ|ΓΡΑΨΕ|ΔΙΑΒΑΣΕ|ΤΕΛΟΣ_ΠΡΟΓΡΑΜΜΑΤΟΣ|DIV|MOD|ΑΝ|ΤΟΤΕ|ΑΛΛΙΩΣ|ΑΛΛΙΩΣ_ΑΝ|ΤΕΛΟΣ_ΑΝ|ΓΙΑ|ΑΠΟ|ΜΕΧΡΙ|ΜΕ_ΒΗΜΑ|ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ|ΕΠΙΛΕΞΕ|ΠΕΡΙΠΤΩΣΗ|ΤΕΛΟΣ_ΕΠΙΛΟΓΩΝ|ΟΣΟ|ΕΠΑΝΑΛΑΒΕ|ΑΡΧΗ_ΕΠΑΝΑΛΗΨΗΣ|ΜΕΧΡΙΣ_ΟΤΟΥ|ΚΑΙ|Η|ΟΧΙ|ΑΛΗΘΗΣ|ΨΕΥΔΗΣ|ΚΑΛΕΣΕ|ΔΙΑΔΙΚΑΣΙΑ|ΤΕΛΟΣ_ΔΙΑΔΙΚΑΣΙΑΣ|Α_Μ(|Α_Τ(|Ε|ΕΦ(|ΗΜ(|ΛΟΓ(|ΣΥΝ(|Τ_Ρ(|ΣΥΝΑΡΤΗΣΗ|ΤΕΛΟΣ_ΣΥΝΑΡΤΗΣΗΣ|"
-With Pad, "NoWrap", True, "ColorCollection1", identifiers$, "LineComment1", "!!", "OtherSymbols","@", "CommentSymbols", "!", "ComSymbolsWidth", 1, "WordCharRight", ": ,[]+-*/)}≤≥≠"+chr$(9), "WordCharleft", " :,[]+*/({≤≥≠"+chr$(9)
-With Pad, "LineComment2",CHR$(0), "StringSep2","'", "AssignSym","<-", "SearchWords",True, "UseColon","","SplitExpr",",", "CommentLineLight", True
+With Pad, "NoWrap", True, "ColorCollection1", identifiers$, "LineComment1", "!!", "OtherSymbols","@", "CommentSymbols", "!", "ComSymbolsWidth", 1, "WordCharRight", ": ,[]+()-*/)}≤≥≠"+chr$(9), "WordCharleft", " :,[]+*/)({≤≥≠"+chr$(9), "WordCharRightButIncluded", "("
+With Pad, "LineComment2",CHR$(0), "StringSep2","'", "AssignSym","<-", "SearchWords",FALSE, "UseColon","","SplitExpr",",", "CommentLineLight", True
 With Pad, "Sellength" as Pad.SelLength
 With File1,"label","Αρχείο", "listtext" As list$, "list" As list$() '
 With Edit1,"label","Επεξεργασία",  "Mark", Color(255,100,0)

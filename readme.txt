@@ -1,9 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 41 active-X
-The spaceship operator now works fine for numbers
-Print 2+2<=>1+1+1+1   print 0.
-
+Version 9.8 Revision 42 active-X
+1. I  tiny correction for Editbox, for syntax color.
+2. New info.gsb
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
 load info

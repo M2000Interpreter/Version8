@@ -6290,9 +6290,12 @@ Do While pos <= Len(a$)
         End If
       
         If Not BlockParam4(a$, pos, Asc(w$)) Then pos = Len(a$) + 1: Exit Do
-       If Mid$(a$, pos + 1, 1) <> "." Then b$ = b$ & part$
+       If Mid$(a$, pos + 1, 1) <> "." Then
+       b$ = b$ & part$
+        Else
+        pos = pos - 1
+        End If
         part$ = vbNullString
-        
     ElseIf w$ = "{" Then
 
     
@@ -6435,7 +6438,6 @@ Do While pos <= Len(a$)
                 Else
                 Exit Do
                 End If
-        
         Case ")", "}", Is < " ", LineCommandSep, ";", LineComment1, LineComment2, "]"
         Exit Do
         Case Else
@@ -6455,7 +6457,7 @@ Do While pos <= Len(a$)
         
     pos = pos + 1
 
-Loop
+ Loop
 
     w$ = Replace(b$ & part$, "a", "")
     
