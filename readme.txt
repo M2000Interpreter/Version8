@@ -1,7 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 40 active-X
-Two bugs removed.
+Version 9.8 Revision 41 active-X
+The spaceship operator now works fine for numbers
+Print 2+2<=>1+1+1+1   print 0.
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

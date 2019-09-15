@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 40
+Global Const Revision = 41
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -3910,6 +3910,7 @@ ElseIf FastSymbol(aa$, "<") Then
         If Left$(aa$, 2) = " >" Then
             Mid$(aa$, 2, 1) = " "
             MUL = 1  ' from 3
+
             If IsExp(bstack, aa$, r, False, True, False) Then
                 If ac = 0 Then
                     Select Case po
@@ -3936,7 +3937,7 @@ ElseIf FastSymbol(aa$, "<") Then
                             po = 1
                         End Select
                     Else
-                        Select Case ac + po
+                        Select Case ac
                         Case Is < r
                             po = -1
                         Case Is = r
