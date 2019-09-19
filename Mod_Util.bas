@@ -5412,7 +5412,7 @@ With Form4.label1
 .Visible = True
 .enabled = False
 .Text = vH_doc$
-.SetRowColumn 1, 0
+If Not bypassshow Then .SetRowColumn 1, 0
 .EditDoc = False
 .NoMark = True
 If abt Then
@@ -5429,7 +5429,7 @@ Else
 End If
 .enabled = True
 .NewTitle vH_title$, (4 + UAddPixelsTop) * Helplastfactor
-.glistN.ShowMe
+If Not bypassshow Then .glistN.ShowMe
 End With
 
 
@@ -12453,7 +12453,11 @@ Function IsSqrt(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
     End If
 End Function
 Function GiveForm() As Form
+If Form1.Visible Then
 Set GiveForm = Form1
+Else
+Set GiveForm = Form3
+End If
 End Function
 Function IsNumberD(a$, d As Double) As Boolean
 Dim a1 As Long
@@ -16944,7 +16948,9 @@ Set aa = Nothing
 End If
 Set bstack.lastobj = Nothing
 End Function
-
+Sub OnlyForInventory()
+MyEr "Only for Inventory object", "Μόνο για αντικείμενο Κατάσταση"
+End Sub
 Function IsEnumAs(bstack As basetask, b$, p) As Boolean
 Dim aaa As mHandler, useHandler As mHandler, ss$, i As Long, that
 If MaybeIsSymbol(b$, ".") Then

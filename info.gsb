@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<41 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<43 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 5.9"
+	Report " A collection of modules for tests version 7.0"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -15346,7 +15346,6 @@ With Help1,"label","Help",  "Mark", Color(255,100,0)
 With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
 With NotePad, "UseIcon", True, "UseReverse", True
 With Pad, "Text" As Pad.text$, "ShowAlways", True,"NoColor", True,"SelLength" as SelLength
-With Pad, "SearchWords", True, "nowrap", True
 Def TitleStr$(a$)=Ucase$(Left$(a$,1))+Mid$(a$,2)
 Filename$=Dir$+"pendulum.cs"
 
@@ -15394,6 +15393,9 @@ For This {
     
       With Help1, "MenuGroup","This"
       Method Help1, mi$, "About", True
+      Method Help1, mi$,""
+      Method Help1, mi$,"Bright Themel",true
+      Method Help1, mi$,"Dark Theme",true
 }
 
 if exist(Filename$) then
@@ -15468,12 +15470,26 @@ Function Pad.PopUp {
       Method Pad,"PopUpMenu", "",X , Y
 }
 function cs_choose{
-	 With Pad, "ColorCollection1", lcase$("abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", True, "MultiLineComment1", "/*","MultiLineComment2", "*/"
-	      With Pad, "WordCharLeft"," .,+=/*^()[];", "WordCharRight"," .,+=/*^()[];","OtherSymbols","@"
-	      With Pad,"StartSymbols", "+-&|*=></,.", "StringSep2","'"
-	      Method Pad, "ReColor"
-	      Method Pad, "Show"
+       With Pad, "ColorCollection1", lcase$("|abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield|"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", True, "MultiLineComment1", "/*","MultiLineComment2", "*/"
+      With Pad, "WordCharLeft"," ,+-=/*^()[];<>", "WordCharRight"," .,+-=/*^()[];<>","OtherSymbols","@","UseColon",";"
+      With Pad,"StartSymbols", "+-&|*=></,.1234567890'"+chr$(34), "StringSep2","'", "EnablePairs", True, "linespace", 30
+      With Pad, "SearchWords", True, "nowrap", True, "AllowInsertBrackets",  True, "SpaceIndent", 2
+      Method Pad, "ReColor"
+      Method Pad, "Show"
 }
+
+Function Dark(){  '  13619071
+      With Pad, "ColorSet", 0, "linespace", 60, "SelectionColor", -#FF0000, "SelectionTextColor", -color(14)
+      Method Pad, "Colors", -color(50,50,50),-color(14),,,-color(0)
+      Method Pad, "Show"
+}
+Function Bright(){
+      With Pad, "ColorSet", 1, "linespace", 30
+      Method Pad, "ColorsReset"
+      Method Pad, "ResetSelColors"
+      Method Pad, "Show"
+}
+
 Function Run1Status() {
       if file.type$(filename$)="cs" then
             Comp.Enabled(0)=True
@@ -15722,16 +15738,25 @@ Function Run1.DblClick {
       end select
 }
 Function Help1.DblClick {
-      Read New Help1index
-      Local A, info$
-      Info$={
-            This is an example
-            of an editor for c#
-            written for M2000 Environment
-            use F1 to change wrap
-            }
-      A=Ask(info$,title$,"","")
-      Method Pad, "GetFocus"
+     rem  Read New Help1index  \\ we get the number without variable
+      select case Number
+      case 0
+      {
+      	Local A, info$
+	      Info$={
+	            This is an example
+	            of an editor for c#
+	            written for M2000 Environment
+	            use F1 to change wrap
+	            }
+	      A=Ask(info$,title$,"","")
+	      Method Pad, "GetFocus"
+      }
+      Case 2
+      Call Local Bright()
+      Case 3
+      Call Local Dark()
+      End Select
 
 }
 Function Notepad.InfoClick {
@@ -15778,10 +15803,12 @@ Function Form1.MouseDown {
       
       Method Form1, "PopUp", aPopUpForm, X, Y
 }
+refresh
 Method Form1,"Show", 1  \\ modal  means wait to return
 \\ we return focus to console
 Show
 Declare Form1 Nothing
+Declare aPopUpForm Nothing
 Print X
 end
 }
@@ -16143,5 +16170,852 @@ Declare NotePad Nothing
 Print "Τέλος"
 Title "Done..", 0
 Latin
+}
+MODULE HTMLEDITOR {\\ Version 0.1
+\\ need some work inside interpreter code
+Clear \\ Clear all variables/objects
+Flush \\ Empty the stack
+makelist()
+def setagain as boolean
+if file.name$("A.abc")="a.abc" then
+Set switches "+CASESENSITIVE"
+setagain=true
+\\ we want to see and use  the actual case of a filename
+End if
+Global Const  CSIDL_MY_DOCUMENTS  = 0x5
+first$={<!DOCTYPE html>
+<html lang = "en-US">
+      <head>
+            <meta charset = "UTF-8">
+            <title>floatForm.html</title>
+            <link rel = "stylesheet"
+                  type = "text/css"
+                  href = "floatForm.css" />
+      </head>
+      <body>
+            <form action = "">
+                  <fieldset>
+                        <label>Name</label>
+                        <input type = "text"
+                              id = "txtName" />
+                        <label>Address</label>
+                        <input type = "text"
+                              id = "txtAddress" />
+                        <label>Phone</label>
+                        <input type = "text"
+                              id = "txtPhone" />
+                        <button type = "button">
+                              submit request
+                        </button>
+                  </fieldset>
+            </form>
+      </body>
+</html>
+}
+title$="C# Editor"
+typ$="html"
+W$=""
+path$="" 
+Read hBase, identifiers$
+Dir User
+lookpath$=dir$
+Declare NotePad Form
+Declare Pad EditBox Form NotePad
+Declare Inform1 Button Form NotePad
+With Inform1, "Caption" as Informe$
+Method Inform1, "Colors", 15, #FFA000
+With Inform1, "Locked", True
+Declare File1 Combobox Form NotePad
+Declare Edit1 Combobox Form NotePad
+Declare Tools Combobox Form NotePad
+Declare Help1 Combobox Form NotePad
+With File1,"label","File", "listtext" As list$, "list" As list$() '
+With Edit1,"label","Edit",  "Mark", Color(255,100,0)
+With Tools,"label","Tools",  "Mark", Color(255,100,0), "list" As tList$()
+With Help1,"label","Help",  "Mark", Color(255,100,0)
+Method Pad, "FontAttr", "VERDANA", 13.5, true
+With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
+With NotePad, "UseIcon", True, "UseReverse", True
+With Pad, "Text" As Pad.text$, "ShowAlways", True,"NoColor", True,"SelLength" as SelLength
+With Pad, "SearchWords", True, "nowrap", True, "linespace", 30
+With Pad, "ReplaceTitle" as InnerInfo$
+Def TitleStr$(a$)=a$ '   Ucase$(Left$(a$,1))+Mid$(a$,2)
+Filename$=Dir$+"floatforms.html"
+
+Caption$=TitleStr$(File.Name$(Filename$)) +" - HTML Editor"
+Title Caption$
+Method NotePad,"MakeStandardInfo", 1
+Method NotePad,"move", 2000, 4000, 8000, 4000
+Layer NotePad {Cls #FFA000}
+With File1,"MenuStyle", True, "MenuWidth", 3000 
+With Edit1,"MenuStyle", True, "MenuWidth", 3000,"menuEnabled" as Enabled() 
+With Tools,"MenuStyle", True, "MenuWidth", 5400
+With Help1,"MenuStyle", True, "MenuWidth", 3000 
+With File1, "MenuEnabled" As mEnable()
+For This {
+      mi$="MenuItem"  \\ is a temporary variable only for For This Block
+      With File1, "MenuGroup","This"
+      Method File1, mi$,"Open",True
+      Method File1, mi$,"Save",True
+      Method File1, mi$,""    \\  only  a line here
+      Method File1,"MenuRadio","css files",True,False
+      Method File1,"MenuRadio","html files",True,True
+      
+      Method File1, mi$,""
+      Method File1, mi$,"Close",True
+      Method File1, mi$,""
+      Method File1, mi$,"Quit",True
+           
+      
+      With Edit1, "MenuGroup","This"
+      Method Edit1, mi$,"Cut",False
+      Method Edit1, mi$,"Copy",False
+      Method Edit1, mi$,"Paste",True
+      Method Edit1, mi$,""
+      Method Edit1, mi$,"Less Indent",True
+      Method Edit1, mi$,"More Indent",True  
+      
+      With Tools, "MenuGroup","This"
+      Method Tools, mi$,"Open in "+piece$(file.title$("html")," ")(0),true
+      Method Tools, mi$,""
+      Method Tools, mi$,"Set Directory from User", true
+      Method Tools, mi$,"Set Directory from My Documents",true
+      
+      With Help1, "MenuGroup","This"
+      Method Help1, mi$, "About", True
+}
+
+if exist(Filename$) then
+      Document BackUp$
+      Load.Doc BackUp$, filename$
+else
+      Document BackUp$=first$
+end if
+Pad.text$=BackUp$
+Function NotePad.Unload {
+      Read New &Ok
+      After 30 {Call local File1.DblClick(8) }
+      Ok=True
+
+}
+Function Notepad.Resize {
+      Layer NotePad { Cls Color(255, 160, 0) ,0}
+      With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
+      tHeight1=theight*2
+      Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
+      Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
+      Method Tools,"move", twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
+      Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*160, tHeight
+      Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*240, tHeight
+      If NP.height>1000 Then {
+            Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
+            With Pad, "NoWrap" As NoWrap
+            If Not NoWrap Then Method Pad,"Resize"
+      }
+}
+Function Edit1.OpenMenu {
+            Local X
+            X=SelLength>0
+            Enabled(0)=X
+            Enabled(1)=X
+}
+
+Function Edit1.DblClick {
+      Read Local Edit1index
+      Select Case Edit1index
+      Case 0
+            {
+            Method Pad,"mn1sub"
+            Method Pad,"Resize"
+            }
+      Case 1
+            Method Pad,"mn2sub"
+      Case 2
+            {
+                 Method Pad, "mn3sub"
+                 Method Pad,"GetFocus"
+                 Method Pad,"Resize"
+           }
+        Case 4
+           {
+                  Method Pad,"PressKey", 9, 1
+            }
+        Case 5
+           {
+                  Method Pad,"PressKey", 9, 0
+            }
+      End Select
+
+}
+Function Pad.Inform {
+      Read New L, P
+      Informe$=format$("{0}-{1}", L,P)
+      Method Pad,"Show"
+}
+Function Pad.PopUp {
+      Read Local X, Y
+      Method Pad,"PopUpMenu", "",X , Y
+}
+function cs_choose{
+      With Pad, "ColorCollection1",identifiers$,"SetHTML", true
+      Method Pad, "ReColor"
+      Method Pad, "Show"
+}
+
+Function File1.MenuChecked {
+Read New RadioIndex \\ 3 or 4
+If RadioIndex =3 Then {
+      After 30 { Static a$="."+File.type$(Filename$), b$=File.name$(Filename$)
+      Filename$=File.path$(Filename$)+Left$(b$,Len(b$)-Len(a$))+".css"
+      Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+      typ$="css"
+      With Pad, "ColorCollection1", "","NoColor", True,  "UseCase", False
+      Pad.text$=Pad.text$
+      Method Pad, "Show"
+      }
+} Else.If RadioIndex =4 Then {
+     After 30 { local a$="."+File.type$(Filename$), b$=File.name$(Filename$)
+      Filename$=File.path$(Filename$)+Left$(b$,Len(b$)-Len(a$))+".html"
+      Caption$=TitleStr$(File.Name$(Filename$)) +" - M2000 Pad"
+      typ$="html"
+      Call local cs_choose()
+      }      
+}
+
+}
+Function File1.DblClick {
+\\ we use functions As subs here
+\\ each function and each module have a name (define a namespace)
+\\ but here real module name is the File1.DblClick() host module
+\\ this is done because is a Gui Event Service Function
+\\ and is Call With Local tag (Call Local)
+      Read New File1index
+      method Pad, "CloseTitle"
+      
+      Local cont, cont2, f$, NL$={
+      }
+      File1index++
+      \\ Because we want some jumps..we use  On Goto
+      \\ on Goto need here a block
+      {
+      On File1index Goto Open1, Save1, ExitNow, ExitNow, ExitNow, ExitNow, Save2, ExitNow,  Unload
+Exitnow:
+      Exit
+Open1:
+      If Pad.text$<>BackUp$ Then {
+            If Ask("Save Changes first?",title$, "Yes","No")=1 Then Goto Save1
+      }
+     Layer NotePad {
+           Open.file filename$,,"Load Text ("+typ$+") File",typ$
+     }
+     
+     Method Pad,"GetFocus"
+     Read f$
+     If f$<>"" Then {
+           Filename$=f$
+           If Exist(F$) Then {
+           Clear BackUp$
+           Load.Doc BackUp$, f$
+           
+           Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+           lookpath$=file.path$(Filename$)
+           Title Caption$
+           \\ silent means here without refresh
+           With Pad, "SelStartSilent", 0, "SellengthSilent",0 
+           Pad.text$=BackUp$
+           } Else Pad.text$="": Clear BackUp$
+           Method Pad, "ReColor"
+      }
+      Exit
+Save1:
+      Layer NotePad {
+            Save.As Filename$,,"Save Text ("+typ$+") File",typ$
+      }
+      If Not cont2 Then Method Pad,"GetFocus"
+      Read f$   ' from save.as we get a value
+      If f$="" Then Exit 
+      If Lcase$(File.type$(f$))<>typ$ Then f$=f$+"."+typ$
+      If Exist(f$) Then  If Ask(NL$+"Overwrite"+NL$+f$,title$, "Yes","No")<>1 Then Exit
+      Try ok {
+        Clear BackUp$
+        BackUp$=Pad.text$
+        Save.Doc BackUp$, f$  ' by default 2 - Utf-8
+        filename$=f$
+        lookpath$=file.path$(Filename$)
+        Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+      }
+     If ok Else Beep
+     If Not cont Then Exit
+Save2:
+      cont=True
+      If Pad.text$<>BackUp$ Then {
+            If Ask("Save Changes?",title$, "Yes","No")=1 Then Goto Save1
+      }
+      Clear BackUp$
+      Pad.text$=""
+      If Cont2 Then {
+            Method NotePad, "CloseNow"
+      } Else {
+            FileName$=Dir$+"Untitled."+typ$
+            Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+            Method Pad, "Resize"
+      }
+      Exit
+Unload:
+      Cont2=True : Goto Save2
+      }
+}
+
+Function Tools.OpenMenu {
+      tlist$(0)="Open in "+piece$(file.title$("html")," ")(0)
+}
+Function Tools.DblClick {
+      Read New Toolsindex
+      select case Toolsindex
+      case 0
+      {
+            lookpath$=file.path$(Filename$)
+            local test$, ok
+            document test$
+            test$=pad.text$
+            try ok {
+                  save.doc test$, dir$+"_test_.html"
+                  win dir$+"_test_.html"
+            }
+            if not ok then beep
+      }
+      case 2
+      {
+            dir user
+            dir ? dir$, "Choose Folder"
+            filename$=dir$+file.name$(filename$)
+       }
+      case 3
+      {
+             dir path$(CSIDL_MY_DOCUMENTS)
+             dir ? dir$, "Choose Folder"
+             filename$=dir$+file.name$(filename$)
+      }
+      end select
+
+}
+Function Help1.DblClick {
+      Read New Help1index
+      Local A, info$
+      Info$={
+            This is an example
+            of an editor for html files
+            written for M2000 Environment
+            use F1 to change wrap
+            }
+      A=Ask(info$,title$,"","")
+      Method Pad, "GetFocus"
+
+}
+Function Notepad.InfoClick {
+	Read New X
+	If X=0 Then Call Local Help1.DblClick(0)  ' 0 for first menu item
+}
+Function Pad.Word(new alfa$) {
+      if exist(hBase, alfa$) then
+            InnerInfo$=alfa$+" "+eval$(hbase)
+      end if
+}
+
+Call Local Notepad.Resize()
+\\ open As moda
+Title title$, 0
+after 200 {
+	Call local cs_choose()
+}
+After 100 {Title "", 0}
+Method NotePad,"Show" , 1
+Declare Pad Nothing
+Declare NotePad Nothing 
+if setagain Then Set switches "-CASESENSITIVE"
+Print "Done"
+Dir User
+Exit
+Sub makelist()
+Document Help$ ={
+	<a>	Defines a hyperlink.
+	<article> 	Defines an article.
+	<aside> 	Defines some content loosely related to the page content.
+	<body>	Defines the document's body.
+	<br>	Produces a single line break.
+	<details> 	Represents a widget from which the user can obtain additional information or controls on-demand.
+	<div>	Specifies a division or a section in a document.
+	<h1>		Defines HTML headings level 1.
+	<h2>		Defines HTML headings level 2.
+	<h3>		Defines HTML headings level 3.
+	<h4>		Defines HTML headings level 4.
+	<h5>		Defines HTML headings level 5.
+	<h6>		Defines HTML headings level 6.
+	<head>	Defines the head portion of the document that contains information about the document.
+	<header> 	Represents the header of a document or a section.
+	<hgroup> 	Defines a group of headings.
+	<hr>	Produce a horizontal line.
+	<html>	Defines the root of an HTML document.
+	<footer> 	Represents the footer of a document or a section.
+	<nav> 	Defines a section of navigation links.
+	<p>	Defines a paragraph.
+	<section> 	Defines a section of a document, such as header, footer etc.
+	<span>	Defines an inline styleless section in a document.
+	<summary> 	Defines a summary for the <details> element.
+	<base>	Defines the base URL for all linked objects on a page.
+	<basefont>	Obsolete Specifies the base font for a page.
+	<link>	Defines the relationship between the current document and an external resource.
+	<meta>	Provides structured metadata about the document content.
+	<style>	Inserts style information (commonly CSS) into the head of a document.
+	<title>	Defines a title for the document.
+	<button>	Creates a clickable button.
+	<datalist> 	Represents a set of pre-defined options for an <input> element.
+	<fieldset>	Specifies a set of related form fields.
+	<form>	Defines an HTML form for user input.
+	<input>	Defines an input control.
+	<keygen> 	Represents a control for generating a public-private key pair.
+	<label>	Defines a label for an <input> control.
+	<legend>	Defines a caption for a <fieldset> element.
+	<meter> 	Represents a scalar measurement within a known range.
+	<optgroup>	Defines a group of related options in a selection list.
+	<option>	Defines an option in a selection list.
+	<select>	Defines a selection list within a form.
+	<textarea>	Defines a multi-line text input control (text area).
+	<abbr>	Defines an abbreviated form of a longer word or phrase.
+	<acronym>	Defines an acronym.
+	<address>	Specifies the author's contact information.
+	<b>	Displays text in a bold style.
+	<bdi> 	Represents text that is isolated from its surrounding for the purposes of bidirectional text formatting.
+	<bdo>	Overrides the current text direction.
+	<big>	displays text in a large size.
+	<blockquote>	Defines a long quotation.
+	<center>	Obsolete Align contents in the center of the enclosing block.
+	<cite>	Indicates a citation or reference to another source.
+	<code>	Specifies text as computer code.
+	<del>	Specifies a block of deleted text.
+	<dfn>	Specifies a definition.
+	<em>	Specifies emphasized text.
+	<font>	Obsolete Defines font, color, and size for text.
+	<i>	Displays text in an italic style.
+	<ins>	Defines a block of text that has been inserted into a document.
+	<kbd>	Specifies text as keyboard input.
+	<mark> 	Represents text highlighted for reference purposes.
+	<output> 	Represents the result of a calculation.
+	<pre>	Defines a block of preformatted text.
+	<progress> 	Represents the completion progress of a task.
+	<q>	Defines a short inline quotation.
+	<rp> 	Provides fall-back parenthesis for browsers that that don't support ruby annotations.
+	<rt> 	Defines the pronunciation of character presented in a ruby annotations.
+	<ruby> 	Represents a ruby annotation.
+	<s>	Obsolete Displays text in strikethrough style.
+	<samp>	Specifies text as sample output from a computer program.
+	<small>	Displays text in a smaller size.
+	<strike>	Obsolete Displays text in strikethrough style.
+	<strong>	Indicate strongly emphasized text.
+	<sub>	Defines subscripted text.
+	<sup>	Defines superscripted text.
+	<tt>	Displays text in a teletype style.
+	<u>	Obsolete Displays text with an underline.
+	<var>	Defines a variable.
+	<wbr> 	Represents a line break opportunity.
+	<dd>	Specifies a definition for a term in a definition list.
+	<dir>	Obsolete Defines a directory list.
+	<dl>	Defines a definition list.
+	<dt>	Defines a term (an item) in a definition list.
+	<li>	Defines a list item.
+	<ol>	Defines an ordered list.
+	<menu>	Represents a list of commands.
+	<ul>	Defines an unordered list.
+	<caption>	Defines the title of a table.
+	<col>	Defines attribute values for one or more columns in a table.
+	<colgroup>	Specifies attributes for multiple columns in a table.
+	<table>	Defines a data table.
+	<tbody>	Groups a set of rows defining the main body of the table data.
+	<td>	Defines a cell in a table.
+	<tfoot>	Groups a set of rows summarizing the columns of the table.
+	<thead>	Groups a set of rows that describes the column labels of a table.
+	<th>	Defines a header cell in a table.
+	<tr>	Defines a row of cells in a table.
+	<noscript>	Defines alternative content to display when the browser doesn't support scripting.
+	<script>	Places script in the document for client-side processing.
+	<applet>	Obsolete Embeds a Java applet (mini Java applications) on the page. Use the <object> element instead.
+	<area>	Defines a specific area within an image map.
+	<audio> 	Embeds a sound, or an audio stream in an HTML document.
+	<canvas> 	Defines a region in the document, which can be used to draw graphics on the fly via scripting (usually JavaScript).
+	<embed> 	Embeds external application, typically multimedia content like audio or video into an HTML document.
+	<figcaption> 	Defines a caption or legend for a figure.
+	<figure> 	Represents a figure illustrated as part of the document.
+	<frame>	Defines a single frame within a frameset.
+	<frameset>	Defines a collection of frames or other frameset.
+	<iframe>	Displays a URL in an inline frame.
+	<img>	Displays an inline image.
+	<map>	Defines a client-side image-map.
+	<noframes>	Defines an alternate content that displays in browsers that do not support frames.
+	<object>	Defines an embedded object.
+	<param>	Defines a parameter for an object or applet element.
+	<source> 	Defines alternative media resources for the media elements like <audio> or <video>.
+	<time> 	Represents a time and/or date.
+	<video> 	Embeds video content in an HTML document.
+}
+Inventory hBase
+Document final$
+m=Paragraph(Help$, 0) 
+If Forward(Help$,m) then {
+      While m {
+            a$=Paragraph$(Help$,(m))
+            if a$<>"" then
+                  \\ help pair to hBase
+                  b$=rightpart$(a$, "<")
+                  c$=trim$(filter$(rightpart$(b$,">"), chr$(9)))
+                  b$=leftpart$(b$,">")
+                  Append hBase,b$:=c$
+                  \\ indentifiers for color syntax
+                  b$=rightpart$(a$, "<")
+                  b$=leftpart$(b$,">")
+                  final$="|"+b$
+            end if
+      }
+}
+final$="|"
+Push	final$
+Push hBase
+end sub
+}
+MODULE VALIDATOR {makelist()
+read tags
+a$ ={
+<!DOCTYPE html>
+<html lang = "en-US">
+      <head>
+            <meta charset = "UTF-8">
+            <title>floatForm.html</title>
+            <link rel = "stylesheet"
+                  type = "text/css"
+                  href = "floatForm.css" />
+      </head>
+      <!-- CSS injected by skin and extensions -->
+      <body>
+            <form action = "">
+                  <fieldset>
+                        <label>Name</label>
+                        <input type = "text"
+                              id = "txtName" />
+                        <label>Address</label>
+                        <input type = "text"
+                              id = "txtAddress" />
+                        <label>Phone</label>
+                        <input type = "text"
+                              id = "txtPhone" />
+                        <button type = "button">
+                              submit request
+                        </button>
+                  </fieldset>
+            </form>
+      </body>
+</html>
+}
+document valdoc$ =filter$(a$,chr$(9))
+Function count34 (a$){
+	i=1 : n=0:t=len(a$)
+	{
+		b= chrcode(mid$(a$,i))
+		if b=34 then n++
+		if b>0x10000 then i+=2 else i++
+		if i<=t then loop
+	}
+	=n
+}
+Function drop34 (&a$){
+	i=1 : n=0:t=len(a$)
+	{
+		b= chrcode(mid$(a$,i))
+		if b=34 then n++
+		if b>0x10000 then i+=2 else i++
+		if n=2 then exit
+		if i<=t then loop
+	}
+	if n=2 then a$=mid$(a$, i) : = true
+}
+er$="general"
+valcurline=0
+valposline=0
+valm=Paragraph(valdoc$, 0) 
+def FindTag as boolean=True
+LastTag$=""
+FindEndComment=false
+def i,j,k
+Stack New {
+      If Forward(valdoc$,valm) then {
+            a$=Paragraph$(valdoc$,(valm))
+            valcurline++
+            a$=replace$(chr$(9)," ", a$)
+            k=len(a$)+1
+            valposline=1
+            Print valcurline , " "+a$
+            rem Stack
+            a$=trim$(a$)
+            valposline=K-len(a$)
+            while valposline<k  {
+                  if FindTag then {
+                        
+                        if left$(a$,1)=">" then{
+                              if LastTag$="" then er$=" not tag for >" : goto exitall1
+                              a$=trim$(mid$(a$,2))
+                              findtag=false
+                        } 
+                        if LastTag$="*" then {
+                        if left$(a$,2)="/>" then a$=mid$(a$,2)
+                        
+                              if not empty then read LastTag$ else LastTag$="" 
+                              FindTag=false
+                        }
+                        if left$(a$,1)="<" then{
+                               a$=mid$(a$,2)
+                               findtag=true
+                        }
+                        if not findtag then exit
+                        if left$(a$,3)="!--" then {
+                              a$=mid$(a$,4)
+                              FindEndComment=True
+                              FindTag=false
+                        } else.if left$(a$,1)="!" then {
+                              a$=rightpart$(a$, ">")
+                        } else.if left$(a$,2)="/>" then {
+                              if LastTag$="" then er$="missing tag" : goto exitall
+                              a$=mid$(a$,3)
+                              if LastTag$<>"link" and LastTag$<>"input" then {
+                                    
+                                    if  empty then  er$="missing tag" : goto exitall1
+                                    read LastTag1$
+                                    If LastTag1$<>LastTag$ then er$=LastTag$+" no match "+LastTag1$: goto exitall
+                              }
+                              if not empty then Read LastTag$
+                        } else.if left$(a$,1)="/" then {
+                              a$=mid$(a$,2)
+                              if LastTag$<>"" then {
+                                    LastTag1$=leftpart$(a$," ")
+                                    if LastTag1$="" then {
+                                          LastTag1$=leftpart$(a$,">") 
+                                          if LastTag1$="" then if len(a$)>0 then LastTag1$=a$ : a$=""
+                                         
+                                          if LastTag1$<>LastTag$ then er$=LastTag$ + " no match /"+LastTag1$ : goto exitall
+                                          a$=trim$(rightpart$(a$,">") )
+                                    } else {
+                                          if LastTag1$<>LastTag$ then er$=LastTag$ + " no match /"+LastTag1$ : goto exitall
+                                          a$=trim$(a$)
+                                          if left$(a$,1)<>">" then er$="missing > from end tag "+LastTag$: goto exitall
+                                    }
+                                    if not empty then read LastTag$
+                              } else {
+                                    LastTag1$=leftpart$(a$," ")
+                                    if LastTag1$="" then {
+                                          LastTag1$=leftpart$(a$,">") 
+                                          if LastTag1$="" then if len(a$)>0 then LastTag1$=a$ : a$=""
+                                    } 
+                                    if LastTag1$<>"" then er$="/" + LastTag1$ + " no pair" : goto exitall
+                                    er$="</  without tag"
+                                    goto exitall
+                              }
+                        } else {
+                              a$=trim$(a$)
+                              LastTag1$=leftpart$(a$," ")
+                              if instr(LastTag1$,">")>0 then
+                              LastTag1$=leftpart$(LastTag1$," ")
+                              end if
+                              if LastTag1$="" then {
+                                    LastTag1$=leftpart$(a$,">") 
+                                    if LastTag1$="" then{
+                                           if len(a$)>0 then LastTag1$=a$ : a$=""
+                                    } else a$=trim$(mid$(a$,len(lasttag1$)+1)) :   FindTag=true
+                              } else a$=trim$(rightpart$(a$," ")) :   FindTag=false
+                              if LastTag1$="" then er$="not tag found" : goto exitall
+                              if LastTag1$="meta" then {
+                                    if LastTag$<>"" then push LastTag$
+                                 LastTag$="*"   
+                                     a$=trim$(a$)
+                              } else {
+                                    if LastTag$<>"" then push LastTag$
+                                    LastTag$=LastTag1$
+                                    a$=trim$(a$)
+                                    if not FindTag then FindTag=left$(a$,2)="/>" : if FindTag then a$=mid$(a$,22) : FindTag=False
+                              }
+                        }
+                  } else.if FindEndComment then {
+                        i=instr(a$,"-->")
+                        if i>0 then {
+                             a$=mid$(a$, i+3)
+                             FindEndComment=false
+                             FindTag=True
+                        }
+                  } else.if left$(a$,1)="<" then {
+                        FindTag=true
+                  } else {
+                        i=count34(a$)
+                        if i mod 2=1 then er$="problem with strings" : goto exitall
+                        if i>0 then while drop34(&a$) {}
+                        a$=trim$(a$)
+                        
+                        i=instr(a$,"<"): if i=0 then i=len(a$)+1
+                        j=instr(a$,"/"): if j=0 then j=len(a$)+1
+                        g=instr(a$,">"): if g=0 then g=len(a$)+1
+                        a$=TRIM$(mid$(a$,min.data(i, j, g))): FindTag= a$<>""
+                  }
+                  valposline=K-len(a$)
+            }
+            if valm<>0 then loop
+      }
+      if not empty then er$=str$(stack.size,"")+" tag left" :goto exitall
+}
+Print "ok"
+exit
+exitall:
+valposline=K-len(a$)
+Print "Error ";er$;" at line ";valcurline; " at cursor pos ";valposline
+Exit
+Sub makelist()
+' test "here"
+Document Help$ ={
+	<a>	Defines a hyperlink.
+	<article> 	Defines an article.
+	<aside> 	Defines some content loosely related to the page content.
+	<body>	Defines the document's body.
+	<br>	Produces a single line break.
+	<details> 	Represents a widget from which the user can obtain additional information or controls on-demand.
+	<div>	Specifies a division or a section in a document.
+	<h1>		Defines HTML headings level 1.
+	<h2>		Defines HTML headings level 2.
+	<h3>		Defines HTML headings level 3.
+	<h4>		Defines HTML headings level 4.
+	<h5>		Defines HTML headings level 5.
+	<h6>		Defines HTML headings level 6.
+	<head>	Defines the head portion of the document that contains information about the document.
+	<header> 	Represents the header of a document or a section.
+	<hgroup> 	Defines a group of headings.
+	<hr>	Produce a horizontal line.
+	<html>	Defines the root of an HTML document.
+	<footer> 	Represents the footer of a document or a section.
+	<nav> 	Defines a section of navigation links.
+	<p>	Defines a paragraph.
+	<section> 	Defines a section of a document, such as header, footer etc.
+	<span>	Defines an inline styleless section in a document.
+	<summary> 	Defines a summary for the <details> element.
+	<base>	Defines the base URL for all linked objects on a page.
+	<basefont>	Obsolete Specifies the base font for a page.
+	<link>	Defines the relationship between the current document and an external resource.
+	<meta>	Provides structured metadata about the document content.
+	<style>	Inserts style information (commonly CSS) into the head of a document.
+	<title>	Defines a title for the document.
+	<button>	Creates a clickable button.
+	<datalist> 	Represents a set of pre-defined options for an <input> element.
+	<fieldset>	Specifies a set of related form fields.
+	<form>	Defines an HTML form for user input.
+	<input>	Defines an input control.
+	<keygen> 	Represents a control for generating a public-private key pair.
+	<label>	Defines a label for an <input> control.
+	<legend>	Defines a caption for a <fieldset> element.
+	<meter> 	Represents a scalar measurement within a known range.
+	<optgroup>	Defines a group of related options in a selection list.
+	<option>	Defines an option in a selection list.
+	<select>	Defines a selection list within a form.
+	<textarea>	Defines a multi-line text input control (text area).
+	<abbr>	Defines an abbreviated form of a longer word or phrase.
+	<acronym>	Defines an acronym.
+	<address>	Specifies the author's contact information.
+	<b>	Displays text in a bold style.
+	<bdi> 	Represents text that is isolated from its surrounding for the purposes of bidirectional text formatting.
+	<bdo>	Overrides the current text direction.
+	<big>	displays text in a large size.
+	<blockquote>	Defines a long quotation.
+	<center>	Obsolete Align contents in the center of the enclosing block.
+	<cite>	Indicates a citation or reference to another source.
+	<code>	Specifies text as computer code.
+	<del>	Specifies a block of deleted text.
+	<dfn>	Specifies a definition.
+	<em>	Specifies emphasized text.
+	<font>	Obsolete Defines font, color, and size for text.
+	<i>	Displays text in an italic style.
+	<ins>	Defines a block of text that has been inserted into a document.
+	<kbd>	Specifies text as keyboard input.
+	<mark> 	Represents text highlighted for reference purposes.
+	<output> 	Represents the result of a calculation.
+	<pre>	Defines a block of preformatted text.
+	<progress> 	Represents the completion progress of a task.
+	<q>	Defines a short inline quotation.
+	<rp> 	Provides fall-back parenthesis for browsers that that don't support ruby annotations.
+	<rt> 	Defines the pronunciation of character presented in a ruby annotations.
+	<ruby> 	Represents a ruby annotation.
+	<s>	Obsolete Displays text in strikethrough style.
+	<samp>	Specifies text as sample output from a computer program.
+	<small>	Displays text in a smaller size.
+	<strike>	Obsolete Displays text in strikethrough style.
+	<strong>	Indicate strongly emphasized text.
+	<sub>	Defines subscripted text.
+	<sup>	Defines superscripted text.
+	<tt>	Displays text in a teletype style.
+	<u>	Obsolete Displays text with an underline.
+	<var>	Defines a variable.
+	<wbr> 	Represents a line break opportunity.
+	<dd>	Specifies a definition for a term in a definition list.
+	<dir>	Obsolete Defines a directory list.
+	<dl>	Defines a definition list.
+	<dt>	Defines a term (an item) in a definition list.
+	<li>	Defines a list item.
+	<ol>	Defines an ordered list.
+	<menu>	Represents a list of commands.
+	<ul>	Defines an unordered list.
+	<caption>	Defines the title of a table.
+	<col>	Defines attribute values for one or more columns in a table.
+	<colgroup>	Specifies attributes for multiple columns in a table.
+	<table>	Defines a data table.
+	<tbody>	Groups a set of rows defining the main body of the table data.
+	<td>	Defines a cell in a table.
+	<tfoot>	Groups a set of rows summarizing the columns of the table.
+	<thead>	Groups a set of rows that describes the column labels of a table.
+	<th>	Defines a header cell in a table.
+	<tr>	Defines a row of cells in a table.
+	<noscript>	Defines alternative content to display when the browser doesn't support scripting.
+	<script>	Places script in the document for client-side processing.
+	<applet>	Obsolete Embeds a Java applet (mini Java applications) on the page. Use the <object> element instead.
+	<area>	Defines a specific area within an image map.
+	<audio> 	Embeds a sound, or an audio stream in an HTML document.
+	<canvas> 	Defines a region in the document, which can be used to draw graphics on the fly via scripting (usually JavaScript).
+	<embed> 	Embeds external application, typically multimedia content like audio or video into an HTML document.
+	<figcaption> 	Defines a caption or legend for a figure.
+	<figure> 	Represents a figure illustrated as part of the document.
+	<frame>	Defines a single frame within a frameset.
+	<frameset>	Defines a collection of frames or other frameset.
+	<iframe>	Displays a URL in an inline frame.
+	<img>	Displays an inline image.
+	<map>	Defines a client-side image-map.
+	<noframes>	Defines an alternate content that displays in browsers that do not support frames.
+	<object>	Defines an embedded object.
+	<param>	Defines a parameter for an object or applet element.
+	<source> 	Defines alternative media resources for the media elements like <audio> or <video>.
+	<time> 	Represents a time and/or date.
+	<video> 	Embeds video content in an HTML document.
+}
+Inventory hBase
+Document final$
+m=Paragraph(Help$, 0) 
+If Forward(Help$,m) then {
+      While m {
+            a$=Paragraph$(Help$,(m))
+            if a$<>"" then
+                  \\ help pair to hBase
+                  b$=rightpart$(a$, "<")
+                  c$=trim$(filter$(rightpart$(b$,">"), chr$(9)))
+                  b$=leftpart$(b$,">")
+                  Append hBase,b$:=c$
+                  \\ indentifiers for color syntax
+                  b$=rightpart$(a$, "<")
+                  b$=leftpart$(b$,">")
+                  final$="|"+b$
+            end if
+      }
+}
+final$="|"
+'Push	final$
+Push hBase
+end sub
 }
 INFO

@@ -370,7 +370,7 @@ End If
 End Sub
 
 Private Sub Form_Activate()
-If ttl Then TrueVisible = True
+'If ttl Then TrueVisible = True
 If ASKINUSE Then
 'Me.ZOrder 1
 Else
@@ -817,7 +817,7 @@ If Len(neo$) >= Len(s$) Then
     End If
     
 End If
-
+TEXT1.glistN.SuspDraw = TEXT1.mDoc.DocParagraphs > 50
 i1 = el
 l = i1 + addthat
 w1 = w
@@ -837,9 +837,9 @@ w2 = w
 If l = i1 Then
  TEXT1.SelLengthSilent = 0
 TEXT1.mDoc.MarkParagraphID = w
-TEXT1.glistN.enabled = False
+ TEXT1.glistN.enabled = False
 TEXT1.ParaSelStart = l
-TEXT1.glistN.enabled = True
+ TEXT1.glistN.enabled = True
 TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 TEXT1.SelText = neo$
@@ -853,13 +853,14 @@ End If
 End If
 TEXT1.SelLengthSilent = 0
 TEXT1.mDoc.MarkParagraphID = w
-TEXT1.glistN.enabled = False
+ TEXT1.glistN.enabled = False
 TEXT1.ParaSelStart = l
-TEXT1.glistN.enabled = True
+ TEXT1.glistN.enabled = True
 TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 TEXT1.SelText = neo$
 TEXT1.RemoveUndo neo$
+TEXT1.GroupUndo
 l = l + Len(neo$)
 
 Else
@@ -883,14 +884,13 @@ If safety And w = w1 Then
 If l = i1 Then
  TEXT1.SelLengthSilent = 0
 TEXT1.mDoc.MarkParagraphID = w
-TEXT1.glistN.enabled = False
+ TEXT1.glistN.enabled = False
 TEXT1.ParaSelStart = l
-TEXT1.glistN.enabled = True
+ TEXT1.glistN.enabled = True
 TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 TEXT1.SelText = neo$
 TEXT1.RemoveUndo neo$
-
 Exit Do
 ElseIf l - addthat < i1 Then
 i1 = i1 + Len(neo$) - Len(s$)
@@ -900,15 +900,15 @@ End If
 End If
 TEXT1.SelLengthSilent = 0
 TEXT1.mDoc.MarkParagraphID = w
-TEXT1.glistN.enabled = False
+ TEXT1.glistN.enabled = False
 TEXT1.ParaSelStart = l
-TEXT1.glistN.enabled = True
+ TEXT1.glistN.enabled = True
 TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 
 TEXT1.SelText = neo$
 TEXT1.RemoveUndo neo
- 
+TEXT1.GroupUndo
 l = l + Len(neo$)
 
 Else
@@ -921,6 +921,7 @@ TEXT1.glistN.dropkey = False
 End If
 TEXT1.mDoc.lcid = OldLcid
 If w2 > 0 Then TEXT1.mDoc.WrapAgainBlock w2, w2:  TEXT1.mDoc.ColorThis w2
+TEXT1.glistN.SuspDraw = False
 TEXT1.Render
 
 End Sub

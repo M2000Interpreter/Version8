@@ -1,8 +1,13 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 42 active-X
-1. I  tiny correction for Editbox, for syntax color.
-2. New info.gsb
+Version 9.8 Revision 43 active-X
+1. A lot of refactory and bug removing work.
+2. Improved TextEditor and GuiEditBox classes. (the two text editors, with syntax color)
+3. Introduce html editor and html validator in info.gsb.  
+4. Improved Test Form.
+5. Improved Gui for modal forms.
+
+
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$
 load info

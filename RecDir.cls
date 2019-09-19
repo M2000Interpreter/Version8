@@ -113,15 +113,15 @@ Public Function GetLongName(strTest As String) As String
    Dim sLongPath As String
    Dim buff As String
    Dim cbbuff As Long
-   Dim result As Long
+   Dim Result As Long
  
    buff = space$(MAX_PATH_UNICODE)
    cbbuff = Len(buff)
  
-   result = GetLongPathName(StrPtr(strTest), StrPtr(buff), cbbuff)
+   Result = GetLongPathName(StrPtr(strTest), StrPtr(buff), cbbuff)
  
-   If result > 0 Then
-      sLongPath = Left$(buff, result)
+   If Result > 0 Then
+      sLongPath = Left$(buff, Result)
    End If
  
    GetLongName = sLongPath
@@ -130,7 +130,7 @@ End Function
   Function TotalDiskSpace(DriveLetter As String) As Double
 ' Returns the total storage capacity for a drive
 On Error GoTo 100
-Dim Dletter As String, x As Long
+Dim Dletter As String, X As Long
 
     Dim SectorsPerCluster As Long
     Dim BytesPerSector As Long
@@ -138,10 +138,10 @@ Dim Dletter As String, x As Long
     Dim TotalClusters As Long
 
     Dletter = Left(DriveLetter, 1) & ":\"
-    x = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
+    X = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
       BytesPerSector, NumberofFreeClusters, TotalClusters)
     
-    If x = 0 Then 'Error occurred
+    If X = 0 Then 'Error occurred
         TotalDiskSpace = -99 'Assign an arbitrary error value
         Exit Function
     End If
@@ -201,17 +201,17 @@ End Function
 Function FreeDiskSpace(DriveLetter As String) As Double
 ' Returns the number of free bytes for a drive
 On Error GoTo 400
-Dim Dletter As String, x As Double
+Dim Dletter As String, X As Double
     Dim SectorsPerCluster As Long
     Dim BytesPerSector As Long
     Dim NumberofFreeClusters As Long
     Dim TotalClusters As Long
 
     Dletter = Left(DriveLetter, 1) & ":\"
-    x = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
+    X = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
       BytesPerSector, NumberofFreeClusters, TotalClusters)
     
-    If x = 0 Then 'Error occurred
+    If X = 0 Then 'Error occurred
         FreeDiskSpace = -99 'Assign an arbitrary error value
         Exit Function
     End If
@@ -1277,18 +1277,23 @@ End Function
 
 
 Public Function FindItemStartWidth(ByVal Key As String, NoCase As Boolean, ByVal offset) As Long
-Dim i As Long, j As Long
+Dim i As Long, j As Long, cp$
+
 j = Len(Key)
 i = -1
 FindItemStartWidth = -1
 If j = 0 Then Exit Function
 If NoCase Then
 For i = offset To listcount - 1
-If StrComp(Left$(list(i), j), Key, vbTextCompare) = 0 Then Exit For
+cp$ = myfile(i)
+If Len(cp$) > 0 Then If AscW(cp$) = 2 Then cp$ = Mid$(cp$, rinstr(cp$, "\") + 1)
+If StrComp(Left$(cp$, j), Key, vbTextCompare) = 0 Then Exit For
 Next i
 Else
 For i = offset To listcount - 1
-If StrComp(Left$(list(i), j), Key, vbBinaryCompare) = 0 Then Exit For
+cp$ = myfile(i)
+If Len(cp$) > 0 Then If AscW(cp$) = 2 Then cp$ = Mid$(cp$, rinstr(cp$, "\") + 1)
+If StrComp(Left$(cp$, j), Key, vbBinaryCompare) = 0 Then Exit For
 Next i
 End If
 If i < listcount Then

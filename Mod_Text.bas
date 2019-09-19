@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 42
+Global Const Revision = 43
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -22093,7 +22093,7 @@ End If
 s$ = NLtrim$(s$)
 Exit Function
 Else
-If InStr(ah, "SN") > 0 Then Exit Function
+If Left$(ah, 2) = "SN" Then Exit Function
 End If
 On Error Resume Next
 
@@ -24237,10 +24237,14 @@ If TaskMaster.Processing And Not bstack.TaskMain Then
         If Not bstack.toprinter Then bstack.Owner.Refresh
         TaskMaster.TimerTick
        ' SleepWait 1
-        MyDoEvents1 Form1   'bstack.Owner '
+
+        MyDoEvents1 Form1
+
 Else
         ' SleepWait 1
-        MyDoEvents1 Form1   'bstack.Owner '
+
+        MyDoEvents1 Form1
+
 End If
 If SLEEPSHORT Then Sleep 1
 If e Then
@@ -43463,17 +43467,19 @@ ProcScreenRes = True
 End Function
 Function ProcDrop(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim X As Double
-ProcDrop = True
+
 If Not IsExp(basestack, rest$, X) Then
+
 X = 1
 Else
 If Not basestack.lastobj Is Nothing Then
 If TypeOf basestack.lastobj Is mHandler Then
     If basestack.lastobj.ReadOnly Then
         ReadOnly
+        ProcDrop = False
         Exit Function
     End If
-    If basestack.lastobj.t1 <> 1 Then Exit Function
+    If basestack.lastobj.t1 <> 1 Then OnlyForInventory: Exit Function
     If TypeOf basestack.lastobj.objref Is FastCollection Then
         Dim tmp As FastCollection
         Set tmp = basestack.lastobj.objref
@@ -43508,16 +43514,17 @@ End If
 
 If X = 0 Then
     ' do nothing
+    ProcDrop = True
 Else
 If X > basestack.soros.Total Then
 MissStackItem
-
 Exit Function
     ElseIf X = basestack.soros.Total Then
     basestack.soros.Flush
     Else
     basestack.soros.drop CLng(X)
     End If
+    ProcDrop = True
     End If
 
 End Function
@@ -45537,15 +45544,17 @@ If FastSymbol(rest$, ",") Then
         If p = 0 Then
             If LenB(s$) = 0 And Not UseMe Is Nothing Then
                 UseMe.Hide
-'                Form1.CaptionW = "M2000"
-            Else
+               ' Form1.TrueVisible = False
                 
+'
+            Else
                 If Not UseMe Is Nothing Then UseMe.Show
                 PlaceCaption s$
             End If
-            If Not ttl Then
-                Form1.TrueVisible = Form1.Visible Or Form1.TrueVisible
+            If Not ttl Or Not UseMe Is Nothing Then
+                'Form1.TrueVisible = Form1.Visible Or Form1.TrueVisible
                 Form1.Visible = False
+                Form1.TrueVisible = Form1.Visible
                 If s$ <> "" Then
                     Form1.CaptionW = s$
                 Else

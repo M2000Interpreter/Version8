@@ -231,7 +231,7 @@ Public Sub MyDoEvents0new(some As Object)
         With Prefresh(GetCode(some))
             If uintnew(timeGetTime) > .k1 Then .RRCOUNTER = 0
             
-                If RRCOUNTER = 0 Then
+                If .RRCOUNTER = 0 Then
                     .k1 = uintnew(timeGetTime + REFRESHRATE): .RRCOUNTER = 1
                     If byPassCallback Then Exit Sub
                     If some.Visible Then some.Refresh

@@ -481,13 +481,15 @@ monitor = FindFormSScreen(Form4)
 End If
 abt = False
 sHelp gList2.HeadLine, testpad.Text, (ScrInfo(monitor).Width - 1) * 3 / 5, (ScrInfo(monitor).Height - 1) * 4 / 7
-vHelp Not Form4.Visible
+
 If TestShowCode Then
+vHelp True
 Form4.label1.SelStartSilent = testpad.SelStart
-Form4.label1.SelLength = 0
+Form4.label1.SelLengthSilent = 0
 Form4.label1.SelectionColor = rgb(255, 64, 128)
-If testpad.SelStart > 0 And testpad.SelLength > 0 Then Form4.label1.SelLength = testpad.SelLength
-'Form4.Label1.Show
+If testpad.SelStart > 0 And testpad.SelLength > 0 Then Form4.label1.SelLength = testpad.SelLength: Form4.label1.glistN.ShowMe
+Else
+vHelp Not Form4.Visible
 End If
 End Sub
 
@@ -686,6 +688,7 @@ Label(2) = Label(2)
 Else
 gList3(2).backcolor = &H3B3B3B
 Label(2) = Label(2)
+testpad.SetRowColumn 1, 1
 End If
 stackshow MyBaseTask
 End If

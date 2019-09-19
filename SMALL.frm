@@ -535,6 +535,7 @@ End Sub
 
 Private Sub Timer1_Timer()
 ' On Error Resume Next
+If lastform Is Nothing And Not Me Is Form3 Then Timer1.enabled = False: Exit Sub
 Static once As Boolean
 If once Then Exit Sub
 once = True

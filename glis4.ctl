@@ -223,6 +223,7 @@ Event LineDown()
 Event PureListOn()
 Event PureListOff()
 Event HaveMark(Yes As Boolean)
+Event GroupUndo()
 Event MarkCut(ThatData As String)
 Event MarkIn()
 Event MarkOut()
@@ -264,6 +265,7 @@ Event DragOverDone(a As Boolean)
 Event HeadLineChange(a$)
 Event AddSelStart(val As Long)
 Event SubSelStart(val As Long)
+
 Private state As Boolean
 Private secreset As Boolean
 Private scrollme As Long
@@ -383,7 +385,7 @@ Private Type DRAWTEXTPARAMS
      uiLengthDrawn As Long
 End Type
 Dim tParam As DRAWTEXTPARAMS
-
+Public SuspDraw As Boolean
 Public Function GetLastKeyPressed() As Long
 Dim Message As Msg
 If mynum$ <> "" Then
@@ -961,6 +963,7 @@ Else
                     RaiseEvent HaveMark(b1)
                     RaiseEvent PushUndoIfMarked
                     RaiseEvent MarkDelete(False)
+                    If b1 Then RaiseEvent GroupUndo
                     enabled = bb
                 End If
                     If EditFlag And ((KeyAscii > 32 And KeyAscii <> 127) Or (KeyAscii = 9 And UseTab)) Then
@@ -1005,11 +1008,11 @@ Exit Sub
             list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
           
             End If
-            RaiseEvent PureListOn
+           ' RaiseEvent PureListOn
       
                
         
-            RaiseEvent PureListOff
+           ' RaiseEvent PureListOff
             Else
             If UKEY$ <> "" Then
                     kk$ = UKEY$
@@ -2978,6 +2981,7 @@ Timer1.enabled = True
 End Sub
 Public Sub ShowMe(Optional visibleme As Boolean = False, Optional headeronly As Boolean)
  Dim REALX As Long, REALX2 As Long, myt1, oldtopitem As Long
+ If SuspDraw Then Exit Sub
 If visibleme Then
  barwidth = UserControlTextWidth("W")
  CalcAndShowBar1
@@ -3268,6 +3272,7 @@ RepaintScrollBar
 RaiseEvent ScrollMove(topitem)
 End Sub
 Public Sub ShowMe2()
+If SuspDraw Then Exit Sub
 Dim YYT As Long, nr As RECT, j As Long, i As Long, skipme As Boolean, fg As Long, hnr As RECT, nfg As Long, nfg1 As Long
  Dim REALX As Long, REALX2 As Long, myt1
 barwidth = UserControlTextWidth("W")

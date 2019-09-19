@@ -252,6 +252,9 @@ conthere:
                     End If
                     If pobjTarget.NeverShow Then
                     Modalid = mycodeid
+                    If Not pobjTarget.IamPopUp Then
+                    pobjTarget.Title = pobjTarget.Title
+                    End If
                     If items = 2 Then
                     CallByName pobjTarget, pstrProcName, VbMethod, 0, varArr(1)
                     Else
@@ -309,7 +312,7 @@ conthere:
                 
                 Else
                     z.ShowmeALL
-                    z.SetFocus
+                   If z.Visible Then z.SetFocus
                     End If
                     Set z = Nothing
                     

@@ -18,6 +18,7 @@ Const mway As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP
 Private col() As Variant, lastdata As String, thispara As Long
 Private TextPixelOffset As Long
 Public ColorSet As Long
+Public PreserveRightSpaces As Boolean
 Public NoCenterLineEdit As Boolean
 Public NumberOnly As Boolean
 Public NumberIntOnly As Boolean
@@ -38,6 +39,7 @@ Attribute mDoc1.VB_VarHelpID = -1
 Dim UndoDoc As New Document  ' one level of undo no events ' no break lines
 Dim undopara As Long, undopos As Long, undotext As String, undomode As Long, undotexthtml As String
 Dim Redopara As Long, Redopos As Long, Redotext As String, Redomode As Long
+Dim undoprev As Boolean, Redoprev As Boolean
 Dim undostate As Boolean
 Dim Redostate As Boolean
 Dim NoHeadwrap As Boolean
@@ -46,6 +48,7 @@ Private Type UndoChain
     undopos As Long
     undomode As Long
     undotext As String
+    undoprev As Boolean
 End Type
 Dim NeoUndo As Long, UndoMax As Long
 Dim NeoRedo As Long, RedoMax As Long
@@ -388,7 +391,6 @@ undopara = mDoc.MarkParagraphID
 undotext = that
 undopos = SelStart
 undomode = 2
-
 Else
 PushUndo
 undopara = mDoc.MarkParagraphID
@@ -396,7 +398,9 @@ undotext = that
 undopos = SelStart ' always the left side of char - so 0 is inside
 undomode = 1
 End If
-
+End Sub
+Public Sub GroupUndo()
+undoprev = True
 End Sub
 Public Sub RemoveUndo(that As String)
 ClearRedo
@@ -419,7 +423,8 @@ undomode = 0
 End If
 End Sub
 Public Sub insertbrackets()
-Dim i As Long, j As Long, ss$
+Dim i As Long, j As Long, ss$, idnt$, tc As Long
+Dim ww As Long
 If SelLength > 0 Then
 ClearRedo
 PushUndo
@@ -427,36 +432,55 @@ glistN_MarkDelete False
 ss$ = undotext
 End If
 Dim a$
+If glistN.UseTab Then
+tc = 0
+Else
+tc = EditTabWidth
+End If
 glistN.enabled = False
-    a$ = Left$(CurrentParagraph, Charpos)
-    If glistN.UseTab And (MyTrimL2NoTab(a$) = 1 Or Len(a$) = 0) Then
-    i = ((Len(a$) - Len(NLtrim$(a$))))
+    a$ = Myleft(CurrentParagraph, Charpos)
+    If MyTrimL2NoTab(a$) = 1 And tc = 0 Then
+   
+     tc = Int(glistN.UserControlTextWidthPixels(Chr(9)) / glistN.UserControlTextWidthPixels("m") * 2)
+    End If
+    If tc = 0 Then
+
     j = SelStart
+    i = Len(a$) - Len(NLtrim$(a$))
+    idnt$ = Myleft$(a$, i)
+   
     If ss$ <> "" Then
         ss$ = Replace(ss$, vbCrLf, vbCrLf + vbTab)
-        RemoveUndo "{" + vbCrLf + String$(i + 1, vbTab) + ss$ + vbCrLf + String$(i, vbTab) + "}"
-        InsertText = "{" + vbCrLf + String$(i + 1, vbTab) + ss$ + vbCrLf + String$(i, vbTab) + "}"
+        RemoveUndo "{" + vbCrLf + idnt$ + vbTab + ss$ + vbCrLf + idnt$ + "}"
+        InsertText = "{" + vbCrLf + idnt$ + vbTab + ss$ + vbCrLf + idnt$ + "}"
     Else
-        RemoveUndo "{" + vbCrLf + String$(i + 1, vbTab) + vbCrLf + String$(i, vbTab) + "}"
-        InsertText = "{" + vbCrLf + String$(i + 1, vbTab) + vbCrLf + String$(i, vbTab) + "}"
+        RemoveUndo "{" + vbCrLf + idnt$ + vbTab + vbCrLf + idnt$ + "}"
+        InsertText = "{" + vbCrLf + idnt$ + vbTab + vbCrLf + idnt$ + "}"
     End If
-    SelStartSilent = j + i + 4
+    SelStartSilent = j + Len(idnt$) + 4
+    
+    
     Else
-    i = ((Len(a$) - Len(LTrim$(a$))) \ 6) * 6
     j = SelStart
+    
+    ww = tc
+    i = Len(a$) - Len(NLtrim$(a$))
+    idnt$ = Myleft$(a$, i)
+   
     If ss$ <> "" Then
-        ss$ = Replace(ss$, vbCrLf, vbCrLf + space$(6))
-        RemoveUndo "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
-        InsertText = "{" + vbCrLf + space$(i + 6) + ss$ + vbCrLf + space$(i) + "}"
+        ss$ = Replace(ss$, vbCrLf, vbCrLf + space$(ww))
+        RemoveUndo "{" + vbCrLf + idnt$ + space$(ww) + ss$ + vbCrLf + idnt$ + "}"
+        InsertText = "{" + vbCrLf + idnt$ + space$(ww) + ss$ + vbCrLf + idnt$ + "}"
     Else
-        RemoveUndo "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
-        InsertText = "{" + vbCrLf + space$(i + 6) + vbCrLf + space$(i) + "}"
+        RemoveUndo "{" + vbCrLf + idnt$ + space$(ww) + vbCrLf + idnt$ + "}"
+        InsertText = "{" + vbCrLf + idnt$ + space$(ww) + vbCrLf + idnt$ + "}"
     End If
-    SelStartSilent = j + i + 3 + 6
+    SelStartSilent = j + Len(idnt$) + 3 + ww
     End If
 glistN.enabled = True
 Render
 End Sub
+
 Public Sub ManualInform()
 If Not glistN.enabled Then Exit Sub
 If glistN.SelStart = 0 Then
@@ -464,7 +488,7 @@ RaiseEvent inform(glistN.ListIndex + 1, 1)
 Else
 RaiseEvent inform(glistN.ListIndex + 1, (glistN.SelStart))
 End If
-glistN.ShowMe2
+glistN.ShowMe
 End Sub
 
 
@@ -514,6 +538,12 @@ b = "}"
 Case "["
 b = "]"
 End Select
+End If
+End Sub
+
+Private Sub glistN_GroupUndo()
+If undopara <> -1 Then
+undoprev = True
 End If
 End Sub
 
@@ -690,8 +720,13 @@ End Sub
 Private Sub glistN_DragPasteData(ThatData As String)
 
 Dim a() As String, k As Long
+If Not glistN.UseTab Then
+
 a() = Split(ThatData, ChrW(9))
 PasteDoc Join(a(), "    ")
+Else
+PasteDoc ThatData
+End If
 RelocateMarkedText
 
 End Sub
@@ -1201,8 +1236,10 @@ If Len(Text) + Len(Pad$) > glistN.maxchar Then
 Pad$ = Left$(Pad$, glistN.maxchar - Len(Text))
 End If
 End If
+
 SelText = Pad$
 RemoveUndo Pad$
+
 KeyCode = 0
 'mDoc.WrapAgainColorBlock mDoc.MarkParagraphID, mDoc.MarkParagraphID
 ElseIf KeyCode = vbKeyA And (shift And 3) = 2 Then
@@ -1211,6 +1248,7 @@ glistN.MarkALL
 KeyCode = 0
 ElseIf KeyCode = vbKeyY And (shift And 3) = 2 Then
 ' Redo
+againY:
 If Redopara <> -1 Then
 
 PushUndo
@@ -1219,7 +1257,7 @@ undopara = Redopara
 undopos = Redopos
 undotext = Redotext
 undomode = Redomode
-
+undoprev = Redoprev
 b = enabled
 enabled = False
 SelLength = 0
@@ -1248,7 +1286,7 @@ undopara = Redopara
 undopos = Redopos
 undotext = Redotext
 undomode = Redomode
-
+undoprev = Redoprev
 Else
 InsertText = Redotext
 
@@ -1271,18 +1309,21 @@ enabled = b
 'If Not NoCenterLineEdit Then
 'glistN.ShowMe
 'Else
-glistN.ShowPan
+If Not undoprev Then glistN.ShowPan
 'End If
 If Not PopRedo Then
 Redopara = -1
 Redotext = vbNullString
 Redomode = 0
 End If
+If undoprev Then GoTo againY
 End If
+
 KeyCode = 0
 ElseIf KeyCode = vbKeyZ And (shift And 3) = 2 Then
 ' 2nd version of undo system
 ' undopos now is selstart
+againZ:
 If undopara <> -1 Then
 ' seve to redo...
 PushRedo
@@ -1290,7 +1331,7 @@ Redopara = undopara
 Redopos = undopos
 Redotext = undotext
 Redomode = undomode
-
+Redoprev = undoprev
 
 ' MOVE TO PARAGRAPH...AND CHARPOS
 b = enabled
@@ -1316,7 +1357,7 @@ If undomode = 0 Or undomode = 4 Then
         Redopos = undopos
         Redotext = undotext
         Redomode = undomode
-
+        Redoprev = undoprev
     ' now we have undomode 5
     InsertText = undotext
     Else
@@ -1333,16 +1374,19 @@ enabled = b
 'If Not NoCenterLineEdit Then
 'glistN.ShowMe
 'Else
-glistN.ShowPan
+If Not undoprev Then glistN.ShowPan
 'End If
 
 End If
  If Not PopUndo Then
  ClearUndo
 undopara = -1
+undoprev = False
 undotext = vbNullString
 undomode = 0
 End If
+If undoprev Then GoTo againZ
+
 KeyCode = 0
 ElseIf KeyCode = vbKeyA And (shift And 3) = 3 Then
 glistN.MarkNext = 0
@@ -3982,13 +4026,15 @@ End If
 End If
 End Property
 Public Property Let SelText(ByVal RHS As String)
-Dim kk As Long, Pad$
+Dim kk As Long, Pad$, prev As Boolean
 
 
 kk = SelStart
 SelStart = kk
+prev = HaveMarkedText
 glistN_MarkDelete False
 glistN.MarkNext = 1
+
 BlockStartPara = mDoc.MarkParagraphID
 BlockStartPos = ParaSelStart
 BlockStartCursor = glistN.SelStart '- 1
@@ -4000,7 +4046,7 @@ BlockEndPos = BlockStartPos
 Dim k As Long, l As Long
 If Right$(RHS, 1) = vbCr Then RHS = RHS + vbLf
 If RHS <> "" Then
-
+If prev Then GroupUndo
 If NumberOnly Then
 
 Pad$ = space$(Len(RHS) + Len(glistN.list(0)))
@@ -4122,6 +4168,19 @@ mDoc.FindPos 1, 0, findit, a, b, c, d
 SetRowColumn a, b, sel1 <> 0
 If sel1 <> 0 Then SelLength = sel1: LastSelStart = sel1
 End Property
+Public Property Let SelStartSilent2(ByVal RHS As Long)
+Dim findit As Long, sel1 As Long
+sel1 = SelLength
+    BlockEndPara = mDoc.MarkParagraphID
+    BlockStartPara = BlockEndPara
+    BlockStartPos = BlockEndPos
+    glistN.MarkNext = 0
+Dim a As Long, b As Long, c As Long, d As Long
+findit = RHS
+mDoc.FindPos 1, 0, findit, a, b, c, d
+SetRowColumn a, b, True
+If sel1 <> 0 Then SelLength = sel1: LastSelStart = sel1
+End Property
 Public Property Let SelStartSilent(ByVal RHS As Long)
 Dim findit As Long
 Dim a As Long, b As Long, c As Long, d As Long
@@ -4161,11 +4220,13 @@ With MultiUndo(b)
 .undopara = undopara  ' not need for this 2nd version
 .undomode = undomode  ' needed
 .undopos = undopos  ' new not charpos but selstart
+.undoprev = undoprev
 undopos = ParaSelStart
 undotext = vbNullString
 undopara = mDoc.MarkParagraphID  ' nod needed maybe for trace errors later
 undomode = -1
 undopara = -1
+undoprev = False
 End With
 End Sub
 Private Function PopUndo() As Boolean
@@ -4178,6 +4239,7 @@ undotext = .undotext
 undopara = .undopara
 undomode = .undomode
 undopos = .undopos
+undoprev = .undoprev
 End With
 NeoUndo = NeoUndo - 1
 PopUndo = True
@@ -4215,6 +4277,7 @@ With MultiRedo(b)
 .undopara = Redopara
 .undomode = Redomode
 .undopos = Redopos
+.undoprev = Redoprev
 Redopos = ParaSelStart
 Redotext = vbNullString
 Redopara = mDoc.MarkParagraphID
@@ -4230,6 +4293,7 @@ Redotext = .undotext
 Redopara = .undopara
 Redomode = .undomode
 Redopos = .undopos
+Redoprev = .undoprev
 End With
 NeoRedo = NeoRedo - 1
 PopRedo = True
@@ -4259,7 +4323,7 @@ End Function
 Public Function AutoIntNewLine() As Boolean
 ' if autonumber
 Dim a$, newid As Long 'mDoc.MarkParagraphID
-Dim b$, c$, d$, e$, skip As Boolean, tr$, maxw As Long
+Dim b$, c$, d$, e$, skip As Boolean, tr$, maxw As Long, ns As String, och As Long
 showparagraphWork = False
 b$ = CurrentParagraph
 On Error Resume Next
@@ -4287,20 +4351,33 @@ a$ = Format((val(c$) + 1), tr$) + Mid$(CurrentParagraph, 1, MyTrimL(CurrentParag
 End If
 End If
 Else
-If glistN.UseTab And MyTrimL2NoTab(CurrentParagraph) = 1 Then
-a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbTab)
-Else
-a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
-End If
-If Len(a$) > Charpos Then a$ = vbNullString
+  GoTo there
 End If
 Else
-If glistN.UseTab And MyTrimL2NoTab(CurrentParagraph) = 1 Then
-a$ = String$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)), vbTab)
+there:
+        ns = NLtrim(CurrentParagraph)
+        a$ = Myleft$(CurrentParagraph, Len(CurrentParagraph) - Len(ns))
+        
+ If Len(a$) > Charpos - 1 Then
+SelStartSilent = SelStart - Charpos + Len(a$) + 1
 Else
-a$ = space$(Len(CurrentParagraph) - Len(NLtrim$(CurrentParagraph)))
+If Charpos > 1 And Not PreserveRightSpaces Then
+maxw = MyTrimRNoCr(Myleft$(CurrentParagraph, Charpos - 1))
+If Charpos > maxw Then
+och = Charpos - maxw - 1
+If och > 0 Then
+skip = enabled
+enabled = False
+
+SelStartSilent2 = SelStart - och
+SelLengthSilent = och
+InsertTextNoRender = ""
+undoprev = True
+enabled = skip
 End If
-If Len(a$) > Charpos Then a$ = vbNullString
+End If
+End If
+ End If
 
 End If
 
@@ -4308,7 +4385,6 @@ If a$ <> "" Then
 RemoveUndo vbCrLf + a$
 InsertText = vbCrLf + a$
 AutoIntNewLine = True
-
 End If
 showparagraphWork = True
 
@@ -5058,5 +5134,42 @@ FastSymbol = True
 ElseIf mis Then
 MyEr "missing " & c$, "λείπει " & c$
 End If
+End Function
+Private Function Myleft$(a As Variant, pos As Variant)
+If pos < 1 Then Myleft$ = vbNullString Else Myleft$ = Mid$(a, 1, pos)
+End Function
+Private Function MyTrimRNoCr(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimRNoCr = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p4 To p2 Step -2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160, 9
+    Case Else
+     MyTrimRNoCr = (i - p2) \ 2 + 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimRNoCr = l + 2
+End Function
+Private Function MyTrimL2NoTab(s$) As Long
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then MyTrimL2NoTab = 0: Exit Function
+  p2 = StrPtr(s): l = l - 1
+  p4 = p2 + l * 2
+  For i = p2 To p4 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160
+    Case Else
+     MyTrimL2NoTab = (i - p2) \ 2 + 1
+   Exit Function
+  End Select
+  Next i
+ MyTrimL2NoTab = 0
 End Function
 

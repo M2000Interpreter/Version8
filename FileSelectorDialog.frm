@@ -143,13 +143,13 @@ Private Sub Form_Activate()
              If LastActive Is Nothing Then Set LastActive = gList1
               If Typename(ActiveControl) = "gList" Then
                 If LastActive Is ActiveControl Then
-                Hook hwnd, ActiveControl
+                Hook hWnd, ActiveControl
                 Else
-                Hook hwnd, Nothing
+                Hook hWnd, Nothing
                 End If
                 Else
                
-                Hook hwnd, Nothing
+                Hook hWnd, Nothing
                 End If
 
         
@@ -164,7 +164,7 @@ Private Sub Form_Activate()
 End Sub
 
 Private Sub Form_Deactivate()
-UnHook hwnd
+UnHook hWnd
 End Sub
 
 Private Sub Form_Load()
@@ -360,52 +360,52 @@ End If
 End Sub
 Public Sub UNhookMe()
 Set LastGlist = Nothing
-UnHook hwnd
+UnHook hWnd
 End Sub
 
 Private Sub Form_LostFocus()
 If HOOKTEST <> 0 Then
-UnHook hwnd
+UnHook hWnd
 End If
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
 If Button = 1 Then
 
 If lastfactor = 0 Then lastfactor = 1
 
 If bordertop < 150 Then
-If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
+If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
 dr = True
 mousepointer = vbSizeNWSE
-Lx = x
-ly = y
+Lx = X
+ly = Y
 End If
 
 Else
-If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
+If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
 dr = True
 mousepointer = vbSizeNWSE
-Lx = x
-ly = y
+Lx = X
+ly = Y
 End If
 
 End If
 End If
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False
 If bordertop < 150 Then
-If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
+If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
  Else
- If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
+ If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
 End If
 If dr Then
-    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
-    If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
+    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
+    If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
     
    If Not ExpandWidth Then addX = 0
         If lastfactor = 0 Then lastfactor = 1
@@ -436,10 +436,10 @@ If dr Then
 
         If addX = 0 Then
         If lastfactor <> factor Then ScaleDialog lastfactor, DialogPreview, Width
-        Lx = x
+        Lx = X
         
         Else
-        Lx = x * lastfactor / factor
+        Lx = X * lastfactor / factor
          ScaleDialog lastfactor, DialogPreview, (Width + addX) * lastfactor / factor
          End If
 
@@ -458,14 +458,14 @@ If dr Then
         'End If
         End If
         Else
-        Lx = x
-        ly = y
+        Lx = X
+        ly = Y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
 If dr Then Me.mousepointer = 0
 dr = False
 End Sub
@@ -527,13 +527,13 @@ Private Sub gList1_CtrlPlusF1()
 FlipList
 End Sub
 
-Private Sub gList1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
 
 Static doubleclick As Long
 
 If mySelector.IamBusy Then Exit Sub
 If item = -1 Then
-    If Button = 1 And x > gList1.WidthPixels - setupxy And y < setupxy Then
+    If Button = 1 And X > gList1.WidthPixels - setupxy And Y < setupxy Then
     doubleclick = doubleclick + 1
       If doubleclick > 1 Then
       doubleclick = 0
@@ -609,7 +609,7 @@ End Sub
 
 
 
-Private Sub gList1_ScrollSelected(item As Long, y As Long)
+Private Sub gList1_ScrollSelected(item As Long, Y As Long)
 ShearchList = vbNullString
 End Sub
 
@@ -684,8 +684,8 @@ Set LastGlist = Nothing
 If Err.Number > 0 Then gList1.NoWheel = True
 End Sub
 
-Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
-If gList2.DoubleClickCheck(Button, item, x, y, CLng(setupxy) / 2, CLng(setupxy) / 2, CLng(setupxy) / 2, -1) Then
+Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+If gList2.DoubleClickCheck(Button, item, X, Y, CLng(setupxy) / 2, CLng(setupxy) / 2, CLng(setupxy) / 2, -1) Then
                       mySelector.AbordAll
                       Unload Me
 End If
@@ -710,7 +710,7 @@ End Sub
 
 
 
-Private Sub gList2_MouseUp(x As Single, y As Single)
+Private Sub gList2_MouseUp(X As Single, Y As Single)
             If mySelector.myDir2 Is Nothing Then Exit Sub
             If Not LastActive Is Nothing Then
             If LastActive.enabled Then
@@ -738,7 +738,7 @@ Set LastActive = gList3
 End Sub
 
 
-Private Sub glist3_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+Private Sub glist3_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
 If gList3.EditFlag Then Exit Sub
     If gList3.list(0) = vbNullString Then
     gList3.backcolor = &H808080
