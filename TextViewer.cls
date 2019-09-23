@@ -15,15 +15,16 @@ Attribute VB_Exposed = False
 Option Explicit
 ' chr(34) is """" maybe somewhere in a module as public
 Const mway As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP
-Private col() As Variant, lastdata As String, thispara As Long
+Private col() As Long, lastdata As String, thispara As Long
 Private TextPixelOffset As Long
-Public ColorSet As Long
+Public ColorSet As Long, sp As String, sp1 As String, sp2 As String
 Public PreserveRightSpaces As Boolean
 Public NoCenterLineEdit As Boolean
 Public NumberOnly As Boolean
 Public NumberIntOnly As Boolean
 Public WithEvents glistN As gList
 Attribute glistN.VB_VarHelpID = -1
+Dim profundo As New clsProfiler
 Private blockKeyboard As Boolean
 Public WithEvents mDoc As Document    ' document
 Attribute mDoc.VB_VarHelpID = -1
@@ -342,7 +343,9 @@ End Property
 Private Sub Class_Initialize()
 tParam.cbSize = LenB(tParam)
 tParam.iTabLength = 4
-
+sp1 = ",+-*/=<>^!.&[]{}()^;""" + "'!"
+sp = " " + ChrW(9) + ChrW(160)
+sp2 = sp1 + sp
 Set mDoc = New Document
 Set mDoc1 = New Document
 ResetSelColors
@@ -369,11 +372,15 @@ ElseIf undomode = 1 And undotext <> "" Then
 If undopos = SelStart Then
 ' we add after
 undotext = undotext + that
-Else
+ElseIf undopos = SelStart + 1 Then
+
 undotext = that + undotext
 undopos = SelStart
+Else
+GoTo there
 End If
 Else
+there:
 PushUndo
 undopara = mDoc.MarkParagraphID
 undotext = that
@@ -489,21 +496,6 @@ Else
 RaiseEvent inform(glistN.ListIndex + 1, (glistN.SelStart))
 End If
 glistN.ShowMe
-End Sub
-
-
-
-Private Sub glistN_AddSelStart(val As Long)
-Dim w As Long, a$
-If Charpos > 0 Then
-a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos, 1)
-If Len(a$) > 0 Then
-w = AscW(a$)
-If w > -10241 And w < -9984 Then
-val = 2
-End If
-End If
-End If
 End Sub
 
 Private Sub glistN_CorrectCursorAfterDrag()
@@ -1248,7 +1240,9 @@ glistN.MarkALL
 KeyCode = 0
 ElseIf KeyCode = vbKeyY And (shift And 3) = 2 Then
 ' Redo
+profundo.MARKONE
 againY:
+If profundo.MARKTWO > 1000 Then ProcTask2 basestack1: profundo.MARKONE
 If Redopara <> -1 Then
 
 PushUndo
@@ -1323,7 +1317,9 @@ KeyCode = 0
 ElseIf KeyCode = vbKeyZ And (shift And 3) = 2 Then
 ' 2nd version of undo system
 ' undopos now is selstart
+profundo.MARKONE
 againZ:
+If profundo.MARKTWO > 1000 Then ProcTask2 basestack1: profundo.MARKONE
 If undopara <> -1 Then
 ' seve to redo...
 PushRedo
@@ -2034,18 +2030,100 @@ End If
 End Sub
 
 
-Private Sub glistN_SubSelStart(val As Long)
-Dim w As Long, a$
-If Charpos < 2 Then Exit Sub
-a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos - 1, 1)
-If Len(a$) > 0 Then
-w = AscW(a$)
-If w > -9215 And w < -8960 Then
-
-val = 2
-
+Private Sub glistN_SubSelStart(val As Long, shift As Integer)
+Dim w As Long, a$, l As Long, b$
+If HaveMarkedText And Not (shift And 1) = 1 Then
+BlockStartPara = BlockEndPara
+BlockStartPos = BlockEndPos
+glistN.MarkNext = 0
+val = 0
+Exit Sub
 End If
+
+If Charpos < 2 Or NumberOnly Or NumberIntOnly Then Exit Sub
+    a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos - 1)
+    If Len(a$) > 0 Then
+        w = AscW(a$)
+        If (shift And 2) = 2 And Charpos > 1 Then
+            a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), 1, Charpos - 1)
+            l = Len(a$)
+            val = l
+            If val = 1 Then Exit Sub
+            b$ = Mid$(a$, l, 1)
+            If InStr(sp1, b$) = 0 Then
+                Do While l > 1 And InStr(sp, b$) > 0
+                    l = l - 1
+                    b$ = Mid$(a$, l, 1)
+                Loop
+                If InStr(sp1, b$) = 0 Then
+                    If l = val Then
+                        Do While l > 1 And InStr(sp2, b$) = 0
+                            l = l - 1
+                            b$ = Mid$(a$, l, 1)
+                        Loop
+                        If l = 1 And Not InStr(sp2, b$) > 0 Then l = l - 1
+                        
+                    Else
+                     If InStr(sp2, b$) > 0 Then l = l - 1
+                    End If
+                End If
+            Else
+                l = l - 1
+            End If
+            val = val - l
+        ElseIf w > -10241 And w < -9984 Then
+            val = 2
+        End If
+    End If
+End Sub
+
+Private Sub glistN_AddSelStart(val As Long, shift As Integer)
+If NumberOnly Or NumberIntOnly Then Exit Sub
+Dim w As Long, a$, l As Long, b$
+If HaveMarkedText And Not (shift And 1) = 1 Then
+BlockStartPara = BlockEndPara
+BlockStartPos = BlockEndPos
+glistN.MarkNext = 0
+val = 0
+Exit Sub
 End If
+If Charpos > 0 Then
+    a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos, 1)
+    If Len(a$) > 0 Then
+        w = AscW(a$)
+        If (shift And 2) = 2 Then
+            a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos)
+            l = Len(a$)
+            val = 1
+            If l < 2 Then Exit Sub
+                b$ = Mid$(a$, val, 1)
+                If InStr(sp1, b$) = 0 Then
+                Do While val < l And InStr(sp, b$) > 0
+                    val = val + 1
+                    b$ = Mid$(a$, val, 1)
+                Loop
+                If InStr(sp1, b$) = 0 Then
+                    If val = 1 Then
+                        Do While val < l And InStr(sp2, b$) = 0
+                            val = val + 1
+                            b$ = Mid$(a$, val, 1)
+                        Loop
+                        If InStr(sp2, b$) > 0 Then val = val - 1
+                    Else
+                        If val < l Then val = val - 1
+                    End If
+                Else
+                    val = val - 1
+                End If
+            End If
+        ElseIf w > -10241 And w < -9984 Then
+            val = 2
+        End If
+    End If
+End If
+
+
+
 End Sub
 
 Private Sub glistN_SyncKeyboard(item As Integer)
@@ -2082,7 +2160,7 @@ End If
 
 End Sub
 Private Sub makebase(basecolor As Long)
-ReDim col(1)
+ReDim col(1) As Long
 col(0) = basecolor
 col(1) = 1
 
@@ -2091,7 +2169,7 @@ Private Sub addone(ByVal thispos As Long, ByVal thiscolor As Long)
 Dim k As Long
 If thiscolor = 0 Then thiscolor = 14
 k = UBound(col())
-If VarType(col(0)) = 0 Then
+If col(1) = 0 Then
 makebase 14
 If thispos <> 1 Then
 k = UBound(col())
@@ -2110,7 +2188,7 @@ End If
 
 ''''If col(k - 1) = thiscolor And k > 1 Then Exit Sub
 
-ReDim Preserve col(k + 2)
+ReDim Preserve col(k + 2) As Long
 col(k + 1) = thiscolor
 col(k + 2) = thispos
 
@@ -2850,7 +2928,9 @@ If IsNumberLabel(a$, drop$) Then
  
  End If
 If pos2 > 0 Then addone pos2, 14
-
+If col(1) = 0 Then
+makebase 0
+End If
 End Sub
 
 Private Sub ColorizeExpressions(ByVal a$, k As Long, pos2 As Long, feedthis As Long)
@@ -4010,7 +4090,7 @@ End Property
 Public Property Get SelHtmlText() As String
 If HaveMarkedText Then
 ''FillBlock
-Dim curcolors(0 To 15) As Variant, i As Long
+Dim curcolors(0 To 15) As String, i As Long
 For i = 0 To 15
 curcolors(i) = Right$("000000" + Hex$(htmlM2000(i)), 6)
 
@@ -4355,6 +4435,12 @@ Else
 End If
 Else
 there:
+        If HaveMarkedText Then
+        ClearRedo
+        PushUndo
+        glistN_MarkDelete False
+        undoprev = True
+        End If
         ns = NLtrim(CurrentParagraph)
         a$ = Myleft$(CurrentParagraph, Len(CurrentParagraph) - Len(ns))
         
@@ -4426,11 +4512,11 @@ there12345:
 glistN.ShowMe False, True
 
 End Property
-Private Sub PrintItem1X(mHdc As Long, ByVal c As String, r As RECT, col() As Variant)
+Private Sub PrintItem1X(mHdc As Long, ByVal c As String, r As RECT, col() As Long)
 On Error Resume Next
     Dim cc As String, all As Long, CM As String, offset As Long, addthis As Long, hRgn As Long
     Dim b As RECT
-    Dim ww$(), items&, i, rleft, cuts()
+    Dim ww$(), items&, i, rleft, cuts() As Long
     If UBound(col()) <= 1 Or NoColor Then
         PrintItem1 mHdc, c, r
         Exit Sub
@@ -4501,11 +4587,11 @@ End If
     
 
 
-Private Sub PrintItem1XOLD(mHdc As Long, ByVal c As String, r As RECT, col() As Variant)
+Private Sub PrintItem1XOLD(mHdc As Long, ByVal c As String, r As RECT, col() As Long)
 On Error Resume Next
     Dim cc As String, all As Long, CM As String, offset As Long, addthis As Long, hRgn As Long
     Dim b As RECT
-    Dim ww$(), items&, i, rleft, cuts()
+    Dim ww$(), items&, i, rleft, cuts() As Long
     If UBound(col()) <= 1 Or NoColor Then
         PrintItem1 mHdc, c, r
         Exit Sub
@@ -4575,7 +4661,7 @@ End If
 
 
 
-Function SplitStringUsingArray(ByVal c$, bb() As Variant, wc&, cuts() As Variant) As String()
+Function SplitStringUsingArray(ByVal c$, bb() As Long, wc&, cuts() As Long) As String()
 Dim cc$()
 ReDim cc$((UBound(bb()) + 1) / 2)
 Dim st&, ste&, w&
@@ -4615,7 +4701,7 @@ End If
 SplitStringUsingArray = cc$()
 End Function
 
-Function SplitStringUsingArrayNoTab(c$, bb() As Variant, wc&) As String()
+Function SplitStringUsingArrayNoTab(c$, bb() As Long, wc&) As String()
 Dim cc$()
 ReDim cc$((UBound(bb()) + 1) / 2)
 Dim st&, ste&, w&
@@ -4642,7 +4728,7 @@ If cc$(wc&) = vbNullString Then wc& = wc& - 1
 SplitStringUsingArrayNoTab = cc$()
 End Function
 
-Function M2000(ch As Variant) As Long
+Function M2000(ch As Long) As Long
 Dim b As Integer
 
 Select Case ColorSet
@@ -4675,7 +4761,7 @@ End Select
 End Select
 
 End Function
-Function htmlM2000(ch As Variant) As Long
+Function htmlM2000(ch As Long) As Long
 Dim b As Integer
 
 Select Case Abs(pagiohtml$ = "DARK")
@@ -5135,7 +5221,7 @@ ElseIf mis Then
 MyEr "missing " & c$, "λείπει " & c$
 End If
 End Function
-Private Function Myleft$(a As Variant, pos As Variant)
+Private Function Myleft$(a As String, pos As Long)
 If pos < 1 Then Myleft$ = vbNullString Else Myleft$ = Mid$(a, 1, pos)
 End Function
 Private Function MyTrimRNoCr(s$) As Long

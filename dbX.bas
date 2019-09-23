@@ -1,6 +1,423 @@
 Attribute VB_Name = "databaseX"
 'This is the new version for ADO.
 Option Explicit
+'---- CursorTypeEnum Values ----
+'Const adOpenForwardOnly = 0
+'Const adOpenKeyset = 1
+'Const adOpenDynamic = 2
+'Const adOpenStatic = 3
+
+'---- LockTypeEnum Values ----
+'Const adLockReadOnly = 1
+'Const adLockPessimistic = 2
+'Const adLockOptimistic = 3
+'Const adLockBatchOptimistic = 4
+
+'---- CursorLocationEnum Values ----
+'Const adUseServer = 2
+'Const adUseClient = 3
+'ActiveX Data Objects (ADO)
+Const adAddNew = &H1000400
+Const adAffectAllChapters = 4
+Const adAffectCurrent = 1
+Const adAffectGroup = 2
+Const adApproxPosition = &H4000
+Const adArray = &H2000
+Const adAsyncConnect = &H10
+Const adAsyncExecute = &H10
+Const adAsyncFetch = &H20
+Const adAsyncFetchNonBlocking = &H40
+Const adBigInt = 20
+Const adBinary = 128
+Const adBookmark = &H2000
+Const adBookmarkCurrent = 0
+Const adBookmarkFirst = 1
+Const adBookmarkLast = 2
+Const adBoolean = 11
+Const adBSTR = 8
+Const adChapter = 136
+Const adChar = 129
+Const adClipString = 2
+Const adCmdFile = &H100
+Const adCmdStoredProc = &H4
+Const adCmdTable = &H2
+Const adCmdTableDirect = &H200
+Const adCmdText = &H1
+Const adCmdUnknown = &H8
+Const adCollectionRecord = 1
+Const adCompareEqual = 1
+Const adCompareGreaterThan = 2
+Const adCompareLessThan = 0
+Const adCompareNotComparable = 4
+Const adCompareNotEqual = 3
+Const adCopyAllowEmulation = 4
+Const adCopyNonRecursive = 2
+Const adCopyOverWrite = 1
+Const adCopyUnspecified = -1
+Const adCR = 13
+Const adCreateCollection = &H2000
+Const adCreateNonCollection = &H0
+Const adCreateOverwrite = &H4000000
+Const adCreateStructDoc = &H80000000
+Const adCriteriaAllCols = 1
+Const adCriteriaKey = 0
+Const adCriteriaTimeStamp = 3
+Const adCriteriaUpdCols = 2
+Const adCRLF = -1
+Const adCurrency = 6
+Const adDate = 7
+Const adDBDate = 133
+Const adDBTime = 134
+Const adDBTimeStamp = 135
+Const adDecimal = 14
+Const adDefaultStream = -1
+Const adDelayFetchFields = &H8000
+Const adDelayFetchStream = &H4000
+Const adDelete = &H1000800
+Const adDouble = 5
+Const adEditAdd = &H2
+Const adEditDelete = &H4
+Const adEditInProgress = &H1
+Const adEditNone = &H0
+Const adEmpty = 0
+Const adErrBoundToCommand = &HE7B
+Const adErrCannotComplete = &HE94
+Const adErrCantChangeConnection = &HEA4
+Const adErrCantChangeProvider = &HC94
+Const adErrCantConvertvalue = &HE8C
+Const adErrCantCreate = &HE8D
+Const adErrCatalogNotSet = &HEA3
+Const adErrColumnNotOnThisRow = &HE8E
+Const adErrDataConversion = &HD5D
+Const adErrDataOverflow = &HE89
+Const adErrDelResOutOfScope = &HE9A
+Const adErrDenyNotSupported = &HEA6
+Const adErrDenyTypeNotSupported = &HEA7
+Const adErrFeatureNotAvailable = &HCB3
+Const adErrFieldsUpdateFailed = &HEA5
+Const adErrIllegalOperation = &HC93
+Const adErrIntegrityViolation = &HE87
+Const adErrInTransaction = &HCAE
+Const adErrInvalidArgument = &HBB9
+Const adErrInvalidConnection = &HE7D
+Const adErrInvalidParamInfo = &HE7C
+Const adErrInvalidTransaction = &HE82
+Const adErrInvalidURL = &HE91
+Const adErrItemNotFound = &HCC1
+Const adErrNoCurrentRecord = &HBCD
+Const adErrNotReentrant = &HE7E
+Const adErrObjectClosed = &HE78
+Const adErrObjectInCollection = &HD27
+Const adErrObjectNotSet = &HD5C
+Const adErrObjectOpen = &HE79
+Const adErrOpeningFile = &HBBA
+Const adErrOperationCancelled = &HE80
+Const adError = 10
+Const adErrOutOfSpace = &HE96
+Const adErrPermissionDenied = &HE88
+Const adErrPropConflicting = &HE9E
+Const adErrPropInvalidColumn = &HE9B
+Const adErrPropInvalidOption = &HE9C
+Const adErrPropInvalidValue = &HE9D
+Const adErrPropNotAllSettable = &HE9F
+Const adErrPropNotSet = &HEA0
+Const adErrPropNotSettable = &HEA1
+Const adErrPropNotSupported = &HEA2
+Const adErrProviderFailed = &HBB8
+Const adErrProviderNotFound = &HE7A
+Const adErrReadFile = &HBBB
+Const adErrResourceExists = &HE93
+Const adErrResourceLocked = &HE92
+Const adErrResourceOutOfScope = &HE97
+Const adErrSchemaViolation = &HE8A
+Const adErrSignMismatch = &HE8B
+Const adErrStillConnecting = &HE81
+Const adErrStillExecuting = &HE7F
+Const adErrTreePermissionDenied = &HE90
+Const adErrUnavailable = &HE98
+Const adErrUnsafeOperation = &HE84
+Const adErrURLDoesNotExist = &HE8F
+Const adErrURLIntegrViolSetColumns = &HE8F
+Const adErrURLNamedRowDoesNotExist = &HE99
+Const adErrVolumeNotFound = &HE95
+Const adErrWriteFile = &HBBC
+Const adExecuteNoRecords = &H80
+Const adFailIfNotExists = -1
+Const adFieldAlreadyExists = 26
+Const adFieldBadStatus = 12
+Const adFieldCannotComplete = 20
+Const adFieldCannotDeleteSource = 23
+Const adFieldCantConvertValue = 2
+Const adFieldCantCreate = 7
+Const adFieldDataOverflow = 6
+Const adFieldDefault = 13
+Const adFieldDoesNotExist = 16
+Const adFieldIgnore = 15
+Const adFieldIntegrityViolation = 10
+Const adFieldInvalidURL = 17
+Const adFieldIsNull = 3
+Const adFieldOK = 0
+Const adFieldOutOfSpace = 22
+Const adFieldPendingChange = &H40000
+Const adFieldPendingDelete = &H20000
+Const adFieldPendingInsert = &H10000
+Const adFieldPendingUnknown = &H80000
+Const adFieldPendingUnknownDelete = &H100000
+Const adFieldPermissionDenied = 9
+Const adFieldReadOnly = 24
+Const adFieldResourceExists = 19
+Const adFieldResourceLocked = 18
+Const adFieldResourceOutOfScope = 25
+Const adFieldSchemaViolation = 11
+Const adFieldSignMismatch = 5
+Const adFieldTruncated = 4
+Const adFieldUnavailable = 8
+Const adFieldVolumeNotFound = 21
+Const adFileTime = 64
+Const adFilterAffectedRecords = 2
+Const adFilterConflictingRecords = 5
+Const adFilterFetchedRecords = 3
+Const adFilterNone = 0
+Const adFilterPendingRecords = 1
+Const adFind = &H80000
+Const adFldCacheDeferred = &H1000
+Const adFldFixed = &H10
+Const adFldIsChapter = &H2000
+Const adFldIsCollection = &H40000
+Const adFldIsDefaultStream = &H20000
+Const adFldIsNullable = &H20
+Const adFldIsRowURL = &H10000
+Const adFldKeyColumn = &H8000
+Const adFldLong = &H80
+Const adFldMayBeNull = &H40
+Const adFldMayDefer = &H2
+Const adFldNegativeScale = &H4000
+Const adFldRowID = &H100
+Const adFldRowVersion = &H200
+Const adFldUnknownUpdatable = &H8
+Const adFldUpdatable = &H4
+Const adGetRowsRest = -1
+Const adGUID = 72
+Const adHoldRecords = &H100
+Const adIDispatch = 9
+Const adIndex = &H800000
+Const adInteger = 3
+Const adIUnknown = 13
+Const adLF = 10
+Const adLockBatchOptimistic = 4
+Const adLockOptimistic = 3
+Const adLockPessimistic = 2
+Const adLockReadOnly = 1
+Const adLongVarBinary = 205
+Const adLongVarChar = 201
+Const adLongVarWChar = 203
+Const adMarshalAll = 0
+Const adMarshalModifiedOnly = 1
+Const adModeRead = 1
+Const adModeReadWrite = 3
+Const adModeRecursive = &H400000
+Const adModeShareDenyNone = &H10
+Const adModeShareDenyRead = 4
+Const adModeShareDenyWrite = 8
+Const adModeShareExclusive = &HC
+Const adModeUnknown = 0
+Const adModeWrite = 2
+Const adMoveAllowEmulation = 4
+Const adMoveDontUpdateLinks = 2
+Const adMoveOverWrite = 1
+Const adMovePrevious = &H200
+Const adMoveUnspecified = -1
+Const adNotify = &H40000
+Const adNumeric = 131
+Const adOpenAsync = &H1000
+Const adOpenDynamic = 2
+Const adOpenForwardOnly = 0
+Const adOpenIfExists = &H2000000
+Const adOpenKeyset = 1
+Const adOpenRecordUnspecified = -1
+Const adOpenSource = &H800000
+Const adOpenStatic = 3
+Const adOpenStreamAsync = 1
+Const adOpenStreamFromRecord = 4
+Const adOpenStreamUnspecified = -1
+Const adParamInput = &H1
+Const adParamInputOutput = &H3
+Const adParamLong = &H80
+Const adParamNullable = &H40
+Const adParamOutput = &H2
+Const adParamReturnValue = &H4
+Const adParamSigned = &H10
+Const adParamUnknown = &H0
+Const adPersistADTG = 0
+Const adPersistXML = 1
+Const adPosBOF = -2
+Const adPosEOF = -3
+Const adPosUnknown = -1
+Const adPriorityAboveNormal = 4
+Const adPriorityBelowNormal = 2
+Const adPriorityHighest = 5
+Const adPriorityLowest = 1
+Const adPriorityNormal = 3
+Const adPromptAlways = 1
+Const adPromptComplete = 2
+Const adPromptCompleteRequired = 3
+Const adPromptNever = 4
+Const adPropNotSupported = &H0
+Const adPropOptional = &H2
+Const adPropRead = &H200
+Const adPropRequired = &H1
+Const adPropVariant = 138
+Const adPropWrite = &H400
+Const adReadAll = -1
+Const adReadLine = -2
+Const adRecalcAlways = 1
+Const adRecalcUpFront = 0
+Const adRecCanceled = &H100
+Const adRecCantRelease = &H400
+Const adRecConcurrencyViolation = &H800
+Const adRecDBDeleted = &H40000
+Const adRecDeleted = &H4
+Const adRecIntegrityViolation = &H1000
+Const adRecInvalid = &H10
+Const adRecMaxChangesExceeded = &H2000
+Const adRecModified = &H2
+Const adRecMultipleChanges = &H40
+Const adRecNew = &H1
+Const adRecObjectOpen = &H4000
+Const adRecOK = &H0
+Const adRecordURL = -2
+Const adRecOutOfMemory = &H8000
+Const adRecPendingChanges = &H80
+Const adRecPermissionDenied = &H10000
+Const adRecSchemaViolation = &H20000
+Const adRecUnmodified = &H8
+Const adResync = &H20000
+Const adResyncAllValues = 2
+Const adResyncUnderlyingValues = 1
+Const adRsnAddNew = 1
+Const adRsnClose = 9
+Const adRsnDelete = 2
+Const adRsnFirstChange = 11
+Const adRsnMove = 10
+Const adRsnMoveFirst = 12
+Const adRsnMoveLast = 15
+Const adRsnMoveNext = 13
+Const adRsnMovePrevious = 14
+Const adRsnRequery = 7
+Const adRsnResynch = 8
+Const adRsnUndoAddNew = 5
+Const adRsnUndoDelete = 6
+Const adRsnUndoUpdate = 4
+Const adRsnUpdate = 3
+Const adSaveCreateNotExist = 1
+Const adSaveCreateOverWrite = 2
+Const adSchemaAsserts = 0
+Const adSchemaCatalogs = 1
+Const adSchemaCharacterSets = 2
+Const adSchemaCheckConstraints = 5
+Const adSchemaCollations = 3
+Const adSchemaColumnPrivileges = 13
+Const adSchemaColumns = 4
+Const adSchemaColumnsDomainUsage = 11
+Const adSchemaConstraintColumnUsage = 6
+Const adSchemaConstraintTableUsage = 7
+Const adSchemaCubes = 32
+Const adSchemaDBInfoKeywords = 30
+Const adSchemaDBInfoLiterals = 31
+Const adSchemaDimensions = 33
+Const adSchemaForeignKeys = 27
+Const adSchemaHierarchies = 34
+Const adSchemaIndexes = 12
+Const adSchemaKeyColumnUsage = 8
+Const adSchemaLevels = 35
+Const adSchemaMeasures = 36
+Const adSchemaMembers = 38
+Const adSchemaPrimaryKeys = 28
+Const adSchemaProcedureColumns = 29
+Const adSchemaProcedureParameters = 26
+Const adSchemaProcedures = 16
+Const adSchemaProperties = 37
+Const adSchemaProviderSpecific = -1
+Const adSchemaProviderTypes = 22
+Const adSchemaReferentialConstraints = 9
+Const adSchemaSchemata = 17
+Const adSchemaSQLLanguages = 18
+Const adSchemaStatistics = 19
+Const adSchemaTableConstraints = 10
+Const adSchemaTablePrivileges = 14
+Const adSchemaTables = 20
+Const adSchemaTranslations = 21
+Const adSchemaTrustees = 39
+Const adSchemaUsagePrivileges = 15
+Const adSchemaViewColumnUsage = 24
+Const adSchemaViews = 23
+Const adSchemaViewTableUsage = 25
+Const adSearchBackward = -1
+Const adSearchForward = 1
+Const adSeek = &H400000
+Const adSeekAfter = &H8
+Const adSeekAfterEQ = &H4
+Const adSeekBefore = &H20
+Const adSeekBeforeEQ = &H10
+Const adSeekFirstEQ = &H1
+Const adSeekLastEQ = &H2
+Const adSimpleRecord = 0
+Const adSingle = 4
+Const adSmallInt = 2
+Const adStateClosed = &H0
+Const adStateConnecting = &H2
+Const adStateExecuting = &H4
+Const adStateFetching = &H8
+Const adStateOpen = &H1
+Const adStatusCancel = &H4
+Const adStatusCantDeny = &H3
+Const adStatusErrorsOccurred = &H2
+Const adStatusOK = &H1
+Const adStatusUnwantedEvent = &H5
+Const adStructDoc = 2
+Const adTinyInt = 16
+Const adTypeBinary = 1
+Const adTypeText = 2
+Const adUnsignedBigInt = 21
+Const adUnsignedInt = 19
+Const adUnsignedSmallInt = 18
+Const adUnsignedTinyInt = 17
+Const adUpdate = &H1008000
+Const adUpdateBatch = &H10000
+Const adUseClient = 3
+Const adUserDefined = 132
+Const adUseServer = 2
+Const adVarBinary = 204
+Const adVarChar = 200
+Const adVariant = 12
+Const adVarNumeric = 139
+Const adVarWChar = 202
+Const adWChar = 130
+Const adWriteChar = 0
+Const adWriteLine = 1
+Const adwrnSecurityDialog = &HE85
+Const adwrnSecurityDialogHeader = &HE86
+Const adXactAbortRetaining = &H40000
+Const adXactBrowse = &H100
+Const adXactChaos = &H10
+Const adXactCommitRetaining = &H20000
+Const adXactCursorStability = &H1000
+Const adXactIsolated = &H100000
+Const adXactReadCommitted = &H1000
+Const adXactReadUncommitted = &H100
+Const adXactRepeatableRead = &H10000
+Const adXactSerializable = &H100000
+Const adXactUnspecified = &HFFFFFFFF
+
+'ADC / ADO Constants
+Const adcExecAsync = 2
+Const adcExecSync = 1
+Const adcFetchAsync = 3
+Const adcFetchBackground = 2
+Const adcFetchUpFront = 1
+Const adcReadyStateComplete = 4
+Const adcReadyStateInteractive = 3
+Const adcReadyStateLoaded = 2
 Public ArrBase As Long
 Dim AABB As Long
 Dim conCollection As FastCollection
@@ -22,7 +439,7 @@ Public extDBUser As String ' '= VbNullString ' "admin"  ' or ""
 Public extDBUserPassword   As String ''= VbNullString
 Public DBtype As String ' can be mdb or something else
 Public Const DBtypeHelp = ".mdb" 'allways help has an mdb as type"
-Const DBSecurityOFF = ";Persist Security Info=False"
+Public Const DBSecurityOFF = ";Persist Security Info=False"
 
 Private Declare Function MoveFileW Lib "kernel32.dll" (ByVal lpExistingFileName As Long, ByVal lpNewFileName As Long) As Long
 Private Declare Function DeleteFileW Lib "kernel32.dll" (ByVal lpFileName As Long) As Long
@@ -426,13 +843,13 @@ End If
                 End If
                 If myBase = vbNullString Then
                     If Left$(base, 1) = "(" Or JetPostfix = ";" Then
-                        myBase.Open JetPrefix & JetPostfix
+                        myBase.open JetPrefix & JetPostfix
                         If Err.Number Then
                         MyEr Err.Description, Err.Description
                         Exit Sub
                         End If
                     Else
-                        myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF      'open the Connection
+                        myBase.open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF      'open the Connection
                     End If
                 End If
                 If Err.Number > 0 Then
@@ -445,24 +862,24 @@ End If
                     Loop
                     If srl = DriveSerial(Left$(base, 3)) Then
                         Err.clear
-                        If myBase = vbNullString Then myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF       'open the Connection
+                        If myBase = vbNullString Then myBase.open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF       'open the Connection
                     End If
                 End If
             Else
                 If myBase = vbNullString Then
                 ' check if we have ODBC
                     If Left$(base, 1) = "(" Or JetPostfix = ";" Then
-                        myBase.Open JetPrefix & JetPostfix
+                        myBase.open JetPrefix & JetPostfix
                         If Err.Number Then
                             MyEr Err.Description, Err.Description
                             Exit Sub
                         End If
                     Else
                         Err.clear
-                        myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                        myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
                            Err.clear
-                           myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                           myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
                                JetPostfix = JetPostfixOld
@@ -482,8 +899,8 @@ End If
            Set rs = CreateObject("ADODB.Recordset")
         Set TBL = CreateObject("ADOX.TABLE")
            Set cat = CreateObject("ADOX.Catalog")
-           Set cat.activeconnection = myBase
-           If cat.activeconnection.errors.count > 0 Then
+           Set cat.ActiveConnection = myBase
+           If cat.ActiveConnection.errors.count > 0 Then
            MyEr "Can't connect to Base", "Δεν μπορώ να συνδεθώ με τη βάση"
            Exit Sub
            End If
@@ -521,7 +938,7 @@ End If
                                         End If
          ElseIf tablename = TBL.name Then
          cnt = 1
-                     rs.Open "Select * From [" & TBL.name & "] ;", myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
+                     rs.open "Select * From [" & TBL.name & "] ;", myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
                                          stac1.Flush
                                         stac1.DataVal CDbl(rs.fields.count)
                                         If TBL.indexes.count > 0 Then
@@ -658,17 +1075,17 @@ End If
                     Exit Sub
                 Else
                 If Left$(base, 1) = "(" Or JetPostfix = ";" Then
-                    myBase.Open JetPrefix & JetPostfix
+                    myBase.open JetPrefix & JetPostfix
                     If Err.Number Then
                         MyEr Err.Description, Err.Description
                         Exit Sub
                     End If
                 Else
                         Err.clear
-                        myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                        myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
                            Err.clear
-                           myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                           myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
                                JetPostfix = JetPostfixOld
@@ -690,17 +1107,17 @@ End If
           
            Set rec = CreateObject("ADODB.Recordset")
             Err.clear
-           rec.Open Id$, myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
+           rec.open Id$, myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
 
  If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
 Set myBase = Nothing
 RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
- myBase.Open = LL$
+ myBase.open = LL$
  PushOne base, myBase
  Err.clear
-rec.Open Id$, myBase, 3, 4
+rec.open Id$, myBase, 3, 4
 If Err.Number Then
 MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
 Exit Sub
@@ -850,7 +1267,7 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
 
  
  '  If mybase = VbNullString Then ' mybase.Mode = adShareDenyWrite
-   If myBase = vbNullString Then myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+   If myBase = vbNullString Then myBase.open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
 
             If Err.Number > 0 Then
             
@@ -863,7 +1280,7 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
             Loop
             If srl = DriveSerial(Left$(base, 3)) Then
             Err.clear
-        If myBase = vbNullString Then myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF      'open the Connection
+        If myBase = vbNullString Then myBase.open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF      'open the Connection
         
             End If
         
@@ -872,17 +1289,17 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
 '     myBase.Open JetPrefix & """" & GetDosPath(BASE) & """" & ";Jet OLEDB:Database Password=100101;User Id=" & DBUser  & ";Password=" & DBUserPassword & ";" &  DBSecurityOFF  'open the Connection
  If myBase = vbNullString Then
  If Left$(base, 1) = "(" Or JetPostfix = ";" Then
- myBase.Open JetPrefix & JetPostfix
+ myBase.open JetPrefix & JetPostfix
  If Err.Number Then
  MyEr Err.Description, Err.Description
  Exit Sub
  End If
  Else
         Err.clear
-        myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+        myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
         If Err.Number = -2147467259 Then
            Err.clear
-           myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+           myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
            If Err.Number = 0 Then
                JetPrefix = JetPrefixOld
                JetPostfix = JetPostfixOld
@@ -905,17 +1322,17 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
 Dim LL$
    Set rec = CreateObject("ADODB.Recordset")
  Err.clear
- 
-  rec.Open Id$, myBase, 3, 4
+ If myBase.mode = 0 Then myBase.open
+  rec.open Id$, myBase, 3, 4
 If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
 Set myBase = Nothing
 RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
- myBase.Open = LL$
+ myBase.open = LL$
  PushOne base, myBase
  Err.clear
-rec.Open Id$, myBase, 3, 4
+rec.open Id$, myBase, 3, 4
 If Err.Number Then
 MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
 Exit Sub
@@ -1056,7 +1473,7 @@ End If
     End If
      End If
 
-     myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF    'open the Connection
+     myBase.open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF    'open the Connection
 
                If Err.Number > 0 Then
         
@@ -1069,24 +1486,24 @@ End If
             Loop
             If srl = DriveSerial(Left$(base, 3)) Then
             Err.clear
-   myBase.Open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF   'open the Connection
+   myBase.open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBSecurityOFF   'open the Connection
                 
             End If
         
         End If
    Else
     If Left$(base, 1) = "(" Or JetPostfix = ";" Then
- myBase.Open JetPrefix & JetPostfix
+ myBase.open JetPrefix & JetPostfix
  If Err.Number Then
  MyEr Err.Description, Err.Descnullription
  Exit Sub
  End If
  Else
         Err.clear
-        myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+        myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
         If Err.Number = -2147467259 Then
            Err.clear
-           myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+           myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
            If Err.Number = 0 Then
                JetPrefix = JetPrefixOld
                JetPostfix = JetPostfixOld
@@ -1103,16 +1520,16 @@ On Error GoTo g101
  Dim LL$
    Set rec = CreateObject("ADODB.Recordset")
     Err.clear
-     rec.Open Id$, myBase, 3, 4
+     rec.open Id$, myBase, 3, 4
       If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
 Set myBase = Nothing
 RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
- myBase.Open = LL$
+ myBase.open = LL$
  PushOne base, myBase
  Err.clear
-rec.Open Id$, myBase, 3, 4
+rec.open Id$, myBase, 3, 4
 If Err.Number Then
 MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
 Exit Sub
@@ -1184,85 +1601,79 @@ Else
     If Not CanKillFile(base) Then FilePathNotForUser: Exit Sub
 End If
 
-Dim myBase
+Dim myBase, rs As Object
     
-    On Error Resume Next
-       If Not getone(base, myBase) Then
-           
-              Set myBase = CreateObject("ADODB.Connection")
-                If DriveType(Left$(base, 3)) = "Cd-Rom" Then
-                ' we can do NOTHING...
-                    MyEr "Can't execute command in a CD-ROM", "Δεν μπορώ εκτελέσω εντολή στη βάση δεδομένων σε CD-ROM"
-                    Exit Sub
-                Else
-                    If Left$(base, 1) = "(" Or JetPostfix = ";" Then
-                        myBase.Open JetPrefix & JetPostfix
-                        If Err.Number Then
-                        MyEr Err.Description, Err.Description
-                        Exit Sub
-                        End If
-                    Else
-                        Err.clear
-                        myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
-                        If Err.Number = -2147467259 Then
-                           Err.clear
-                           myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
-                           If Err.Number = 0 Then
-                               JetPrefix = JetPrefixOld
-                               JetPostfix = JetPostfixOld
-                           Else
-                               MyEr "Maybe Need Jet 4.0 library", "Μαλλον χρειάζεται η Jet 4.0 βιβλιοθήκη ρουτινών"
-                           End If
-                        End If
-                    End If
-                End If
-                PushOne base, myBase
+On Error Resume Next
+If Not getone(base, myBase) Then
+   
+    Set myBase = CreateObject("ADODB.Connection")
+      
+    If DriveType(Left$(base, 3)) = "Cd-Rom" Then
+    ' we can do NOTHING...
+        MyEr "Can't execute command in a CD-ROM", "Δεν μπορώ εκτελέσω εντολή στη βάση δεδομένων σε CD-ROM"
+        Exit Sub
+    Else
+        If Left$(base, 1) = "(" Or JetPostfix = ";" Then
+            myBase.open JetPrefix & JetPostfix
+            If Err.Number Then
+            MyEr Err.Description, Err.Description
+            Exit Sub
+            End If
+        Else
+            Err.clear
+            myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+            If Err.Number = -2147467259 Then
+               Err.clear
+               myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+               If Err.Number = 0 Then
+                   JetPrefix = JetPrefixOld
+                   JetPostfix = JetPostfixOld
+               Else
+                   MyEr "Maybe Need Jet 4.0 library", "Μαλλον χρειάζεται η Jet 4.0 βιβλιοθήκη ρουτινών"
+               End If
+            End If
+        End If
     End If
-        Dim erdesc$, rs As Object
-           Err.clear
-           If comTimeOut >= 10 Then myBase.CommandTimeout = CLng(comTimeOut)
-           If Err.Number > 0 Then Err.clear: myBase.errors.clear
-           com2execute = Replace(com2execute, Chr(9), " ")
-           com2execute = Replace(com2execute, vbCrLf, "")
-           com2execute = Replace(com2execute, ";", vbCrLf)
-           If InStr(com2execute, vbCrLf) > 0 Then
-            Dim commands() As String, i As Long
-            commands() = Split(com2execute, vbCrLf)
-            For i = LBound(commands()) To UBound(commands())
-            If Len(MyTrim(commands(i))) > 0 Then
-            Set rs = myBase.Execute(commands(i))
-            If Typename(rs) = "Recordset" Then
-            If rs.fields.count > 0 Then
-            
-            End If
-            End If
-            If myBase.errors.count <> 0 Then
-            
-            Exit For
-            End If
-            End If
-            Next i
-           Else
-            Set rs = myBase.Execute(com2execute)
-            If Typename(rs) = "Recordset" Then
-            If rs.fields.count > 0 Then
-            bstackstr.soros.PushObj rs
-            Set rs = Nothing
-            End If
-            End If
-            End If
-If myBase.errors.count <> 0 Then
-For i = 0 To myBase.errors.count - 1
-erdesc$ = erdesc$ + myBase.errors(i)
-Next i
-MyEr "Can't execute command:" + erdesc$, "Δεν μπορώ να εκτελέσω την εντολή:" + erdesc$
- myBase.errors.clear
+    PushOne base, myBase
 End If
+Dim erdesc$
+Err.clear
+If comTimeOut >= 10 Then myBase.CommandTimeout = CLng(comTimeOut)
+If Err.Number > 0 Then Err.clear: myBase.errors.clear
+com2execute = Replace(com2execute, Chr(9), " ")
+com2execute = Replace(com2execute, vbCrLf, "")
+com2execute = Replace(com2execute, ";", vbCrLf)
+Dim commands() As String, i As Long, mm As mStiva, aa As Object
+commands() = Split(com2execute + vbCrLf, vbCrLf)
+Set mm = New mStiva
+For i = LBound(commands()) To UBound(commands())
 
-' we have response
+    If Len(MyTrim(commands(i))) > 0 Then
+        ProcTask2 bstackstr  'to allow threads to run at background.
+        Set rs = myBase.Execute(commands(i))
+        If Typename(rs) = "Recordset" Then
+            If rs.fields.count > 0 Then
+                Set aa = rs
+                mm.DataObj aa
+                Set aa = Nothing
+                Set rs = Nothing
+            End If
+        End If
+        If myBase.errors.count <> 0 Then Exit For
+    End If
+Next i
 
-
+If mm.Total > 0 Then bstackstr.soros.MergeTop mm
+If myBase.errors.count <> 0 Then
+    For i = 0 To myBase.errors.count - 1
+        erdesc$ = erdesc$ + myBase.errors(i)
+    Next i
+        MyEr "Can't execute command:" + erdesc$, "Δεν μπορώ να εκτελέσω την εντολή:" + erdesc$
+    myBase.errors.clear
+End If
 End Sub
+
+
 
 
 
@@ -1299,17 +1710,17 @@ End If
                     Exit Sub
                 Else
                     If Left$(base, 1) = "(" Or JetPostfix = ";" Then
-                        myBase.Open JetPrefix & JetPostfix
+                        myBase.open JetPrefix & JetPostfix
                         If Err.Number Then
                         MyEr Err.Description, Err.Description
                         Exit Sub
                         End If
                     Else
                         Err.clear
-                        myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                        myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
                            Err.clear
-                           myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                           myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
                                JetPostfix = JetPostfixOld
@@ -1328,7 +1739,7 @@ End If
           
             Err.clear
             Set mcat = CreateObject("ADOX.Catalog")
-            mcat.activeconnection = myBase
+            mcat.ActiveConnection = myBase
 
             
 
@@ -1337,11 +1748,11 @@ LL$ = myBase ' AS A STRING
 Set myBase = Nothing
 RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
- myBase.Open = LL$
+ myBase.open = LL$
  PushOne base, myBase
  Err.clear
             Set mcat = CreateObject("ADOX.Catalog")
-            mcat.activeconnection = myBase
+            mcat.ActiveConnection = myBase
             
 
 If Err.Number Then
@@ -1377,8 +1788,8 @@ Else
  mtable.indexes("ndx").Remove  ' remove the old index/
  End If
  Err.clear
- If mcat.activeconnection.errors.count > 0 Then
- mcat.activeconnection.errors.clear
+ If mcat.ActiveConnection.errors.count > 0 Then
+ mcat.ActiveConnection.errors.clear
  End If
  Err.clear
    Set pIndex = CreateObject("ADOX.Index")
@@ -1449,17 +1860,17 @@ End If
                     Exit Sub
                 Else
                 If Left$(base, 1) = "(" Or JetPostfix = ";" Then
-                    myBase.Open JetPrefix & JetPostfix
+                    myBase.open JetPrefix & JetPostfix
                     If Err.Number Then
                     MyEr Err.Description, Err.Description
                     Exit Sub
                     End If
                 Else
                     Err.clear
-                    myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                    myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                     If Err.Number = -2147467259 Then
                        Err.clear
-                       myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                       myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                        If Err.Number = 0 Then
                            JetPrefix = JetPrefixOld
                            JetPostfix = JetPostfixOld
@@ -1477,7 +1888,7 @@ End If
    okntable = True
 Dim cat, mtable, LL$
   Set cat = CreateObject("ADOX.Catalog")
-           Set cat.activeconnection = myBase
+           Set cat.ActiveConnection = myBase
 
 
 If Err.Number <> 0 Then
@@ -1485,10 +1896,10 @@ LL$ = myBase ' AS A STRING
 Set myBase = Nothing
 RemoveOneConn base
  Set myBase = CreateObject("ADODB.Connection")
- myBase.Open = LL$
+ myBase.open = LL$
  PushOne base, myBase
  Err.clear
- Set cat.activeconnection = myBase
+ Set cat.ActiveConnection = myBase
 If Err.Number Then
 MyEr Err.Description & " " & mtable, Err.Description & " " & mtable
 Exit Sub
@@ -1757,17 +2168,17 @@ Dim myBase
                     Exit Function
                 Else
                     If Left$(base, 1) = "(" Or JetPostfix = ";" Then
-                        myBase.Open JetPrefix & JetPostfix
+                        myBase.open JetPrefix & JetPostfix
                         If Err.Number Then
                         MyEr Err.Description, Err.Description
                         DELfields = False: Exit Function
                         End If
                     Else
                         Err.clear
-                        myBase.Open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                        myBase.open JetPrefix & GetDosPath(base) & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                         If Err.Number = -2147467259 Then
                            Err.clear
-                           myBase.Open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
+                           myBase.open JetPrefixOld & GetDosPath(base) & JetPostfixOld & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF     'open the Connection
                            If Err.Number = 0 Then
                                JetPrefix = JetPrefixOld
                                JetPostfix = JetPostfixOld
@@ -1811,10 +2222,10 @@ Dim Cnn1
  Set Cnn1 = CreateObject("ADODB.Connection")
 
  On Error Resume Next
- Cnn1.Open JetPrefix & DBFileName & ";Jet OLEDB:Database Password=;User Id=" & DBUser & ";Password=" & DBUserPassword & ";"  ' &  DBSecurityOFF 'open the Connection
+ Cnn1.open JetPrefix & DBFileName & ";Jet OLEDB:Database Password=;User Id=" & DBUser & ";Password=" & DBUserPassword & ";"  ' &  DBSecurityOFF 'open the Connection
  If Err Then
  Err.clear
- Cnn1.Open JetPrefix & DBFileName & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF    'open the Connection
+ Cnn1.open JetPrefix & DBFileName & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF    'open the Connection
  If Err Then
  Else
  CheckMine = True
@@ -1825,7 +2236,7 @@ Dim Cnn1
 End Function
 
 
-Private Sub PushOne(conname As String, v As Variant)
+Public Sub PushOne(conname As String, v As Variant)
 On Error Resume Next
 conCollection.AddKey conname, v
 'Set v = conCollection(conname)
@@ -1842,7 +2253,7 @@ On Error Resume Next
 conCollection.index = i
 If conCollection.IsObj Then
 With conCollection.ValueObj
-bb = .connectionstring <> ""
+bb = .ConnectionString <> ""
 If Err.Number = 0 Then
 If .mode > 0 Then
 If .state = 1 Then
@@ -1870,46 +2281,46 @@ Public Sub RemoveOneConn(conname)
 On Error Resume Next
 Dim vv
 If conCollection Is Nothing Then Exit Sub
-If Not conCollection.ExistKey(conname) Then Exit Sub
-
-Set vv = conCollection.ValueObj
-If Typename$(vv) = "Empty" Then
-' old code here
-Err.clear
-    vv = conCollection(conname)
-    If Not Err.Number <> 0 Then
-        conCollection.Remove conname
-        
-Else
-    Err.clear
+If Not conCollection.ExistKey(conname) Then
     conname = mylcasefILE(conname)
     If ExtractPath(conname) = vbNullString Then conname = mylcasefILE(mcd + conname)
-    If ExtractType(CVar(conname)) = vbNullString Then conname = mylcasefILE(conname + ".mdb")
-    conCollection.Remove conname
-    End If
+    If ExtractType(CStr(conname)) = vbNullString Then conname = mylcasefILE(conname + ".mdb")
+    If conCollection.ExistKey(conname) Then
     
+    GoTo conthere
+    End If
     Exit Sub
-End If
-If Not Err.Number <> 0 Then
-Err.clear
-If vv.connectionstring <> "" Then
-If Err.Number = 0 Then If vv.activeconnection <> "" Then vv.Close
-Err.clear
-End If
-conCollection.Remove conname
-Err.clear
+Else
+conthere:
+    vv = conCollection(conname)
+    If vv.ConnectionString <> "" Then
+    
+    If Err.Number = 0 And vv.mode <> 0 Then vv.Close
+    Err.clear
+    End If
+    conCollection.Remove conname
+    Err.clear
 End If
 End Sub
 Private Function getone(conname As String, this As Variant) As Boolean
 On Error Resume Next
 Dim v As Variant
 InitMe
+If conCollection.ExistKey(conname) Then
+Set this = conCollection.ValueObj
+getone = True
+End If
+End Function
+Public Function getone2(conname As String, this As Variant) As Boolean
+On Error Resume Next
+Dim v As Variant
+InitMe
 
 If conCollection.ExistKey(conname) Then
 Set this = conCollection.ValueObj
+getone2 = True
 End If
 End Function
-
 Private Sub InitMe()
 If Init Then Exit Sub
 Set conCollection = New FastCollection
@@ -2097,8 +2508,10 @@ End Function
 Sub GeneralErrorReport(aBasBase As Variant)
 Dim errorObject
 
- For Each errorObject In aBasBase.activeconnection.errors
+ For Each errorObject In aBasBase.ActiveConnection.errors
  'Debug.Print "Description :"; errorObject.Description
  'Debug.Print "Number:"; Hex(errorObject.Number)
  Next
 End Sub
+
+

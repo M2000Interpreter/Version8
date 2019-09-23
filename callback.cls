@@ -223,6 +223,8 @@ Sleep 5
 End If
 On Error Resume Next
 If Not ExtForm Is Nothing Then ExtForm.Shutdown
+Dim i As Long
+For i = UBound(var()) To 0 Step -1: var(i) = 0&: Next i
 finished = True
 End Sub
 Property Let ShowGui(RHS As Boolean)

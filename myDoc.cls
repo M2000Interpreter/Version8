@@ -32,7 +32,7 @@ Public final$
 ' each paragraph has a number
 Private Type Paragraph
   content() As String
-  colordata() As Variant
+  colordata() As Long
   startfrom As Long
 lines As Long  ' computed by the width of ruler...
 End Type
@@ -111,7 +111,7 @@ Sub RemoveDocParaIndex(ParaNum As Long)
     para(ParaNum).lines = 0   ' clear' also can be a flag to show that this is deleted
     ReDim para(ParaNum).content(1 To 1)
     para(ParaNum).content(1) = vbNullString
-    Dim emp() As Variant
+    Dim emp() As Long
     para(ParaNum).colordata() = emp()
     DocParaNext(ParaNum) = delDocPara
     para(ParaNum).startfrom = 0
@@ -205,7 +205,7 @@ again55:
                   ReDim para(mNum).colordata(1)
                             para(mNum).colordata(0) = 14
                             para(mNum).colordata(1) = 1
-            ElseIf para(mNum).colordata(0) = vbEmpty Then
+            ElseIf para(mNum).colordata(1) = 0 Then
                              para(mNum).colordata(0) = 14
                             para(mNum).colordata(1) = 1
             End If
@@ -422,7 +422,7 @@ End If
 End Sub
  
 
-Sub PlaceColorData(ParaNum As Long, thatcolordata() As Variant)
+Sub PlaceColorData(ParaNum As Long, thatcolordata() As Long)
     para(ParaNum).colordata = thatcolordata()
 End Sub
 Sub ReWritePara(ParaNum As Long, ByVal data$, Optional skipcolor As Boolean = False)
@@ -492,8 +492,8 @@ Function AppendParagraph(myparagraph$) As Long
     End If
     AppendParagraph = getAparaNum
 End Function
-Function AppendParagraphPlusColor(myparagraph$, colordata() As Variant, Optional offset As Long = 0) As Long
-    Dim getAparaNum As Long, mColor() As Variant
+Function AppendParagraphPlusColor(myparagraph$, colordata() As Long, Optional offset As Long = 0) As Long
+    Dim getAparaNum As Long, mColor() As Long
     mColor() = colordata()
     getAparaNum = FindNewPara
     ' getAparaNum is paragraph absolute address
@@ -528,8 +528,8 @@ Function InsertAfterParagraph(ParaNum As Long, myparagraph$) As Long
     End If
     InsertAfterParagraph = getAparaNum
 End Function
-Function InsertAfterParagraphPlusColor(ParaNum As Long, myparagraph$, colordata() As Variant, Optional offset As Long = 0) As Long
-    Dim getAparaNum As Long, mColor() As Variant
+Function InsertAfterParagraphPlusColor(ParaNum As Long, myparagraph$, colordata() As Long, Optional offset As Long = 0) As Long
+    Dim getAparaNum As Long, mColor() As Long
     mColor() = colordata()
     getAparaNum = FindNewPara
     WritePara getAparaNum, myparagraph$
@@ -702,8 +702,8 @@ Property Let textDocColor(norawtext As String)
 WrapAgain
 End Property
 
-Sub textParagraphPlusColor(norawtext As String, colordata() As Variant, Optional offset As Long = 0)
-Dim where As Long, copyColor() As Variant
+Sub textParagraphPlusColor(norawtext As String, colordata() As Long, Optional offset As Long = 0)
+Dim where As Long, copyColor() As Long
 where = AppendParagraph(norawtext)
 copyColor() = colordata()
 If offset > 0 Then copyColor() = Relocate(copyColor(), offset)
@@ -788,9 +788,9 @@ Else
 textDoc = Left$(textDoc, thiscur - 1)
 End If
 End Sub
-Function textHtmlDoc(colortable() As Variant) As String
+Function textHtmlDoc(colortable() As String) As String
 Dim mlines As Long, NeoData As String
- Dim mycur As Long, thiscur, l As Long, a$, mColor() As Variant, qu$
+ Dim mycur As Long, thiscur, l As Long, a$, mColor() As Long, qu$
  qu$ = """"
 mycur = DocParaNext(0)
 textHtmlDoc = space$(500)
@@ -1180,16 +1180,16 @@ End Function
 Property Get LastCurLineChar() As Long
 LastCurLineChar = lastlinelastchar
 End Property
-Property Get lastcolordata() As Variant()
+Property Get lastcolordata() As Long()
 If lastcolordatacur <> 0 Then
 lastcolordata = Relocate(para(lastcolordatacur).colordata(), lastlinelastchar)
 Else
-Dim dummy(1)
+Dim dummy(1) As Long
 lastcolordata = dummy()
 End If
 End Property
-Function Relocate(aa() As Variant, ByVal offset As Long)
-Dim i As Long, bbb(), j As Long
+Function Relocate(aa() As Long, ByVal offset As Long) As Long()
+Dim i As Long, bbb() As Long, j As Long
 If offset = 0 Or UBound(aa()) <= 1 Then
 Relocate = aa()
 Exit Function
@@ -1257,7 +1257,7 @@ If lineno < 1 Then Exit Property
     If lineno <= mlines Then
     
     If ColorEvent And Not skipcolor Then
-    If para(mycur).colordata(0) = Empty Then
+    If para(mycur).colordata(1) = 0 Then
     ColorThis (mycur)
         End If
 End If
@@ -1304,11 +1304,11 @@ End Property
 Property Get startfrom(ParaNum As Long) As Long
 startfrom = para(ParaNum).startfrom
 End Property
-Property Let Paracolordata(ParaNum As Long, col() As Variant)
+Property Let Paracolordata(ParaNum As Long, col() As Long)
 If ParaNum <> 0 Then para(ParaNum).colordata() = col()
 End Property
 
-Property Get Paracolordata(ParaNum As Long) As Variant()
+Property Get Paracolordata(ParaNum As Long) As Long()
 ' it is valid
 On Error Resume Next
 Paracolordata = para(ParaNum).colordata()
@@ -1579,9 +1579,9 @@ Dim mlines As Long, counter As Long
     If para(ParaNum).lines = 0 Then Exit Property
     
     If ColorEvent And Not skipcolor Then
-If para(ParaNum).colordata(0) = Empty Then
+If para(ParaNum).colordata(1) = 0 Then
     ColorThis (ParaNum)
-    If para(ParaNum).colordata(0) = Empty Then para(ParaNum).startfrom = 0
+    If para(ParaNum).colordata(1) = 0 Then para(ParaNum).startfrom = 0
 End If
 End If
      For mlines = 1 To para(ParaNum).lines
@@ -1619,12 +1619,6 @@ Function TextParagraphLine2(ByVal lineno As Long, thistext As String, ParaNum As
       End If
       End If
         ParaNum = mycur
-        'If Not sckipcolor Then
-        'If para(Paranum).colordata(0) = Empty Then
-    'ColorThis (Paranum)
-   'End If
-   
-'End If
         If (lineno - mlinesold) = 1 Then
             TextParagraphLine2 = 0
         Else
@@ -1756,7 +1750,7 @@ mycur = DocParaNext(0)
 Do While mycur <> 0
       RaiseEvent MayQuit(ok)
       If ok Then busy = False: Exit Sub
-If para(mycur).colordata(0) = Empty Then
+If para(mycur).colordata(1) = 0 Then
 ColorThis mycur
 Else
 mycur = DocParaNext(mycur)
@@ -1794,7 +1788,7 @@ Else
 Do While mycur <> 0
       RaiseEvent MayQuit(ok)
       If ok Then Exit Sub
-If para(mycur).colordata(0) = Empty Then
+If para(mycur).colordata(1) = 0 Then
 ColorThis (mycur)
 mycur = DocParaNext(mycur)
 Else

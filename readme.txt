@@ -1,11 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 43 active-X
-1. A lot of refactory and bug removing work.
-2. Improved TextEditor and GuiEditBox classes. (the two text editors, with syntax color)
-3. Introduce html editor and html validator in info.gsb.  
-4. Improved Test Form.
-5. Improved Gui for modal forms.
+Version 9.8 Revision 44 active-X
+1.  A serius bug when minimize a form removed (happen on later revisions)
+2. Improved more TextEditor and GuiEditBox classes. (the two text editors, with syntax color)
+3. Beter html editor and html validator in info.gsb.  
+
 
 
 The fist time you run the interpreter do this in M2000 console:

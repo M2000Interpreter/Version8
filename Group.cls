@@ -298,7 +298,7 @@ Public Property Get soros() As mStiva2
 Set soros = OwnSoros
 End Property
 
-Public Property Let Varlist(ByVal vNewValue As String)
+Public Property Let Varlist(vNewValue As String)
 VarRef$ = vNewValue
 End Property
 Public Property Get Varlist() As String
@@ -313,7 +313,7 @@ Else
 FuncList = FuncRef$
 End If
 End Property
-Public Property Let FuncList(ByVal vNewValue As String)
+Public Property Let FuncList(vNewValue As String)
 FuncRef$ = vNewValue
 End Property
 
@@ -322,23 +322,23 @@ Public Property Get LocalList() As String
 LocalList = LocalRef$
 End Property
 
-Public Property Let LocalList(ByVal vNewValue As String)
+Public Property Let LocalList(vNewValue As String)
 LocalRef$ = vNewValue
 End Property
 
-Public Property Get FloatGroupName() As Variant
-FloatGroupName = mFloatGroupName
+Public Property Get FloatGroupName() As String
+ FloatGroupName = mFloatGroupName
 End Property
 
-Public Property Let FloatGroupName(ByVal vNewValue As Variant)
+Public Property Let FloatGroupName(vNewValue As String)
 mFloatGroupName = vNewValue
 End Property
 
-Public Property Get GroupName() As Variant
+Public Property Get GroupName() As String
 GroupName = mName
 End Property
 
-Public Property Let GroupName(ByVal vNewValue As Variant)
+Public Property Let GroupName(vNewValue As String)
 mName = vNewValue
 End Property
 
@@ -362,7 +362,7 @@ edittag = mTag
 End If
 End Property
 
-Public Property Let edittag(ByVal vNewValue As String)
+Public Property Let edittag(vNewValue As String)
 If Not mTeam Then mTag = vNewValue
 End Property
 

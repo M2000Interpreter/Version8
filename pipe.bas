@@ -416,7 +416,7 @@ End If
 End If
 End Sub
 Public Function RenameFile(ByVal sSourceFile As String, ByVal sDesFile As String) As Boolean
-Dim F$, fd$, flag As Long
+Dim F$, fd$
 If Not CanKillFile(sSourceFile) Then Exit Function
 If ExtractType(sSourceFile) = vbNullString Then sSourceFile = sSourceFile + ".gsb"
 If ExtractType(sDesFile) = vbNullString Then
@@ -443,12 +443,26 @@ fd$ = "\\?\" + sDesFile
 Else
 fd$ = sDesFile
 End If
-flag = 1
 RenameFile = 0 <> MoveFile(StrPtr(F$), StrPtr(fd$))
 
 End Function
 
-
+Public Function RenameFile2(ByVal sSourceFile As String, ByVal sDesFile As String) As Boolean
+Dim F$, fd$
+sDesFile = ExtractPath(sSourceFile) + ExtractName(sDesFile)
+If Left$(sSourceFile, 2) <> "\\" Then
+F$ = "\\?\" + sSourceFile
+Else
+F$ = sSourceFile
+End If
+If Left$(sDesFile, 2) <> "\\" Then
+fd$ = "\\?\" + sDesFile
+Else
+fd$ = sDesFile
+End If
+RenameFile2 = 0 <> CopyFile(StrPtr(F$), StrPtr(fd$), 1)
+KillFile F$
+End Function
 Public Function CanKillFile(FileName$) As Boolean
 FixPath FileName$
 If Not IsSupervisor Then
@@ -472,7 +486,7 @@ End If
 End Function
 Public Function MakeACopy(ByVal sSourceFile As String, ByVal sDesFile As String) As Boolean
 If Not CanKillFile(sSourceFile) Then Exit Function
-Dim F$, fd$, flag As Long
+Dim F$, fd$
 If Left$(sSourceFile, 2) <> "\\" Then
 F$ = "\\?\" + sSourceFile
 Else
@@ -484,8 +498,7 @@ Else
 fd$ = sDesFile
 End If
 
-
-MakeACopy = 0 <> CopyFile(StrPtr(F$), StrPtr(fd$), flag)
+MakeACopy = 0 <> CopyFile(StrPtr(F$), StrPtr(fd$), 0)
 End Function
 
 Public Function NeoUnicodeFile(FileName$) As Boolean
@@ -605,7 +618,18 @@ st& = 1
 Dim word$(), it As Long, max As Long, line$, ok As Boolean, Min As Long
 simple$ = simple$ + "|"
 word$() = Split(simple$, "|")
+
+
 max = UBound(word$()) - 1
+If max > 0 Then
+For st& = 0 To max
+If word$(st&) = vbNullString Then
+MyEr "Need to give a string of type ""word1|word2....""", "Χρειάζεται να δώσεις ένα αλφαριθμητικό ""λεξη|άλληλέξη..."""
+Exit Function
+End If
+Next
+End If
+st& = 1
 If Len(simple$) <= 1 Then
 Included = ExtractName(afile$)
 Else
@@ -624,7 +648,9 @@ Else
     ' work in paragraphs..
   
 again:
+
     st& = a.FindStr(word$(0), st&, pa&, po&)
+    
     If st& > 0 Then
     
      If max > 0 Then

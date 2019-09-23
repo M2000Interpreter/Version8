@@ -5956,12 +5956,13 @@ If IsLabel(basestack1, s$, d$) > 0 Then
             cc.ValueKey = "PEN"
             cc.ValueType = REG_DWORD
             If IsNumberLabel(s$, w$) Then
-                If p = val(w$) Then p = 16 - p Else p = val(w$) Mod 16
+                If p = val(w$) Then p = 15 - p Else p = val(w$) Mod 16
                 cc.Value = CLng(val(p))
             End If
         ElseIf d$ = "BOLD" Then
                 cc.ValueKey = "BOLD"
                 cc.ValueType = REG_DWORD
+                cc.Value = 1
                 If IsNumberLabel(s$, w$) Then cc.Value = CLng(val(w$) Mod 16)
                 
         ElseIf d$ = "PAPER" Then
@@ -5971,7 +5972,7 @@ If IsLabel(basestack1, s$, d$) > 0 Then
                 cc.ValueKey = "PAPER"
                 cc.ValueType = REG_DWORD
                 If IsNumberLabel(s$, w$) Then
-                If p = val(w$) Then p = 16 - p Else p = val(w$) Mod 16
+                If p = val(w$) Then p = 15 - p Else p = val(w$) Mod 16
                     cc.Value = CLng(val(p))
                 End If
         ElseIf d$ = "GREEK" Then
@@ -17838,12 +17839,12 @@ Dim p As Variant, X As Variant, i As Long, F As Long, s$, ss$
                                                      Set pppp.GroupRef = Nothing
                                                      pppp.IHaveClass = False
                                                      If basestack.lastobj.IamSuperClass Then
-                                                    Dim myOBJ As Object
-                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myOBJ
+                                                    Dim myobj As Object
+                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myobj
                         
-                                              Set myOBJ.SuperClassList = basestack.lastobj.SuperClassList
-                                              Set pppp.item(i) = myOBJ
-                                              Set myOBJ = Nothing
+                                              Set myobj.SuperClassList = basestack.lastobj.SuperClassList
+                                              Set pppp.item(i) = myobj
+                                              Set myobj = Nothing
                                              
                                                Else
                                                   
@@ -21523,7 +21524,7 @@ End With
 End Sub
 Function ProcSave(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim pa$, w$, s$, col As Long, prg$, x1 As Long, par As Boolean, i As Long, noUse As Long, lcl As Boolean
-On Error Resume Next
+Dim askme As Boolean
 If lckfrm <> 0 Then MyEr "Save is locked", "Η αποθήκευση είναι κλειδωμένη": rest$ = vbNullString: Exit Function
 lcl = IsLabelSymbolNew(rest$, "ΤΟΠΙΚΑ", "LOCAL", Lang) Or basestack.IamChild Or basestack.IamAnEvent
 x1 = Abs(IsLabelFileName(basestack, rest, pa$, , s$))
@@ -21536,6 +21537,11 @@ End If
 
 If x1 <> 0 Then
         If subHash.count = 0 Or pa$ = vbNullString Then MyEr "Nothing to save", "Δεν υπάρχει κάτι να σώσω":              Exit Function
+        If ExtractType(pa$) = "gsb1" Then
+            MyEr "Recovery Mode (file is a gsb1 type): use another name or set type to gsb", "Κατάσταση Ανάκτησης (o τύπος αρχείου είναι gsb1): χρησιμοποίησε άλλο όνομα χωρίς τύπο, ή τύπο gsb"
+            Exit Function
+        End If
+
         If ExtractType(pa$) = "gsb" Then pa$ = ExtractPath(pa$) + ExtractNameOnly(pa$)
         If ExtractPath(pa$) <> "" Then
                 If InStr(ExtractPath(pa$), mcd) <> 1 Then pa$ = pa$ & ".gsb" Else pa$ = pa$ & ".gsb"
@@ -21623,35 +21629,56 @@ If x1 <> 0 Then
                 par = True
         End If
         s$ = vbNullString
-        If CFname(pa$) <> "" Then
+
+        If Not WeCanWrite(pa$) Then Exit Function
+       ' If CFname(pa$) <> "" Then
+        If par Then
+        If Not SaveUnicode(pa$ + "1", prg$, 0) Then BadFilename: Exit Function
+        Else
+        If Not SaveUnicode(pa$ + "1", prg$, 2) Then BadFilename: Exit Function
+        End If
+        ProcTask2 basestack1
+        If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".gsb") <> "" Then
+            If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1") <> "" Then
+                KillFile ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
+            End If
+            RenameFile2 pa$, ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
+            askme = True
+        End If
+     ProcTask2 basestack1
+     
+        If askme Then
+                
                 If Lang = 1 Then
                         If MsgBoxN("Replace " + ExtractNameOnly(pa$), vbOKCancel, MesTitle$) <> vbOK Then
+nogood:
+                        If CFname(pa$ + "1") <> "" Then
+                        KillFile pa$ + "1"
+                        End If
+                        RenameFile2 ExtractPath(pa$) & ExtractNameOnly(pa$) + ".bck1", ExtractPath(pa$) & ExtractNameOnly(pa$) + ".gsb"
                         MyEr "File not saved -1005", "Δεν σώθηκε το αρχείο -1005"
                         ProcSave = True
                         Exit Function
                         End If
                 Else
                         If MsgBoxN("Αλλαγή " + ExtractNameOnly(pa$), vbOKCancel, MesTitle$) <> vbOK Then
-                        MyEr "File not saved -1005", "Δεν σώθηκε το αρχείο -1005"
-                        ProcSave = True
-                        Exit Function
+                        GoTo nogood
                         End If
                 End If
                 s$ = "*"
         End If
-        If Not WeCanWrite(pa$) Then Exit Function
         If par Then
                 If s$ = "*" Then
-                       '' If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck") <> "" Then killfile GetDosPath(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"): Sleep 30
-                        MakeACopy pa$, ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
+                        MakeACopy pa$ + "1", ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
+                        KillFile ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
                 End If
-                If Not SaveUnicode(pa$, prg$, 0) Then BadFilename
-                Else
+                RenameFile2 pa$ + "1", pa$
+        Else
                 If s$ <> "" Then
-                        ''If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck") <> "" Then killfile GetDosPath(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"):  Sleep 30
-                        MakeACopy pa$, ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
+                        MakeACopy pa$ + "1", ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
+                        KillFile ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
                 End If
-                ProcSave = SaveUnicode(pa$, prg$, 2)  ' 2 = utf-8 standard save mode for version 7
+                RenameFile2 pa$ + "1", pa$
                 If here$ = vbNullString Then LASTPROG$ = pa$
         End If
  ProcSave = True

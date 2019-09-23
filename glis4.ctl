@@ -263,8 +263,8 @@ Event CorrectCursorAfterDrag()
 Event DragOverNow(a As Boolean)
 Event DragOverDone(a As Boolean)
 Event HeadLineChange(a$)
-Event AddSelStart(val As Long)
-Event SubSelStart(val As Long)
+Event AddSelStart(val As Long, shift As Integer)
+Event SubSelStart(val As Long, shift As Integer)
 
 Private state As Boolean
 Private secreset As Boolean
@@ -1449,7 +1449,7 @@ End If
 Case vbKeyLeft
 If EditFlag Then
 val = 1
-RaiseEvent SubSelStart(val)
+RaiseEvent SubSelStart(val, shift)
 If MultiLineEditBox Then
 If SelStart > val Then
 mSelstart = SelStart - val
@@ -1457,8 +1457,9 @@ RaiseEvent MayRefresh(bb)
 If bb Then ShowMe2
 ElseIf ListIndex > 0 Then
 ShowThis SELECTEDITEM - 1
-If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 mSelstart = Len(list(ListIndex)) + 1
+If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
+
 End If
 ElseIf SelStart > val Then
 mSelstart = SelStart - val
@@ -1467,7 +1468,7 @@ End If
 Case vbKeyRight
 If EditFlag Then
 val = 1
-RaiseEvent AddSelStart(val)
+RaiseEvent AddSelStart(val, shift)
 If MultiLineEditBox Then
 If SelStart <= Len(list(SELECTEDITEM - 1)) - val + 1 Then
 
@@ -1476,7 +1477,7 @@ RaiseEvent MayRefresh(bb)
 If bb Then ShowMe2
 ElseIf ListIndex < listcount - 1 Then
 ListindexPrivateUse = ListIndex + 1
-mSelstart = 0
+mSelstart = 1
 If (SELECTEDITEM - topitem) > lines + 1 Then topitem = topitem + 1
 If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 
@@ -1501,7 +1502,7 @@ End If
 Else
  RaiseEvent PureListOn
  val = 1
-RaiseEvent AddSelStart(val)
+RaiseEvent AddSelStart(val, shift)
  RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))
 list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + val)
 RaiseEvent PureListOff
@@ -1514,7 +1515,7 @@ Case vbKeyBack
 If EditFlag Then
     If SelStart > 1 Then
         val = 1
-        RaiseEvent SubSelStart(val)
+        RaiseEvent SubSelStart(val, shift)
         SelStart = SelStart - val  ' make it a delete because we want selstart to take place before list() take value
      RaiseEvent PureListOn
         RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))

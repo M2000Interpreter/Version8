@@ -510,8 +510,8 @@ Public Property Let MaxCharLength(ByVal RHS As Long)
 glistN.maxchar = RHS
 End Property
 
-Private Function Myleft$(a As Variant, pos As Variant)
-Myleft$ = Mid$(a, 1, pos)
+Private Function Myleft$(a As String, pos As Long)
+If pos < 1 Then Myleft$ = vbNullString Else Myleft$ = Mid$(a, 1, pos)
 End Function
 Private Function GetTextData(ByVal lFormatId As Long) As String
 '' Addition to myTextBox for ctrl+V
@@ -705,7 +705,7 @@ End Property
 Public Property Get drop()
 drop = glistN.DropEnabled
 End Property
-Private Sub glistN_AddSelStart(val As Long)
+Private Sub glistN_AddSelStart(val As Long, shift As Integer)
 Dim w As Long, a$
 If glistN.SelStart > 0 Then
 a$ = Mid$(vartext, glistN.SelStart, 1)
@@ -718,7 +718,7 @@ End If
 End If
 End Sub
 
-Private Sub glistN_SubSelStart(val As Long)
+Private Sub glistN_SubSelStart(val As Long, shift As Integer)
 Dim w As Long, a$
 If glistN.SelStart < 2 Then Exit Sub
 a$ = Mid$(vartext, glistN.SelStart - 1, 1)

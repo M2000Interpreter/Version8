@@ -220,7 +220,7 @@ Public EditTextWord As Boolean
 Private Pad$, s$
 Private LastDocTitle$, para1 As Long, PosPara1 As Long, Para2 As Long, PosPara2 As Long, Para3 As Long, PosPara3 As Long
 Public ShadowMarks As Boolean
-Private nochange As Boolean
+Private nochange As Boolean, LastSearchType As Long
 Private Declare Function lstrlenW Lib "kernel32.dll" (ByVal psString As Long) As Long
 Private Declare Function EmptyClipboard Lib "user32" () As Long
 Public MY_BACK As New cDIBSection
@@ -370,7 +370,6 @@ End If
 End Sub
 
 Private Sub Form_Activate()
-'If ttl Then TrueVisible = True
 If ASKINUSE Then
 'Me.ZOrder 1
 Else
@@ -783,6 +782,7 @@ If TEXT1.mDoc.busy Then Exit Sub
 Dim l As Long, w As Long, s$, TempLcid As Long, OldLcid As Long, noinp As Double
 Dim el As Long, eW As Long, safety As Long, TT$, w1 As Long, i1 As Long
 Dim neo$, mDoc10 As Document, addthat As Long, w2 As Long
+Dim prof1 As New clsProfiler
 w = TEXT1.mDoc.MarkParagraphID
 eW = w
 TEXT1.SelStartSilent = TEXT1.SelStart  'MOVE CHARPOS TO SELSTART
@@ -792,9 +792,9 @@ TEXT1.SelStartSilent = TEXT1.SelStart
 el = TEXT1.Charpos  ' charpos maybe is in the start or the end of block
 
 If pagio$ = "GREEK" Then
-neo$ = InputBoxN("Αλλαγή Λέξης (Shift για σταμάτημα)", "Συγγραφή Κειμένου", s$, noinp)
+neo$ = InputBoxN("Αλλαγή " & IIf(anystr, "μέρους ", "") & "Λέξης", "Συγγραφή Κειμένου", s$, noinp)
 Else
-neo$ = InputBoxN("Replace Word (use Shift for Stop)", "Text Editor", s$, noinp)
+neo$ = InputBoxN("Replace " & IIf(anystr, "part of ", "") & "Word", "Text Editor", s$, noinp)
 End If
 If noinp <> 1 Then Exit Sub
 OldLcid = TEXT1.mDoc.lcid
@@ -817,7 +817,11 @@ If Len(neo$) >= Len(s$) Then
     End If
     
 End If
-TEXT1.glistN.SuspDraw = TEXT1.mDoc.DocParagraphs > 50
+prof1.MARKONE
+If TEXT1.mDoc.DocParagraphs > 50 Then
+TEXT1.glistN.SuspDraw = True
+TEXT1.mDoc.busy = True
+End If
 i1 = el
 l = i1 + addthat
 w1 = w
@@ -861,13 +865,14 @@ TEXT1.AddUndo ""
 TEXT1.SelText = neo$
 TEXT1.RemoveUndo neo$
 TEXT1.GroupUndo
-l = l + Len(neo$)
+'''l = l + Len(neo$)
 
 Else
 w = 1
 l = 0
 safety = safety + 1
 End If
+If prof1.MARKTWO > 1000 Then ProcTask2 basestack1: prof1.MARKONE
 Loop Until safety = 2 Or KeyPressed(16)
 TEXT1.glistN.dropkey = False
 
@@ -916,12 +921,14 @@ w = 1
 l = 0
 safety = safety + 1
 End If
+If prof1.MARKTWO > 1000 Then ProcTask2 basestack1: prof1.MARKONE
 Loop Until safety = 2 Or KeyPressed(16)
 TEXT1.glistN.dropkey = False
 End If
 TEXT1.mDoc.lcid = OldLcid
 If w2 > 0 Then TEXT1.mDoc.WrapAgainBlock w2, w2:  TEXT1.mDoc.ColorThis w2
 TEXT1.glistN.SuspDraw = False
+TEXT1.mDoc.busy = False
 TEXT1.Render
 
 End Sub
@@ -935,9 +942,10 @@ SearchDown s$
 End Sub
 Sub SearchDown(s$, Optional anystr As Boolean = False)
 Dim l As Long, w As Long, TempLcid As Long, OldLcid As Long
+
 w = TEXT1.mDoc.MarkParagraphID   ' this is the not the order
 TEXT1.SelStartSilent = TEXT1.SelStart
-l = TEXT1.Charpos + 1
+l = TEXT1.Charpos
 
 OldLcid = TEXT1.mDoc.lcid
 TempLcid = FoundLocaleId(s$)
@@ -972,7 +980,7 @@ Sub Searchup(s$, Optional anystr As Boolean = False)
 Dim l As Long, w As Long, TempLcid As Long, OldLcid As Long
 w = TEXT1.mDoc.MarkParagraphID
 TEXT1.SelStartSilent = TEXT1.SelStart - (TEXT1.SelLength > 1)
-l = TEXT1.Charpos + 1
+l = TEXT1.Charpos + Len(s$)
 OldLcid = TEXT1.mDoc.lcid
 TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then TEXT1.mDoc.lcid = TempLcid
@@ -2228,33 +2236,47 @@ End If
 KeyCode = 0
 Case vbKeyF2
 If shift <> 0 Then
-If s$ = vbNullString And TEXT1.SelText <> "" Then s$ = TEXT1.SelText
+LastSearchType = 2 - Abs(shift Mod 2 = 1)
+If TEXT1.SelText <> "" Then s$ = TEXT1.SelText
 If pagio$ = "GREEK" Then
-s$ = InputBoxN("Αναζήτησε προς τα πάνω:", "Συγγραφή Κειμένου", s$, noinp)
+s$ = InputBoxN("Αναζήτησε προς την αρχή " & IIf(LastSearchType = 1, "(και σε μέρος λέξης):" & vbCrLf & " Ctrl+F2 για λέξεις μόνο", ":" & vbCrLf & " Ctrl+F2 και για μέρη λέξεων"), "Συγγραφή Κειμένου", s$, noinp)
+
 Else
-s$ = InputBoxN("Search to top:", "Text Editor", s$, noinp)
+s$ = InputBoxN("Search to top " & IIf(LastSearchType = 1, "(inside words also):" & vbCrLf & " Ctrl+F2 words only", ":" & vbCrLf & " Shift+F2 for any position "), "Text Editor", s$, noinp)
 End If
-If MyTrim$(s$) <> "" And noinp = 1 Then Searchup s$, shift Mod 2 = 1
+If MyTrim$(s$) <> "" And noinp = 1 Then Searchup s$, LastSearchType = 1 Else LastSearchType = 0
 shift = 0
 ElseIf TEXT1.SelText <> "" Or s$ <> "" Then
+If LastSearchType > 0 Then
+If TEXT1.SelText <> "" Then s$ = TEXT1.SelText
+Searchup s$, LastSearchType = 1
+Else
 supsub
+End If
 End If
 
 KeyCode = 0
 Case vbKeyF3
-If shift <> 0 Then
-If s$ = vbNullString And TEXT1.SelText <> "" Then s$ = TEXT1.SelText
-If pagio$ = "GREEK" Then
 
-s$ = InputBoxN("Αναζήτησε προς τα κάτω:", "Συγγραφή Κειμένου", s$, noinp)
+If shift <> 0 Then
+LastSearchType = 2 - Abs(shift Mod 2 = 1)
+If TEXT1.SelText <> "" Then s$ = TEXT1.SelText
+If pagio$ = "GREEK" Then
+s$ = InputBoxN("Αναζήτησε προς το τέλος " & IIf(LastSearchType = 1, "(και σε μέρος λέξης):" & vbCrLf & " Ctrl+F3 για λέξεις μόνο", ":" & vbCrLf & " Ctrl+F3 και για μέρη λέξεων"), "Συγγραφή Κειμένου", s$, noinp)
+
 Else
-s$ = InputBoxN("Search to down:", "Text Editor", s$, noinp)
+s$ = InputBoxN("Search to end " & IIf(LastSearchType = 1, "(inside words also):" & vbCrLf & " Ctrl+F3 words only", ":" & vbCrLf & " Shift+F3 for any position "), "Text Editor", s$, noinp)
 End If
-If MyTrim$(s$) <> "" And noinp = 1 Then SearchDown s$, shift Mod 2 = 1
+
+If MyTrim$(s$) <> "" And noinp = 1 Then SearchDown s$, LastSearchType = 1 Else LastSearchType = 0
 shift = 0
 ElseIf TEXT1.SelText <> "" Or s$ <> "" Then
-
+If LastSearchType > 0 Then
+If TEXT1.SelText <> "" Then s$ = TEXT1.SelText
+SearchDown s$, LastSearchType = 1
+Else
 sdnSub
+End If
 End If
 KeyCode = 0
 Case vbKeyF4
@@ -2969,7 +2991,7 @@ End If
     cc.ValueKey = "PAPER"
         cc.ValueType = REG_DWORD
       
-    If cc.Value = PenOne Then cc.Value = 16 - PenOne
+    If cc.Value = PenOne Then cc.Value = 15 - PenOne
    
         DIS.ForeColor = mycolor(PenOne)
     cc.ValueKey = "PAPER"
@@ -3217,6 +3239,8 @@ Unload NeoMsgBox: ASKINUSE = False: Exit Function
 End If
 BreakMe = True
 
+
+
 INK$ = vbNullString
 If MsgBoxN("Break Key - Hard Reset" + vbCrLf + "Μ2000 - Execution Stop / Τερματισμός Εκτέλεσης", vbYesNo, MesTitle$) <> vbNo Then
                 
@@ -3266,6 +3290,4 @@ End Select
 TEXT1.mDoc.ColorEvent = Not TEXT1.NoColor
 
 End Sub
-
-
 

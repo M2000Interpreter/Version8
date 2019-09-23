@@ -108,170 +108,6 @@ AskText$ = a$
 ask = NeoASK(bstack)
 
 End Function
-Public Function NeoASK(bstack As basetask) As Double
-If ASKINUSE Then Exit Function
-Dim safety As Long
-Dim oldesc As Boolean, zz As Form
-    oldesc = escok
-'using AskTitle$, AskText$, AskCancel$, AskOk$, AskDIB$
-Static once As Boolean
-If once Then Exit Function
-once = True
-ASKINUSE = True
-If Not Screen.ActiveForm Is Nothing Then
-If TypeOf Screen.ActiveForm Is GuiM2000 Then Screen.ActiveForm.UNhookMe
-Set zz = Screen.ActiveForm
-End If
-Dim INFOONLY As Boolean
-k1 = 0
-If AskTitle$ = vbNullString Then AskTitle$ = MesTitle$
-If AskCancel$ = vbNullString Then INFOONLY = True
-If AskOk$ = vbNullString Then AskOk$ = "OK"
-
-
-If Not Screen.ActiveForm Is Nothing Then
-If Screen.ActiveForm Is MyPopUp Then
-   If MyPopUp.LASTActiveForm Is Form1 Then
-        NeoMsgBox.Show , Form1
-        MoveFormToOtherMonitorOnly NeoMsgBox, False
-   ElseIf MyPopUp.LASTActiveForm Is Nothing Then
-     NeoMsgBox.Show , MyPopUp.LASTActiveForm
-     MoveFormToOtherMonitorOnly NeoMsgBox, True
-   End If
-ElseIf Screen.ActiveForm Is Form1 Then
-NeoMsgBox.Show , Screen.ActiveForm
-MoveFormToOtherMonitorOnly NeoMsgBox, False
-Else
-NeoMsgBox.Show , Screen.ActiveForm
-MoveFormToOtherMonitorOnly NeoMsgBox, True
-End If
-ElseIf form5iamloaded Then
-MyDoEvents1 Form5
-Sleep 1
-NeoMsgBox.Show , Form5
-MoveFormToOtherMonitorCenter NeoMsgBox
-Else
-NeoMsgBox.Show
-MoveFormToOtherMonitorCenter NeoMsgBox
-End If
-'End If
-On Error Resume Next
-''SleepWait3 10
-Sleep 1
-If Form1.Visible Then
-Form1.Refresh
-ElseIf form5iamloaded Then
-Form5.Refresh
-Else
-MyDoEvents
-End If
-Sleep 1
-safety = uintnew(timeGetTime) + 30
-While Not NeoMsgBox.Visible And safety < uintnew(timeGetTime)
-    MyDoEvents
-Wend
-If NeoMsgBox.Visible = False Then
-    MyEr "can't open msgbox", "δεν μπορώ να ανοίξω τον διάλογο"
-    GoTo conthere
-    Exit Function
-End If
-
-If AskInput Then
-NeoMsgBox.gList3.SetFocus
-End If
-  If bstack.ThreadsNumber = 0 Then
-    On Error Resume Next
-    If Not (bstack.toback Or bstack.toprinter) Then If bstack.Owner.Visible Then bstack.Owner.Refresh
-    End If
-    If Not NeoMsgBox.Visible Then
-    NeoMsgBox.Visible = True
-    MyDoEvents
-    End If
-    Dim mycode As Double, oldcodeid As Double, X As Form
-mycode = Rnd * 12312314
-oldcodeid = Modalid
-
- For Each X In Forms
-                            If X.Visible And X.name = "GuiM2000" Then
-                     
-                           If X.Enablecontrol Then
-                               X.Modal = mycode
-                                X.Enablecontrol = False
-                            End If
-                            End If
-                    Next X
-                     Set X = Nothing
-If INFOONLY Then
-NeoMsgBox.command1(0).SetFocus
-End If
-Modalid = mycode
-
-Do
-If TaskMaster Is Nothing Then
-        mywaitOld bstack, 5
-      Sleep 1
-      Else
-    
-      If Not TaskMaster.Processing And TaskMaster.QueueCount = 0 Then
-        DoEvents
-      Else
-       TaskMaster.TimerTickNow
-       TaskMaster.StopProcess
-       
-       DoEvents
-       TaskMaster.StartProcess
-       End If
-      End If
-Loop Until NOEXECUTION Or Not ASKINUSE
- Modalid = mycode
-k1 = 0
- BLOCKkey = True
-While KeyPressed(&H1B)
-
-ProcTask2 bstack
-NOEXECUTION = False
-Wend
-BLOCKkey = False
-AskTitle$ = vbNullString
-Dim z As Form
- Set z = Nothing
-
-           For Each X In Forms
-            If X.Visible And X.name = "GuiM2000" Then
-            If Not X.Enablecontrol Then X.TestModal mycode
-          If X.Enablecontrol Then Set z = X
-            End If
-            Next X
-             Set X = Nothing
-          If Not zz Is Nothing Then Set z = zz
-          
-          If Typename(z) = "GuiM2000" Then
-            z.ShowmeALL
-            z.SetFocus
-            Set z = Nothing
-            ElseIf Not z Is Nothing Then
-            If z.Visible Then z.SetFocus
-          End If
-          Modalid = oldcodeid
-          
-If INFOONLY Then
-NeoASK = 1
-Else
-NeoASK = Abs(AskCancel$ = vbNullString) + 1
-End If
-If NeoASK = 1 Then
-If AskInput Then
-bstack.soros.PushStr AskStrInput$
-End If
-End If
-conthere:
-AskCancel$ = vbNullString
-once = False
-ASKINUSE = False
-INK$ = vbNullString
-escok = oldesc
-End Function
-
 Sub mywait(bstack As basetask, PP As Double, Optional SLEEPSHORT As Boolean = False)
 Dim p As Boolean, e As Boolean
 On Error Resume Next
@@ -535,7 +371,6 @@ End Sub
 
 Private Sub Timer1_Timer()
 ' On Error Resume Next
-If lastform Is Nothing And Not Me Is Form3 Then Timer1.enabled = False: Exit Sub
 Static once As Boolean
 If once Then Exit Sub
 once = True
@@ -762,3 +597,187 @@ If Forms(i) Is vNewValue Then affiliatehwnd = Forms(i).hWnd: Exit Property
 Next i
 affiliatehwnd = 0
 End Property
+Public Function NeoASK(bstack As basetask) As Double
+If ASKINUSE Then Exit Function
+On Error GoTo recover
+Timer1.enabled = False
+Dim safety As Long
+Dim oldesc As Boolean, zz As Form
+    oldesc = escok
+'using AskTitle$, AskText$, AskCancel$, AskOk$, AskDIB$
+Static once As Boolean
+If once Then Exit Function
+once = True
+ASKINUSE = True
+If Not Screen.ActiveForm Is Nothing Then
+If TypeOf Screen.ActiveForm Is GuiM2000 Then Screen.ActiveForm.UNhookMe
+Set zz = Screen.ActiveForm
+End If
+Dim INFOONLY As Boolean
+k1 = 0
+If AskTitle$ = vbNullString Then AskTitle$ = MesTitle$
+If AskCancel$ = vbNullString Then INFOONLY = True
+If AskOk$ = vbNullString Then AskOk$ = "OK"
+
+
+If Not Screen.ActiveForm Is Nothing Then
+If Screen.ActiveForm Is MyPopUp Then
+   If MyPopUp.LASTActiveForm Is Form1 Then
+        NeoMsgBox.Show , Form1
+        MoveFormToOtherMonitorOnly NeoMsgBox, False
+   ElseIf Not MyPopUp.LASTActiveForm Is Nothing Then
+     NeoMsgBox.Show , MyPopUp.LASTActiveForm
+     MoveFormToOtherMonitorOnly NeoMsgBox, True
+   Else
+    NeoMsgBox.Show , Me
+     MoveFormToOtherMonitorOnly NeoMsgBox, True
+   End If
+ElseIf Screen.ActiveForm Is Form1 Then
+NeoMsgBox.Show , Screen.ActiveForm
+MoveFormToOtherMonitorOnly NeoMsgBox, False
+ElseIf Not Screen.ActiveForm Is Nothing Then
+NeoMsgBox.Show , Screen.ActiveForm
+MoveFormToOtherMonitorOnly NeoMsgBox, True
+Else
+NeoMsgBox.Show , Form3
+MoveFormToOtherMonitorOnly NeoMsgBox, True
+End If
+ElseIf form5iamloaded Then
+MyDoEvents1 Form5
+Sleep 1
+NeoMsgBox.Show , Form5
+MoveFormToOtherMonitorCenter NeoMsgBox
+Else
+NeoMsgBox.Show
+MoveFormToOtherMonitorCenter NeoMsgBox
+End If
+'End If
+On Error Resume Next
+''SleepWait3 10
+Sleep 1
+If Form1.Visible Then
+Form1.Refresh
+ElseIf form5iamloaded Then
+Form5.Refresh
+Else
+MyDoEvents
+End If
+Sleep 1
+safety = uintnew(timeGetTime) + 30
+While Not NeoMsgBox.Visible And safety < uintnew(timeGetTime)
+    MyDoEvents
+Wend
+If NeoMsgBox.Visible = False Then
+    MyEr "can't open msgbox", "δεν μπορώ να ανοίξω τον διάλογο"
+    GoTo conthere
+    Exit Function
+End If
+
+If AskInput Then
+NeoMsgBox.gList3.SetFocus
+End If
+  If bstack.ThreadsNumber = 0 Then
+    On Error Resume Next
+    If Not (bstack.toback Or bstack.toprinter) Then If bstack.Owner.Visible Then bstack.Owner.Refresh
+    End If
+    If Not NeoMsgBox.Visible Then
+    NeoMsgBox.Visible = True
+    MyDoEvents
+    End If
+    Dim mycode As Double, oldcodeid As Double, X As Form
+mycode = Rnd * 12312314
+oldcodeid = Modalid
+
+ For Each X In Forms
+                            If X.Visible And X.name = "GuiM2000" Then
+                     
+                           If X.Enablecontrol Then
+                               X.Modal = mycode
+                                X.Enablecontrol = False
+                            End If
+                            End If
+                    Next X
+                     Set X = Nothing
+If INFOONLY Then
+NeoMsgBox.command1(0).SetFocus
+End If
+Modalid = mycode
+
+Do
+If TaskMaster Is Nothing Then
+        mywaitOld bstack, 5
+      Sleep 1
+      Else
+    
+      If Not TaskMaster.Processing And TaskMaster.QueueCount = 0 Then
+        DoEvents
+      Else
+       TaskMaster.TimerTickNow
+       TaskMaster.StopProcess
+       
+       DoEvents
+       TaskMaster.StartProcess
+       End If
+      End If
+Loop Until NOEXECUTION Or Not ASKINUSE
+ Modalid = mycode
+k1 = 0
+ BLOCKkey = True
+While KeyPressed(&H1B)
+
+ProcTask2 bstack
+NOEXECUTION = False
+Wend
+recover:
+On Error GoTo recover2
+BLOCKkey = False
+AskTitle$ = vbNullString
+Dim z As Form
+ Set z = Nothing
+
+           For Each X In Forms
+            If X.Visible And X.name = "GuiM2000" Then
+            If Not X.Enablecontrol Then X.TestModal mycode
+          If X.Enablecontrol Then Set z = X
+            End If
+            Next X
+             Set X = Nothing
+          If Not zz Is Nothing Then Set z = zz
+          
+          If Typename(z) = "GuiM2000" Then
+            z.ShowmeALL
+            z.SetFocus
+            Set z = Nothing
+            ElseIf Not z Is Nothing Then
+            If z.Visible Then z.SetFocus
+          End If
+          Modalid = oldcodeid
+          
+If INFOONLY Then
+NeoASK = 1
+Else
+NeoASK = Abs(AskCancel$ = vbNullString) + 1
+End If
+If NeoASK = 1 Then
+If AskInput Then
+bstack.soros.PushStr AskStrInput$
+End If
+End If
+GoTo conthere
+recover2:
+' fatal error
+NERR = True: NOEXECUTION = True
+conthere:
+BLOCKkey = False
+AskCancel$ = vbNullString
+once = False
+ASKINUSE = False
+INK$ = vbNullString
+escok = oldesc
+Exit Function
+
+
+
+End Function
+
+

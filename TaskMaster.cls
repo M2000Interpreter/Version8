@@ -434,6 +434,7 @@ End If
   If LastErNum <> 0 Then Dispose
 End Sub
 Public Sub TimerTickNow()
+tickTimer = tickTimer + 1
 Dim this As TaskInterface
 If myTimerHandle = 0 Then Exit Sub
   If myMasterList.count = 0 Then Exit Sub

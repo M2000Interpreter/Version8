@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 43
+Global Const Revision = 44
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -18207,7 +18207,7 @@ parsecommand:
     
     If Not Identifier(bstack, w$, b$, iscom, Lang) Then
     
-    
+    If NERR Then NOEXECUTION = True
 conthere111:
         If LastErNum1 = -1 And bstack.IamThread Then Execute = 1 Else Execute = 0
         Exit Function
@@ -24213,9 +24213,12 @@ End Function
 Sub mywait(bstack As basetask, PP As Variant, Optional SLEEPSHORT As Boolean = False)
 Dim p As Boolean, e As Boolean
 On Error Resume Next
+If bstack Is Nothing Then
+If PP = 0 Then Exit Sub
+End If
 If bstack.Process Is Nothing Then
 ''If extreme Then MyDoEvents1 Form1
-If PP = 0 Then Exit Sub
+
 Else
 
 Err.clear
@@ -24229,7 +24232,7 @@ End If
 End If
 
 PP = PP + CDbl(timeGetTime)
-
+If TaskMaster Is Nothing Then Set TaskMaster = New TaskMaster
 Do
 
 
@@ -30670,19 +30673,24 @@ If Right$(" " & aDir.Pattern, 1) <> "*" And InStr(" " & aDir.Pattern, "|") = 0 T
     If addext Then
         If addpath Then
             s$ = Included(mcd + frm$, stac1)
+            If LastErNum1 <> 0 Then Exit Function
             If s$ <> "" Then s$ = mcd + s$
         Else
             s$ = ExtractName(Included(mcd + frm$, stac1))
+            If LastErNum1 <> 0 Then Exit Function
         End If
     Else
         s$ = ExtractNameOnly(Included(mcd + frm$, stac1))
+    If LastErNum1 <> 0 Then Exit Function
     End If
 Else
 If addpath Then
             s$ = Included(mcd + frm$, stac1)
+            If LastErNum1 <> 0 Then Exit Function
             If s$ <> "" Then s$ = mcd + s$
 Else
    s$ = Included(mcd + frm$, stac1)
+   If LastErNum1 <> 0 Then Exit Function
    End If
 End If
 If s$ <> "" Then
@@ -40387,7 +40395,7 @@ mDir.IncludedFolders = False
 mDir.Nofiles = False
 mDir.TopFolder = mcd
 mDir.SortType = Abs(FastSymbol(rest$, "!"))
-frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "GSB", False))
+frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "GSB|GSB1", False))
 
 If frm$ <> "" Then
 If pa$ <> "" Then pa$ = pa$ & vbCrLf
@@ -46528,7 +46536,14 @@ If x1 <> 0 Then
         Key$ = mcd + ExtractNameOnly(w$) & ".gsb"
         s$ = CFname(mcd + ExtractNameOnly(w$) & ".gsb")
         End If
-    Else
+        If s$ = vbNullString Then
+        Key$ = mcd + ExtractNameOnly(w$) & ".gsb1"
+        s$ = CFname(mcd + ExtractNameOnly(w$) & ".gsb1")
+        If RenameFile2(s$, mcd + ExtractNameOnly(s$) + ".gsb") Then
+         s$ = CFname(mcd + ExtractNameOnly(w$) & ".gsb")
+        End If
+        End If
+     Else
         ss$ = s$
         If ExtractPath$(s$) = vbNullString Then
             s$ = ExtractName(s$)
@@ -47004,9 +47019,19 @@ End Function
 
 Function MyError(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim p As Variant, x1 As Long, s$, ss$, what$
+Dim myMsgBox As New stdCallFunction, i As Long
 x1 = LastErNum
 If IsExp(basestack, rest$, p, , True) Then
 If p = 0 Then
+myMsgBox.CallThis "user32.MessageBoxW", "long alfa, lptext$, lpcaption$, long type", 1
+i = AllocVar()
+Set var(i) = myMsgBox
+basestack.soros.PushVal 16
+basestack.soros.PushStr MesTitle$
+basestack.soros.PushStr "Fatal Error"
+basestack.soros.PushVal Form1.hWnd
+CallByObject basestack, i, False
+Set var(i) = Nothing
 NERR = True
 MyError = False
 Exit Function
@@ -47229,12 +47254,12 @@ ArrBase = usethisbase
                                                      Set pppp.GroupRef = Nothing
                                                      pppp.IHaveClass = False
                                                      If basestack.lastobj.IamSuperClass Then
-                                                    Dim myOBJ As Object
-                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myOBJ
+                                                    Dim myobj As Object
+                                          pppp.CopyGroupObj basestack.lastobj.SuperClassList, myobj
                         
-                                              Set myOBJ.SuperClassList = basestack.lastobj.SuperClassList
-                                              Set pppp.item(i) = myOBJ
-                                              Set myOBJ = Nothing
+                                              Set myobj.SuperClassList = basestack.lastobj.SuperClassList
+                                              Set pppp.item(i) = myobj
+                                              Set myobj = Nothing
                                              
                                                Else
                                                   
@@ -47585,7 +47610,9 @@ Else
 Do
 If IsStrExp(basestack, rest$, ss$) Then
 On Error Resume Next
-If (ss$ Like "*.mdb") Or (ss$ Like "*:\*") Then ss$ = mylcasefILE(ss$)
+If (ss$ Like "*.mdb") Or (ss$ Like "*:\*") Then
+ss$ = mylcasefILE(ss$)
+End If
 
  RemoveOneConn ss$
 End If
@@ -51648,7 +51675,7 @@ End If
 Exit Function
 End Function
 Public Function GetPointer(bstack As basetask, a$) As Boolean
-Dim w1 As Long, s$, pppp As mArray, w2 As Long, p, nbstack As basetask, myOBJ As Object, i As Long
+Dim w1 As Long, s$, pppp As mArray, w2 As Long, p, nbstack As basetask, myobj As Object, i As Long
 Dim glob As Boolean
 w1 = Abs(IsLabel(bstack, a$, s$))
 If w1 = 1 Or w1 = 3 Then
@@ -51664,8 +51691,8 @@ Else
                         PushStage bstack, False
                     
                             i = globalvarGroup("_1", 0, , True)
-                            Set myOBJ = var(w1)
-                            UnFloatGroup bstack, "_1", i, myOBJ, True
+                            Set myobj = var(w1)
+                            UnFloatGroup bstack, "_1", i, myobj, True
                             
                         Set p = CopyGroupObj(var(i))
                         PopStage bstack
@@ -51710,8 +51737,8 @@ If GetSub(s$ + ")", w2) Then
                         PushStage bstack, False
                     
                             i = globalvarGroup("_1", 0, , True)
-                            Set myOBJ = p
-                            UnFloatGroup bstack, "_1", i, myOBJ, True
+                            Set myobj = p
+                            UnFloatGroup bstack, "_1", i, myobj, True
                             
                         Set p = CopyGroupObj(var(i))
                         PopStage bstack
@@ -51793,8 +51820,8 @@ End If
                         PushStage bstack, False
                     
                             i = globalvarGroup("_1", 0, , True)
-                            Set myOBJ = p
-                            UnFloatGroup bstack, "_1", i, myOBJ, True
+                            Set myobj = p
+                            UnFloatGroup bstack, "_1", i, myobj, True
                             
                         Set p = CopyGroupObj(var(i))
                         PopStage bstack
@@ -51815,14 +51842,14 @@ If s$ = "THIS" Or s$ = "ауто" Then
  s$ = Left$(bstack.UseGroupname, Len(bstack.UseGroupname) - 1)
 If GetVar(bstack, s$, w1) Then
 If IsBadCodePtr(var(w1).PointerPtr) = 0 Then
-ObjSetAddRef myOBJ, var(w1).PointerPtr
-Set p = myOBJ
+ObjSetAddRef myobj, var(w1).PointerPtr
+Set p = myobj
 'MakeGroupPointer bstack, p
  '       Set p = bstack.lastobj
         p.link.lasthere = var(w1).lasthere
         p.link.LastOpen = var(w1).LastOpen
-        Set bstack.lastobj = myOBJ
-        Set bstack.lastpointer = myOBJ
+        Set bstack.lastobj = myobj
+        Set bstack.lastpointer = myobj
         GetPointer = True
     Exit Function
 End If

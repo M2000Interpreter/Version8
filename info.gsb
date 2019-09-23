@@ -1,4 +1,34 @@
-﻿MODULE GEORGE {Binary {
+﻿MODULE A {Superclass alfa {
+      Unique:
+            counter=1
+      Public:
+            Value {
+                  For SuperClass {
+                        =.counter
+                        .counter++
+                  }
+            }
+            Module Reset (x){
+                  For SuperClass {
+                        .counter<=x
+                  }                  
+            }
+}
+a=alfa
+b=alfa
+Print a=1, b=2, a=3, a=4, b=5 ' true true true true true
+\\ we have to use group(a) to get the group not the value
+\\ we use ( ) to get a copy
+z->(group(a))
+Print eval(z)=6, a=7, b=8, eval(z)=9 ' true true true true
+z=>Reset 100
+Print eval(z)=100, a=101, b=102, eval(z)=103 ' true true true true
+For z {
+      .Reset 10
+}
+Print eval(z)=10, a=11, b=12, eval(z)=13 ' true true true true
+}
+MODULE GEORGE {Binary {
       /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQIBAQEBAQIB
       AQECAgICAgICAgIDAwQDAwMDAwICAwQDAwQEBAQEAgMFBQQEBQQEBAT/2wBDAQEB
       AQEBAQIBAQIEAwIDBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE
@@ -117,36 +147,6 @@ while mouse=0 and inkey$=""
 End While
 Escape On
 cls 
-}
-MODULE A {Superclass alfa {
-      Unique:
-            counter=1
-      Public:
-            Value {
-                  For SuperClass {
-                        =.counter
-                        .counter++
-                  }
-            }
-            Module Reset (x){
-                  For SuperClass {
-                        .counter<=x
-                  }                  
-            }
-}
-a=alfa
-b=alfa
-Print a=1, b=2, a=3, a=4, b=5 ' true true true true true
-\\ we have to use group(a) to get the group not the value
-\\ we use ( ) to get a copy
-z->(group(a))
-Print eval(z)=6, a=7, b=8, eval(z)=9 ' true true true true
-z=>Reset 100
-Print eval(z)=100, a=101, b=102, eval(z)=103 ' true true true true
-For z {
-      .Reset 10
-}
-Print eval(z)=10, a=11, b=12, eval(z)=13 ' true true true true
 }
 MODULE B {\\ m is an auto array (a tuple)
 \\ z is an iterator of m
@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<43 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<44 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -4669,10 +4669,12 @@ Pen #ffeeff {
 }
 End Sub
 }
-MODULE SAVEME {Title "Info"
+MODULE SAVEME {Beep
+Title "Info"
 dir user
 save info, info
 Print "Done"
+
 }
 MODULE M2000_EDITOR_INFORMATION {thread.plan sequential   ' can run as concurrent too
 linespace twipsY*2
@@ -4689,7 +4691,7 @@ Pen 0 {
 	Print part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " M2000 Editor"
+	Report " Internal M2000 Editor"
 	Pen 5{
 		cursor 0, row-1
 		Report 1, "George Karras 2019"
@@ -4722,39 +4724,44 @@ Report {
 title("Functions Keys for Editor")
 Report {
 	F1 - Toggle Wrapping setting (on or off)
-	F2 - search marked or last searched word up - using shift or ctrl to search phrases
-	F3 - search marked or last searched word down - using shift or ctrl to search phrases
+	F2 - search marked or last searched word/characters up
+		using shift  to search characters using  ctrl to search words (both open a messabox)
+	F3 - search marked or last searched word/characters down
+		using shift  to search characters using  ctrl to search words (both open a messabox)
 	F4 - change the letters case using the marked word (no undo for this)
-	F5 - Replace marked word with one we provide in inputbox (multiple undo)
-	F6, F7, F8 Bookmarks. On press for Set, Delete, Goto Bookmark. Messages displayed
-	F9 - Count words  / Shift F9 change Editor Style
+	F5 - Replace marked word with one we provide in inputbox (multiple undo) - using shift replace characters - Ctr-Z undo the action
+	F6, F7, F8 Bookmarks. One press for Set, Delete, Goto Bookmark. Messages displayed
+	F9 - Count words  - Shift F9 change Editor Style
 	F10 - Show hidden characters (paragraph, spaces as dot, nbsp as space, figure space, tab)
 	F10 & Shift - Open Popup Menu
 	F11 - Change Syntax Color On, Language Width Normal, Syntax color Off, Language Width Small
 	F12 - Open a form displaying all names of loaded modules, we can click on any to read or copy part of source
 	Shift F12 Exit without changes (useful if Editor get crazy...)
 	}, width-12
-title("Other Keys for Editor")
+title("Holding Ctrl")
 Report {
-	Ctrl+X Cut
-	Ctrl+C Copy   (copy Html and Simple Text, Html has <pre></pre> if tabs exist in copied text)
-	Ctrl+V Paste
-	Ctrl+A Select all
-	Ctrl+Z Undo (unlimited, but we loose it if we press Esc to leave from editor)
-	Ctrl+Y Redo (unlimited too)
+	Ctrl+X Cut	Ctrl+C Copy   (copy Html and Simple Text, Html has <pre></pre> if tabs exist in copied text)
+	Ctrl+V Paste	Ctrl+A Select all
+	Ctrl+Z Undo (unlimited, but we loose it if we press Esc to leave from editor)		Ctrl+Y Redo (unlimited too)
+	}, width-12
+title("Using TAB")	
+Report {
 	Shift+Tab Insert spaces not tab
+		we can change the tab width using a commmand: Edit ! Number. We can set spaces as tab using Switches "-TAB"
 	Tab  insert a tab in umarked text, apply indentation in marked text
 	Tab + Shift remove indentation in marked text,  Insert spaces as tab if no leading tab exist
-	
+	}, width-12
+title("Special Key Combinations")
+Report {
 	Ctrl+Shift Enter place Braces and a line inside with proper indentation
 		We can mark text and place braces and indentation for all marked text
 	Ctrl+Shift+Space insert a non break space
 	Alt+Shift+Space insert a figure space
-	Alt +5+9 return ANSI 0x59 (;) 
-	Alt "+" 3 0 2 a give â Unicode 0x302
+	Alt + 5 + 9 return ANSI 0x59 (;)  (we can give any number - the number is in decimal Unicode format)
+	a Alt "+" 3 0 2 a give â (Combining Diacritical Mark 0x302)  - we can use Ins if no Number Keypad exist (lfor aptos)
+		We can use  numbers above 0x10000 . Hold Alt and press Ins 1 0 4 3 7 on keypad or number keys and release Alt to get 𐐷
 	Pairs:() {} "" []  we press the first and we get the other and cursor set inside them
 		Also we can mark text and press one of above to place makred text inside
-		we have to press two times undo to undo this
 	}, width-12
 Press()
 Cls
@@ -4775,7 +4782,9 @@ Report {
 	Make same All
 	Replace word
 	Word Wrap
-	Drag Enabled (by default drop is enables, to allow drag operation we have to set this)
+	Drag Enabled (by default drop is enabled, to allow drag operation we have to set this)
+		(drag start when we give a double click inside marked text. By default for inside drop is a cut and paste procedure)
+		(Shift/Ctrl works also)
 	Color/Short Language
 	Paragraph Mark (show hidden characters, we can edit in this mode)
 	Word Count
@@ -4784,26 +4793,28 @@ Report {
 	Insert File  (this is a macro which insert a file as Base64 encoded in text, for a string variable).
 	Load Resource (this is a macro which insert a binary file to a buffer type variable).
 	}, width-12
-title("View code without get the cursor from position")
+title("View code without moving the cursor from position")
 Report {
 	We can scroll up or down using vertical scroll bar. Press left or right or up or down or an key to return to previous view 
 	Use F1 to change wrap (this also has no affect to cursor).
 	Move some lines up or down holding down right mouse button. There is a timer which enable quick move.
 	The same timer enabled when we click the top or bottom areas of the scroll bar control.
 	}, width-12
-title("View code as you change the cursor from position")
+title("View/Select code as you change the cursor from position")
 Report {
 	Use arrows, Home (change from position 1 to first non space  in row, each time we use it).
 	End to end of line.
 	Page Up, Page Down  (Page is the  half page of view).
 	Clicking with right mouse button.
 	Shift with all above mark text.
-
+	**New**	Ctrl+Left or Right arrow make long jump based on context, can be used with Shift to mark text also
+			Ctrl+Delete, Ctrl+Backspace delete multiple characters base on the jump system.
 	Using mouse wheel we change half pages (moving the cursor too), shift has no effect.
 	Using F6 to F8 (Bookmarks) to jump to a bookmark.
 
 	When we edit a line editor keep the line in the middle of view if it is possible.
-	If no warp enabled then the horizontal moving is automated, when we type, or when we move text to drop it, depending of the position of the "running cursor" (if we miss the drop, the cursor return to starting position).
+	If no warp enabled then the horizontal moving is automated, when we type, or when we move text to drop it,
+	depending of the position of the "running cursor" (if we miss the drop, the cursor return to starting position).
 	}, width-12
 Press()
 Keyboard "info"+chr$(13)
@@ -5718,7 +5729,8 @@ Print counter1, counter2
 Title "Demo Complete"
 Set Fast   ' return to normal
 }
-MODULE UPDATE {Title "Info"
+MODULE UPDATE {beep
+Title "Info"
 dir appdir$
 save info, info
 if isnum then {
@@ -11002,7 +11014,8 @@ MODULE CALENDAR (YEAR, LOCALEID) {
                   SKIP(I)=SKIPMO(YEAR, MONTH)
                   COUNT(I)=GETMAX(YEAR, MONTH)
             }
-            PRINT 
+            PRINT
+            IF PRINT_IT ELSE REFRESH 1000
             FOR I=1 TO 6 {
                       IF I>1 THEN PRINT " ";
                       FOR K=1 TO 7 {
@@ -11014,6 +11027,7 @@ MODULE CALENDAR (YEAR, LOCALEID) {
                   }
             }
             PRINT
+            IF PRINT_IT ELSE REFRESH 1000
             PRINT @(0)
             FOR M=1 TO 5 {
                   FOR I=1 TO 6 {
@@ -11025,12 +11039,13 @@ MODULE CALENDAR (YEAR, LOCALEID) {
                               D(I)++
                         }
                   }
-            PRINT 
+            PRINT
+            IF PRINT_IT ELSE REFRESH 1000 
             }
       }     
 }
 WHILE INKEY$<>"" :  END WHILE
-IF PRINT_IT THEN PRINTING ON
+IF PRINT_IT THEN PRINTING ON ELSE REFRESH 1000
 FONT "COURIER NEW"
 PEN 0
 CLS 15, 0
@@ -11041,7 +11056,7 @@ FOR I=2019 TO 2025
 CALENDAR I, 1033  ' ENGLISH
 GOSUB WAITKEY_OR_MOUSE
 NEXT I
-IF PRINT_IT THEN PRINTING OFF
+IF PRINT_IT THEN PRINTING OFF ELSE REFRESH 50
 CLEAR  ' CLEAR VARIABLES FROM THIS MODULE
 KEYBOARD "INFO"+CHR$(13)
 END
@@ -14262,7 +14277,7 @@ execute "gSQL",{
 			first_name,
 			phone,
 			points
-	FROM `customers`
+	FROM 	`customers`
 	WHERE 	Points<1000 
 	ORDER BY 	Points DESC,
 			last_name,
@@ -14276,13 +14291,13 @@ report  "Select customers id where phone is null"
 execute "gSQL",{
 	SELECT 	customer_id,
 			phone
-	FROM `customers`
+	FROM 	`customers`
 	WHERE 	phone IS Null 
 	ORDER BY 	customer_id 
 }
 GetIDwithNullPhone()    ' value is already in stack
 
-
+close base "gSQl"
 \\ using list to check the variable names
 list
 \\ there are no variables in module, at this moment.
@@ -15265,6 +15280,66 @@ PointerA->SecondbookDB
       PointerA=>ProcessPaperbackBooks &PrintTitle
 \\ PointerA is not a real pointer. Is a weak pointer to a non float group.
 }
+MODULE POPUP {Declare Form1 Form
+Declare aPopUpForm Form
+With Form1, "Title", "Hello There"
+With aPopUpForm, "Title", "This is a PopUp Form", "Visible" as PopUpVisible
+Declare Text1 TextBox Form aPopUpForm
+Method Text1,"Move", 2000,2000,6000,600
+With Text1,"Text" as txt$
+txt$="U+10437 (𐐷) in UTF-16"
+Function Text1.Enter {
+      \\ If we press enter in textbox in popup form
+      \\ we change title in form1
+      With Form1, "Title", txt$
+      With form1, "GetFocus"
+}
+X=1000
+Function Form1.MouseDown {
+\* Use STACK to see stack in console...
+\* ...before you decide what to do with the values
+\* Stack is cleared by you or by system, if stack isn't empty
+      Rem 1 : Stack
+      Read button
+      If button<>2 Then Exit
+      Drop  \\ drop shift
+      Local X, Y : Read X, Y
+      
+      Method Form1, "PopUp", aPopUpForm, X, Y
+}
+refresh
+With Form1, "visible" as visible
+p=0
+thread {
+      if visible then print "ok" : refresh :  p=ask("test left click on form's layer ","Explain","Test now","") : thread this erase
+} as k interval 100
+Method Form1,"Show", 1  \\ modal  means wait to return
+\\ we return focus to console
+Show
+Declare Form1 Nothing
+Declare aPopUpForm Nothing
+Print X
+end
+}
+MODULE SURROGATE {\\ pressing alt press INS or + on keypad and 10437 on keypad or number keys and release alt to get 𐐷
+
+Print "𐐷"
+Print hex$(chrcode("𐐷"),2.5)="10437"
+Print chrcode$(0x10437)="𐐷"
+
+keyboard "𐐷"
+print inkey$
+keyboard "𐐷"
+Print key$
+keyboard "1𐐷2"+chr$(13)
+Input "surrogate=",a$
+Print a$
+Print $(4), "surrogate=";
+Input ! a$, 30
+Print a$, $(0)   ' return to normal text
+if random(1,2)=1 then Print else Print Under
+Report a$
+}
 MODULE CS {Clear \\ Clear all variables/objects
 Flush \\ Empty the stack
 first$={using System;
@@ -15346,11 +15421,13 @@ With Help1,"label","Help",  "Mark", Color(255,100,0)
 With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
 With NotePad, "UseIcon", True, "UseReverse", True
 With Pad, "Text" As Pad.text$, "ShowAlways", True,"NoColor", True,"SelLength" as SelLength
+With Pad, "ColorSet", 1, "linespace", 30, "NoCenterLineEdit", True   ' we can tongle value of  NoCenterLineEdit  using shift F9
+Method Pad, "UserColorSet", false, , -#ff0000
 Def TitleStr$(a$)=Ucase$(Left$(a$,1))+Mid$(a$,2)
 Filename$=Dir$+"pendulum.cs"
 
 Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
-Title caption$
+Title "",0
 Method NotePad,"MakeStandardInfo", 1
 Method NotePad,"move", 2000, 4000, 8000, 4000
 Layer NotePad {Cls #FFA000}
@@ -15470,9 +15547,9 @@ Function Pad.PopUp {
       Method Pad,"PopUpMenu", "",X , Y
 }
 function cs_choose{
-       With Pad, "ColorCollection1", lcase$("|abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield|"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", True, "MultiLineComment1", "/*","MultiLineComment2", "*/"
+       With Pad, "ColorCollection1", lcase$("|abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield|"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", false, "MultiLineComment1", "/*","MultiLineComment2", "*/"
       With Pad, "WordCharLeft"," ,+-=/*^()[];<>", "WordCharRight"," .,+-=/*^()[];<>","OtherSymbols","@","UseColon",";"
-      With Pad,"StartSymbols", "+-&|*=></,.1234567890'"+chr$(34), "StringSep2","'", "EnablePairs", True, "linespace", 30
+      With Pad,"StartSymbols", "+-&|*=></,.1234567890()'"+chr$(34), "StringSep2","'", "EnablePairs", True, "linespace", 30
       With Pad, "SearchWords", True, "nowrap", True, "AllowInsertBrackets",  True, "SpaceIndent", 2
       Method Pad, "ReColor"
       Method Pad, "Show"
@@ -15480,11 +15557,13 @@ function cs_choose{
 
 Function Dark(){  '  13619071
       With Pad, "ColorSet", 0, "linespace", 60, "SelectionColor", -#FF0000, "SelectionTextColor", -color(14)
-      Method Pad, "Colors", -color(50,50,50),-color(14),,,-color(0)
+       Method Pad, "Colors", -color(50,50,50),-color(14),,,-color(0)
       Method Pad, "Show"
 }
 Function Bright(){
-      With Pad, "ColorSet", 1, "linespace", 30
+      With Pad, "ColorSet", 1
+      Method  Pad, "UserColorSet",0,,,,,,,,-#FF0000
+      With Pad, "ColorSet", -1
       Method Pad, "ColorsReset"
       Method Pad, "ResetSelColors"
       Method Pad, "Show"
@@ -15766,70 +15845,14 @@ Function Notepad.InfoClick {
 Call Local Notepad.Resize()
 \\ open As moda
 Title title$, 0
-after 200 {
-	Call local cs_choose()
-}
-After 100 {Title "", 0}
+Call local cs_choose()
+Call Local Bright()
+\\After 100 {Title "", 0}
 Method NotePad,"Show" , 1
 Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
 keyboard "INFO"+chr$(13)
-}
-MODULE POPUP {Declare Form1 Form
-Declare aPopUpForm Form
-With Form1, "Title", "Hello There"
-With aPopUpForm, "Title", "This is a PopUp Form", "Visible" as PopUpVisible
-Declare Text1 TextBox Form aPopUpForm
-Method Text1,"Move", 2000,2000,6000,600
-With Text1,"Text" as txt$
-txt$="U+10437 (𐐷) in UTF-16"
-Function Text1.Enter {
-      \\ If we press enter in textbox in popup form
-      \\ we change title in form1
-      With Form1, "Title", txt$
-      With form1, "GetFocus"
-}
-X=1000
-Function Form1.MouseDown {
-\* Use STACK to see stack in console...
-\* ...before you decide what to do with the values
-\* Stack is cleared by you or by system, if stack isn't empty
-      Rem 1 : Stack
-      Read button
-      If button<>2 Then Exit
-      Drop  \\ drop shift
-      Local X, Y : Read X, Y
-      
-      Method Form1, "PopUp", aPopUpForm, X, Y
-}
-refresh
-Method Form1,"Show", 1  \\ modal  means wait to return
-\\ we return focus to console
-Show
-Declare Form1 Nothing
-Declare aPopUpForm Nothing
-Print X
-end
-}
-MODULE SURROGATE {\\ pressing alt press INS or + on keypad and 10437 on keypad or number keys and release alt to get 𐐷
-
-Print "𐐷"
-Print hex$(chrcode("𐐷"),2.5)="10437"
-Print chrcode$(0x10437)="𐐷"
-
-keyboard "𐐷"
-print inkey$
-keyboard "𐐷"
-Print key$
-keyboard "1𐐷2"+chr$(13)
-Input "surrogate=",a$
-Print a$
-Print $(4), "surrogate=";
-Input ! a$, 30
-Print a$, $(0)   ' return to normal text
-if random(1,2)=1 then Print else Print Under
-Report a$
 }
 MODULE ΓΛΩΣΣΑ {\\ `notepad for educational school language ΓΛΩΣΣΑ
 Greek  ' this make the popup menu of edit boc as 
@@ -15948,6 +15971,7 @@ first$={ΠΡΟΓΡΑΜΜΑ Κυκλική_Ουρά
 Title$="Πρόχειρο Γλώσσας"
 Dir User
 Declare NotePad Form
+
 Declare Pad EditBox Form NotePad
 Declare Inform1 Button Form NotePad
 With Inform1, "Caption" as Informe$
@@ -15956,12 +15980,13 @@ With Inform1, "Locked", True
 Declare File1 Combobox Form NotePad
 Declare Edit1 Combobox Form NotePad
 Declare Help1 Combobox Form NotePad
+Method NotePad, "FontAttr", "Times", 28, True
 With NotePad, "UseIcon", True, "UseReverse", True
 Method Pad, "FontAttr", "COURIER NEW", 14, true
 identifiers$="<-|ΠΡΟΓΡΑΜΜΑ|ΜΕΤΑΒΛΗΤΕΣ|ΠΡΑΓΜΑΤΙΚΕΣ|ΑΚΕΡΑΙΕΣ|ΛΟΓΙΚΕΣ|ΧΑΡΑΚΤΗΡΕΣ|ΣΤΑΘΕΡΕΣ|ΑΡΧΗ|ΓΡΑΨΕ|ΔΙΑΒΑΣΕ|ΤΕΛΟΣ_ΠΡΟΓΡΑΜΜΑΤΟΣ|DIV|MOD|ΑΝ|ΤΟΤΕ|ΑΛΛΙΩΣ|ΑΛΛΙΩΣ_ΑΝ|ΤΕΛΟΣ_ΑΝ|ΓΙΑ|ΑΠΟ|ΜΕΧΡΙ|ΜΕ_ΒΗΜΑ|ΤΕΛΟΣ_ΕΠΑΝΑΛΗΨΗΣ|ΕΠΙΛΕΞΕ|ΠΕΡΙΠΤΩΣΗ|ΤΕΛΟΣ_ΕΠΙΛΟΓΩΝ|ΟΣΟ|ΕΠΑΝΑΛΑΒΕ|ΑΡΧΗ_ΕΠΑΝΑΛΗΨΗΣ|ΜΕΧΡΙΣ_ΟΤΟΥ|ΚΑΙ|Η|ΟΧΙ|ΑΛΗΘΗΣ|ΨΕΥΔΗΣ|ΚΑΛΕΣΕ|ΔΙΑΔΙΚΑΣΙΑ|ΤΕΛΟΣ_ΔΙΑΔΙΚΑΣΙΑΣ|Α_Μ(|Α_Τ(|Ε|ΕΦ(|ΗΜ(|ΛΟΓ(|ΣΥΝ(|Τ_Ρ(|ΣΥΝΑΡΤΗΣΗ|ΤΕΛΟΣ_ΣΥΝΑΡΤΗΣΗΣ|"
-With Pad, "NoWrap", True, "ColorCollection1", identifiers$, "LineComment1", "!!", "OtherSymbols","@", "CommentSymbols", "!", "ComSymbolsWidth", 1, "WordCharRight", ": ,[]+()-*/)}≤≥≠"+chr$(9), "WordCharleft", " :,[]+*/)({≤≥≠"+chr$(9), "WordCharRightButIncluded", "("
-With Pad, "LineComment2",CHR$(0), "StringSep2","'", "AssignSym","<-", "SearchWords",FALSE, "UseColon","","SplitExpr",",", "CommentLineLight", True
-With Pad, "Sellength" as Pad.SelLength
+With Pad, "NoWrap", True, "ColorCollection1", identifiers$, "LineComment1", "!", "OtherSymbols","@", "CommentSymbols", "[!][!]", "ComSymbolsWidth", 2, "WordCharRight", ": ,[]+()-*/)}≤≥≠"+chr$(9), "WordCharleft", " :,[]+*/)({≤≥≠"+chr$(9), "WordCharRightButIncluded", "("
+With Pad, "LineComment2",CHR$(0), "StringSep2","'", "AssignSym","<-", "SearchWords",False, "UseColon","","SplitExpr",",", "CommentLineLight", True
+With Pad, "Sellength" as Pad.SelLength, "EnablePairs", True, "BracketsForArrays", True
 With File1,"label","Αρχείο", "listtext" As list$, "list" As list$() '
 With Edit1,"label","Επεξεργασία",  "Mark", Color(255,100,0)
 With Help1,"label","Βοήθεια",  "Mark", Color(255,100,0)
@@ -15972,12 +15997,16 @@ LastWord$=""
 Filename$=Dir$+"κυκλική_ουρά.glo"
 Caption$=TitleStr$(File.Name$(Filename$)) +" - ΓΛΩΣΣΑ"
 Method NotePad,"MakeStandardInfo", 0
-Method NotePad,"move", 2000, 4000, 8000, 4000
+Method NotePad,"move", 2000, 4000, 12000, 8000
 Layer NotePad {Cls #FFA000}
 With File1,"MenuStyle", True, "MenuWidth", 3000 
-With Edit1,"MenuStyle", True, "MenuWidth", 4000
+With Edit1,"MenuStyle", True, "MenuWidth", 4500
+	\\ Advanced programming. Handling of the real control under Edit1 (the drop down list)
+	With Edit1, "GlistN" set Control1
+	With Control1, "UseTab", True, "TabWidthChar", 12
 With Help1,"MenuStyle", True, "MenuWidth", 3000 , "List" as Help.List$()
 With File1, "MenuEnabled" As mEnable()
+this_line=1
 For This {
       mi$="MenuItem"  \\ is a temporary variable only for For This Block
       Method File1, mi$,"Φόρτωσε",True
@@ -15990,21 +16019,41 @@ For This {
       Method Edit1, mi$,"Αντιγραφή",True
       Method Edit1, mi$,"Επικόληση",True
       Method Edit1, mi$,"",True
-      Method Edit1, mi$,"Λιγότερη εσοχή",True
-      Method Edit1, mi$,"Περισσότερη εσοχή",True
+      Method Edit1, mi$,"Λιγότερη εσοχή"+chr$(9)+"Ctrl Q",True
+      Method Edit1, mi$,"Περισσότερη εσοχή"+chr$(9)+"Ctrl W",True
       Method Edit1, mi$,"",True
       Method Edit1, mi$,"Άνοιγμα στη Γλώσσα", exist(filename$)
       
+      With Help1, "Mark", -#7777FF
       Method Help1, mi$,"Περί",True
       Method Help1, mi$,"Βοήθεια",True
+      Method Help1, mi$,"",True
+      Method Help1, mi$,"Μέγεθος",False
+      Method Help1, "MenuRadio","Mεγάλο",True, False
+      Method Help1, "MenuRadio","Μικρό",True, True  
 }
-
-if exist(Filename$) then
+Function Help1.MenuChecked {
+      Read New RadioIndex \\ 3 or 4
+      If RadioIndex =4 Then {
+            'After 30
+            {
+                  Method Pad, "FontAttr", "COURIER NEW", 18, true
+                  Method Pad, "Show"
+            }
+      } Else.If RadioIndex =5 Then {
+            'After 30
+            {
+                  Method Pad, "FontAttr", "COURIER NEW", 14, true
+                  Method Pad, "Show"
+            }
+      }
+}
+If exist(Filename$) then
 	Document BackUp$
 	Load.Doc BackUp$, filename$
 else
 	Document BackUp$=first$
-end if
+End If
 Pad.text$=BackUp$
 Function NotePad.Unload {
       Read New &Ok
@@ -16024,16 +16073,44 @@ Function Pad.Help {
 Function Notepad.Resize {
       Layer NotePad { Cls Color(255, 160, 0) ,0}
       With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
+      
       tHeight1=theight*2
-      Method File1,"move", twipsX*2, tHeight,  twipsX*100, tHeight
-      Method Edit1,"move", twipsX*2+twipsX*100, tHeight,  twipsX*160, tHeight
-      Method Help1,"move", twipsX*2+twipsX*260, tHeight,  twipsX*120, tHeight
-      Method Inform1,"move", twipsX*2+twipsX*360, tHeight,  twipsX*120, tHeight
+      local theight2=theight*.8, theight0=theight*1.2
+      Method File1,"move", twipsX*2, theight0,  twipsX*100, tHeight2
+      Method Edit1,"move", twipsX*2+twipsX*100, theight0,  twipsX*160, tHeight2
+      Method Help1,"move", twipsX*2+twipsX*260, theight0,  twipsX*120, tHeight2
+      Method Inform1,"move", twipsX*2+twipsX*360, theight0,  twipsX*120, tHeight2
       If NP.height>2000 Then {
             Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
             With Pad, "NoWrap" As NoWrap
             If Not NoWrap Then Method Pad,"Resize"
       }
+}
+Function LessI(){
+      Method Pad,"SetRowColumn", This_line, 0, true
+      Method Pad,"PressKey", 9, 1
+}
+Function MoreI(){
+      Method Pad,"SetRowColumn", This_line, 0, true
+      Method Pad,"PressKey", 9, 0
+}
+\\  ctrl+Q for less indentation (adjust also the column)
+\\ (also Ctrl+Shift+Tab  - for one row we have to select a block or to have the column before letters else we get spaces)
+\\  ctrl_W for more indentation () (adjust also the column)
+
+Function Pad.KeyDown {
+      Read New &kc, &Shf
+      If kc=81 and shf=2 Then
+            kc=0 : shf=0
+            After 20{
+                  Call Local LessI()
+            }
+      Else.if Kc=87 and shf=2 then
+            kc=0 : shf=0
+            After 20{
+                  Call Local MoreI()
+            }      
+      End If
 }
 Function Edit1.DblClick {
       Read Local Edit1index
@@ -16047,20 +16124,20 @@ Function Edit1.DblClick {
             Method Pad,"mn2sub"
       Case 2
             {
-                 Method Pad, "mn3sub"
-                 Method Pad,"GetFocus"
-                 Method Pad,"Resize"
+                  Method Pad, "mn3sub"
+                  Method Pad,"GetFocus"
+                  Method Pad,"Resize"
            }
       Case 4
-            Method Pad,"PressKey", 9, 1
+            Call Local LessI()
       Case 5
-            Method Pad,"PressKey", 9, 0
+            Call Local MoreI()
       Case 7
             {
                   If Pad.Text$<>BackUp$ then
                         call local File1.DblClick(1)
-                  end if
-                  if exist(filename$) then Win "Γλώσσα.exe", filename$
+                  End If
+                  If exist(filename$) then Win "Γλώσσα.exe", filename$
             }
       End Select
 }
@@ -16070,6 +16147,7 @@ Function Pad.PopUp {
 }
 Function Pad.Inform {
       Read New L, P
+      this_line=L
       Informe$=format$("{0}-{1}", L,P)
       Method Pad,"Show"
 }
@@ -16107,7 +16185,7 @@ Save1:
       Layer NotePad {
             Save.As Filename$,"c:\","Σώσε αρχείο","glo"
       }
-      if not cont2 then Method Pad,"GetFocus"
+      If not cont2 then Method Pad,"GetFocus"
       Read f$
       If f$="" Then Exit 
       If lcase$(file.type$(f$))<>"glo" then f$=f$+".glo"
@@ -16141,30 +16219,43 @@ Unload:
       }
 }
 Function Help1.DblClick(new index) {
-if index=0 then
+If index=0 then
       Local A, info$
       Info$={
-            Πρόχειρο για συγγραφή προγραμμάτων σε ΓΛΩΣΣΑ για το μάθημα της ΑΕΠΠ
+            Πρόχειρο για συγγραφή προγραμμάτων σε ΓΛΩΣΣΑ για το μάθημα της ΑΕΠΠ.
+            Η εξαγωγή στο πρόχειρο γίνεται σε Html και απλό κείμενο, ταυτόχρονα.
             }
       A=Ask(info$,Title$,"ΝΑΙ","")  ' one button only
-else.if lastword$<>"" then
-      If not exist(lastword$+".txt") then local a$ : Document a$ : Save.Doc a$, lastword$+".txt"
-      win "notepad", dir$+lastword$+".txt"
-end if
+else.if index=1 then
+      if  lastword$<>"" then
+            If not exist(lastword$+".txt") then local a$ : Document a$ : Save.Doc a$, lastword$+".txt"
+            win "notepad", dir$+lastword$+".txt"
+      else
+            after 30 {local A=Ask("Επίλεξε μια λέξη και γύρνα στο μενού βοήθεια ξανά!", Title$, "Κατάλαβα","")
+            }            
+      end if
+else.if index>2 then
+      Call Local Help1.MenuChecked(index)
+End If
 
 }
 Function Pad.Word(new alfa$) {
-      if instr(identifiers$, "|"+alfa$+"|")>0 then
+      If instr(identifiers$, "|"+alfa$+"|")>0 then
             Lastword$=alfa$	
             Help.list$(1)="Βοήθεια για "+alfa$
             With Help1,"MenuWidth", Max.data(Size.X(Help.list$(1), "Verdana",12 )+1000, 3000)
-      end if
+      End If
+}
+Function Notepad.InfoClick {
+	Read New X
+	If X=0 Then Call Local Help1.DblClick(0)  ' 0 for first menu item
 }
 Call Local Notepad.Resize()
 
 After 100 {Title "", 0}
 Method NotePad,"Show" , 1
 
+Declare Control1 Nothing 
 Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Τέλος"
@@ -16237,7 +16328,7 @@ Method Pad, "FontAttr", "VERDANA", 13.5, true
 With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
 With NotePad, "UseIcon", True, "UseReverse", True
 With Pad, "Text" As Pad.text$, "ShowAlways", True,"NoColor", True,"SelLength" as SelLength
-With Pad, "SearchWords", True, "nowrap", True, "linespace", 30
+With Pad, "SearchWords", False, "nowrap", True, "linespace", 30
 With Pad, "ReplaceTitle" as InnerInfo$
 Def TitleStr$(a$)=a$ '   Ucase$(Left$(a$,1))+Mid$(a$,2)
 Filename$=Dir$+"floatforms.html"
@@ -16524,7 +16615,7 @@ Function Pad.Word(new alfa$) {
 
 Call Local Notepad.Resize()
 \\ open As moda
-Title title$, 0
+Title "", 0
 after 200 {
 	Call local cs_choose()
 }

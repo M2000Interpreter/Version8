@@ -454,7 +454,7 @@ Public Property Let FadePartColor(ByVal vNewValue As Variant)
 On Error Resume Next
 mPartColor = CLng(vNewValue)
 End Property
-Private Sub glistN_AddSelStart(val As Long)
+Private Sub glistN_AddSelStart(val As Long, shift As Integer)
 Dim w As Long, a$
 If glistN.SelStart > 0 Then
 a$ = Mid$(vartext, glistN.SelStart, 1)
@@ -467,7 +467,7 @@ End If
 End If
 End Sub
 
-Private Sub glistN_SubSelStart(val As Long)
+Private Sub glistN_SubSelStart(val As Long, shift As Integer)
 Dim w As Long, a$
 If glistN.SelStart < 2 Then Exit Sub
 a$ = Mid$(vartext, glistN.SelStart - 1, 1)
