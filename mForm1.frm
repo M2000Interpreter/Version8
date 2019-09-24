@@ -29,6 +29,7 @@ Private Declare Function SetWindowLongA Lib "user32" (ByVal hwnd As Long, ByVal 
 Private Declare Function SetWindowLongW Lib "user32" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare Function SetWindowTextW Lib "user32" (ByVal hwnd As Long, ByVal lpString As Long) As Long
     Private Const GWL_WNDPROC = -4
+    Private Const WM_SETTEXT = &HC
     Private m_Caption As String
 Public finished As Boolean
 Public m As Object, mm As Object
@@ -40,9 +41,25 @@ Public Property Get CaptionW() As String
     End If
 
 End Property
-
-
 Public Property Let CaptionW(ByVal NewValue As String)
+
+If LenB(NewValue) = 0 Then NewValue = "M2000"
+    m_Caption = NewValue
+DefWindowProcW Me.hwnd, WM_SETTEXT, 0, ByVal StrPtr(NewValue)
+If WindowState = 0 Then
+   Show
+  DoEvents
+  If m Is Nothing Then Show: Exit Property
+  If m.iamvisible Then
+On Error Resume Next
+  m.SetFocus
+  If Err.Number = 0 Then DoEvents
+  End If
+  End If
+     
+End Property
+
+Public Property Let CaptionW2(ByVal NewValue As String)
     Static WndProc As Long, VBWndProc As Long
     If NewValue = "" Then NewValue = "M2000"
     m_Caption = NewValue

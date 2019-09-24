@@ -1,9 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 45 active-X
-1. Fix the html output gor html code
-2. Addition of property HighlightParagraph to Editbox, and property HighlightColor for setting the right color to highlight the current paragraph.
-
+Version 9.8 Revision 46 active-X
+1. Fix the replace function of Editors
+2.Fix a bug with diacritics marks in console when input these chars
+3. A peculiar bug maybe is fixed. Is a bug which happen when we save our code - There is a recovery function, so the next time we get the saved file (the file saved temporary before ask for saving)
+4.. New info.gsb. Two new modules, one for export the help text from help database, and the other to change the help text directly to database
 
 
 The fist time you run the interpreter do this in M2000 console:

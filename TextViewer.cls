@@ -1152,6 +1152,7 @@ mDoc.busy = True
 all = mDoc.DocLines
 glistN.ListIndex = mDoc.FirstParagraphLine(mDoc.MarkParagraphID) + mDoc.TextParagraph2Line(mDoc.MarkParagraphID, Charpos, selstart2, NoColor)
 glistN.SelStart = selstart2
+
 If glistN.ListIndex < glistN.ScrollFrom Then
 If glistN.ListIndex > glistN.lines Then
 glistN.ScrollToSilent glistN.ListIndex - glistN.lines / 2

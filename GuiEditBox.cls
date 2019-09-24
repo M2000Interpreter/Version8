@@ -155,7 +155,7 @@ Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not
 Private Const DWL_ANYTHREAD& = 0
 Const LOCALE_ILANGUAGE = 1
     ' for Gui purposes
-Private S$
+Private s$
 Public ctrlName As String
 Private mesCtrlName As String
 Dim mIndex As Long, mStayOpen As Boolean
@@ -2909,26 +2909,26 @@ If pos2 > 0 Then addone pos2, 14
 
 
 End Sub
-Private Function blockString(S$) As String
+Private Function blockString(s$) As String
 Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
 
-If S$ = vbNullString Then Exit Function
+If s$ = vbNullString Then Exit Function
 If mMultiLineComment2 <> "}" Then
-i = InStr(S$, mMultiLineComment2)
-If i > 0 Then blockString = Mid$(S$, 1, i - 1): S$ = Mid$(S$, i)
+i = InStr(s$, mMultiLineComment2)
+If i > 0 Then blockString = Mid$(s$, 1, i - 1): s$ = Mid$(s$, i)
 Exit Function
 Else
 
-c = Len(S$)
+c = Len(s$)
 a1 = True
 i = 1
 Do
-Select Case Asc(Mid$(S$, i, 1))
+Select Case Asc(Mid$(s$, i, 1))
 Case 34
 Do While i < c
 i = i + 1
-If Asc(Mid$(S$, i, 1)) = 34 Then If Asc(Mid$(S$, i - 1, 1)) <> 92 Then Exit Do
+If Asc(Mid$(s$, i, 1)) = 34 Then If Asc(Mid$(s$, i - 1, 1)) <> 92 Then Exit Do
 Loop
 Case 123
 j = j - 1
@@ -2938,37 +2938,37 @@ End Select
 i = i + 1
 Loop Until i > c
 If j = 1 Then
-blockString = Myleft$(S$, i - 1)
-S$ = Mid$(S$, i)
+blockString = Myleft$(s$, i - 1)
+s$ = Mid$(s$, i)
 Else
-blockString = S$
-S$ = vbNullString
+blockString = s$
+s$ = vbNullString
 End If
 End If
 End Function
-Private Function blockString2(S$) As String
+Private Function blockString2(s$) As String
 Dim i As Long, j As Long, c As Long
 
-If S$ = vbNullString Then Exit Function
+If s$ = vbNullString Then Exit Function
 
-c = Len(S$)
+c = Len(s$)
 i = 0
 Do While i < c
 i = i + 1
-If Asc(Mid$(S$, i, 1)) = 34 Then
+If Asc(Mid$(s$, i, 1)) = 34 Then
 If i = 1 Then Exit Do
-If Asc(Mid$(S$, i - 1, 1)) <> 92 Then Exit Do
+If Asc(Mid$(s$, i - 1, 1)) <> 92 Then Exit Do
 End If
 Loop
 If i = 1 Then
-S$ = Mid$(S$, 2)
+s$ = Mid$(s$, 2)
 blockString2 = Chr$(34) + Chr$(34)
 ElseIf i < c Then
-blockString2 = Chr$(34) + Myleft$(S$, i)
-S$ = Mid$(S$, i + 1)
+blockString2 = Chr$(34) + Myleft$(s$, i)
+s$ = Mid$(s$, i + 1)
 Else
-blockString2 = Chr$(34) + S$
-S$ = vbNullString
+blockString2 = Chr$(34) + s$
+s$ = vbNullString
 End If
 End Function
 Private Function IsLabelDot(where$, a$, r$) As Long ' ok
@@ -7337,12 +7337,12 @@ KeyCode = 0
 Case vbKeyF2
 If shift <> 0 Then
 LastSearchType = 2 - Abs(shift Mod 2 = 1)
-If SelText <> "" Then S$ = SelText
+If SelText <> "" Then s$ = SelText
 If pagio$ = "GREEK" Then
-S$ = InputBoxN("Αναζήτησε προς την αρχή " & IIf(LastSearchType = 1, "(και σε μέρος λέξης):" & vbCrLf & " Ctrl+F2 για λέξεις μόνο", ":" & vbCrLf & " Ctrl+F2 και για μέρη λέξεων"), "Συγγραφή Κειμένου", S$, noinp)
+s$ = InputBoxN("Αναζήτησε προς την αρχή " & IIf(LastSearchType = 1, "(και σε μέρος λέξης):" & vbCrLf & " Ctrl+F2 για λέξεις μόνο", ":" & vbCrLf & " Ctrl+F2 και για μέρη λέξεων"), "Συγγραφή Κειμένου", s$, noinp)
 
 Else
-S$ = InputBoxN("Search to top " & IIf(LastSearchType = 1, "(inside words also):" & vbCrLf & " Ctrl+F2 words only", ":" & vbCrLf & " Shift+F2 for any position "), "Text Editor", S$, noinp)
+s$ = InputBoxN("Search to top " & IIf(LastSearchType = 1, "(inside words also):" & vbCrLf & " Ctrl+F2 words only", ":" & vbCrLf & " Shift+F2 for any position "), "Text Editor", s$, noinp)
 End If
 If Not noinp = 1 Then
 noentrance = False
@@ -7351,12 +7351,12 @@ Exit Sub
 End If
 End If
 If noinp = 1 Then
-    If MyTrim(S$) <> "" Then Searchup S$, LastSearchType = 1 Else LastSearchType = 0
+    If MyTrim(s$) <> "" Then Searchup s$, LastSearchType = 1 Else LastSearchType = 0
     shift = 0
-ElseIf SelText <> "" Or S$ <> "" Then
+ElseIf SelText <> "" Or s$ <> "" Then
 If LastSearchType > 0 Then
-    If SelText <> "" Then S$ = SelText
-        Searchup S$, LastSearchType = 1
+    If SelText <> "" Then s$ = SelText
+        Searchup s$, LastSearchType = 1
     Else
         supsub
     End If
@@ -7364,11 +7364,11 @@ End If
 KeyCode = 0
 Case vbKeyF3
     If shift <> 0 Then
-        If S$ = vbNullString And SelText <> "" Then S$ = SelText
+        If s$ = vbNullString And SelText <> "" Then s$ = SelText
         If pagio$ = "GREEK" Then
-            S$ = InputBoxN("Αναζήτησε προς το τέλος " & IIf(LastSearchType = 1, "(και σε μέρος λέξης):" & vbCrLf & " Ctrl+F3 για λέξεις μόνο", ":" & vbCrLf & " Ctrl+F3 και για μέρη λέξεων"), "Συγγραφή Κειμένου", S$, noinp)
+            s$ = InputBoxN("Αναζήτησε προς το τέλος " & IIf(LastSearchType = 1, "(και σε μέρος λέξης):" & vbCrLf & " Ctrl+F3 για λέξεις μόνο", ":" & vbCrLf & " Ctrl+F3 και για μέρη λέξεων"), "Συγγραφή Κειμένου", s$, noinp)
         Else
-            S$ = InputBoxN("Search to end " & IIf(LastSearchType = 1, "(inside words also):" & vbCrLf & " Ctrl+F3 words only", ":" & vbCrLf & " Shift+F3 for any position "), "Text Editor", S$, noinp)
+            s$ = InputBoxN("Search to end " & IIf(LastSearchType = 1, "(inside words also):" & vbCrLf & " Ctrl+F3 words only", ":" & vbCrLf & " Shift+F3 for any position "), "Text Editor", s$, noinp)
         End If
         If Not noinp = 1 Then
             noentrance = False
@@ -7377,12 +7377,12 @@ Case vbKeyF3
         End If
     End If
     If noinp = 1 Then
-    If MyTrim(S$) <> "" Then SearchDown S$, LastSearchType = 1 Else LastSearchType = 0
+    If MyTrim(s$) <> "" Then SearchDown s$, LastSearchType = 1 Else LastSearchType = 0
     shift = 0
-    ElseIf SelText <> "" Or S$ <> "" Then
+    ElseIf SelText <> "" Or s$ <> "" Then
         If LastSearchType > 0 Then
-            If SelText <> "" Then S$ = SelText
-            SearchDown S$, LastSearchType = 1
+            If SelText <> "" Then s$ = SelText
+            SearchDown s$, LastSearchType = 1
         Else
             sdnSub
         End If
@@ -7632,26 +7632,26 @@ ctrl = False
 End Select
 noentrance = False
 End Sub
-Sub SearchDown(S$, Optional anystr As Boolean = False)
+Sub SearchDown(s$, Optional anystr As Boolean = False)
 Dim l As Long, w As Long, TempLcid As Long, OldLcid As Long
 w = mDoc.MarkParagraphID   ' this is the not the order
 SelStartSilent = SelStart
 l = Charpos
 
 OldLcid = mDoc.lcid
-TempLcid = FoundLocaleId(S$)
+TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then mDoc.lcid = TempLcid
 If EditTextWord Or anystr Then
     If anystr Then
-  If Not mDoc.FindStrDown(S$, w, l) Then GoTo sdnOut
+  If Not mDoc.FindStrDown(s$, w, l) Then GoTo sdnOut
   Else
-    If Not mDoc.FindWord(S$, True, w, l) Then GoTo sdnOut
+    If Not mDoc.FindWord(s$, True, w, l) Then GoTo sdnOut
     End If
 Else
     If WordOnly Then
-    If Not mDoc.FindWord(S$, True, w, l) Then GoTo sdnOut
+    If Not mDoc.FindWord(s$, True, w, l) Then GoTo sdnOut
     Else
-    If Not mDoc.FindIdentifier(S$, True, w, l) Then GoTo sdnOut
+    If Not mDoc.FindIdentifier(s$, True, w, l) Then GoTo sdnOut
     End If
 End If
 SelLengthSilent = 0
@@ -7659,29 +7659,29 @@ mDoc.MarkParagraphID = w
 glistN.enabled = False
 ParaSelStart = l
 glistN.enabled = True
-SelLength = Len(S$)
+SelLength = Len(s$)
 sdnOut:
 mDoc.lcid = OldLcid
 End Sub
-Sub Searchup(S$, Optional anystr As Boolean = False)
+Sub Searchup(s$, Optional anystr As Boolean = False)
 Dim l As Long, w As Long, TempLcid As Long, OldLcid As Long
 w = mDoc.MarkParagraphID
 SelStartSilent = SelStart - (SelLength > 1)
-l = Charpos + Len(S$)
+l = Charpos + Len(s$)
 OldLcid = mDoc.lcid
-TempLcid = FoundLocaleId(S$)
+TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then mDoc.lcid = TempLcid
 If EditTextWord Or anystr Then
    If anystr Then
-   If Not mDoc.FindStrUp(S$, w, l) Then GoTo sdupOut
+   If Not mDoc.FindStrUp(s$, w, l) Then GoTo sdupOut
    Else
-       If Not mDoc.FindWord(S$, False, w, l) Then GoTo sdupOut
+       If Not mDoc.FindWord(s$, False, w, l) Then GoTo sdupOut
     End If
 Else
     If WordOnly Then
-        If Not mDoc.FindWord(S$, False, w, l) Then GoTo sdupOut
+        If Not mDoc.FindWord(s$, False, w, l) Then GoTo sdupOut
     Else
-        If Not mDoc.FindIdentifier(S$, False, w, l) Then GoTo sdupOut
+        If Not mDoc.FindIdentifier(s$, False, w, l) Then GoTo sdupOut
     End If
 End If
 SelLengthSilent = 0
@@ -7689,7 +7689,7 @@ mDoc.MarkParagraphID = w
 glistN.enabled = False
 ParaSelStart = l
 glistN.enabled = True
-SelLength = Len(S$)
+SelLength = Len(s$)
 sdupOut:
 mDoc.lcid = OldLcid
 End Sub
@@ -7702,21 +7702,21 @@ Public Sub helpmeSub()
 End Sub
 Public Sub supsub()
 Dim b$
-b$ = S$
-S$ = SelText
-If S$ = vbNullString Or InStr(S$, Chr$(13)) > 0 Or InStr(S$, Chr$(10)) > 0 Then S$ = b$
-Searchup S$
+b$ = s$
+s$ = SelText
+If s$ = vbNullString Or InStr(s$, Chr$(13)) > 0 Or InStr(s$, Chr$(10)) > 0 Then s$ = b$
+Searchup s$
 End Sub
 Public Sub sdnSub()
 Dim b$
-b$ = S$
-S$ = SelText
-If S$ = vbNullString Or InStr(S$, Chr$(13)) > 0 Or InStr(S$, Chr$(10)) > 0 Then S$ = b$
-SearchDown S$
+b$ = s$
+s$ = SelText
+If s$ = vbNullString Or InStr(s$, Chr$(13)) > 0 Or InStr(s$, Chr$(10)) > 0 Then s$ = b$
+SearchDown s$
 End Sub
 Public Sub mscatsub()
 ''
-Dim l As Long, w As Long, S$, TempLcid As Long, OldLcid As Long
+Dim l As Long, w As Long, s$, TempLcid As Long, OldLcid As Long
 Dim el As Long, eW As Long, safety As Long, TT$
 
 w = mDoc.MarkParagraphID
@@ -7724,17 +7724,17 @@ eW = w
 SelStartSilent = SelStart  'MOVE CHARPOS TO SELSTART
 
 el = Charpos  ' charpos maybe is in the start or the end of block
-S$ = SelText
+s$ = SelText
 OldLcid = mDoc.lcid
-TempLcid = FoundLocaleId(S$)
+TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then mDoc.lcid = TempLcid
 
 l = el + 1
 If EditTextWord Then
 Do
-If mDoc.FindWord(S$, True, w, l) Then
+If mDoc.FindWord(s$, True, w, l) Then
 TT$ = mDoc.TextParagraph(w)
-Mid$(TT$, l, Len(S$)) = S$
+Mid$(TT$, l, Len(s$)) = s$
 mDoc.ReWritePara w, TT$
 mDoc.WrapAgainBlock w, w
 mDoc.ColorThis (w)
@@ -7747,9 +7747,9 @@ Loop Until (w = eW And l = el) Or safety = 2
 
 Else
 Do
-If mDoc.FindIdentifier(S$, True, w, l) Then
+If mDoc.FindIdentifier(s$, True, w, l) Then
 TT$ = mDoc.TextParagraph(w)
-Mid$(TT$, l, Len(S$)) = S$
+Mid$(TT$, l, Len(s$)) = s$
 mDoc.TextParagraph(w) = TT$
 mDoc.WrapAgainBlock w, w
 mDoc.ColorThis (w)
@@ -7768,7 +7768,7 @@ If glistN.Visible Then glistN.SetFocus
 End Sub
 
 Public Sub rthissub(Optional shift As Integer)
-Dim l As Long, w As Long, S$, TempLcid As Long, OldLcid As Long
+Dim l As Long, w As Long, s$, TempLcid As Long, OldLcid As Long
 Dim el As Long, eW As Long, safety As Long, TT$, w1 As Long, i1 As Long, noinp As Double
 Dim neo$, mDoc10 As Document, addthat As Long, w2 As Long, ok1 As Boolean
 Dim anystr As Boolean
@@ -7778,28 +7778,28 @@ eW = w
 w2 = -1
 SelStartSilent = SelStart  'MOVE CHARPOS TO SELSTART
 el = Charpos  ' charpos maybe is in the start or the end of block
-S$ = Trim$(SelText)
+s$ = Trim$(SelText)
 SelStartSilent = SelStart
 el = Charpos  ' charpos maybe is in the start or the end of block
 If shift Mod 2 = 1 Then
 anystr = True
 If pagio$ = "GREEK" Then
-neo$ = InputBoxN("Αλλαγή Χαρακτήρων", "Διορθωτής Κειμένου", S$, noinp)
+neo$ = InputBoxN("Αλλαγή Χαρακτήρων", "Διορθωτής Κειμένου", s$, noinp)
 Else
-neo$ = InputBoxN("Replace Characters", "Text Editor", S$, noinp)
+neo$ = InputBoxN("Replace Characters", "Text Editor", s$, noinp)
 End If
 ElseIf WordOnly Or Not EditTextWord Then
 If pagio$ = "GREEK" Then
-neo$ = InputBoxN("Αλλαγή Λέξης", "Διορθωτής Κειμένου", S$, noinp)
+neo$ = InputBoxN("Αλλαγή Λέξης", "Διορθωτής Κειμένου", s$, noinp)
 Else
-neo$ = InputBoxN("Replace Word", "Text Editor", S$, noinp)
+neo$ = InputBoxN("Replace Word", "Text Editor", s$, noinp)
 End If
 Else
 If EditTextWord Then
     If pagio$ = "GREEK" Then
-        neo$ = InputBoxN("Αλλαγή " & IIf(anystr, "μέρους ", "") & "Λέξης", "Συγγραφή " & IIf(EditTextWord, "Κειμένου", "Κώδικα"), S$, noinp)
+        neo$ = InputBoxN("Αλλαγή " & IIf(anystr, "μέρους ", "") & "Λέξης", "Συγγραφή " & IIf(EditTextWord, "Κειμένου", "Κώδικα"), s$, noinp)
     Else
-        neo$ = InputBoxN("Replace " & IIf(anystr, "part of ", "") & "Word", IIf(EditTextWord, "Text", "Code") & " Editor", S$, noinp)
+        neo$ = InputBoxN("Replace " & IIf(anystr, "part of ", "") & "Word", IIf(EditTextWord, "Text", "Code") & " Editor", s$, noinp)
     End If
 End If
 
@@ -7807,9 +7807,9 @@ End If
 
 If noinp <> 1 Then Exit Sub
 OldLcid = mDoc.lcid
-TempLcid = FoundLocaleId(S$)
+TempLcid = FoundLocaleId(s$)
 If TempLcid <> 0 Then mDoc.lcid = TempLcid
-If Len(neo$) >= Len(S$) Then
+If Len(neo$) >= Len(s$) Then
     Set mDoc10 = New Document
     
     mDoc10 = neo$
@@ -7818,15 +7818,14 @@ If Len(neo$) >= Len(S$) Then
     i1 = 0
     
     If EditTextWord Or WordOnly Then
-        If mDoc10.FindWord(S$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(S$) And addthat = 0 Then Exit Sub
+        If mDoc10.FindWord(s$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
     ElseIf anystr Then
-        If mDoc10.FindStrDown(S$, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(S$) And addthat = 0 Then Exit Sub
+        If mDoc10.FindStrDown(s$, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
     Else
-        If mDoc10.FindIdentifier(S$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(S$) And addthat = 0 Then Exit Sub
+        If mDoc10.FindIdentifier(s$, True, w1, i1) Then addthat = i1 - 1: If Len(neo$) = Len(s$) And addthat = 0 Then Exit Sub
     End If
     
 End If
-mDoc.busy = True
 prof1.MARKONE
 glistN.SuspDraw = True
 i1 = el
@@ -7837,9 +7836,9 @@ glistN.dropkey = True
 Do
 
 If anystr Then
-ok1 = mDoc.FindStrDown(S$, w, l)
+ok1 = mDoc.FindStrDown(s$, w, l)
 Else
-ok1 = mDoc.FindWord(S$, True, w, l)
+ok1 = mDoc.FindWord(s$, True, w, l)
 End If
 If ok1 Then
 If w2 > 0 Then If w2 <> w Then mDoc.WrapAgainBlock w2, w2:  mDoc.ColorThis w2
@@ -7852,13 +7851,13 @@ mDoc.MarkParagraphID = w
 glistN.enabled = False
 ParaSelStart = l
 glistN.enabled = True
-SelLength = Len(S$)
+SelLength = Len(s$)
 AddUndo ""
 SelText = neo$
 RemoveUndo neo$
 Exit Do
 ElseIf l - addthat < i1 Then
-i1 = i1 + Len(neo$) - Len(S$)
+i1 = i1 + Len(neo$) - Len(s$)
 Else
 
 End If
@@ -7868,7 +7867,7 @@ mDoc.MarkParagraphID = w
 glistN.enabled = False
 ParaSelStart = l
 glistN.enabled = True
-SelLength = Len(S$)
+SelLength = Len(s$)
 AddUndo ""
 SelText = neo$
 
@@ -7889,7 +7888,7 @@ Else
 
 glistN.dropkey = True
 Do
-If mDoc.FindIdentifier(S$, True, w, l) Then
+If mDoc.FindIdentifier(s$, True, w, l) Then
 If w2 > 0 Then If w2 <> w Then mDoc.WrapAgainBlock w2, w2:  mDoc.ColorThis w2
 w2 = w
 If safety And w = w1 Then
@@ -7899,13 +7898,13 @@ mDoc.MarkParagraphID = w
 glistN.enabled = False
 ParaSelStart = l
 glistN.enabled = True
-SelLength = Len(S$)
+SelLength = Len(s$)
 AddUndo ""
 SelText = neo$
 RemoveUndo neo$
 Exit Do
 ElseIf l - addthat < i1 Then
-i1 = i1 + Len(neo$) - Len(S$)
+i1 = i1 + Len(neo$) - Len(s$)
 Else
 
 End If
@@ -7915,7 +7914,7 @@ mDoc.MarkParagraphID = w
 glistN.enabled = False
 ParaSelStart = l
 glistN.enabled = True
-SelLength = Len(S$)
+SelLength = Len(s$)
 AddUndo ""
 SelText = neo$
 RemoveUndo neo$
@@ -7934,7 +7933,6 @@ End If
 mDoc.lcid = OldLcid
 If w2 > 0 Then mDoc.WrapAgainBlock w2, w2:   mDoc.ColorThis w2
 glistN.SuspDraw = False
-mDoc.busy = False
 Render
 If glistN.Visible Then glistN.SetFocus
 End Sub
@@ -8387,11 +8385,11 @@ Public Property Let TabWidthChar(ByVal vNewValue As Long)
 glistN.TabWidthChar = vNewValue
 tParam.iTabLength = Abs(vNewValue)
 End Property
-Private Function MyTrimL(S$) As Long
+Private Function MyTrimL(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(S): If l = 0 Then MyTrimL = 1: Exit Function
-  p2 = StrPtr(S): l = l - 1
+  l = Len(s): If l = 0 Then MyTrimL = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
   p4 = p2 + l * 2
   For i = p2 To p4 Step 2
   GetMem2 i, p1
@@ -8404,11 +8402,11 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimL = l + 2
 End Function
-Private Function MyTrimLNoTab(S$) As Long
+Private Function MyTrimLNoTab(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(S): If l = 0 Then MyTrimLNoTab = 1: Exit Function
-  p2 = StrPtr(S): l = l - 1
+  l = Len(s): If l = 0 Then MyTrimLNoTab = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
   p4 = p2 + l * 2
   For i = p2 To p4 Step 2
   GetMem2 i, p1
@@ -8421,11 +8419,11 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimLNoTab = l + 2
 End Function
-Private Function MyTrimL2(S$) As Long
+Private Function MyTrimL2(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(S): If l = 0 Then MyTrimL2 = 0: Exit Function
-  p2 = StrPtr(S): l = l - 1
+  l = Len(s): If l = 0 Then MyTrimL2 = 0: Exit Function
+  p2 = StrPtr(s): l = l - 1
   p4 = p2 + l * 2
   For i = p2 To p4 Step 2
   GetMem2 i, p1
@@ -8438,18 +8436,18 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimL2 = 0
 End Function
-Private Function NLTrim2(S$) As String
+Private Function NLTrim2(s$) As String
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(S): If l = 0 Then NLTrim2 = 1: Exit Function
-  p2 = StrPtr(S): l = l - 1
+  l = Len(s): If l = 0 Then NLTrim2 = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
   p4 = p2 + l * 2
   For i = p2 To p4 Step 2
   GetMem2 i, p1
   Select Case p1
     Case 32, 160
     Case Else
-     NLTrim2 = Mid$(S$, (i - p2) \ 2 + 1)
+     NLTrim2 = Mid$(s$, (i - p2) \ 2 + 1)
    Exit Function
   End Select
   Next i
@@ -8473,18 +8471,18 @@ End Select
 Next i
 
 End Sub
-Function blockStringAhead(S$, pos1 As Long) As Long
+Function blockStringAhead(s$, pos1 As Long) As Long
 Dim i As Long, j As Long, c As Long
-c = Len(S$)
+c = Len(s$)
 i = pos1
 If i > c Then blockStringAhead = False: Exit Function
 Do
 
-Select Case AscW(Mid$(S$, i, 1))
+Select Case AscW(Mid$(s$, i, 1))
 Case 34
 Do While i < c
 i = i + 1
-If AscW(Mid$(S$, i, 1)) = 34 Then Exit Do
+If AscW(Mid$(s$, i, 1)) = 34 Then Exit Do
 Loop
 Case 123
 j = j - 1
@@ -8559,7 +8557,7 @@ End Property
 Public Property Let BracketsForArrays(ByVal RHS As Boolean)
 Brackets = RHS
 End Property
-Function BlockParam4(S$, pos As Long, what As Long) As Boolean
+Function BlockParam4(s$, pos As Long, what As Long) As Boolean
 ' need to be open
 Dim i As Long, j As Long, ii As Long
 If what = 91 Then
@@ -8567,19 +8565,19 @@ j = 1000
 Else
 j = 1
 End If
-For i = pos To Len(S$)
-Select Case AscW(Mid$(S$, i, 1))
+For i = pos To Len(s$)
+Select Case AscW(Mid$(s$, i, 1))
 Case 0
 Exit For
 Case 34
 again:
-ii = InStr(i + 1, S$, """")
+ii = InStr(i + 1, s$, """")
 
 If ii = 0 Then Exit Function
 
  i = ii
-If Mid$(S$, ii - 1, 1) = Chr$(34) Then GoTo again
-If Mid$(S$, ii - 1, 1) = "\" Then GoTo again
+If Mid$(s$, ii - 1, 1) = Chr$(34) Then GoTo again
+If Mid$(s$, ii - 1, 1) = "\" Then GoTo again
 Case 91
 If WordOnly Then
 j = j + 1000
@@ -8596,7 +8594,7 @@ j = j - 1
 If j = 0 Then Exit For
 Case 123
 i = i + 1
-If blockStringPOS(S$, i) Then
+If blockStringPOS(s$, i) Then
 Else
 i = 0
 End If
@@ -8620,11 +8618,11 @@ Else
 LineCommandSep = Myleft$(RHS, 1)
 End If
 End Property
-Private Function MyTrimRNoCr(S$) As Long
+Private Function MyTrimRNoCr(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(S): If l = 0 Then MyTrimRNoCr = 1: Exit Function
-  p2 = StrPtr(S): l = l - 1
+  l = Len(s): If l = 0 Then MyTrimRNoCr = 1: Exit Function
+  p2 = StrPtr(s): l = l - 1
   p4 = p2 + l * 2
   For i = p4 To p2 Step -2
   GetMem2 i, p1
@@ -8637,11 +8635,11 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimRNoCr = l + 2
 End Function
-Private Function MyTrimL2NoTab(S$) As Long
+Private Function MyTrimL2NoTab(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(S): If l = 0 Then MyTrimL2NoTab = 0: Exit Function
-  p2 = StrPtr(S): l = l - 1
+  l = Len(s): If l = 0 Then MyTrimL2NoTab = 0: Exit Function
+  p2 = StrPtr(s): l = l - 1
   p4 = p2 + l * 2
   For i = p2 To p4 Step 2
   GetMem2 i, p1

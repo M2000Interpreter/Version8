@@ -218,6 +218,8 @@ Attribute TEXT1.VB_VarHelpID = -1
 Public EditTextWord As Boolean
 ' by default EditTextWord is false, so we look for identifiers not words
 Private Pad$, s$
+Private Declare Function DefWindowProcW Lib "user32" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+
 Private LastDocTitle$, para1 As Long, PosPara1 As Long, Para2 As Long, PosPara2 As Long, Para3 As Long, PosPara3 As Long
 Public ShadowMarks As Boolean
 Private nochange As Boolean, LastSearchType As Long
@@ -278,24 +280,11 @@ End Property
 
 
 Public Property Let CaptionW(ByVal NewValue As String)
-    Static WndProc As Long, VBWndProc As Long
-    'If NewValue = vbnullstring Then NewValue = "M2000"
+
     m_Caption = NewValue
-
-    If WndProc = 0 Then
-        WndProc = GetProcAddress(GetModuleHandleW(StrPtr("user32")), "DefWindowProcW")
-        VBWndProc = GetWindowLongA(hWnd, GWL_WNDPROC)
-    End If
+DefWindowProcW Me.hWnd, &HC, 0, ByVal StrPtr(NewValue)
 
 
-    If WndProc <> 0 Then
-        SetWindowLongW hWnd, GWL_WNDPROC, WndProc
-        SetWindowTextW hWnd, StrPtr(m_Caption)
-        SetWindowLongA hWnd, GWL_WNDPROC, VBWndProc
-    Else
-        Caption = m_Caption
-       
-    End If
 End Property
 Public Function commandW() As String
 Static mm$
@@ -820,7 +809,6 @@ End If
 prof1.MARKONE
 If TEXT1.mDoc.DocParagraphs > 50 Then
 TEXT1.glistN.SuspDraw = True
-TEXT1.mDoc.busy = True
 End If
 i1 = el
 l = i1 + addthat
@@ -928,7 +916,6 @@ End If
 TEXT1.mDoc.lcid = OldLcid
 If w2 > 0 Then TEXT1.mDoc.WrapAgainBlock w2, w2:  TEXT1.mDoc.ColorThis w2
 TEXT1.glistN.SuspDraw = False
-TEXT1.mDoc.busy = False
 TEXT1.Render
 
 End Sub
@@ -1295,12 +1282,7 @@ Case vbKeyV
     If ctrl And (shift And &H2) = 2 Then
         Pad$ = GetTextData(CF_UNICODETEXT)
         If Pad$ <> "" Then
-          '  For i = 1 To Len(pad$)
-              '  If Asc(Mid$(pad$, i, 1)) > 31 Then
                 INK$ = Pad$
-              '  Exit Sub
-             '   End If
-           ' Next i
         End If
          KeyCode = 0
         Exit Sub

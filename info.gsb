@@ -4581,7 +4581,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
 	Print
 	Normal
-	Report " A collection of modules for tests version 7.0"
+	Report " A collection of modules for tests version 7.2"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -17109,5 +17109,274 @@ final$="|"
 'Push	final$
 Push hBase
 end sub
+}
+MODULE EXPORTHELP {\\ prepare the groups of help database
+Print "Greek or English Help File:(G/E)"
+Select Case Ucase$(Key$)
+case "G", "Γ"
+      Gr=True : Print "Greek... Περίμενε"
+case "E", "Ε"
+      Gr=False : Print "English...Wait"
+Else Case
+      Break
+End Select
+Flush
+gosub dat
+Read  myGroups
+Dim No(1 to myGroups), name$(1 to myGroups)
+for i=1 to myGroups
+      Read No(i), name$(i)
+      name$(i)=Replace$(chr$(160)," ", name$(i))
+Next
+ 
+Document GreekInfo$, EnglishInfo$, out$ 
+\\ we have to read from application directory
+Dir AppDir$
+For i=1 To myGroups {
+
+     EnglishInfo$=RightPart$(name$(i),", ")
+     GreekInfo$= LeftPart$(name$(i),", ")
+     if  GR Else Swap EnglishInfo$, GreekInfo$
+     GreekInfo$={ - }+EnglishInfo$+{
+     }
+     Print GreekInfo$
+     out$ =  If$(GR->"Ομάδα: ", "Group: ")
+     out$ =  GreekInfo$ 'EnglishInfo$
+     out$ = {
+     }
+     Retrieve "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i)),1,"",""
+     Read mywords
+    
+     If no(i)<>22 or TRUE Then {
+     For j=1 To mywords  {
+            If i=1 then
+                  Retrieve  "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i)) +" ORDER BY [ENGLISH]",j,"","" 
+            Else
+                  Retrieve "HELP2000", "SELECT *FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i))+If$(GR -> ""," ORDER BY [ENGLISH]"),j,"",""
+            End if
+            Drop ' no need this number - is equal to mywords
+            Read GreekName$, HelpText$, EnglishName$, groupnumFrom
+            if  GR Else Swap  GreekName$, EnglishName$
+            if i>1 then
+                  out$ = If$(GR->"Αναγνωριστικό: ", "identifier:  ")
+                  out$ =  GreekName$ + "      ["+ EnglishName$+"]"
+            else
+                  out$ =  "  *  "+Replace$(chr$(160)," ", GreekName$ + "      ["+ EnglishName$+"]")
+            end if
+            out$ =  {
+            }
+            if i>1 then
+                  out$ =  If$(Gr->LeftPart$(HelpText$,"__<ENG>__"), RightPart$(HelpText$,"__<ENG>__"))
+                  out$ =  {
+                  
+                  }
+            end if
+      }
+   }
+   Clear GreekInfo$
+   Clear EnglishInfo$  
+   
+} 
+Print "DONE"
+Flush
+clipboard out$
+dir user
+if Gr then fname$="Γενικά.doc" else fname$="General.doc"
+save.doc out$, fname$
+win dir$+fname$   
+end
+dat:
+Data 24
+Data 22,"ΓΕΝΙΚΑ, GENERAL"
+Data 14,"ΔΙΕΡΜΗΝΕΥΤΗΣ, INTERPRETER"
+Data 15,"ΧΕΙΡΙΣΜΟΣ ΤΜΗΜΑΤΩΝ, MODULE COMMANDS"
+Data 3,"ΡΟΗ ΠΡΟΓΡΑΜΜΑΤΟΣ, FLOW CONTROL"
+Data 9,"ΕΝΤΟΛΕΣ ΣΩΡΟΥ, STACK COMMANDS"
+Data 7,"ΟΡΙΣΜΟΙ, DEFINITIONS"
+Data 25,"ΕΓΓΡΑΦΑ, DOCUMENTS"
+Data 11,"ΧΕΙΡΙΣΜΟΣ ΑΡΧΕΙΩΝ, FILE OPERATIONS"
+Data 8,"ΕΝΤΟΛΕΣ ΚΟΝΣΟΛΑΣ, CONSOLE COMMANDS"
+Data 16,"ΟΘΟΝΗ & ΑΡΧΕΙΑ, SCREEN & FILES"
+Data 24,"ΧΕΙΡΙΣΤΕΣ ΤΗΣ ΤΥΠΩΣΕ, OPERATORS IN PRINT"
+Data 13,"ΣΤΟΧΟΙ & ΕΠΙΛΟΓΗ, TARGET & MENU"
+Data 1,"ΓΡΑΦΙΚΑ 2Δ, DRAWING 2D"
+Data 4,"ΕΝΤΟΛΕΣ ΕΙΚΟΝΩΝ, BITMAP COMMANDS"
+Data 2,"ΒΑΣΕΙΣ ΔΕΔΟΜΕΝΩΝ, DATABASES"
+Data 5,"ΗΧΟΙ & ΤΑΙΝΙΕΣ, SOUNDS AND MOVIES"
+Data 6,"ΕΝΤΟΛΕΣ ΔΕΙΚΤΗ, MOUSE COMMANDS"
+Data 10,"ΕΝΤΟΛΕΣ ΙΣΤΟΥ, BROWSER COMMANDS"
+Data 12,"ΚΟΙΝΕΣ ΦΟΡΜΕΣ, COMMON DIALOGS"
+Data 19,"ΑΡΙΘΜΗΤΙΚΑ, ARITHMETIC FUNCTIONS"
+Data 20,"ΑΛΦΑΡΙΘΜΗΤΙΚΑ, STRING FUNCTIONS"
+Data 21,"ΜΕΤΑΒΛΗΤΕΣ ΣΥΣΤΗΜΑΤΟΣ, VARS READ ONLY"
+Data 23,"ΣΤΑΘΕΡΕΣ, CONSTANTS"
+Data 17,"ΕΚΤΥΠΩΣΕΙΣ, PRINTINGS"
+Print "Dat ok"
+Return
+}
+MODULE CHANGEHELP {      Base 0  \\ for arrays
+      Font "Arial"
+      menu fill 1,11,0
+      menu frame
+      DB.Provider ""  \\ reset
+      Window 12,0
+      Bold 1 : Form 70, 32
+      OldDir$=Dir$  \\ keep direcory
+      Dir AppDir$  \\ Use helpfile from application's Dir
+      Selection=1
+      Document HelpText$   \\ this is an object, = means append
+      {
+            Here = 0
+            Cls #ffd074,0
+            Pen #3c1414 \\dark sienna
+            Menu
+            Retrieve "HELP2000","GROUP", 1,"",""
+            Read Many, NoDummy, nnDummy$
+            Dim No(Many+1)  'redim
+            For i=1 To Many {
+            Retrieve "HELP2000","GROUP", i,"",""
+            Read Many, No(i), P$
+            If Instr(P$,",")=0 Then {
+                  Menu + "Without Description Yet  No"+Str$(No(i))
+            } Else {
+                  Menu + Mid$(P$, Instr(P$,",")+1)
+            }
+      }
+      Print "Prepare the Help Database"
+      Print "Select Group:";
+      Menu Show Selection
+      Selection=Menu
+      If Menu>0 Then {
+            GroupName$=Menu$(Menu)
+            If left$(GroupName$,19)="Without Description" Then  {
+                  Menu "Change Description","Not Now"
+                  If Menu=1 Then {
+                  Retrieve "HELP2000","GROUP", Selection,"",""
+                  Read Many, No(Selection), P$
+                  GroupName$ =Field$(P$, 50)
+                  Field 0,Row+1,50 As GroupName$
+                  Return "HELP2000","GROUP" To Selection, ,GroupName$  
+                  Print
+                  If Instr(P$,",")=0 Then {
+                              GroupName$ = "Without Description Yet  No"+Str$(No(Selection))
+                        } Else {
+                              GroupName$ =  Mid$(P$, Instr(P$,",")+1)
+                        }
+                  }
+            }
+            Print GroupName$
+            Retrieve "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(Selection)),1,"",""
+            Read Many
+            Menu
+            Print "Select identifier:";
+            If Many>0 Then {
+                  Clear HelpText$
+                  Read GreekName$, HelpText$, EnglishName$, GroupNumFrom
+                  Menu + "<New>"
+                  View "HELP2000", "SELECT [ENGLISH] FROM COMMANDS WHERE GROUPNUM ="+Str$(No(Selection))+" ORDER BY [ENGLISH]",1,Many
+                  Sel2=Menu
+                  If Sel2>1 Then {
+                        Print Menu$(Sel2)
+                        Retrieve "HELP2000", "COMMANDS",1,"ENGLISH",Menu$(Sel2)
+                        Cls #fdf5e8,3  \\ paper white
+                        Pen #100c08  \\ smoky black
+                        Read Many
+                        If Many= 0 Then Exit
+                        Clear HelpText$
+                        Read GreekName$, HelpText$, EnglishName$, GroupNumFrom
+                        Print "Greek:";GreekName$ 
+                        Print "English:";EnglishName$
+                        Report HelpText$
+                        Menu
+                        Print @(40);"Choose ";
+                        Menu "Edit Description","Change Group","Pick another","End"
+                        Cls #edca85,3
+                        Pen #3c1414
+                        If Menu=4 Then Exit
+                        If Menu=3 Then Here = True : Exit
+                        If Menu=2 Then {
+                              ChangeGroup(EnglishName$)
+                              Here = True
+                        } Else {
+                              Escape Off
+                              Scroll Split Row
+                              Cls #0077AA
+                              Pen #66DD77
+                              Edit.doc Code HelpText$
+                              Return "HELP2000", "SELECT * FROM [COMMANDS] WHERE ENGLISH LIKE '"+EnglishName$ +"'", ,HelpText$
+                              Escape On
+                              Here=True  
+                        }
+                  } Else.If Sel2=1 Then {
+                        Print "New"
+                        Escape off
+                        Input "Greek:", GreekID$
+                        Input "English:", EnglishID$                      
+                        ''Input ! HelpText$, Width-1, Height-Row-2
+                        Scroll Split Row
+                        Clear HelpText$    ' we need a fresh one
+                        Cls #0077AA
+                        Pen #66DD77
+                        Edit.doc Code HelpText$
+                        Menu
+                        Escape on
+                        Print "Save it?"; : Menu "Yes","No"
+                        If Menu =1 Then {
+                              Append "HELP2000","COMMANDS",GreekID$, HelpText$, EnglishID$, No(Selection) 
+                              Wait 100 
+                        }
+                  Here =True
+                  }     
+            } Else {
+            ' If is empty delete group
+                  Delete "HELP2000","GROUP","GROUPNUM", No(Selection)
+            }
+      }
+      If Here Then Loop
+            Cls #ffd074,0
+      }
+      Dir OldDir$
+      Print "Compress (Y/N) ?"
+      If Ucase$(Key$)="Y" Then Compress()
+      End
+      Sub ChangeGroup(descr2match$)
+            Stack New {
+                  Cls
+                  Menu
+                  Retrieve "HELP2000","GROUP", 1,"",""
+                  Read MANY, No, nn$
+                  For i=1 To MANY {
+                        Retrieve "HELP2000","GROUP", i,"",""
+                        Read MANY, No, P$
+                        Print No, P$
+                  }
+                  Retrieve "HELP2000", "SELECT * FROM [COMMANDS] WHERE ENGLISH LIKE '"+descr2match$+"'",1,"",""
+                  
+                  If Not Empty Then {
+                        Read MANY, GreekName$, HelpText$, EnglishName$, groupnumFrom
+                        Print "ENGLISH:";EnglishName$
+                        Print "No", groupnumFrom
+                        Try ok {
+                              Input "New No:", groupnumTo
+                        }
+                        If Not ok Then exit
+                        If groupnumTo>0 Then {
+                              return "HELP2000","SELECT * FROM [COMMANDS] WHERE ENGLISH = '"+EnglishName$+"'",,,,groupnumTo
+                        }
+                  }
+            }
+      End Sub
+      Sub Compress()
+            Print Part $("#,###,###,###\ \B\y\t\e\s"),FILELEN(AppDir$+"help2000.mdb")
+            Print Under
+            Close Base Lcase$(AppDir$+"help2000.mdb")
+            a$=Dir$
+            Dir AppDir$
+            compress AppDir$+"help2000.mdb"
+            Dir a$
+            Print PART $("#,###,###,###\ \B\y\t\e\s"),FILELEN(AppDir$+"help2000.mdb")
+            Print 
+            Dir User
+      End Sub
 }
 INFO

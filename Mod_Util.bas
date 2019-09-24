@@ -4929,7 +4929,7 @@ If clickMe = 38 Then
          q1 = 1: LASTQUERYLIST = 1
          End If
         MKEY$ = vbNullString
-        INK = String$(RealLen(s$), 8) + Mid$(QUERYLIST, LASTQUERYLIST, q1 - LASTQUERYLIST)
+        INK = String$(Len(s$), 8) + Mid$(QUERYLIST, LASTQUERYLIST, q1 - LASTQUERYLIST)
         LASTQUERYLIST = q1 + 1
 
     ElseIf clickMe = 40 Then
@@ -5113,9 +5113,13 @@ If RealLen(a$, True) = 0 Then
         MKEY$ = vbNullString
         'UINK = VbNullString
         safe$ = a$
-        INK = Chr$(8)
+       INK = Chr$(8) + INK
+    ElseIf a$ = vbNullString Then
+        a$ = a$ + s$
+        safe$ = a$
+       
     Else
-        If s$ = vbNullString Then a$ = " "
+       ' If s$ = vbNullString Then a$ = " "
         GoTo cont12345
     End If
 Else
@@ -9437,8 +9441,8 @@ Dim p2 As Long, p1 As Integer, p4 As Long
     If LL = 2 Then Exit For
     Case 768 To 879
     If LL < 2 Then
-    PopOne = " " + ChrW(p1)
-    s$ = Mid$(s$, LL + 1)
+    PopOne = ChrW(p1)
+    s = Mid$(s, 2)
     Exit Function
     ' nothing
     End If
@@ -21884,5 +21888,91 @@ Unload Form4
 End If
 End If
 Exit Function
+End Function
+Function Funcweak(basestack As basetask, s$, Optional w As Long, Optional lastname As String) As String
+' no validation of names
+' check for "dot"
+Dim ww$, original$, s1$, ww1$, p As Variant, w1 As Long
+again:
+w = IsLabel(basestack, s$, lastname)
+ww$ = lastname$
+ww1$ = ww$
+If w >= 5 Then
+s1$ = "&" + ww$ + ")"
+w1 = IsLabel(basestack, s1$, ww$)
+If w1 = 2 Then
+' IT IS A FUNCTION
+ ww1$ = ww1$ + ")"
+GetSubFullName ww1$, ww$
+If FastSymbol(s$, ")") Then
+If here$ = vbNullString Then
+Funcweak = ww1$
+Else
+Funcweak = here$ + "." + ww1$
+End If
+End If
+ElseIf w1 = 0 Then
+If ISSTRINGA(s1$, ww$) Then
+If FastSymbol(s$, ")") Then
+Funcweak = ww$
+Else
+' check parameters
+'ww$ = ww$ + "("
+again12:
+Do
+
+If IsExp(basestack, s$, p) Then
+ww$ = ww$ + CStr(p)
+ElseIf IsStrExp(basestack, s$, ww1$) Then
+ww$ = ww$ + Chr$(34) + ww1$ + Chr$(34)
+End If
+
+If Not FastSymbol(s$, ",") Then Exit Do
+ww$ = ww$ + ","
+Loop
+If FastSymbol(s$, ")") Then ww$ = ww$ + ")"
+    If FastSymbol(s$, ".") Then ' ............
+        If AscW(s$) > 64 Then
+            If IsLabelOnly(s$, ww1$) > 3 Then
+            ww$ = ww$ + "." + ww1$
+            GoTo again12
+            Else
+             ww$ = ww$ + "." + ww1$
+            End If
+        End If
+    
+    End If
+
+Funcweak = ww$
+End If
+End If
+End If
+Else
+
+s1$ = "&" + ww$
+If IsLabel(basestack, s1$, ww1$) = 0 Then
+
+If s1$ = vbNullString Then
+
+GetSubFullName ww$, ww1$
+Funcweak = ww1$
+Else
+
+If ISSTRINGA(s1$, ww1$) Then
+If FastSymbol(s$, ".") Then
+
+If Right$(ww1$, 1) = "$" Then
+If IsStrExp(basestack, ww1$, ww$) Then
+s$ = ww$ + "." + s$
+GoTo again
+End If
+End If
+End If
+Funcweak = ww1$
+End If
+End If
+End If
+End If
+
 End Function
 

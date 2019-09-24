@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 8
-Global Const Revision = 45
+Global Const Revision = 46
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -11643,13 +11643,15 @@ fstr9: ' "SHORTDIR$(", "лийяос.йатакоцос$("
 fstr10: '"FILTER$(", "жиктяо$("
      If IsStrExp(bstackstr, a$, q$) Then
        If FastSymbol(a$, ",") And IsStrExp(bstackstr, a$, q1$) Then
-       
-     IsStr1 = True
-    r$ = CleanStr(q$, q1$)
-    
+        r$ = CleanStr(q$, q1$)
+        IsStr1 = True
+        Else
+        MissStringExpr
        End If
+       Else
+       MissStringExpr
     End If
-    If Not FastSymbol(a$, ")") Then IsStr1 = False
+    If IsStr1 Then If Not FastSymbol(a$, ")") Then IsStr1 = False
     Exit Function
 fstr11: '"коцос$(", "SPEECH$("
            If IsExp(bstackstr, a$, p) Then
@@ -33262,92 +33264,6 @@ End If
  GetRealRow = mybasket.currow
 End Function
 
-Function Funcweak(basestack As basetask, s$, Optional w As Long, Optional lastname As String) As String
-' no validation of names
-' check for "dot"
-Dim ww$, original$, s1$, ww1$, p As Variant, w1 As Long
-again:
-w = IsLabel(basestack, s$, lastname)
-ww$ = lastname$
-ww1$ = ww$
-If w >= 5 Then
-s1$ = "&" + ww$ + ")"
-w1 = IsLabel(basestack, s1$, ww$)
-If w1 = 2 Then
-' IT IS A FUNCTION
- ww1$ = ww1$ + ")"
-GetSubFullName ww1$, ww$
-If FastSymbol(s$, ")") Then
-If here$ = vbNullString Then
-Funcweak = ww1$
-Else
-Funcweak = here$ + "." + ww1$
-End If
-End If
-ElseIf w1 = 0 Then
-If ISSTRINGA(s1$, ww$) Then
-If FastSymbol(s$, ")") Then
-Funcweak = ww$
-Else
-' check parameters
-'ww$ = ww$ + "("
-again12:
-Do
-
-If IsExp(basestack, s$, p) Then
-ww$ = ww$ + CStr(p)
-ElseIf IsStrExp(basestack, s$, ww1$) Then
-ww$ = ww$ + Chr$(34) + ww1$ + Chr$(34)
-End If
-
-If Not FastSymbol(s$, ",") Then Exit Do
-ww$ = ww$ + ","
-Loop
-If FastSymbol(s$, ")") Then ww$ = ww$ + ")"
-    If FastSymbol(s$, ".") Then ' ............
-        If AscW(s$) > 64 Then
-            If IsLabelOnly(s$, ww1$) > 3 Then
-            ww$ = ww$ + "." + ww1$
-            GoTo again12
-            Else
-             ww$ = ww$ + "." + ww1$
-            End If
-        End If
-    
-    End If
-
-Funcweak = ww$
-End If
-End If
-End If
-Else
-
-s1$ = "&" + ww$
-If IsLabel(basestack, s1$, ww1$) = 0 Then
-
-If s1$ = vbNullString Then
-
-GetSubFullName ww$, ww1$
-Funcweak = ww1$
-Else
-
-If ISSTRINGA(s1$, ww1$) Then
-If FastSymbol(s$, ".") Then
-
-If Right$(ww1$, 1) = "$" Then
-If IsStrExp(basestack, ww1$, ww$) Then
-s$ = ww$ + "." + s$
-GoTo again
-End If
-End If
-End If
-Funcweak = ww1$
-End If
-End If
-End If
-End If
-
-End Function
 Function VariantType(a As Variant) As Integer
     GetMem2 VarPtr(a), VariantType
 End Function
