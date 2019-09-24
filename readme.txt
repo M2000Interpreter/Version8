@@ -1,9 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.8 Revision 44 active-X
-1.  A serius bug when minimize a form removed (happen on later revisions)
-2. Improved more TextEditor and GuiEditBox classes. (the two text editors, with syntax color)
-3. Beter html editor and html validator in info.gsb.  
+Version 9.8 Revision 45 active-X
+1. Fix the html output gor html code
+2. Addition of property HighlightParagraph to Editbox, and property HighlightColor for setting the right color to highlight the current paragraph.
 
 
 

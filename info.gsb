@@ -4018,7 +4018,7 @@ With HelpPad, "NoCenterLineEdit", True, "SetM2000", True, "EditDoc" as HelpEdit 
 \\ we want HelpPad not shown from beginning, so we disable it
 HelpEnabled=false
 
-With Pad, "NoWrap", True, "SetM2000", True, "SelLength" as SelLength
+With Pad, "NoWrap", True, "SetM2000", True, "SelLength" as SelLength, "HighlightParagraph", True
 
 \\ Set labels for menu's headers. and thecolor for check mark/ disable items,  in menus which we have those
 With File1,"label","File"
@@ -4553,7 +4553,7 @@ Declare NotePad Nothing
 Print "Done"
 }
 MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<44 then Error "No proper M2000 revision for version 9.8"
+If Version=9.8 and revision<45 then Error "No proper M2000 revision for version 9.8"
 Font "Verdana"
 PEN 14
 CLS,0
@@ -15280,7 +15280,8 @@ PointerA->SecondbookDB
       PointerA=>ProcessPaperbackBooks &PrintTitle
 \\ PointerA is not a real pointer. Is a weak pointer to a non float group.
 }
-MODULE POPUP {Declare Form1 Form
+MODULE POPUP {title "",0
+Declare Form1 Form
 Declare aPopUpForm Form
 With Form1, "Title", "Hello There"
 With aPopUpForm, "Title", "This is a PopUp Form", "Visible" as PopUpVisible
@@ -15550,18 +15551,18 @@ function cs_choose{
        With Pad, "ColorCollection1", lcase$("|abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield|"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", false, "MultiLineComment1", "/*","MultiLineComment2", "*/"
       With Pad, "WordCharLeft"," ,+-=/*^()[];<>", "WordCharRight"," .,+-=/*^()[];<>","OtherSymbols","@","UseColon",";"
       With Pad,"StartSymbols", "+-&|*=></,.1234567890()'"+chr$(34), "StringSep2","'", "EnablePairs", True, "linespace", 30
-      With Pad, "SearchWords", True, "nowrap", True, "AllowInsertBrackets",  True, "SpaceIndent", 2
+      With Pad, "SearchWords", True, "nowrap", True, "AllowInsertBrackets",  True, "SpaceIndent", 2, "HighlightParagraph", True
       Method Pad, "ReColor"
       Method Pad, "Show"
 }
 
 Function Dark(){  '  13619071
-      With Pad, "ColorSet", 0, "linespace", 60, "SelectionColor", -#FF0000, "SelectionTextColor", -color(14)
+      With Pad, "ColorSet", 0, "linespace", 60, "SelectionColor", -#FF0000, "SelectionTextColor", -color(14), "HighLightColor", -Color(60,60,128)
        Method Pad, "Colors", -color(50,50,50),-color(14),,,-color(0)
       Method Pad, "Show"
 }
 Function Bright(){
-      With Pad, "ColorSet", 1
+      With Pad, "ColorSet", 1, "HighLightColor", -Color(225,255,255)
       Method  Pad, "UserColorSet",0,,,,,,,,-#FF0000
       With Pad, "ColorSet", -1
       Method Pad, "ColorsReset"
@@ -15991,7 +15992,7 @@ With File1,"label","Αρχείο", "listtext" As list$, "list" As list$() '
 With Edit1,"label","Επεξεργασία",  "Mark", Color(255,100,0)
 With Help1,"label","Βοήθεια",  "Mark", Color(255,100,0)
 With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
-With Pad, "Text" As Pad.Text$, "NoColor", False, "ShowAlways", True, "SpaceIndent", 2, "NoCenterLineEdit", true
+With Pad, "Text" As Pad.Text$, "NoColor", False, "ShowAlways", True, "SpaceIndent", 2, "NoCenterLineEdit", true, "HighlightParagraph", True
 Def TitleStr$(a$)=ucase$(left$(a$,1))+mid$(a$,2)
 LastWord$=""
 Filename$=Dir$+"κυκλική_ουρά.glo"

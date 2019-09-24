@@ -803,8 +803,8 @@ If NeoData = vbNullString Then
 If thiscur <> 0 Then NeoData = "<p>" Else thiscur = 1
 Else
 ' put color here
-a$ = ReplaceStr("</", ChrW$(1) + ChrW$(2), NeoData)
-a$ = ReplaceStr("<", ChrW$(3), a$)
+'a$ = ReplaceStr("</", ChrW$(1) + ChrW$(2), NeoData)
+a$ = ReplaceStr("<", ChrW$(3), NeoData)
 a$ = ReplaceStr(">", ChrW$(4), a$)
 a$ = ReplaceStr("  ", ChrW$(7) + ChrW$(7), a$)
 a$ = ReplaceStr(ChrW$(7) + " ", ChrW$(7) + ChrW$(7), a$)
@@ -817,49 +817,50 @@ Do
 If l > 3 Then
 If mColor(l - 3) <> 15 And mColor(l - 3) <> 7 Then
 If mColor(l) - mColor(l - 2) < 1 Then
-If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2)), ChrW$(7), " ") + "</font>"
+If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2)), ChrW$(7), " ") + "</span>"
 Else
-If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)), ChrW$(7), " ") + "</font>"
-End If
-Else
-If l > 1 Then
-    If mColor(l) - mColor(l - 2) < 1 Then
-    NeoData = NeoData + Mid$(a$, mColor(l - 2)) + "</font>"
-    Else
-NeoData = NeoData + Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)) + "</font>"
-End If
-End If
+If l > 1 Then NeoData = NeoData + Replace(Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)), ChrW$(7), " ") + "</span>"
 End If
 Else
 If l > 1 Then
     If mColor(l) - mColor(l - 2) < 1 Then
-    NeoData = NeoData + Mid$(a$, mColor(l - 2)) + "</font>"
+    NeoData = NeoData + Mid$(a$, mColor(l - 2)) + "</span>"
     Else
-    NeoData = NeoData + Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)) + "</font>"
+NeoData = NeoData + Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)) + "</span>"
+End If
+End If
+End If
+Else
+If l > 1 Then
+    If mColor(l) - mColor(l - 2) < 1 Then
+    NeoData = NeoData + Mid$(a$, mColor(l - 2)) + "</span>"
+    Else
+    NeoData = NeoData + Mid$(a$, mColor(l - 2), mColor(l) - mColor(l - 2)) + "</span>"
     End If
 End If
 End If
-NeoData = NeoData + "<font color=" + qu$ + "#" + colortable(mColor(l - 1)) + qu$ + ">"
+NeoData = NeoData + "<span style=" + qu$ + "color: #" + colortable(mColor(l - 1)) + ";" + qu$ + ">"
 
   l = l + 2
 Loop Until l > UBound(mColor())
 If mColor(l - 2) > 0 Then
 If mColor(l - 3) <> 15 And mColor(l - 3) <> 7 Then
-a$ = NeoData + Replace(Mid$(a$, mColor(l - 2)), ChrW$(7), " ") + "</font>"
+a$ = NeoData + Replace(Mid$(a$, mColor(l - 2)), ChrW$(7), " ") + "</span>"
 Else
-a$ = NeoData + Mid$(a$, mColor(l - 2)) + "</font>"
+a$ = NeoData + Mid$(a$, mColor(l - 2)) + "</span>"
 End If
 Else
-a$ = NeoData + "</font>"
+a$ = NeoData + "</span>"
 End If
 
 End If
 
-a$ = ReplaceStr(ChrW$(1) + ChrW$(2), "&lt;/", a$)
+'a$ = ReplaceStr(ChrW$(1), "&lt;", a$)
+'a$ = ReplaceStr(ChrW$(2), "/", a$)
 a$ = ReplaceStr(ChrW$(3), "&lt;", a$)
 a$ = ReplaceStr(ChrW$(4), "&gt;", a$)
 a$ = ReplaceStr(ChrW$(7), "&nbsp;", a$)
-If thiscur <> 0 Then NeoData = "<br>" + a$ Else thiscur = 1: NeoData = a$
+If thiscur <> 0 Then NeoData = "<br />" + a$ Else thiscur = 1: NeoData = a$
 
 End If
 l = Len(NeoData)
