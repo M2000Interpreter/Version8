@@ -25,6 +25,7 @@ Dim maxitems As Long
 Dim maxitems1 As Long
 Dim nmaxitems As Long
 Dim nmaxitems1 As Long
+Public comevents As Boolean
 Public myarrbase As Long
 Public common As Boolean
 Public IHaveClass As Boolean
@@ -50,9 +51,9 @@ Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As 
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
 Private Declare Function VarPtrArray Lib "msvbvm60.dll" Alias "VarPtr" (Ptr() As Any) As Long
-  Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" _
+  Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
-        Private Declare Sub CopyPart Lib "KERNEL32" Alias "RtlMoveMemory" _
+        Private Declare Sub CopyPart Lib "kernel32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
 Private Declare Function SafeArrayGetDim Lib "OleAut32.dll" (ByVal pSA As Long) As Long
 Private Declare Function SafeArrayLock Lib "OleAut32.dll" (ByVal pSA As Long) As Long
@@ -72,6 +73,7 @@ Private Type SAFEARRAY1D
     lLBound As Long
 End Type
 Public index As Long, final As Boolean, refgroup As Object, grouperror As Boolean
+Public RefArray As Variant
 Public Sub Compute0(p As Variant, ss$)
 If final Then CantAssignValue: Exit Sub
 Dim v As Long
@@ -241,7 +243,33 @@ Public Sub PushProp(a As Variant)
 Set GroupRef = a
 Arr = False
 End Sub
-Public Sub CopySerialize(mmm() As Variant)
+Friend Sub ExportArrayNow()
+CopyVariantArray RefArray, actualdata()
+End Sub
+Friend Sub FixArray()
+Dim z As Long, i As Long
+If count <> UBound(actualdata()) - LBound(actualdata) + 1 Then
+i = count
+maxitems1 = UBound(actualdata()) - LBound(actualdata)
+maxitems = maxitems1 + 1
+z = 1
+If dnum > 1 Then
+
+  z = i \ limit(dnum - 1)
+
+   If maxitems Mod z <> 0 Then
+  maxitems = maxitems + z - maxitems Mod z
+  maxitems1 = maxitems - 1
+  ReDim Preserve actualdata(maxitems1)
+  End If
+  limit(dnum - 1) = maxitems \ z
+Else
+limit(0) = maxitems
+End If
+End If
+'
+End Sub
+Friend Sub CopySerialize(mmm() As Variant)
 ' may we get an exception here
 Dim m_base As Long, first12 As Long
 Dim m_base_0 As Long, first12_0 As Long, r1 As Long, r2 As Long
@@ -261,8 +289,9 @@ r2 = SafeArrayUnaccessData(ByVal m_base_0)
 r1 = SafeArrayUnaccessData(ByVal m_base)
 r2 = SafeArrayUnlock(m_base_0)
 r1 = SafeArrayUnlock(m_base)
+
 End Sub
-Public Sub CopyBackSerialize(mmm() As Variant)
+Friend Sub CopyBackSerialize(mmm() As Variant)
 ' may we get an exception here
 Dim m_base As Long, first12 As Long
 Dim m_base_0 As Long, first12_0 As Long, r1 As Long, r2 As Long
@@ -847,8 +876,8 @@ Friend Function bDnum() As Variant
 bDnum = dnum
 End Function
 
-Public Function SerialItem(item As Variant, cursor As Long, command As Long) As Boolean
-If command = 1 Then
+Public Function SerialItem(item As Variant, cursor As Long, Command As Long) As Boolean
+If Command = 1 Then
 If dnum = 0 Then Exit Function
 If cursor < 0 Or cursor >= maxitems Then Exit Function
 If VarType(item) = vbObject Then
@@ -856,18 +885,18 @@ Set actualdata(cursor) = item
 Else
 actualdata(cursor) = item
 End If
-ElseIf command = 2 Then
+ElseIf Command = 2 Then
 If dnum = 0 Then Exit Function
 If cursor < 0 Or cursor >= maxitems Then Exit Function
 item = actualdata(cursor)
-ElseIf command = 3 Then
+ElseIf Command = 3 Then
     Fill item
-ElseIf command = 4 Then
+ElseIf Command = 4 Then
     cursor = maxitems
-ElseIf command = 5 Then
+ElseIf Command = 5 Then
 cursor = dnum
 item = dnum
-ElseIf command = 6 Then
+ElseIf Command = 6 Then
 If cursor > 9 Or cursor < 0 Then
 item = 0
 Else
@@ -877,10 +906,10 @@ Else
 item = limit(cursor)
 End If
 End If
-ElseIf command = 7 Then  'erase all data
+ElseIf Command = 7 Then  'erase all data
 Dim aa As Variant
 Fill aa
-ElseIf command = 8 Then
+ElseIf Command = 8 Then
 If dnum = 1 Then
 If cursor = -1 Then
 dnum = 0 ' no actions
@@ -901,21 +930,21 @@ End If
     limit(0) = maxitems
 
 End If
-ElseIf command = 9 Then
+ElseIf Command = 9 Then
 If dnum = 1 Then
     ReDim Preserve actualdata(cursor) As Variant
     maxitems = cursor - 1
     limit(0) = maxitems
 End If
 maxitems1 = maxitems - 1
-ElseIf command = 10 Then
+ElseIf Command = 10 Then
    
     ReDim Preserve actualdata(cursor) As Variant
     maxitems = cursor
     limit(0) = maxitems
 dnum = 1
 maxitems1 = maxitems - 1
-ElseIf command = 11 Then   ' new from 9.4  rev 4
+ElseIf Command = 11 Then   ' new from 9.4  rev 4
 If cursor > 9 Or cursor < 0 Then
 item = 0
 Else
@@ -925,10 +954,10 @@ Else
 item = limBase(cursor)
 End If
 End If
-ElseIf command = 12 Then   ' new from 9.4  rev 4
-    For command = 0 To 9
-        limBase(command) = cursor
-    Next command
+ElseIf Command = 12 Then   ' new from 9.4  rev 4
+    For Command = 0 To 9
+        limBase(Command) = cursor
+    Next Command
     myarrbase = cursor
 End If
 SerialItem = True
@@ -959,6 +988,9 @@ End Function
 Public Property Get itemPtr(curitem As Long) As Long
 itemPtr = VarPtr(actualdata(curitem))
 End Property
+Friend Sub CopyVariantArray(ByRef a As Variant, ByRef b As Variant)
+    CopyMemory ByVal VarPtr(a), ByVal VarPtr(b), 16
+End Sub
 Friend Sub SwapItem(curitem As Long, thisvariant)
 SwapVariant actualdata(curitem), thisvariant
 End Sub
@@ -1296,6 +1328,7 @@ ReDim actualdata(0)
 CodeName = GetAnyName$
 Arr = True
 myarrbase = -ArrBase
+RefArray = 0&
 End Sub
 
 Private Sub Class_Terminate()

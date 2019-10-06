@@ -37,7 +37,7 @@ Private Type SAFEARRAY1D
 End Type
 Private Width As Long, Height As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 Sub Costruct(ByteLen As Long, Optional Times As Long = 1, Optional clearme As Long = 0, Optional executable As Boolean = False, Optional thatbasicitem As Integer)
 
 If mItems <> 0 Then ErrorMes = 1: Exit Sub
@@ -109,8 +109,8 @@ End Sub
 Public Property Get ItemsAreStrings() As Boolean
 ItemsAreStrings = BasicItem = vbString
 End Property
-Public Property Get WhatAreBasicItem() As Integer
-WhatAreBasicItem = BasicItem
+Public Property Get WhatIsBasicItem() As Integer
+WhatIsBasicItem = BasicItem
 End Property
 
 Public Property Get GetBytePtr(offset As Variant) As Long
@@ -155,16 +155,17 @@ If mExecBloc Then
     
 End If
 End Property
-Public Function ValidArea(ByVal ThisStart As Long, ByVal ThisWidth As Double) As Boolean
-Dim a As Double
+Public Function ValidArea(ByVal ThisStart, ByVal ThisWidth) As Boolean
+Dim a As Currency
 ' ThisStart is a sign long which hold same bits with Unsigned address
 If ErrorMes = 0 And mItems > 0 Then
-a = uintnew(CDbl(mPtr))  ' make mptr an Unsigned as double
+a = uintnew(CCur(mPtr))   ' make mptr an Unsigned
 If ThisStart = 0 Then
     ThisStart = a
 Else
-    ThisStart = uintnew(CDbl(ThisStart))
+    ThisStart = uintnew(ThisStart)
 End If
+ThisWidth = CCur(ThisWidth)
 ' we have to make both Unsigned and then check them
 If ThisStart - a >= 0 Then
 If mExecBloc Then
@@ -181,7 +182,7 @@ Public Function ValidArea2(ByVal ThisOffsetU As Double, ByVal ThisWidth As Doubl
 If ErrorMes = 0 And mItems > 0 Then
 If ThisOffsetU >= 0 Then
 If mExecBloc Then
-If ThisOffsetU * ItemLen + ThisWidth <= BlockSize(mPtr) Then ValidArea2 = True
+If ThisOffsetU * ItemLen + ThisWidth <= uintnew2(CDbl(BlockSize(mPtr))) Then ValidArea2 = True
 Else
 If ThisOffsetU * ItemLen + ThisWidth <= mBytes Then ValidArea2 = True
 End If
@@ -367,7 +368,7 @@ Public Function DrawSpriteToHdc(bstack As basetask, sprt As Boolean, angle!, zoo
     CopyMemory ByVal VarPtrArray(a), 0&, 4
  
 End Function
-Public Function DrawImageToHdc(where As Object, Optional x As Long = 0&, Optional y As Long = 0&, Optional Width As Long = -1, Optional Height As Long = -1) As Boolean
+Public Function DrawImageToHdc(where As Object, Optional X As Long = 0&, Optional Y As Long = 0&, Optional Width As Long = -1, Optional Height As Long = -1) As Boolean
    Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
      With a1
         .cbElements = 1
@@ -377,7 +378,7 @@ Public Function DrawImageToHdc(where As Object, Optional x As Long = 0&, Optiona
         .pvData = Me.GetPtr(0)
     End With
     CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
-    DrawImageToHdc = DrawImageFromBuffer(a(), where.hDC, x, y, Width, Height)
+    DrawImageToHdc = DrawImageFromBuffer(a(), where.hDC, X, Y, Width, Height)
     
     CopyMemory ByVal VarPtrArray(a), 0&, 4
  

@@ -138,7 +138,7 @@ End Sub
 
 Private Sub TaskInterface_Tick()
 On Error Resume Next
- Dim x As Long, mycnt As Long, ohere$, look As Boolean, ok As Boolean
+ Dim X As Long, mycnt As Long, ohere$, look As Boolean, ok As Boolean
  Static offset As Double
  Dim NowProcess As basetask
  Set NowProcess = myProcess
@@ -161,12 +161,12 @@ End If
             End If
             ohere$ = here$
             here$ = myHere$
-            x = 1
+            X = 1
             look = True
             
 Set NowProcess.Owner = myOwner
 If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner)): mStep = True
- Call executeblock(x, NowProcess, mybuf$, False, look, Interrupted, True)
+ Call executeblock(X, NowProcess, mybuf$, False, look, Interrupted, True)
   If Not (NowProcess Is Nothing) Then Set myOwner = NowProcess.Owner
         If Len(mybuf$) < 3 Then
             mybuf$ = vbNullString
@@ -176,14 +176,14 @@ If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner)): mStep 
       
     If Not look Then GoTo conthere
      End If
-       If LastErNum <> 0 Or x = 0 Then
+       If LastErNum <> 0 Or X = 0 Then
        mStep = False
        myDone = True
        End If
-        If x = 3 Then x = 1: look = False
+        If X = 3 Then X = 1: look = False
         If ProcessEnd Then Exit Sub
         
-        If (x = 1 Or (x = 2 And mybuf$ = vbNullString)) And look = True Then
+        If (X = 1 Or (X = 2 And mybuf$ = vbNullString)) And look = True Then
         
             If NowProcess.Parent.exist(myid, "_multi") Then
                 mStep = False
@@ -203,7 +203,7 @@ If Interrupted Then SetTextBasketBack myOwner, players(GetCode(myOwner)): mStep 
 conthere:
 If NOEXECUTION Then GoTo there
                 here$ = ohere$
-        If x = 0 Then
+        If X = 0 Then
         myDone = True
         
         End If

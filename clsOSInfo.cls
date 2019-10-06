@@ -8,9 +8,9 @@ BEGIN
 END
 Attribute VB_Name = "clsOSInfo"
 Attribute VB_GlobalNameSpace = False
-Attribute VB_Creatable = True
+Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
-Attribute VB_Exposed = False
+Attribute VB_Exposed = True
 Attribute VB_Ext_KEY = "SavedWithClassBuilder6" ,"Yes"
 Attribute VB_Ext_KEY = "Top_Level" ,"Yes"
 Option Explicit
@@ -237,7 +237,7 @@ Private Sub Class_Initialize()
     Dim dec             As Single
     Dim ProductType     As Long
     Dim lRet            As Long
-    Dim pos             As Long
+    Dim Pos             As Long
     Dim tmp             As String
     Dim hLib            As Long
     Dim dwMajor         As Long
@@ -272,8 +272,8 @@ Private Sub Class_Initialize()
         Set colOS = oWMI.ExecQuery("Select * from Win32_OperatingSystem")
         
         For Each oOS In colOS
-            pos = InStr(oOS.Version, ".")
-            If pos = 0 Then
+            Pos = InStr(oOS.Version, ".")
+            If Pos = 0 Then
                 osi.dwMajorVersion = CLng(oOS.Version)
                 osi.dwMinorVersion = 0
                 osi.dwBuildNumber = 0
@@ -1613,7 +1613,7 @@ End Property
 '        Error handler
 '###############################
 
-Function ErrorMsg(ByVal ErrObj As ErrObject, ParamArray CodeModule())
+Friend Function ErrorMsg(ByVal ErrObj As ErrObject, ParamArray CodeModule())
     'some error handler wrapper
     Dim Other$, i&
     For i = 1 To UBound(CodeModule)

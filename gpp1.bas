@@ -137,12 +137,12 @@ End Type
       Private Declare Function ClosePrinter Lib "winspool.drv" _
       (ByVal hPrinter As Long) As Long
 
-      Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" _
+      Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
-      Private Declare Function GlobalLock Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalUnlock Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalAlloc Lib "KERNEL32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
-Private Declare Function GlobalFree Lib "KERNEL32" (ByVal hMem As Long) As Long
+      Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
 Const GMEM_MOVEABLE = &H2
 Const GMEM_ZEROINIT = &H40
 
@@ -174,26 +174,26 @@ End Sub
 
       Function ShowProperties(F As Object, szPrinterName As String, adevmode() As Byte) As Boolean
       Dim hPrinter As Long, i As Long
-      Dim nsize As Long
+      Dim nSize As Long
      '' Dim pDevMode As DEVMODE
      ' Dim adevmode() As Byte
       Dim TempStr As String, oldfields As Long
       Dim pd As PRINTER_DEFAULTS
       pd.DesiredAccess = PRINTER_ACCESS_USE
         If OpenPrinter(szPrinterName, hPrinter, pd) <> 0 Then
-           nsize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, NULLPTR, NULLPTR, 0)
+           nSize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, NULLPTR, NULLPTR, 0)
           ' Form1.Caption = nSize
-          If nsize < 1 Then
+          If nSize < 1 Then
             ShowProperties = False
             Exit Function
           End If
           
-          If UBound(adevmode) <> nsize + 100 Then
-         ReDim adevmode(1 To nsize + 100) As Byte
+          If UBound(adevmode) <> nSize + 100 Then
+         ReDim adevmode(1 To nSize + 100) As Byte
          
-           nsize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, adevmode(1), ByVal NULLPTR, DM_OUT_BUFFER)
+           nSize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, adevmode(1), ByVal NULLPTR, DM_OUT_BUFFER)
           
-          If nsize < 0 Then
+          If nSize < 0 Then
             ShowProperties = False
             Exit Function
           End If
@@ -204,9 +204,9 @@ End Sub
       '' Call CopyMemory(adevmode(1), pDevMode, Len(pDevMode))
    End If
          If Not F Is Nothing Then
-          nsize = DocumentProperties(F.hWnd, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_IN_BUFFER Or DM_OUT_BUFFER)  '
+          nSize = DocumentProperties(F.hWnd, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_IN_BUFFER Or DM_OUT_BUFFER)  '
          Else
-         nsize = DocumentProperties(0, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_IN_BUFFER Or DM_OUT_BUFFER)
+         nSize = DocumentProperties(0, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_IN_BUFFER Or DM_OUT_BUFFER)
         End If
 
        ''  Call CopyMemory(pDevMode, adevmode(1), Len(pDevMode))
@@ -262,31 +262,31 @@ End Function
 
 Function ChangeOrientation(F As Object, szPrinterName As String, adevmode() As Byte) As Boolean
       Dim hPrinter As Long, i As Long
-      Dim nsize As Long
+      Dim nSize As Long
       Dim pDevMode As DEVMODE
       Dim TempStr As String, oldfields As Long
       Dim pd As PRINTER_DEFAULTS
       pd.DesiredAccess = PRINTER_ACCESS_USE
         If OpenPrinter(szPrinterName, hPrinter, pd) <> 0 Then
-           nsize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, _
+           nSize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, _
            NULLPTR, NULLPTR, 0)
-          If nsize < 1 Then
+          If nSize < 1 Then
             ChangeOrientation = False
             Exit Function
           End If
-          If UBound(adevmode) <> nsize Then
-         ReDim adevmode(1 To nsize) As Byte
+          If UBound(adevmode) <> nSize Then
+         ReDim adevmode(1 To nSize) As Byte
          
-           nsize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, adevmode(1), ByVal NULLPTR, DM_OUT_BUFFER)
+           nSize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, adevmode(1), ByVal NULLPTR, DM_OUT_BUFFER)
           
-          If nsize < 0 Then
+          If nSize < 0 Then
             ChangeOrientation = False
             Exit Function
           End If
    
    End If
          If Not F Is Nothing Then
-          nsize = DocumentProperties(F.hWnd, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_OUT_BUFFER Or DM_IN_BUFFER)
+          nSize = DocumentProperties(F.hWnd, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_OUT_BUFFER Or DM_IN_BUFFER)
          Else
 
       
@@ -296,7 +296,7 @@ Function ChangeOrientation(F As Object, szPrinterName As String, adevmode() As B
      Call CopyMemory(adevmode(1), pDevMode, Len(pDevMode))
       
       
-         nsize = DocumentProperties(0, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_IN_BUFFER Or DM_OUT_BUFFER)
+         nSize = DocumentProperties(0, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_IN_BUFFER Or DM_OUT_BUFFER)
         End If
 
          Call CopyMemory(pDevMode, adevmode(1), Len(pDevMode))
@@ -397,7 +397,7 @@ Else
 uintnew3 = CDbl(a)
 End If
 End Function
-Function uintnew1(a As Long) As Currency
+Function uintnew1(a As Long) As Currency   ' uintnew1(cUlng(add32(2147483647@, 2147483647@)))=4294967294
 If a < 0 Then
 uintnew1 = 4294967296@ + CCur(a)
 Else

@@ -40,16 +40,16 @@ Private Declare Function UrlCanonicalizeApi Lib "shlwapi" Alias "UrlCanonicalize
     ByVal pszCanonicalized As Long, _
     pcchCanonicalized As Long, _
     ByVal dwFlags As Long) As Long
-Public Function ApiCanonicalize(ByVal Url As String, Optional dwFlags As Long = 0) As String
-    Url = Left$(Url, INTERNET_MAX_URL_LENGTH)
+Public Function ApiCanonicalize(ByVal url As String, Optional dwFlags As Long = 0) As String
+    url = Left$(url, INTERNET_MAX_URL_LENGTH)
    Dim dwSize As Long, res As String
    
-   If Len(Url) > 0 Then
+   If Len(url) > 0 Then
    
       ApiCanonicalize = space$(INTERNET_MAX_URL_LENGTH)
       dwSize = Len(ApiCanonicalize)
      
-      If UrlCanonicalizeApi(StrPtr(Url), _
+      If UrlCanonicalizeApi(StrPtr(url), _
                     StrPtr(ApiCanonicalize), _
                     dwSize, _
                     dwFlags) = 0 Then
@@ -95,22 +95,22 @@ Public Function GetUrlPort(ByVal Address As String) As String
 
 End Function
 Public Function URLDecode( _
-    ByVal Url As String, _
-    Optional ByVal PlusSpace As Boolean = True, Optional flags As Long = 0) As String
-    Url = Left$(Url, INTERNET_MAX_URL_LENGTH)
+    ByVal url As String, _
+    Optional ByVal PlusSpace As Boolean = True, Optional Flags As Long = 0) As String
+    url = Left$(url, INTERNET_MAX_URL_LENGTH)
     Dim cchUnescaped As Long
-    Dim HRESULT As Long
+    Dim hResult As Long
     
-    If PlusSpace Then Url = Replace$(Url, "+", " ")
-    cchUnescaped = Len(Url)
+    If PlusSpace Then url = Replace$(url, "+", " ")
+    cchUnescaped = Len(url)
     URLDecode = String$(cchUnescaped, 0)
-    HRESULT = UrlUnescape(StrPtr(Url), StrPtr(URLDecode), cchUnescaped, flags)
-    If HRESULT = E_POINTER Then
+    hResult = UrlUnescape(StrPtr(url), StrPtr(URLDecode), cchUnescaped, Flags)
+    If hResult = E_POINTER Then
         URLDecode = String$(cchUnescaped, 0)
-        HRESULT = UrlUnescape(StrPtr(Url), StrPtr(URLDecode), cchUnescaped, flags)
+        hResult = UrlUnescape(StrPtr(url), StrPtr(URLDecode), cchUnescaped, Flags)
     End If
     
-    If HRESULT <> S_OK Then
+    If hResult <> S_OK Then
         MyEr "can't decode this url", "δεν μπορώ να αποκωδικοποιήσω την διεύθυνση"
         Exit Function
     End If
@@ -119,23 +119,23 @@ Public Function URLDecode( _
 End Function
 
 Public Function URLEncode( _
-    ByVal Url As String, _
+    ByVal url As String, _
     Optional ByVal SpacePlus As Boolean = True) As String
-    Url = Left$(Url, INTERNET_MAX_URL_LENGTH)
+    url = Left$(url, INTERNET_MAX_URL_LENGTH)
     Dim cchEscaped As Long
-    Dim HRESULT As Long
+    Dim hResult As Long
     If SpacePlus Then
       
-        Url = Replace$(Url, " ", "+")
+        url = Replace$(url, " ", "+")
     End If
-    cchEscaped = Len(Url) * 1.5
+    cchEscaped = Len(url) * 1.5
     URLEncode = String$(cchEscaped, 0)
-    HRESULT = UrlEscape(StrPtr(Url), StrPtr(URLEncode), cchEscaped, URL_ESCAPE_PERCENT + &H40000)
-    If HRESULT = E_POINTER Then
+    hResult = UrlEscape(StrPtr(url), StrPtr(URLEncode), cchEscaped, URL_ESCAPE_PERCENT + &H40000)
+    If hResult = E_POINTER Then
         URLEncode = String$(cchEscaped, 0)
-        HRESULT = UrlEscape(StrPtr(Url), StrPtr(URLEncode), cchEscaped, URL_ESCAPE_PERCENT + &H40000)
+        hResult = UrlEscape(StrPtr(url), StrPtr(URLEncode), cchEscaped, URL_ESCAPE_PERCENT + &H40000)
     End If
-    If HRESULT <> S_OK Then
+    If hResult <> S_OK Then
       Exit Function
     End If
     
@@ -405,6 +405,23 @@ End Function
 'Public Function RemoveIllegals(ByVal pstrCheckString As String) As String
      
 'End Function
+Public Function GetHost(url$) As String
+        Dim w As Long
+        GetHost = GetDomainName(url$, True)
+        If GetHost <> vbNullString Then
+        If Left$(GetHost, 1) <> "[" Then
+            w = InStr(GetHost, "@")
+            If w > 0 Then GetHost = Mid$(GetHost, w + 1)
+            If GetHost <> vbNullString Then
+                 w = InStr(GetHost, ":")
+                If w > 0 Then GetHost = Left$(GetHost, w - 1)
+            End If
+        Else
+            w = InStr(GetHost, "]")
+            GetHost = Mid$(GetHost, 2, w - 2)
+        End If
+        End If
+End Function
 Public Function RemoveRootName(ByVal pstrPath As String, _
                                ByVal pblnGetLowestLevelName As Boolean) _
                               As String

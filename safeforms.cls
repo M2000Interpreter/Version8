@@ -20,7 +20,10 @@ j = Forms.count
 While j > 0
 For i = start To Forms.count - 1
 If mylist.ExistKey(Forms(i).hWnd) Then
-If mylist.Value = "" Then Unload Forms(i): start = i: Exit For
+If mylist.Value = "" Then
+Forms(i).icon = LoadPicture("")
+Unload Forms(i): start = i: Exit For
+End If
 End If
 Next i
 j = j - 1

@@ -429,6 +429,9 @@ End If
 undomode = 0
 End If
 End Sub
+Public Sub dothis()
+glistN.MarkWord
+End Sub
 Public Sub insertbrackets()
 Dim i As Long, j As Long, ss$, idnt$, tc As Long
 Dim ww As Long
@@ -437,6 +440,7 @@ ClearRedo
 PushUndo
 glistN_MarkDelete False
 ss$ = undotext
+undoprev = True
 End If
 Dim a$
 If glistN.UseTab Then
@@ -446,9 +450,9 @@ tc = EditTabWidth
 End If
 glistN.enabled = False
     a$ = Myleft(CurrentParagraph, Charpos)
-    If MyTrimL2NoTab(a$) = 1 And tc = 0 Then
-   
-     tc = Int(glistN.UserControlTextWidthPixels(Chr(9)) / glistN.UserControlTextWidthPixels("m") * 2)
+    
+    If MyTrimL2NoTab(a$) <> 1 And Len(a$) > 0 And tc = 0 Then
+      tc = Int(glistN.UserControlTextWidthPixels(Chr(9)) / glistN.UserControlTextWidthPixels("m") * 2)
     End If
     If tc = 0 Then
 
@@ -516,6 +520,18 @@ End Sub
 
 Private Sub glistN_DragOverCursor(ok As Boolean)
 ok = True
+End Sub
+
+Private Sub glistN_Fkey(a As Integer)
+Dim s$
+If Me.UsedAsTextBox Then
+If FK$(a) <> "" Then
+    s$ = FK$(a)
+    interpret basestack1, s$
+Fkey = 0
+End If
+a = 0
+End If
 End Sub
 
 Private Sub glistN_getpair(a As String, b As String)
@@ -1225,7 +1241,7 @@ End If
 AddUndo ""
 If UsedAsTextBox Then
 Pad$ = GetNextLine((Pad$))
-If Len(Text) + Len(Pad$) > glistN.maxchar Then
+If Len(Text) + Len(Pad$) - SelLength > glistN.maxchar Then
 Pad$ = Left$(Pad$, glistN.maxchar - Len(Text))
 End If
 End If

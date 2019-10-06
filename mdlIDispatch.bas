@@ -136,7 +136,15 @@ passhere:
                 ReDim varArr(0 To items - 1 + fixnamearg)
                
                 For lngLoop = 0 To items - 1 + fixnamearg
+                If Not MyIsNumericPointer(pArgs(lngLoop)) Then
+                If TypeOf pArgs(lngLoop) Is mArray Then
+                    SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop).RefArray
+                Else
+                 SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop)
+                End If
+                Else
                     SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop)
+                    End If
                 Next
               With params
                     .cArgs = items + fixnamearg
@@ -235,12 +243,12 @@ conthere:
                    pobjTarget.Modal = mycodeid
                    Dim X As Form, z As Form, zz As Form
                    Set zz = Screen.ActiveForm
-                   If zz.name = "Form3" Then
+                   If zz.Name = "Form3" Then
                    Set zz = zz.lastform
                    End If
                    If Not pobjTarget.IamPopUp Then
                         For Each X In Forms
-                            If X.Visible And X.name = "GuiM2000" Then
+                            If X.Visible And X.Name = "GuiM2000" Then
                                 If Not X Is pobjTarget Then
                                     If X.Enablecontrol Then
                                         X.Modal = mycodeid
@@ -301,7 +309,7 @@ conthere:
                 End If
                 Set z = Nothing
                 For Each X In Forms
-                    If X.Visible And X.name = "GuiM2000" Then
+                    If X.Visible And X.Name = "GuiM2000" Then
                         X.TestModal mycodeid
                         If X.Enablecontrol Then Set z = X
                     End If
@@ -366,8 +374,21 @@ End If
                 where = fixnamearg + items - 1 - lngLoop
                 If VariantIsRef(VarPtr(varArr(where))) Then
                 If Not MyIsNumericPointer(pArgs(lngLoop)) Then
+                If Not MyIsNumericPointer(varArr(where)) Then
+                    If VarType(varArr(where)) = 8204 Then
+                        VarByRefClean VarPtr(varArr(where))
+                        Dim mmm As mArray
+                        Set mmm = pArgs(lngLoop)
+                        mmm.FixArray
+                        Set mmm = Nothing
+                        Else
+                        VarByRefCleanRef VarPtr(varArr(where))
+                        SwapVariant varArr(where), pArgs(lngLoop)
+                    End If
+                Else
                     VarByRefCleanRef VarPtr(varArr(where))
                     SwapVariant varArr(where), pArgs(lngLoop)
+                    End If
                 Else
                 VarByRefClean VarPtr(varArr(where))
                 If pArgs(lngLoop) = vbEmpty Then

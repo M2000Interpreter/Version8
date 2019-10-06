@@ -216,6 +216,7 @@ Public TrueVisible As Boolean
 Public WithEvents TEXT1 As TextViewer
 Attribute TEXT1.VB_VarHelpID = -1
 Public EditTextWord As Boolean
+Private Declare Function timeGetTime Lib "winmm.dll" () As Long
 ' by default EditTextWord is false, so we look for identifiers not words
 Private Pad$, s$
 Private Declare Function DefWindowProcW Lib "user32" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
@@ -225,7 +226,7 @@ Public ShadowMarks As Boolean
 Private nochange As Boolean, LastSearchType As Long
 Private Declare Function lstrlenW Lib "kernel32.dll" (ByVal psString As Long) As Long
 Private Declare Function EmptyClipboard Lib "user32" () As Long
-Public MY_BACK As New cDIBSection
+Public MY_BACK As New cDIBSection, Back_Back As New cDIBSection
 Private mynum$
 Dim OneOnly As Boolean
 Public WithEvents HTML As HTMLDocument
@@ -236,7 +237,7 @@ Attribute HTML.VB_VarHelpID = -1
 Private DisStack As basetask
 Private MeStack As basetask
 Dim lookfirst As Boolean, look1 As Boolean
-Private Declare Function GetLocaleInfo Lib "KERNEL32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
+Private Declare Function GetLocaleInfo Lib "kernel32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
 Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not NT?
 Private Const DWL_ANYTHREAD& = 0
 Const LOCALE_ILANGUAGE = 1
@@ -257,12 +258,12 @@ End Type
 End Type
 Public Point2Me As Object
 Public TabControl As Long
-Private Declare Function GetCommandLineW Lib "KERNEL32" () As Long
+Private Declare Function GetCommandLineW Lib "kernel32" () As Long
 
 Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal Ptr As Long, ByVal Value As Long)
 Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal Ptr As Long, ByVal Length As Long) As Long
-Private Declare Function GetModuleHandleW Lib "KERNEL32" (ByVal lpModuleName As Long) As Long
-Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
+Private Declare Function GetModuleHandleW Lib "kernel32" (ByVal lpModuleName As Long) As Long
+Private Declare Function GetProcAddress Lib "kernel32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
 Private Declare Function GetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
 Private Declare Function SetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
@@ -290,7 +291,7 @@ Public Function commandW() As String
 Static mm$
 If mm$ <> "" Then commandW = mm$: Exit Function
 If m_bInIDE Then
-mm$ = command
+mm$ = Command
 Else
 Dim Ptr As Long: Ptr = GetCommandLineW
     If Ptr Then
@@ -302,7 +303,7 @@ Dim Ptr As Long: Ptr = GetCommandLineW
         End If
     End If
     End If
-    If mm$ = vbNullString And command <> "" Then commandW = command Else commandW = mm$
+    If mm$ = vbNullString And Command <> "" Then commandW = Command Else commandW = mm$
 End Function
 
 
@@ -326,7 +327,7 @@ DestroyCaret
 End If
 End Sub
 
-Private Sub DIS_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
+Private Sub DIS_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -348,7 +349,7 @@ DestroyCaret
 End If
 End Sub
 
-Private Sub dSprite_OLEDragOver(index As Integer, data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
+Private Sub dSprite_OLEDragOver(index As Integer, Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -432,7 +433,7 @@ DestroyCaret
 End If
 End Sub
 
-Private Sub Form_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
+Private Sub Form_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -1316,7 +1317,7 @@ If BreakMe Then Exit Sub
 Unload NeoMsgBox: ASKINUSE = False: Exit Sub
 End If
 BreakMe = True
-If MsgBoxN("Break Key - Hard Reset" + vbCrLf + "Μ2000 - Execution Stop / Τερματισμός Εκτέλεσης", vbYesNo, MesTitle$) <> vbNo Then
+If MsgBoxN(BreakMes, vbYesNo, MesTitle$) <> vbNo Then
 
 MOUT = i
 
@@ -1382,12 +1383,12 @@ End If
 NOEXECUTION = True
 End If
 Case vbKeyF1 To vbKeyF12
-If FKey >= 0 Then FKey = (KeyCode - vbKeyF1 + 1) + 12 * (shift And 1)
-If Abs(FKey) = 1 And ctrl And (shift And &H2) = 2 Then
+If Fkey >= 0 Then Fkey = (KeyCode - vbKeyF1 + 1) + 12 * (shift And 1)
+If Abs(Fkey) = 1 And ctrl And (shift And &H2) = 2 Then
 If lastAboutHTitle <> "" Then abt = True: vH_title$ = vbNullString
 
-FKey = 0: KeyCode = 0: vHelp
-ElseIf FKey = 4 And ctrl And QRY Then
+Fkey = 0: KeyCode = 0: vHelp
+ElseIf Fkey = 4 And ctrl And QRY Then
 interpret DisStack, "END"
 End If
 
@@ -1542,7 +1543,7 @@ ThereIsAPrinter = IsPrinter
 If ThereIsAPrinter Then
 
 pname = Printer.DeviceName
-port = Printer.port
+Port = Printer.Port
 
 End If
 
@@ -1554,21 +1555,21 @@ myBold = False
 
 myCharSet = 0
 With Form1
-.Font.name = MYFONT
+.Font.Name = MYFONT
 .Font.Strikethrough = False
 .Font.Underline = False
 .Font.bold = myBold
-MYFONT = .Font.name
+MYFONT = .Font.Name
     .Font.charset = myCharSet
     .DIS.Font.charset = myCharSet
-    .DIS.Font.name = MYFONT
+    .DIS.Font.Name = MYFONT
     .DIS.Font.bold = myBold
     .TEXT1.Font.charset = myCharSet
-    .TEXT1.Font.name = MYFONT
+    .TEXT1.Font.Name = MYFONT
     .TEXT1.Font.bold = myBold
     
     .List1.charset = myCharSet
-    .List1.Font.name = MYFONT
+    .List1.Font.Name = MYFONT
     .List1.FontBold = myBold
      
 End With
@@ -1862,7 +1863,7 @@ conthere:
 
       If basestack1.Owner Is Nothing Then GoTo nExit
 If basestack1.Owner.Visible = True Then basestack1.Owner.Refresh Else basestack1.Owner.Visible = True
-    FKey = 0
+    Fkey = 0
     If pagio$ = "GREEK" Then
     FK$(13) = "ΣΥΓΓΡΑΦΕΑΣ"
     Else
@@ -2120,7 +2121,7 @@ If KeyCode = vbKeyPause Then
                 Unload NeoMsgBox: ASKINUSE = False: noentrance = False: Exit Sub
                 End If
             BreakMe = True
-            If Form3.ask(basestack1, "Break Key - Hard Reset" & vbCrLf & "Μ2000 - Execution Stop / Τερματισμός Εκτέλεσης") = 1 Then
+            If ask(basestack1, BreakMes) = 1 Then
             
             If AVIRUN Then
             AVI.GETLOST
@@ -2153,7 +2154,9 @@ If TEXT1.UsedAsTextBox Then
 Select Case KeyCode
 Case Is = vbKeyTab And (shift Mod 2 = 1), vbKeyUp
 Result = -1
-Case vbKeyReturn, vbKeyTab, vbKeyDown
+Case vbKeyReturn
+If Use13 Then Result = 13 Else Result = 1
+Case vbKeyTab, vbKeyDown
 Result = 1
 Case Else
 noentrance = False
@@ -2262,7 +2265,7 @@ End If
 End If
 KeyCode = 0
 Case vbKeyF4
-If TEXT1.SelText <> "" Then mscatsub
+If TEXT1.SelText <> "" Then mscatsub Else TEXT1.dothis
 KeyCode = 0
 Case vbKeyF5
 If TEXT1.SelText <> "" Then rthissub shift Mod 2 = 1
@@ -2500,7 +2503,7 @@ End If
 End Sub
 
 
-Private Sub view1_BeforeNavigate2(ByVal pDisp As Object, Url As Variant, flags As Variant, TargetFrameName As Variant, PostData As Variant, Headers As Variant, Cancel As Boolean)
+Private Sub view1_BeforeNavigate2(ByVal pDisp As Object, URL As Variant, Flags As Variant, TargetFrameName As Variant, PostData As Variant, Headers As Variant, Cancel As Boolean)
 If look1 Then
 look1 = False:  lookfirst = False
 
@@ -2513,12 +2516,12 @@ If lookfirst Then look1 = True: view1.Silent = True
 End Sub
 
 
-Private Sub view1_DocumentComplete(ByVal pDisp As Object, Url As Variant)
+Private Sub view1_DocumentComplete(ByVal pDisp As Object, URL As Variant)
    Set HTML = view1.Document
 
 End Sub
 
-Private Sub view1_NavigateComplete2(ByVal pDisp As Object, Url As Variant)
+Private Sub view1_NavigateComplete2(ByVal pDisp As Object, URL As Variant)
 '
 On Error Resume Next
 If look1 Then
@@ -2641,7 +2644,7 @@ On Error Resume Next
 'tf2$ = THISFILE
 needset = False
 Dim MSD As String
-MSD = App.path
+MSD = App.Path
 AddDirSep MSD
 'View1.TabStop = True
 
@@ -2785,7 +2788,7 @@ End Function
 
 
 Public Sub myBreak(basestack As basetask)
-   ClearLoadedForms
+ClearLoadedForms
 Dim cc As Object
 Set cc = New cRegistry
 
@@ -2916,10 +2919,10 @@ Else
         MYFONT = cc.Value
         On Error Resume Next
         
-        Me.Font.name = MYFONT
+        Me.Font.Name = MYFONT
         Me.Font.Italic = False
-        Me.Font.name = MYFONT
-        If Me.Font.name <> MYFONT Then
+        Me.Font.Name = MYFONT
+        If Me.Font.Name <> MYFONT Then
         MYFONT = defFontname
         End If
        
@@ -3224,8 +3227,8 @@ BreakMe = True
 
 
 INK$ = vbNullString
-If MsgBoxN("Break Key - Hard Reset" + vbCrLf + "Μ2000 - Execution Stop / Τερματισμός Εκτέλεσης", vbYesNo, MesTitle$) <> vbNo Then
-                
+If MsgBoxN(BreakMes, vbYesNo, MesTitle$) <> vbNo Then
+                Check2SaveModules = False
                 
                 If AVIRUN Then AVI.GETLOST
                 On Error Resume Next
@@ -3272,4 +3275,250 @@ End Select
 TEXT1.mDoc.ColorEvent = Not TEXT1.NoColor
 
 End Sub
+
+Public Function NeoASK(bstack As basetask) As Double
+If ASKINUSE Then Exit Function
+On Error GoTo recover
+Dim safety As Long
+Dim oldesc As Boolean, zz As Form
+    oldesc = escok
+'using AskTitle$, AskText$, AskCancel$, AskOk$, AskDIB$
+Static once As Boolean
+If once Then Exit Function
+once = True
+ASKINUSE = True
+If Not Screen.ActiveForm Is Nothing Then
+If TypeOf Screen.ActiveForm Is GuiM2000 Then Screen.ActiveForm.UNhookMe
+Set zz = Screen.ActiveForm
+End If
+Dim INFOONLY As Boolean
+k1 = 0
+If AskTitle$ = vbNullString Then AskTitle$ = MesTitle$
+If AskCancel$ = vbNullString Then INFOONLY = True
+If AskOk$ = vbNullString Then AskOk$ = "OK"
+
+
+If Not Screen.ActiveForm Is Nothing Then
+If Screen.ActiveForm Is MyPopUp Then
+   If MyPopUp.LASTActiveForm Is Form1 Then
+        NeoMsgBox.Show , Form1
+        MoveFormToOtherMonitorOnly NeoMsgBox, False
+   ElseIf Not MyPopUp.LASTActiveForm Is Nothing Then
+     NeoMsgBox.Show , MyPopUp.LASTActiveForm
+     MoveFormToOtherMonitorOnly NeoMsgBox, True
+   Else
+    NeoMsgBox.Show , Me
+     MoveFormToOtherMonitorOnly NeoMsgBox, True
+   End If
+ElseIf Screen.ActiveForm Is Form1 Then
+NeoMsgBox.Show , Screen.ActiveForm
+MoveFormToOtherMonitorOnly NeoMsgBox, False
+ElseIf Not Screen.ActiveForm Is Nothing Then
+NeoMsgBox.Show , Screen.ActiveForm
+MoveFormToOtherMonitorOnly NeoMsgBox, True
+Else
+NeoMsgBox.Show , Form3
+MoveFormToOtherMonitorOnly NeoMsgBox, True
+End If
+ElseIf form5iamloaded Then
+MyDoEvents1 Form5
+Sleep 1
+NeoMsgBox.Show , Form5
+MoveFormToOtherMonitorCenter NeoMsgBox
+Else
+NeoMsgBox.Show
+MoveFormToOtherMonitorCenter NeoMsgBox
+End If
+'End If
+On Error Resume Next
+''SleepWait3 10
+Sleep 1
+If Form1.Visible Then
+Form1.Refresh
+ElseIf form5iamloaded Then
+Form5.Refresh
+Else
+MyDoEvents
+End If
+On Error GoTo recover
+If IsWine Then
+    Sleep 1
+    safety = uintnew(timeGetTime) + 30
+    While Not NeoMsgBox.Visible And safety < uintnew(timeGetTime)
+        MyDoEvents
+    Wend
+    
+    If NeoMsgBox.Visible = False Then
+        MyEr "can't open msgbox", "δεν μπορώ να ανοίξω τον διάλογο"
+        GoTo conthere
+        Exit Function
+    End If
+Else
+If Forms.count < 6 Then SleepWaitEdit bstack, 30
+End If
+If AskInput Then
+NeoMsgBox.gList3.SetFocus
+End If
+  If bstack.ThreadsNumber = 0 Then
+    On Error Resume Next
+    If Not (bstack.Owner Is Form1 Or bstack.toprinter) Then If bstack.Owner.Visible Then bstack.Owner.Refresh
+    End If
+    On Error GoTo recover
+    If Not NeoMsgBox.Visible Then
+    NeoMsgBox.Visible = True
+    MyDoEvents
+    End If
+   
+    Dim mycode As Double, oldcodeid As Double, X As Form
+mycode = Rnd * 12312314
+oldcodeid = Modalid
+
+ For Each X In Forms
+                            If X.Visible And X.Name = "GuiM2000" Then
+                     
+                           If X.Enablecontrol Then
+                               X.Modal = mycode
+                                X.Enablecontrol = False
+                            End If
+                            End If
+                    Next X
+                     Set X = Nothing
+If INFOONLY Then
+NeoMsgBox.command1(0).SetFocus
+End If
+Modalid = mycode
+
+Do
+If TaskMaster Is Nothing Then
+      Sleep 1
+      Else
+    
+      If Not TaskMaster.Processing And TaskMaster.QueueCount = 0 Then
+        DoEvents
+      Else
+       TaskMaster.TimerTickNow
+       TaskMaster.StopProcess
+       
+       DoEvents
+       TaskMaster.StartProcess
+       End If
+      End If
+Loop Until NOEXECUTION Or Not ASKINUSE
+Unload NeoMsgBox
+ Modalid = mycode
+k1 = 0
+ BLOCKkey = True
+While KeyPressed(&H1B)
+
+ProcTask2 bstack
+NOEXECUTION = False
+Wend
+recover:
+On Error GoTo recover2
+BLOCKkey = False
+AskTitle$ = vbNullString
+Dim z As Form
+ Set z = Nothing
+
+           For Each X In Forms
+            If X.Visible And X.Name = "GuiM2000" Then
+            If Not X.Enablecontrol Then X.TestModal mycode
+          If X.Enablecontrol Then Set z = X
+            End If
+            Next X
+             Set X = Nothing
+          If Not zz Is Nothing Then Set z = zz
+          
+          If Typename(z) = "GuiM2000" Then
+            z.ShowmeALL
+            z.SetFocus
+            Set z = Nothing
+            ElseIf Not z Is Nothing Then
+            If z.Visible Then z.SetFocus
+          End If
+          Modalid = oldcodeid
+          
+If INFOONLY Then
+NeoASK = 1
+Else
+NeoASK = Abs(AskCancel$ = vbNullString) + 1
+End If
+If NeoASK = 1 Then
+If AskInput Then
+bstack.soros.PushStr AskStrInput$
+End If
+End If
+GoTo conthere
+recover2:
+' fatal error
+NERR = True: NOEXECUTION = True
+conthere:
+BLOCKkey = False
+AskCancel$ = vbNullString
+once = False
+ASKINUSE = False
+INK$ = vbNullString
+escok = oldesc
+Exit Function
+
+
+
+End Function
+
+Public Function ask(bstack As basetask, a$) As Double
+If ASKINUSE Then Exit Function
+DialogSetupLang DialogLang
+AskText$ = a$
+ask = NeoASK(bstack)
+
+End Function
+
+Sub mywait(bstack As basetask, PP As Double, Optional SLEEPSHORT As Boolean = False)
+Dim p As Boolean, e As Boolean
+On Error Resume Next
+If bstack.Process Is Nothing Then
+''If extreme Then MyDoEvents1 Form1
+If PP = 0 Then Exit Sub
+Else
+
+Err.clear
+p = bstack.Process.Done
+If Err.Number = 0 Then
+e = True
+If p <> 0 Then
+Exit Sub
+End If
+End If
+End If
+
+PP = PP + CDbl(timeGetTime)
+
+Do
+
+
+
+
+
+        If Form1.DIS.Visible And Not bstack.toprinter Then
+        MyDoEvents0 Form1.DIS
+   
+        Else
+        MyDoEvents0 Me
+        End If
+If SLEEPSHORT Then Sleep 1
+If e Then
+p = bstack.Process.Done
+If Err.Number = 0 Then
+If p <> 0 Then
+Exit Do
+End If
+End If
+End If
+Loop Until PP <= CDbl(timeGetTime) Or NOEXECUTION Or MOUT
+
+                       If exWnd <> 0 Then
+                MyTitle$ bstack
+                End If
+End Sub
+
 

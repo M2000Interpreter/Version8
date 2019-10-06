@@ -1,14 +1,14 @@
 Attribute VB_Name = "Module9"
 Option Explicit
 Private Declare Function EnumDisplayMonitors Lib "user32" (ByVal hDC As Long, lprcClip As Any, ByVal lpfnEnum As Long, dwData As Any) As Long
-Public Declare Function MonitorFromPoint Lib "user32" (ByVal x As Long, ByVal y As Long, ByVal dwFlags As Long) As Long
-Private Declare Function MonitorFromWindow Lib "user32" (ByVal hWND As Long, ByVal dwFlags As Long) As Long
+Public Declare Function MonitorFromPoint Lib "user32" (ByVal X As Long, ByVal Y As Long, ByVal dwFlags As Long) As Long
+Private Declare Function MonitorFromWindow Lib "user32" (ByVal hWnd As Long, ByVal dwFlags As Long) As Long
 
 Private Declare Function GetMonitorInfo Lib "user32" Alias "GetMonitorInfoA" (ByVal hmonitor As Long, ByRef lpmi As MONITORINFO) As Long
-Private Declare Function GetWindowRect Lib "user32" (ByVal hWND As Long, lpRect As RECT) As Long
+Private Declare Function GetWindowRect Lib "user32" (ByVal hWnd As Long, lpRect As RECT) As Long
 Private Declare Function UnionRect Lib "user32" (lprcDst As RECT, lprcSrc1 As RECT, lprcSrc2 As RECT) As Long
-Private Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal x As Long, ByVal y As Long) As Long
-Private Declare Function MoveWindow Lib "user32" (ByVal hWND As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
+Private Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal X As Long, ByVal Y As Long) As Long
+Private Declare Function MoveWindow Lib "user32" (ByVal hWnd As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal bRepaint As Long) As Long
 'Private Type RECT
  '   Left As Long
   '  Top As Long
@@ -29,7 +29,7 @@ Dim rcMonitors() As RECT 'coordinate array for all monitors
 Dim rcVS         As RECT 'coordinates for Virtual Screen
 
 Public Type Screens
-    Top As Long
+    top As Long
     Left As Long
     Height As Long
     Width As Long
@@ -77,9 +77,9 @@ Function EnumMonitors(F As Form) As Long
     Dim n As Long
     EnumDisplayMonitors 0, ByVal 0&, AddressOf MonitorEnumProc, n
     With F
-        .Move .Left, .Top, (rcVS.Right - rcVS.Left) * 2 + .Width - .ScaleWidth, (rcVS.Bottom - rcVS.Top) * 2 + .Height - .ScaleHeight
+        .Move .Left, .top, (rcVS.Right - rcVS.Left) * 2 + .Width - .ScaleWidth, (rcVS.Bottom - rcVS.top) * 2 + .Height - .ScaleHeight
     End With
-    F.Scale (rcVS.Left, rcVS.Top)-(rcVS.Right, rcVS.Bottom)
+    F.Scale (rcVS.Left, rcVS.top)-(rcVS.Right, rcVS.Bottom)
     F.Caption = n & " Monitor" & IIf(n > 1, "s", vbNullString)
     F.lblMonitors(0).Appearance = 0 'Flat
     F.lblMonitors(0).BorderStyle = 1 'FixedSingle
@@ -89,10 +89,10 @@ Function EnumMonitors(F As Form) As Long
             F.lblMonitors(n).Visible = True
         End If
         With rcMonitors(n)
-            F.lblMonitors(n).Move .Left, .Top, .Right - .Left, .Bottom - .Top
+            F.lblMonitors(n).Move .Left, .top, .Right - .Left, .Bottom - .top
             F.lblMonitors(n).Caption = "Monitor " & n + 1 & vbLf & _
-                .Right - .Left & " x " & .Bottom - .Top & vbLf & _
-                "(" & .Left & ", " & .Top & ")-(" & .Right & ", " & .Bottom & ")"
+                .Right - .Left & " x " & .Bottom - .top & vbLf & _
+                "(" & .Left & ", " & .top & ")-(" & .Right & ", " & .Bottom & ")"
         End With
     Next
 End Function
@@ -112,10 +112,10 @@ Private Function MonitorEnumProc(ByVal hmonitor As Long, ByVal hdcMonitor As Lon
    ' Else
     .Left = mi.rcMonitor.Left * dv15
     
-    .Top = mi.rcMonitor.Top * dv15
+    .top = mi.rcMonitor.top * dv15
     'End If
     
-    .Height = (mi.rcMonitor.Bottom - mi.rcMonitor.Top + 1) * dv15
+    .Height = (mi.rcMonitor.Bottom - mi.rcMonitor.top + 1) * dv15
     .Width = (mi.rcMonitor.Right - mi.rcMonitor.Left + 1) * dv15
     .primary = CBool(mi.dwFlags = MONITORINFOF_PRIMARY)
     .handler = hmonitor
@@ -125,11 +125,11 @@ Private Function MonitorEnumProc(ByVal hmonitor As Long, ByVal hdcMonitor As Lon
     MonitorEnumProc = 1 'continue
 End Function
 
-Sub SavePosition(hWND As Long)
+Sub SavePosition(hWnd As Long)
     Dim rc As RECT
-    GetWindowRect hWND, rc 'save position in pixel units
+    GetWindowRect hWnd, rc 'save position in pixel units
     SaveSetting "Multi Monitor Demo", "Position", "Left", rc.Left
-    SaveSetting "Multi Monitor Demo", "Position", "Top", rc.Top
+    SaveSetting "Multi Monitor Demo", "Position", "Top", rc.top
 End Sub
 
 
@@ -146,7 +146,7 @@ Set F = z
 Else
 Set F = z.Parent
 End If
-FindFormSScreenCorner = FindMonitorFromPixel(F.Left, F.Top)
+FindFormSScreenCorner = FindMonitorFromPixel(F.Left, F.top)
 
 End Function
 Function FindFormSScreen(z As Object)
@@ -158,16 +158,16 @@ Set F = z.Parent
 End If
 On Error Resume Next
 Dim thismonitor As Long
-thismonitor = MonitorFromWindow(F.hWND, MONITOR_DEFAULTTONEAREST)
+thismonitor = MonitorFromWindow(F.hWnd, MONITOR_DEFAULTTONEAREST)
 Dim i As Long
 For i = 0 To UBound(ScrInfo())
 If thismonitor = ScrInfo(i).handler Then FindFormSScreen = i:   Exit Function
 Next i
 End Function
-Function FindMonitorFromPixel(x, y) As Long
+Function FindMonitorFromPixel(X, Y) As Long
 Dim x1 As Long, y1 As Long
-x1 = x \ dv15
-y1 = y \ dv15
+x1 = X \ dv15
+y1 = Y \ dv15
 Dim i As Long
 For i = 0 To UBound(ScrInfo())
 If ScrInfo(i).handler = MonitorFromPoint(x1, y1, MONITOR_DEFAULTTONEAREST) Then FindMonitorFromPixel = i: Exit Function
@@ -177,13 +177,13 @@ End Function
 Function FindMonitorFromMouse()
 '
    ' - offset
-Dim x As Long, y As Long, tp As POINTAPI
+Dim X As Long, Y As Long, tp As POINTAPI
 GetCursorPos tp
-x = tp.x
-y = tp.y
+X = tp.X
+Y = tp.Y
 Dim i As Long
 For i = 0 To UBound(ScrInfo())
-If ScrInfo(i).handler = MonitorFromPoint(x, y, MONITOR_DEFAULTTONEAREST) Then FindMonitorFromMouse = i: Exit Function
+If ScrInfo(i).handler = MonitorFromPoint(X, Y, MONITOR_DEFAULTTONEAREST) Then FindMonitorFromMouse = i: Exit Function
 Next i
 End Function
 Sub MoveFormToOtherMonitor(F As Form)
@@ -194,13 +194,13 @@ z = FindMonitorFromMouse
 ' center to z
 If F.Width > ScrInfo(z).Width Then
     If F.Height > ScrInfo(z).Height Then
-        F.Move ScrInfo(z).Left, ScrInfo(z).Top
+        F.Move ScrInfo(z).Left, ScrInfo(z).top
     Else
-        F.Move ScrInfo(z).Left, ScrInfo(z).Top + (ScrInfo(z).Height - F.Height) / 2
+        F.Move ScrInfo(z).Left, ScrInfo(z).top + (ScrInfo(z).Height - F.Height) / 2
     End If
     
 ElseIf F.Height > ScrInfo(z).Height Then
-    F.Move ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2, ScrInfo(z).Top
+    F.Move ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2, ScrInfo(z).top
 Else
  ' F.Move ScrInfo(Z).Left + (ScrInfo(Z).width - F.width) / 2, ScrInfo(Z).Top + (ScrInfo(Z).Height - F.Height) / 2
 
@@ -209,25 +209,26 @@ End If
 End Sub
 Sub MoveFormToOtherMonitorOnly(F As Form, Optional flag As Boolean)
 Dim k As Long, z As Long
+If DisplayMonitorCount = 1 Then Exit Sub
 Dim nowX As Long, nowY As Long
-k = FindMonitorFromPixel(F.Left, F.Top)
+k = FindMonitorFromPixel(F.Left, F.top)
 z = FindMonitorFromMouse
 If k = z Then
 If flag Then
 Dim tp As POINTAPI
 GetCursorPos tp
-nowX = tp.x * dv15
-nowY = tp.y * dv15
+nowX = tp.X * dv15
+nowY = tp.Y * dv15
 flag = False
 Else
 flag = False
 nowX = F.Left - ScrInfo(k).Left + ScrInfo(z).Left
-nowY = F.Top - ScrInfo(k).Top + ScrInfo(z).Top
+nowY = F.top - ScrInfo(k).top + ScrInfo(z).top
 'Exit Sub
 End If
 Else
 nowX = F.Left - ScrInfo(k).Left + ScrInfo(z).Left
-nowY = F.Top - ScrInfo(k).Top + ScrInfo(z).Top
+nowY = F.top - ScrInfo(k).top + ScrInfo(z).top
 End If
 
 If nowX > ScrInfo(z).Left + ScrInfo(z).Width Then
@@ -240,32 +241,32 @@ If nowX + F.Width > ScrInfo(z).Left + ScrInfo(z).Width Then
     nowX = ScrInfo(z).Left
     End If
 End If
-If nowY > ScrInfo(z).Top + ScrInfo(z).Height Then
-    nowY = ScrInfo(z).Top + ScrInfo(z).Height * 2 / 3
+If nowY > ScrInfo(z).top + ScrInfo(z).Height Then
+    nowY = ScrInfo(z).top + ScrInfo(z).Height * 2 / 3
 End If
-If nowY + F.Height > ScrInfo(z).Top + ScrInfo(z).Height Then
+If nowY + F.Height > ScrInfo(z).top + ScrInfo(z).Height Then
     If F.Height < ScrInfo(z).Height Then
-    nowY = ScrInfo(z).Top + ScrInfo(z).Height - F.Height
+    nowY = ScrInfo(z).top + ScrInfo(z).Height - F.Height
     Else
-    nowY = ScrInfo(z).Top
+    nowY = ScrInfo(z).top
     End If
 End If
 
 If F.Width > ScrInfo(z).Width Then
     If F.Height > ScrInfo(z).Height Then
         nowX = ScrInfo(z).Left
-        nowY = ScrInfo(z).Top
+        nowY = ScrInfo(z).top
     Else
         nowX = ScrInfo(z).Left
-        nowY = ScrInfo(z).Top + (ScrInfo(z).Height - F.Height) / 2
+        nowY = ScrInfo(z).top + (ScrInfo(z).Height - F.Height) / 2
     End If
     
 ElseIf F.Height > ScrInfo(z).Height Then
     nowX = ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2
-    nowY = ScrInfo(z).Top
+    nowY = ScrInfo(z).top
 ElseIf flag Then
     nowX = ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2
-    nowY = ScrInfo(z).Top + (ScrInfo(z).Height - F.Height) / 2
+    nowY = ScrInfo(z).top + (ScrInfo(z).Height - F.Height) / 2
 End If
 F.Move nowX, nowY
 End Sub
@@ -277,15 +278,15 @@ z = FindMonitorFromMouse
 ' center to z
 If F.Width > ScrInfo(z).Width Then
     If F.Height > ScrInfo(z).Height Then
-        F.Move ScrInfo(z).Left, ScrInfo(z).Top
+        F.Move ScrInfo(z).Left, ScrInfo(z).top
     Else
-        F.Move ScrInfo(z).Left, ScrInfo(z).Top + (ScrInfo(z).Height - F.Height) / 2
+        F.Move ScrInfo(z).Left, ScrInfo(z).top + (ScrInfo(z).Height - F.Height) / 2
     End If
     
 ElseIf F.Height > ScrInfo(z).Height Then
-    F.Move ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2, ScrInfo(z).Top
+    F.Move ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2, ScrInfo(z).top
 Else
- F.Move ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2, ScrInfo(z).Top + (ScrInfo(z).Height - F.Height) / 2
+ F.Move ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2, ScrInfo(z).top + (ScrInfo(z).Height - F.Height) / 2
 
 End If
 'End If

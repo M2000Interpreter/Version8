@@ -68,8 +68,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
-'m2000 ver 9.3 rev 2
-' repair undo for continous keystroke
 Option Explicit
 Dim waitforparent As Boolean
 Dim havefocus As Boolean, UKEY$
@@ -126,7 +124,7 @@ Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC 
 Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
 Private Declare Function FillRect Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
 Private Declare Function FrameRect Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
-Private Declare Function CreateRoundRectRgn Lib "gdi32" (ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal y3 As Long) As Long
+Private Declare Function CreateRoundRectRgn Lib "gdi32" (ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal Y3 As Long) As Long
 
 Private Declare Function CreateSolidBrush Lib "gdi32" (ByVal crColor As Long) As Long
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
@@ -265,7 +263,7 @@ Event DragOverDone(a As Boolean)
 Event HeadLineChange(a$)
 Event AddSelStart(val As Long, shift As Integer)
 Event SubSelStart(val As Long, shift As Integer)
-
+Event Fkey(a As Integer)
 Private state As Boolean
 Private secreset As Boolean
 Private scrollme As Long
@@ -1556,7 +1554,7 @@ End Sub
 
 Private Sub UserControl_KeyUp(KeyCode As Integer, shift As Integer)
 If BypassKey Then KeyCode = 0: shift = 0: Exit Sub
-Dim i As Long
+Dim i As Long, k As Integer
 
 lastshift = shift
 
@@ -1567,6 +1565,10 @@ KeyCode = 0
 shift = 0
 RaiseEvent CtrlPlusF1
 Exit Sub
+ElseIf KeyCode >= vbKeyF1 And KeyCode <= vbKeyF12 Then
+    k = (KeyCode - vbKeyF1 + 1) + 12 * (shift And 1)
+    RaiseEvent Fkey(k)
+    If k = 0 Then KeyCode = 0: shift = 0
 ElseIf KeyCode = 16 And shift <> 0 Then
 RaiseEvent Maybelanguage
 ElseIf KeyCode = vbKeyV Then
@@ -1617,6 +1619,7 @@ End Sub
 
 Private Sub UserControl_LostFocus()
 doubleclick = 0
+Fkey = 0
 If Not NoWheel Then RaiseEvent UnregisterGlist
 RaiseEvent CheckLostFocus
 If myEnabled Then SoftExitFocus
@@ -2132,12 +2135,12 @@ Timer2.enabled = False
 If marvel Then RaiseEvent CorrectCursorAfterDrag
 End Sub
 
-Private Sub UserControl_OLEDragDrop(data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub UserControl_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single)
 Dim something$, ok As Boolean
 If dropkey Then Exit Sub
  
 If (Effect And 3) > 0 Then
-If data.GetFormat(vbCFText) Or data.GetFormat((13)) Then
+If Data.GetFormat(vbCFText) Or Data.GetFormat((13)) Then
 
 If (Button And 1) = 0 Then
     If (shift And 2) = 2 Then
@@ -2156,12 +2159,12 @@ RaiseEvent MarkDestroyAny
 ok = True
 End If
 If ok Then
-        If data.GetFormat(13) Then
+        If Data.GetFormat(13) Then
           
-          something$ = data.getData(13)
+          something$ = Data.getData(13)
           Else
         
-            something$ = data.getData(vbCFText)
+            something$ = Data.getData(vbCFText)
             End If
 something$ = Replace(something$, ChrW(0), "")
 
@@ -2209,7 +2212,7 @@ End If
 
 End Sub
 
-Private Sub UserControl_OLEDragOver(data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
+Private Sub UserControl_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
 On Error Resume Next
 If dropkey Then Exit Sub
 If Not DropEnabled Then Effect = 0: Exit Sub
@@ -2253,7 +2256,7 @@ ElseIf (Y - mHeadlineHeightTwips) < myt / 2 And (topitem + YYT > 0) Then
                               
                                
               '  End If
-            If data.GetFormat(vbCFText) Or data.GetFormat((13)) Then
+            If Data.GetFormat(vbCFText) Or Data.GetFormat((13)) Then
                         If (shift And 2) = 2 Then
                             Effect = vbDropEffectCopy
                         Else
@@ -2294,7 +2297,7 @@ End If
                                
         End If
         
-             If data.GetFormat(vbCFText) Or data.GetFormat((13)) Then
+             If Data.GetFormat(vbCFText) Or Data.GetFormat((13)) Then
                     If (shift And 2) = 2 Then
                        Effect = vbDropEffectCopy
                        Else
@@ -2325,14 +2328,14 @@ On Error Resume Next
    
 End Sub
 
-Private Sub UserControl_OLEStartDrag(data As DataObject, AllowedEffects As Long)
+Private Sub UserControl_OLEStartDrag(Data As DataObject, AllowedEffects As Long)
 If dropkey Then Exit Sub
 If Not DragEnabled Then Exit Sub
 Dim aa() As Byte, this$
 RaiseEvent DragData(this$)
 aa = this$ & ChrW$(0)
- data.SetData aa(), 13
-data.SetData aa(), vbCFText
+ Data.SetData aa(), 13
+Data.SetData aa(), vbCFText
 AllowedEffects = vbDropEffectCopy + vbDropEffectMove
 End Sub
 Public Sub MovePos(ByVal X As Single, ByVal Y As Single)
@@ -3573,7 +3576,7 @@ Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
 Else
 Set mo = UserControl.Parent.Controls(nm$)
 End If
-If UserControl.Parent.Picture.handle <> 0 And BackStyle = 1 Then
+If UserControl.Parent.Picture.Handle <> 0 And BackStyle = 1 Then
 
 If Me.BorderStyle = 1 Then
 CurrentY = 0
@@ -3591,7 +3594,7 @@ ElseIf BackStyle = 1 Then
 Dim mmo As PictureBox
 RaiseEvent GetBackPicture(mmo)
 If Not mmo Is Nothing Then
-If mmo.Picture.handle <> 0 Then
+If mmo.Picture.Handle <> 0 Then
     UserControl.PaintPicture mmo.Picture, 0, 0, , , mo.Left, mo.top
     If Me.BorderStyle = 1 Then
     CurrentY = 0
@@ -3636,7 +3639,7 @@ Set mo = UserControl.Parent.Controls(nm$)
 End If
 If BackStyle = 1 Then
     If Not SkipForm Then
-        If UserControl.Parent.Picture.handle <> 0 Then
+        If UserControl.Parent.Picture.Handle <> 0 Then
             If Me.BorderStyle = 1 Then
                     CurrentY = 0
                     CurrentX = 0
@@ -3663,7 +3666,7 @@ If BackStyle = 1 Then
         Dim mmo As Object, isfrm As Boolean
         RaiseEvent GetBackPicture(mmo)
         If Not mmo Is Nothing Then
-            If mmo.Image.handle <> 0 Then
+            If mmo.Image.Handle <> 0 Then
                 UserControl.PaintPicture mmo.Image, 0, 0, , , mo.Left - mmo.Left, mo.top - mmo.top
                 If Me.BorderStyle = 1 Then
                 CurrentY = 0
@@ -3680,24 +3683,24 @@ th1:
 UserControl.Cls
 End If
 End Sub
-Private Function GetStrUntilB(pos As Long, ByVal sStr As String, fromstr As String, Optional RemoveSstr As Boolean = True) As String
+Private Function GetStrUntilB(Pos As Long, ByVal sStr As String, fromstr As String, Optional RemoveSstr As Boolean = True) As String
 Dim i As Long
 If fromstr = vbNullString Then GetStrUntilB = vbNullString: Exit Function
-If pos <= 0 Then pos = 1
-If pos > Len(fromstr) Then
+If Pos <= 0 Then Pos = 1
+If Pos > Len(fromstr) Then
     GetStrUntilB = vbNullString
 Exit Function
 End If
-i = InStr(pos, fromstr, sStr)
-If (i < 1 + pos) And Not ((i > 0) And RemoveSstr) Then
+i = InStr(Pos, fromstr, sStr)
+If (i < 1 + Pos) And Not ((i > 0) And RemoveSstr) Then
     GetStrUntilB = vbNullString
-    pos = Len(fromstr) + 1
+    Pos = Len(fromstr) + 1
 Else
-    GetStrUntilB = Mid$(fromstr, pos, i - pos)
+    GetStrUntilB = Mid$(fromstr, Pos, i - Pos)
     If RemoveSstr Then
-        pos = i + Len(sStr)
+        Pos = i + Len(sStr)
     Else
-        pos = i
+        Pos = i
     End If
 End If
 End Function
@@ -3847,7 +3850,7 @@ End Function
 Public Sub RepaintFromOut(parentpic As StdPicture, Myleft As Long, mytop As Long)
 On Error GoTo th1
 
-If parentpic.handle <> 0 Then
+If parentpic.Handle <> 0 Then
 UserControl.PaintPicture parentpic, 0, 0, , , Myleft, mytop
 Else
 th1:
@@ -4583,13 +4586,13 @@ mList(item).radiobutton = radiobutton ' one of the group can be checked
 End If
 End If
 End Sub
-Public Function GetMenuId(Id$, pos As Long) As Boolean
+Public Function GetMenuId(Id$, Pos As Long) As Boolean
 ' return item number with that id$
 ' work only in the internal list
 Dim i As Long
 If itemcount > 0 And Not BlockItemcount Then
 For i = 0 To itemcount - 1
-If mList(i).contentID = Id$ Then pos = i: Exit For
+If mList(i).contentID = Id$ Then Pos = i: Exit For
 Next i
 End If
 GetMenuId = Not (i = itemcount)
@@ -4749,7 +4752,7 @@ End Sub
 Public Function Pixels2Twips(pixels As Long) As Long
 Pixels2Twips = pixels * scrTwips
 End Function
-Public Function BreakLine(data As String, datanext As String, Optional thatTwipsPreserveRight As Long = -1, Optional aSpace$ = " ") As Boolean
+Public Function BreakLine(Data As String, datanext As String, Optional thatTwipsPreserveRight As Long = -1, Optional aSpace$ = " ") As Boolean
 Dim i As Long, k As Long, m As Long
 If thatTwipsPreserveRight = -1 Then
 m = widthtwips
@@ -4757,19 +4760,19 @@ Else
 m = widthtwips - thatTwipsPreserveRight
 End If
 ''If aSpace$ <> "" Then m = m - UserControlTextWidth(aSpace$)
-REALCURb data, m, k, i, True
-datanext = Mid$(data, 1, i)
-data = Mid$(data, i + 1)
+REALCURb Data, m, k, i, True
+datanext = Mid$(Data, 1, i)
+Data = Mid$(Data, i + 1)
 
 ' lets see if we have space in data
-If Len(data) > 0 Then
-    If Right$(datanext, 1) <> aSpace$ And Left$(data, 1) <> aSpace$ Then
+If Len(Data) > 0 Then
+    If Right$(datanext, 1) <> aSpace$ And Left$(Data, 1) <> aSpace$ Then
     ' we have a broken word
     m = InStrRev(datanext, aSpace$)
     If m > 0 Then
     ' we have a space inside datanext
     If m > 1 Then
-    data = Mid$(datanext, m + 1) + data
+    Data = Mid$(datanext, m + 1) + Data
     datanext = Left$(datanext, m)
     Else
     ' do nothing, we will have nothing for this line if we take the word
@@ -4778,7 +4781,7 @@ If Len(data) > 0 Then
     ' do nothing it is a big word...
     m = InStrRev(datanext, "\")
     If m > 1 Then
-    data = Mid$(datanext, m + 1) + data
+    Data = Mid$(datanext, m + 1) + Data
     datanext = Left$(datanext, m)
     Else
     ' do nothing, we will have nothing for this line if we take the word
@@ -4787,16 +4790,16 @@ If Len(data) > 0 Then
     End If
     
     i = 1
-    If data <> aSpace$ Or data$ = vbNullString Then
-    While Left$(data, i) = aSpace$
+    If Data <> aSpace$ Or Data$ = vbNullString Then
+    While Left$(Data, i) = aSpace$
     i = i + 1
     Wend
     End If
-    datanext = datanext + Mid$(data, 1, i - 1)
-    data = Mid$(data, i)
+    datanext = datanext + Mid$(Data, 1, i - 1)
+    Data = Mid$(Data, i)
     
 End If
-BreakLine = data <> ""
+BreakLine = Data <> ""
 End Function
 Public Sub REALCURb(ByVal s$, ByVal probeX As Single, realpos As Long, usedCharLength As Long, Optional notextonly As Boolean = False)
 ' this is for breakline only
@@ -5077,34 +5080,34 @@ End Sub
 Friend Sub MarkWord()
 If ListIndex < 0 Then Exit Sub
 Dim one$
-Dim mline$, pos As Long, Epos As Long, oldselstart As Long
+Dim mline$, Pos As Long, Epos As Long, oldselstart As Long
 RaiseEvent PureListOn
 mline$ = list(ListIndex)
 RaiseEvent PureListOff
 'Enabled = False
-pos = SelStart
-If pos <> 0 Then
+Pos = SelStart
+If Pos <> 0 Then
 Dim mypos As Long, ogt As String, this$
-Epos = pos
-Do While pos > 0
-If InStr(1, WordCharLeft, Mid$(mline$, pos, 1)) Then Exit Do
-pos = pos - 1
+Epos = Pos
+Do While Pos > 0
+If InStr(1, WordCharLeft, Mid$(mline$, Pos, 1)) Then Exit Do
+Pos = Pos - 1
 Loop
-If pos > 0 Then If InStr(1, WordCharLeftButIncluded, Mid$(mline$, pos, 1)) Then pos = pos - 1
+If Pos > 0 Then If InStr(1, WordCharLeftButIncluded, Mid$(mline$, Pos, 1)) Then Pos = Pos - 1
 Do While Epos <= Len(mline$)
 one$ = Mid$(mline$, Epos, 1)
 If InStr(1, WordCharRightButIncluded, one$) Then Epos = Epos + 1: Exit Do
 If InStr(1, WordCharRight, one$) Then Exit Do
 Epos = Epos + 1
 Loop
-If (Epos - pos - 1) > 0 Then
-    this$ = Mid$(mline$, pos + 1, Epos - pos - 1)
+If (Epos - Pos - 1) > 0 Then
+    this$ = Mid$(mline$, Pos + 1, Epos - Pos - 1)
     RaiseEvent WordMarked(this$)
     If this = vbNullString Or Not EditFlag Then Exit Sub
     oldselstart = SelStart
     MarkNext = 0
-    If (oldselstart - pos - 1) > (Epos - oldselstart) Then
-        SelStart = pos + 1
+    If (oldselstart - Pos - 1) > (Epos - oldselstart) Then
+        SelStart = Pos + 1
         RaiseEvent MarkIn
         MarkNext = 1
         SelStart = Epos
@@ -5112,10 +5115,10 @@ If (Epos - pos - 1) > 0 Then
     Else
         SelStart = Epos
         RaiseEvent MarkIn
-        SelStart = pos + 1
+        SelStart = Pos + 1
         MarkNext = 1
         RaiseEvent MarkOut
-        SelStart = pos + 1
+        SelStart = Pos + 1
     End If
 ShowMe2
 ElseIf Not EditFlag Then
@@ -5128,7 +5131,7 @@ End Sub
 Public Sub MarkALL()
 MarkNext = 0
 ListindexPrivateUse = 0
-SelStart = 0
+SelStart = 1
 RaiseEvent selected(ListIndex + 1)
 RaiseEvent MarkIn
 MarkNext = 1

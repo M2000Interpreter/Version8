@@ -221,7 +221,7 @@ Private blnAttached As Boolean
 ' m2000 connect
 Public modulename$  ' module name plus name of object
 Public modulenameonly$
-Public VarIndex As Long
+Public VarIndex As Long, ItemIndex As Long
 ' by Edanmo
 Private exclude As New LongHash, inUse As New LongHash
 Private Sub pvSetParamArray(ByVal Ptr As Long, aParams() As Variant)
@@ -373,7 +373,7 @@ Private Function GetMemberName(obj As Object, ByVal dispid As Long, IID As GUID,
     CpyMem pVTblTpInfo, ByVal pTypeInfo, 4
     CpyMem oTypeInfo, ByVal pVTblTpInfo, Len(oTypeInfo)
 
-    ' let's first ty to get the name
+    ' let's first try to get the name
     ' of the member by using the current TypeInfo
     hRet = CallPointer(oTypeInfo.GetNames, pTypeInfo, dispid, VarPtr(strName), 1, VarPtr(pcNames))
     If Len(strName) > 0 Then first$ = strName$: strName = vbNullString
@@ -413,7 +413,7 @@ finalize:
         End If
 End Function
 
-Public Sub FireEvent(ByVal dispid As Long, ByVal params As Long)
+Public Sub fireevent(ByVal dispid As Long, ByVal params As Long)
 Static once As Boolean
 If once Then Exit Sub
 If exclude.ExistKey(dispid) Then Exit Sub
@@ -441,7 +441,7 @@ once = True
    On Error Resume Next
  ''   Debug.Print "FireEvent", strEvent, what$
 
- If Not CallEventFromCOM(Me, strEvent, what$, NumVar, vParams(), delme) Then
+ If Not CallEventFromCOM(Me, strEvent, what$, NumVar, vParams(), delme, ItemIndex) Then
     MyEr "Problem With Event: " + strEvent, "Πρόβλημα με το γεγονός: " + strEvent
  End If
 ''inUse.Remove strEvent
@@ -526,6 +526,7 @@ End Function
 
 Private Sub Class_Initialize()
     InitObjExtender
+    ItemIndex = -1
 End Sub
 
 Private Sub Class_Terminate()

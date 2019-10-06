@@ -98,7 +98,18 @@ par2$ = Prompt$
 CliRun
 End Sub
 Public Sub Shutdown(Cancel As Integer)
+
+If ASKINUSE Or loadfileiamloaded Then
+NOEXECUTION = Cancel = 2
+If NOEXECUTION Then
+ASKINUSE = False: loadfileiamloaded = False: DoEvents
+Else
+Cancel = -1
+Exit Sub
+End If
+End If
 If Cancel < 1 Then
+If Not MayQuit Then Cancel = -1: Exit Sub
 Dim F As Form, i As Long, F1 As GuiM2000, nook As Long
 For i = Forms.count - 1 To 0 Step -1
 Set F = Forms(i)
@@ -133,6 +144,7 @@ End If
 byPassCallback = True
 NOEXECUTION = True
 If Cancel > 0 Then
+Check2SaveModules = False
 NERR = True: NOEXECUTION = True
 ExTarget = True: INK$ = Chr(27): UKEY$ = Chr$(27)  ': UINK$ = Chr(27)
 End If
@@ -235,7 +247,7 @@ Form1.WindowState = 0
 If Form1.top >= VirtualScreenHeight Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
 Else
 If Form1.WindowState = 0 Then
-If Not (QRY Or GFQRY Or Forms.count > 5) Then Form1.Visible = False
+If Not (Forms.count > 5) Then Form1.Visible = False
 End If
 End If
 End Property
@@ -402,8 +414,12 @@ End Sub
 Public Function IamVisible() As Boolean
 On Error Resume Next
 If UseMe Is Nothing Then Exit Function
-
+If Not IhaveExtForm Then IamVisible = Form1.Visible: Exit Function
 IamVisible = ExtForm.Visible
+If Err.Number > 0 Then
+Set ExtForm = Nothing
+IamVisible = Form1.Visible
+End If
 End Function
 Private Sub Class_Initialize()
 Dim anyname As Long
@@ -416,15 +432,22 @@ stacksize = 900000
 End Sub
 
 Private Sub Class_Terminate()
+Dim i As Long
 StopTimer
+If objref Is Nothing Then Exit Sub
 Set objref.Owner = Nothing
 Set objref.Sorosref = Nothing
 Set objref = Nothing
 globalstack.Flush
 TerminateM2000
 terminatefinal
+If Forms.count > 0 Then
+For i = Forms.count - 1 To 0
+Set Forms(i).icon = LoadPicture("")
+Unload Forms(i)
+Next i
+End If
 l_complete = False
-'MsgBox "terminate"
 End Sub
 Public Sub StopTimer()
   If hTimer <> 0 Then
@@ -447,10 +470,17 @@ If Form1.Visible Then Form1.Show , Form5:   Form1.SetFocus
    
 End Sub
 Public Property Get WindowState() As Variant
+If Not IhaveExtForm Then Exit Property
 WindowState = 1 - CLng(Form1.Visible Or Form1.TrueVisible)
 End Property
 
 Public Property Let WindowState(ByVal vNewValue As Variant)
+If Not IhaveExtForm Then
+StopTimer
+StopTimer2
+Class_Terminate
+Exit Property
+End If
 If vNewValue = 1 Then
     If Form1.Visible Or Form1.TrueVisible Then
     Form1.TrueVisible = Form1.Visible Or Form1.TrueVisible
@@ -477,3 +507,6 @@ Public Property Get AppTitle() As Variant
 AppTitle = lasttitle
 End Property
 
+Public Property Get MayQuit() As Boolean
+MayQuit = Not Check2Save
+End Property

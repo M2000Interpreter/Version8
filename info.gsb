@@ -1021,7 +1021,19 @@ MODULE URL {Module checkit {
                   while left$(a$, 1)="/" { a$=mid$(a$,2): count++}
                   if count>1 then {
                         domain$=leftpart$(a$+"/", "/")
+                        if left$(what$,1)=":"  and instr(what$,"@")<instr(what$,"/")  and instr(what$,"@")>0  then
+                        username$=domain$
+                        Print "uername:"+username$
+                        what$=mid$(what$,2)
+                        password$=leftpart$(what$,"@")
+                        Print "password:"+password$
+                        what$=rightpart$(what$,"@")
+                        domain$=leftpart$(what$+"/", "/")
+                        what$=Rightpart$(what$,"/")
+                        end if
+                        
                         a$=rightpart$(a$,"/")
+                        
                         if domain$<>"" Then Print( "Domain:"+Domain$)
                         if a$<>"" Then Print("Path:"+a$)
                   } else.if left$(What$,1) =":" then {
@@ -3200,15 +3212,15 @@ exitthis=False
 Function FromEvent {
       Read New &What, mykey$
       Local K
-      K=Ask(what.myvalue$, LocalVar$)
+      K=Ask(what.myvalue$, LocalVar$,"*")
 }
 Function FromEvent2 {
       Read New &What, mkey$
       Local K
-
       IF what.menuitem>0 Then {
             IF instr(Menu$(what.menuitem),"---")>0 Then Break
-            K=Ask(what.myvalue$+" "+Menu$(what.menuitem), "No2")
+            K=Ask(what.myvalue$+" "+Menu$(what.menuitem), "No2",,"*")
+            If K<>1 then break
             IF what.menuitem=2 Then {
                   M=InpValue2.ItemValue("Exit")
                   M.myvalue$="Press me "+Time$(Now)
@@ -4552,36 +4564,19 @@ Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
 }
-MODULE INFO {If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<45 then Error "No proper M2000 revision for version 9.8"
-Font "Verdana"
-PEN 14
-CLS,0
-Set Fast
-Title "Info"   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
-dir user
-Player 0  ' erase any layer
-back {
-	cls 11, 0   '   backcolor,  split line (0 means no split line)
-	\\ split means to define a lower part of form to be scrolled up or down
-rem	gradient 11, 0
-}
-Cls 11,0
-WINDOW 12, 0  ' 0 FOR MONITOR 0
-\\ Use form without ! for less border
-\\ Form ! 100,66
+MODULE INFOBASIC {
+refresh 10000
 Form ! 80,66
 backcolor=5   'point
 oldpen=14  ' pen
-Refresh 500
 Pen 0 {
 	cls 7
 	ico 1   ' draw icon (a png image, loaded as text as BASE64 encoded)
 	Double
-	Print Part  "  M2000 Interpreter"+str$(version)+" ("+str$(revision,0)+")"
+	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 7.2"
+	Report " A collection of modules for tests version 7.5"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4614,29 +4609,25 @@ Report {
 	Use statement Flush to empty the stack
 	}
 Stack
-refresh 30
 title("Useful Statements")
 Report {
-	Help All, Help Print, Help
-	Monitor  (to see switches), shitches
+	Help All, Help Print, Help  |	Monitor  (to see switches), shitches
 	(some staments can be used from a module using the Set statement)
 	(Set Monitor - because Monitor is known to Console Interepreter)
-	Edit info  (press esc to exit editor)
-	Edit "disk_file.gsb"  (to edit from disk - saved at exit)
+	Edit info  (press esc to exit editor) | Edit "disk_file.gsb"  (to edit from disk - saved at exit)
 	Edit  (no argument) open command editor (we pick in console line using up/down arrows)
-	Save filename   (without quotes, except If we want spaces)
-	load filename
-	Settings (open dialog for setting environment), 	Start  ' restart console
+	Save filename   (without quotes, except If we want spaces) | load filename  (filename without "" and type)
+	Settings (open dialog for setting environment) |	Start  ' restart console
 	Use filename  (use info open another info in another console)
 	Dir to show current directory or Dir user to set current dir to user folder
 	Files "GSB","PRINT|FOR" (search files *.gsb for words PRINT and FOR)
-	Win Dir$	Win Calc
+	Win Dir$ | Win Calc | Win Appdir$
 	End (to exit from console)  
 	}
 Fkey Clear
 FKey 1,"Saveme ' save all loaded modules"
-FKey 2,"Edit Info ' edit this"
-FKey 3,"Info ' this page"
+FKey 2,"Edit InfoBasic ' edit this"
+FKey 3,"InfoBasic ' this page"
 FKey 4,"M2000_Editor_Information  ' about editor"
 FKey 5,"Demo1  ' 3d Drawing in a Window"
 \\FKey 6,"Edit M2000_editor_information"
@@ -4646,6 +4637,8 @@ Fkey 8,"mEditor ' A window based M2000 Editor"
 Fkey 9,"kb ' A keyboard to play music"
 FKey 10,"Settings"
 FKey 11,"Dijkstra"
+Fkey 24, {chessgame "rnb2rk1/ppp1q1pp/5n2/2bpp3/2Q1p3/1B3P2/PPPP1NPP/RNB2RK1 w - - 0 10"}
+Fkey 12, "chessgame"
 FKey 19,"List33  ' Listbox control Example"
 FKey 18,"Form44  ' Muliple Windows Example"
 FKey 17,"Maze2  ' Maze Drawing in console"
@@ -4658,6 +4651,7 @@ Title("Fkey")
 Fkey
 \\title("M2000 Writer")
 \\Keyboard "Writer"+chr$(13)
+show
 End
 Sub title(a$)
 Pen #ffeeff {
@@ -4676,7 +4670,8 @@ save info, info
 Print "Done"
 
 }
-MODULE M2000_EDITOR_INFORMATION {thread.plan sequential   ' can run as concurrent too
+MODULE M2000_EDITOR_INFORMATION {if width<>80 and height<>66 then window 10, window : form !80,66
+thread.plan sequential   ' can run as concurrent too
 linespace twipsY*2
 ' Mode as read only value return the height of layer form in pt. Using Mode we set to the same Mode but we cut extra space (use linespace also)
 Mode Mode   
@@ -4782,8 +4777,7 @@ Report {
 	Make same All
 	Replace word
 	Word Wrap
-	Drag Enabled (by default drop is enabled, to allow drag operation we have to set this)
-		(drag start when we give a double click inside marked text. By default for inside drop is a cut and paste procedure)
+	Drag Enabled (by default drop is enabled, to allow drag operation we have to set this)		(drag start when we give a double click inside marked text. By default for inside drop is a cut and paste procedure)
 		(Shift/Ctrl works also)
 	Color/Short Language
 	Paragraph Mark (show hidden characters, we can edit in this mode)
@@ -4795,10 +4789,7 @@ Report {
 	}, width-12
 title("View code without moving the cursor from position")
 Report {
-	We can scroll up or down using vertical scroll bar. Press left or right or up or down or an key to return to previous view 
-	Use F1 to change wrap (this also has no affect to cursor).
-	Move some lines up or down holding down right mouse button. There is a timer which enable quick move.
-	The same timer enabled when we click the top or bottom areas of the scroll bar control.
+	We can scroll up or down using vertical scroll bar. Press left or right or up or down or an key to return to previous view 	Use F1 to change wrap (this also has no affect to cursor).	Move some lines up or down holding down right mouse button. There is a timer which enable quick move.	The same timer enabled when we click the top or bottom areas of the scroll bar control.
 	}, width-12
 title("View/Select code as you change the cursor from position")
 Report {
@@ -4942,7 +4933,7 @@ MODULE FORM44 {Module TryIt {
 	      Read New K, L
 	      Print "Form:";L,"Button:";K
 	      Print Controls(L).ReadCaption$(K)
-	      if k=1 and l=2 then test
+	      if k=1 and l=2 then after 20 {test}
 	}
 	Function Form1.MouseMove {
 	      Read New K, Button, Shft, X, Y
@@ -5074,6 +5065,7 @@ You can:
 }
 push key$ : drop
 TryIt
+test !
 Keyboard "info"+chr$(13)
 }
 MODULE LIST33 {Declare Simple Form
@@ -5184,7 +5176,8 @@ Threads Erase
 Declare Simple Nothing
 }
 MODULE TEXTOUT {Module UsingEvents {
-      Form 60, 32
+      rem Form ! 80,66
+      \\ from version 9.9 we have to get the byvalue parameters to variables without & (which used for byref read)
       Declare WithEvents sp "SAPI.SpVoice"
       That$={Rosetta Code is a programming chrestomathy site.
       The idea is to present solutions to the same task in as many different languages as possible, to demonstrate how languages are similar and different, and to aid a person with a grounding in one approach to a problem in learning another. Rosetta Code currently has 913 tasks, 214 draft tasks, and is aware of 707 languages, though we do not (and cannot) have solutions to every task in every language.}
@@ -5192,7 +5185,7 @@ MODULE TEXTOUT {Module UsingEvents {
       LastPosition=-1
       TxtWidth=0
       Function sp_Word {
-            Read New &StreamNumber, &StreamPosition, &CharacterPosition, &Length
+            Read New StreamNumber, StreamPosition, CharacterPosition, Length
             Rem:  Print StreamNumber, StreamPosition , CharacterPosition, Length
             If  LastPosition=CharacterPosition Then exit
             LastPosition=CharacterPosition
@@ -5208,7 +5201,7 @@ MODULE TEXTOUT {Module UsingEvents {
             EndStream=True
       }
       Function sp_Sentence {
-            Read New &StreamNumber, &StreamPosition, &CharacterPosition, &Length
+            Read New StreamNumber, StreamPosition, CharacterPosition, Length
             if Length>0 and not CharacterPosition=0 then Print
             Print "  ";
             TxtWidth=CharacterPosition+Length-1
@@ -9543,8 +9536,7 @@ DoSomething2 &OnelIne()    ' 10506
 \\ for groups including the reference of group
 Group {
 	x=100
-	Function InGroup {
-		
+	Function InGroup {		
 	}
 	
 }
@@ -14082,8 +14074,7 @@ MODULE LIBDIV {Function ProDiv$ {
 		r$=str$(val(c$)-val(b$)*d1,"0")
 		if gg<s-1  then
 			if v$="0" then mm=-s+gg : if p+mm<17 then  a$+=string$("0", p+mm)
-			v$+=string$("0",s-1-gg) 
-		end if
+			v$+=string$("0",s-1-gg) 		end if
 		if d1=0 then
 			if tz>0 then
 				if  len(v$)=tz then  tz++ else.if   len(v$)>tz+1 then  exit
@@ -14284,7 +14275,6 @@ execute "gSQL",{
 			first_name
 }
 Def CheckNull$(a, a$)=If$(type$(a)="Null"->"NULL", a$)
-
 GetListA() ' value is already in stack
 
 report  "Select customers id where phone is null"
@@ -14340,8 +14330,7 @@ end sub
 MODULE EN1 {Module Checkit {
       \\ need revision 15, version 9.4
       Enum Fruit  {apple, banana, cherry}
-      Enum Fruit2  {apple2=10, banana2=20, cherry2=30}
-      Print apple, banana, cherry
+      Enum Fruit2  {apple2=10, banana2=20, cherry2=30}      Print apple, banana, cherry
       Print apple2, banana2, cherry2
       Print Len(apple)=0
       Print Len(banana)=1
@@ -14861,9 +14850,11 @@ Sub Press()
 	Threads Erase
 End Sub
 }
-MODULE CLOCK {ΤΜΗΜΑ Α {\\ Αναλογικό ρολόι-ξυπνητήρι
-ομαλά ναί
+MODULE CLOCK {Αν Έγκυρο(ok) Αλλιως Πληκτρολόγιο "Clock1"+χαρ$(13) : Έξοδος
 Ανανέωση 5000
+Φόρμα
+ομαλά ναί
+Παράθυρο 16, Παράθυρο
 Οθόνη 5,0
 Πενα 14
 Περιθώριο {Πένα 14}
@@ -15022,13 +15013,11 @@ MODULE CLOCK {ΤΜΗΜΑ Α {\\ Αναλογικό ρολόι-ξυπνητήρι
 
 Αν Πατημένο(13) τότε ΟλόκληρεςΏρες~  \\ αντιστροφή αληθές<>ψευδές
 }
+Τιτλος ".....",0
 Οθόνη \\ επαναφορά από το περιορισμό περιοχής της Χρώμα
 Επιφάνεια 255
+Επιφάνεια Κρυψε
 
-}
-Φόρμα
-Α
-KEYBOARD "INFO"+CHR$(13)
 }
 MODULE BOOK {Class Book {
       \\ these are public but can get value one time
@@ -17378,5 +17367,2230 @@ MODULE CHANGEHELP {      Base 0  \\ for arrays
             Print 
             Dir User
       End Sub
+}
+MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake game","start","stop")<>1 τότε έξοδος
+
+Δυαδικό {
+      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
+      CvwDsQToRRwHj3AAAAAASUVORK5CYII=
+} Ως ΦιδάκιΕικόνα
+
+\\ Φιδάκι!
+Πένα 14
+Ομαλά Ναι
+Θέσε Γρήγορα !
+\\Διαφυγή Όχι
+Οθόνη,0
+Καθαρό Α$
+Κλάση Κ_5χ6 {
+      μεταφορά$
+      Ιδιότητα θ {Θέσε}
+      Ιδιότητα Χ { 
+            Αξία {
+                  Ένωσε Γονικό [θ] στο θ
+                  Αξία=(θ-1) υπολ 6
+            }
+            }
+      Ιδιότητα Υ { 
+            Αξία {
+                  Ένωσε Γονικό [θ] στο θ
+                  Αξία=(θ-1) Δια 6
+            }
+      }            
+
+}
+Κλάση Πιόνι {
+      θέση_π, νο
+      νέα_θέση
+      Τμήμα Αφαίρεσε {
+            .θέση_π<=0
+      }
+      Τμήμα Μετακίνηση {
+            .θέση_π<=.νέα_θέση
+            .νέα_θέση<=0
+      }
+}
+Πίνακας Θέσεις(31)=Κ_5χ6(), Πιόνια(4)=Πιόνι(), ΣειράΝικητών(4)
+Για ι=1 Έως 4 { Για Πιόνια(ι-1) {.θέση_π=1 : .νο=ι}}
+Για ι=1 εως 30 {
+      Αν ((ι-1) Υπολ 12)>5 Τότε { θέσεις(ι).θ=6*((ι-1) Δια 6)+(6-(ι-1) υπολ 6) } Αλλιώς θέσεις(ι).θ=ι
+}
+\\ φίδια!
+Θέσεις(27).μεταφορά$="22,23,24,13,12,1"
+Θέσεις(21).μεταφορά$="16,15,10,9"
+Θέσεις(19).μεταφορά$="18,7"
+Θέσεις(17).μεταφορά$="8,9,4"
+\\ σκάλες
+Θέσεις(3).μεταφορά$="10,15,22"
+Θέσεις(5).μεταφορά$="8"
+Θέσεις(11).μεταφορά$="14,23,26"
+Θέσεις(20).μεταφορά$="29"
+
+Γενικές χ,υ, θχ, θυ, Χρ(5)
+Χρ(1)=14,11,13,12
+Στοίχισε(ΦιδάκιΕικόνα, &χ,&υ,&θχ,&θυ)
+Ανανεώση 5000
+Φοντο 1,5
+κ=υ/1200
+Βάλε_Τίτλο("Snake Board Game - AutoPlay", 0, θυ*.8, 0)
+Βάλε_Τίτλο("Dice", 0,θυ*.4, θυ, θχ)
+ΠλαίσιοΠαικτών(0,θυ*.4, Θυ, θχ, κ)
+Για ι=1 Έως 4 {
+      ΠιόνιΣτοΠλαίσιο(0,θυ*.4,θυ, θχ, κ, ι)
+}
+Βάλε_Τίτλο("Final", θχ+χ,θυ*.4, θυ)
+ΠλαίσιοΠαικτών(θχ+χ,θυ*.4,θυ,Χ.σημεία, κ)
+Για ι=1 Έως 4 {
+      ΠιόνιΣτοΠλαίσιο(θχ+χ,θυ*.4, θυ,Χ.σημεία, κ, ι)
+}
+θέση θχ, θυ
+Εικόνα ΦιδάκιΕικόνα, χ
+\\ το φιδάκι έχει 6 Χ 5 θέσεις
+Κάνε ΜετΧ(χχ,κ)=(χ Δια 6)*χχ+(κ/30)*χ+χ/40+θχ
+Κάνε ΜετΥ(υυ)=(υ Δια 5)*υυ+υ/20+θυ
+Κράτησε
+Οθόνη, -5
+Δείξε_Όλα(-1,"")
+ολα=1
+Νικητές=0
+Ενώ  ολα>0 και όχι πατημένο(32) {
+      ολα=0
+      Για ι=1 Έως 4 {
+            Αν πιόνια(ι-1).θέση_π>0 Τότε {
+                  ολα++
+                  Ζάρι=Τυχαίος(1,6) ' για μεγάλο Ζάρι 1,10 !
+                  Αν πιόνια(ι-1).θέση_π+Ζάρι >31 τότε {
+                        ΠαίξεΜε(ι, Ζάρι, Αληθής, μορφή$("{0}",Ζάρι))
+                  } Αλλιώς {
+                        Για μ=1 Έως Ζάρι {
+                              ΠαίξεΜε(ι, 1, ζαρι=μ, μορφή$("{0}",Ζάρι))
+                        }     
+                  }
+            }
+            Αν νικητές=4 Τότε Έξοδος
+      }
+}
+Αν νικητές=4 Τότε {
+      Για ι=1 Έως 4 {
+            Αν πιόνια(ι-1).θέση_π>0 Τότε πιόνια(ι-1).θέση_π=0 : ΣειράΝικητών(ι-1)=4
+      }
+}
+Δείξε_Όλα(-1,"")
+Κύλιση Χώρισμα 0  ' όπως το Οθόνη,0 χωρίς να καθαρίσει την οθόνη!
+Τέλος
+Ρουτίνα ΠαίξεΜε(Πιόνι, Ζάρι, τελικό, ζαρ$)
+      Τοπική πιόνι1=-1, μεζάρι=Αληθής, πρ$, ι
+      Σωρός Νέος {
+            Για Πιόνια(Πιόνι-1) {
+                        Αν μεζάρι Τότε {
+                        Άν (Ζάρι+.θέση_π)<=30 Τότε { 
+                                 .νέα_θέση=Ζάρι+.θέση_π 
+                                 πιόνι1=Πιόνι
+                                 Αν τελικό Τότε {
+                                       πρ$=Θέσεις(.νέα_θέση).μεταφορά$
+                                       Αν πρ$<>"" Τότε Σωρός πρ$
+                                 }
+                        } Αλλιώς.Άν (Ζάρι+.θέση_π)>31 τότε {
+                              \\ Φιδάκι 2....επιστροφή!
+                               .νέα_θέση= 61-Ζάρι-.θέση_π
+                              πιόνι1=Πιόνι
+                              Δες οκ {
+                              Αν Ζάρι+.θέση_π>32 Τότε {
+                                     πρ$=Θέσεις(.νέα_θέση).μεταφορά$
+                                     Αν πρ$<>"" Τότε Σωρός πρ$
+                                     Για ι=61-Ζάρι-.θέση_π  έως 29 {
+                                          Βάλε ι 
+                                     }
+                               }
+                              Αν .θεση_π<30 τότε {
+                                    Για ι=30 έως .θέση_π+1 {
+                                          Βάλε ι
+                                    }
+                              }      
+                              }
+                           Αν είναρ τότε  Διάβασε .νέα_θέση
+                              αν όχι οκ τότε ανανέωση 50 : δοκιμη
+                        } Αλλιώς .θέση_π=0 : νικητές++ : ΣειράΝικητών(Πιόνι-1)=νικητές
+                  } Αλλιώς {
+                          Διάβασε .νέα_θέση     
+                  }   
+            }
+            Δείξε_Όλα(πιόνι1, ζαρ$) 
+            μεζάρι=0
+            Αν ΕινΑρ Τότε Κυκλικά
+      }
+Τέλος Ρουτίνας
+Ρουτίνα Δείξε_Όλα(εκτός, λεζ$)
+      Τοπική ι, κιν, εξ=Αληθής
+      Για κιν=1 Έως 4 {
+            Άφησε
+            Για ι=0 Έως 3 {
+                  Για Πιόνια(ι) {
+                        Αν .θέση_π>0 Τότε {
+                              Αν .νο<>εκτός Τότε {
+                                    Για θέσεις(.θέση_π) {
+                                          ΠιόνιΔείξε(..Χ,..Υ,.νο)
+                                    } 
+                              } Αλλιώς {
+                                    ΠιόνιΚιν(Θέσεις(.θέση_π).Χ,Θέσεις(.θέση_π).Υ, Θέσεις(.νέα_θέση).Χ,Θέσεις(.νέα_θέση).Υ,κιν, .νο)
+                                    εξ=Ψευδές
+                                    Αν κιν=4 Τότε .μετακίνηση
+                              }
+                        }            
+                  }
+                  Αν ΣειράΝικητών(ι)>0 Τότε ΛεζάνταΣτοΠλαίσιο(θχ+χ,θυ*.4, θυ,Χ.σημεία, κ, ι+1, μορφή$("{0}",ΣειράΝικητών(ι)))
+            }
+            Αν εκτός>=0 Τότε {
+                  ΛεζάνταΣτοΠλαίσιο(0, θυ*.4,θυ,θχ ,κ,εκτός, λεζ$)
+            }
+            Ανανέωση 5000
+            Αν εξ Τότε Έξοδος
+      }
+Τέλος Ρουτίνας
+Ρουτίνα Στοίχισε(εικόνα1, &χχ, &υυ, &μ_χ, &μ_υ)
+      Τοπική αναλογία_εικόνας
+      αναλογία_εικόνας=Εικόνα.Χ.Σημεία(εικόνα1)/Εικόνα.Υ.Σημεία(εικόνα1)
+      χχ=Χ.σημεία*.7
+      υυ=Υ.σημεία*.7
+      Αν χχ>αναλογία_εικόνας*υυ Τότε {χχ=αναλογία_εικόνας*υυ} Αλλιώς υυ=χχ/αναλογία_εικόνας
+      μ_χ=(Χ.σημεια-χχ) Δια 2
+      μ_υ=(Υ.σημεια-υυ) Δια 2
+Τέλος Ρουτίνας
+Ρουτίνα ΠιόνιΔείξε(χ1, υ1, νο)
+      Θέση ΜετΧ(χ1,νο-1),ΜετΥ(4-υ1)
+      βήμα χ/120, υ*3/44
+      Πάχος 3 { Πένα 0 { Κύκλος Γέμισμα Χρ(νο), υ*3/44,3 } }
+Τέλος Ρουτίνας
+Ρουτίνα ΠιόνιΚιν(χ1, υ1, χ2,υ2, κιν, νο)   
+      Θέση ΜετΧ(χ1,νο-1)-κιν*(ΜετΧ(χ1,νο-1)-ΜετΧ(χ2,νο-1))/4,ΜετΥ(4-υ1)-κιν*(ΜετΥ(4-υ1)-ΜετΥ(4-υ2))/4
+      βήμα χ/120, υ*3/44
+      Πάχος 3 { Πένα 0 { Κύκλος Γέμισμα Χρ(νο), υ*3/44,3 } }
+Τέλος Ρουτίνας
+Ρουτίνα Βάλε_Τίτλο(τ$, χ1, μυ, υ2)
+      Αν Ταύτιση("Α") Τότε { Διάβασε Τοπικά χ2 } Αλλιώς χ2=χ.σημειά
+      Τοπική μ,μχ
+      μ=μυ/30*ύψος.σημείου/15
+      μχ=(χ2-χ1-Μέγεθος.χ(τ$, "Arial Black",μ)) Δια 2
+      Αν μχ<0 Τότε  {
+            μ=μεγαλο.σειράς(μ/2,6)
+            μχ=(χ2-χ1-Μέγεθος.χ(τ$, "Arial Black",μ)) Δια 2
+      }
+      θέση μχ+χ1, υ2
+      Επιγραφή τ$, "Arial Black",μ
+Τέλος Ρουτίνας
+Ρουτίνα ΠιόνιΣτοΠλαίσιο(χ1, μυ, υ2, χ2, ν, νο)
+      Τοπική μ,μχ
+      μχ=(χ2-χ1)/6
+    Θέση χ1+μχ+χ/30, υ2+μυ+(υ-μυ*2)*(νο-.5)/4
+    Πάχος 3 { Πένα 0 { Κύκλος Γέμισμα χρ(νο), υ*3/44,3 } }
+Τέλος Ρουτίνας
+Ρουτίνα ΛεζάνταΣτοΠλαίσιο(χ1, μυ, υ2, χ2, ν, νο, Λ$)
+      Τοπική μ,μχ
+      μχ=(χ2-χ1)/6
+      Βάλε_Τίτλο(Λ$,χ1, μυ*2,υ2+(υ-μυ*2)*(νο-.5)/4, χ2) 
+Τέλος Ρουτίνας
+Ρουτίνα ΠλαίσιοΠαικτών(χ1, μυ, υ2, χ2, ν)
+      Τοπική μ,μχ
+      μχ=(χ2-χ1)/6
+      Θέση χ1+μχ, υ2+μυ
+      Πάχος 2 {
+            Χρώμα 3 {
+                  Βάψε μχ*4, υ-μυ*2
+            }
+      }
+Τέλος Ρουτίνας
+
+}
+MODULE MAXITEM {Module TestThis {
+      Print "Search a tuple type list (is an array also)"
+      A=(,)
+      For i=1 to Random(1,10)
+      Append A, (Random(1,100),)
+      Next
+      Print Len(A)
+      Print A
+      Print A#max()
+      
+      Print "Search an array"
+      B=lambda->Random(1,100)
+      Rem Dim A(1 to Random(1,10))<<B()
+      Dim A(1 to Random(1,10))<<lambda->{=Random(1,100)}()
+      Print Len(A())
+      Print A()
+      Print A()#max()
+      
+      \\ #max() skip non numeric values
+      Rem Print (1,"100",3)#max()=3
+      
+      Print "Search an inventory list"
+      Inventory C
+      for i=1 to Random(1,10)
+            do
+                  key=random(10000)
+            until not exist(c, key)
+            \\ we can put a number as string
+            if random(1,2)=1 then Append c, key:=B() else Append c, key:=str$(B())
+      Next
+      
+      \\ if inventory item is string with a number work fine
+      Function MaxItem(a) {
+            k=each(a,2)
+            val=a(0!)
+            while k
+                  \\ using stack of values
+                  \\ over -equal to over 1 - copy value from 1 to top, means double the top value
+                  \\ number - pop top value
+                  \\ drop -equal to drop 1 : drop top value 
+                  Push a(k^!): Over : If Number>val then Read Val else drop
+                  Rem If a(k^!)>Val Then Val=a(k^!)
+            end while
+            =val
+      }
+      Print Len(C)
+      Print C
+      Print MaxItem(C)
+      
+      Print "Search a stack object"
+      \\ a stack object is the same as the stack of values
+      \\ which always is present
+      D=stack
+      I=0
+      J=Random(1,10)
+      \\ Stack stackobjext {}
+      \\ hide current stack and attach the D stack
+      Stack D {
+            Push B() : I++ : IF I>J Else Loop
+      }
+      \\ if stack item isn't numeric we get a run time error
+      Function MaxItemStack(a) {
+            Stack a {env$=envelope$()}
+            if replace$("N","", env$)<>"" then error "only numbers allowed"
+            k=each(a,2)
+            val=Stackitem(a,1)
+            while k
+                  If Stackitem(k)>val then Val=stackitem(k)
+            end while
+            =val
+      }
+      Print Len(D)
+      Print D
+      Print MaxItemStack(D)     	
+}
+TestThis
+}
+MODULE INFO {keyboard "UseThis : InfoBasic"+chr$(13)
+}
+MODULE CLOCK1 {keyboard " clock %ok=1 : clear :  info "+chr$(13)
+}
+MODULE USETHIS {hide
+window mode, window
+back {cls 11,0}
+Font "Verdana"
+Bold 1
+PEN 14
+CLS,0
+If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
+If Version=9.8 and revision<45 then Error "No proper M2000 revision for version 9.8"
+Set Fast
+Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
+dir user
+Player 0  ' erase any layer
+
+\\ Use form without ! for less border
+\\ Form ! 100,66
+
+}
+MODULE DOWN3 {Declare form1 form
+With form1, "visible" as visible
+with form1, "Title", "Download Example"
+layer form1 {
+	window 12, 12000,6000
+	cls #333333
+	cursor 0,2
+	report 2,"close form to exit download"
+}
+Method form1, "show"
+cls,0
+report 2, "Download 3 Files using Download object"
+cls, 10
+declare withevents d(2) download
+w=0
+m=row
+Function d_Start(new con, host$,port) {
+	cursor 0,m
+	Print Part con, host$, port
+	Print under
+	m=row
+	w++
+}
+Function d_DownloadProgress(new con, many, total) {
+	cursor 0,3+con
+	Print over $(4,10), con,  many;"/";total
+	\\ do not use Refresh here
+	cursor 0, m
+	layer form1 {
+		cursor 0,3+con
+		Print over $(4,10), con,  many;"/";total		
+	}
+}
+Function d_DownloadError(new con) {
+	cursor 0,m
+	Print "DownLoad Error"
+	Print  con, number, letter$
+	m=row
+	layer form1 {
+		cursor 0,3+con
+		Print over $(4,10), con,  "failed"
+	}
+	w--
+}
+Function d_DownloadComplete(new who, a$) {
+	cursor 0,3+who
+	print over a$+" - complete"
+	layer form1 {
+		cursor 0,3+who
+		print over a$+" - complete"		
+	}
+	w--	
+}
+declare d() over   ' one more withevents
+\\ GetUrl$() function used if we wish the property url to connect on the fly, and disposed
+\\ because object is naked (not in a mHandler carrier), can't used as value
+\\ so we have to pass it by reference
+\\ M2000 pass array items by reference using a second variable, which pass by reference
+\\ and at the exit get the value from the variable and try to store it back to array to proper item
+\\ no error happen if array has no item with specific item number
+\\ this method is like copy in copy out
+\\ VB6 lock arrays if we pass an array item by reference. M2000 never lock arrays.
+Function GetUrl$(&where) {
+	With where, "url" as url$
+	=url$
+}
+Dim url$(3)
+for i=0 to len(d())-1
+	With d(i), "url" as url$(i)  \\ connect property url of d(i) to url$(i)
+next i
+Method d(0), "DownloadFile", "http://www.vbforums.com/showthread.php?818583-Binary-Code-Thunk-Experiment", dir$+"vbforums.html"
+Method d(2), "DownloadFile", "http://www.cs.virginia.edu/~evans/cs216/guides/x86.html", dir$+"x86.html"
+Method d(1), "DownloadFile","http://rosettacode.org/wiki/Rosetta_Code", dir$+"rossetacode.html"
+cursor 0, m
+
+for i=0 to len(d())-1
+	Print Part "Read Property Url for"+str$(i)+":";~(11); url$(i)  ' GetUrl$(&d(i)) 
+	Print Under
+Next
+Print "press left mouse to exit"
+refresh
+m=row
+cls,m
+kk=0
+thread {
+	cursor 0, m
+	print kk
+	kk++
+	m=row
+} as mm interval 10
+While w
+	cursor 0,2
+	print over $(4),"live connections:";w, visible
+	if keypress(2)  or not visible then exit
+	bb$=inkey$
+	\\ wait 0
+	\\ threads need a wait or a Key$, or Inkey$ or a Main.Task or a Every, or a Modal form to be opend.
+	\\ com events no need this.
+End While
+threads erase
+wait 100
+cursor 0,2
+print over $(4),"live connections:";w
+cursor 0,m
+print "done"
+declare d() nothing
+declare form1 nothing
+}
+MODULE CHESSGAME {\\ George Karras, 2019
+\\ Chess Example (a big one)
+\\ Example Using sprites
+Hide
+window 12, window
+if random(1, 3)=1 then
+window 12, scale.x*random(6,9)/10,scale.y*random(6,9)/10;
+end if
+form 48,34
+def thismode
+thismode=mode
+global const  NoSound = False
+Module NothingToMove {
+	Layer {Print $(4)," Nothing to move",$(0);}
+}
+Module Proper {
+	Layer {Print $(4)," Wrong color",$(0);}
+}
+Module Beep {
+	Layer {Print $(4)," Not Possible",$(0);}
+	if NoSound Else Beep
+}
+back {
+	\\ we use a switch to alter the return code in Input ! variant, when we press Enter key
+	\\ normally "-inp" return in Field  read only variable 1 when we press enter or down arrow
+	\\ using "+inp" we can get 13 for enter and 1 for down arrow
+	Cls 0,0
+	font "Times"
+	Pen 15
+	Mode thismode*5
+	cursor 0,height div 2
+	Report 2, "Wait...."
+	refresh 10000	
+	Mode thismode
+
+	set switches "+inp"
+	Fkey Clear
+	Escape off
+	Cls #FFA000,0
+	Pen 14
+	bold 1
+	mode thismode
+	Def White$="PNBRQK", Black$="pnbrqk", WhiteDisp$="♙♘♗♖♕♔"
+	Def BlackDisp$="♟♞♝♜♛♚", empty$="12345678", disp$
+	disp$=WhiteDisp$+BlackDisp$ 
+	Def White_♔_file, White_♔_rank, Black_♚_rank, Black_♚_file
+	Def boolean White_♔_no_roke, Black_♚_no_roke
+	Def boolean White_no_left_roke, Black_no_left_roke
+	Def boolean White_no_right_roke, Black_no_right_roke
+	Def Halfmove_clock, Fullmove_number, threat, Clip$
+	Dim emptydisp$(1 to 8), BoardSq(1 to 8, 1 to 8)=(,)
+	Def en_passant_rank=0, en_passant_file=0
+	for i=1 to 8 :emptydisp$(i)=string$(" ",i):next i
+	Def board$, status$, oldI, color1, color2, C=14
+	color1=Color(209, 139, 71)
+	color2=Color(255, 206,158)
+	
+	dim line$()
+	Def flashtime=300
+	Dim PastGames$(1 to 200)
+	Def freeSlot=0, cur=0, ok=true, k$, condition$
+	Def double ip, jp, ip1, jp1, si, sj, getone as boolean
+	Def st, fig$, tr, mx, my, lx,ly, key=0, mmx,mmy, mmb
+	Def movelogic as boolean=false, mvx, mvy
+	sa=(,) : sb=each(sa)
+	Double
+	OldI=Italic
+	Italic 1
+	Def upperlimit
+	Cursor 0,0
+	Pen 15 {Report 2, "Chess Game for two"}
+	Italic OldI
+	Normal
+	Move !      ' Move graphic cursor to character cursor  - Cursor !  the other way
+	upperlimit=pos.y*1.6
+	move 0, upperlimit*6/8
+	Fill scale.x,scale.y-upperlimit*6/8, 3,5,1
+	Set Fast !
+	\\ calc based to height
+	HalfWidth=(scale.y*.65) div 16
+	def downlimit=0, White as boolean=True, fw
+	DrawEmptyBoard((scale.x/2-HalfWidth*8),upperlimit, HalfWidth, 15)
+	fw=HalfWidth*2-60
+	\\ hold
+	\\ set new game
+	\\ -1 for no FEN
+	def NoFEN(aGame$)=len(aGame$)<>len(filter$(aGame$,"/"))+7
+	Inventory OnBoard
+	Const NewGame$="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+	Def ThisGame$
+	\\ CHECK IF A STRING IS IN STACK (SO THIS MAYBE A FEN NOTATION FOR A STARTING POSITION)
+	if match("S") then
+		For this {
+			\\block for temporary definitions
+			Local row$(),  i, nok, m
+			Read ThisGame$
+			row$()=piece$(ThisGame$, chr$(13)+chr$(10))
+			\\ we drop lines by redim the array (dim also is a "dim preserve")
+			while  len(row$())>1
+				if row$(len(row$())-1)="" then dim row$(len(row$())-1) else exit
+			end while
+			if len(row$())>0  then
+				m=each(row$())
+				while m
+					if NoFEN(array$(m)) Then nok=true: exit
+				end while
+			End if
+			if nok then Push ThisGame$ : ThisGame$=NewGame$ : exit
+			PastGames$()=row$()
+			Dim PastGames$(1 to 200)
+			freeSlot=len(row$())
+			ThisGame$=PastGames$(freeSlot)
+		}
+	else
+		ThisGame$=NewGame$
+	End if
+	
+	SetBoard(ThisGame$)
+	RedrawBoard(True)
+	sx=scale.x
+	sy=scale.y-downlimit
+	move 0,downlimit
+	fill  sx,sy, 5
+	Layer {
+		font "Arial"
+		mode thismode, sx,sy
+		motion center
+		motion, downlimit
+		Cls 5,0
+		Pen 14
+	}
+	Refresh 60
+	flush
+	' roke white left
+	rem data 2,1,1,3,4,7,4,5,2,2,2,3,5,7,5,5,3,1,2,2,5,5,5,4,5,2,5,3,8,7,8,5,4,1,5,2,1,7,1,5,5,1,3,1,2,7,2,5
+	
+	' roke white right
+	rem data 7,1,8,3,4,7,4,5,7,2,7,3,5,7,5,5,6,1,7,2,5,5,5,4,5,1,7,1,3,7,3,5
+	move$=""
+	refresh
+	rem  goto 1000
+	\\ ctrl+F1 help
+	About  ! "How to play", 14000,9000,{Give one or more moves in one input line.
+		Each move has a letter a number a letter and  final a number
+		so:
+					e2e4   or  e2-e4  or e2..e4
+					(symbols other than aebcdefgh and 123456789 are white space)
+		move something from e2 to e4, but this
+					e2e3e7e5
+		give two moves (so we can paste a number of moves)
+		before a move a new FEN string compiled and copied to clipboard.
+		if nothing exist in e2 then we get a beep sound. If a move break a rule then no move happen and we get a beep. If King have a threat then we have to do a proper move to eliminate threat otherwise we get a beep.
+		We can press enter without giving a move, so we asked for ending the game or not.
+		If we press Y then a new input start to get a FEN board notation, so we can use ctrl+V to paste the string and pressing enter we get the new boad.
+		* Castling work automatic. So if rules are ok wen can give a e1c1 for queen side castling for white king.
+		* En passant works fine
+		* A pawn at last rank turn to Queen
+		You can call this module passing a FEN string as parameter.
+		George Karras
+		}
+	1000
+	Thread {
+		if control$<>"MAIN" then continue
+		mmb=mouse
+		If mmb=0 then continue
+		mmy=mouse.y : mmx=mouse.x
+		if mmy>downlimit  then
+			if  mmx<scale.x*.8 then
+				if mmb=2  then Field New 99 : Input End
+			else
+				if mmb=1 then Input End
+			end if
+		else.if mmy<downlimit  and mmy>upperlimit then
+			Field New if(mmy>((downlimit+upperlimit)/2)->1,-1)
+			Input End				
+		end if
+		
+	} as Handler interval 100
+	Thread Handler Hold
+	Thread {
+		if control$<>"MAIN" then continue
+	
+		if getone then
+		move lx, ly
+		Refresh 100
+		sprite sprite$
+		mx=mouse.x : my=mouse.y :mmb=mouse
+		sb=each(BoardSq())
+		
+		St=(,)
+		While sb
+		sa=array(sb)
+		if sa#val(3)-twipsX<=mx and sa#val(5)+twipsX>=mx and sa#val(4)-twipsY<=my and sa#val(6)+twipsY>=my then St=sa : exit
+		End While
+		if len(st)>0 then
+			si=st#val(10) : sj=st#val(11)
+			if mmb=0 then
+				keyboard chr$(ip+96)+chr$(jp+48)+chr$(si+96)+chr$(sj+48)+chr$(13)
+				getone=false:  refresh 100 : mouse.icon show
+			else
+				lx=mx : ly=my
+				move lx, ly
+				if st#val$(8)=" " or  (si=ip and sj=jp) then
+					sprite fig$, tr
+				else
+		 			sprite fig$, tr,-10,,80
+		 		end if
+		 		refresh 100
+		 	end if
+	 	else.if mmb=0 then
+			RedrawBoard(?)
+			getone=false
+			mouse.icon show
+			Thread Sp restart
+	 	end if
+	 	if not getone  then Thread this hold
+	} as pSp interval 1000/30
+	Thread pSp hold
+	Thread {
+		if control$<>"MAIN" then continue
+		if mouse=0 and movelogic then movelogic=false 
+		if mouse.y<upperlimit then mouse.icon 15 else mouse.icon 1
+		
+		if not movelogic then if mouse.y<upperlimit and mouse=1 then  movelogic=true: mvx=mousea.x : mvy=mousea.y:continue
+		if movelogic then if  mouse=1 then motion  motion.wx- mvx+mousea.x, motion.wy-mvy+mousea.y : continue
+		
+		mx=mouse.x : my=mouse.y
+		if mouse=1 and my>downlimit then input end : Thread this hold
+
+		if mouse=1 and not getone then{
+		move mx, my
+		if point=0 or point=#FFFFFF else exit
+		sb=each(OnBoard)
+		
+		St=(,)
+		While sb
+		sa=eval(sb)
+		if sa#val(3)<mx and sa#val(5)>mx and sa#val(4)<my and sa#val(6)>my then St=sa : exit
+		End While
+		if len(st)=0 then exit
+		move st#val(3)+30, st#val(4)+30
+		refresh 1000
+		tr=point
+		copy fw,fw to fig$
+		Image fig$ to fig$,120,120
+		fill fw,fw, tr
+		move mx, my
+		lx=mx:ly=my
+		ip=st#val(10):jp=st#val(11)
+		sprite fig$, tr
+		mouse.icon hide
+		getone=true
+		Thread pSp restart
+		Thread this hold
+		}
+	} as Sp interval 100
+	mouse.icon show
+	isok=true
+	{
+	
+		{
+			if white then		
+				CheckThreat(white, White_♔_file, White_♔_rank, &threat)
+			else
+				CheckThreat(white, Black_♚_file, Black_♚_rank, &threat)
+			end if
+			if isok  then
+				freeSlot++
+				GetBoard(&Clip$)
+				if freeSlot>Len(PastGames$()) then Dim PastGame$(1 to 2*Len(PastGames$()))
+				PastGames$(freeSlot)=Clip$
+			end if
+			\\\test
+			condition$=if$(White->"White move", "Black move") + if$(threat->" (check)","")+ if$(Halfmove_clock>50->"(You can draw)","")+":"
+			Layer {
+				Print Part $(4,5), right$(string$(chrcode$(8199), 3)+str$(Fullmove_number,""),3)+".", $(7,12),condition$,
+			}
+
+			White~
+			if empty then
+			Layer {
+				Pen 15 {Input "",move$;}
+			}
+			\\\test !			
+			Thread Sp hold
+			Thread pSp Hold
+			mouse.icon 1
+			getone=false
+			if move$="" then
+				
+				Layer {
+					wait 100
+					Refresh 60
+					profiler
+					Every 1000/60 {
+						if timecount>flashtime then
+							profiler
+							Cls
+							Pen C {Double : Report 2,"End this Game ?" : Normal}
+							C=20-C
+							Cursor width, Height
+							Move !   \\ copy character cursor to graphic cursor
+							Legend "Use Y or Left Mouse Click  to exit | Right Mouse Click or N to continue", FontName$, Mode*.7, 0,1, 1,twipsX
+						end if
+						k$=""
+						if keypress(0x1B) then k$="Y":exit
+						if keypress(0xE4) then  exit
+						if keypress(0x59) then  k$="Y":exit
+						if keypress(2) then k$="Y": exit
+						if keypress(1) then exit
+						
+					}
+				}
+				If k$="Y" else
+					\\ if stack has something then RedrawBoard mey use it (because read for optional variable)
+					\\ we can be sure we set the optional value using ?
+					White~ :RedrawBoard(?): Layer {Cls}
+					getone=false
+					Thread Sp restart
+					flush ' make empty true (so stack is empty for sure)
+					loop  ' set a flag for restart at end bracket of current block
+				end if
+				while not inkey$ ="" {Wait 1}  'drop key any
+			else
+				move$=lcase$(move$)
+				while len(move$)>0
+					select case left$(move$,1)
+					case "1" to "8"
+						data asc(move$)-48
+					case "a" to "h"
+						data asc(move$)-96
+					end select
+					insert 1,1 move$=""
+				end while
+			end if
+			isok=false
+			if not empty then
+				if stack.size mod 4 = 0 then
+					try ok {
+						MakeAmove(&isok)
+						if not isok then flush : White~: exit
+						if not empty then
+						white~: refresh : wait 500 : loop
+						end if
+					}
+					Layer {Print}
+					getone=false
+					if isok else RedrawBoard(?)
+					
+					if ok then loop : Thread Sp restart
+				else
+				
+					flush : White~ : loop  : Thread Sp restart' loop processed at the end of the block, so only a flag raised here
+				end if
+			end if
+		}
+		Thread Sp Hold
+		Thread pSp Hold
+		cur=freeSlot
+		Clip$=PastGames$(cur)
+		Layer {
+			if cur=0 then cur=1
+			if cur>freeSlot then cur=freeSlot 
+			if  Clip$<>PastGames$(cur) then
+			Clip$=PastGames$(cur)
+			if len(Clip$)=len(filter$(Clip$,"/"))+7  and  trim$(Clip$)<>"" then Back {SetBoard(Clip$) :RedrawBoard(?)}
+			end if
+			Refresh  60
+			Cls
+			Cursor width, Height
+			Move !
+			Legend "Left Mouse Click or Esc to Quit | Right Mouse Click right of the FEN to continue play | About Ctrl+F1", FontName$, Mode*.7, 0,1, 1,twipsX
+			Cursor 0,0
+			Report 2, "Replay the Game,(arrows u/d) or Start a new one setting a new FEN"
+			Print Part $(7,7), "Board FEN: "
+			Field New 13
+			Thread Handler Restart
+			Pen 15 {Input ! Clip$, width-7 len=100}
+			Thread Handler Hold
+			Report Clip$
+			refresh 60
+			if field=13 then exit
+			if field=-1then cur-- : loop
+			if field=99 then Clip$="": exit
+			if field=1 then cur++ : loop
+		}
+		if len(Clip$)<>len(filter$(Clip$,"/"))+7  or  trim$(Clip$)="" then SaveGame():Layer {Cls} : exit
+		if Clip$<>PastGames$(cur) then
+			SaveGame()
+			PastGames$(1)=Clip$:cur=1
+		end if
+		freeSlot=cur
+		SetBoard(Clip$)
+		RedrawBoard(?)
+		Layer {Cls}
+		Thread Sp restart
+		Loop
+	}
+	Cls 0,0	
+}
+hide
+threads erase
+wait 200
+about ""
+if module(info) then keyboard "info"+chr$(13)
+Flush
+set switches "-inp"
+escape off
+Window 12,0
+form
+form ;
+end
+Sub SaveGame()
+if freeSlot=1 then exit sub
+Local Out$
+Document Out$     ' upgrade to Document
+layer {
+	Cls
+	if ask("Copy the game to clipboard?","Finish","*Yes","No")=1  then
+		Report "Wait..."
+		for i=1 to freeSlot
+			Out$+=PastGames$(i)
+			if i<freeSlot then
+			Out$={
+			}
+			end if
+		next
+		Clipboard Out$
+		Save.Doc Out$, "LastGame.chess"
+		Report "Done..."
+		wait 300
+	end if	
+}
+end sub
+Sub SaveGame1()
+local Out$, i
+Document Out$  ' upgrate to document
+layer {
+}
+End Sub
+Sub DrawEmptyBoard(leftmargin, topmargin, squarewidth, labelcolor)
+	Local a=true, z=bold : bold 0
+	Local l=squarewidth, k=2*l, k1=k*.85, N1=6, N=6, M=4, B=k*8, B1
+	Local d=0, im=0, jm=0
+	Repeat
+	N=N1
+	N1+=.25
+	Until K1<size.Y("A","Arial", N1)
+	topmargin-=l
+	leftmargin-=l
+	move leftmargin+l,topmargin+l
+	B1=(l div 300)*twipsX
+	step -B1,-B1
+	B+=B1*2
+	Pen 0 {
+	Width b1 div 2+1 {
+		color color1 , 1{Polygon 0, B, 0, 0, B, -B, 0, 0, -B}
+	}
+	M=N*.65
+	For i=1 to 9
+		d=leftmargin
+		move d, topmargin
+		if i<9 then
+			step 0, k
+			Pen labelcolor{Legend str$(9-i,""), "Arial", M,0,2}
+			step 0, -k
+			else
+			N=M
+		end if
+		for j=1 to 8
+			If i<9 then
+				step l, l
+				color  color1,1 {fill k,k, if(a->color1,color2)}
+				step  -l, -l
+				BoardSq(j, 9-i)=(N, pos.x, pos.y, pos.x-l+twipsX, pos.y-l+twipsX, pos.x+l-twipsX, pos.y+l-twipsX, k-twipsX*2, " ", a, j,9-i)
+				a~
+			else
+				step k, k
+				pen labelcolor {
+					Legend mid$("abcdefgh",j,1), "Arial", N, 0, 2
+				}
+			end If
+			d+=k
+			move d, topmargin
+		next
+		a~ : topmargin+=k
+	next
+	}
+	bold z
+	downlimit=topmargin+500
+end sub
+Sub MakeAmove( &ok, i, j, i1, j1)
+Local z=bold, p$, p1$ : bold 0
+Local t,t1, N=BoardSq(1,1)#val(0), again as boolean, playroke as boolean
+ok=false
+rem if i<1 or i>8 or j>8 or j<1 or i1<1 or i1>8 or j1<1 or j1>8 then beep : exit
+Local rule=true, threat as boolean
+refresh 10000
+Pen 0 {
+	again=false
+	t=BoardSq(i,j)
+	t1=BoardSq(i1, j1)
+	p$=t#val$(8)
+	p1$=t1#val$(8)
+	if p$=" " then NothingToMove : exit
+	if t is t1 then NothingToMove : exit
+	if p1$<>" " then if p1$<"♚" and p$<"♚" then Proper : exit
+	if p1$<>" " then if p1$>="♚" and p$>="♚" then Proper : exit
+	\\ white change logic here
+	if not white and instr(WhiteDisp$, p$)=0 then Proper : exit
+	if white and instr(BlackDisp$, p$)=0 then Proper :exit
+	select case p$
+	case "♔"
+	{
+		If not White_♔_no_roke  then
+			CheckThreat(not white, White_♔_file, White_♔_rank, &threat)
+			if not threat then
+				if i1=3 and j1=1  then
+					if p1$=" " and BoardSq(2,1)#val$(8)=" " and  BoardSq(4,1)#val$(8)=" " and not White_no_left_roke then
+						CheckThreat(not white, 4, 1, &threat)
+						if not threat then push 1, 4, 1, 1 : again=true : playroke=true
+					end if
+				else.if i1=7 and j1=1 then
+					if p1$=" " and BoardSq(6,1)#val$(8)=" " and not White_no_right_roke then
+						CheckThreat(not white, 6, 1, &threat)
+						if not threat then push 1, 6, 1, 8 : again=true :  playroke=true
+					end if
+				end if
+			end if
+		end if
+		if not playroke Then
+			if abs(i-i1)>1 then rule=false: exit
+			if abs(j-j1)>1 then rule=false: exit
+			White_♔_no_roke=true
+			White_no_right_roke=True
+			White_no_left_roke=true
+		end if
+		CheckKing()
+		if threat then
+			rule=false
+			if playroke then drop 4
+		else
+			White_♔_rank=j1
+			White_♔_file=i1
+		end if
+	}
+	case "♚"
+	{
+		If not Black_♚_no_roke  then
+			CheckThreat(not white, Black_♚_file, Black_♚_rank, &threat)
+			if not threat then
+				if i1=3 and j1=8 then
+					if p1$=" " and BoardSq(2,8)#val$(8)=" " and  BoardSq(4,8)#val$(8)=" " and not Black_no_left_roke then
+						CheckThreat(not white, 4, 8, &threat)
+						if not threat then push 8, 4, 8, 1 : again=true : playroke=true
+					end if
+				else.if i1=7 and j1=8 then
+					if p1$=" " and BoardSq(6,8)#val$(8)=" " and not Black_no_right_roke then
+						CheckThreat(not white, 6, 8, &threat)
+						if not threat then push 8, 6, 8, 8 : again=true :  playroke=true
+					end if
+				end if
+			end if
+		end if
+		if not playroke Then
+			if abs(i-i1)>1 then rule=false: exit
+			if abs(j-j1)>1 then rule=false: exit
+			Black_♚_no_roke=true
+			Black_no_right_roke=true
+			Black_no_left_roke=true
+		end if
+		CheckKing()
+		if threat then
+			rule=false
+			if playroke then drop 4
+		else
+			Black_♚_rank=j1
+			Black_♚_file=i1
+		end if
+		}
+	case "♕","♛"
+	{
+		if i1<>i and j1<>j then
+			if abs(i1-i)<>abs(j1-j) then rule=false: exit
+			jm=0
+			if abs(i1-i)>1 then
+				jm=j+sgn(j1-j)
+				for im=i+sgn(i1-i) to i1-sgn(i1-i)
+				if BoardSq(im,jm)#val$(8)<>" "  then jm=-1: exit for
+				jm+=sgn(j1-j)
+			next
+			end if
+		else
+		jm=0:im=0
+		if abs(i1-i)>1 then
+			for im=i+sgn(i1-i) to i1-sgn(i1-i) 
+				if BoardSq(im,j)#val$(8)<>" " then jm=-1: exit for
+			next
+		else.if abs(j1-j)>1 then
+			for jm=j+sgn(j1-j) to j1-sgn(j1-j) 
+				if BoardSq(i,jm)#val$(8)<>" " then im=-1 :exit for
+			next
+		end if
+		if im=-1 or jm=-1 then rule=false:exit
+		end if
+		CheckIt()
+	}
+	case "♜"
+	{
+		If playroke then Black_no_right_roke=true : Black_no_left_roke=true : Black_♚_no_roke=True : exit
+		if i1<>i and j1<>j then rule=false: exit
+		jm=0:im=0
+		if abs(i1-i)>1 then
+			for im=i+sgn(i1-i) to i1-sgn(i1-i) 
+				if BoardSq(im,j)#val$(8)<>" " then jm=-1: exit for
+			next
+		else.if abs(j1-j)>1 then
+			for jm=j+sgn(j1-j) to j1-sgn(j1-j) 
+				if BoardSq(i,jm)#val$(8)<>" " then im=-1 :exit for
+			next
+		end if
+		if im=-1 or jm=-1 then rule=false:exit
+		CheckIt()
+		if not rule then exit
+		if i=1 and j=8 then Black_no_left_roke=true
+		if i=8 and j=8 then Black_no_right_roke=true
+	}
+	case "♖"
+	{
+		If playroke then White_no_right_roke=true : White_no_left_roke=true : White_♔_no_roke=True : exit
+		if i1<>i and j1<>j then rule=false: exit
+		jm=0:im=0
+		if abs(i1-i)>1 then
+			for im=i+sgn(i1-i) to i1-sgn(i1-i) 
+				if BoardSq(im,j)#val$(8)<>" " then jm=-1: exit for
+			next
+		else.if abs(j1-j)>1 then
+			for jm=j+sgn(j1-j) to j1-sgn(j1-j) 
+				if BoardSq(i,jm)#val$(8)<>" " then im=-1 :exit for
+			next
+		end if
+		if im=-1 or jm=-1 then rule=false:exit
+		CheckIt()
+		if not rule then exit
+		if i=1 and j=1 then White_no_left_roke=true
+		if i=8 and j=1 then White_no_right_roke=true
+	}
+	case "♗","♝"
+	{
+		if i1=i or j1=j then rule=false: exit
+		if abs(i1-i)<>abs(j1-j) then rule=false: exit
+		jm=0
+		if abs(i1-i)>1 then
+			jm=j+sgn(j1-j)
+			for im=i+sgn(i1-i) to i1-sgn(i1-i)
+				if BoardSq(im,jm)#val$(8)<>" "  then jm=-1: exit for
+				jm+=sgn(j1-j)
+			next
+		end if
+		if jm=-1 then rule=false:exit
+		Checkit()
+      	}
+	case "♘","♞"
+	{
+		if abs(i1-i)=abs(j1-j) then rule=false: exit
+		if abs(i1-i)=0 or abs(j1-j)=0 then rule=false: exit
+		if abs(i1-i)+abs(j1-j)<>3 then rule=false: exit
+		Checkit()
+	}
+	case "♙"
+	{
+		if j1<=j then rule=false:exit
+		if i<>i1 then if i1<i-1 or i1>i+1 then rule=false: exit
+		if j>2 then if j1>j+1 then rule=false:exit
+		if j=2 and j1>j+2 then rule=false:exit
+		if i=i1 and p1$<>" " then rule=false:exit
+		if i<>i1 and p1$=" "and not (en_passant_file=i1 and en_passant_rank=j1-1)  then rule=false:exit
+		if i<>i1 and j1>j+1 then rule=false exit
+		if en_passant_file=i1 and en_passant_rank=j1-1 then
+			Checkit2()
+		else
+			Checkit()
+		End if
+		en_passant_file=0
+		en_passant_rank=0
+		if j1=8 then p$="♕" else if j1=j+2 then en_passant_file=i1:en_passant_rank=j1
+	}
+	case "♟"
+	{
+		if j1>=j then rule=false:exit
+		if i<>i1 then if i1<i-1 or i1>i+1 then rule=false: exit
+		if j<7 then if j1<j-1 then rule=false:exit
+		if j=7 and j1<j-2 then rule=false:exit
+		if i=i1 and p1$<>" " then rule=false:exit
+		if i<>i1 and p1$=" " and not (en_passant_file=i1 and en_passant_rank=j1+1) then rule=false:exit
+		if i<>i1 and j1<j-1 then rule=false:exit
+		if en_passant_file=i1 and en_passant_rank=j1+1 then
+			Checkit2()
+		else
+			Checkit()
+		End if
+		en_passant_file=0
+		en_passant_rank=0
+		if j1=1 then p$="♛" else if j1=j-2 then en_passant_file=i1:en_passant_rank=j1
+	}
+	end select
+	If not rule then beep : exit
+	move t#val(3), t#val(4)
+	return t, 8:=" "
+	delete OnBoard, i*9+j
+	if t#val(9) then fill t#val(7), t#val(7),color1 else fill t#val(7), t#val(7), color2
+	
+	t=t1
+	move t#val(3), t#val(4)
+	fill t#val(7), t#val(7),15
+	if p1$<>" " then
+		Halfmove_clock=0
+		Return OnBoard, i1*9+j1:=t
+	else
+		Halfmove_clock++
+		Append OnBoard, i1*9+j1:=t
+	end if
+	return t, 8:=p$
+	move t#val(1), t#val(2): Legend p$, "Arial", N, 0, 2,0
+	move t#val(3)+twipsx*2, t#val(4)+twipsy*2
+	if t#val(9) then floodfill  ,,color1 else floodfill , , color2
+	if again then read  i, j, i1, j1 : Restart
+	if p$<>"♙" and p$<>"♟" then en_passant_file=0 : en_passant_rank=0
+	if white then Fullmove_number++
+	Ok=true	
+}
+bold z
+refresh 10000
+end Sub
+
+Sub RedrawBoard(NoRefresh as boolean=False)
+Local z=bold, p$ : bold 0
+Local t, N=BoardSq(1,1)#val(0)
+If NoRefresh Else refresh 10000
+Pen 0 {
+	For j=1 to 8
+		For i=1 to 8
+			t=BoardSq(i,j)
+			move t#val(3), t#val(4)
+			fill t#val(7), t#val(7),15
+			p$=t#val$(8)
+			
+			if p$=" " else move t#val(1), t#val(2): Legend p$, "Arial", N, 0, 2,0
+			move t#val(3)+twipsx*2, t#val(4)+twipsy*2	
+			if t#val(9) then floodfill  ,,color1 else floodfill , , color2
+		Next
+	Next
+}
+bold z
+If NoRefresh Else refresh 60
+end Sub
+Sub GetBoard(&chessboard$)
+chessboard$=""
+local i, j,a$, spc, line$
+for j=8 to 1
+line$=""
+for i=1 to 8
+a$=BoardSq(i,j)#val$(8)
+if a$<>" " then
+if spc>0 then line$+=str$(spc,""): spc=0
+
+line$+=mid$("PNBRQKpnbrqk", instr("♙♘♗♖♕♔♟♞♝♜♛♚", a$),1)
+else
+spc++
+end if
+next
+if spc>0 then line$+=str$(spc,""): spc=0
+if j>1 then chessboard$+=line$+"/" else chessboard$+=line$+" "
+next
+if white then chessboard$+="w " else chessboard$+="b "
+if  White_♔_no_roke and  Black_♚_no_roke then
+	chessboard$+="-"
+else
+	if White_no_right_roke else chessboard$+="K"
+	if White_no_left_roke else chessboard$+="Q"
+	if Black_no_right_roke else chessboard$+="k"
+	if Black_no_left_roke else chessboard$+="q"
+end if
+if not en_passant_file=0 then
+	chessboard$+=" "+chr$(96+en_passant_file)+chr$(48+en_passant_rank)
+else
+	chessboard$+=" -"
+end if
+chessboard$+=str$(Halfmove_clock)
+chessboard$+=str$(Fullmove_number)
+End Sub
+Sub SetBoard(chessboard$)
+	Rem https://en.wikipedia.org/wiki/Forsyth–Edwards_Notation
+	Clear OnBoard
+	board$=leftpart$(chessboard$," ")
+	if len(filter$(board$,"K"))<>len(board$)-1 Then  Error "Problem with White King"
+	if len(filter$(board$,"k"))<>len(board$)-1 Then  Error "Problem with Black King"
+	status$=ltrim$(rightpart$(chessboard$," "))
+	white=left$(status$,1)="w" 
+	status$=ltrim$(mid$(status$,2))
+	if left$(status$,1)="-" then
+		White_no_right_roke=True
+		White_no_left_roke=True
+		White_♔_no_roke =True
+		Black_no_right_roke=True
+		Black_no_left_roke=True
+		Black_♚_no_roke=True
+		status$=ltrim$(mid$(status$,2))
+	else
+		local L=len(status$)
+		status$=filter$(status$,"K")
+		White_no_right_roke= len(status$)=L
+		L=len(status$) : status$=filter$(status$,"Q")
+		White_no_left_roke= len(status$)=L
+		White_♔_no_roke = White_no_right_roke and White_no_left_roke
+		L=len(status$) : status$=filter$(status$,"k")
+		Black_no_right_roke= len(status$)=L
+		L=len(status$) : status$=filter$(status$,"q")
+		Black_no_left_roke= len(status$)=L
+		Black_♚_no_roke=Black_no_right_roke and Black_no_left_roke
+		status$=ltrim$(status$)
+		
+	End if
+	if left$(status$,1)="-" then
+		en_passant_file=0
+		en_passant_rank=0
+		status$=mid$(status$,2)
+	else
+		en_passant_file=Asc(left$(status$,1))-96
+		en_passant_rank=Asc(Mid$(status$,2,1))-48
+		if en_passant_rank=3 then en_passant_rank=4 else en_passant_rank=5
+		status$=mid$(status$,3)
+	end if
+	Local m 
+	Halfmove_clock=val(status$, "int", &m)
+	status$=mid$(status$,m)
+	Fullmove_number=max.data(val(status$, "int", &m), 1)
+	nl$={
+	}
+	for i=1 to 6
+		board$=replace$(mid$(White$,i,1),mid$(WhiteDisp$,i,1), board$)
+		board$=replace$(mid$(Black$,i,1),mid$(BlackDisp$,i,1), board$)
+	next
+	for j=1 to 8
+		board$=replace$(str$(j,""),emptydisp$(j), board$)
+	next
+	line$()=piece$(board$,"/")
+	local t
+	dim line$(1 to 8)
+	For j=1 to 8: For i=1 to 8
+		t=BoardSq(i,j)
+		return t, 8:=mid$(line$(9-j), i, 1)
+		if t#val$(8)<>" " then Append OnBoard, i*9+j:=t
+		if t#val$(8)="♔" then
+			White_♔_rank=j
+			White_♔_file=i
+			if i<>5 and j<>1 then White_♔_no_roke=True : White_no_left_roke=true : White_no_right_roke=true
+		else.if t#val$(8)="♚" then
+			Black_♚_rank=j
+			Black_♚_file=i
+			if i<>5 and j<>8 then Black_♚_no_roke=True: Black_no_left_roke=true : Black_no_right_roke=true
+		end if
+	next : next
+end Sub
+Sub CheckIt()
+		return t, 8:=" "
+		return t1, 8:=p$
+		if not white then		
+			CheckThreat(not white, White_♔_file, White_♔_rank, &threat)
+		else
+			CheckThreat(not white, Black_♚_file, Black_♚_rank, &threat)
+		end if
+		if threat then rule=false
+		return t, 8:=p$
+		return t1, 8:=p1$
+end Sub
+Sub CheckIt2()
+		return t, 8:=" "
+		return t1, 8:=p$
+		local t2=BoardSq(en_passant_file, en_passant_rank)
+		local p2$=t2#val$(8)
+		return t2, 8:=" "
+		if not white then		
+			CheckThreat(not white, White_♔_file, White_♔_rank, &threat)
+		else
+			CheckThreat(not white, Black_♚_file, Black_♚_rank, &threat)
+		end if
+		if threat then rule=false
+		return t, 8:=p$
+		return t1, 8:=p1$
+		if  threat then
+			return t2, 6:=p2$
+		else
+			move t2#val(3), t2#val(4)
+			if t2#val(9) then
+				fill t2#val(7), t2#val(7),color1
+			else
+				fill t2#val(7), t2#val(7), color2
+			end if
+			Halfmove_clock=-1
+		end if
+		
+end Sub
+Sub CheckKing()
+		return t, 8:=" "
+		return t1, 8:=p$
+		CheckThreat(not white, i1, j1,&threat)
+		if threat then rule=false
+		return t, 8:=p$
+		return t1, 8:=p1$
+end Sub
+Sub CheckThreat(White as boolean, c, c1, &Yes)
+local i=1, i1=8, j=1, j1=8, k=c, k1=c1
+if white then
+	local oKin$="♚",hor$="♜♛", dia$="♝♛", Kni$="♞"
+else
+	local oKin$="♔",hor$="♖♕", dia$="♗♕", Kni$="♘"
+end if
+ 
+' WhiteDisp$="♙♘♗♖♕♔"
+' BlackDisp$="♟♞♝♜♛♚"
+Yes=false
+if c1<7 and white then
+	if c>1 then
+		if BoardSq(c-1, c1+1)#val$(8)="♟" then Yes=True :exit sub
+	end if
+	if c<8 then
+		if BoardSq(c+1, c1+1)#val$(8)="♟" then Yes=True :exit sub
+	end If
+else.if c1>1 and not white then
+	if c>1 then
+		if BoardSq(c-1, c1-1)#val$(8)="♙" then Yes=True :exit sub
+	end if
+	if c<8 then
+		if BoardSq(c+1, c1-1)#val$(8)="♙" then Yes=True :exit sub
+	end If
+end if
+for k=max.data(c-1, 1) to min.data(c+1, 8)
+for k1=max.data(c1-1, 1) to min.data(c1+1, 8)
+if k1=c1 and k=c else if BoardSq(k, k1)#val$(8) =oKin$ then Yes=True : Exit Sub
+next
+next
+for k=c to i
+	if Instr(hor$,BoardSq(k,c1)#val$(8))>0 then Yes=True :exit sub
+	if k<>c then if Instr(disp$,BoardSq(k,c1)#val$(8))>0 then exit for
+next
+if c>1 and c1<8 then {
+k1=c1+1
+for k=c-1 to i   \\  look up left
+	if Instr(Dia$,BoardSq(k,k1)#val$(8))>0 then Yes=True :exit sub
+	if k<>c then if Instr(disp$,BoardSq(k,k1)#val$(8))>0 then exit for
+	K1++
+	if k1>8 then exit for
+next
+}
+for k=c to i1
+	if Instr(hor$,BoardSq(k,c1)#val$(8))>0 then Yes=True :exit sub
+	if k<>c then if Instr(disp$,BoardSq(k,c1)#val$(8))>0 then exit for
+next
+if c<i1 and c1>1 then {
+k1=c1-1
+for k=c+1 to i1   \\  look down right
+	if Instr(Dia$,BoardSq(k,k1)#val$(8))>0 then Yes=True :exit sub
+	if Instr(disp$,BoardSq(k,k1)#val$(8))>0 then exit for
+	K1--
+	if k1<1 then exit for
+next
+}
+for k1=c1 to j
+	if Instr(hor$,BoardSq(c,k1)#val$(8))>0 then Yes=True :exit sub
+	if k1<>c1 then if Instr(disp$,BoardSq(c,k1)#val$(8))>0 then exit for
+next
+if c1>j and c>1 then {
+k=c-1
+for k1=c1-1 to j   \\  look down left
+	if Instr(Dia$,BoardSq(k,k1)#val$(8))>0 then Yes=True :exit sub
+	if Instr(disp$,BoardSq(k,k1)#val$(8))>0 then exit for
+	k--
+	if k<1 then exit for
+next
+}
+for k1=c1 to j1
+	if Instr(hor$,BoardSq(c,k1)#val$(8))>0 then Yes=True :exit sub
+	if k1<>c1 then if Instr(disp$,BoardSq(c,k1)#val$(8))>0 then exit for
+next
+if c1<j1 and c<8 then {
+k=c+1
+for k1=c1+1 to j1   \\ look up right
+	if Instr(Dia$,BoardSq(k,k1)#val$(8))>0 then Yes=True :exit sub
+	if Instr(disp$,BoardSq(k,k1)#val$(8))>0 then exit for
+	k++
+	if k>8 then exit for
+next
+}
+rem test "here"
+for k=max.data(c-2,i) to min.data(c+2, i1)
+	for k1=max.data(c1-2,j) to min.data(c1+2, j1)
+		if Abs(k-c)+Abs(k1-c1)=3 then if BoardSq(k,k1)#val$(8)=Kni$ then Yes=True :exit sub
+	next
+next
+end Sub
+
+}
+MODULE URLNEW {Stack New {
+      Data "foo://example.com:8042/over/there?name=ferret#nose",  "urn:example:animal:ferret:nose" 
+      Data "jdbc:mysql://test_user:ouupppssss@localhost:3306/sakila?profileSQL=true",   "ftp://ftp.is.co.za/rfc/rfc1808.txt"
+      Data "http://www.ietf.org/rfc/rfc2396.txt#header1",   "ldap://[2001:db8::7]/c=GB?objectClass=one&objectClass=two"
+      Data "mailto:John.Doe@example.com",   "news:comp.infosystems.www.servers.unix",   "tel:+1-816-555-1212"
+      Data "telnet://192.0.2.16:80/",   "urn:oasis:names:specification:docbook:dtd:xml:4.1.2",  "ssh://alice@example.com"
+      Data "https://bob:pass@example.com/place",   "http://example.com/?a=1&b=2+2&c=3&c=4&d=%65%6e%63%6F%64%65%64"
+      data "ftp://username:password@hostname/"
+      a=Array([])
+}
+function prechar$(a$, b$) {
+      if a$<>"" then {=quote$(b$+a$)} else ={""}
+}
+z=each(a)
+document s$="["+{
+}
+While z {
+      a$=array$(z)
+      s1$={           "uri": }+quote$(a$)+{,
+            "authority": }+ quote$(string$(a$ as URLAuthority))+{,
+            "userInfo": }+ quote$(string$(a$ as URLUserInfo))+{,
+            "username": }+ quote$(string$(a$ as URLpart 3))+{,
+            "password": }+ quote$(string$(a$ as URLpart 4))+{,
+            "scheme": }+quote$(string$(a$ as URLScheme))+{,
+            "hostname": }+quote$(string$(a$ as UrlHost))+{,
+            "Port": }+quote$(string$(a$ as UrlPort))+{,
+            "pathname": }+quote$(string$(a$ as UrlPath))+{,
+            "search": }+prechar$(string$(a$ as URLpart 6),"?")+{,
+            "hash": }+prechar$(string$(a$ as UrlFragment),"#")+{
+      } 
+      s$="     {"+{
+      }+s1$+"     }"
+      if  z^<len(a)-1 then s$=" ,"   ' append to document
+      s$={
+      }
+}
+s$="]"
+Report s$
 }
 INFO

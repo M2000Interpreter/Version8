@@ -30,7 +30,7 @@ Option Explicit
 
 
 Private myid As Long
-
+Private opencounter As Long
 Private Declare Function mciGetErrorString Lib "winmm.dll" Alias "mciGetErrorStringA" (ByVal dwError As Long, ByVal lpstrBuffer As String, ByVal uLength As Long) As Long 'Get the error message of the mcidevice if any
 Private Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal lpstrReturnString As String, ByVal uReturnLength As Long, ByVal hwndCallback As Long) As Long 'Send command strings to the mci device
 Private data As String * 128 ' Used to store our return data
@@ -302,9 +302,6 @@ Dim hMem As Long
       End Function
   
 Public Property Let FileName(n As String)
-'If mFilename = n Then
-'Exit Property
-'End If
 mFilename = n
 If mFilename <> "" Then
 openMovie
@@ -355,11 +352,12 @@ Public Function openMovie()
 
     End If
     End If
+    If error <> 0 Then opencounter = 0 Else opencounter = 1
     'Let the mci device decide which driver to use
     'Error = mciSendString("open " & Filename & " alias m"+cstr(myID)+"", 0, 0, 0)
 End Function
 
-Public Function openMovieWindow(hWND As Long, WindowStyle As String)
+Public Function openMovieWindow(hWnd As Long, WindowStyle As String)
     'Style types = popup , child or overlapped
     'Child window would be a .hwnd window of your choice.
     'Ex. A picturebox control or a frame control would be
@@ -373,13 +371,14 @@ Public Function openMovieWindow(hWND As Long, WindowStyle As String)
    ' error = mciSendString("open " & LASTF & " type mpegvideo alias m"+cstr(myID)+" parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
     
     'Let the mci device decide which driver to use
-      error = mciSendString("open " & LASTF & " alias m" & CStr(myid) & " parent " & hWND & " style " & WindowStyle & " ", 0, 0, 0)
+      error = mciSendString("open " & LASTF & " alias m" & CStr(myid) & " parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
  
     If error <> 0 Then
-    error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " parent " & hWND & " style " & WindowStyle & " ", 0, 0, 0)
+    error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
     
     
     End If
+    If error <> 0 Then opencounter = 0 Else opencounter = 1
     End Function
 Public Function minimizeMovie()
     'Minimize the m"+cstr(myID)+" window
@@ -482,11 +481,11 @@ Public Function getAudioStatus() As String
     error = mciSendString("status m" & CStr(myid) & " audio", data, 128, 0)
     getAudioStatus = CStr(data)
 End Function
-Public Function sizeLocateMovie(Left As Long, Top As Long, Width As Long, Height As Long)
+Public Function sizeLocateMovie(Left As Long, top As Long, Width As Long, Height As Long)
     'Change the size of the m"+cstr(myID)+" and the location of
     'the m"+cstr(myID)+" in Pixels
 ' 120 120 200 200 frame 0 0 200 200 source 0 0 200 200
-    error = mciSendString("put m" & CStr(myid) & " window at " & Left & " " & Top & " " & Width & " " & Height, 0, 0, 0)
+    error = mciSendString("put m" & CStr(myid) & " window at " & Left & " " & top & " " & Width & " " & Height, 0, 0, 0)
 
 'error = mciSendString("put m"+cstr(myID)+" video 120 120 200 200 frame 0 0 200 200 source 0 0 200 200 ", 0, 0, 0)
 
@@ -625,7 +624,7 @@ Public Function getStatus() As String
 End Function
 Public Function closeMovie()
     'Close the mci device
-    error = mciSendString("close m" & CStr(myid) & "", 0, 0, 0)
+   If opencounter > 0 Then error = mciSendString("close m" & CStr(myid) & "", 0, 0, 0): opencounter = opencounter - 1
 End Function
 Public Function getFormatPosition() As String
     'Get the position in a userfriendly time format
@@ -827,22 +826,22 @@ End Function
 Sub timeOut(duration)
     'Pauses for a specified amount of milliseconds
     Dim StartTime As Long
-    Dim x As Long
+    Dim X As Long
     StartTime = Timer
     Do While Timer - StartTime < duration
-        x = DoEvents()
+        X = DoEvents()
     Loop
     Exit Sub
 End Sub
 
 Private Sub Class_Initialize()
 myid = CLng(Timer * 1000 Mod 1000)
-error = mciSendString("open m" & CStr(myid), 0, 0, 0)
+
 
 End Sub
 
 Private Sub Class_Terminate()
-error = mciSendString("close m" & CStr(myid), 0, 0, 0)
+closeMovie
 End Sub
 Public Sub SetMasterVolume(MVol As Long)
     Dim hmixer As Long          ' mixer handle
@@ -861,4 +860,6 @@ Public Sub SetMasterVolume(MVol As Long)
 SetVolumeControl hmixer, volCtrl, ovol
 End If
 End Sub
+
+
 

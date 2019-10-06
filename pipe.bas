@@ -1020,8 +1020,13 @@ End If
 backhere:
 UseMe.CliRun
 If UseMe Is Nothing Then Exit Sub
+
 UseMe.Shutdown Cancel
+
 If Cancel Then GoTo backhere
+If Not UseMe.IhaveExtForm Then
+UseMe.ShowGui = False
+End If
 Set UseMe = Nothing
 If InitOk > 0 Then
 InitOk = 0

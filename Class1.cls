@@ -22,9 +22,9 @@ f.Move VirtualScreenWidth() + 2000, VirtualScreenHeight() + 2000
 
 
 On Error Resume Next
-With New cFIE
-.FEATURE_BROWSER_EMULATION = .InstalledVersion
-End With
+'With New cFIE
+'.FEATURE_BROWSER_EMULATION = .InstalledVersion
+'End With
 Set m = CreateObject("M2000.callback")
 'Dim m As New M2000.callback
 If Err Then
@@ -39,12 +39,13 @@ Debug.Assert (InIDECheck = True)
 m.Run "start"
 m.StackMax -12345
 a$ = commandW
-If Trim$(a$) = "-h" Or Trim$(a$) = "/?" Then frmAbout.Show: Exit Sub
+If Trim$(a$) = "-h" Or Trim$(a$) = "/?" Then frmAbout.Show 1: ExitNow = True: Exit Sub
 If m.Status = 0 Then
 m.Cli a$, ">"
 End If
 Set m = Nothing
-ShutDownAll
+ExitNow = True
+Exit Sub
 
 Else
 m.getform f
@@ -52,7 +53,7 @@ Debug.Assert (InIDECheck = True)
 m.Run "start"
 m.StackMax -12345
 a$ = commandW
-If Trim$(a$) = "-h" Or Trim$(a$) = "/?" Then frmAbout.Show: ShutDownAll: Exit Sub
+If Trim$(a$) = "-h" Or Trim$(a$) = "/?" Then frmAbout.Show 1: ExitNow = True: Exit Sub
 If m.Status = 0 Then
 Set f.mm = Me
 Set f.m = m

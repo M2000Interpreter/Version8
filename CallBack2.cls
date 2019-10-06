@@ -18,14 +18,18 @@ Private mineHere$
 Public Event ErrorAtt(ByRef recover As Variant)
 Private mObjRef As Object, mName$
 Private reghash As New FastCollection
-
 Dim locked As Boolean
 Friend Sub NoPublic(bstack As basetask, where$)
         Set objref = New basetask
         Set objref.Sorosref = bstack.soros
         Set objref.Owner = bstack.Owner
-        mineHere$ = where$
+        mineHere$ = where
 End Sub
+Friend Property Get CopyOfMe() As Object
+Dim a As New CallBack2
+a.NoPublic objref, mineHere$
+Set CopyOfMe = a
+End Property
 Property Let ShowGui(RHS As Boolean)
 If Forms.count = 0 Then Exit Property
 If RHS Then
@@ -38,9 +42,9 @@ If Not (QRY Or GFQRY Or Forms.count > 5) Then Form1.Visible = False
 End If
 End If
 End Property
-Public Sub EventRef(RHS As Object, Optional name As String)
+Public Sub EventRef(RHS As Object, Optional Name As String)
 Set mObjRef = RHS
-mName$ = name$
+mName$ = Name$
 End Sub
 Public Sub MethodType(ByVal mName$, mType$)
 mName$ = myUcase(mName$)
@@ -278,7 +282,7 @@ once = False
 End Sub
 
 Public Sub ExecuteStatement(ByVal code$)
-Dim what$, pos As Long, func As Boolean, param$, drop$
+Dim what$, Pos As Long, func As Boolean, param$, drop$
 If Status <> 0 Then Exit Sub
 If IsLabelOnly(code$, what$) > 4 Then
     func = True
@@ -290,15 +294,15 @@ Call Run(what$)
 Exit Sub
 End If
 Do
- pos = 1
-  drop$ = aheadstatus(code$, True, pos)
-  If drop$ = vbNullString And pos > Len(code$) Then Exit Sub
+ Pos = 1
+  drop$ = aheadstatus(code$, True, Pos)
+  If drop$ = vbNullString And Pos > Len(code$) Then Exit Sub
   If param$ <> "" Then
-  param$ = param$ + ", " + Left$(code$, pos - 1)
+  param$ = param$ + ", " + Left$(code$, Pos - 1)
   Else
-  param$ = Left$(code$, pos - 1)
+  param$ = Left$(code$, Pos - 1)
   End If
-  code$ = Mid$(code$, pos)
+  code$ = Mid$(code$, Pos)
   Loop Until Not FastSymbol(code$, ",")
   If func Then
   Call Run(what$ + " " + param$ + ")")
@@ -307,12 +311,12 @@ Do
   End If
 End Sub
 Public Function Eval(code$) As Variant
-Dim pos As Long, p As Double, s As String, drop$
- pos = 1
-  drop$ = aheadstatus(code$, True, pos)
-  If drop$ = vbNullString And pos > Len(code$) Then Exit Function
+Dim Pos As Long, p As Double, s As String, drop$
+ Pos = 1
+  drop$ = aheadstatus(code$, True, Pos)
+  If drop$ = vbNullString And Pos > Len(code$) Then Exit Function
   If InStr(drop$, "N") Then
-  If IsExp(objref, Left$(code$, pos), p) Then
+  If IsExp(objref, Left$(code$, Pos), p) Then
   If Not objref.lastobj Is Nothing Then
   Set Eval = objref.lastobj
   
@@ -321,7 +325,7 @@ Dim pos As Long, p As Double, s As String, drop$
    End If
   End If
   Else
-  If IsStrExp(objref, Left$(code$, pos), s$) Then
+  If IsStrExp(objref, Left$(code$, Pos), s$) Then
   If Not objref.lastobj Is Nothing Then
       Set Eval = objref.lastobj
   Else

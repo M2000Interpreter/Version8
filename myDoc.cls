@@ -1576,7 +1576,7 @@ End Function
 
 Property Get TextParagraph2Line(ByVal ParaNum As Long, ByVal Charpos As Long, newselstart, Optional skipcolor As Boolean = False) As Long
 Dim mlines As Long, counter As Long
-    If ParaNum = 0 Then Exit Property
+    If ParaNum <= 0 Then Exit Property
     If para(ParaNum).lines = 0 Then Exit Property
     
     If ColorEvent And Not skipcolor Then

@@ -48,10 +48,10 @@ Public sumhDC As Long  ' check it
 Public Rixecode As String
 Public MYSCRnum2stop As Long
 Public octava As Integer, NOTA As Integer, ENTASI As Long
-Private Declare Sub Sleep Lib "KERNEL32" (ByVal dwMilliseconds As Long)
+Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Const Face$ = "C C#D D#E F F#G G#A A#B  "
 Public CLICK_COUNT As Long
-Private Declare Function GetVersionExA Lib "KERNEL32" (lpVersionInformation As OSVERSIONINFO) As Long
+Private Declare Function GetVersionExA Lib "kernel32" (lpVersionInformation As OSVERSIONINFO) As Long
 Private Type OSVERSIONINFO
     dwOSVersionInfoSize As Long
     dwMajorVersion As Long
@@ -103,7 +103,7 @@ Private Type XFORM  ' used for stretching/skewing a region
 End Type
 Public Const RGN_OR = 2
 '**********************************
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Private Const Pi = 3.14159265359
 Private Type SAFEARRAYBOUND
@@ -165,12 +165,12 @@ Private Declare Function GetClipboardData Lib "user32" _
       ByVal bDaclPresent As Long, _
       ByVal pDacl As Long, _
       ByVal bDaclDefaulted As Long) As Long
- Declare Function GlobalAlloc Lib "KERNEL32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
-Private Declare Function GlobalFree Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalLock Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalReAlloc Lib "KERNEL32" (ByVal hMem As Long, ByVal dwBytes As Long, ByVal wFlags As Long) As Long
-Private Declare Function GlobalSize Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalUnlock Lib "KERNEL32" (ByVal hMem As Long) As Long
+ Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalReAlloc Lib "kernel32" (ByVal hMem As Long, ByVal dwBytes As Long, ByVal wFlags As Long) As Long
+Private Declare Function GlobalSize Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
 Private Declare Function IsClipboardFormatAvailable Lib "user32" _
     (ByVal wFormat As Long) As Long
 
@@ -208,7 +208,7 @@ Private Type MEMORYSTATUS
     dwTotalVirtual As Long
     dwAvailVirtual As Long
 End Type
-Private Declare Sub GlobalMemoryStatus Lib "KERNEL32" (lpBuffer As MEMORYSTATUS)
+Private Declare Sub GlobalMemoryStatus Lib "kernel32" (lpBuffer As MEMORYSTATUS)
 Public Declare Function joyGetPosEx Lib "winmm.dll" (ByVal uJoyID As Long, pji As JOYINFOEX) As Long
 Public Declare Function joyGetDevCapsA Lib "winmm.dll" (ByVal uJoyID As Long, pjc As JOYCAPS, ByVal cjc As Long) As Long
 
@@ -1653,14 +1653,14 @@ Call SetWindowRgn(.hWnd, myRgn, 0)
 .Tag = Priority
 On Error Resume Next
 .ZOrder 0
-.Font.name = Form1.DIS.Font.name
+.Font.Name = Form1.DIS.Font.Name
 .Font.charset = Form1.DIS.Font.charset
 .Font.Size = SZ
 .Font.Strikethrough = False
 .Font.Underline = False
 .Font.Italic = Form1.DIS.Font.Italic
 .Font.bold = Form1.DIS.Font.bold
-.Font.name = Form1.DIS.Font.name
+.Font.Name = Form1.DIS.Font.Name
 .Font.charset = Form1.DIS.Font.charset
 .Font.Size = SZ
 
@@ -2214,10 +2214,9 @@ Dim task As TaskInterface, bsdady As basetask
 Set bsdady = bs.Parent
 ' above 20000 the thid
  Set task = New myProcess
- 
-          Set task.Owner = bs.Parent.Owner
+          Set task.Owner = bsdady.Owner
           Set task.Process = bs
-          
+
           Set bsdady.LinkThread(ThID) = bs.Process
           Set bs = Nothing
           task.Parameters ThID, Thinterval, ThCode, holdtime, threadhere$, Nostretch
@@ -2503,22 +2502,25 @@ End If
         AskOk$ = "RETRY"
         ElseIf v = vbYesNo Then
         AskOk$ = "YES"
-        AskCancel$ = "NO"
+        AskCancel$ = "*NO"
         ElseIf v = vbOKCancel Then
         AskOk$ = "OK"
+        AskCancel$ = "*" + AskCancel$
         Else
-        AskOk$ = "OK"
+        AskOk$ = "*OK"
         AskCancel$ = vbNullString
         End If
+        
         AskText$ = a$ + "..?" + vbCrLf
     Else
              If v = vbRetryCancel Then
         AskOk$ = "епамакгьг"
         ElseIf v = vbYesNo Then
         AskOk$ = "маи"
-        AskCancel$ = "ови"
+        AskCancel$ = "*ови"
         ElseIf v = vbOKCancel Then
          AskOk$ = "емтанеи"
+         AskCancel$ = "*" + AskCancel$
         Else
         AskCancel$ = vbNullString
         AskOk$ = "емтанеи"
@@ -2526,7 +2528,7 @@ End If
         AskText$ = a$ + "..;" + vbCrLf
     End If
 
-    resp = Form3.NeoASK(basestack1)
+    resp = Form1.NeoASK(basestack1)
     
  If resp = 0 Then
  
@@ -2556,7 +2558,7 @@ End If
     AskStrInput$ = Trim$(vv$)
     
 
-    resp = Form3.NeoASK(basestack1)
+    resp = Form1.NeoASK(basestack1)
         If resp = 1 Then InputBoxN = basestack1.soros.PopStr
           AskInput = False
           thisresp = resp
@@ -2645,10 +2647,10 @@ If ret > 0 Then
 GetCodePage = val(Mid$(Buffer, 1, 41))
 End If
 End Function
-Function GetCharSet(codepage As Long)
+Function GetCharSet(CodePage As Long)
 '
  Dim cp As CHARSETINFO
-     If TranslateCharsetInfo(ByVal codepage, cp, TCI_SRCCODEPAGE) Then
+     If TranslateCharsetInfo(ByVal CodePage, cp, TCI_SRCCODEPAGE) Then
         GetCharSet = cp.ciCharset
     End If
 End Function
@@ -2679,7 +2681,8 @@ t(0) = 10 ' VT_ERROR
 t(2) = -2147352572
    CopyMemory ByVal VarPtr(VarOpt), t(0), 16
 End Sub
-'  &H4000  VY_BYREF
+
+
 Sub VarByRef(ByVal a As Long, ByRef b As Variant)
 Dim t(0 To 3) As Long
    CopyMemory t(0), ByVal VarPtr(b), 16
@@ -4142,7 +4145,7 @@ myid() = Array("THIS", 1, "ауто", 1, "RND", 2, "туваиос", 2, "PEN", 3, "пема", 3
 , "PLAYSCORE", 64, "паифеижымг", 64, "MOVIE", 65, "MEDIA", 65, "MUSIC", 65, "таимиа", 65, "лоусийг", 65, "DURATION", 66, "диаяйеиа", 66 _
 , "VOLUME", 67, "емтасг", 67, "TAB", 68, "стгкг", 68, "HEIGHT", 69, "уьос", 69, "POS", 70, "хесг", 70, "ROW", 71, "цяаллг", 71, "TIMECOUNT", 72, "жоятос", 72 _
 , "TICK", 73, "тий", 73, "TODAY", 74, "сглеяа", 74, "NOW", 75, "тыяа", 75, "MENU.VISIBLE", 76, "епикоцес.жамеяес", 76, "MENUITEMS", 77, "епикоцес", 77 _
-, "MENU", 78, "епикоцг", 78, "NUMBER", 79, "аяихлос", 79, "тилг", 79, "LAMBDA", 80, "калда", 81, "GROUP", 83, "олада", 83, "ARRAY", 84, "пимайас", 84, "[]", 85, "сыяос", 86, "STACK", 86, "ISWINE", 87, "SHOW", 88, "охомг", 88, "OSBIT", 89, "WINDOW", 90, "паяахуяо", 90, "MONITOR.STACK", 91, "екецвос.сыяоу", 91, "MONITOR.STACK.SIZE", 92, "екецвос.лецехос.сыяоу", 92, "?", 93, "диаяхяысг", 94, "BUFFER", 94, "йатастасг", 95, "INVENTORY", 95, "LIST", 96, "киста", 96, "QUEUE", 97, "оуяа", 97, "INFINITY", 82, "апеияо", 82)
+, "MENU", 78, "епикоцг", 78, "NUMBER", 79, "аяихлос", 79, "тилг", 79, "LAMBDA", 80, "калда", 81, "GROUP", 83, "олада", 83, "ARRAY", 84, "пимайас", 84, "[]", 85, "сыяос", 86, "STACK", 86, "ISWINE", 87, "SHOW", 88, "охомг", 88, "OSBIT", 89, "WINDOW", 90, "паяахуяо", 90, "MONITOR.STACK", 91, "екецвос.сыяоу", 91, "MONITOR.STACK.SIZE", 92, "екецвос.лецехос.сыяоу", 92, "?", 93, "диаяхяысг", 94, "BUFFER", 94, "йатастасг", 95, "INVENTORY", 95, "LIST", 96, "киста", 96, "QUEUE", 97, "оуяа", 97, "INFINITY", 82, "апеияо", 82, "еккгмийа", 98, "GREEK", 98)
 If Not ahashbackup Is Nothing Then
 For i = 0 To UBound(myid()) Step 2
     ahashbackup.ItemCreator CStr(myid(i)), CLng(myid(i + 1))

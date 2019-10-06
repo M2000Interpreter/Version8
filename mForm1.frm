@@ -22,12 +22,14 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+Private Declare Function DefWindowProcW Lib "user32" (ByVal hWnd As Long, ByVal wMsg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
+
 Private Declare Function GetModuleHandleW Lib "KERNEL32" (ByVal lpModuleName As Long) As Long
 Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
-Private Declare Function GetWindowLongA Lib "user32" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
-Private Declare Function SetWindowLongA Lib "user32" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
-Private Declare Function SetWindowLongW Lib "user32" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
-Private Declare Function SetWindowTextW Lib "user32" (ByVal hwnd As Long, ByVal lpString As Long) As Long
+Private Declare Function GetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
+Private Declare Function SetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare Function SetWindowTextW Lib "user32" (ByVal hWnd As Long, ByVal lpString As Long) As Long
     Private Const GWL_WNDPROC = -4
     Private Const WM_SETTEXT = &HC
     Private m_Caption As String
@@ -45,7 +47,7 @@ Public Property Let CaptionW(ByVal NewValue As String)
 
 If LenB(NewValue) = 0 Then NewValue = "M2000"
     m_Caption = NewValue
-DefWindowProcW Me.hwnd, WM_SETTEXT, 0, ByVal StrPtr(NewValue)
+DefWindowProcW Me.hWnd, WM_SETTEXT, 0, ByVal StrPtr(NewValue)
 If WindowState = 0 Then
    Show
   DoEvents
@@ -66,14 +68,14 @@ Public Property Let CaptionW2(ByVal NewValue As String)
 
     If WndProc = 0 Then
         WndProc = GetProcAddress(GetModuleHandleW(StrPtr("user32")), "DefWindowProcW")
-        VBWndProc = GetWindowLongA(hwnd, GWL_WNDPROC)
+        VBWndProc = GetWindowLongA(hWnd, GWL_WNDPROC)
     End If
 
 
     If WndProc <> 0 Then
-        SetWindowLongW hwnd, GWL_WNDPROC, WndProc
-        SetWindowTextW hwnd, StrPtr(m_Caption)
-        SetWindowLongA hwnd, GWL_WNDPROC, VBWndProc
+        SetWindowLongW hWnd, GWL_WNDPROC, WndProc
+        SetWindowTextW hWnd, StrPtr(m_Caption)
+        SetWindowLongA hWnd, GWL_WNDPROC, VBWndProc
     Else
         Caption = m_Caption
        
@@ -135,6 +137,12 @@ End Sub
 Private Sub Form_Resize()
 If Me.WindowState = 2 Then WindowState = 0: Exit Sub
 If m Is Nothing Then Exit Sub
+If Not m.IhaveExtForm Then
+m.ShutDown 2
+Set mm = Nothing
+End
+Exit Sub
+End If
 m.WindowState = WindowState
 End Sub
 
@@ -146,6 +154,7 @@ End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
 On Error Resume Next
+Set Icon = Nothing
 If Cancel Then Exit Sub
 If Not m Is Nothing Then m.ShutDown 2
 Set mm = Nothing

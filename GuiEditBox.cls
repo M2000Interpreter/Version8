@@ -6283,6 +6283,9 @@ End Property
 Public Property Get Length() As Long
 Length = mDoc.SizeCRLF
 End Property
+Public Sub dothis()
+glistN.MarkWord
+End Sub
 Public Sub insertbrackets()
 Dim i As Long, j As Long, ss$, idnt$, tc As Long
 Dim ww As Long
@@ -6291,6 +6294,7 @@ ClearRedo
 PushUndo
 glistN_MarkDelete False
 ss$ = undotext
+undoprev = True
 End If
 Dim a$
 tc = TabControl
@@ -7388,7 +7392,7 @@ Case vbKeyF3
         End If
     End If
 Case vbKeyF4
-If SelText <> "" Then mscatsub
+If SelText <> "" Then mscatsub Else dothis
 KeyCode = 0
 Case vbKeyF5
 If SelText <> "" Then rthissub shift
@@ -8652,3 +8656,8 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimL2NoTab = 0
 End Function
+Sub Keyboard(RHS As String)
+    RemoveUndo RHS
+    InsertTextNoRender = RHS
+    Render
+End Sub

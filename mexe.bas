@@ -11,9 +11,9 @@ Private Declare Function FreeLibrary Lib "KERNEL32" (ByVal hLibModule As Long) A
 
 Private Declare Sub DisableProcessWindowsGhosting Lib "user32" ()
 Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As Long, ByVal nIndex As Long) As Long
-Private Declare Function GetDC Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function GetDesktopWindow Lib "user32" () As Long
-Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As Long, ByVal hDC As Long) As Long
+Private Declare Function ReleaseDC Lib "user32" (ByVal hWnd As Long, ByVal hDC As Long) As Long
 Private Const LOGPIXELSX = 88
 
 Private Const SM_CXVIRTUALSCREEN = 78
@@ -31,7 +31,7 @@ Private Declare Function SetErrorMode Lib "KERNEL32" ( _
 Public UnloadForm1 As Boolean, a$
 Public Declare Sub Sleep Lib "KERNEL32" (ByVal dwMilliseconds As Long)
 Public dv15 As Long
-
+Public ExitNow As Boolean
 
 Public Function commandW() As String
 Static mm$
@@ -60,12 +60,14 @@ Set o = mm
 CoAllowSetForegroundWindow o, 0
 
 mm.doit
+If ExitNow Then ShutDownAll
 Sleep 500
 End Sub
 Public Sub ShutDownAll()
 Dim z As Form
 If Forms.Count > 0 Then
 For Each z In Forms
+Set z.Icon = LoadPicture("")
 Unload z
 Next z
 End If
