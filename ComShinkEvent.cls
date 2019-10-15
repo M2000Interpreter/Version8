@@ -414,10 +414,12 @@ finalize:
 End Function
 
 Public Sub fireevent(ByVal dispid As Long, ByVal params As Long)
-Static once As Boolean
-If once Then Exit Sub
+' change to fire events, when also othet events are fired.
+'Static once As Boolean
+'If once Then Exit Sub
+' if en event not used then do nothing and exit sub
 If exclude.ExistKey(dispid) Then Exit Sub
-once = True
+'once = True
     Dim strEvent    As String
     Dim vParams()   As Variant
     Dim NumVar As Long, what$, delme As Boolean
@@ -430,25 +432,19 @@ once = True
     inUse.AddKey dispid, strEvent, what$
     End If
  
- 'If inUse.ExistKey(strEvent) Then Exit Sub
- ''inUse.AddKey strEvent
-    ' param array
    
     vParams = pvGetParamArray(params, NumVar)
 
-    ' forward the event
-   ' RaiseEvent EventRaised(strEvent, vParams)
    On Error Resume Next
- ''   Debug.Print "FireEvent", strEvent, what$
+    Debug.Print "FireEvent", strEvent, what$
 
  If Not CallEventFromCOM(Me, strEvent, what$, NumVar, vParams(), delme, ItemIndex) Then
     MyEr "Problem With Event: " + strEvent, "Πρόβλημα με το γεγονός: " + strEvent
  End If
-''inUse.Remove strEvent
    If delme Then exclude.AddKey dispid, ""
 
     pvSetParamArray params, vParams
-    once = False
+    'once = False
 End Sub
 
 Public Sub Detach()

@@ -151,6 +151,7 @@ Text = RHS
 End Property
 
 
+
 Private Sub glistN_CtrlPlusF1()
 RaiseEvent CtrlPlusF1
 End Sub
@@ -303,6 +304,7 @@ End Sub
 Private Sub glistN_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
 RaiseEvent MouseMove(Button, shift, X, Y)
 End Sub
+
 
 Private Sub glistN_SyncKeyboard(item As Integer)
 RaiseEvent KeyPress(item)

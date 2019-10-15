@@ -48,10 +48,10 @@ Public sumhDC As Long  ' check it
 Public Rixecode As String
 Public MYSCRnum2stop As Long
 Public octava As Integer, NOTA As Integer, ENTASI As Long
-Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Private Declare Sub Sleep Lib "KERNEL32" (ByVal dwMilliseconds As Long)
 Const Face$ = "C C#D D#E F F#G G#A A#B  "
 Public CLICK_COUNT As Long
-Private Declare Function GetVersionExA Lib "kernel32" (lpVersionInformation As OSVERSIONINFO) As Long
+Private Declare Function GetVersionExA Lib "KERNEL32" (lpVersionInformation As OSVERSIONINFO) As Long
 Private Type OSVERSIONINFO
     dwOSVersionInfoSize As Long
     dwMajorVersion As Long
@@ -103,7 +103,7 @@ Private Type XFORM  ' used for stretching/skewing a region
 End Type
 Public Const RGN_OR = 2
 '**********************************
-Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Private Const Pi = 3.14159265359
 Private Type SAFEARRAYBOUND
@@ -165,12 +165,12 @@ Private Declare Function GetClipboardData Lib "user32" _
       ByVal bDaclPresent As Long, _
       ByVal pDacl As Long, _
       ByVal bDaclDefaulted As Long) As Long
- Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
-Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalReAlloc Lib "kernel32" (ByVal hMem As Long, ByVal dwBytes As Long, ByVal wFlags As Long) As Long
-Private Declare Function GlobalSize Lib "kernel32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
+ Declare Function GlobalAlloc Lib "KERNEL32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalFree Lib "KERNEL32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalLock Lib "KERNEL32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalReAlloc Lib "KERNEL32" (ByVal hMem As Long, ByVal dwBytes As Long, ByVal wFlags As Long) As Long
+Private Declare Function GlobalSize Lib "KERNEL32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "KERNEL32" (ByVal hMem As Long) As Long
 Private Declare Function IsClipboardFormatAvailable Lib "user32" _
     (ByVal wFormat As Long) As Long
 
@@ -208,7 +208,7 @@ Private Type MEMORYSTATUS
     dwTotalVirtual As Long
     dwAvailVirtual As Long
 End Type
-Private Declare Sub GlobalMemoryStatus Lib "kernel32" (lpBuffer As MEMORYSTATUS)
+Private Declare Sub GlobalMemoryStatus Lib "KERNEL32" (lpBuffer As MEMORYSTATUS)
 Public Declare Function joyGetPosEx Lib "winmm.dll" (ByVal uJoyID As Long, pji As JOYINFOEX) As Long
 Public Declare Function joyGetDevCapsA Lib "winmm.dll" (ByVal uJoyID As Long, pjc As JOYCAPS, ByVal cjc As Long) As Long
 
@@ -1653,14 +1653,14 @@ Call SetWindowRgn(.hWnd, myRgn, 0)
 .Tag = Priority
 On Error Resume Next
 .ZOrder 0
-.Font.Name = Form1.DIS.Font.Name
+.Font.name = Form1.DIS.Font.name
 .Font.charset = Form1.DIS.Font.charset
 .Font.Size = SZ
 .Font.Strikethrough = False
 .Font.Underline = False
 .Font.Italic = Form1.DIS.Font.Italic
 .Font.bold = Form1.DIS.Font.bold
-.Font.Name = Form1.DIS.Font.Name
+.Font.name = Form1.DIS.Font.name
 .Font.charset = Form1.DIS.Font.charset
 .Font.Size = SZ
 
@@ -2872,7 +2872,7 @@ Case "GARBAGE", "GET", "GLOBAL", "GOSUB", "GOTO", "GRABFRAME$", "GRADIENT", "GRE
 Case "GROUP.COUNT(", "HALT", "HEIGHT", "HELP", "HEX", "HEX$(", "HIDE", "HIDE$(", "HIGH", "HIFI", "HIGHWORD("
 Case "HILOWWORD(", "HIWORD(", "HSL(", "HOLD", "HTML", "HWND", "ICON", "IF", "IF(", "IF$(", "IMAGE", "IMAGE(", "IMAGE.X("
 Case "IMAGE.X.PIXELS(", "IMAGE.Y(", "IMAGE.Y.PIXELS(", "IN", "INFINITY", "INKEY$", "INKEY(", "INLINE", "INPUT", "INPUT$("
-Case "INSERT", "INSTR(", "INT(", "INTEGER", "INTERVAL", "INVENTORY", "IS", "ISLET", "ISNUM", "ISWINE", "ITALIC"
+Case "INSERT", "INSTR(", "INT(", "INTEGER", "INTERVAL", "INTERNET", "INTERNET$", "INVENTORY", "IS", "ISLET", "ISNUM", "ISWINE", "ITALIC"
 Case "JOYPAD", "JOYPAD(", "JOYPAD.ANALOG.X(", "JOYPAD.ANALOG.Y(", "JOYPAD.DIRECTION(", "JPG$(", "KEEP", "KEY$", "KEYBOARD"
 Case "KEYPRESS(", "LAMBDA", "LAMBDA(", "LAMBDA$", "LAMBDA$(", "LAN$", "LATIN", "LAYER", "LAZY$(", "LCASE$(", "LEFT$(", "LEFTPART$(", "LEGEND", "LEN"
 Case "LEN(", "LEN.DISP(", "LET", "LETTER$", "LIB", "LICENCE", "LINE", "LINESPACE", "LINK", "LIST", "LN("
@@ -2919,7 +2919,7 @@ Case "басг(", "басг.паяовос", "басг.вягстгс", "баье", "бектистопоигсг", "бгла", 
 Case "цемийес", "цемийг", "цемийо", "циа", "цомийо", "цяалла", "цяалла$", "цяаллатосеияа", "цяаллатосеияа$", "цяаллесамажояас", "цяаллг"
 Case "цяажг$(", "цяаье", "цягцояа", "цымиа", "дапед(", "деийтг.лояжг", "деийтгс", "деийтгс(", "деийтгс.йол", "деийтгс.у", "деийтгс.в"
 Case "деийтгса.у", "деийтгса.в", "деине", "дей(", "дейаен", "дейаен$(", "дем", "дениос", "дени$(", "денилеяос$(", "дес", "дглосио"
-Case "диа", "диабасе", "диацяажг", "диадовийо", "диайопг", "диайоптес", "диалесоу", "диаяхяысг", "диаяхяысг(", "диаяйеиа", "диастасг("
+Case "диа", "диабасе", "диацяажг", "диадийтуо", "диадийтуо$", "диадовийо", "диайопг", "диайоптес", "диалесоу", "диаяхяысг", "диаяхяысг(", "диаяйеиа", "диастасг("
 Case "диастиво", "диажамеиа", "диажамеиа$", "диажамо", "диажуцг", "диайопг", "диейоье", "дийтуо$", "диояхысе"
 Case "дипка", "дипко", "дипкос", "дойилг", "дойилг(", "долг", "дяолеас", "дуадийг.пеяистяожг(", "дуадийо", "дуадийо(", "дуадийо.айеяаио("
 Case "дуадийо.амти(", "дуадийо.амтистяожо(", "дуадийо.апо(", "дуадийо.г(", "дуадийо.йаи(", "дуадийо.окисхгсг(", "дуадийо.ови(", "дуадийо.пяосхесг(", "дуадийо.пяо(", "дуолиса(", "дысе"
@@ -4087,7 +4087,7 @@ myid() = Array("ABOUT$", 1, "пеяи$", 1, "CONTROL$", 2, "THREADS$", 3, "мглата$",
 , "MOVIE.DEVICE$", 20, "сусйеуг.пяобокгс$", 20, "MOVIE.ERROR$", 21, "кахос.таимиас$", 21, "PLATFORM$", 22, "пкатжояла$", 22 _
 , "FONTNAME$", 23, "цяаллатосеияа$", 23, "BROWSER$", 24, "амакоцио$", 24, "SPRITE$", 25, "диажамеиа$", 25 _
 , "APPDIR$", 26, "ежаялоцг.йат$", 26, "DIR$", 27, "йат$", 27, "KEY$", 28, "йол$", 28, "INKEY$", 29, "емйол$", 29, "LETTER$", 30, "цяалла$", 30, "LAMBDA$", 31, "калда$", 35, "жояла$", 32 _
-, "омола.тлглатос$", 36, "MODULE.NAME$", 36)
+, "омола.тлглатос$", 36, "MODULE.NAME$", 36, "INTERNET$", 37, "диадийтуо$", 37)
 If Not ahashbackup Is Nothing Then
     For i = 0 To UBound(myid()) Step 2
         ahashbackup.ItemCreator CStr(myid(i)), CLng(myid(i + 1))
@@ -4145,7 +4145,7 @@ myid() = Array("THIS", 1, "ауто", 1, "RND", 2, "туваиос", 2, "PEN", 3, "пема", 3
 , "PLAYSCORE", 64, "паифеижымг", 64, "MOVIE", 65, "MEDIA", 65, "MUSIC", 65, "таимиа", 65, "лоусийг", 65, "DURATION", 66, "диаяйеиа", 66 _
 , "VOLUME", 67, "емтасг", 67, "TAB", 68, "стгкг", 68, "HEIGHT", 69, "уьос", 69, "POS", 70, "хесг", 70, "ROW", 71, "цяаллг", 71, "TIMECOUNT", 72, "жоятос", 72 _
 , "TICK", 73, "тий", 73, "TODAY", 74, "сглеяа", 74, "NOW", 75, "тыяа", 75, "MENU.VISIBLE", 76, "епикоцес.жамеяес", 76, "MENUITEMS", 77, "епикоцес", 77 _
-, "MENU", 78, "епикоцг", 78, "NUMBER", 79, "аяихлос", 79, "тилг", 79, "LAMBDA", 80, "калда", 81, "GROUP", 83, "олада", 83, "ARRAY", 84, "пимайас", 84, "[]", 85, "сыяос", 86, "STACK", 86, "ISWINE", 87, "SHOW", 88, "охомг", 88, "OSBIT", 89, "WINDOW", 90, "паяахуяо", 90, "MONITOR.STACK", 91, "екецвос.сыяоу", 91, "MONITOR.STACK.SIZE", 92, "екецвос.лецехос.сыяоу", 92, "?", 93, "диаяхяысг", 94, "BUFFER", 94, "йатастасг", 95, "INVENTORY", 95, "LIST", 96, "киста", 96, "QUEUE", 97, "оуяа", 97, "INFINITY", 82, "апеияо", 82, "еккгмийа", 98, "GREEK", 98)
+, "MENU", 78, "епикоцг", 78, "NUMBER", 79, "аяихлос", 79, "тилг", 79, "LAMBDA", 80, "калда", 81, "GROUP", 83, "олада", 83, "ARRAY", 84, "пимайас", 84, "[]", 85, "сыяос", 86, "STACK", 86, "ISWINE", 87, "SHOW", 88, "охомг", 88, "OSBIT", 89, "WINDOW", 90, "паяахуяо", 90, "MONITOR.STACK", 91, "екецвос.сыяоу", 91, "MONITOR.STACK.SIZE", 92, "екецвос.лецехос.сыяоу", 92, "?", 93, "диаяхяысг", 94, "BUFFER", 94, "йатастасг", 95, "INVENTORY", 95, "LIST", 96, "киста", 96, "QUEUE", 97, "оуяа", 97, "INFINITY", 82, "апеияо", 82, "еккгмийа", 98, "GREEK", 98, "INTERNET", 99, "диадийтуо", 99)
 If Not ahashbackup Is Nothing Then
 For i = 0 To UBound(myid()) Step 2
     ahashbackup.ItemCreator CStr(myid(i)), CLng(myid(i + 1))

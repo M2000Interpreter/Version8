@@ -57,7 +57,7 @@ Private Declare Function CloseClipboard Lib "user32" _
     Private Pad$
     ' for Gui purposes
 Public ctrlName As String
-Private mesCtrlName As String
+Private mesCtrlName As String, sp As String, sp1 As String, sp2 As String
 Dim mIndex As Long, mStayOpen As Boolean
 Dim Callback As GuiM2000
 Dim white As Long, black As Long, dimm1 As Long, dimm2 As Long
@@ -210,6 +210,12 @@ glistN.PromptLineIdent = Len(RHS)
 Text = RHS
 End Property
 
+
+Private Sub Class_Initialize()
+sp1 = ",+-*/=<>^!.&[]{}()^;""" + "'!"
+sp = " " + ChrW(9) + ChrW(160)
+sp2 = sp1 + sp
+End Sub
 
 Private Sub Class_Terminate()
 Set glistN = Nothing
@@ -422,9 +428,6 @@ On Error Resume Next
 glistN.SetFocus
 End Sub
 
-Private Sub glistN_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
-' RaiseEvent MouseMove(Button, shift, x, y)
-End Sub
 
 Private Sub glistN_Selected(item As Long)
 If item >= 0 Then
@@ -510,8 +513,8 @@ Public Property Let MaxCharLength(ByVal RHS As Long)
 glistN.maxchar = RHS
 End Property
 
-Private Function Myleft$(a As String, pos As Long)
-If pos < 1 Then Myleft$ = vbNullString Else Myleft$ = Mid$(a, 1, pos)
+Private Function Myleft$(a As String, Pos As Long)
+If Pos < 1 Then Myleft$ = vbNullString Else Myleft$ = Mid$(a, 1, Pos)
 End Function
 Private Function GetTextData(ByVal lFormatId As Long) As String
 '' Addition to myTextBox for ctrl+V
@@ -706,28 +709,79 @@ Public Property Get drop()
 drop = glistN.DropEnabled
 End Property
 Private Sub glistN_AddSelStart(val As Long, shift As Integer)
-Dim w As Long, a$
+Dim w As Long, a$, l As Long, b$
 If glistN.SelStart > 0 Then
-a$ = Mid$(vartext, glistN.SelStart, 1)
-If Len(a$) > 0 Then
-w = AscW(a$)
-If w > -10241 And w < -9984 Then
-val = 2
-End If
-End If
+a$ = Mid$(vartext, glistN.SelStart)
+
+    If Len(a$) > 0 Then
+        w = AscW(a$)
+        If (shift And 2) = 2 Then
+            l = Len(a$)
+            val = 1
+            If l < 2 Then Exit Sub
+                b$ = Mid$(a$, val, 1)
+                If InStr(sp1, b$) = 0 Then
+                Do While val < l And InStr(sp, b$) > 0
+                    val = val + 1
+                    b$ = Mid$(a$, val, 1)
+                Loop
+                If InStr(sp1, b$) = 0 Then
+                    If val = 1 Then
+                        Do While val < l And InStr(sp2, b$) = 0
+                            val = val + 1
+                            b$ = Mid$(a$, val, 1)
+                        Loop
+                        If InStr(sp2, b$) > 0 Then val = val - 1
+                    Else
+                        If val < l Then val = val - 1
+                    End If
+                Else
+                    val = val - 1
+                End If
+            End If
+        ElseIf w > -10241 And w < -9984 Then
+            val = 2
+        End If
+    End If
 End If
 End Sub
 
 Private Sub glistN_SubSelStart(val As Long, shift As Integer)
-Dim w As Long, a$
+Dim w As Long, a$, l As Long, b$
 If glistN.SelStart < 2 Then Exit Sub
 a$ = Mid$(vartext, glistN.SelStart - 1, 1)
 If Len(a$) > 0 Then
 w = AscW(a$)
-If w > -9215 And w < -8960 Then
+        If (shift And 2) = 2 Then
+            a$ = Mid$(vartext, 1, glistN.SelStart - 1)
+            l = Len(a$)
+            val = l
+            If val = 1 Then Exit Sub
+            b$ = Mid$(a$, l, 1)
+            If InStr(sp1, b$) = 0 Then
+                Do While l > 1 And InStr(sp, b$) > 0
+                    l = l - 1
+                    b$ = Mid$(a$, l, 1)
+                Loop
+                If InStr(sp1, b$) = 0 Then
+                    If l = val Then
+                        Do While l > 1 And InStr(sp2, b$) = 0
+                            l = l - 1
+                            b$ = Mid$(a$, l, 1)
+                        Loop
+                        If l = 1 And Not InStr(sp2, b$) > 0 Then l = l - 1
+                        
+                    Else
+                     If InStr(sp2, b$) > 0 Then l = l - 1
+                    End If
+                End If
+            Else
+                l = l - 1
+            End If
+            val = val - l
+        ElseIf w > -9215 And w < -8960 Then
+            val = 2
+        End If
 
-val = 2
-
-End If
 End If
 End Sub

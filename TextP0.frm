@@ -237,7 +237,7 @@ Attribute HTML.VB_VarHelpID = -1
 Private DisStack As basetask
 Private MeStack As basetask
 Dim lookfirst As Boolean, look1 As Boolean
-Private Declare Function GetLocaleInfo Lib "kernel32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
+Private Declare Function GetLocaleInfo Lib "KERNEL32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
 Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not NT?
 Private Const DWL_ANYTHREAD& = 0
 Const LOCALE_ILANGUAGE = 1
@@ -258,12 +258,12 @@ End Type
 End Type
 Public Point2Me As Object
 Public TabControl As Long
-Private Declare Function GetCommandLineW Lib "kernel32" () As Long
+Private Declare Function GetCommandLineW Lib "KERNEL32" () As Long
 
 Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal Ptr As Long, ByVal Value As Long)
 Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal Ptr As Long, ByVal Length As Long) As Long
-Private Declare Function GetModuleHandleW Lib "kernel32" (ByVal lpModuleName As Long) As Long
-Private Declare Function GetProcAddress Lib "kernel32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
+Private Declare Function GetModuleHandleW Lib "KERNEL32" (ByVal lpModuleName As Long) As Long
+Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
 Private Declare Function GetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
 Private Declare Function SetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
@@ -1318,7 +1318,7 @@ Unload NeoMsgBox: ASKINUSE = False: Exit Sub
 End If
 BreakMe = True
 If MsgBoxN(BreakMes, vbYesNo, MesTitle$) <> vbNo Then
-
+Check2SaveModules = False
 MOUT = i
 
 extreme = False
@@ -1555,21 +1555,21 @@ myBold = False
 
 myCharSet = 0
 With Form1
-.Font.Name = MYFONT
+.Font.name = MYFONT
 .Font.Strikethrough = False
 .Font.Underline = False
 .Font.bold = myBold
-MYFONT = .Font.Name
+MYFONT = .Font.name
     .Font.charset = myCharSet
     .DIS.Font.charset = myCharSet
-    .DIS.Font.Name = MYFONT
+    .DIS.Font.name = MYFONT
     .DIS.Font.bold = myBold
     .TEXT1.Font.charset = myCharSet
-    .TEXT1.Font.Name = MYFONT
+    .TEXT1.Font.name = MYFONT
     .TEXT1.Font.bold = myBold
     
     .List1.charset = myCharSet
-    .List1.Font.Name = MYFONT
+    .List1.Font.name = MYFONT
     .List1.FontBold = myBold
      
 End With
@@ -1925,7 +1925,7 @@ If executeblock((1), basestack1, qq$, False, kolpo, , , True) Then
 GoTo cont123
 Else
 If kolpo Then GoTo nExit
-kolpo = True
+'kolpo = True
 GoTo cont567
 End If
 End If
@@ -2503,7 +2503,7 @@ End If
 End Sub
 
 
-Private Sub view1_BeforeNavigate2(ByVal pDisp As Object, URL As Variant, Flags As Variant, TargetFrameName As Variant, PostData As Variant, Headers As Variant, Cancel As Boolean)
+Private Sub view1_BeforeNavigate2(ByVal pDisp As Object, url As Variant, Flags As Variant, TargetFrameName As Variant, PostData As Variant, Headers As Variant, Cancel As Boolean)
 If look1 Then
 look1 = False:  lookfirst = False
 
@@ -2516,12 +2516,12 @@ If lookfirst Then look1 = True: view1.Silent = True
 End Sub
 
 
-Private Sub view1_DocumentComplete(ByVal pDisp As Object, URL As Variant)
+Private Sub view1_DocumentComplete(ByVal pDisp As Object, url As Variant)
    Set HTML = view1.Document
 
 End Sub
 
-Private Sub view1_NavigateComplete2(ByVal pDisp As Object, URL As Variant)
+Private Sub view1_NavigateComplete2(ByVal pDisp As Object, url As Variant)
 '
 On Error Resume Next
 If look1 Then
@@ -2919,10 +2919,10 @@ Else
         MYFONT = cc.Value
         On Error Resume Next
         
-        Me.Font.Name = MYFONT
+        Me.Font.name = MYFONT
         Me.Font.Italic = False
-        Me.Font.Name = MYFONT
-        If Me.Font.Name <> MYFONT Then
+        Me.Font.name = MYFONT
+        If Me.Font.name <> MYFONT Then
         MYFONT = defFontname
         End If
        
@@ -3374,7 +3374,7 @@ mycode = Rnd * 12312314
 oldcodeid = Modalid
 
  For Each X In Forms
-                            If X.Visible And X.Name = "GuiM2000" Then
+                            If X.Visible And X.name = "GuiM2000" Then
                      
                            If X.Enablecontrol Then
                                X.Modal = mycode
@@ -3421,7 +3421,7 @@ Dim z As Form
  Set z = Nothing
 
            For Each X In Forms
-            If X.Visible And X.Name = "GuiM2000" Then
+            If X.Visible And X.name = "GuiM2000" Then
             If Not X.Enablecontrol Then X.TestModal mycode
           If X.Enablecontrol Then Set z = X
             End If

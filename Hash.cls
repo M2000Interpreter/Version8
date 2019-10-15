@@ -206,7 +206,7 @@ With PriveSpace(k)
     If .Key = Key Then
     If .KeyType = 0 Then
         If IsObject(v(.ndx)) Then Set v(.ndx) = Nothing
-        v(.ndx) = Empty
+        If newnum <> .ndx Then v(.ndx) = Empty
         .KeyType = 1
     End If
     .ndx = newnum

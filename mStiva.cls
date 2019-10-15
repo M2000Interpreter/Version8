@@ -830,7 +830,7 @@ Dim subgroup As Object, sub2 As Object, myArray As mArray, mySecondArray As mArr
                 mygroup2.HasValue = .HasValue
                 mygroup2.HasSet = .HasSet
                 mygroup2.HasParameters = .HasParameters
-
+                mygroup2.HasParametersSet = .HasParametersSet
              Set mygroup2.SuperClassList = .SuperClassList
                 Set mygroup2.Events = .Events
                 mygroup2.highpriorityoper = .highpriorityoper

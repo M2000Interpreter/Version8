@@ -68,6 +68,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+' use of Extender
 Option Explicit
 Dim waitforparent As Boolean
 Dim havefocus As Boolean, UKEY$
@@ -714,52 +715,18 @@ Public Property Get enabled() As Boolean
     enabled = myEnabled
 End Property
 Public Property Let enabled(ByVal RHS As Boolean)
- myEnabled = RHS
+    myEnabled = RHS
  
     PropertyChanged "Enabled"
     On Error Resume Next
     If Not waitforparent Then Exit Property
-    Dim mm$, mo As Control, nm$, cnt$, p As Long
-    
-''new position
-
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-'' old position
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-mo.TabStop = RHS
+    Extender.TabStop = RHS
 End Property
 Public Property Let TabStop(ByVal RHS As Boolean)
     On Error Resume Next
     mTabStop = RHS
     If Not waitforparent Then Exit Property
-    Dim mm$, mo As Control, nm$, cnt$, p As Long
-    
-''new position
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-'' old position
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-    
-mo.TabStop = RHS
+    Extender.TabStop = RHS
 End Property
 Public Property Let TabStopSoft(ByVal RHS As Boolean)
     mTabStop = RHS
@@ -2490,24 +2457,11 @@ ListIndex = SELECTEDITEM - 1
 End If
 End Property
 Property Let ListIndex(item As Long)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
+On Error GoTo there
 If listcount <= lines + 1 Then
 BarVisible = False
 Else
-Redraw m_showbar And mo.Visible
+Redraw m_showbar And Extender.Visible
 
 End If
 
@@ -2518,23 +2472,12 @@ RaiseEvent softSelected(SELECTEDITEM)
 Else
 SELECTEDITEM = 0
 End If
+there:
 End Property
 Public Sub FloatListMe(state As Boolean, X As Single, Y As Single)
 Static preX As Single, preY As Single
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
+On Error GoTo there
+If Extender.Parent Is Nothing Then Exit Sub
 If Not state Then
 preX = X
 preY = Y
@@ -2542,31 +2485,32 @@ state = True
 mousepointer = 0
 doubleclick = 0
 Else
-If mo.Visible Then
+If Extender.Visible Then
 
 mousepointer = 5
 RaiseEvent NeedDoEvents
 If MoveParent Then
-If (mo.Parent.top + (Y - preY) < 0) Then preY = Y + mo.Parent.top
-If (mo.Parent.Left + (X - preX) < 0) Then preX = X + mo.Parent.Left
-If ((mo.Parent.top + Y - preY) > FloatLimitTop) And FloatLimitTop > 0 Then preY = mo.Parent.top + Y - FloatLimitTop
+If (Extender.Parent.top + (Y - preY) < 0) Then preY = Y + Extender.Parent.top
+If (Extender.Parent.Left + (X - preX) < 0) Then preX = X + Extender.Parent.Left
+If ((Extender.Parent.top + Y - preY) > FloatLimitTop) And FloatLimitTop > 0 Then preY = Extender.Parent.top + Y - FloatLimitTop
 
-If ((mo.Parent.Left + X - preX) > FloatLimitLeft) And FloatLimitLeft > 0 Then preX = mo.Parent.Left + X - FloatLimitLeft
-mo.Parent.Move mo.Parent.Left + (X - preX), mo.Parent.top + (Y - preY)
+If ((Extender.Parent.Left + X - preX) > FloatLimitLeft) And FloatLimitLeft > 0 Then preX = Extender.Parent.Left + X - FloatLimitLeft
+Extender.Parent.Move Extender.Parent.Left + (X - preX), Extender.Parent.top + (Y - preY)
 RaiseEvent RefreshDesktop
 Else
-mo.ZOrder
-If (mo.top + (Y - preY) < 0) Then preY = Y + mo.top
-If (mo.Left + (X - preX) < 0) Then preX = X + mo.Left
-If ((mo.top + Y - preY) > FloatLimitTop) And FloatLimitTop > 0 Then preY = mo.top + Y - FloatLimitTop
+Extender.ZOrder
+If (Extender.top + (Y - preY) < 0) Then preY = Y + Extender.top
+If (Extender.Left + (X - preX) < 0) Then preX = X + Extender.Left
+If ((Extender.top + Y - preY) > FloatLimitTop) And FloatLimitTop > 0 Then preY = Extender.top + Y - FloatLimitTop
 
-If ((mo.Left + X - preX) > FloatLimitLeft) And FloatLimitLeft > 0 Then preX = mo.Left + X - FloatLimitLeft
+If ((Extender.Left + X - preX) > FloatLimitLeft) And FloatLimitLeft > 0 Then preX = Extender.Left + X - FloatLimitLeft
 
-mo.Move mo.Left + (X - preX), mo.top + (Y - preY)
+Extender.Move Extender.Left + (X - preX), Extender.top + (Y - preY)
 End If
 End If
 If Me.BackStyle = 1 Then ShowMe2
 End If
+there:
 End Sub
 Property Get list(item As Long) As String
 Dim that$
@@ -2771,26 +2715,14 @@ Find = i
 End If
 End Function
 Public Sub ShowThis(ByVal item As Long, Optional noselect As Boolean)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
 On Error GoTo skipthis
-mm$ = UserControl.Ambient.DisplayName
 
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
+If Extender.Parent Is Nothing Then Exit Sub
 
 If listcount <= lines + 1 Then
     BarVisible = False
 Else
-    BarVisible = m_showbar And mo.Visible
+    BarVisible = m_showbar And Extender.Visible
 
 End If
 If item > 0 And item <= listcount Then
@@ -3560,33 +3492,20 @@ End If
 mytPixels = myt / scrTwips
 myt = mytPixels * scrTwips
 On Error GoTo th1
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-If Err.Number > 0 Then
-'DestroyCaret
-Exit Sub
-End If
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-If UserControl.Parent.Picture.Handle <> 0 And BackStyle = 1 Then
+
+If Extender.Parent Is Nothing Then Exit Sub
+
+If Extender.Parent.Picture.Handle <> 0 And BackStyle = 1 Then
 
 If Me.BorderStyle = 1 Then
 CurrentY = 0
     CurrentX = 0
 Line (0, 0)-(ScaleWidth - scrTwips, ScaleHeight - scrTwips), Me.backcolor, B
-UserControl.PaintPicture UserControl.Parent.Picture, scrTwips, scrTwips, Width - 2 * scrTwips, Height - 2 * scrTwips, mo.Left, mo.top, Width - 2 * scrTwips, Height - 2 * scrTwips
+UserControl.PaintPicture UserControl.Parent.Picture, scrTwips, scrTwips, Width - 2 * scrTwips, Height - 2 * scrTwips, Extender.Left, Extender.top, Width - 2 * scrTwips, Height - 2 * scrTwips
     CurrentY = 0
     CurrentX = 0
 Else
-UserControl.PaintPicture UserControl.Parent.Picture, 0, 0, , , mo.Left, mo.top
+UserControl.PaintPicture UserControl.Parent.Picture, 0, 0, , , Extender.Left, Extender.top
 
 End If
 
@@ -3595,7 +3514,7 @@ Dim mmo As PictureBox
 RaiseEvent GetBackPicture(mmo)
 If Not mmo Is Nothing Then
 If mmo.Picture.Handle <> 0 Then
-    UserControl.PaintPicture mmo.Picture, 0, 0, , , mo.Left, mo.top
+    UserControl.PaintPicture mmo.Picture, 0, 0, , , Extender.Left, Extender.top
     If Me.BorderStyle = 1 Then
     CurrentY = 0
         CurrentX = 0
@@ -3620,23 +3539,9 @@ End If
 mytPixels = myt / scrTwips
 myt = mytPixels * scrTwips
 On Error GoTo th1
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-If Err.Number > 0 Then
-'DestroyCaret
-Exit Sub
-End If
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-On Error Resume Next
 If Not waitforparent Then Exit Sub
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
+If Extender.Parent Is Nothing Then Exit Sub
+
 If BackStyle = 1 Then
     If Not SkipForm Then
         If UserControl.Parent.Picture.Handle <> 0 Then
@@ -3644,22 +3549,22 @@ If BackStyle = 1 Then
                     CurrentY = 0
                     CurrentX = 0
                     Line (0, 0)-(ScaleWidth - scrTwips, ScaleHeight - scrTwips), Me.backcolor, B
-                    UserControl.PaintPicture UserControl.Parent.Picture, scrTwips, scrTwips, Width - 2 * scrTwips, Height - 2 * scrTwips, mo.Left, mo.top, Width - 2 * scrTwips, Height - 2 * scrTwips
+                    UserControl.PaintPicture UserControl.Parent.Picture, scrTwips, scrTwips, Width - 2 * scrTwips, Height - 2 * scrTwips, Extender.Left, Extender.top, Width - 2 * scrTwips, Height - 2 * scrTwips
                     CurrentY = 0
                     CurrentX = 0
             Else
-                    UserControl.PaintPicture UserControl.Parent.Picture, 0, 0, , , mo.Left, mo.top
+                    UserControl.PaintPicture UserControl.Parent.Picture, 0, 0, , , Extender.Left, Extender.top
             End If
             Else
             If Me.BorderStyle = 1 Then
                 CurrentY = 0
                 CurrentX = 0
                 Line (0, 0)-(ScaleWidth - scrTwips, ScaleHeight - scrTwips), Me.backcolor, B
-                UserControl.PaintPicture UserControl.Parent.Image, scrTwips, scrTwips, Width - 2 * scrTwips, Height - 2 * scrTwips, mo.Left, mo.top, Width - 2 * scrTwips, Height - 2 * scrTwips
+                UserControl.PaintPicture UserControl.Parent.Image, scrTwips, scrTwips, Width - 2 * scrTwips, Height - 2 * scrTwips, Extender.Left, Extender.top, Width - 2 * scrTwips, Height - 2 * scrTwips
                 CurrentY = 0
                 CurrentX = 0
             Else
-                UserControl.PaintPicture UserControl.Parent.Image, 0, 0, , , mo.Left, mo.top
+                UserControl.PaintPicture UserControl.Parent.Image, 0, 0, , , Extender.Left, Extender.top
             End If
         End If
     Else
@@ -3667,7 +3572,7 @@ If BackStyle = 1 Then
         RaiseEvent GetBackPicture(mmo)
         If Not mmo Is Nothing Then
             If mmo.Image.Handle <> 0 Then
-                UserControl.PaintPicture mmo.Image, 0, 0, , , mo.Left - mmo.Left, mo.top - mmo.top
+                UserControl.PaintPicture mmo.Image, 0, 0, , , Extender.Left - mmo.Left, Extender.top - mmo.top
                 If Me.BorderStyle = 1 Then
                 CurrentY = 0
                     CurrentX = 0
@@ -3981,190 +3886,55 @@ Public Property Get Value() As Long
 Value = mValue
 End Property
 Public Property Get Visible() As Boolean
-Dim mm$, mo As Control, nm$, cnt$, p As Long
 On Error Resume Next
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-'On Error Resume Next
 If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-
-Visible = mo.Visible
+Visible = Extender.Visible
 End Property
 
 Public Property Get TopTwips() As Long
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-TopTwips = CLng(mo.top)
+TopTwips = CLng(Extender.top)
 End Property
 Public Property Let Visible(ByVal RHS As Boolean)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
 On Error Resume Next
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
-
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-If mo.Visible = RHS Then Exit Property
-mo.Visible = RHS
-
+Extender.Visible = RHS
 End Property
 Public Property Let TopTwips(ByVal RHS As Long)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-mo.Move mo.Left, CSng(RHS)
+Extender.Move Extender.Left, CSng(RHS)
 End Property
 Public Property Get HeightTwips() As Long
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-HeightTwips = CLng(mo.Height)
+HeightTwips = CLng(Extender.Height)
 End Property
 Public Sub GetLeftTop(Ltwips, Ttwips)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-Ltwips = CLng(mo.Left)
-Ttwips = CLng(mo.top)
-
+Ltwips = CLng(Extender.Left)
+Ttwips = CLng(Extender.top)
 End Sub
 Public Property Let HeightTwips(ByVal RHS As Long)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Property
-If Err.Number > 0 Then Exit Property
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-mo.Move mo.Left, mo.top, mo.Width, RHS
+Extender.Move Extender.Left, Extender.top, Extender.Width, RHS
 End Property
 Public Sub MoveTwips(ByVal mleft As Long, ByVal mtop As Long, mWidth As Long, mHeight As Long)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
 If mWidth < 100 Then
-mo.Move mleft, mtop, mo.Width, mo.Height
+Extender.Move mleft, mtop, Extender.Width, Extender.Height
 ElseIf mHeight < 100 Then
-mo.Move mleft, mtop, mWidth, mo.Height
+Extender.Move mleft, mtop, mWidth, Extender.Height
 Else
-mo.Move mleft, mtop, mWidth, mHeight
+Extender.Move mleft, mtop, mWidth, mHeight
 End If
 End Sub
 Public Sub ZOrder(Optional ByVal RHS As Long = 0)
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-mo.ZOrder RHS
+Extender.ZOrder RHS
 End Sub
 
 Public Sub SetFocus()
-Dim mm$, mo As Control, nm$, cnt$, p As Long
-mm$ = UserControl.Ambient.DisplayName
-
-nm$ = GetStrUntilB(p, "(", mm$ & "(", True)
-cnt$ = GetStrUntilB(p, ")", mm$, True)
 On Error Resume Next
-If UserControl.Parent Is Nothing Then Exit Sub
-If Err.Number > 0 Then Exit Sub
-If cnt$ <> "" Then
-
-Set mo = UserControl.Parent.Controls(nm$).item(CInt(cnt$))
-Else
-Set mo = UserControl.Parent.Controls(nm$)
-End If
-If mo.Visible Then
-mo.SetFocus
+If Extender.Visible Then
+Extender.SetFocus
 End If
 End Sub
 Public Property Let Value(ByVal RHS As Long)

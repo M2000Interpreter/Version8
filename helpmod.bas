@@ -24,16 +24,16 @@ Public Const DFC_POPUPMENU = 5            'Only Win98/2000 !!
 Public Const DFCS_BUTTON3STATE = &H10
 
 Public Const DC_GRADIENT = &H20          'Only Win98/2000 !!
-Public Declare Function FillRect Lib "User32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
+Public Declare Function FillRect Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
 Public Declare Function CreateSolidBrush Lib "gdi32" (ByVal crColor As Long) As Long
 Public Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 Public Declare Function SetTextColor Lib "gdi32" (ByVal hDC As Long, ByVal crColor As Long) As Long
 Public Const OPAQUE = 2
 Public Declare Function SetBkMode Lib "gdi32" (ByVal hDC As Long, ByVal nBkMode As Long) As Long
-Public Declare Function DrawFrameControl Lib "User32" (ByVal hDC As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
-Public Declare Function DrawText Lib "User32" Alias "DrawTextW" (ByVal hDC As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
-Public Declare Function SetRect Lib "User32" (lpRect As RECT, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
-Public Declare Function OffsetRect Lib "User32" (lpRect As RECT, ByVal X As Long, ByVal Y As Long) As Long
+Public Declare Function DrawFrameControl Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
+Public Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
+Public Declare Function SetRect Lib "user32" (lpRect As RECT, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
+Public Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal X As Long, ByVal Y As Long) As Long
 
 Public Const DT_BOTTOM As Long = &H8&
 Public Const DT_CALCRECT As Long = &H400&
@@ -62,7 +62,7 @@ Public Const DT_WORD_ELLIPSIS As Long = &H40000
 Private Declare Function GetLogicalDriveStrings Lib "KERNEL32" _
   Alias "GetLogicalDriveStringsA" (ByVal nBufferLength As Long, _
   ByVal lpBuffer As String) As Long
-   Private Declare Function GetComputerName Lib "KERNEL32" Alias "GetComputerNameW" (ByVal lpBuffer As Long, nsize As Long) As Long
+   Private Declare Function GetComputerName Lib "KERNEL32" Alias "GetComputerNameW" (ByVal lpBuffer As Long, nSize As Long) As Long
  Private Declare Function GetDiskFreeSpace Lib "KERNEL32" _
  Alias "GetDiskFreeSpaceA" (ByVal lpRootPathName As String, _
  lpSectorsPerCluster As Long, lpBytesPerSector As Long, _
@@ -146,9 +146,9 @@ Set oFolder = oshell.NameSpace(NET_HOOD)
 For Each ofile In oFolder.items
 If ofile.name = vbNullString Then
 If all = vbNullString Then
-all = "(" + ofile.GetLink.path + ")"
+all = "(" + ofile.GetLink.Path + ")"
 Else
-     all = all + vbCrLf + "(" + ofile.GetLink.path + ")"
+     all = all + vbCrLf + "(" + ofile.GetLink.Path + ")"
      End If
 
 Else
@@ -184,7 +184,7 @@ Set oFolder = oshell.NameSpace(NET_HOOD)
 
 For Each ofile In oFolder.items
 If ofile.name = giveAname Then
-FindNetworkFolderPath = ofile.GetLink.path
+FindNetworkFolderPath = ofile.GetLink.Path
 Exit For
 End If
 Next ofile
@@ -194,23 +194,22 @@ End If
 
 End Function
 Public Function getIP()
+Dim l() As AdapterInfo, many As Long, i As Long
 
-Dim WMI     As Object
-Dim qryWMI  As Object
-Dim item    As Variant
-
-    Set WMI = GetObject("winmgmts:\\.\root\cimv2")
-
-    Set qryWMI = WMI.ExecQuery("SELECT * FROM Win32_NetworkAdapterConfiguration " & _
-                               "WHERE IPEnabled = True")
-
-    For Each item In qryWMI
-      getIP = item.IPAddress(0)
-    Next
-    Set item = Nothing
-    Set WMI = Nothing
-    Set qryWMI = Nothing
-
+many = GetAdaptersInfo(l())
+If many = 0 Then
+getIP = "127.0.0.1"
+Else
+For i = 0 To many - 1
+If l(i).GatewayIP <> "0.0.0.0" Then getIP = l(i).IP: Exit For
+Next i
+If Typename(getIP) = "Empty" Then
+For i = 0 To many - 1
+If l(i).IP <> "0.0.0.0" Then getIP = l(i).IP: Exit For
+Next i
+End If
+If Typename(getIP) = "Empty" Then getIP = "127.0.0.1"
+End If
 End Function
 Public Sub showmodules()
 If Not Form1.EditTextWord Then
@@ -219,3 +218,52 @@ Else
 Beep
 End If
 End Sub
+Private Function At(vArray As Variant, ByVal lIdx As Long) As Variant
+    On Error GoTo QH
+    At = vArray(lIdx)
+QH:
+End Function
+Public Function Connected() As Boolean
+With New cTlsClient
+    .NoError = True
+    .SetTimeouts 100, 300, 200, 300
+     Connected = .Connect("www.google.com", 80)
+End With
+End Function
+Public Function GetExternalIP() As String
+    Dim sResponse     As String
+    
+    With New cTlsClient
+    .NoError = True
+    .SetTimeouts 0, 300, 300, 600
+       If Not .Connect("ifconfig.co", 80) Then GoTo there1
+       If Not .WriteText("GET /ip HTTP/1.1" & vbCrLf & "Host: ifconfig.co" & vbCrLf & vbCrLf) Then GoTo there1
+        Do
+            sResponse = sResponse & .ReadText()
+            If InStr(sResponse, vbCrLf & vbCrLf) > 0 Then
+                
+                sResponse = At(Split(At(Split(sResponse, vbCrLf & vbCrLf), 1), vbLf), 0)
+                If sResponse Like "*.*.*.*" Then
+                    Exit Do
+                End If
+            End If
+            If .LastError.Number <> 0 Then
+                .Socket.GetSockName sResponse, 0
+                Exit Do
+            End If
+            If sResponse = vbNullString Then Exit Do
+        Loop
+    
+    GoTo there
+there1:
+    If Not .Connect("myip.dfbgaming.com", 80) Then GoTo there
+    If Not .WriteText("GET / HTTP/1.1" & vbCrLf & "Host: myip.dfbgaming.com" & vbCrLf & "Accept: text/plain" & vbCrLf & vbCrLf, 0) Then GoTo there
+    sResponse = At(Split(At(Split(.ReadText(), vbCrLf + "e" + vbCrLf), 1), vbCrLf), 0)
+    End With
+there:
+    If sResponse Like "*.*.*.*" Then
+        GetExternalIP = sResponse
+    Else
+        GetExternalIP = "127.0.0.1"
+    End If
+End Function

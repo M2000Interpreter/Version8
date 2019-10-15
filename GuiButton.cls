@@ -45,13 +45,13 @@ Public Sub ConstructArray(there As Form, name$, i As Long)
  there.Controls(ctrlName).TabStop = True
  mesCtrlName = name$
 End Sub
-Public Sub Move(x, y, Optional w, Optional h)
+Public Sub Move(X, Y, Optional w, Optional h)
 If IsMissing(w) Then
-glistN.MoveTwips CLng(x), CLng(y), 0, 0
+glistN.MoveTwips CLng(X), CLng(Y), 0, 0
 ElseIf IsMissing(h) Then
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), 0
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), 0
 Else
-glistN.MoveTwips CLng(x), CLng(y), CLng(w), CLng(h)
+glistN.MoveTwips CLng(X), CLng(Y), CLng(w), CLng(h)
 End If
 End Sub
 Public Sub deconstruct()
@@ -169,7 +169,7 @@ Private Sub glistN_CtrlPlusF1()
       End If
 End Sub
 
-Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
 glistN.ShowMe
 End Sub
 
@@ -229,23 +229,23 @@ Public Property Get index() As Long
 index = mIndex
 End Property
 
-Public Property Let index(ByVal rhs As Long)
-mIndex = rhs
+Public Property Let index(ByVal RHS As Long)
+mIndex = RHS
 End Property
 Public Property Get enabled() As Long
 enabled = glistN.enabled
 End Property
 
-Public Property Let enabled(ByVal rhs As Long)
+Public Property Let enabled(ByVal RHS As Long)
 If glistN Is Nothing Then Exit Property
-glistN.enabled = rhs
+glistN.enabled = RHS
 End Property
 Public Property Get WrapText() As Long
 WrapText = glistN.WrapText
 End Property
 
-Public Property Let WrapText(ByVal rhs As Long)
-glistN.WrapText = rhs <> 0
+Public Property Let WrapText(ByVal RHS As Long)
+glistN.WrapText = RHS <> 0
 End Property
 Sub ColorsReset()
 white = rgb(255, 255, 255)
@@ -282,21 +282,22 @@ aa.bold = ThisBold
 Set glistN.Font = aa
 End If
 End Sub
-Public Sub Curve(rhs As Single)
-glistN.Curve False, rhs
+Public Sub Curve(RHS As Single)
+glistN.Curve False, RHS
 End Sub
-Public Property Get Top() As Variant
-Top = Callback.Controls(ctrlName).Top
+Public Property Get top() As Variant
+'top = Callback.Controls(ctrlName).top
+top = glistN.TopTwips
 End Property
-Public Property Let Top(ByVal rhs As Variant)
-Callback.Controls(ctrlName).Top = rhs
+Public Property Let top(ByVal RHS As Variant)
+Callback.Controls(ctrlName).top = RHS
 End Property
 Public Property Get Left() As Variant
 Left = Callback.Controls(ctrlName).Left
 End Property
 
-Public Property Let Left(ByVal rhs As Variant)
-Callback.Controls(ctrlName).Left = rhs
+Public Property Let Left(ByVal RHS As Variant)
+Callback.Controls(ctrlName).Left = RHS
 End Property
 Sub GetFocus()
 On Error Resume Next
@@ -335,10 +336,10 @@ Public Property Get Blink()
 Blink = glistN.BlinkTime
 End Property
 Sub Transparent()
-Dim x  As Long, y As Long
+Dim X  As Long, Y As Long
 glistN.BackStyle = 1
-glistN.GetLeftTop x, y
-glistN.RepaintFromOut Callback.Image, x, y
+glistN.GetLeftTop X, Y
+glistN.RepaintFromOut Callback.Image, X, Y
 glistN.ShowMe
 Callback.RefreshList = Callback.RefreshList + 1
 End Sub
@@ -364,17 +365,17 @@ Colors shadowcol
 Me.locked = False
 Show
 End Sub
-Public Property Let Default(rhs)
+Public Property Let Default(RHS)
 On Error Resume Next
-If CBool(rhs) Then Callback.Default = ctrlName
+If CBool(RHS) Then Callback.Default = ctrlName
 End Property
 
 Private Sub glistN_UnregisterGlist()
 On Error Resume Next
 If glistN.TabStopSoft Then Callback.LastActive = ctrlName
 End Sub
-Public Property Let icon(rhs)
-glistN.icon = rhs
+Public Property Let icon(RHS)
+glistN.icon = RHS
 
 End Property
 

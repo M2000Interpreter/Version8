@@ -44,10 +44,7 @@ Event DownloadComplete(ByVal LocalFileName As String)
 Private Const STGM_WRITE                    As Long = 1
 Private Const STGM_CREATE                   As Long = &H1000
 
-Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
-Private Declare Function vbaObjSetAddref Lib "msvbvm60" Alias "__vbaObjSetAddref" (oDest As Any, ByVal lSrcPtr As Long) As Long
-Private Declare Function SHCreateStreamOnFile Lib "shlwapi" Alias "SHCreateStreamOnFileW" (ByVal pszFile As Long, ByVal grfMode As Long, ppstm As IUnknown) As Long
-Private Declare Function IStream_Write Lib "shlwapi" (ByVal pstm As IUnknown, pv As Any, ByVal cb As Long) As Long
+'Private Declare Function vbaObjSetAddref Lib "msvbvm60" Alias "__vbaObjSetAddref" (oDest As Any, ByVal lSrcPtr As Long) As Long
 
 '=========================================================================
 ' Constants and member variables
@@ -66,9 +63,11 @@ Private WithEvents m_oSocket    As cAsyncSocket
 Attribute m_oSocket.VB_VarHelpID = -1
 Private m_uRemote               As UcsParsedUrl
 Private m_sLocalFileName        As String
-Private m_pOutputStream         As IUnknown
+Private m_file                  As Boolean
 Private m_dStartDate            As Date
-Private m_lCallbackPtr          As Long
+'Private m_lCallbackPtr          As Long
+Private m_wait_close            As Boolean
+Private m_reading               As Long
 Private m_eState                As UcsStateEnum
 Private m_baRecvBuffer()        As Byte
 Private m_dblBytesRead          As Double
@@ -113,19 +112,19 @@ Property Get StartDate() As Date
     StartDate = m_dStartDate
 End Property
 
-Friend Property Get CallbackWeakRef() As Object
-    Call vbaObjSetAddref(CallbackWeakRef, m_lCallbackPtr)
-End Property
+'Friend Property Get CallbackWeakRef() As Object
+'    Call vbaObjSetAddref(CallbackWeakRef, m_lCallbackPtr)
+'End Property
 
-Friend Property Set CallbackWeakRef(oValue As Object)
-    m_lCallbackPtr = ObjPtr(oValue)
-End Property
+'Friend Property Set CallbackWeakRef(oValue As Object)
+'    m_lCallbackPtr = ObjPtr(oValue)
+'End Property
 
 '=========================================================================
 ' Methods
 '=========================================================================
 
-Public Sub DownloadFile(url As String, LocalFileName As Variant)
+Public Sub DownloadFile(url As String, LocalFileName As String)
     Const FUNC_NAME     As String = "DownloadFile"
     Dim hResult     As Long
     
@@ -138,17 +137,11 @@ Public Sub DownloadFile(url As String, LocalFileName As Variant)
         On Error GoTo 0
         Err.Raise vbObjectError, , ERR_HTTP_ONLY
     End If
-    If IsObject(LocalFileName) Then
-        m_sLocalFileName = "[stream]"
-        Set m_pOutputStream = LocalFileName
-    Else
-        m_sLocalFileName = LocalFileName
-        hResult = SHCreateStreamOnFile(StrPtr(m_sLocalFileName), STGM_WRITE Or STGM_CREATE, m_pOutputStream)
-        If hResult < 0 Then
-            On Error GoTo 0
-            Err.Raise hResult
+    m_wait_close = False
+        OpenStream (LocalFileName)
+        If Not m_file Then
+           Exit Sub
         End If
-    End If
     m_dStartDate = Now
     m_eState = ucsIdle
     m_dblBytesRead = 0
@@ -162,6 +155,7 @@ Public Sub DownloadFile(url As String, LocalFileName As Variant)
         On Error GoTo 0
         Err.Raise vbObjectError, , m_oSocket.GetErrorDescription(m_oSocket.LastError)
     End If
+    Debug.Print "Start:", m_uRemote.Host
     RaiseEvent Start(m_uRemote.Host, m_uRemote.Port)
     Exit Sub
 EH:
@@ -173,8 +167,7 @@ Public Sub CancelDownload()
     
     On Error GoTo EH
     Set m_oSocket = Nothing
-    Set m_pOutputStream = Nothing
-    m_lCallbackPtr = 0
+    'm_lCallbackPtr = 0
     m_eState = ucsIdle
     Exit Sub
 EH:
@@ -256,21 +249,17 @@ Private Function pvRecvBody(baBuffer() As Byte, Optional ByVal Flush As Boolean)
     On Error GoTo EH
     If UBound(baBuffer) >= 0 Then
         m_dblBytesRead = m_dblBytesRead + UBound(baBuffer) + 1
+        
+        WriteStream baBuffer()
+       
+        'If Not (m_wait_close And m_reading = 1) Then
+        Debug.Print "DownloadProgress", m_sLocalFileName, m_dblBytesRead
+    
         RaiseEvent DownloadProgress(m_dblBytesRead, m_dblContentLength)
-        If m_lCallbackPtr <> 0 Then
-            Call CallbackWeakRef.DownloadProgress(Me, m_dblBytesRead, m_dblContentLength)
-        End If
-        lIdx = UBound(m_baRecvBuffer) + 1
-        ReDim Preserve m_baRecvBuffer(0 To lIdx + UBound(baBuffer)) As Byte
-        Call CopyMemory(m_baRecvBuffer(lIdx), baBuffer(0), UBound(baBuffer) + 1)
-    End If
-    If UBound(m_baRecvBuffer) >= LNG_FLUSH_LIMIT Or Flush Then
-        hResult = IStream_Write(m_pOutputStream, m_baRecvBuffer(0), UBound(m_baRecvBuffer) + 1)
-        m_baRecvBuffer = vbNullString
-        If hResult < 0 Then
-            pvSetError hResult
-            GoTo QH
-        End If
+       ' End If
+        'If m_lCallbackPtr <> 0 Then
+        '    Call CallbackWeakRef.DownloadProgress(Me, m_dblBytesRead, m_dblContentLength)
+        'End If
     End If
     '--- success
     pvRecvBody = True
@@ -294,9 +283,9 @@ Private Sub pvSetError(ByVal lNumber As Long, Optional sDescription As String)
     End If
     CancelDownload
     RaiseEvent DownloadError(lNumber, sDescription)
-    If m_lCallbackPtr <> 0 Then
-        Call CallbackWeakRef.DownloadError(Me, lNumber, sDescription)
-    End If
+    'If m_lCallbackPtr <> 0 Then
+    '    Call CallbackWeakRef.DownloadError(Me, lNumber, sDescription)
+    'End If
     Exit Sub
 EH:
     PrintError FUNC_NAME
@@ -361,7 +350,7 @@ End Sub
 Private Sub m_oSocket_OnReceive()
     Const FUNC_NAME     As String = "m_oSocket_OnReceive"
     Dim baBuffer()      As Byte
-    
+
     On Error GoTo EH
     If m_eState = ucsWaitHeaders Then
         If Not m_oSocket.ReceiveArray(baBuffer) Then
@@ -375,36 +364,73 @@ Private Sub m_oSocket_OnReceive()
             GoTo QH
         End If
     End If
+
     If m_eState = ucsWaitBody Then
-        If Not m_oSocket.ReceiveArray(baBuffer) Then
-            pvSetError m_oSocket.LastError
-            GoTo QH
+        If m_reading > 0 Then
+            Debug.Print "reading in progess....", m_sLocalFileName, FileLen(GetDosPath(m_sLocalFileName)), m_reading
+            m_reading = m_reading + 1
+            Exit Sub
         End If
-        If UBound(baBuffer) < 0 Then
-            GoTo QH
+        
+           
+            m_reading = m_reading + 1
+again:
+             baBuffer = vbNullString
+            If Not m_oSocket.ReceiveArray(baBuffer) Then
+                pvSetError m_oSocket.LastError
+                
+                
+             End If
+            
+      '
+            If UBound(baBuffer) > 0 Then
+again2:
+            If pvRecvBody(baBuffer) Then
+            Debug.Print "reading now....", m_sLocalFileName, FileLen(GetDosPath(m_sLocalFileName)), m_reading, m_wait_close
+            Else
+             RaiseEvent DownloadError(m_oSocket.LastError, m_oSocket.GetErrorDescription(m_oSocket.LastError))
+            CancelDownload
+            End If
+            Else
+            Debug.Print "missing data", m_sLocalFileName
+            If Not m_wait_close Then If m_oSocket.ReceiveArray(baBuffer) Then If UBound(baBuffer) > 0 Then GoTo again2
+            'Exit Sub
         End If
-        If Not pvRecvBody(baBuffer) Then
-            GoTo QH
-        End If
+            
+            If m_wait_close And m_reading < 2 Then
+            RaiseEvent DownloadComplete(m_sLocalFileName)
+            CancelDownload
+            Exit Sub
+            End If
+       m_reading = m_reading - 1
+       If m_reading > 0 Then GoTo again
     End If
 QH:
     Exit Sub
 EH:
+m_reading = m_reading - 1
     PrintError FUNC_NAME
 End Sub
 
 Private Sub m_oSocket_OnClose()
     Const FUNC_NAME     As String = "m_oSocket_OnClose"
-    Dim baBuffer()      As Byte
-    
+    'Dim baBuffer()      As Byte
+    If m_reading Then
+        Debug.Print "here////////////////////////", m_sLocalFileName
+        
+        m_wait_close = True
+        Exit Sub
+    End If
     On Error GoTo EH
     If m_eState = ucsWaitBody Then
-        baBuffer = vbNullString
-        pvRecvBody baBuffer, Flush:=True
-        RaiseEvent DownloadComplete(m_sLocalFileName)
-        If m_lCallbackPtr <> 0 Then
-            Call CallbackWeakRef.DownloadComplete(Me, m_sLocalFileName)
-        End If
+    m_wait_close = True
+    m_reading = -1
+    m_oSocket_OnReceive
+        ' need to close file before evenet OnClose
+        'RaiseEvent DownloadComplete(m_sLocalFileName)
+        'If m_lCallbackPtr <> 0 Then
+         '   Call CallbackWeakRef.DownloadComplete(Me, m_sLocalFileName)
+        'End If
     End If
     CancelDownload
     Exit Sub
@@ -414,10 +440,35 @@ End Sub
 
 Private Sub m_oSocket_OnError(ByVal ErrorCode As Long, ByVal EventMask As UcsAsyncSocketEventMaskEnum)
     Const FUNC_NAME     As String = "m_oSocket_OnError"
-    
+    Debug.Print ErrorCode, m_sLocalFileName
     On Error GoTo EH
     pvSetError ErrorCode
     Exit Sub
 EH:
     PrintError FUNC_NAME
 End Sub
+Private Sub OpenStream(s$)
+If Not NeoUnicodeFile(s$) Then NoCreateFile: Exit Sub
+Dim i As Long
+i = FreeFile
+m_sLocalFileName = s$
+If CFname(GetDosPath(s$)) <> "" Then
+    Open GetDosPath(s$) For Binary Access Write Lock Read Write As i
+    Close i
+    m_file = True
+End If
+
+End Sub
+Private Function WriteStream(a() As Byte)
+If m_file Then
+Dim i As Long
+i = FreeFile
+If CFname(GetDosPath(m_sLocalFileName)) <> "" Then
+    Open GetDosPath(m_sLocalFileName) For Binary Access Write Lock Read Write As i
+    Seek i, LOF(i) + 1
+    Put #i, , a()
+    Close i
+    m_file = True
+End If
+End If
+End Function

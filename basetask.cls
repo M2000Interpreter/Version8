@@ -83,6 +83,7 @@ Public CallLocalLast As Boolean
 Public IamGlobal As Boolean
 Public numnumlimit As Long
 Public SkipClear As Long
+Public Prof As clsProfiler
 Public Sub SetSkip()
     SkipClear = SkipClear + 1
 End Sub

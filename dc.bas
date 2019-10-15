@@ -39,7 +39,7 @@ Private Declare Function GetSystemPaletteEntries Lib "gdi32" (ByVal hDC As Long,
 Private Declare Function CreatePalette Lib "gdi32" (lpLogPalette As LOGPALETTE) As Long
 Private Declare Function SelectPalette Lib "gdi32" (ByVal hDC As Long, ByVal HPALETTE As Long, ByVal bForceBackground As Long) As Long
 Private Declare Function RealizePalette Lib "gdi32" (ByVal hDC As Long) As Long
-Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
 Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As Long) As Long
 Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function OpenPrinter Lib "winspool.drv" Alias "OpenPrinterA" (ByVal pPrinterName As String, phPrinter As Long, pDefault As Any) As Long
@@ -84,8 +84,8 @@ Type PRINTER_DEFAULTS
 End Type
 ' New Win95 Page Setup dialogs are up to you
 Private Type POINTL
-    x As Long
-    y As Long
+    X As Long
+    Y As Long
 End Type
 Private Type RECT
     Left As Long
@@ -108,15 +108,15 @@ Public Function GetLongName(strTest As String) As String
    Dim sLongPath As String
    Dim buff As String
    Dim cbbuff As Long
-   Dim result As Long
+   Dim Result As Long
  
-   buff = Space$(MAX_PATH_UNICODE)
+   buff = space$(MAX_PATH_UNICODE)
    cbbuff = Len(buff)
  
-   result = GetLongPathName(StrPtr(strTest), StrPtr(buff), cbbuff)
+   Result = GetLongPathName(StrPtr(strTest), StrPtr(buff), cbbuff)
  
-   If result > 0 Then
-      sLongPath = Left$(buff, result)
+   If Result > 0 Then
+      sLongPath = Left$(buff, Result)
    End If
  
    GetLongName = sLongPath
@@ -125,17 +125,17 @@ End Function
  
 
 
-Function PathStrip2root(path$) As String
+Function PathStrip2root(Path$) As String
 Dim i As Long
-If Len(path$) >= 2 Then
-If Mid$(path$, 2, 1) = ":" Then
-PathStrip2root = Left$(path$, 2) & "\"
+If Len(Path$) >= 2 Then
+If Mid$(Path$, 2, 1) = ":" Then
+PathStrip2root = Left$(Path$, 2) & "\"
 Else
-i = InStrRev(path$, Left$(path$, 1))
+i = InStrRev(Path$, Left$(Path$, 1))
 If i > 1 Then
-PathStrip2root = "\" & ExtractPath(Mid$(path$, 2, i))
+PathStrip2root = "\" & ExtractPath(Mid$(Path$, 2, i))
 Else
-PathStrip2root = Left$(path$, 1)
+PathStrip2root = Left$(Path$, 1)
 End If
 
 End If
@@ -146,18 +146,18 @@ Sub Pprop()
     
     If ThereIsAPrinter = False Then Exit Sub
         
-    Dim x As Printer
-For Each x In Printers
-If x.DeviceName = pname And x.port = port Then Exit For
-Next x
-Dim gp As Long, Td As PRINTER_DEFAULTS
-Call OpenPrinter(x.DeviceName, gp, Td)
+    Dim X As Printer
+For Each X In Printers
+If X.DeviceName = pname And X.Port = Port Then Exit For
+Next X
+Dim gp As Long, td As PRINTER_DEFAULTS
+Call OpenPrinter(X.DeviceName, gp, td)
 If form5iamloaded Then
 Call PrinterProperties(Form5.hWnd, gp)
 Else
 Call PrinterProperties(Form1.hWnd, gp)
 End If
-Call ResetPrinter(gp, Td)
+Call ResetPrinter(gp, td)
 Call ClosePrinter(gp)
 End Sub
 Function CreateBitmapPicture(ByVal hbmp As Long, ByVal hPal As Long) As Picture
@@ -235,8 +235,8 @@ Function hDCToPicture(ByVal hDCSrc As Long, ByVal LeftSrc As Long, ByVal TopSrc 
     Set hDCToPicture = CreateBitmapPicture(hbmp, hPal)
 End Function
 
-Function DriveType(ByVal path$) As String
-    Select Case GetDriveType(path$)
+Function DriveType(ByVal Path$) As String
+    Select Case GetDriveType(Path$)
         Case 2
             DriveType = "Μεταθέσιμο"
         Case 3
@@ -252,8 +252,8 @@ Function DriveType(ByVal path$) As String
     End Select
 End Function
 
-Function DriveTypee(ByVal path$) As String
-    Select Case GetDriveType(path$)
+Function DriveTypee(ByVal Path$) As String
+    Select Case GetDriveType(Path$)
         Case 2
             DriveTypee = "Removable"
         Case 3
@@ -268,34 +268,34 @@ Function DriveTypee(ByVal path$) As String
             DriveTypee = "Unrecognized"
     End Select
 End Function
-Function DriveSerial(ByVal path$) As Long
+Function DriveSerial(ByVal Path$) As Long
     'KPD-Team 1998
     'URL: http://www.allapi.net/
     'E-Mail: KPDTeam@Allapi.net
-    Dim Serial As Long, VName As String, FSName As String
+    Dim Serial As Long, Vname As String, FSName As String
     'Create buffers
-    If Len(path$) = 1 Then path$ = path$ & ":\"
-    If Len(path$) = 2 Then path$ = path$ & "\"
-    VName = String$(255, Chr$(0))
+    If Len(Path$) = 1 Then Path$ = Path$ & ":\"
+    If Len(Path$) = 2 Then Path$ = Path$ & "\"
+    Vname = String$(255, Chr$(0))
     FSName = String$(255, Chr$(0))
     'Get the volume information
-    GetVolumeInformation path$, VName, 255, Serial, 0, 0, FSName, 255
+    GetVolumeInformation Path$, Vname, 255, Serial, 0, 0, FSName, 255
     'Strip the extra chr$(0)'s
     'VName = Left$(VName, InStr(1, VName, Chr$(0)) - 1)
     'FSName = Left$(FSName, InStr(1, FSName, Chr$(0)) - 1)
  DriveSerial = Serial
 End Function
 
-Function WeCanWrite(ByVal path$) As Boolean
+Function WeCanWrite(ByVal Path$) As Boolean
 Dim SecondTry As Boolean, PP$
 On Error GoTo wecant
-PP$ = ExtractPath(path$, , True)
+PP$ = ExtractPath(Path$, , True)
 PP$ = GetDosPath(PP$)
 If PP$ = vbNullString Then
-MyEr "Not writable device " & path$, "Δεν μπορώ να γράψω στη συσκευή " & path$
+MyEr "Not writable device " & Path$, "Δεν μπορώ να γράψω στη συσκευή " & Path$
 Exit Function
 End If
-PP$ = PathStrip2root(path$)
+PP$ = PathStrip2root(Path$)
 
 
     Select Case GetDriveType(PP$)
@@ -308,8 +308,8 @@ PP$ = PathStrip2root(path$)
    Exit Function
 wecant:
                    If Err.Number > 0 Then
-                Err.Clear
-                 MyEr "Not writable device " & path$, "Δεν μπορώ να γράψω στη συσκευή " & path$
+                Err.clear
+                 MyEr "Not writable device " & Path$, "Δεν μπορώ να γράψω στη συσκευή " & Path$
             WeCanWrite = False
                 Exit Function
                 End If
@@ -321,7 +321,7 @@ Dim o As Object
 If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
 If Typename(sapi) = "Nothing" Then VoiceName = vbNullString: Exit Function
 d = Int(d)
-If sapi.getvoices().Count >= d And d > 0 Then
+If sapi.getvoices().count >= d And d > 0 Then
 For Each o In sapi.getvoices
 d = d - 1
 If d = 0 Then VoiceName = o.GetDescription: Exit For
@@ -332,8 +332,8 @@ Public Function NumVoices() As Long
 On Error Resume Next
 If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
 If Typename(sapi) = "Nothing" Then NumVoices = -1: Exit Function
-If sapi.getvoices().Count > 0 Then
-NumVoices = sapi.getvoices().Count
+If sapi.getvoices().count > 0 Then
+NumVoices = sapi.getvoices().count
 End If
 End Function
 Public Sub SPEeCH(ByVal a$, Optional BOY As Boolean = False, Optional ByVal vNumber As Long = -1)
@@ -343,8 +343,8 @@ On Error Resume Next
 If vNumber = 0 Then vNumber = 1
 If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
 If Typename(sapi) = "Nothing" Then Beep: Exit Sub
-If sapi.getvoices().Count > 0 Then
-If sapi.getvoices().Count <= vNumber Or sapi.getvoices().Count < 1 Then vNumber = 1
+If sapi.getvoices().count > 0 Then
+If sapi.getvoices().count <= vNumber Or sapi.getvoices().count < 1 Then vNumber = 1
  With sapi
          Set .Voice = .getvoices.item(vNumber - 1)
        If BOY Then
@@ -363,6 +363,223 @@ If sapi.getvoices().Count <= vNumber Or sapi.getvoices().Count < 1 Then vNumber 
        End With
        lastvoice = vNumber
 End If
+End Sub
+Public Sub wwPlain(bstack As basetask, mybasket As basket, ByVal what As String, ByVal wi As Long, ByVal Hi As Long, Optional scrollme As Boolean = False, Optional nosettext As Boolean = False, Optional frmt As Long = 0, Optional ByVal skip As Long = 0, Optional res As Long, Optional isAcolumn As Boolean = False, Optional collectit As Boolean = False, Optional nonewline As Boolean)
+Dim ddd As Object, mDoc As Object, para() As String, i As Long
+Dim n As Long, st As Long, st1 As Long, st0 As Long, w As Integer
+Dim PX As Long, PY As Long, nowait As Boolean
+Dim nopage As Boolean
+Dim Buf$, b$, npy As Long, lCount As Long, SCRnum2stop As Long
+Dim nopr As Boolean, nohi As Long, w2 As Long, lastPara As Long
+Dim dv2x15 As Long
+dv2x15 = dv15 * 2
+If collectit Then Set mDoc = New Document
+Set ddd = bstack.Owner
+If what = vbNullString Then GoTo finish
+para() = Split(what, vbCrLf)
+With mybasket
+' from old code here
+    tParam.iTabLength = .ReportTab
+    PX = .curpos
+    PY = .currow
+    If Not nosettext Then
+        If PX >= .mx Then
+            nowait = True
+            PX = 0
+        End If
+    End If
+    If PX > .mx Then nowait = True
+    If wi = 0 Then
+        If nowait Then wi = .Xt * (.mx - PX) Else wi = .mx * .Xt
+    Else
+        If wi <= .mx Then wi = wi * .Xt
+    End If
+    
+    wi = wi - CLng(dv2x15)
+    If wi <= 0 Then Exit Sub
+    If Hi < 0 Then
+        Hi = -Hi - 2
+        nohi = Hi
+        nopr = True
+    End If
+
+    If Not nopr Then
+        If Not nosettext Then
+             LCTbasket ddd, mybasket, PY, PX
+        End If
+        ddd.CurrentX = ddd.CurrentX + dv2x15
+        If Not scrollme Then
+            If Hi >= 0 Then If (.My - PY) * .Yt < Hi Then Hi = (.My - PY) * .Yt
+        Else
+            If Hi > 1 Then
+                If .pageframe <> 0 Then
+                    lCount = holdcontrol(ddd, mybasket)
+                    .pageframe = 0
+                End If
+                SCRnum2stop = holdcontrol(ddd, mybasket)
+            End If
+        End If
+    End If
+    npy = PY
+
+    w2 = wi
+    If bstack.IamThread Then nopage = True
+' -----end old code---------
+lastPara = UBound(para)
+If Len(para(lastPara)) = 0 Then lastPara = lastPara - 1
+    For i = LBound(para) To lastPara
+        Buf$ = vbNullString
+nextline:
+        If NOEXECUTION Then Exit For
+        n = MyTextWidth(ddd, para(i))
+        If n > wi Then
+            st = Len(para(i))
+            st1 = st + 1
+            st0 = 1
+            While st > st0 + 1
+                st1 = (st + st0) \ 2
+                w = AscW(Mid$(para(i), 1, st1))
+                If w > -10241 And w < -9984 Then
+                    If wi >= MyTextWidth(ddd, Mid$(para(i), 1, st1 + 1)) Then
+                        st0 = st1
+                    Else
+                        st = st1
+                    End If
+                Else
+                    If wi >= MyTextWidth(ddd, Mid$(para(i), 1, st1)) Then
+                        st0 = st1
+                    Else
+                        st = st1
+                    End If
+                End If
+            Wend
+            st = rinstr(para(i), "_", Len(para(i)) - st0)
+            st1 = rinstr(para(i), " ", Len(para(i)) - st0)
+            If st > st1 Then
+               st1 = st
+            Else
+                If MyTrimL3Len(Mid$(para(i), 1, st1)) = st1 Then st1 = st0
+      
+            End If
+            If st1 >= Len(para(i)) Then
+                Buf$ = para(i)
+            Else
+                Buf$ = Left$(para(i), st1)
+                     If st1 = st0 Then
+                     If Right$(Buf$, 1) = "_" Then Mid$(Buf$, st1, 1) = "-"
+                        End If
+                para(i) = LTrim(Mid$(para(i), st1 + 1))
+            End If
+             skip = skip - 1
+             If skip < 0 Then
+                 If Len(para(i)) = 0 Then GoTo last
+                 If frmt > 0 Then
+                     If Not nopr Then fullPlainWhere ddd, mybasket, RTrim$(Buf$), w2, frmt, nowait, nonewline ' rtrim
+                 Else
+                     If Not nopr Then fullPlain ddd, mybasket, RTrim$(Buf$), w2, nowait, nonewline
+                 End If
+                 If collectit Then mDoc.AppendParagraphOneLine RTrim$(Buf$)
+            
+             End If
+        Else
+            skip = skip - 1
+            If Len(Buf$) > 0 Then para(i) = Mid$(para(i), MyTrimL3Len(para(i)) + 1)
+            Buf$ = para(i)
+            para(i) = vbNullString
+last:
+        If skip >= 0 Then GoTo continue
+        If Hi = 0 And frmt = 0 Then
+        If Not scrollme Then
+        If Not nopr Then
+    
+            MyPrintNew ddd, mybasket.uMineLineSpace, Buf$, , nowait     ';   '************************************************************************************
+    
+            res = ddd.CurrentX
+                    If Trim$(Buf$) = vbNullString Then
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 2) \ .Xt) * .Xt
+                    Else
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 1.2) \ .Xt) * .Xt
+                    End If
+            End If
+            Exit Sub
+        End If
+        If Not nopr Then
+            fullPlainWhere ddd, mybasket, Buf$, w2, frmt, nowait, nonewline
+        End If
+        Else
+        If frmt > 0 Then
+                If Not nopr Then fullPlainWhere ddd, mybasket, Buf$, w2, frmt, nowait, nonewline
+        ElseIf frmt = 0 Then
+        If Not nopr Then fullPlainWhere ddd, mybasket, Buf$, w2, 3, nowait, nonewline
+        Else
+                If Not nopr Then fullPlain ddd, mybasket, Buf$, w2, nowait, nonewline  'DDD.Width ' w2
+        End If
+        End If
+   
+        If collectit Then
+        mDoc.AppendParagraphOneLine Trim$(Buf$)
+        End If
+             End If
+                If isAcolumn Then Exit Sub
+                'If UBound(para) = i Then Exit For
+        If skip < 0 Or scrollme Then
+            
+            lCount = lCount + 1
+            npy = npy + 1
+            
+            If npy >= .My And scrollme Then
+                         If Not nopr Then
+                             If SCRnum2stop > 0 Then
+                                 If lCount >= SCRnum2stop Then
+                                   If Not bstack.toprinter Then
+                                    If Not nowait Then
+                                 
+                                 If Not nopage Then
+                                  ddd.Refresh
+                                     Do
+                
+                                         mywait bstack, 10
+                                    
+                                     Loop Until INKEY$ <> "" Or mouse <> 0 Or NOEXECUTION
+                                     End If
+                                     End If
+                                     End If
+                                     SCRnum2stop = .pageframe
+                                     lCount = 1
+                                 
+                                 End If
+                             End If
+                           If Not bstack.toprinter Then
+                                ddd.Refresh
+                                ScrollUpNew ddd, mybasket
+                            Else
+                              getnextpage
+                              npy = 1
+                          End If
+                End If
+                npy = npy - 1
+                      ''
+         ElseIf npy >= .My Then
+         
+        If Not nopr Then crNew bstack, mybasket
+               npy = npy - 1
+              
+        End If
+      End If
+If Not nopr Then LCTbasket ddd, mybasket, npy, PX: ddd.CurrentX = ddd.CurrentX + dv2x15
+If skip < 0 Then Hi = Hi - 1
+If Hi < 0 Then Exit For
+continue:
+     If Len(para(i)) > 0 Then GoTo nextline
+    Next i
+End With
+finish:
+If scrollme Then
+HoldReset lCount, mybasket
+End If
+res = nohi - Hi
+wi = ddd.CurrentX
+If collectit Then bstack.soros.PushStr mDoc.textDoc
 End Sub
 
 

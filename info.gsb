@@ -177,21 +177,23 @@ MODULE B1 {Module FadeScreen  {
 }
 FadeScreen      
 }
-MODULE BB {Print "Press Esc to exit"
+MODULE BB {Print "check mouse buttons"
+Print "Press Esc to exit"
 m=false
 Every 100 {
 if mouse.key then { m=true } else m=false
 print not m
 }
 }
-MODULE BB1 {while not mouse { print mouse ,  not -mouse}
+MODULE BB1 {a=mouse
+while not a {a=mouse: print a ,  not -a}
 ? "ok"
 }
 MODULE D {\\ Identifiers in Greek language
 \\ see DR for the same program with statements in English language
 
 \\ [] return the pointer of last current stack, and leave an empty current stack
-
+? "The Greek Version - Statements/Messages in Greek language"
 Τμήμα Λατινικοί_Αριθμοί {
       Άδειασε
       Διαμέσου Αρχικοποίηση
@@ -255,7 +257,8 @@ MODULE D {\\ Identifiers in Greek language
 }
 Λατινικοί_Αριθμοί
 }
-MODULE DD {class beta {
+MODULE DD {Print "A structure in a Class"
+class beta {
       structure alfa1 {
             a as long*4
             b as long*4
@@ -268,11 +271,12 @@ MODULE DD {class beta {
       buffer delta as alfa*3
 }
 beta=beta()
+Print "Offset b in structure alfa"
 Print beta.alfa("b")
 list
 }
 MODULE DD1 {local group alfa {
-      x=10, y%=50, z$="asdasda"
+      x=10, y%=50, z$="anything here"
       dim M(4)=10
       event alfa {read b}
       document a$="100"
@@ -289,40 +293,62 @@ MODULE DD1 {local group alfa {
            
       }
 }
-local group alfa {
-      x=10, y%=50,z$="asdasda"
-      dim M(4)=10
-      event alfa {read b}
-      document a$="100"
-      class allo {
-            q=4
-      }
-      Group M {
-            k=10
-      }
-      function delta {
-           
-      }
-      module kappa {
-           
-      }
-}
-
-List
+testMe()
+Print "After the call"
+List !
 Modules ?
 
+End
+Sub testMe()
+Print "Create a second alfa group, hidding the old one"
+local group alfa {
+      x=10, y%=50,z$="anything here"
+      dim M(4)=10
+      event alfa {read b}
+      document a$="100"
+      class allo {
+            q=4
+      }
+      Group M {
+            k=10
+      }
+      function delta {
+           
+      }
+      module kappa {
+           
+      }
 }
-MODULE DD2 {const b=lambda->100
+List !
+Modules ?
+End Sub
+
+}
+MODULE DD2 {Print "Make some constant lambda functions"
+const b=lambda->100
 const b%=lambda->100
 const b$=lambda$->"hello"
 Print b%()
 Print b$()
-Try {
+Try ok {
       b=lambda->500
 }
+if Error or Not ok Then Print Error$
 Print b()
 }
-MODULE DD3 {\\ this is in a global module A
+MODULE DD3 {cursor 0,height-1
+Pen 11 {Print "When report stop press space or mouse button"}
+Report "Reassign a lambda function in a Group - static link group, we use a unique name of group as local identifier"
+Report {
+      group alfa {
+            x=100
+            b=lambda->{
+                  =.x
+                  .x++
+            }
+      }
+}
+\\ this is in a global module A
 group alfa {
       x=100
       b=lambda->{
@@ -331,26 +357,50 @@ group alfa {
       }
 }
 \\ get a copy to alfa
+Report {
+	We make a beta as a copy of alfa
+}
 beta=alfa
-\\ try to change function with a fake one
+Print "alfa.b()=";alfa.b()
+Print  "beta.b()=";beta.b()
+Report {
+	Try to change function with a fake one
+	function alfa.b {
+		=500
+	}
+}
 function alfa.b {
       =500
 }
-\\ references for functions are strings with code
-\\ we get  {CALL EXTERN 3}A.ALFA. (but is not the actual hard link.
-\\ actual code is in lambda object. 3 is the actual "slot" where the object exist.
-Print &alfa.b()
-\\ we can make a link to f() (only for new identifiers)
+Modules ?
+Print "alfa.b()=";alfa.b()
+
+Report {
+	 References for functions are strings with code. We get  {CALL EXTERN 3}A.ALFA, but is not the actual hard link. The actual code is in lambda object. 3 is the actual "slot" or index in a var(), an array of variants inside M2000 code where all the variables and this object exist.
+}
+pen 15 {Report 2,  &alfa.b()}
+Report {
+	We can make a link of alfa.b() to f() (only for new identifiers). The reference has the same weak reference to the name of group. So we can make a reference if the group has a name (is not keep it by a pointer, or exist in an array or other object like stacks and inventories)
+}
 Link  alfa.b() to f()
-Print f()
-\\ this function can be changed because has no "hard link" with lambda
-\\ all functions except final in groups can be changed
+Report {
+	This is the function f() code (a reference to a function is actual the code of the function in a string in a block {}). We see two things. One is a line 11001edit which used when an error happen to display the line of the code, and the other is the weak reference of the actual group, which copied by the link statement (a link statement is actual two statements a Push and a Read). We can't assign a second reference.
+}
+Pen 15 {Report 2,  &f()}
+Report  {
+	This function can be changed because has no "hard link" with lambda
+	All functions except final in groups can be changed:
+	function f {
+               =500
+         }
+}
+
 function f {
       =500
 }
-Print f()=500
-Print alfa.b()
-Print  beta.b()
+Print "f()=";f()
+Print "alfa.b()=";alfa.b()
+Print  "beta.b()=";beta.b()
 \\ we can test pointers
 \\ there is two type of pointers
 \\ 1. pointers to float groups (holded in containers or by pointers)
@@ -359,16 +409,30 @@ Print  beta.b()
 \\ but as all pointers can change value later
 \\ pointers can be null, using p->0 but they hold just an empty group
 \\ so never a pointer in M2000 has a real null value, but an "empty" one.
-
+Report {
+	Reassign a lambda function in a float group -group handled by pointer(s) - no static linked
+	We use p->pointer((beta)), is the same as p->(beta)
+	Parenthesis used to make the beta a copy as a float group, so we get the pointer to that float group
+	Without Parentesis the pointer is a weak reference to beta, so if we pass the pointer as a return value the beta group deleted and the weak reference be invalid. Using the float group, we can move it (like a float object) any where. The float group destroyed when no pointer points to it.
+	So the copy we get has the last state of the object, where beta.x is 102.
+	We can use -> in place of = for a return value from a function, but we have to use (name_of_group) to return a float group not a reference.
+}
 \\ p->(beta) is the same as this:
 p=pointer((beta)) ' a copy of beta
-Print p=>b(), p=>b()
-Print beta.b()
+Print "p=>b()=";p=>b(),"p=>b()="; p=>b()
+Print "beta.b()=";beta.b()
 \\ p->beta is same as this
-p=pointer(beta) ' as reference to beta
-Print p=>b(), p=>b()
+Report {
+	Now we change p to point to beta, using p=pointer(beta)  same as p->beta  (we use pointer() to pass as an argument, where we can't use ->)
 }
-MODULE DD4 {n=lambda ->500
+p=pointer(beta) ' as reference to beta
+Print "p=>b()=";p=>b(),"p=>b()="; p=>b()
+Print "beta.b()=";beta.b()
+}
+MODULE DD4 {Report {
+	This example show how to use closures in lambda functions
+}
+n=lambda ->500
 a=lambda n (x)->{
       if x<=0 then=0 : exit
       =lambda(x-1)+x+n()
@@ -392,6 +456,7 @@ Print a(10)=1055
 \\ touple is an array, can have zero items (,)
 \\ or one ore more, and it is a reference type
 z=(m,)
+Print Function("m")=100
 Link z to Z()
 Print Z(0)()=100
 a=lambda z (x) -> {
@@ -3786,7 +3851,9 @@ If Not Mess Then {
 }
 Print Timecount
 }
-MODULE P {SET FAST !
+MODULE P {\\ this is not a game is an example for how we make a game using threads and sprites. Images are simple for this example.
+
+SET FAST !
 PEN #fff9aa
 \\ BLOCK ESCAPE KEY
 ESCAPE OFF
@@ -4576,7 +4643,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 7.5"
+	Report " A collection of modules for tests version 8 = for ver 9.9 rev 1 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4663,7 +4730,7 @@ Pen #ffeeff {
 }
 End Sub
 }
-MODULE SAVEME {Beep
+MODULE SAVEME {Print "Wait..."
 Title "Info"
 dir user
 save info, info
@@ -5734,7 +5801,8 @@ if isnum then {
 dir user
 save info, info
 }
-MODULE BJ { Flush  \\empty Stack, we use optional arguments in Modules
+MODULE BJ { Escape Off
+ Flush  \\empty Stack, we use optional arguments in Modules
  NoPlayers=4
 \\ Dealer get one hidden And one open Card
 \\ Player's get two open cards, one at a time
@@ -6058,6 +6126,8 @@ Print "Dealer Money:", DealerMoney
 Print "Press space to exit" : while Key$<>" " {}
 Player 0
 cls,0
+Escape On
+If module(info) then Keyboard "info"+chr$(13)
 End
 Sub Suffle()
       Layer 1 {
@@ -9574,15 +9644,86 @@ Module CheckFirst {
 CheckFirst
  
 }
-MODULE COMP2 {Dim A(10)=1000, Z()
+MODULE COMP2 {Report {in this example we pass an array A() to function b()
+	but instead we have a c() or something we have m so interpreter pass the pointer of array
+	we link the pointer to c() so we can use c() as a by reference (but by pointer) pass
+		
+		Dim A(10)=1000, Z()
+		Function b(m) {
+			link m to c()
+			c(3)=10
+			=m
+		}
+		Z()=b(A())
+		Print Z(3), A(3)	
+	
+	}
+
+Dim A(10)=1000, Z()
 Function b(m) {
 	link m to c()
 	c(3)=10
 	=m
 }
-z()=b(a())
-Print z(3), a(3)
+Z()=b(A())
+Print Z(3), A(3)
+Report {
+	Z() is a copy because this array interface works as a variable, we assign a new value always
+	
+		Z(3)++
+		Print Z(3)<>A(3)
+	
+	}
+Z(3)++
+Print Z(3)<>A(3)
 
+Report {We do the same for passing by reference. We can redefine b() at run time. When we return the c() only a pointer returned. The Z() get a copy of array from that pointer.
+		
+		Function b(&c()) {
+			c(3)=100
+			=c()
+		}
+		
+		Z()=b(&A())
+		Print Z(3), A(3)
+		Z(3)++
+		Print Z(3)<>A(3)
+	}
+Function b(&c()) {
+	c(3)=100
+	=c()
+}
+
+Z()=b(&A())
+Print Z(3), A(3)
+Z(3)++
+Print Z(3)<>A(3)
+Report {
+	Now we do some magic. We make an empty array and put a pointer of it to m. Next we make a reference to m in Z1(). We can't change in Z1() the reference. But reference is not a pointer. Z1() reference to the place which m save the pointer. In fact the interpreter see both identifiers to share common memory for the pointer to array. Now we call the b()
+		
+		m=(,)
+		Link m to Z1()
+		m=b(&A())
+		Print Z1(3), A(3)
+		Z1(3)+=100
+		Print Z1(3)<>A(3)
+	
+	}
+m=(,)
+Link m to Z1()
+m=b(&A())
+Print Z1(3), A(3)
+Z1(3)+=100
+Print Z1(3)<>A(3)
+Report {
+	 So we get false, because we get a pointer from C() which points to A(), and m now point to A() and Z1()  is a reference of m, so a reference of A(). We can check the objects using IS.
+	
+		Print Z1() is A(), Z() is A() 
+		Print m is A() 
+	
+	}
+Print Z1() is A(), Z() is A()  ' true false
+Print m is A()  ' true
 }
 MODULE CL {Class zz {
       module bb {
@@ -10891,7 +11032,7 @@ MODULE HTTP {Module CheckIt  {
       }  as TimeOut interval 300   ' change thread interval to give more time to collect
       \\ In main thread we can check ReadyState and Mouse button
       Task.Main 100 {
-            Print ReadyState
+            Report 2, Str$(ReadyState)
             If ReadyState=4 then exit
             if k>20 then exit   ' 20*100= 2 sec
             if mouse then exit ' exit if mouse click
@@ -10907,6 +11048,7 @@ MODULE HTTP {Module CheckIt  {
       }
       Declare xml Nothing
 }
+Report 2, "Using the Microsoft.XMLHTTP with threads - see Down4 where we use an internal object for download with events. Use space bar or mouse click to advance the scroll"
 CheckIt
 }
 MODULE CAL {\\ Calendar - for "REAL" programmers
@@ -12181,6 +12323,13 @@ But here we don't have to skip FOR NEXT and no STEP clause used.
 Also the code is not the best, because we can move from 4 position to 5 (we can't do that with real puzzle) 
 }
 Escape OFF
+Report 1, {
+	
+	
+	Hold down Ctrl+C to exit any time - Escape key not used
+	
+	
+	}
 TRY {
             00 BASE 1 : DEF RND(X)=RND
             10 REM 15-PUZZLE GAME
@@ -12222,7 +12371,7 @@ TRY {
             370 REM
             380 REM' *******************************
             390 REM' INTRO AND LEVEL OF DIFFICULTY
-            400 PRINT CHR$(147)
+            400 REM PRINT CHR$(147)    ' NOT USED HERE
             410 DIM SH(3) : SH(1)=10 : SH(2)=50 : SH(3)=100
             420 PRINT "15 PUZZLE GAME FOR COMMODORE BASIC 2.0" : PRINT : PRINT
             430 PRINT "PLEASE ENTER LEVEL OF DIFFICULTY,"
@@ -14204,7 +14353,9 @@ MODULE ADDER4BIT {Module  FourBitAdder {
 }
 FourBitAdder
 }
-MODULE BASEG {\\ remove base if exist in current directory
+MODULE BASEG {Print "Wait..."
+
+\\ remove base if exist in current directory
 base "gSQL"
 \\ Make a new table and insert values (M2000 use ADOdb with a special connection string)
 \\ data taken from example's of MOSH HAMEDANI for SQL, see this video
@@ -14260,7 +14411,7 @@ execute "gSQL", {
 \\ id 10 has no Null phone, has no phone (is an empty string)
 \\ Null means "no information yet"
 report "customers created"
-\\ execute a SE`LECT query to get a Recordset
+\\ execute a SELECT query to get a Recordset
 report "Selected customers where Points<1000 in descending order"
 execute "gSQL",{
 	SELECT 	customer_id,
@@ -14820,7 +14971,7 @@ normal
 Print
 Print
 Press()
-Keyboard "info"+chr$(13)
+Keyboard "infobasic"+chr$(13)
 End  ' we can omit this
 Sub title(a$)
 Pen #ffeeff {
@@ -15277,7 +15428,7 @@ With aPopUpForm, "Title", "This is a PopUp Form", "Visible" as PopUpVisible
 Declare Text1 TextBox Form aPopUpForm
 Method Text1,"Move", 2000,2000,6000,600
 With Text1,"Text" as txt$
-txt$="U+10437 (𐐷) in UTF-16"
+txt$="U+10437 (𐐷) in UNICODE"
 Function Text1.Enter {
       \\ If we press enter in textbox in popup form
       \\ we change title in form1
@@ -15630,7 +15781,6 @@ Open1:
            
            Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
            lookpath$=file.path$(Filename$)
-           Title caption$
            \\ silent means here without refresh
            With Pad, "SelStartSilent", 0, "SellengthSilent",0 
            Pad.text$=BackUp$
@@ -15842,7 +15992,7 @@ Method NotePad,"Show" , 1
 Declare Pad Nothing
 Declare NotePad Nothing 
 Print "Done"
-keyboard "INFO"+chr$(13)
+keyboard "INFOBasic"+chr$(13)
 }
 MODULE ΓΛΩΣΣΑ {\\ `notepad for educational school language ΓΛΩΣΣΑ
 Greek  ' this make the popup menu of edit boc as 
@@ -16255,8 +16405,6 @@ Latin
 MODULE HTMLEDITOR {\\ Version 0.1
 \\ need some work inside interpreter code
 Clear \\ Clear all variables/objects
-Flush \\ Empty the stack
-makelist()
 def setagain as boolean
 if file.name$("A.abc")="a.abc" then
 Set switches "+CASESENSITIVE"
@@ -16264,6 +16412,12 @@ setagain=true
 \\ we want to see and use  the actual case of a filename
 End if
 Global Const  CSIDL_MY_DOCUMENTS  = 0x5
+if match("S") then
+Filename$=Dir$+letter$
+document first$
+load.doc first$, filename$
+else
+Filename$=Dir$+"floatforms.html"
 first$={<!DOCTYPE html>
 <html lang = "en-US">
       <head>
@@ -16293,6 +16447,9 @@ first$={<!DOCTYPE html>
       </body>
 </html>
 }
+end if
+Flush \\ Empty the stack
+makelist()
 title$="C# Editor"
 typ$="html"
 W$=""
@@ -16318,10 +16475,10 @@ Method Pad, "FontAttr", "VERDANA", 13.5, true
 With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeight, "Sizable", True
 With NotePad, "UseIcon", True, "UseReverse", True
 With Pad, "Text" As Pad.text$, "ShowAlways", True,"NoColor", True,"SelLength" as SelLength
-With Pad, "SearchWords", False, "nowrap", True, "linespace", 30
+With Pad, "SearchWords", False, "nowrap", False, "linespace", 30
 With Pad, "ReplaceTitle" as InnerInfo$
 Def TitleStr$(a$)=a$ '   Ucase$(Left$(a$,1))+Mid$(a$,2)
-Filename$=Dir$+"floatforms.html"
+
 
 Caption$=TitleStr$(File.Name$(Filename$)) +" - HTML Editor"
 Title Caption$
@@ -16500,7 +16657,6 @@ Open1:
            
            Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
            lookpath$=file.path$(Filename$)
-           Title Caption$
            \\ silent means here without refresh
            With Pad, "SelStartSilent", 0, "SellengthSilent",0 
            Pad.text$=BackUp$
@@ -16624,6 +16780,7 @@ Document Help$ ={
 	<aside> 	Defines some content loosely related to the page content.
 	<body>	Defines the document's body.
 	<br>	Produces a single line break.
+	<!DOCTYPE> The type of document
 	<details> 	Represents a widget from which the user can obtain additional information or controls on-demand.
 	<div>	Specifies a division or a section in a document.
 	<h1>		Defines HTML headings level 1.
@@ -17203,173 +17360,308 @@ Data 17,"ΕΚΤΥΠΩΣΕΙΣ, PRINTINGS"
 Print "Dat ok"
 Return
 }
-MODULE CHANGEHELP {      Base 0  \\ for arrays
-      Font "Arial"
-      menu fill 1,11,0
-      menu frame
-      DB.Provider ""  \\ reset
-      Window 12,0
-      Bold 1 : Form 70, 32
-      OldDir$=Dir$  \\ keep direcory
-      Dir AppDir$  \\ Use helpfile from application's Dir
-      Selection=1
-      Document HelpText$   \\ this is an object, = means append
-      {
-            Here = 0
-            Cls #ffd074,0
-            Pen #3c1414 \\dark sienna
-            Menu
-            Retrieve "HELP2000","GROUP", 1,"",""
-            Read Many, NoDummy, nnDummy$
-            Dim No(Many+1)  'redim
-            For i=1 To Many {
-            Retrieve "HELP2000","GROUP", i,"",""
-            Read Many, No(i), P$
-            If Instr(P$,",")=0 Then {
-                  Menu + "Without Description Yet  No"+Str$(No(i))
-            } Else {
-                  Menu + Mid$(P$, Instr(P$,",")+1)
-            }
+MODULE CHANGEHELP {Base 0  \\ for arrays
+Font "Arial"
+menu fill 1,11,0
+menu frame
+DB.Provider ""  \\ reset
+Window 12,0
+Bold 1 : Form 70, 32
+OldDir$=Dir$  \\ keep direcory
+Dir AppDir$  \\ Use helpfile from application's Dir
+Selection=1
+Document HelpText$   \\ this is an object, = means append
+{
+      Here = 0
+      Cls #ffd074,0
+      Pen #3c1414 \\dark sienna
+      Menu
+      Retrieve "HELP2000","GROUP", 1,"",""
+      Read Many, NoDummy, nnDummy$
+      Dim No(Many+1)  'redim
+      For i=1 To Many {
+      Retrieve "HELP2000","GROUP", i,"",""
+      Read Many, No(i), P$
+      If Instr(P$,",")=0 Then {
+            Menu + "Without Description Yet  No"+Str$(No(i))
+      } Else {
+            Menu + Mid$(P$, Instr(P$,",")+1)
       }
-      Print "Prepare the Help Database"
-      Print "Select Group:";
-      Menu Show Selection
-      Selection=Menu
-      If Menu>0 Then {
-            GroupName$=Menu$(Menu)
-            If left$(GroupName$,19)="Without Description" Then  {
-                  Menu "Change Description","Not Now"
-                  If Menu=1 Then {
-                  Retrieve "HELP2000","GROUP", Selection,"",""
-                  Read Many, No(Selection), P$
-                  GroupName$ =Field$(P$, 50)
-                  Field 0,Row+1,50 As GroupName$
-                  Return "HELP2000","GROUP" To Selection, ,GroupName$  
-                  Print
-                  If Instr(P$,",")=0 Then {
-                              GroupName$ = "Without Description Yet  No"+Str$(No(Selection))
-                        } Else {
-                              GroupName$ =  Mid$(P$, Instr(P$,",")+1)
-                        }
+}
+Print "Prepare the Help Database"
+Print "Select Group:";
+Menu Show Selection
+Selection=Menu
+If Menu>0 Then {
+      GroupName$=Menu$(Menu)
+      If left$(GroupName$,19)="Without Description" Then  {
+            Menu "Change Description","Not Now"
+            If Menu=1 Then {
+            Retrieve "HELP2000","GROUP", Selection,"",""
+            Read Many, No(Selection), P$
+            GroupName$ =Field$(P$, 50)
+            Field 0,Row+1,50 As GroupName$
+            Return "HELP2000","GROUP" To Selection, ,GroupName$  
+            Print
+            If Instr(P$,",")=0 Then {
+                        GroupName$ = "Without Description Yet  No"+Str$(No(Selection))
+                  } Else {
+                        GroupName$ =  Mid$(P$, Instr(P$,",")+1)
                   }
             }
-            Print GroupName$
-            Retrieve "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(Selection)),1,"",""
-            Read Many
-            Menu
-            Print "Select identifier:";
-            If Many>0 Then {
+      }
+      Print GroupName$
+      Retrieve "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(Selection)),1,"",""
+      Read Many
+      Menu
+      Print "Select identifier:";
+      If Many>0 Then {
+            Clear HelpText$
+            Read GreekName$, HelpText$, EnglishName$, GroupNumFrom
+            Menu + "<New>"
+            View "HELP2000", "SELECT [ENGLISH] FROM COMMANDS WHERE GROUPNUM ="+Str$(No(Selection))+" ORDER BY [ENGLISH]",1,Many
+            Sel2=Menu
+            If Sel2>1 Then {
+                  Print Menu$(Sel2)
+                  Retrieve "HELP2000", "COMMANDS",1,"ENGLISH",Menu$(Sel2)
+                  Cls #fdf5e8,3  \\ paper white
+                  Pen #100c08  \\ smoky black
+                  Read Many
+                  If Many= 0 Then Exit
                   Clear HelpText$
                   Read GreekName$, HelpText$, EnglishName$, GroupNumFrom
-                  Menu + "<New>"
-                  View "HELP2000", "SELECT [ENGLISH] FROM COMMANDS WHERE GROUPNUM ="+Str$(No(Selection))+" ORDER BY [ENGLISH]",1,Many
-                  Sel2=Menu
-                  If Sel2>1 Then {
-                        Print Menu$(Sel2)
-                        Retrieve "HELP2000", "COMMANDS",1,"ENGLISH",Menu$(Sel2)
-                        Cls #fdf5e8,3  \\ paper white
-                        Pen #100c08  \\ smoky black
-                        Read Many
-                        If Many= 0 Then Exit
-                        Clear HelpText$
-                        Read GreekName$, HelpText$, EnglishName$, GroupNumFrom
-                        Print "Greek:";GreekName$ 
-                        Print "English:";EnglishName$
-                        Report HelpText$
-                        Menu
-                        Print @(40);"Choose ";
-                        Menu "Edit Description","Change Group","Pick another","End"
-                        Cls #edca85,3
-                        Pen #3c1414
-                        If Menu=4 Then Exit
-                        If Menu=3 Then Here = True : Exit
-                        If Menu=2 Then {
-                              ChangeGroup(EnglishName$)
-                              Here = True
-                        } Else {
-                              Escape Off
-                              Scroll Split Row
-                              Cls #0077AA
-                              Pen #66DD77
-                              Edit.doc Code HelpText$
-                              Return "HELP2000", "SELECT * FROM [COMMANDS] WHERE ENGLISH LIKE '"+EnglishName$ +"'", ,HelpText$
-                              Escape On
-                              Here=True  
-                        }
-                  } Else.If Sel2=1 Then {
-                        Print "New"
-                        Escape off
-                        Input "Greek:", GreekID$
-                        Input "English:", EnglishID$                      
-                        ''Input ! HelpText$, Width-1, Height-Row-2
+                  Print "Greek:";GreekName$ 
+                  Print "English:";EnglishName$
+                  Report HelpText$
+                  Menu
+                  Print @(40);"Choose ";
+                  Menu "Edit Description","Change Group","Pick another","End"
+                  Cls #edca85,3
+                  Pen #3c1414
+                  If Menu=4 Then Exit
+                  If Menu=3 Then Here = True : Exit
+                  If Menu=2 Then {
+                        ChangeGroup(EnglishName$)
+                        Here = True
+                  } Else {
+                        Escape Off
                         Scroll Split Row
-                        Clear HelpText$    ' we need a fresh one
                         Cls #0077AA
                         Pen #66DD77
                         Edit.doc Code HelpText$
-                        Menu
-                        Escape on
-                        Print "Save it?"; : Menu "Yes","No"
-                        If Menu =1 Then {
-                              Append "HELP2000","COMMANDS",GreekID$, HelpText$, EnglishID$, No(Selection) 
-                              Wait 100 
-                        }
-                  Here =True
-                  }     
-            } Else {
-            ' If is empty delete group
-                  Delete "HELP2000","GROUP","GROUPNUM", No(Selection)
-            }
-      }
-      If Here Then Loop
-            Cls #ffd074,0
-      }
-      Dir OldDir$
-      Print "Compress (Y/N) ?"
-      If Ucase$(Key$)="Y" Then Compress()
-      End
-      Sub ChangeGroup(descr2match$)
-            Stack New {
-                  Cls
+                        Return "HELP2000", "SELECT * FROM [COMMANDS] WHERE ENGLISH LIKE '"+EnglishName$ +"'", ,HelpText$
+                        Escape On
+                        Here=True  
+                  }
+            } Else.If Sel2=1 Then {
+                  Print "New"
+                  Escape off
+                  Input "Greek:", GreekID$
+                  Input "English:", EnglishID$                      
+                  ''Input ! HelpText$, Width-1, Height-Row-2
+                  Scroll Split Row
+                  Clear HelpText$    ' we need a fresh one
+                  Cls #0077AA
+                  Pen #66DD77
+                  Edit.doc Code HelpText$
                   Menu
-                  Retrieve "HELP2000","GROUP", 1,"",""
-                  Read MANY, No, nn$
-                  For i=1 To MANY {
-                        Retrieve "HELP2000","GROUP", i,"",""
-                        Read MANY, No, P$
-                        Print No, P$
+                  Escape on
+                  Print "Save it?"; : Menu "Yes","No"
+                  If Menu =1 Then {
+                        Append "HELP2000","COMMANDS",GreekID$, HelpText$, EnglishID$, No(Selection) 
+                        Wait 100 
                   }
-                  Retrieve "HELP2000", "SELECT * FROM [COMMANDS] WHERE ENGLISH LIKE '"+descr2match$+"'",1,"",""
-                  
-                  If Not Empty Then {
-                        Read MANY, GreekName$, HelpText$, EnglishName$, groupnumFrom
-                        Print "ENGLISH:";EnglishName$
-                        Print "No", groupnumFrom
-                        Try ok {
-                              Input "New No:", groupnumTo
-                        }
-                        If Not ok Then exit
-                        If groupnumTo>0 Then {
-                              return "HELP2000","SELECT * FROM [COMMANDS] WHERE ENGLISH = '"+EnglishName$+"'",,,,groupnumTo
-                        }
+            Here =True
+            }     
+      } Else {
+      ' If is empty delete group
+            Delete "HELP2000","GROUP","GROUPNUM", No(Selection)
+      }
+}
+If Here Then Loop
+      Cls #ffd074,0
+}
+Print "Create General (Y/N) ?"
+If Ucase$(Key$)="Y" Then CreateGeneral()
+Dir OldDir$
+Print "Compress (Y/N) ?"
+If Ucase$(Key$)="Y" Then Compress()
+End
+Sub ChangeGroup(descr2match$)
+      Stack New {
+            Cls
+            Menu
+            Retrieve "HELP2000","GROUP", 1,"",""
+            Read MANY, No, nn$
+            For i=1 To MANY {
+                  Retrieve "HELP2000","GROUP", i,"",""
+                  Read MANY, No, P$
+                  Print No, P$
+            }
+            Retrieve "HELP2000", "SELECT * FROM [COMMANDS] WHERE ENGLISH LIKE '"+descr2match$+"'",1,"",""
+            
+            If Not Empty Then {
+                  Read MANY, GreekName$, HelpText$, EnglishName$, groupnumFrom
+                  Print "ENGLISH:";EnglishName$
+                  Print "No", groupnumFrom
+                  Try ok {
+                        Input "New No:", groupnumTo
+                  }
+                  If Not ok Then exit
+                  If groupnumTo>0 Then {
+                        return "HELP2000","SELECT * FROM [COMMANDS] WHERE ENGLISH = '"+EnglishName$+"'",,,,groupnumTo
                   }
             }
-      End Sub
-      Sub Compress()
-            Print Part $("#,###,###,###\ \B\y\t\e\s"),FILELEN(AppDir$+"help2000.mdb")
-            Print Under
-            Close Base Lcase$(AppDir$+"help2000.mdb")
-            a$=Dir$
-            Dir AppDir$
-            compress AppDir$+"help2000.mdb"
-            Dir a$
-            Print PART $("#,###,###,###\ \B\y\t\e\s"),FILELEN(AppDir$+"help2000.mdb")
-            Print 
-            Dir User
-      End Sub
-}
-MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake game","start","stop")<>1 τότε έξοδος
+      }
+End Sub
+Sub Compress()
+      Print Part $("#,###,###,###\ \B\y\t\e\s"),FILELEN(AppDir$+"help2000.mdb")
+      Print Under
+      Close Base Lcase$(AppDir$+"help2000.mdb")
+      a$=Dir$
+      Dir AppDir$
+      compress AppDir$+"help2000.mdb"
+      Dir a$
+      Print PART $("#,###,###,###\ \B\y\t\e\s"),FILELEN(AppDir$+"help2000.mdb")
+      Print 
+      Dir User
+End Sub
+Sub CreateGeneral()
+\\ this module exist only in until this sub exit
+Module CreateGeneral {
 
+\* For each group we get a field in General Group
+\* Use module mg to create grouporder
+\\ flush
+Data 24
+Data 22
+Data 14
+Data 15
+Data 3
+Data 9
+Data 7
+Data 25
+Data 11
+Data 8
+Data 16
+Data 24
+Data 13
+Data 1
+Data 4
+Data 2
+Data 5
+Data 6
+Data 10
+Data 12
+Data 19
+Data 20
+Data 21
+Data 23
+Data 17
+Data 24
+Data 1,"ΓΡΑΦΙΚΑ 2Δ, DRAWING 2D"
+Data 2,"ΒΑΣΕΙΣ ΔΕΔΟΜΕΝΩΝ, DATABASES"
+Data 3,"ΡΟΗ ΠΡΟΓΡΑΜΜΑΤΟΣ, FLOW CONTROL"
+Data 4,"ΕΝΤΟΛΕΣ ΕΙΚΟΝΩΝ, BITMAP COMMANDS"
+Data 5,"ΗΧΟΙ & ΤΑΙΝΙΕΣ, SOUNDS AND MOVIES"
+Data 6,"ΕΝΤΟΛΕΣ ΔΕΙΚΤΗ, MOUSE COMMANDS"
+Data 7,"ΟΡΙΣΜΟΙ, DEFINITIONS"
+Data 8,"ΕΝΤΟΛΕΣ ΚΟΝΣΟΛΑΣ, CONSOLE COMMANDS"
+Data 9,"ΕΝΤΟΛΕΣ ΣΩΡΟΥ, STACK COMMANDS"
+Data 10,"ΕΝΤΟΛΕΣ ΙΣΤΟΥ, BROWSER COMMANDS"
+Data 11,"ΧΕΙΡΙΣΜΟΣ ΑΡΧΕΙΩΝ, FILE OPERATIONS"
+Data 12,"ΚΟΙΝΕΣ ΦΟΡΜΕΣ, COMMON DIALOGS"
+Data 13,"ΣΤΟΧΟΙ & ΕΠΙΛΟΓΗ, TARGET & MENU"
+Data 14,"ΔΙΕΡΜΗΝΕΥΤΗΣ, INTERPRETER"
+Data 15,"ΧΕΙΡΙΣΜΟΣ ΤΜΗΜΑΤΩΝ, MODULE COMMANDS"
+Data 16,"ΟΘΟΝΗ & ΑΡΧΕΙΑ, SCREEN & FILES"
+Data 17,"ΕΚΤΥΠΩΣΕΙΣ, PRINTINGS"
+Data 19,"ΑΡΙΘΜΗΤΙΚΑ, ARITHMETIC FUNCTIONS"
+Data 20,"ΑΛΦΑΡΙΘΜΗΤΙΚΑ, STRING FUNCTIONS"
+Data 21,"ΜΕΤΑΒΛΗΤΕΣ ΣΥΣΤΗΜΑΤΟΣ, VARS READ ONLY"
+Data 22,"ΓΕΝΙΚΑ, GENERAL"
+Data 23,"ΣΤΑΘΕΡΕΣ, CONSTANTS"
+Data 24,"ΧΕΙΡΙΣΤΕΣ ΤΗΣ ΤΥΠΩΣΕ, OPERATORS IN PRINT"
+Data 25,"ΕΓΓΡΑΦΑ, DOCUMENTS"
+
+            Read  myGroups
+            Dim No(myGroups+1), Name$(myGroups+1) , PointTo(100)
+            for i=1 to myGroups {
+                  Read n
+                  PointTo(n)=i
+            }
+           drop  ' a second 24 value
+            
+          for i=1 to myGroups {
+                Read n
+                No(PointTo(n))=n
+                Read  name$(PointTo(n))           
+            }  
+Document GreekInfo$, EnglishInfo$, GroupInfo$, AllGreek$, AllEnglish$
+Dir AppDir$
+stp$=","+chrcode$(160)
+Execute "HELP2000", "DELETE FROM COMMANDS WHERE GROUPNUM =22;"
+\\ Retrieve "HELP2000","GROUP", 1,"",""
+      For i=1 To myGroups {
+           EnglishInfo$= RightPart$(name$(i),stp$)
+           GreekInfo$= LeftPart$(name$(i),stp$)
+           GreekInfo$={
+           }
+           EnglishInfo$={
+           }
+         
+            Retrieve "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i)),1,"",""
+            Read mywords
+            If no(i)<>22 Then {
+            For j=1 To mywords {
+                  Retrieve  "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i))+" ORDER BY [ENGLISH]",j,"",""        
+                  Read mywords
+                  Read GreekName$, HelpText$, EnglishName$, groupnumFrom     
+                  If mywords=j Then {EnglishInfo$= EnglishName$ } Else  EnglishInfo$= EnglishName$+", "
+                  Retrieve  "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i))+" ORDER BY [DESCRIPTION]",j,"",""
+                  Read mywords
+                  Read GreekName$, HelpText$, EnglishName$, groupnumFrom     
+                  If mywords=j Then {GreekInfo$= GreekName$} Else GreekInfo$= GreekName$+", "                
+            }
+         AllGreek$=GreekInfo$+{
+         
+         }
+         AllEnglish$=EnglishInfo$+{
+         
+         }
+         GroupInfo$=GreekInfo$+{
+         __<ENG>__
+         }+EnglishInfo$+{
+         
+         }
+         \\  print LeftPart$(name$(i),stp$)    \\ Greek name of group
+         print RightPart$(name$(i),stp$)
+         Append "HELP2000",  "COMMANDS",  LeftPart$(name$(i),stp$),  GroupInfo$, RightPart$(name$(i),stp$), 22
+         Clear GroupInfo$
+         }
+         Clear GreekInfo$
+         Clear EnglishInfo$  
+         
+      }  
+      AllGreek$={
+      __<ENG>__
+      } + AllEnglish$
+         Append "HELP2000",  "COMMANDS",  "ΟΛΑ",  AllGreek$,"ALL", 22
+         Help All
+Print "DONE"
+clear
+Flush
+Dir User
+
+}
+Stack New {
+	CreateGeneral	
+}
+
+End Sub
+}
+MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake game","*Start","Leave")<>1 τότε έξοδος
+Διαφυγή Όχι
 Δυαδικό {
       iVBORw0KGgoAAAANSUhEUgAAAyAAAAKbCAMAAAA61B5YAAAAGFBMVEUgpM3///8B
       c7nxxhhjuEiVYD7sGC9ISUeVfStuAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAACXRF
@@ -17936,7 +18228,8 @@ MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake ga
       4tdXAsiTtBreDJDwlzKY18C/+HQBIFsa5/Uf+kDJTyWRlR+i5fBeEW7nUiYCBJ1u
       8MEpOpevfToeiC+7wXHwpxV5CK8DxAJAfDNLCki5AmluY70JIFK9PA+QDX4n5aVJ
       gDxjsFawJbQJhQFxf0QvCW8Iyy99HZB29s6N61mhYBhArLQDchUgOZrXhLVHBwAh
-      nZBDDovLOQCIVQIiaJjpAfHZhAXZgs1JXuh8P5tc5QGXw2F+MOHB8KeCx7C+6bVg      UniLj62SJ5/J3s5q5vBHXgOTAiLF4xWAGDEgFhtw2sZ6JSDbICDoLz6dD8jGAuLv
+      nZBDDovLOQCIVQIiaJjpAfHZhAXZgs1JXuh8P5tc5QGXw2F+MOHB8KeCx7C+6bVg
+      UniLj62SJ5/J3s5q5vBHXgOTAiLF4xWAGDEgFhtw2sZ6JSDbICDoLz6dD8jGAuLv
       mZQwhN9mP7r14PS2g2fx0ABSOxtLZmMTrpE5/B5XIvYnwivq+LhiwpT1++GAZ5am
       ggOEOtNJPNZbWBDzNoC0bgnGmG0cwWIBgaKwdFl+4YtaLkKqvKaq4i1AotL36Iq/
       +mMYEB0fV0y5jYCAdyirgwUkDTWEjP5oLPrqgp/axJIHqIgBSWtcRanm0m2bRVrI
@@ -18153,6 +18446,7 @@ MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake ga
             .νέα_θέση<=0
       }
 }
+Πάλι_εδώ:
 Πίνακας Θέσεις(31)=Κ_5χ6(), Πιόνια(4)=Πιόνι(), ΣειράΝικητών(4)
 Για ι=1 Έως 4 { Για Πιόνια(ι-1) {.θέση_π=1 : .νο=ι}}
 Για ι=1 εως 30 {
@@ -18220,6 +18514,10 @@ MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake ga
 }
 Δείξε_Όλα(-1,"")
 Κύλιση Χώρισμα 0  ' όπως το Οθόνη,0 χωρίς να καθαρίσει την οθόνη!
+Αν Ρώτα( "New Game","snake game","*Play","Not now")=1 τότε προς Πάλι_εδώ
+Αν Τμημα(info) Τότε  Πληκτρολόγιο "info"+χαρ$(13)
+Διαφυγή Ναι
+Θέσε Γρήγορα
 Τέλος
 Ρουτίνα ΠαίξεΜε(Πιόνι, Ζάρι, τελικό, ζαρ$)
       Τοπική πιόνι1=-1, μεζάρι=Αληθής, πρ$, ι
@@ -18443,7 +18741,12 @@ Player 0  ' erase any layer
 \\ Form ! 100,66
 
 }
-MODULE DOWN3 {Declare form1 form
+MODULE DOWN4 {module OpenHtml (filename$){
+	\\ call m2000.exe and then load info without executing commands, and then execute htmleditor passing the filename
+	\\ and last an End command to end the program
+	win appdir$+"m2000.exe","{{load modules info : htmleditor {"+filename$+"}: end}}"
+}
+Declare form1 form
 With form1, "visible" as visible
 with form1, "Title", "Download Example"
 layer form1 {
@@ -18454,9 +18757,9 @@ layer form1 {
 }
 Method form1, "show"
 cls,0
-report 2, "Download 3 Files using Download object"
+report 2, "Download 4 Files using Download object"
 cls, 10
-declare withevents d(2) download
+declare withevents d(3) download
 w=0
 m=row
 Function d_Start(new con, host$,port) {
@@ -18489,14 +18792,14 @@ Function d_DownloadError(new con) {
 }
 Function d_DownloadComplete(new who, a$) {
 	cursor 0,3+who
-	print over a$+" - complete"
+	print over a$+" - complete"+str$(filelen(a$))
 	layer form1 {
 		cursor 0,3+who
-		print over a$+" - complete"		
+		print over a$+" - complete	"
 	}
 	w--	
 }
-declare d() over   ' one more withevents
+declare d() over   ' one more withevents - so now we have 4
 \\ GetUrl$() function used if we wish the property url to connect on the fly, and disposed
 \\ because object is naked (not in a mHandler carrier), can't used as value
 \\ so we have to pass it by reference
@@ -18509,13 +18812,14 @@ Function GetUrl$(&where) {
 	With where, "url" as url$
 	=url$
 }
-Dim url$(3)
+Dim url$(4)
 for i=0 to len(d())-1
 	With d(i), "url" as url$(i)  \\ connect property url of d(i) to url$(i)
 next i
 Method d(0), "DownloadFile", "http://www.vbforums.com/showthread.php?818583-Binary-Code-Thunk-Experiment", dir$+"vbforums.html"
 Method d(2), "DownloadFile", "http://www.cs.virginia.edu/~evans/cs216/guides/x86.html", dir$+"x86.html"
 Method d(1), "DownloadFile","http://rosettacode.org/wiki/Rosetta_Code", dir$+"rossetacode.html"
+Method d(3), "DownloadFile","http://georgekarras.blogspot.gr", dir$+"m2000.html"
 cursor 0, m
 
 for i=0 to len(d())-1
@@ -18547,9 +18851,19 @@ wait 100
 cursor 0,2
 print over $(4),"live connections:";w
 cursor 0,m
+If exist("vbforums.html") then Print "vbforums.html - ";Filelen("vbforums.html")
+If exist("rossetacode.html") then Print "rossetacode.html - ";Filelen("rossetacode.html")
+If exist("x86.html") then Print "x86.html - ";Filelen("x86.html")
+If exist("m2000.html") then Print "m2000.html - ";Filelen("m2000.html")
 print "done"
 declare d() nothing
 declare form1 nothing
+if exist("m2000.html") then
+	if filelen("m2000.html")>0 then
+		if Ask("Open m2000.html in htmlEdtitor, as other process?")=1 then openhtml "m2000.html" : Print "wait and then use ctrl+tab to get the htmleditor window"
+		if Ask("Open m2000.html in console text editor?")=1 then Edit "m2000.html", 1
+	end if
+end if
 }
 MODULE CHESSGAME {\\ George Karras, 2019
 \\ Chess Example (a big one)
@@ -19592,5 +19906,397 @@ While z {
 }
 s$="]"
 Report s$
+}
+MODULE COMBO1 {about call { 
+      select case about$ 
+      case "is a big name here"
+            about  "Title: is a big name here", 8000,6000,"that [is a big name here] easy [too]"
+      else
+            about  "Title: too", 8000,6000,"that [is a big name here] easy"+about$
+      end select
+}
+
+declare form1 form
+With form1, "Width" as form1.Width, "Height" as form1.Height
+layer Form1 {
+	window 12, 8000,6000;
+	cls #202020
+}
+
+declare combo1 combobox form form1
+declare text1 textbox form form1
+declare but1 button form form1
+With form1,"Title" as title$, "Sizable", True, "UseReverse", True
+Method form1, "MakeStandardInfo", 1
+
+With combo1,"Edit", True,"UseOnlyTheList", false,"autocomplete", True, "listIndex" as ListIndex,"ShowAlways", True
+With combo1,"label","Combo1", "ListText" as item$, "list" as list$(), "text" as combo1$, "icon", 3
+item$={alfa
+            delta
+            gamma
+            beta
+            }
+With combo1,"Find" as Find()
+Method combo1,"Sort"
+combo1$=list$(find("gam*"))
+
+Method combo1,"Move", 1000,1000,6000,600
+Method text1, "Move", 1000,1900,6000,600
+Method but1, "Move", 1000, 2800, 6000, 600
+With But1, "Blink" as but1.blink, "caption" as but1.caption$
+but1.caption$="press to stop"
+but1.blink=300
+With text1, "left" as left, "text" as text1.text$ , "ShowAlways", True , "Default", true,"icon", 3
+Print left
+Method form1, "show"
+
+\\ we use mono for part structure. when a part executed the mono change to true,
+\\ so no other part with same variable can executed
+def boolean mono, allow=true
+Function but1.Blink {
+      Read New face
+      if allow<>0 and face then
+      part {
+            print face, if$(internet$<>"127.0.0.1"->"connected to internet","not connection found")
+            refresh
+      } as mono
+      end if
+      If Face then {
+            Method but1,"Colors", 15,2
+      } else Method but1,"Colors", 14,7
+      Method but1,"TransparentOff"
+}
+Function but1.click {
+      part {
+            if allow then but1.caption$="ok" :allow=false
+            Print "click: Your ip=";lan$, "Your public ip=" ;internet$
+            but1.blink=0
+            refresh
+      } as mono
+}
+function form1.resize {
+	layer form1 {
+		if form1.width<4000 then form1.width=4000
+		if form1.height<4000 then form1.height=4000
+		move form1.Width-twipsx*3, form1.Height  '-size.y("A","Courier",8)
+		cls
+		local oldi=italic
+		italic 1
+		Legend "Use Ctrl+F1 in textboxes","Courier",8,0,1
+		italic oldi
+	}
+}
+Call Local form1.resize()
+function form1.unload {
+      about
+      Keyboard "!"
+      show
+}
+function combo1.about {
+      about show "is a big name here"
+}
+function text1.about {
+      about show ""
+}
+Function combo1.dblclick {
+        text1.text$=combo1$
+        title$=combo1$
+        if find(title$)= -1 then {
+         method combo1,"additem",title$ 
+         Method combo1,"Sort"
+         listindex=find(title$)
+         }
+         combo1$=combo1$
+          Method text1,"GetFocus"
+}
+Function combo1.click {
+      if listindex>=0 then  text1.text$=list$(listindex)
+}
+Function combo1.scroll {
+      if listindex>=0 then  text1.text$=list$(listindex) 
+}
+\\ just wait for a key in console
+a$=key$
+
+declare Text1 nothing
+declare combo1 nothing
+declare form1 nothing
+}
+MODULE PROF {cls
+Rem
+ Set Fast!
+Rem Set fast
+Rem Set Slow
+Report {From Version 9.9 rev 1
+		Profiler	reset the current profiler (if a local exist then reset the local one)
+		Profiler !	if not local profiler exist then one created else Reset the profiler
+		timecount	value return from local profiler if exist, or from global
+	
+		For this example we use global profiler in this module and in glo() function
+		Modules and functions may have local profilers if we create one using Profiler !
+		Only one local profiler for each module and function.
+	}
+Report "First Example: Accessing both local and global profiler"
+module alfa {
+	def glo()=timecount
+	profiler !
+	for i=1 to 1000
+	next
+	print timecount,"", glo()
+}
+
+profiler
+for i=1 to 10
+alfa
+next
+Print @(tab(3)), timecount, "/total"
+Report "Second Example: using only global profiler"
+Profiler
+Function Deep(N) {
+	if N>1 then =Deep(N-1)
+	For i=1 to 100
+	Next i
+	Print N, "", timecount
+}
+N=Deep(10)
+Print @(tab(2)), timecount, "/total"
+Report "Third example: using local profiler"
+Function Deep(N) {
+	if N>1 then =Deep(N-1)
+	Profiler !
+	For i=1 to 100
+	Next i
+	Print N, "", timecount
+}
+Profiler
+N=Deep(10)
+Print @(tab(2)), timecount, "/total"
+Set Fast
+}
+MODULE BASIC {
+\\ this is a style like BASIC
+\\ we use line numbers
+\\ we have two types of subroutines
+\\ the sinple routine (Gosub/Return)
+\\ the SUB/END SUB  (GOSUB is optional for the call)
+\\ we use FOR as in BASIC SO IF A < 1 we SKIP THE FOR LOOP
+\\ we use arrrays like in VB, so we get plus one ITEM (here 11 items fro 0 to 10)
+\\ the gosub 200 enable these features
+\\ the gosub 210 disable these features
+
+
+000 GOSUB 200
+010 
+020 REM 
+030 FORM 80,48
+040 CONST MAX=64%   ' % for Integer
+050 DEF INTEGER A1, I  :  DEF Z$
+060 DIM P(MAX)
+070 PRINT $(0,20)   ' SET WIDTH TO 20
+080 INPUT "Give a value for variable A (try 64)=", A1
+090 GOSUB ALFA(&A1)
+100 IF A1<=1 THEN 170 ELSE PRINT "We have ";A1;"items with these types:"
+110 PRINT $(0,10)
+120 WHILE A1>0
+130 PRINT FORMAT$("({0}) : {1}", A1, TYPE$(P(A1))),
+140 A1-- 
+150 END WHILE
+160 PRINT
+170 GOSUB 220
+180 END
+
+
+200 SET SWITCHES "+FOR +DIM"
+210 RETURN
+220 SET SWITCHES "-FOR -DIM"
+230 RETURN
+
+
+300 SUB ALFA(&A AS Integer)
+310 P(0)=1~   ' we use ~ for float comstant values
+320 FOR I=1 TO A
+330 IF I>MAX THEN A=I : EXIT
+340 P(I)=P(I-1)*I
+350 IF I<10 THEN F$=STR$(P(I),"") ELSE F$=STR$(P(I),"#.######E+###")
+360 PRINT @(TAB((I-1) MOD 4)), "P(";STR$(I,"00");")=";F$;
+370 IF (I-1) MOD 4=3 THEN PRINT
+380 NEXT I
+390 PRINT
+400 END SUB
+}
+MODULE REPORTTEST {
+\\ USE SHIFT TAB AT START OF PARAGRAPH TO ADD SPACES
+Global B$={      Tokyo (CNN)Typhoon Hagibis weakened to a tropical depression as it continued to move across central Japan on Sunday, leaving at least 15 people dead and more than 140 injured in its wake.
+      The storm made landfall just before 7 p.m. Saturday local time on the Izu Peninsula, southwest of Tokyo, bringing hurricane-force winds and heavy rains which led to widespread flooding. More than 230,000 people were evacuated ahead of the storm, with emergency orders issued for many cities around the greater Tokyo area.
+      Along with the 15 deaths, Japan's Fire Disaster and Management Agency said about 140 people had been injured and nine remain missing.
+      Prime Minister Shinzo Abe offered his "condolences for the people killed in the disaster and my sincere sympathy for the people affected by this disaster."
+      "Now not only police, fire department and coast guard, but also 27,000 staff of the self-defense force are on rescue, search for missing and supporting evacuation," Abe said Sunday. "We are to enhance the scale of operation depending on necessity."
+      Typhoon Hagibis came as the country hosts the Rugby World Cup. Two matches -- England-France and New Zealand-Italy -- had to be preemptively canceled. Sunday's Pool B match between Namibia and Canada in Kamaishi was also canceled hours before it was due to take place.
+      Original:https://edition.cnn.com/2019/10/13/asia/typhoon-hagibis-japan-rugby-intl-hnk/index.html
+}
+Module Check {
+	READ A, k
+	Print @(0,5);" 199";@(pos,row,k+pos,10+row, 5, 8);
+	Report 0, B$, k, 10  Line a
+	Print @(23,5);" 200";@(pos,row,k+pos,10+row, 5, 8);
+	Report 2, B$, k, 10  Line a+1
+	Print @(0,17);" 201";@(pos,row,k+pos,10+row, 5, 8);
+	Report 1, B$, k, 10  Line a
+	Print @(23,17);" 202";@(pos,row,k+pos,10+row, 5, 8);
+	Report 3, B$, k, 10  Line a+1
+	Print
+	Refresh 5000	
+}
+\\ set tab width
+Report ! 4
+KK=80
+Repeat {
+Refresh 5000
+form KK, 32
+g=20 : d=2
+\\ Blocks {} handle Goto jumps
+Repeat {
+	Cls 5, 0
+	Pen 14
+	Double
+	Pen 15 {Report 2, "Example of Report statement"}
+	Normal
+	OldItalic=Italic
+	Italic 1
+	Cursor 0,1
+	Pen 7 {
+		Report {
+			Press space to Exit
+			Press M to stop - press any key again to start
+			Press any other key to change mode (font size)
+		}
+	}
+	Italic OldItalic
+	For f=2 to 5{
+		check  f, g
+		Wait 4
+		If Keypress(32) Then Goto ExitLoop		
+		M$=Inkey$
+		If M$<>"" Then {
+			If Ucase$(M$)="M" Then M$=Key$ Else Goto ContHere
+		}
+	}
+	For f=4 to 1 {
+		Check  f, g
+		Wait 4
+		If Keypress(32) Then Goto ExitLoop
+		M$=Inkey$
+		If M$<>"" Then {
+			If Ucase$(M$)="M" Then M$=Key$ Else Goto ContHere
+		}
+	}
+	g=g-d
+	If g<=3 Then d=-d
+	If g>18 Then d=-d
+} Always
+ContHere:
+KK=KK-5
+} Until KK<50
+ExitLoop:
+}
+MODULE TEXTONLY {Declare Form1 Form
+Layer Form1 { Cls 7
+    Move scale.x/2, scale.y/2
+   Pen 14 { Circle Fill 14, 100, 0.5}
+   w=scale.x
+ }
+Declare Edit1 EditBox Form Form1
+Declare Text1 TextBox Form Form1
+Method Edit1, "move",1000,1000,w-2000,2000
+Method Text1, "move",1000,3600,w-2000,600
+With Edit1, "Text",{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+TextBox Handle:
+Use ctrl + left ore right arrow, for moving fast skipping words and spaces. You can paste text with Ctrl+V, but without merging, the old text replaced with the new one. You can't get a copy.
+}, "ScrollKeyUpDown", True
+With Text1, "MaxCharLength", 100
+Method Edit1,"TextViewOnly"
+Method Edit1, "Transparent"
+Method Edit1, "Colors", 15, 15
+Method Text1, "Transparent"
+Method Text1, "Colors", 15,15
+m=1 : s=1
+Layer Form1 {
+                  gradient 7,0
+                  hold
+      Thread {
+            {
+                  Release
+                  Pen 0 { Circle Fill 0, m*100, 0.5}
+                  m+=s
+                  if m>=60 then {
+                        pen random(1,4)
+                         s-!
+                  } else.If m<2 then {
+                         s-!
+                         pen random(1,4)
+                  }
+       
+\\		refresh 5000
+                  method Form1, "RefreshAll"
+            }
+      } as mm interval 1000/24
+}
+Method Form1, "Show", 1
+Threads Erase
+Declare Form1 Nothing
+}
+MODULE PRMASTER {      let col=8, flip=True, oldbold=Bold
+      Bold 0
+      Refresh 1000
+      Form ! (100 div col)*col,32
+      Cls 5
+      Pen 14
+      For i=0 To Width-1 Step col {
+            If flip Then {
+                  Print @(i,0,i+col,Height,#222222,3),
+            } Else Print @(i,0,i+col,Height,5,3),
+            flip~
+      }
+
+      For i=2 To Height-2
+            Cursor 0, i
+            Pen 2 { Print Under }
+      Next i
+      Print @(0,2),   \\ same as Cursor 0,2
+      For i=0 To 9 {
+            Print $(i, col),145355,34.23432,34.222, ~(10,2, 2-12*(i=8)), "aaa",~(14),"bb"
+            Print 145355,"A So Real Big String",34.222, "Small", 10, i
+            Print $(0),  ' For να το επαναφέρουμε
+      }
+      Print $(";True;False;"), 0,-1, True, False, "A">" ", "*"
+      Print $(""), True, "*Ok"
+      Print Part @(Tab*2), $(6,col*2),~(10,2),"Double Column",$(4,col), ~(14), 1000
+      Pen 2 { Print Under }
+      Print Part @(Tab*2), $(6,col*3),~(10,2),"Triple Column",$(4,col),~(14), "ok"
+      For i=0 To 1 {
+            Cursor 0,i : Print Over ~(14,7,7),
+      }
+      Cursor 0,0
+      Double : Bold 1
+      Pen 15 { Report 2, "Example with Print & Report Statements"}
+      Pen 2 { Print Under }
+      Normal : Bold
+      Print @(Tab(8),15, Tab(11),30,#222222, 2),
+      Print @(Tab(8),4, Tab(11),14,#222222, 2),
+      Document$={   Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+   Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
+   Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
+}
+      Pen 7 {
+            Report Document$, Tab*3, 10
+            Cursor Tab(8), 16
+            Report Document$, Tab*3, 14 Line 12
+      }
+      Pen 13 {
+            Cursor Tab(8), 15
+            Report Document$, Tab*3, 1 Line 11
+           }
+      Cursor 0,Height-2
+      Bold OldBold
 }
 INFO

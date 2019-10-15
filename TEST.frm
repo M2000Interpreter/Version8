@@ -198,7 +198,7 @@ Attribute testpad.VB_VarHelpID = -1
 Public WithEvents Compute As myTextBox
 Attribute Compute.VB_VarHelpID = -1
 Private Label(0 To 2) As New myTextBox
-
+Dim run_in_basestack1 As Boolean
 Dim MyBaseTask As New basetask
 Dim setupxy As Single
 Dim Lx As Long, ly As Long, dr As Boolean, drmove As Boolean
@@ -218,7 +218,7 @@ If mBtask Is Nothing Then
 Else
 Set MyBaseTask = New basetask
 mBtask.CopyStrip2 MyBaseTask
-
+run_in_basestack1 = mBtask Is basestack1
 End If
 End Property
 
@@ -253,44 +253,35 @@ KeyCode = 0
     Else
             'bypasstrace = True
          If Compute <> "" Then STbyST = True
+        If run_in_basestack1 Then
+        If QRY And Form1.Visible Then
+        INK$ = Compute + Chr$(13)
+        
+        End If
+
+        Else
         tracecode = Compute
-        
-        If False Then
-        
-          MOUT = False
-         NOEXECUTION = False
-         NERR = False
-         LastErNum = 0
-         If LastErName <> "" Then LastErName = Chr(0) + LastErName
-         If LastErNameGR <> "" Then LastErNameGR = Chr(0) + LastErNameGR
-         
-        bypasstrace = False
-        
-        KeyCode = 0
-        If MyBaseTask.IamChild And sb2used = 0 Then
-            NOEXECUTION = True
-            MOUT = True
-            If Form2.Visible Then Compute = vbNullString: FillAgainLabels
         End If
-        End If
+        
     End If
 ElseIf KeyCode = 8 Then
 If Compute = vbNullString Then
-    If Compute.Prompt = "? " Then
+    If Compute.Prompt <> ">" Then
         Compute.Prompt = ">"
          If pagio$ = "GREEK" Then
-            Compute.ThisKind = "     Ένθεση Εντολής + Enter | Backspace Επιλογή Τύπου"
+            Compute.ThisKind = "     Ένθεση Εντολής | ΔΙΑΚΟΠΗ | Backspace Επιλογή Τύπου"
         Else
-            Compute.ThisKind = "     Inline command + Enter | Backspace Select Mode"
+            Compute.ThisKind = "     Inline command | STOP | Backspace Select Mode"
         End If
     Else
         Compute.Prompt = "? "
         If pagio$ = "GREEK" Then
-            Compute.ThisKind = "     [Εκφρ,] Εκφρ + Enter | Backspace Επιλογή Τύπου"
+            Compute.ThisKind = "     [Εκφρ,] Εκφρ | Backspace Επιλογή Τύπου"
         Else
-            Compute.ThisKind = "     [Expr,] Expr + Enter | Backspace Select Mode"
+            Compute.ThisKind = "     [Expr,] Expr | Backspace Select Mode"
         End If
     End If
+    Compute.vartext = vbNullString
 KeyCode = 0
 Exit Sub
 End If
@@ -459,6 +450,9 @@ Set MyBaseTask = Nothing
 trace = False
 STq = True
 End Sub
+
+
+
 
 Private Sub gList1_CheckGotFocus()
 gList1.backcolor = &H606060
