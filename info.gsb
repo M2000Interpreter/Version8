@@ -14223,7 +14223,8 @@ MODULE LIBDIV {Function ProDiv$ {
 		r$=str$(val(c$)-val(b$)*d1,"0")
 		if gg<s-1  then
 			if v$="0" then mm=-s+gg : if p+mm<17 then  a$+=string$("0", p+mm)
-			v$+=string$("0",s-1-gg) 		end if
+			v$+=string$("0",s-1-gg)
+		end if
 		if d1=0 then
 			if tz>0 then
 				if  len(v$)=tz then  tz++ else.if   len(v$)>tz+1 then  exit
@@ -18730,8 +18731,8 @@ Font "Verdana"
 Bold 1
 PEN 14
 CLS,0
-If Version<9.8 then Error "No proper M2000 version (must be >=9.8)"
-If Version=9.8 and revision<45 then Error "No proper M2000 revision for version 9.8"
+If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
+If Version=9.9 and revision<1 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -20298,5 +20299,14 @@ MODULE PRMASTER {      let col=8, flip=True, oldbold=Bold
            }
       Cursor 0,Height-2
       Bold OldBold
+}
+MODULE BREAKPOINT {Test "start", test("ok"), A
+For A=1 to 100 {
+      Wait 1
+      Print A
+      if A=41 then test "ok" : test test("ok2")
+      if A=81 then test "ok2": test  \\ wait for keypress
+}
+Test !
 }
 INFO
