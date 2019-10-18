@@ -1061,6 +1061,8 @@ MODULE URL {Module checkit {
       is_path=repeated(oneAndoptional(is_void(is_xpalphas), series(one("/"))))
       is_uri=oneAndoptional(many(is_scheme, series(one(":")), is_path), many(series(one("?")),is_search))
       is_fragmentaddress=oneAndoptional(is_uri, many(series(one("#")),is_fragmentid ))
+      
+      Flush ' empty the stack of values
 
       data "foo://example.com:8042/over/there?name=ferret#nose"
       data "urn:example:animal:ferret:nose"
@@ -4629,7 +4631,10 @@ With NotePad,  "Blink", 50, "BlinkTimes", 20
 Method NotePad,"Show", 1
 Declare Pad Nothing
 Declare NotePad Nothing 
-Print "Done"
+If Module(Info) Then
+	Title "Info"
+	keyboard "INFOBasic"+chr$(13)
+end if
 }
 MODULE INFOBASIC {
 refresh 10000
@@ -4643,7 +4648,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8 = for ver 9.9 rev 1 and newer"
+	Report " A collection of modules for tests version 8.1 for ver 9.9 rev 1 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -11459,7 +11464,7 @@ MODULE UTF8 {Module checkit {
             }
       document a$
       a$={First Line
-            Second line
+            Second line 𐐷
             Third Line
             Ελληνικά Greek Letters
             yä®€
@@ -11505,12 +11510,12 @@ MODULE UTF8 {Module checkit {
                         ch$=Eval$(Bytes, 0, 3)
                   } Else.if Binary.And(mrk, 0xF8)=0xF0 then {
                         Get #f,three
-                        Return Bytes, 1:=Eval$(three, 0, 3)
+                        Return Bytes, 1:=Eval$(three, 0, 3)  
                         ch$=Eval$(Bytes, 0, 4)
                   } Else ch$=Eval$(Bytes, 0, 1)
             }
             if Error or not ok then ch$="" : exit sub
-            ch$=left$(string$(ch$ as Utf8dec),1)
+            ch$=string$(ch$ as Utf8dec)
       End Sub
 }
 checkit
@@ -13767,7 +13772,7 @@ MODULE KNUTH {\\ Trabb Pardo–Knuth algorithm
 \\ We can see Globals, but a local or a global defined in module shadow the previous global. At the return from module, any new identifier erased (including local modules and functions).
 
 
-Report {	ask for 11 numbers to be read into a sequence S
+Report {ask for 11 numbers to be read into a sequence S
       reverse sequence S
       for each item in sequence S
           result := call a function to do an operation
@@ -13778,7 +13783,7 @@ Report {	ask for 11 numbers to be read into a sequence S
       
       The task is to implement the algorithm:
                   
-            Use the function:     f ( x ) = | x | 0.5 + 5 x 3 {\displaystyle f(x)=|x|^{0.5}+5x^{3}}
+            Use the function:    f(x)=|x|^{0.5}+5x^3
             The overflow condition is an answer of greater than 400.
             The 'user alert' should not stop processing of other items of the sequence.
             Print a prompt before accepting eleven, textual, numeric inputs.
@@ -14189,18 +14194,17 @@ Data ProDiv$("100","2",1), 100/2
 Data ProDiv$("632010","123",16), 632010 / 123
 
 Data ProDiv$("1000","15",16), 1000 / 15
-Data ProDiv$("1500","25000",1), r(1500 / 25000, 1)
-
-Data ProDiv$("1500","25000",2), r(1500 / 25000, 2)
-Data ProDiv$("1500","25000",3), r(1500 / 25000, 3)
+Data ProDiv$("1500","25000",,,1), r(1500 / 25000, 1)
+Data ProDiv$("1500","25000"), r(1500 / 25000, 2)
+Data ProDiv$("1500","25000"), r(1500 / 25000, 3)
 
 Data ProDiv$("1500","22000",16), r(1500 / 22000, 16)
 Data ProDiv$("1500","22000",14, true), 1500 / 22000
 Data ProDiv$("1500","2500",16), 1500/2500
 
-Data ProDiv$("1500","250",16), 1500/250
+Data ProDiv$("1500","250",,,16), 1500/250
 
-Data ProDiv$("15000","25",16), 15000/25
+Data ProDiv$("15000","25",,,16), 15000/25
 
 Data ProDiv$("15000000000","25",0), 15000000000/25
 Data ProDiv$("15000000000","245",14), 15000000000/245
@@ -14211,10 +14215,17 @@ print val(a$)==a , @(12), a$,@(50), a
 end while
 }
 MODULE LIBDIV {Function ProDiv$ {
-	Read a$, b$, pp, rd=false
+	Read a$, b$, pp=10, rd as boolean=false, maxd=-1, dp$="."
 	if pp<0 then error "decimal digits>=0 "
 	if rd then pp++
-	Let v$="", gg=len(b$), p=pp,  mm=0, tz=0
+	Let v$="", gg=len(b$), p=pp,  mm=0, d1=0, mm1=0, od1=-1
+	if len(b$)>len(a$) then 
+		gg=len(b$)-len(a$): a$+=string$("0",gg):mm1=gg :gg=1:pp++:p=pp
+	else.if len(b$)=len(a$) and b$>a$ then
+		a$+="0":  mm1=-1:gg=1: pp++:p=pp		
+	end if
+	if mm1<>0 and maxd>0 then p=min.data(maxd-1, p)-rd : maxd=0
+	lz=pp
 	{
 		s=len(b$)
 		c$=left$(a$,s)
@@ -14222,16 +14233,14 @@ MODULE LIBDIV {Function ProDiv$ {
 		d1=val(c$) div val(b$)
 		r$=str$(val(c$)-val(b$)*d1,"0")
 		if gg<s-1  then
-			if v$="0" then mm=-s+gg : if p+mm<17 then  a$+=string$("0", p+mm)
+			if v$="0" then
+				mm=-s+gg : if p+mm<17 then  a$+=string$("0", p+mm)
+				p=p-len(v$) : if p<0 then p=0
+			end if
 			v$+=string$("0",s-1-gg)
 		end if
-		if d1=0 then
-			if tz>0 then
-				if  len(v$)=tz then  tz++ else.if   len(v$)>tz+1 then  exit
-			end if
-		end if
-		
 		v$+=str$(d1,"0")
+		if d1<>0 then od1=len(v$)-1
 		gg=len(r$)
 		a$ =r$+mid$(a$,s+1)
 		cc=false
@@ -14240,18 +14249,32 @@ MODULE LIBDIV {Function ProDiv$ {
 		else
 			cc=len(a$)>len(b$) and a$<>"0"
 		end if
-		if mm<0 then if tz>=pp then v$="0" :mm=0:  exit
+		
 		
 		if cc else if p=0 then  exit
 		
 		if p>0  and not cc then
-			mm=len(v$)+1
-			a$+=string$("0", p) : p=0 
+			if len(a$)>gg then
+				mm=len(v$)+2
+			else
+				mm=len(v$)+1
+			end if
+			a$+=string$("0", p) : p=0
 		end if
+		
 		loop
 	}
-	\\ round id we choose
-	if rd then
+	if mm1<>0 then
+	if mm1=-1 then if left$(v$,1)="0" then v$=mid$(v$,2)
+	if mm1<0 then mm=mm1 : mm1=-2 else mm=2-mm
+
+	 end if
+         if len(a$)>gg and len(a$)>=len(b$) then v$+=string$("0",gg)
+         if maxd>0 then
+         if mm=0 then mm=len(v$)+1
+         v$=left$(v$,maxd+2) :if len(v$)>maxd+1 then rd=true
+         end if
+	if rd  then
 		bb$=strrev$(v$) :v$="":cc=5
 		for i=1 to len(bb$)
 			if cc=0 then v$+=mid$(bb$, i) : exit for
@@ -14261,36 +14284,45 @@ MODULE LIBDIV {Function ProDiv$ {
 		next i
 		v$=strrev$(mid$(v$,2))
 	end if
-	if len(a$)>gg and len(a$)>=len(b$) then v$+=string$("0",gg)
-	if mm>=0 then
-		if tz>mm then mm=0: v$="0"
-	else
-		tz+=mm+3
-		if tz>=pp then mm=0: v$="0"
-	end if
-	if mm<>0else =v$ : exit
+	if left$(v$,1)="0" and len(v$)>1  then v$=mid$(v$,2): mm--
+
+	if mm=0 then  =v$ : exit
 	if mm>1 then
 		n$=mid$(v$,mm+1)
 		if len(n$)<16 then  if val(n$)=0 then n$="" : v$=left$(v$,mm)
-		if mm<>len(v$) then
-			=left$(v$,1)+"."+mid$(v$,2)+"E+"+str$(mm-2,"00")
-		else.if  mm<16 then
+		if mm+pp>16 or maxd>0 then
+			if od1>0 then v$=left$(v$, od1+1)
+			if mm-1<16 and maxd>0 then
+				=left$(v$, mm-1)
+			else
+				=left$(v$,1)+dp$+mid$(v$,2)+if$(mm=2->"","E+"+str$(mm-2,"00"))
+			end if
+		else.if  mm+pp<16 then
 			if val(mid$(v$,mm))=0 then
 				=left$(v$,mm-1)
 			else
-				=left$(v$,mm-1)+"."+mid$(v$,mm)
+				if od1>0 then v$=left$(v$, od1+1)
+				=left$(v$,mm-1)+dp$+mid$(v$,mm)
 			end if
 		else
-			=Left$(v$,1)+"."+n$
+			if od1>1 then n$=left$(v$, od1-1)
+			=Left$(v$,1)+dp$+n$
 		end if
-	else.if mm<0 then
-		if  len(v$)-tz<=pp then
-			="0."+mid$(v$,2, len(v$)-gg)
+	else.if mm<0  then
+		if od1>0 then v$=left$(v$, od1)
+		if len(v$)<=16 and mm1+mm<16 then
+			if mm1=-1 then
+				v$="0"+mid$(v$,-mm,1)
+			else
+				v$=string$( "0", mm1+1)+mid$(v$,-mm,1)
+			end if
+			=mid$(v$,1, 1)+dp$+Mid$(v$,2)
 		else
-			=Mid$(v$,-mm+1,1)+"."+Mid$(v$,-mm+2)+"E-"+str$(abs(mm),"00")
+			=mid$(v$, -mm, 1)+dp$+Mid$(v$,-mm+1)+if$(mm1+1=0 -> "","E-"+str$(abs(mm1+1),"00"))
 		end if
 	else
-		=v$
+		if od1>0 then v$=left$(v$, od1)
+		if maxd=0 then ="0" else =v$
 	end if
 }
 }
@@ -14482,7 +14514,8 @@ end sub
 MODULE EN1 {Module Checkit {
       \\ need revision 15, version 9.4
       Enum Fruit  {apple, banana, cherry}
-      Enum Fruit2  {apple2=10, banana2=20, cherry2=30}      Print apple, banana, cherry
+      Enum Fruit2  {apple2=10, banana2=20, cherry2=30}
+      Print apple, banana, cherry
       Print apple2, banana2, cherry2
       Print Len(apple)=0
       Print Len(banana)=1
@@ -14853,7 +14886,9 @@ MODULE FIXLENGTH {Module FixedFile {
       Locale OldLocale    
 }
 FixedFile "fixed.random"
-Print "Press F3 to display info page"
+Print "Press any key to display info page"
+Push Key$ : Drop
+Keyboard "Info"+chr$(13)
 }
 MODULE EERTREE {\\ https://rosettacode.org/wiki/Eertree
 \\ https://en.wikipedia.org/wiki/Trie
@@ -15461,6 +15496,7 @@ Show
 Declare Form1 Nothing
 Declare aPopUpForm Nothing
 Print X
+Title "Info"
 end
 }
 MODULE SURROGATE {\\ pressing alt press INS or + on keypad and 10437 on keypad or number keys and release alt to get 𐐷
@@ -15992,8 +16028,10 @@ Call Local Bright()
 Method NotePad,"Show" , 1
 Declare Pad Nothing
 Declare NotePad Nothing 
-Print "Done"
-keyboard "INFOBasic"+chr$(13)
+If Module(Info) Then
+	Title "Info"
+	keyboard "INFOBasic"+chr$(13)
+end if
 }
 MODULE ΓΛΩΣΣΑ {\\ `notepad for educational school language ΓΛΩΣΣΑ
 Greek  ' this make the popup menu of edit boc as 
@@ -16399,9 +16437,11 @@ Method NotePad,"Show" , 1
 Declare Control1 Nothing 
 Declare Pad Nothing
 Declare NotePad Nothing 
-Print "Τέλος"
-Title "Done..", 0
 Latin
+If Module(Info) Then
+	Title "Info"
+	keyboard "INFOBasic"+chr$(13)
+end if
 }
 MODULE HTMLEDITOR {\\ Version 0.1
 \\ need some work inside interpreter code
@@ -16772,6 +16812,7 @@ Declare Pad Nothing
 Declare NotePad Nothing 
 if setagain Then Set switches "-CASESENSITIVE"
 Print "Done"
+If module(Info) then Title "Info"
 Dir User
 Exit
 Sub makelist()
@@ -18448,7 +18489,7 @@ MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake ga
       }
 }
 Πάλι_εδώ:
-Πίνακας Θέσεις(31)=Κ_5χ6(), Πιόνια(4)=Πιόνι(), ΣειράΝικητών(4)
+Πίνακας Θέσεις(31)=Κ_5χ6(), Πιόνια(4)=Πιόνι(), ΣειράΝικητών(4)=0
 Για ι=1 Έως 4 { Για Πιόνια(ι-1) {.θέση_π=1 : .νο=ι}}
 Για ι=1 εως 30 {
       Αν ((ι-1) Υπολ 12)>5 Τότε { θέσεις(ι).θ=6*((ι-1) Δια 6)+(6-(ι-1) υπολ 6) } Αλλιώς θέσεις(ι).θ=ι

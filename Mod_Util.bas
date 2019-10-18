@@ -6252,7 +6252,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     If w$ = """" Then
         Pos = Pos + 1
         Do While Pos <= Len(a$)
@@ -6365,7 +6365,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     If w$ = """" Then
         Pos = Pos + 1
         Do While Pos <= Len(a$)
@@ -6413,7 +6413,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     If w$ = """" Then
         Pos = Pos + 1
         Do While Pos <= Len(a$)
@@ -6459,7 +6459,7 @@ lenA = Len(a$)
 Do While Pos <= lenA
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6492,7 +6492,7 @@ again22:
         Select Case w$
         Case "%", "$", "0" To "9", vbLf
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), vbCr, ":"
+        Case " ", ChrW(160), vbCr, ":", vbTab
 again:
             If Len(what$) > 2 Then
                 If Lang = 0 Then
@@ -6607,7 +6607,7 @@ lenA = Len(a$)
 Do While Pos <= lenA
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6640,7 +6640,7 @@ again22:
         Select Case w$
         Case "%", "$", "0" To "9", vbLf
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), vbCr
+        Case " ", ChrW(160), vbCr, vbTab
             If Len(what$) > 1 Then
                 If Lang = 0 Then
                     v1 = Len(what$)
@@ -6758,7 +6758,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     If w$ = """" Then
         Pos = Pos + 1
         Do While Pos <= Len(a$)
@@ -6806,7 +6806,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= lenA
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     If w$ = """" Then
         Pos = Pos + 1
         Do While Pos <= lenA
@@ -6860,7 +6860,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -6888,7 +6888,7 @@ again22:
         Exit Do
         Case "%", "$", "0" To "9"
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), vbCr, "{"
+        Case " ", ChrW(160), vbCr, "{", vbTab
                 If Len(what$) > 3 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
@@ -6976,7 +6976,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7004,7 +7004,7 @@ again22:
         Exit Do
         Case "%", "$", "0" To "9"
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), "{"
+        Case " ", ChrW(160), "{", vbTab
                 If Len(what$) > 3 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
@@ -7076,7 +7076,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7102,7 +7102,7 @@ again22:
         Select Case w$
         Case "%", "$", "0" To "9"
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), "0" To "9", "{"
+        Case vbTab, " ", ChrW(160), "0" To "9", "{"
                 If Len(what$) > 1 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
@@ -7181,7 +7181,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7214,7 +7214,7 @@ again22:
         Select Case w$
         Case "%", "$", "0" To "9"
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160), "0" To "9"
+        Case " ", ChrW(160), "0" To "9", vbTab
                 If Len(what$) > 1 Then
                     If Len(what$) > 0 Then
                         what$ = myUcase(what$)
@@ -7287,7 +7287,7 @@ lenA = Len(a$)
 Do While Pos <= lenA
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7322,7 +7322,7 @@ again22:
             If Len(what$) > 0 Then what$ = vbNullString
         
         
-        Case " ", ChrW(160), vbCr ',  Check Else and IF
+        Case " ", ChrW(160), vbCr, vbTab ',  Check Else and IF
                 If Len(what$) > 1 Then
                         
                         If Lang = 0 Then
@@ -7486,7 +7486,7 @@ lenA = Len(a$)
 Do While Pos <= lenA
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7519,7 +7519,7 @@ again22:
         Select Case w$
         Case "%", "$", "0" To "9", vbCr, vbLf
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
                 If Len(what$) > 1 Then
                         
                         If Lang = 0 Then
@@ -7651,7 +7651,7 @@ lenA = Len(a$)
 Do While Pos <= lenA
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
@@ -7684,7 +7684,7 @@ again22:
         Select Case w$
         Case "%", "$", "0" To "9", vbCr, vbLf
             If Len(what$) > 0 Then what$ = vbNullString
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
                 If Len(what$) > 1 Then
                         
                         If Lang = 0 Then
@@ -7863,7 +7863,7 @@ If Pos = 0 Then Pos = 1
 Do While Pos <= Len(a$)
     w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
-    If Abs(v1) > 9 Then
+    If Abs(v1) > 8 Then
     If part$ = vbNullString And w$ = "0" Then
         If Pos + 2 <= Len(a$) Then
             If LCase(Mid$(a$, Pos, 2)) Like "0[x÷]" Then
@@ -8002,7 +8002,7 @@ Select Case Left$(Right$(b$, 2), 1)
             b$ = b$ & part$
             End If
             part$ = "o"
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
             If part$ <> "" Then
             b$ = b$ & part$
             part$ = vbNullString
@@ -8139,7 +8139,7 @@ Do While Pos <= Len(a$)
         w$ = """"
    
     
-    ElseIf Abs(v1) > 9 Then
+    ElseIf Abs(v1) > 8 Then
     If part$ = vbNullString And w$ = "0" Then
         If Pos + 2 <= Len(a$) Then
             If LCase(Mid$(a$, Pos, 2)) Like "0[x÷]" Then
@@ -8276,7 +8276,7 @@ If Pos <= Len(a$) Then
             b$ = b$ & part$
             End If
             part$ = "o"
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
             If part$ <> "" Then
             b$ = b$ & part$
             part$ = vbNullString
@@ -8407,7 +8407,7 @@ Do While Pos <= Len(a$)
         w$ = """"
    
     
-    ElseIf Abs(v1) > 9 Then
+    ElseIf Abs(v1) > 8 Then
     If part$ = vbNullString And w$ = "0" Then
         If Pos + 2 <= Len(a$) Then
             If LCase(Mid$(a$, Pos, 2)) Like "0[x÷]" Then
@@ -8544,7 +8544,7 @@ If Pos <= Len(a$) Then
             b$ = b$ & part$
             End If
             part$ = "o"
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
             If part$ <> "" Then
             b$ = b$ & part$
             part$ = vbNullString
@@ -8720,7 +8720,7 @@ Do While Pos <= Len(a$)
     If pos2 = 0 Then aheadstatusStr = True
     Exit Function
     
-    ElseIf Abs(v1) > 9 Then
+    ElseIf Abs(v1) > 8 Then
     
     If v1 = 34 Then
         If pos2 = 0 Then aheadstatusStr = True
@@ -8749,7 +8749,7 @@ again22:
         Exit Function
     Else
         Select Case w$
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
         If pos2 > 0 Then Exit Function
         Case "%"
             If Not Mid$(a$, Pos + 1, 1) = "(" Then Exit Function
@@ -10651,7 +10651,7 @@ If er = 2 Then oj = 0: j = i - 2: Exit For
 er2 = 1
 oj = j: j = 0
 If oj = 0 Then oj = i - 1: If oj < 0 Then oj = 0
-Case " ", ChrW(160)
+Case " ", ChrW(160), vbTab
 If j > 0 Then Exit For
 If er2 = 2 Then oj = 0: j = i - 1: Exit For
 er = 1
@@ -12750,7 +12750,7 @@ Else
         Do While sng <= Len(a$)
        
         Select Case Mid$(a$, sng, 1)
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
         If Not (sg1 And Len(ex$) = 1) Then
         Exit Do
         End If
@@ -12823,7 +12823,7 @@ sng = fr - 1
     Do While sng < Len(a$)
     sng = sng + 1
     Select Case Mid$(a$, sng, 1)
-    Case " ", ChrW(160)
+    Case " ", ChrW(160), vbTab
     Case "+"
     foundsign = True
     Case "-"
@@ -12913,7 +12913,7 @@ Else
         Do While sng <= Len(a$)
        
         Select Case Mid$(a$, sng, 1)
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
         If Not (sg1 And Len(ex$) = 1) Then
         Exit Do
         End If
@@ -13048,7 +13048,7 @@ Dim a1 As Long
 If a$ <> "" Then
 For a1 = 1 To Len(a$) + 1
 Select Case Mid$(a$, a1, 1)
-Case " ", ChrW(160)
+Case " ", ChrW(160), vbTab
 If a1 > 1 Then Exit For
 Case Is = Chr(2)
 If a1 = 1 Then Exit Function
@@ -13084,7 +13084,7 @@ Dim d As Double
 If a$ <> "" Then
 For a1 = fr To Len(a$) + 1
 Select Case Mid$(a$, a1, 1)
-Case " ", ChrW(160)
+Case " ", ChrW(160), vbTab
 If a1 > fr Then Exit For
 Case Is = Chr(2)
 If a1 = fr Then Exit Function
@@ -13194,7 +13194,7 @@ Else
         Do While sng& <= Len(a$)
        
         Select Case Mid$(a$, sng&, 1)
-        Case " ", ChrW(160)
+        Case " ", ChrW(160), vbTab
         If Not (sg1 And Len(ex$) = 1) Then
         Exit Do
         End If
@@ -19254,7 +19254,7 @@ PROCESSCOMMAND:
             GoTo there1
         End If
         End If
-            Case " ", ChrW(160)
+            Case " ", ChrW(160), vbTab
             ' nothing
           '  SSS = Len(B$)
             Case "SLOW", "ÁÑÃÁ"
