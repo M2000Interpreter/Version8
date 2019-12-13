@@ -1,10 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 2 active-X
-1. A small bug removed - when a tab follow a else an error happen.
-2. New info.gsbm a beter LIBDIV library
-
-George Karras, Kallithea Attikis, Greece.
+Version 9.9 revision 3 active-X
+Fix a bug in Cons() function.
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

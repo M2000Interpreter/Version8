@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 2
+Global Const Revision = 3
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -51191,6 +51191,7 @@ a13410:
             Set pppp = anything
             If FastSymbol(a$, ",") Then
 againcons:
+                Set bstack.lastobj = Nothing
                 If IsExp(bstack, a$, r) Then
                     Set anything = bstack.lastobj
                     If CheckIsmArray(anything) Then
