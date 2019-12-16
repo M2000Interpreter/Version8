@@ -669,7 +669,7 @@ skip = False
 End If
 End Sub
 
-Private Sub List1_PanLeftRight(Direction As Boolean)
+Private Sub List1_PanLeftRight(direction As Boolean)
 Dim dummy As Boolean
 If List1.Tag <> "" Then
 If QRY Or GFQRY Then
@@ -1959,18 +1959,18 @@ If NERR Then Exit Do
                         crNew basestack1, mybasket
                         If basestack1.Owner.Font.charset <> 161 Then
                         
-                        wwPlain basestack1, mybasket, " ? " & LastErName, basestack1.Owner.Width, 1000, True
-                        If Left$(FK$(13), 4) = "EDIT" Then crNew basestack1, mybasket: wwPlain basestack1, mybasket, "Use SHIFT F1, edit, ESC to return", basestack1.Owner.Width, 1000, True
+                        wwPlain2 basestack1, mybasket, " ? " & LastErName, basestack1.Owner.Width, 1000, True
+                        If Left$(FK$(13), 4) = "EDIT" Then crNew basestack1, mybasket: wwPlain2 basestack1, mybasket, "Use SHIFT F1, edit, ESC to return", basestack1.Owner.Width, 1000, True
                         Else
-                        wwPlain basestack1, mybasket, " ? " & LastErNameGR, basestack1.Owner.Width, 1000, True
-                        If Left$(FK$(13), 4) = "EDIT" Then crNew basestack1, mybasket: wwPlain basestack1, mybasket, "Με το SHIFT F1 διορθώνεις, ESC επιστρέφεις", basestack1.Owner.Width, 1000, True
+                        wwPlain2 basestack1, mybasket, " ? " & LastErNameGR, basestack1.Owner.Width, 1000, True
+                        If Left$(FK$(13), 4) = "EDIT" Then crNew basestack1, mybasket: wwPlain2 basestack1, mybasket, "Με το SHIFT F1 διορθώνεις, ESC επιστρέφεις", basestack1.Owner.Width, 1000, True
                         End If
                             
                             LastErName = "?" & LastErName
                             LastErNameGR = "?" & LastErNameGR
                 Else
                         mybasket = players(DisForm)
-                        wwPlain basestack1, mybasket, " ? " & qq$, basestack1.Owner.Width, 1000, True
+                        wwPlain2 basestack1, mybasket, " ? " & qq$, basestack1.Owner.Width, 1000, True
                 End If
         End If
         crNew basestack1, mybasket
@@ -2347,6 +2347,9 @@ KeyCode = 0
 
 Case vbKeyTab
 nochange = True
+If Len(TEXT1.CurrentParagraph) + 1 < TEXT1.Charpos Then
+TEXT1.SelStartSilent = TEXT1.CharPosStart - TEXT1.Charpos + 1
+End If
 If TEXT1.HaveMarkedText Then TEXT1.SelStartSilent = TEXT1.SelStart
     gList1.enabled = False
     JJ = TEXT1.SelStart
@@ -2491,12 +2494,12 @@ If TEXT1.UsedAsTextBox Then
 
 Else
 If UserCodePage = 1253 Then
-textinformCaption = "Γραμμή(" + CStr(tLine) + ")-Θέση(" + CStr(TEXT1.Charpos) + ")"
+textinformCaption = "Γραμμή(" + CStr(tLine) + ")-Θέση(" + CStr(tPos) + ")"
 TEXT1.ReplaceTitle = "[" + CStr(TEXT1.Charpos) + "-" + CStr(tLine) + "/" + CStr(TEXT1.mDoc.DocLines) + "]  §:" + CStr(TEXT1.mDoc.DocParagraphs) + Mark$ + " " + GetLCIDFromKeyboardLanguage
 
 Else
-textinformCaption = "Line(" + CStr(tLine) + ")-Pos(" + CStr(TEXT1.Charpos) + ")"
-TEXT1.ReplaceTitle = "[" + CStr(TEXT1.Charpos) + "-" + CStr(tLine) + "/" + CStr(TEXT1.mDoc.DocLines) + "] §:" + CStr(TEXT1.mDoc.DocParagraphs) + Mark$ + " " + GetLCIDFromKeyboardLanguage
+textinformCaption = "Line(" + CStr(tLine) + ")-Pos(" + CStr(tPos) + ")"
+TEXT1.ReplaceTitle = "[" + CStr(tPos) + "-" + CStr(tLine) + "/" + CStr(TEXT1.mDoc.DocLines) + "] §:" + CStr(TEXT1.mDoc.DocParagraphs) + Mark$ + " " + GetLCIDFromKeyboardLanguage
 End If
 
 End If

@@ -249,7 +249,6 @@ Private Sub ReduceHash(newTop As Long)
                 MaxSpace = 5
                 ReDim Preserve PriveSpace(MaxSpace) As item
                 
-                ReDim Hash(MaxSpace * 2 + 3)
                 hashlen = MaxSpace * 2 + 3
                 
                 ReHash
@@ -261,7 +260,6 @@ Private Sub ReduceHash(newTop As Long)
             If MaxSpace - newTop + 1 > 2 * newTop + 2 Then
             MaxSpace = 2 * (newTop + 1) + 1
             ReDim Preserve PriveSpace(MaxSpace) As item
-            ReDim Hash(MaxSpace * 2 + 3)
             hashlen = MaxSpace * 2 + 3
             ReHash
     End If

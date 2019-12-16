@@ -79,7 +79,7 @@ Private Const LOCALE_SYSTEM_DEFAULT As Long = &H800
 Private Const LOCALE_USER_DEFAULT As Long = &H800
 Private Const C3_DIACRITIC As Long = &H2
 Private Const CT_CTYPE3 As Byte = &H4
-Private Declare Function GetStringTypeExW Lib "kernel32.dll" (ByVal Locale As Long, ByVal dwInfoType As Long, ByVal lpSrcStr As Long, ByVal cchSrc As Long, ByRef lpCharType As Byte) As Long
+Private Declare Function GetStringTypeExW Lib "kernel32.dll" (ByVal Locale As Long, ByVal dwInfoType As Long, ByVal lpSrcStr As Long, ByVal cchSrc As Long, ByRef lpCharType As Integer) As Long
 Private Declare Function SetTextCharacterExtra Lib "gdi32" (ByVal hDC As Long, ByVal nCharExtra As Long) As Long
 Private Declare Function WideCharToMultiByte Lib "KERNEL32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long, ByVal lpMultiByteStr As Long, ByVal cchMultiByte As Long, ByVal lpDefaultChar As Long, ByVal lpUsedDefaultChar As Long) As Long
 Private Declare Function GdiFlush Lib "gdi32" () As Long
@@ -337,6 +337,17 @@ Public Type DRAWTEXTPARAMS
      uiLengthDrawn As Long
 End Type
 Public tParam As DRAWTEXTPARAMS
+
+Public Const TA_LEFT = 0
+Public Const TA_RIGHT = 2
+Public Const TA_CENTER = 6
+Public Const TA_RTLREADING = &H100&
+Public Declare Function SetTextJustification Lib "gdi32" (ByVal hDC As Long, ByVal nBreakExtra As Long, ByVal nBreakCount As Long) As Long
+Public Declare Function SetTextAlign Lib "gdi32" (ByVal hDC As Long, ByVal wFlags As Long) As Long
+Public Declare Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal hDC As Long, ByVal X As Long, ByVal Y As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Long, ByVal nTabOrigin As Long) As Long
+Public Declare Function TextOut Lib "gdi32" Alias "TextOutW" (ByVal hDC As Long, ByVal X As Long, ByVal Y As Long, ByVal lpString As Long, ByVal nCount As Long) As Long
+Public Declare Function GetTabbedTextExtent Lib "user32" Alias "GetTabbedTextExtentW" (ByVal hDC As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, lpnTabStopPositions As Long) As Long
+
 Function CheckItemType(bstackstr As basetask, v As Variant, a$, r$, Optional ByVal wasarr As Boolean = False) As Boolean
 Dim useHandler As mHandler, fastcol As FastCollection, pppp As mArray, w1 As Long, p As Variant, s$
 CheckItemType = True
@@ -703,7 +714,7 @@ Else
 
 LastErNum = val(" " & Mid$(er$, rinstr(er$, " ")) + ".0")
 End If
-If LastErNum = 0 Then LastErNum = -1 ': Debug.Print er$, ergr$: Stop
+If LastErNum = 0 Then LastErNum = -1
 LastErNum1 = LastErNum
 
 If InStr("*" + LastErName, NLtrim$(er$)) = 0 Then
@@ -1400,7 +1411,6 @@ conthere:
                           
 End Function
 
-
 Public Function MyTextWidth(d As Object, a$) As Long
 Dim nr As RECT
 CalcRect d.hDC, a$, nr
@@ -1630,18 +1640,39 @@ Dim PX As Long, PY As Long, r As Long, p$, c$, LEAVEME As Boolean, nr As RECT, n
 Dim p2 As Long, mUAddPixelsTop As Long
 Dim pixX As Long, pixY As Long
 Dim rTop As Long, rBottom As Long
-Dim lenw&, realR&, realstop&, r1 As Long, WHAT1$
+Dim lenw&, realR&, realstop&, r1 As Long, WHAT1$, ff As Long, LL$(), must As Long
+If processcr Then
+LL$() = Split(what, vbLf)
+what = LL$(0)
+ff = 0
+End If
 
-Dim a() As Byte, a1() As Byte
+Dim a1() As Integer, A2() As Integer
 '' LEAVEME = False -  NOT NEEDED
 again:
 nr.Left = 0
 realR& = 0
 
+
 With mybasket
     mUAddPixelsTop = mybasket.uMineLineSpace \ dv15  ' for now
     PX = .curpos
     PY = .currow
+        If PY = .My And .double Then
+            If ddd.name = "PrinterDocument1" Then
+                        getnextpage
+                         With nr
+                         .top = PY * pixY + mUAddPixelsTop
+                          .Bottom = .top + pixY - p2
+                         End With
+                        PY = 0
+                        .currow = 0
+                        Else
+                        
+                        ScrollUpNew ddd, mybasket
+                        End If
+            PY = .currow
+        End If
     p2 = mUAddPixelsTop * 2
     pixX = .Xt / dv15
     pixY = .Yt / dv15
@@ -1656,13 +1687,14 @@ With mybasket
     rBottom = rTop + pixY - plusone
     lenw& = RealLen(what)
     WHAT1$ = what + " "
-     ReDim a(Len(WHAT1$) * 2 + 20)
-       ReDim a1(Len(WHAT1$) * 2 + 20)
-     
+      ReDim a1(Len(WHAT1$) + 10)
+    ReDim A2(Len(WHAT1$) + 10)
      Dim skip As Boolean
+     skip = GetStringTypeExW(&HB, 4, StrPtr(WHAT1$), Len(WHAT1$), a1(0)) = 0
+      skip = GetStringTypeExW(&HB, 2, StrPtr(WHAT1$), Len(WHAT1$), A2(0)) = 0 Or skip
+     Dim ii As Long, mark1 As Long, mr As Long, ML As Long
+
      
-     skip = GetStringTypeExW(&HB, 1, StrPtr(WHAT1$), Len(WHAT1$), a(0)) = 0  ' Or IsWine
-     skip = GetStringTypeExW(&HB, 4, StrPtr(WHAT1$), Len(WHAT1$), a1(0)) = 0 Or skip
         Do While (lenw& - r) >= .mx - PX And (.mx - PX) > 0
         
 
@@ -1678,19 +1710,38 @@ With mybasket
         r1 = .mx - PX - 1 + r
         If ddd.CurrentX = 0 And clearline Then ddd.Line (0&, PY * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (PY) * .Yt + .Yt - 1 * DYP), .Paper, BF
             Do
-           '  If ddd.CurrentX = 0 And clearline Then ddd.Line (0&, PY * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (PY) * .Yt + .Yt - 1 * DYP), .Paper, BF
-
-            If ONELINE And nocr And PX > .mx Then what = vbNullString: Exit Do
+             If ONELINE And nocr And PX > .mx Then what = vbNullString: Exit Do
             c$ = Mid$(WHAT1$, r + 1, 1)
                 w = AscW(c$)
                 If w > -10241 And w < -9984 Then
                 c$ = Mid$(WHAT1$, r + 1, 2)
                 r = r + 1
-                End If
-                If nounder32(c$) Then
-            
+                GoTo checkcombine
+                ElseIf A2(r) = 0 And a1(r) = 0 Then
+                r = r + 1
+                GoTo cont0
+                ElseIf (A2(r) And 254) = 2 And (a1(r) And &H8000) <> 0 Then
+                mark1 = r + 1
+                For ii = r + 2 To Len(what$)
+                If Not A2(ii) > 2 Then If (A2(ii) And 2) <> 2 And (a1(ii) And 7) = 0 Then Exit For
+                Next ii
+                 c$ = Mid$(what$, mark1, ii - mark1 + 1)
+                r = r + Len(c$)
+                If ii > mark1 Then r = r - 1
+                mark1 = nr.Right
+                nr.Right = (PX + Len(what$)) * pixX + 1
+                DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX
+                mark1 = TextWidth(ddd, c$)
+                mark1 = mark1 \ .Xt - (mark1 Mod .Xt > 0)
+                nr.Right = nr.Left + mark1 * pixX + 1
+                realR& = realR + mark1
+               
+                ddd.CurrentX = nr.Right * DXP
+                
+                ElseIf nounder32(c$) Then
+checkcombine:
                 If Not skip Then
-                    If a(r * 2 + 2) = 0 And a(r * 2 + 3) <> 0 And a1(r * 2 + 2) < 8 Then
+                    If (a1(r + 1) And &H8000) = 0 And (a1(r + 1) And 7) <> 0 Then
                           Do
                                 p$ = Mid$(WHAT1$, r + 2, 1)
                                 If ideographs(p$) Then Exit Do
@@ -1698,13 +1749,18 @@ With mybasket
                                 c$ = c$ + p$
                                 r = r + 1
                                 If r >= r1 Then Exit Do
-                         Loop Until a(r * 2 + 2) <> 0 Or a(r * 2 + 3) = 0
+                         Loop Until (a1(r) And 7) = 0
                      End If
                  End If
+                 
                  DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
               Else
               
-            If c$ = Chr$(7) Then Beep: r = r + 1: realR = realR - 1: GoTo cont0
+            If c$ = Chr$(7) Then
+            If ddd.name <> "PrinterDocument1" Then Beep
+             r = r + 1: realR = realR - 1:
+             GoTo cont0
+             End If
 
         If processcr Then
             realR& = realR + 1
@@ -1736,10 +1792,23 @@ With mybasket
                 Else
                 .currow = PY + 1
                 End If
-                what$ = Mid$(WHAT1$, r + 2)
-               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
-               r = 0
+                ff = ff + 1
+                If ff < UBound(LL) Then
+                    If Right$(LL$(ff), 1) <> vbCr Then
+                        what = LL$(ff) + vbCr
+                    Else
+                    what = LL$(ff)
+                    End If
+                    r = 0
                     GoTo again
+                ElseIf ff = UBound(LL) Then
+                   what = LL$(ff)
+                    r = 0
+                    GoTo again
+                Else
+                    Exit Do
+                End If
+
         
             ElseIf c$ = ChrW(10) Then
                 .curpos = 0
@@ -1790,8 +1859,11 @@ cont0:
         If realR > .mx - PX - 1 Then Exit Do
     
          Loop
+   If realR < .mx - PX - 1 Then
+  GoTo cont1
+  End If
         .curpos = PX + realR
- 
+
         If Not ONELINE Then PX = 0
         
         If nocr Then Exit Sub Else PY = PY + 1
@@ -1856,18 +1928,42 @@ realR& = 0
     ddd.CurrentY = PY * .Yt + .uMineLineSpace
         If ddd.CurrentX = 0 And clearline Then ddd.Line (0&, PY * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (PY) * .Yt + .Yt - 1 * DYP), .Paper, BF
 
+
 r1 = Len(what$) - 1
     For r = r To r1
         c$ = Mid$(WHAT1$, r + 1, 1)
+       
                         w = AscW(c$)
                 If w > -10241 And w < -9984 Then
                 c$ = Mid$(WHAT1$, r + 1, 2)
                 r = r + 1
-                End If
-        If nounder32(c$) Then
-       ' skip = True
+                GoTo checkcombine1
+                ElseIf A2(r) = 0 And a1(r) = 0 Then
+                r = r + 1
+                GoTo cont1
+                ElseIf (A2(r) And 254) = 2 And (a1(r) And &H8000) <> 0 Then
+                mark1 = r + 1
+                For ii = r + 2 To Len(what$)
+                If Not A2(ii) > 2 Then If (A2(ii) And 2) <> 2 And (a1(ii) And 7) = 0 Then Exit For
+                Next ii
+                c$ = Mid$(what$, mark1, ii - mark1 + 1)
+                r = r + Len(c$)
+                If ii > mark1 Then r = r - 1
+                mark1 = nr.Right
+                nr.Right = (PX + Len(what$)) * pixX + 1
+                DrawTextEx ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX, 0
+                mark1 = TextWidth(ddd, c$)
+                mark1 = mark1 \ .Xt - (mark1 Mod .Xt > 0)
+                nr.Right = nr.Left + mark1 * pixX + 1
+                realR& = realR + mark1
+               
+                ddd.CurrentX = nr.Right * DXP
+                If Not processcr Then GoTo contNew
+                GoTo again
+                ElseIf nounder32(c$) Then
+checkcombine1:
              If Not skip Then
-           If a(r * 2 + 2) = 0 And a(r * 2 + 3) <> 0 And a1(r * 2 + 2) < 8 Then
+           If (a1(r + 1) And &H8000) = 0 And (a1(r + 1) And 7) <> 0 Then
             Do
                 p$ = Mid$(WHAT1$, r + 2, 1)
                 If ideographs(p$) Then Exit Do
@@ -1875,14 +1971,18 @@ r1 = Len(what$) - 1
                 c$ = c$ + p$
                 r = r + 1
                 If r >= r1 Then Exit Do
-            Loop Until a(r * 2 + 2) <> 0 Or a(r * 2 + 3) = 0
+            Loop Until (a1(r) And 7) = 0
             End If
          End If
                
       ddd.CurrentX = ddd.CurrentX + .Xt
         
     Else
-        If c$ = Chr$(7) Then Beep: GoTo cont1
+CHECK1:
+        If c$ = Chr$(7) Then
+            If ddd.name <> "PrinterDocument1" Then Beep
+            GoTo cont1
+        End If
         If processcr Then
             realR& = realR + 1
             If c$ = ChrW(9) Then
@@ -1897,6 +1997,10 @@ r1 = Len(what$) - 1
                     r = r + 1
                 End If
                     .curpos = 0
+                    PX = 0
+                    ddd.CurrentX = 0
+                    realR& = 0
+                    c$ = ""
                 If PY + 1 = .My Then
                     If ddd.name = "PrinterDocument1" Then
                         getnextpage
@@ -1913,12 +2017,22 @@ r1 = Len(what$) - 1
                 Else
                 .currow = PY + 1
                 End If
-                what$ = Mid$(WHAT1$, r + 2)
-               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
-               r = 0
-                    
+                ff = ff + 1
+                If ff < UBound(LL) Then
+                    If Right$(LL$(ff), 1) <> vbCr Then
+                        what = LL$(ff) + vbCr
+                    Else
+                    what = LL$(ff)
+                    End If
+                    r = 0
                     GoTo again
-                
+                ElseIf ff = UBound(LL) Then
+                   what = LL$(ff)
+                    r = 0
+                    GoTo again
+                Else
+                    Exit For
+                End If
             ElseIf c$ = ChrW(10) Then
                 .curpos = 0
                 If PY + 1 >= .My Then
@@ -1943,6 +2057,7 @@ r1 = Len(what$) - 1
                 what$ = Mid$(WHAT1$, r + 2)
                If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
                r = 0
+               If Len(what$) = 0 Then GoTo contNew
                 GoTo again
             End If
         
@@ -1951,15 +2066,27 @@ r1 = Len(what$) - 1
         
     DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
     realR& = realR + 1
+contNew:
     With nr
        .Left = .Right
        .Right = .Left + pixX
     End With
 cont1:
     Next r
+    If Not processcr Then
+    If lenw& > realR& Then
+    realR& = ((realR& + .Column + 1) \ (.Column + 1)) * (.Column + 1)
+    End If
+    End If
      .curpos = PX + realR
      .currow = PY
      Exit Sub
+    ElseIf processcr Then
+    If ff < UBound(LL) Then
+        what = Chr$(13)
+    
+    GoTo again
+    End If
     End If
 
   .curpos = PX
@@ -2143,11 +2270,10 @@ Public Sub fullPlainWhere(dd As Object, mb As basket, ByVal wh$, ByVal wi As Lon
 Dim whNoSpace$, Displ As Long, DisplLeft As Long, i As Long, whSpace$, INTD As Long, MinDispl As Long
 Dim stdisp As Long, ratio As Double
 
-If Left$(LTrim(wh$), 1) = Chr$(9) Then
-MyPrintNew dd, mb.uMineLineSpace, wh$, Not nocr, fake
-Exit Sub
-End If
-
+'If Left$(LTrim(wh$), 1) = Chr$(9) Then
+'MyPrintNew dd, mb.uMineLineSpace, wh$, Not nocr, fake
+'Exit Sub
+'End If
 If TextWidth(dd, "W") = TextWidth(dd, " ") Then
 MinDispl = TextWidth(dd, " ")
 Else
@@ -2810,7 +2936,6 @@ Public Sub nForm(bstack As basetask, TheSize As Single, nW As Long, nH As Long, 
     nH = fonttest.TextHeight("Wq") + myLineSpace * 2
     nW = fonttest.TextWidth("W") + dv15
 End Sub
-
 Sub crNew(bstack As basetask, mb As basket)
 Dim d As Object
 Set d = bstack.Owner
@@ -2885,6 +3010,7 @@ ar.top = .mysplit * .Yt / dv15
 p = .Yt / dv15
 r = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.top), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.top + p), SRCCOPY)
 
+ 
  ar.top = ar.Bottom - p
 FillBack d.hDC, ar, .Paper
 .curpos = 0
@@ -3542,7 +3668,7 @@ b$ = "ENVIRONMENT "
 End If
 d.ForeColor = mycolor(PenOne)
 LCTbasket d, players(DisForm), 0, 0
-wwPlain bstack, players(DisForm), b$ & "M2000", d.Width, 0, 0 '',True
+wwPlain2 bstack, players(DisForm), b$ & "M2000", d.Width, 0, 0 '',True
 ICO = TextWidth(d, b$ & "M2000") + 100
 ' draw graphic'
 Dim IX As Long, IY As Long
@@ -3568,24 +3694,24 @@ SetNormal d
         rs = vbNullString
             If bstack.myCharSet = 161 Then
             If Revision = 0 Then
-            wwPlain bstack, players(DisForm), "Έκδοση Διερμηνευτή: " & CStr(VerMajor) & "." & CStr(VerMinor), d.Width, 0, True
+            wwPlain2 bstack, players(DisForm), "Έκδοση Διερμηνευτή: " & CStr(VerMajor) & "." & CStr(VerMinor), d.Width, 0, True
             Else
-                    wwPlain bstack, players(DisForm), "Έκδοση Διερμηνευτή: " & CStr(VerMajor) & "." & Left$(CStr(VerMinor), 1) & " (" & CStr(Revision) & ")", d.Width, 0, True
+                    wwPlain2 bstack, players(DisForm), "Έκδοση Διερμηνευτή: " & CStr(VerMajor) & "." & Left$(CStr(VerMinor), 1) & " (" & CStr(Revision) & ")", d.Width, 0, True
                 End If
-                   wwPlain bstack, players(DisForm), "Λειτουργικό Σύστημα: " & os & osbit, d.Width, 0, True
+                   wwPlain2 bstack, players(DisForm), "Λειτουργικό Σύστημα: " & os & osbit, d.Width, 0, True
             
-                      wwPlain bstack, players(DisForm), "Όνομα Χρήστη: " & Tcase(Originalusername), d.Width, 0, True
+                      wwPlain2 bstack, players(DisForm), "Όνομα Χρήστη: " & Tcase(Originalusername), d.Width, 0, True
                 
             Else
              If Revision = 0 Then
-              wwPlain bstack, players(DisForm), "Interpreter Version: " & CStr(VerMajor) & "." & CStr(VerMinor), d.Width, 0, True
+              wwPlain2 bstack, players(DisForm), "Interpreter Version: " & CStr(VerMajor) & "." & CStr(VerMinor), d.Width, 0, True
              Else
-                    wwPlain bstack, players(DisForm), "Interpreter Version: " & CStr(VerMajor) & "." & Left$(CStr(VerMinor), 1) & " rev. (" & CStr(Revision) & ")", d.Width, 0, True
+                    wwPlain2 bstack, players(DisForm), "Interpreter Version: " & CStr(VerMajor) & "." & Left$(CStr(VerMinor), 1) & " rev. (" & CStr(Revision) & ")", d.Width, 0, True
                  End If
               
-                      wwPlain bstack, players(DisForm), "Operating System: " & os & osbit, d.Width, 0, True
+                      wwPlain2 bstack, players(DisForm), "Operating System: " & os & osbit, d.Width, 0, True
                 
-                   wwPlain bstack, players(DisForm), "User Name: " & Tcase(Originalusername), d.Width, 0, True
+                   wwPlain2 bstack, players(DisForm), "User Name: " & Tcase(Originalusername), d.Width, 0, True
         
                  End If
                         '    cr bstack
@@ -4180,7 +4306,6 @@ a1 = True
 i = 1
 Do
 Column = Column + 1
-'Debug.Print Mid$(s$, i, 1)
 Select Case AscW(Mid$(s$, i, 1))
 Case 10
 Column = 0
@@ -7793,65 +7918,6 @@ Loop
 Pos = lenA + 2
 
 End Sub
-Sub dumpModule(no As Long)
-Dim a$, i As Long, GUARD As Long, oldi As Long, ok As Boolean, r As Long
-Dim part$, trimright
-a$ = sbf(no).sb
-GUARD = Len(a$)
-i = 1
-While i <= GUARD
-i = MyTrimLi(a$, i)
-While Mid$(a$, i, 2) = vbCrLf And i <= GUARD
-i = i + 2
-Wend
-While MaybeIsSymbol3lot(a$, "'\#", i)
-i = i + 1
-While Not Mid$(a$, i, 2) = vbCrLf And i <= GUARD
-i = i + 1
-Wend
-While Mid$(a$, i, 2) = vbCrLf And i <= GUARD
-i = i + 2
-Wend
-i = MyTrimLi(a$, i)
-Wend
-
-If i <= GUARD Then
-    oldi = i
- 
-    
-    GetCodePart a$, i
-    
-    trimright = MyTrimRfrom(a$, oldi, i)
-    If IsNumberLabel2(a$, part$, oldi, i) Then
-    Debug.Print "<<LABEL>> " & part$
-    oldi = MyTrimLi(a$, oldi)
-    End If
-   If oldi < trimright Then
-    Debug.Print "<<Part>>"
-    Debug.Print Mid$(a$, oldi, trimright - oldi)
-    
-    End If
-    If i = 0 Then Exit Sub
-    If Mid$(a$, i) = vbCr Then i = i + 2 Else i = i + 1
-End If
-Wend
-'Debug.Print a$
-End Sub
-Sub test2(Optional a$)
-Dim i As Long, j As Long, s$, ok As Boolean
-a$ = "a>15  {" + vbCrLf + " Print 1000 " + vbCrLf + "} 1 2 3"
-a$ = "nmn nmmn {asdsad}+{dsdfsf}>a${hjkh}"
-a$ = "{ddg}+b$ {hkjh}"
-a$ = "not {a}>{aa}+aaa$ and 10>len({3}) and {z}=basdas$ gghjh{asdas}"
-a$ = " 1>2 and  {alfa}={beta} and 1>2"
-a$ = "a$+b$ {}" ' + vbCr
-a$ = "              a$> b$"
-a$ = "list:=1,2,3,4 : Print 12"
-i = 1
-aheadstatusNew a$, i, ok
-Debug.Print Left$(a$, i), i
-Debug.Print ok
-End Sub
 '
 Public Sub aheadstatusNew(a$, Pos As Long, flag As Boolean)
 Dim b$, part$, w$, pos2 As Long
@@ -9513,100 +9579,183 @@ a112:
 
 End Sub
 Public Function RealLen(s$, Optional checkone As Boolean = False) As Long
-Dim i&, LL As Long
-Dim p2 As Long, p1 As Integer, p4 As Long
-  LL = Len(s): If LL = 0 Then Exit Function
-  p2 = StrPtr(s):
-  p4 = p2 + (LL - 1) * 2
+Dim i&, LL As Long, n As Long
+LL = Len(s): If LL = 0 Then Exit Function
+If checkone Then LL = 1
+Dim a1() As Integer, A2() As Integer
+ReDim a1(LL + 6)
+ReDim A2(LL + 6)
+Dim skip As Boolean
+skip = GetStringTypeExW(&HB, 4, StrPtr(s$), LL, a1(0)) = 0
+skip = GetStringTypeExW(&HB, 2, StrPtr(s$), LL, A2(0)) = 0 Or skip
+If skip Then
+RealLen = LL
+Else
+  i& = LL - 1
   LL = LL * 2
-  If checkone Then p4 = p2
-  For i = p2 To p4 Step 2
-  GetMem2 i, p1
-  Select Case p1
-    Case -10240 To -9985, -9214 To -8959
+  For n = 0 To i&
+  If a1(n) = 2048 And A2(n) = 1 Then
     LL = LL - 1
-    Case 768 To 879
+  ElseIf a1(n) = 4096 And A2(n) = 0 Then
+     LL = LL - 1
+   ElseIf a1(n) = 3 And A2(n) = 11 Then
     LL = LL - 2
-     End Select
-  Next i
-
+   ElseIf a1(n) = 0 And A2(n) = 0 Then
+   LL = LL - 2
+   ElseIf a1(n) = 1 Then
+   LL = LL - 2
+   End If
+  Next n
 RealLen = LL \ 2
+End If
+
 End Function
 Public Function PopOne(s$) As String
-Dim i&, l As Long, LL As Long, l2 As Long
-Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(s): If l = 0 Then Exit Function
-  p2 = StrPtr(s)
-  p4 = p2 + (l - 1) * 2
-  For i = p2 To p4 Step 2
-  GetMem2 i, p1
-  Select Case p1
-    Case -10240 To -9985, -9214 To -8959
+Dim i&, LL As Long, n As Long
+LL = Len(s): If LL = 0 Then Exit Function
+Dim a1() As Integer, A2() As Integer
+ReDim a1(LL + 6)
+ReDim A2(LL + 6)
+Dim skip As Boolean
+skip = GetStringTypeExW(&HB, 4, StrPtr(s$), LL, a1(0)) = 0
+skip = GetStringTypeExW(&HB, 2, StrPtr(s$), LL, A2(0)) = 0 Or skip
+If skip Then
+ PopOne = Left$(s$, 1)
+ s$ = Mid$(s$, 2)
+Else
+  i& = LL - 1
+  LL = 0
+  For n = 0 To i&
+  If a1(n) = 2048 And A2(n) = 1 Then
+  If LL = 2 Then Exit For
     LL = LL + 1
+  ElseIf a1(n) = 4096 And A2(n) = 0 Then
     If LL = 2 Then Exit For
-    Case 768 To 879
-    If LL < 2 Then
-    PopOne = ChrW(p1)
-    s = Mid$(s, 2)
-    Exit Function
-    ' nothing
-    End If
-    Case Else
-    If LL = 1 Then
-    PopOne = "?"
-    s$ = Mid$(s$, 3)
-    Exit Function
-    End If
-    Exit For
-     End Select
-  Next i
+     LL = LL + 1
+     ElseIf a1(n) = 3 And A2(n) = 11 Then
+        If LL < 2 Then
+            PopOne = Left$(s, 1)
+            s = Mid$(s, 2)
+            Exit Function
+        End If
+     ElseIf (a1(n) = 0 And A2(n) = 0) Or a1(n) = 1 Then
+        If LL < 2 Then
+            PopOne = Left$(s, 1)
+            s = Mid$(s, 2)
+            Exit Function
+        End If
+    Else
+    If LL = 2 Then Exit For
+    LL = LL + 2
+   End If
+  Next n
   If LL < 2 Then LL = 1 Else LL = LL \ 2
  PopOne = Left$(s$, LL)
 s$ = Mid$(s$, LL + 1)
+End If
+
+
 End Function
 Public Sub ExcludeOne(s$)
-Dim i&, LL As Long
-Dim p2 As Long, p1 As Integer, p4 As Long, many
-  LL = Len(s): If LL = 0 Then Exit Sub
- 
-  p2 = StrPtr(s):
-  p4 = p2 + (LL - 1) * 2
-  many = 2
-  For i = p4 To p2 Step -2
-  GetMem2 i, p1
-  Select Case p1
-    Case -10240 To -9985, -9214 To -8959
-    many = many - 1
-    Case 768 To 879
-    Case Else
-    many = many - 2
-     End Select
-     If many <= 0 Then Exit For
-  Next i
-  s$ = Mid$(s$, 1, (i - p2) \ 2)
+Dim i&, LL As Long, n As Long
+LL = Len(s): If LL = 0 Then Exit Sub
+Dim a1() As Integer, A2() As Integer
+ReDim a1(LL + 6)
+ReDim A2(LL + 6)
+Dim skip As Boolean
+skip = GetStringTypeExW(&HB, 4, StrPtr(s$), LL, a1(0)) = 0
+skip = GetStringTypeExW(&HB, 2, StrPtr(s$), LL, A2(0)) = 0 Or skip
+If skip Then
+ s$ = Left$(s$, Len(s$) - 1)
+Else
+  i& = LL - 1
+  LL = 0
+  For n = i& To 0 Step -1
+  If a1(n) = 2048 And A2(n) = 1 Then
+  If LL = 2 Then Exit For
+    LL = LL + 1
+  ElseIf a1(n) = 4096 And A2(n) = 0 Then
+    If LL = 2 Then Exit For
+     LL = LL + 1
+     ElseIf a1(n) = 3 And A2(n) = 11 Then
+    ElseIf a1(n) = 0 And A2(n) = 0 Then
+    ElseIf a1(n) = 1 Then
+    Else
+    If LL = 2 Then Exit For
+    LL = LL + 2
+   End If
+  Next n
+     s$ = Left$(s$, n + 1)
+End If
 End Sub
 Function RealRight(s$, ByVal many As Long) As String
-Dim i&, LL As Long
-Dim p2 As Long, p1 As Integer, p4 As Long
-  LL = Len(s): If LL = 0 Or many <= 0 Then Exit Function
-  If many >= LL Then RealRight = s$: Exit Function
-  p2 = StrPtr(s):
-  p4 = p2 + (LL - 1) * 2
-  many = many * 2
-  For i = p4 To p2 Step -2
-  GetMem2 i, p1
-  Select Case p1
-    Case -10240 To -9985, -9214 To -8959
-    many = many - 1
-    Case 768 To 879
-    Case Else
-    many = many - 2
-     End Select
-     If many <= 0 Then Exit For
-  Next i
-  RealRight = Mid$(s$, (i - p2 + 2) \ 2)
-End Function
+Dim i&, LL As Long, n As Long
+LL = Len(s): If LL = 0 Then Exit Function
+If many >= LL Then RealRight = s$: Exit Function
 
+Dim a1() As Integer, A2() As Integer
+ReDim a1(LL + 6)
+ReDim A2(LL + 6)
+Dim skip As Boolean
+skip = GetStringTypeExW(&HB, 4, StrPtr(s$), LL, a1(0)) = 0
+skip = GetStringTypeExW(&HB, 2, StrPtr(s$), LL, A2(0)) = 0 Or skip
+If skip Then
+ RealRight = Right$(s$, many)
+Else
+  i& = LL - 1
+  LL = -(many - 1) * 2 + 2
+  For n = i& To 0 Step -1
+  If a1(n) = 2048 And A2(n) = 1 Then
+  If LL = 2 Then Exit For
+    LL = LL + 1
+  ElseIf a1(n) = 4096 And A2(n) = 0 Then
+    If LL = 2 Then Exit For
+     LL = LL + 1
+     ElseIf a1(n) = 3 And A2(n) = 11 Then
+     ElseIf a1(n) = 0 And A2(n) = 0 Then
+     ElseIf a1(n) = 1 Then
+    Else
+    If LL = 2 Then Exit For
+    LL = LL + 2
+   End If
+  Next n
+     RealRight = Mid$(s$, n + 1)
+End If
+End Function
+Function RealLeft(s$, ByVal many As Long) As String
+Dim i&, LL As Long, n As Long
+LL = Len(s): If LL = 0 Then Exit Function
+If many >= LL Then RealLeft = s$: Exit Function
+
+Dim a1() As Integer, A2() As Integer
+ReDim a1(LL + 6)
+ReDim A2(LL + 6)
+Dim skip As Boolean
+skip = GetStringTypeExW(&HB, 4, StrPtr(s$), LL, a1(0)) = 0
+skip = GetStringTypeExW(&HB, 2, StrPtr(s$), LL, A2(0)) = 0 Or skip
+If skip Then
+ RealLeft = Left$(s$, many)
+Else
+  i& = LL - 1
+  LL = -(many - 1) * 2 + 2
+  For n = 0 To i&
+  If a1(n) = 2048 And A2(n) = 1 Then
+  If LL = 2 Then Exit For
+    LL = LL + 1
+  ElseIf a1(n) = 4096 And A2(n) = 0 Then
+    If LL = 2 Then Exit For
+     LL = LL + 1
+     ElseIf a1(n) = 3 And A2(n) = 11 Then
+     ElseIf a1(n) = 0 And A2(n) = 0 Then
+     ElseIf a1(n) = 1 Then
+    Else
+    If LL = 2 Then Exit For
+    LL = LL + 2
+   End If
+  Next n
+     RealLeft = Mid$(s$, 1, n + 1)
+End If
+End Function
 
 Function Tcase(s$) As String
 Dim a() As String, i As Long
@@ -9931,6 +10080,12 @@ MyEr "File/Folder Selector in Use", "Η φόρμα επιλογής αρχείων/φακέλων είναι σε χ
 End Sub
 Public Sub MissingDoc()  ' this is for identifier or execute part
 MyEr "missing document type variable", "λείπει μεταβλητή τύπου εγγράφου"
+End Sub
+Public Sub MissingDocOrArrayOrInventory()  ' this is for identifier or execute part
+MyEr "missing document or Array or Inventory type ", "λείπει τύπος έγγραφο ή πίνακα ή κατάσταση"
+End Sub
+Public Sub MissingArrayOrInventory()  ' this is for identifier or execute part
+MyEr "missing Array or Inventory type ", "λείπει τύπος πίνακα ή κατάσταση"
 End Sub
 Public Sub MissingLabel()
 MyEr "Missing label/Number line", "Λείπει Ετικέτα/Αριθμός γραμμής"
@@ -10474,13 +10629,13 @@ Do
         If IsExp(bstack, b$, p) Then
         If x1 = 0 Then If MaybeIsSymbol(b$, ",") Then x1 = 1: Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd
         If x1 = 0 Then
-                If Len(bstack.OriginalName$) > 3 Then
-                        If Mid$(bstack.OriginalName$, Len(bstack.OriginalName$) - 2, 1) = "$" Then
+                If Len(bstack.originalname$) > 3 Then
+                        If Mid$(bstack.originalname$, Len(bstack.originalname$) - 2, 1) = "$" Then
                             MissStringExpr
                             Exit Do
                         End If
                     End If
-                 If Right$(bstack.OriginalName$, 3) = "%()" Then p = MyRound(p)
+                 If Right$(bstack.originalname$, 3) = "%()" Then p = MyRound(p)
                  Set bstack.FuncObj = bstack.lastobj
                  Set bstack.lastobj = Nothing
                  bstack.FuncValue = p
@@ -10499,8 +10654,8 @@ Do
         ElseIf IsStrExp(bstack, b$, ss$) Then
             If x1 = 0 Then If MaybeIsSymbol(b$, ",") Then x1 = 1: Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd
             If x1 = 0 Then
-                If Len(bstack.OriginalName$) > 3 Then
-                    If Mid$(bstack.OriginalName$, Len(bstack.OriginalName$) - 2, 1) <> "$" Then
+                If Len(bstack.originalname$) > 3 Then
+                    If Mid$(bstack.originalname$, Len(bstack.originalname$) - 2, 1) <> "$" Then
                          MissNumExpr
                          GetReturnArray = True
                          Exit Function
@@ -10944,25 +11099,25 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
     Dim ss$, di As Object
     Set di = bstack.Owner
     If Lang = 0 Then
-        wwPlain bstack, prive, "Εξ ορισμού κωδικοσελίδα: " & GetACP, bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Φάκελος εφαρμογής", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, PathFromApp("m2000"), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Καταχώρηση gsb", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, myRegister("gsb"), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Φάκελος προσωρινών αρχείων", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, LONGNAME(strTemp), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Τρέχον φάκελος", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, mcd, bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Εξ ορισμού κωδικοσελίδα: " & GetACP, bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Φάκελος εφαρμογής", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, PathFromApp("m2000"), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Καταχώρηση gsb", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, myRegister("gsb"), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Φάκελος προσωρινών αρχείων", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, LONGNAME(strTemp), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Τρέχον φάκελος", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, mcd, bstack.Owner.Width, 1000, True
         If m_bInIDE Then
-        wwPlain bstack, prive, "Όριο Αναδρομής για Συναρτήσεις " + CStr(stacksize \ 2948 - 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Όριο Αναδρομής Συναρτήσεων/Τμημάτων με την Κάλεσε " + CStr(stacksize \ 1772 - 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Όριο κλήσεων για Τμήματα " + CStr(stacksize \ 1254 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Όριο Αναδρομής για Συναρτήσεις " + CStr(stacksize \ 2948 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Όριο Αναδρομής Συναρτήσεων/Τμημάτων με την Κάλεσε " + CStr(stacksize \ 1772 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Όριο κλήσεων για Τμήματα " + CStr(stacksize \ 1254 - 1), bstack.Owner.Width, 1000, True
         Else
-        wwPlain bstack, prive, "Όριο Αναδρομής για Συναρτήσεις " + CStr(stacksize \ 9832 - 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Όριο Αναδρομής Συναρτήσεων/Τμημάτων με την Κάλεσε " + CStr(stacksize \ 5864), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Όριο κλήσεων για Τμήματα  " + CStr(stacksize \ 5004), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Όριο Αναδρομής για Συναρτήσεις " + CStr(stacksize \ 9832 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Όριο Αναδρομής Συναρτήσεων/Τμημάτων με την Κάλεσε " + CStr(stacksize \ 5864), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Όριο κλήσεων για Τμήματα  " + CStr(stacksize \ 5004), bstack.Owner.Width, 1000, True
         End If
-        If OverideDec Then wwPlain bstack, prive, "Αλλαγή Τοπικού " + CStr(cLid), bstack.Owner.Width, 1000, True
+        If OverideDec Then wwPlain2 bstack, prive, "Αλλαγή Τοπικού " + CStr(cLid), bstack.Owner.Width, 1000, True
         If UseIntDiv Then ss$ = "+DIV" Else ss$ = "-DIV"
         If priorityOr Then ss$ = ss$ + " +PRI" Else ss$ = ss$ + " -PRI"
         If Not mNoUseDec Then ss$ = ss$ + " -DEC" Else ss$ = ss$ + " +DEC"
@@ -10976,32 +11131,32 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
         If Use13 Then ss$ = ss$ + " +INP" Else ss$ = ss$ + " -INP"
-        wwPlain bstack, prive, "Διακόπτες " + ss$, bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Περί διακοπτών: χρησιμοποίησε την εντολή Βοήθεια Διακόπτες", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Οθόνες:" + Str$(DisplayMonitorCount()) + "  η βασική :" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Αυτή η φόρμα είναι στην οθόνη:" + Str$(FindFormSScreen(di) + 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Η κονσόλα είναι στην οθόνη:" + Str$(Console + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Διακόπτες " + ss$, bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Περί διακοπτών: χρησιμοποίησε την εντολή Βοήθεια Διακόπτες", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Οθόνες:" + Str$(DisplayMonitorCount()) + "  η βασική :" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Αυτή η φόρμα είναι στην οθόνη:" + Str$(FindFormSScreen(di) + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Η κονσόλα είναι στην οθόνη:" + Str$(Console + 1), bstack.Owner.Width, 1000, True
 
     Else
-        wwPlain bstack, prive, "Default Code Page:" & GetACP, bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "App Path", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, PathFromApp("m2000"), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Register gsb", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, myRegister("gsb"), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Temporary", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, LONGNAME(strTemp), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Current directory", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, mcd, bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Default Code Page:" & GetACP, bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "App Path", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, PathFromApp("m2000"), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Register gsb", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, myRegister("gsb"), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Temporary", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, LONGNAME(strTemp), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Current directory", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, mcd, bstack.Owner.Width, 1000, True
         If m_bInIDE Then
-        wwPlain bstack, prive, "Max Limit for Function Recursion " + CStr(stacksize \ 2948 - 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Max Limit for Function/Module Recursion using Call " + CStr(stacksize \ 1772 - 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Max Limit for calling modules in depth " + CStr(stacksize \ 1254 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Max Limit for Function Recursion " + CStr(stacksize \ 2948 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Max Limit for Function/Module Recursion using Call " + CStr(stacksize \ 1772 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Max Limit for calling modules in depth " + CStr(stacksize \ 1254 - 1), bstack.Owner.Width, 1000, True
         Else
-        wwPlain bstack, prive, "Max Limit for Function Recursion " + CStr(stacksize \ 9832 - 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Max Limit for Function/Module Recursion using Call " + CStr(stacksize \ 5864), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Max Limit for calling modules in depth " + CStr(stacksize \ 5004), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Max Limit for Function Recursion " + CStr(stacksize \ 9832 - 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Max Limit for Function/Module Recursion using Call " + CStr(stacksize \ 5864), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Max Limit for calling modules in depth " + CStr(stacksize \ 5004), bstack.Owner.Width, 1000, True
         End If
-        If OverideDec Then wwPlain bstack, prive, "Locale Overide " + CStr(cLid), bstack.Owner.Width, 1000, True
+        If OverideDec Then wwPlain2 bstack, prive, "Locale Overide " + CStr(cLid), bstack.Owner.Width, 1000, True
         If UseIntDiv Then ss$ = "+DIV" Else ss$ = "-DIV"
         If priorityOr Then ss$ = ss$ + " +PRI" Else ss$ = ss$ + " -PRI"
         If Not mNoUseDec Then ss$ = ss$ + " -DEC" Else ss$ = ss$ + " +DEC"
@@ -11015,11 +11170,11 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
         If Use13 Then ss$ = ss$ + " +INP" Else ss$ = ss$ + " -INP"
-        wwPlain bstack, prive, "Switches " + ss$, bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "About Switches: use command Help Switches", bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Screens:" + Str$(DisplayMonitorCount()) + "  Primary is:" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "This form is in screen:" + Str$(FindFormSScreen(di) + 1), bstack.Owner.Width, 1000, True
-        wwPlain bstack, prive, "Console is in screen:" + Str$(Console + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Switches " + ss$, bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "About Switches: use command Help Switches", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Screens:" + Str$(DisplayMonitorCount()) + "  Primary is:" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "This form is in screen:" + Str$(FindFormSScreen(di) + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Console is in screen:" + Str$(Console + 1), bstack.Owner.Width, 1000, True
     End If
 End Sub
 Sub NeoSwap(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
@@ -11076,8 +11231,7 @@ Sub NeoLayer(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = ProcLayer(ObjFromPtr(basestackLP), rest$)
 End Sub
 Sub NeoOrder(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-MyOrder ObjFromPtr(basestackLP), rest$
-resp = True
+resp = MyOrder(ObjFromPtr(basestackLP), rest$, Lang)
 End Sub
 
 Sub NeoDelete(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
@@ -11086,11 +11240,10 @@ resp = DELfields(ObjFromPtr(basestackLP), rest$)
 End Sub
 Sub NeoAppend(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 Dim s$, p As Variant
-resp = True
 If IsExp(ObjFromPtr(basestackLP), rest$, p) Then
 resp = AddInventory(ObjFromPtr(basestackLP), rest$)
 ElseIf IsStrExp(ObjFromPtr(basestackLP), rest$, s$) Then
-append_table ObjFromPtr(basestackLP), s$, rest$, False
+resp = append_table(ObjFromPtr(basestackLP), s$, rest$, False)
 Else
 SyntaxError
 resp = False
@@ -11115,12 +11268,10 @@ End If
 End Sub
 
 Sub NeoTable(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-NewTable ObjFromPtr(basestackLP), rest$
-resp = True
+resp = NewTable(ObjFromPtr(basestackLP), rest$, Lang)
 End Sub
 Sub NeoBase(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
-NewBase ObjFromPtr(basestackLP), rest$
-resp = True
+resp = NewBase(ObjFromPtr(basestackLP), rest$, Lang)
 End Sub
 Sub NeoHold(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = ProcHold(ObjFromPtr(basestackLP))
@@ -13111,15 +13262,6 @@ End If
 
 End Function
 
-Sub tsekme()
-Dim b$, l As Double
-b$ = " 12323 45.44545 -2345.343 .345 345.E-45 34.53 434 534 534 534 345"
-'b$ = VbNullString
-Debug.Print b$
-While IsNumberD2(b$, l)
-Debug.Print l
-Wend
-End Sub
 Function IsNumberCheck(a$, r As Variant, Optional mydec$ = " ") As Boolean
 Dim sng&, SG As Variant, ig$, DE$, sg1 As Boolean, ex$, s$
 If mydec$ = " " Then mydec$ = "."
@@ -13381,13 +13523,7 @@ If BLen = 0 Then Exit Function
             utf8decode = space$(WChars)
             MultiByteToWideChar 65001, 0, b(0), (BLen), StrPtr(utf8decode), WChars
 End Function
-Sub test()
 
-Dim a$
-a$ = "  + 100"
-Debug.Print FastSymbol1(a$, "+")
-Debug.Print "*" & a$ & "*"
-End Sub
 Public Function ideographs(c$) As Boolean
 Dim code As Long
 If c$ = vbNullString Then Exit Function
@@ -14835,7 +14971,6 @@ End If
                            '' If s$ = VbNullString Then s$ = " "
                         
                             PlainBaSket Scr, prive, s$ + space$(.Column - (RealLen(s$) - 1) Mod (.Column + 1)), w4, w4, , clearline
-                       
                 Case 4
                             
                             LCTbasketCur Scr, prive
@@ -15544,6 +15679,7 @@ Mid$(a$, 1, cut) = space$(cut)
 Set useHandler = anything
 If TypeOf useHandler.objref Is mArray Then
 Set pppp = useHandler.objref
+
 If Left$(Pad$, 1) = Chr$(1) Then LSet Pad$ = Mid$(Pad$, 2): cut = cut - 1
 Do
 multi = False
@@ -15944,12 +16080,16 @@ If .t1 = 3 Then
 End If
 End With
 ElseIf TypeOf bstack.lastobj Is Group Then
-If bstack.lastpointer Is Nothing Then
-If bstack.lastobj.IamApointer Then
-    Set bstack.lastpointer = bstack.lastobj
+    If bstack.lastpointer Is Nothing Then
+    If bstack.lastobj.IamApointer Then
+        Set bstack.lastpointer = bstack.lastobj
+    
+    End If
+    End If
+ElseIf TypeOf bstack.lastobj Is mArray Then
 
-End If
-End If
+Set pppp = bstack.lastobj
+multi = True
 End If
 End If
 Else
@@ -16003,8 +16143,44 @@ Set useHandler = New mHandler
 useHandler.t1 = 3
 Set useHandler.objref = pppp
 Set bstack.lastobj = useHandler
+Case "SORT", "ΤΑΞΙΝΟΜΗΣΗ"
+w2 = 0
+w3 = -1
+w4 = -1
+If IsExp(bstack, a$, p) Then
+w2 = CLng(p)
+End If
+If FastSymbol(a$, ",") Then
+If IsExp(bstack, a$, p) Then
+w3 = CLng(p)
+End If
+End If
+If FastSymbol(a$, ",") Then
+If IsExp(bstack, a$, p) Then
+w4 = CLng(p)
+End If
+End If
+If original > 0 Then
+    Set pppp1 = pppp
+Else
+    Set pppp1 = New mArray
+    pppp.CopyArrayRev pppp1
+End If
+original = original + 1
 
-
+If w2 Then
+pppp1.SortDesTuple w3, w4
+Else
+pppp1.SortTuple w3, w4
+End If
+Set pppp = pppp1
+Set pppp1 = Nothing
+multi = True
+Matrix = True
+Set useHandler = New mHandler
+useHandler.t1 = 3
+Set useHandler.objref = pppp
+Set bstack.lastobj = useHandler
 Case "FOLD", "ΠΑΚ", "FOLD$", "ΠΑΚ$"
 If IsExp(bstack, a$, p) Then
     If Not bstack.lastobj Is Nothing Then
@@ -21735,8 +21911,7 @@ End If
 Else
 .enabled = False
 End If
-''Debug.Print b.addlen
-'MyDoEvents
+
 End With
 
 once = False
@@ -22757,7 +22932,7 @@ y1 = IsLabelSymbolNew(rest$, "ΓΕΝΙΚΟ", "GLOBAL", Lang)
 Y3 = IsLabelSymbolNew(rest$, "ΜΕΓΕΓΟΝΟΤΑ", "WITHEVENTS", Lang)
 x1 = Abs(innerIsLabel(bstack, rest$, what$, , True, True))
 
-w$ = myUcase(what$)
+w$ = myUcase(what$, True)
 gohere:
     If x1 = 1 Or x1 = 3 Then
         If x1 = 1 Then
@@ -22840,8 +23015,28 @@ goNothing:
    
          End If
          ss$ = vbNullString
+         If IsLabelSymbolNewExp(rest$, "ΒΑΣΗ", "BASE", Lang, ss$) Then
+         If Not IsStrExp(bstack, rest$, pa$) Then
+                   BadObjectDecl
+                    MyDeclare = False
+                  Exit Function
+         End If
+
+         If GetVar(bstack, w$, i) Then
+                      BadObjectDecl
+                    MyDeclare = False
+                  Exit Function
          
-         If IsLabelSymbolNewExp(rest$, "ΑΠΟ", "LIB", Lang, ss$) Then
+         End If
+
+         If Not getone2(pa$, p) Then
+         Set p = New Mk2Base
+         PushOne pa$, p
+         End If
+         globalvar bstack.GroupName & w$, p, y1 = True
+          MyDeclare = True
+                  Exit Function
+         ElseIf IsLabelSymbolNewExp(rest$, "ΑΠΟ", "LIB", Lang, ss$) Then
          
               par = Fast2Label(rest$, "C", 1, "", 0, 1)
               
@@ -23675,5 +23870,133 @@ ElseIf IsLabelSymbolNew(rest$, "ΤΜΗΜΑ", "MODULE", Lang) Then
 End If
 End Function
 
+Function ReArrangePara(what$) As String
+ReArrangePara = what$
+Exit Function
+Dim a1() As Integer, A2() As Integer, WHAT1$, r As Long, mark1 As Long, ii As Long, mark2 As Long
+Dim wr$
+If Len(what$) = 0 Then Exit Function
+    ReDim a1(Len(what$) + 10)
+    ReDim A2(Len(what$) + 10)
+    Dim skip As Boolean
+    skip = GetStringTypeExW(&HB, 4, StrPtr(what$), Len(what$), a1(0)) = 0
+    skip = GetStringTypeExW(&HB, 2, StrPtr(what$), Len(what$), A2(0)) = 0 Or skip
+    
+    If Not skip Then
+    For r = 0 To Len(what$) - 1
+    If (A2(r) And 254) = 2 And (a1(r) And &H8000) <> 0 Then
+    If mark1 = 0 Then WHAT1$ = WHAT1$ + Left$(what$, r)
+    mark1 = r + 1
+    mark2 = 0
+    For ii = mark1 + 1 To Len(what$) - 1
+    If (A2(ii) And 254) > 2 And (a1(ii) And 7) = 0 Then mark2 = ii: Exit For
+    Next ii
+    If mark2 = 0 Then
+    wr$ = Mid$(what$, mark1) + wr$
+    r = ii
+    Else
+    wr$ = Mid$(what$, mark1, mark2 - mark1 + 1) + wr$
 
+    r = ii - 1
+    End If
+    ElseIf (a1(r) And &HFFF8) <> 0 And (a1(ii) And 7) = 0 Then
+    mark1 = 0
+    For ii = r To Len(what$) - 1
+  
+    If mark2 > 0 Then
+    If (a1(r) And &H8000) <> 0 Then
+    If (A2(ii) And 2) = 2 Then mark1 = ii: Exit For
+    Else
+    If A2(ii) > 3 And mark1 > 0 Then
+    
+   ' If (A2(ii + 1) And 15) <> 3 Then
+   If A2(ii) > 9 Then ii = ii - 1: Exit For
+    ElseIf (A2(ii) And 3) = 2 Then
+        If A2(ii) > 3 And A2(ii + 1) = 1 Then
+                WHAT1$ = WHAT1$ + wr$
+                wr$ = ""
+                mark2 = 0
+         Else
+            mark1 = ii: Exit For
+        End If
+    ElseIf A2(ii) > 3 Then
 
+        If (A2(ii + 1) And 3) > 1 Then mark1 = ii
+        Exit For
+
+    End If
+        mark1 = ii
+    
+    End If
+    Else
+    If Len(wr$) > 0 Then
+    If A2(ii) > 3 Then
+            If A2(ii) > 9 And A2(ii + 1) > 9 Then
+        mark1 = 0
+        
+        Else
+    If (A2(ii + 1) And 1) = 1 And A2(ii + 1) <> 3 Then
+          WHAT1$ = WHAT1$ + wr$
+    wr$ = ""
+    mark1 = ii
+    Else
+    
+    mark2 = ii
+    mark1 = ii
+    
+    If A2(ii + 1) < 4 Then Exit For
+    End If
+    End If
+    ElseIf A2(ii + 1) > 3 Then
+
+    If A2(r) = 3 Then
+    mark2 = ii
+    mark1 = ii
+    
+    Exit For
+    End If
+    End If
+    End If
+    If (A2(ii) And 254) = 2 And (a1(ii) And &H8000) <> 0 Then mark1 = ii: Exit For
+    End If
+    
+    Next ii
+
+    If mark2 = 0 Then
+    WHAT1$ = WHAT1$ + Mid$(what$, r + 1, ii - r)
+    r = ii - 1
+    ElseIf mark1 = 0 Then
+    If Len(wr$) > 0 Then wr$ = wr$ + Mid$(what$, r + 1, ii - r + 1)
+    r = ii
+    Else
+   
+    If Len(wr$) > 0 Then wr$ = Mid$(what$, r + 1, ii - r + 1) + wr$
+    r = ii
+    End If
+    If mark2 > 0 Then
+    If (A2(ii) And 3) = 3 Then
+
+        mark2 = 0
+    ElseIf (A2(ii) And 3) = 0 Then
+      WHAT1$ = WHAT1$ + wr$
+    wr$ = ""
+    mark2 = 0
+    End If
+    
+    End If
+    
+    
+    Else
+    
+    End If
+    Next r
+    
+    
+    
+    End If
+    If Len(wr$) = 0 And Len(WHAT1$) = 0 Then
+    ReArrangePara = what$
+    Else
+    ReArrangePara = WHAT1$ + wr$
+    End If
+End Function

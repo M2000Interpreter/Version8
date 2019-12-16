@@ -18,7 +18,7 @@ Option Explicit
 ' We can't pass UDT from M2000 script but we can pass a pointer to memory
 ' which we make using Buffer statement, and using Structure we can create offsets too.
 Private mcheck As Boolean
-Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
   ByVal lpvDest As Long, ByVal lpvSource As Long, ByVal cbCopy As Long)
 Private Const Pi = 3.14159265358979
 Private Const pihalf = 1.5707963267949
@@ -1488,6 +1488,7 @@ Sub testStrArr(a() As Byte)
 Dim b$
 b$ = a()
 Debug.Print b$
+a(0) = 65
 End Sub
 Function RetStrArr() As Byte()
 Dim b() As Byte
@@ -1503,7 +1504,7 @@ a = b
 End Sub
 Sub TestArr(a() As Variant)
 On Error GoTo there
-If UBound(a()) - LBound(a()) = 0 Then Exit Sub
+If UBound(a()) - LBound(a()) < 0 Then Exit Sub
 a(LBound(a)) = 100
 ReDim Preserve a(20 - 1)
 there:

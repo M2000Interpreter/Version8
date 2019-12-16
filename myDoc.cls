@@ -808,7 +808,7 @@ a$ = ReplaceStr("<", ChrW$(3), NeoData)
 a$ = ReplaceStr(">", ChrW$(4), a$)
 a$ = ReplaceStr("  ", ChrW$(7) + ChrW$(7), a$)
 a$ = ReplaceStr(ChrW$(7) + " ", ChrW$(7) + ChrW$(7), a$)
-If UBound(para(mycur).colordata()) > 1 Then
+If UBound(para(mycur).colordata()) > 0 Then
 mColor() = para(mycur).colordata()
 NeoData = vbNullString
 l = 1
@@ -2663,9 +2663,9 @@ Next i
 ExportWords = a()
 End If
 End Function
-Sub ExportWords2ObjectAddItem(ThisObject As Object, Optional usenumbers As Boolean = True)
-Dim a() As String, i As Long
-
+Sub ExportWords2ObjectAddItem(ThisObject1 As Object, Optional usenumbers As Boolean = True)
+Dim a() As String, i As Long, ThisObject As mStiva
+Set ThisObject = ThisObject1
 If unique = 0 Then
 a() = Split(mWordMap(textDoc))
 QuickSortString a(), LBound(a()), UBound(a())
@@ -2973,10 +2973,10 @@ Dim acc As Long
 PutMem2 VarPtr(acc), mValue
 RangeUnsignInteger = acc >= Abs(mFrom) And acc <= Abs(mTo)
 End Function
-Function FindWord(Find$, Direction As Boolean, there As Long, cur As Long) As Boolean
+Function FindWord(Find$, direction As Boolean, there As Long, cur As Long) As Boolean
 Dim oncemore As Boolean, Result As Boolean, res$, code As Integer
 again:
-If Direction Then
+If direction Then
  Result = FindStrDown(Find$, there, cur)
  Else
  Result = FindStrUp(Find$, there, cur)
@@ -2988,7 +2988,7 @@ If cur > 1 Then
     If Not RangeUnsignInteger(code, &H2000&, &H206F&) Then
         Select Case code
         Case 39, 65 To 90, 97 To 122, Is > 127
-        If Direction Then cur = cur + 1 Else cur = cur - 1
+        If direction Then cur = cur + 1 Else cur = cur - 1
         GoTo again
         Case Else
         End Select
@@ -3000,7 +3000,7 @@ If (Len(res$) - cur + 1) > Len(Find$) Then
     Select Case code
     Case 39, 65 To 90, 97 To 122, Is > 127
     
-    If Direction Then
+    If direction Then
     cur = cur + 1
     Else
         If cur <= 0 Then
@@ -3025,7 +3025,7 @@ FindWord = True
 Exit Function
 Else
 If oncemore Then Exit Function
-If Direction Then
+If direction Then
 there = 1
 cur = 1
 Else
@@ -3036,14 +3036,14 @@ oncemore = True
 End If
 End Function
 
-Function FindIdentifier(Find$, Direction As Boolean, there As Long, cur As Long) As Boolean
+Function FindIdentifier(Find$, direction As Boolean, there As Long, cur As Long) As Boolean
 ' there is paragraph number not paragraph order
 Dim oncemore As Boolean, Result As Boolean, res$
 If Len(Find$) > 1 And Left$(Find$, 1) = "&" Then Find$ = Mid$(Find$, 2): cur = cur + 1
 If InStr(Find$, Chr$(13)) > 0 Then Exit Function
 If InStr(Find$, Chr$(10)) > 0 Then Exit Function
 again:
-If Direction Then
+If direction Then
  Result = FindStrDown(Find$, there, cur)
  Else
  Result = FindStrUp(Find$, there, cur)
@@ -3056,7 +3056,7 @@ Else
     Select Case AscW(Mid$(res$, cur - 1, 1))
     Case 160
     Case 35, 46, 65 To 90, 95, 97 To 122, Is > 127
-    If Direction Then cur = cur + 1 Else cur = cur - 1
+    If direction Then cur = cur + 1 Else cur = cur - 1
     GoTo again
     Case Else
     End Select
@@ -3069,7 +3069,7 @@ Case Else
 If (Len(res$) - cur + 1) > Len(Find$) Then
     Select Case AscW(Mid$(res$, cur + Len(Find$), 1))
     Case 40, 46, 48 To 57, 65 To 90, 95, 97 To 122, Is > 127
-    If Direction Then
+    If direction Then
     cur = cur + 1
     Else
         If cur <= Len(Find$) Then
@@ -3094,7 +3094,7 @@ FindIdentifier = True
 Exit Function
 Else
 If oncemore Then Exit Function
-If Direction Then
+If direction Then
 there = 1
 cur = 1
 Else

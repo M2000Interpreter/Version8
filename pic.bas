@@ -31,6 +31,7 @@ End Type
 Dim tm As TEXTMETRIC
 Public UseMe As Callback, byPassCallback As Boolean
 Public osnum As Long
+
 Private Declare Function GdiFlush Lib "gdi32" () As Long
 Private Declare Function GetSystemMetrics Lib "user32" _
     (ByVal nIndex As Long) As Long
@@ -257,7 +258,7 @@ End Type
 Public Type MYJOYSTATtype
 enabled As Boolean
 lngButton As Long
-joyPaD As Direction
+joyPaD As direction
 AnalogX As Long
 AnalogY As Long
 Wait2Read As Boolean
@@ -267,7 +268,7 @@ Public MYJOYSTAT(0 To 15) As MYJOYSTATtype
 
 Public MYJOYCAPS As JOYCAPS
 
-Public Enum Direction
+Public Enum direction
     DirectionNone = 0
     DirectionLeft = 1
     DirectionRight = 2
@@ -2667,13 +2668,45 @@ Sub MoveStringToVariant(ByRef s$, ByRef a As Variant)
    CopyMemory ByVal VarPtr(a) + 8, ByVal VarPtr(s$), 4
    CopyMemory ByVal VarPtr(s$), ByVal VarPtr(t), 4
 End Sub
+Sub testthat()
+Dim a() As Byte, n As Byte
 
+ReDim a(10)
+Dim vv As Variant
+vv = a()
+GetMem1 VarPtr(vv), n
+Debug.Print n, VarType(a)
+GetMem1 VarPtr(vv) + 1, n
+Debug.Print n
+Debug.Print VarPtr(vv), VarPtr(vv)
+
+End Sub
 Sub testthis()
-Dim a$, k
-a$ = "Hello"
-k = "bye"
-SwapString2Variant a$, k
-Debug.Print a$, k
+Dim aa As New FastCollection, i As Long, k As Currency, b() As Byte
+ReDim b(3)
+b(0) = 1
+b(1) = 2
+b(2) = 3
+
+aa.FeedSCol3 b
+For k = 500 To 1 Step -1
+aa.AddKey "alfa" + Chr$(65 + Rnd * 25) + Chr$(1) & Int(3 * Rnd) & Chr$(1) & k, "beta"
+
+'aa.AddKey aa.MakeCompKey("alfa" + Chr$(65 + Rnd * 25), Int(3 * Rnd), k), "beta"
+Next k
+
+
+For i = 0 To aa.count - 1
+    aa.index = i
+  Debug.Print aa.KeyToString ', aa.Pos
+Next i
+Debug.Print aa.count, aa.Percent
+aa.Sort
+'If aa.ExistSecondKey(400) Then Debug.Print "Exist", aa.KeyToString
+For i = 0 To 10
+    aa.index = i
+  Debug.Print aa.KeyToString ', aa.Pos
+Next i
 End Sub
 Sub OptVariant(ByRef VarOpt)
 Dim t(0 To 3) As Long
@@ -2712,6 +2745,15 @@ Dim z As Integer
    CopyMemory z, ByVal a, 4
    VariantIsRef = (z And &H4000) = &H4000
 End Function
+Sub SwapVariantRef(ByRef a As Variant, ByVal b As Long)
+    Dim z As Variant
+   Dim t(0 To 3) As Long ' 4 Longs * 4 bytes each = 16 bytes
+   CopyMemory ByVal VarPtr(t(0)), ByVal b, 16
+  ' t(0) = 17 ' t(0) Or &H4000
+   
+   CopyMemory ByVal VarPtr(a), ByVal VarPtr(t(0)), 16
+   CopyMemory ByVal b, ByVal VarPtr(z), 16
+End Sub
 Sub SwapVariant(ByRef a As Variant, ByRef b As Variant)
    Dim t(0 To 3) As Long ' 4 Longs * 4 bytes each = 16 bytes
    CopyMemory t(0), ByVal VarPtr(a), 16
@@ -2896,7 +2938,7 @@ Case "RIGHT", "RIGHT$(", "RIGHTPART$(", "RINSTR(", "RND", "ROUND(", "ROW", "RTRI
 Case "SCALE.Y", "SCAN", "SCORE", "SCREEN.PIXELS", "SCREEN.X", "SCREEN.Y", "SCRIPT", "SCROLL", "SEARCH"
 Case "SEEK", "SEEK(", "SELECT", "SEQUENTIAL", "SET", "SETTINGS", "SGN(", "SHIFT", "SHIFTBACK", "SHORTDIR$("
 Case "SHOW", "SHOW$(", "SIN(", "SINGLE", "SINT(", "SIZE", "SIZE.X(", "SIZE.Y(", "SLICE(", "SLOW", "SMOOTH"
-Case "SND$(", "SORT", "SOUND", "SOUNDREC", "SOUNDS", "SPEECH", "SPEECH$(", "SPLIT", "SPRITE"
+Case "SND$(", "SORT", "SORT(", "SOUND", "SOUNDREC", "SOUNDS", "SPEECH", "SPEECH$(", "SPLIT", "SPRITE"
 Case "SPRITE$", "SQRT(", "STACK", "STACK(", "STACK$(", "STACK.SIZE", "STACKITEM$(", "STACKITEM(", "STACKTYPE$(", "START", "STATIC"
 Case "STEP", "STEREO", "STOCK", "STOP", "STR$(", "STREAM", "STRING", "STRING$(", "STRREV$(", "STRUCTURE", "SUB", "SUBDIR", "SUM(", "SUPERCLASS"
 Case "SWAP", "SWEEP", "SWITCHES", "TAB", "TAB(", "TABLE", "TAN(", "TARGET"
@@ -2958,7 +3000,7 @@ Case "стг", "стгкг", "стгкг(", "стгм", "сто", "стой", "стовои", "стовос", "стяоц
 Case "суццяажг", "суцйяиме(", "суцйяоусг(", "суцвымеусе.еццяажо", "сулпиесг", "сулпкгяысг", "сум(", "сумаятгсг", "сумаятгсг$("
 Case "сумаятгсг(", "сумевисе", "сумхгла", "сус", "сусйеуг.пяобокгс$", "сустгла", "сувмотгта(", "свд$(", "сведиа"
 Case "сведио.мглатым", "сыяос", "сыяос(", "сыяос$(", "сыяоутупос$(", "сысе", "сысе.еццяажо", "таимиа", "таимиа.летягтгс", "таимиес"
-Case "танг", "танг(", "танимолгсг", "таутисг(", "таутовяомо", "текестг", "текестгс", "текийг", "текийо", "текийос", "текос", "текос(", "тий", "титкос.аявеиоу$(", "тилг"
+Case "танг", "танг(", "танимолгсг", "танимолгсг(", "таутисг(", "таутовяомо", "текестг", "текестгс", "текийг", "текийо", "текийос", "текос", "текос(", "тий", "титкос.аявеиоу$(", "тилг"
 Case "тилг(", "тилг$(", "тилгсыяоу$(", "тилгсыяоу(", "типота", "титкос", "титкос$(", "тлгла", "тлгла(", "тлгла$", "тлглата", "томос"
 Case "тон.еж(", "топийа", "топийес", "топийг", "топийо", "топийо$(", "топийо(", "топос$(", "топос.аявеиоу$("
 Case "тоте", "тяап(", "тупос", "тупос$(", "тупос.аявеиоу$(", "тупысе", "туваиос", "туваиос(", "тыяа", "у.сглеиа"
@@ -4487,10 +4529,18 @@ Public Function InternalLeadingSpace() As Long
 On Error Resume Next
     GetTextMetrics fonttest.hDC, tm
   With tm
-InternalLeadingSpace = (tm.tmInternalLeading = 0) Or Not (tm.tmInternalLeading > 0)
+InternalLeadingSpace = (.tmInternalLeading = 0) Or Not (.tmInternalLeading > 0)
 End With
 End Function
-
+Public Function AverCharSpace(ddd As Object, Optional breakchar) As Long
+On Error Resume Next
+Dim tmm As TEXTMETRIC
+    GetTextMetrics ddd.hDC, tmm
+  With tmm
+AverCharSpace = .tmAveCharWidth
+breakchar = .tmBreakChar
+End With
+End Function
 Sub TimeZones(zHash As FastCollection)
 Dim zones(), i As Long
 zones() = Array("Dateline Standard Time", -12, "UTC-11", -11, "Aleutian Standard Time", -10, "Hawaiian Standard Time", -10, "Marquesas Standard Time", -8.5, "Alaskan Standard Time", -9, "UTC-09", -9, "Pacific Standard Time (Mexico)", -8, "UTC-08", -8, "Pacific Standard Time", -8, "US Mountain Standard Time", -7, "Mountain Standard Time (Mexico)", -7, _
@@ -4514,4 +4564,10 @@ Dim ret As Long
 ret = HashData(StrPtr(a$), LenB(a$), VarPtr(HD), 4)
 HD = HD And &H7FFFFFFF
 If HD = 0 Then HD = 1
+End Function
+Public Function HD1(aa As Currency) As Long
+Dim ret As Long
+ret = HashData(VarPtr(aa), 8, VarPtr(HD1), 4)
+HD1 = HD1 And &H7FFFFFFF
+If HD1 = 0 Then HD1 = 1
 End Function

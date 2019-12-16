@@ -191,6 +191,8 @@ Else
     Info = PriveSpace(index).infostr
 End If
 End Property
-
+Property Get Percent()
+Percent = 100 * count / hashlen
+End Property
 
 

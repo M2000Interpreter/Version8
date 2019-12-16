@@ -2676,7 +2676,8 @@ MODULE EV {Module CheckEvents {
 }
 CheckEvents
 }
-MODULE MG {Font "Arial"
+MODULE MG {oldfont$=Fontname$
+Font "Arial"
 Form 60,44
 Escape Off
 Flush
@@ -3419,6 +3420,8 @@ Pen 15 {
 InpValue2.Json$={"Left" : "1000", "Top" : "500"}
 Report InpValue2.Json$(0)
 Escape on
+bold true
+Font OldFont$
 }
 MODULE QSORT3 {Module Checkit3 {
       Class Quick {
@@ -4648,7 +4651,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8.1 for ver 9.9 rev 1 and newer"
+	Report " A collection of modules for tests version 8.2 for ver 9.9 rev 3 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -11467,6 +11470,7 @@ MODULE UTF8 {Module checkit {
             Second line 𐐷
             Third Line
             Ελληνικά Greek Letters
+            ברוכים הבאים 1234
             yä®€
             成长汉
             }
@@ -11493,6 +11497,7 @@ MODULE UTF8 {Module checkit {
       Cursor 20
       Report final$, width-20-8
       Print
+      Print #-2, final$
       Sub GetOneUtf8Char(&ch$)
             ch$=""
             if Eof(#f) then Exit Sub
@@ -12649,7 +12654,7 @@ MODULE DIJKSTRA {Module Dijkstra`s_algorithm {
                 }
                 Show_Distance_and_Path$=lambda$ d, pa, from_here, max_number (n) -> {
                         ret1$=chr$(from_here+asc("a"))+" to "+chr$(n+asc("a"))
-                        if d#val(n) =max_number then =ret1$+ "No Path" :exit
+                        if d#val(n) =max_number then =ret1$+ " No Path" :exit
                         let ret$="", mm=n, m=n
                         repeat
                                 n=m
@@ -15501,7 +15506,7 @@ end
 }
 MODULE SURROGATE {\\ pressing alt press INS or + on keypad and 10437 on keypad or number keys and release alt to get 𐐷
 
-Print "𐐷"
+Print #-2, {"𐐷"}
 Print hex$(chrcode("𐐷"),2.5)="10437"
 Print chrcode$(0x10437)="𐐷"
 
@@ -15871,21 +15876,19 @@ function gecsc_folder {
 }
 
 thread {
+      informe$=if$((tick mod 4 +1) ->"|", "/","-","\")
       If not Comp.Enabled(3) then {
             if exist(dir$+"test.bat") then {
                   Informe$="ready to compile"
-                  Comp.Enabled(3)=True 
-                  Method Pad,"Show"
-                  
+                  Comp.Enabled(3)=True
                   Comp.Enabled(0)=True
+                  Method Pad,"Show"                  
             }
       } else.if exist(lookpath$+"test.exe") then {
              Comp.Enabled(1)=true
              Comp.Enabled(2)=true
              informe$="Compiled"
              thread this hold
-      } else {
-            informe$=if$((tick mod 4 +1) ->"|", "/","-","\")
       }
 
 } as lookEXE interval 1000
@@ -15922,14 +15925,16 @@ Function Run1.DblClick {
                         }
             Save.doc aa$, "test.bat", 3  ' Ansi for bat
             after 300 {
-                  
                   dir user
                   dos "cd "+dir$+" && test.bat  > out.txt";
-                  wait 200
-                  Thread lookEXE interval 100
-                  Thread lookEXE Restart                 
+                  after  200 {
+                  
+                        Thread lookEXE interval 100
+                        Thread lookEXE Restart
+                  }                 
                   'Method Pad,"GetFocus"
             }
+           after 500 {Comp.Enabled(0)=true}
       }
       case 1
             {
@@ -15937,7 +15942,7 @@ Function Run1.DblClick {
                   After 40 {
                   if w$="" then
                          dos "cd "+dir$+" && test.exe > out.txt";
-                        Comp.Enabled(3)=True 
+                        Comp.Enabled(3)=True
                    else
                          win dir$+"test.exe"
                    end if
@@ -18773,7 +18778,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<1 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<3 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -20155,7 +20160,7 @@ MODULE BASIC {
 
 
 300 SUB ALFA(&A AS Integer)
-310 P(0)=1~   ' we use ~ for float comstant values
+310 P(0)=1~   ' we use ~ for float constant values
 320 FOR I=1 TO A
 330 IF I>MAX THEN A=I : EXIT
 340 P(I)=P(I-1)*I
@@ -20253,7 +20258,7 @@ Method Edit1, "move",1000,1000,w-2000,2000
 Method Text1, "move",1000,3600,w-2000,600
 With Edit1, "Text",{Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
 TextBox Handle:
-Use ctrl + left ore right arrow, for moving fast skipping words and spaces. You can paste text with Ctrl+V, but without merging, the old text replaced with the new one. You can't get a copy.
+Use ctrl + left or right arrow, for moving fast skipping words and spaces. You can paste text with Ctrl+V, but without merging, the old text replaced with the new one. You can't get a copy.
 }, "ScrollKeyUpDown", True
 With Text1, "MaxCharLength", 100
 Method Edit1,"TextViewOnly"
@@ -20349,5 +20354,24 @@ For A=1 to 100 {
       if A=81 then test "ok2": test  \\ wait for keypress
 }
 Test !
+}
+MODULE RTL {form ! 36,24
+Print "Right to left display"
+Double
+Print "ברוכים הבאים الجامعات والكليات", "ok"
+Print "ok", "ok", "ok","ok"
+Normal
+Report 1, "ברוכים הבאים الجامعات والكليات"
+Report 2, "ברוכים הבאים الجامعات والكليات"
+Report 3, "ברוכים הבאים الجامعات والكليات"
+Report 2, "Word Wrap"
+r=row
+Cursor 4, r
+Report "ברוכים הבאים الجامعات والكليات", 8
+Cursor 16, r
+Report 2, "ברוכים הבאים الجامعات والكليات" , 4
+Cursor 22, r
+Report 1, "ברוכים הבאים الجامعات والكليات" , 5
+Print
 }
 INFO

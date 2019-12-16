@@ -620,6 +620,7 @@ Exit Sub
 End If
 
 If Charpos < 2 Or NumberOnly Or NumberIntOnly Then Exit Sub
+
     a$ = Mid$(mDoc.TextParagraph(mDoc.MarkParagraphID), Charpos - 1)
     If Len(a$) > 0 Then
         w = AscW(a$)
@@ -653,7 +654,11 @@ If Charpos < 2 Or NumberOnly Or NumberIntOnly Then Exit Sub
         ElseIf w > -9215 And w < -8960 Then
             val = 2
         End If
+    ElseIf Charpos > 0 Then
+    w = Len(mDoc.TextParagraph(mDoc.MarkParagraphID))
+    If w < Charpos Then val = Charpos - w
     End If
+    
 End Sub
 
 Private Sub glistN_AddSelStart(val As Long, shift As Integer)
@@ -1419,6 +1424,9 @@ ElseIf KeyCode = vbKeyV And (shift And 3) = 2 Then
             glistN.NoScroll = False
         End If
     End If
+    If Len(CurrentParagraph) + 1 < Charpos Then
+        SelStartSilent = CharPosStart - Charpos + 1
+    End If
     If ParaSelStart = 2 And glistN.list(glistN.ListIndex) = vbNullString Then
         SelStart = SelStart - 1
     End If
@@ -2038,6 +2046,9 @@ End Sub
 
 Private Sub glistN_MarkIn()
 If Not glistN.EditFlag Then glistN.MarkNext = 0: Exit Sub
+If Len(CurrentParagraph) + 1 < Charpos Then
+SelStartSilent = CharPosStart - Charpos + 1
+End If
 BlockStartPara = mDoc.MarkParagraphID
 BlockStartPos = ParaSelStart
 'If glistN.SelStart > 1 Then
@@ -2123,6 +2134,9 @@ End If
 End Sub
 Private Sub glistN_MarkOut()
 '
+If Len(CurrentParagraph) + 1 < Charpos Then
+SelStartSilent = CharPosStart - Charpos + 1
+End If
 BlockEndPara = mDoc.MarkParagraphID
 BlockEndPos = ParaSelStart
 BlockEndline = glistN.ListIndex
@@ -7577,6 +7591,10 @@ ManualInform
 glistN.ShowMe
 KeyCode = 0
 Case vbKeyTab
+If Len(CurrentParagraph) + 1 < Charpos Then
+SelStartSilent = CharPosStart - Charpos + 1
+End If
+
 If UseTab And Not BlockStartPos <> BlockEndPos And (TabControl = 0 Or MyTrimLNoTab(Mid$(CurrentParagraph, 1, Charpos)) < Charpos) Then
     shift = shift And &H1
     ctrl = False

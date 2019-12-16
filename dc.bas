@@ -31,16 +31,16 @@ Private Type PicBmp
     reserved As Long
 End Type
 Private Declare Function OleCreatePictureIndirect Lib "olepro32.dll" (PicDesc As PicBmp, RefIID As GUID, ByVal fPictureOwnsHandle As Long, IPic As IPicture) As Long
-Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As Long) As Long
-Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hDC As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
-Private Declare Function SelectObject Lib "gdi32" (ByVal hDC As Long, ByVal hObject As Long) As Long
-Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As Long, ByVal iCapabilitiy As Long) As Long
-Private Declare Function GetSystemPaletteEntries Lib "gdi32" (ByVal hDC As Long, ByVal wStartIndex As Long, ByVal wNumEntries As Long, lpPaletteEntries As PALETTEENTRY) As Long
+Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As Long) As Long
+Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
+Private Declare Function SelectObject Lib "gdi32" (ByVal hdc As Long, ByVal hObject As Long) As Long
+Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hdc As Long, ByVal iCapabilitiy As Long) As Long
+Private Declare Function GetSystemPaletteEntries Lib "gdi32" (ByVal hdc As Long, ByVal wStartIndex As Long, ByVal wNumEntries As Long, lpPaletteEntries As PALETTEENTRY) As Long
 Private Declare Function CreatePalette Lib "gdi32" (lpLogPalette As LOGPALETTE) As Long
-Private Declare Function SelectPalette Lib "gdi32" (ByVal hDC As Long, ByVal HPALETTE As Long, ByVal bForceBackground As Long) As Long
-Private Declare Function RealizePalette Lib "gdi32" (ByVal hDC As Long) As Long
-Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
-Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As Long) As Long
+Private Declare Function SelectPalette Lib "gdi32" (ByVal hdc As Long, ByVal HPALETTE As Long, ByVal bForceBackground As Long) As Long
+Private Declare Function RealizePalette Lib "gdi32" (ByVal hdc As Long) As Long
+Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+Private Declare Function DeleteDC Lib "gdi32" (ByVal hdc As Long) As Long
 Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function OpenPrinter Lib "winspool.drv" Alias "OpenPrinterA" (ByVal pPrinterName As String, phPrinter As Long, pDefault As Any) As Long
 Private Declare Function ClosePrinter Lib "winspool.drv" (ByVal hPrinter As Long) As Long
@@ -84,8 +84,8 @@ Type PRINTER_DEFAULTS
 End Type
 ' New Win95 Page Setup dialogs are up to you
 Private Type POINTL
-    X As Long
-    Y As Long
+    x As Long
+    y As Long
 End Type
 Private Type RECT
     Left As Long
@@ -146,12 +146,12 @@ Sub Pprop()
     
     If ThereIsAPrinter = False Then Exit Sub
         
-    Dim X As Printer
-For Each X In Printers
-If X.DeviceName = pname And X.Port = Port Then Exit For
-Next X
+    Dim x As Printer
+For Each x In Printers
+If x.DeviceName = pname And x.Port = Port Then Exit For
+Next x
 Dim gp As Long, td As PRINTER_DEFAULTS
-Call OpenPrinter(X.DeviceName, gp, td)
+Call OpenPrinter(x.DeviceName, gp, td)
 If form5iamloaded Then
 Call PrinterProperties(Form5.hWnd, gp)
 Else
@@ -364,7 +364,7 @@ If sapi.getvoices().count <= vNumber Or sapi.getvoices().count < 1 Then vNumber 
        lastvoice = vNumber
 End If
 End Sub
-Public Sub wwPlain(bstack As basetask, mybasket As basket, ByVal what As String, ByVal wi As Long, ByVal Hi As Long, Optional scrollme As Boolean = False, Optional nosettext As Boolean = False, Optional frmt As Long = 0, Optional ByVal skip As Long = 0, Optional res As Long, Optional isAcolumn As Boolean = False, Optional collectit As Boolean = False, Optional nonewline As Boolean)
+Public Sub wwPlain2(bstack As basetask, mybasket As basket, ByVal what As String, ByVal wi As Long, ByVal Hi As Long, Optional scrollme As Boolean = False, Optional nosettext As Boolean = False, Optional frmt As Long = 0, Optional ByVal skip As Long = 0, Optional res As Long, Optional isAcolumn As Boolean = False, Optional collectit As Boolean = False, Optional nonewline As Boolean)
 Dim ddd As Object, mDoc As Object, para() As String, i As Long
 Dim n As Long, st As Long, st1 As Long, st0 As Long, w As Integer
 Dim PX As Long, PY As Long, nowait As Boolean
@@ -405,6 +405,10 @@ With mybasket
 
     If Not nopr Then
         If Not nosettext Then
+        If PY = .My And .double Then
+            crNew bstack, mybasket
+            PY = .currow
+        End If
              LCTbasket ddd, mybasket, PY, PX
         End If
         ddd.CurrentX = ddd.CurrentX + dv2x15
@@ -425,9 +429,11 @@ With mybasket
     w2 = wi
     If bstack.IamThread Then nopage = True
 ' -----end old code---------
+
 lastPara = UBound(para)
 If Len(para(lastPara)) = 0 Then lastPara = lastPara - 1
     For i = LBound(para) To lastPara
+    
         Buf$ = vbNullString
 nextline:
         If NOEXECUTION Then Exit For
@@ -501,6 +507,7 @@ last:
                     ddd.CurrentX = ((ddd.CurrentX + .Xt \ 1.2) \ .Xt) * .Xt
                     End If
             End If
+          If Not (isAcolumn Or nosettext) Then If Not nonewline Then GoTo jumphere
             Exit Sub
         End If
         If Not nopr Then
@@ -523,7 +530,7 @@ last:
                 If isAcolumn Then Exit Sub
                 'If UBound(para) = i Then Exit For
         If skip < 0 Or scrollme Then
-            
+jumphere:
             lCount = lCount + 1
             npy = npy + 1
             
@@ -581,5 +588,320 @@ res = nohi - Hi
 wi = ddd.CurrentX
 If collectit Then bstack.soros.PushStr mDoc.textDoc
 End Sub
+Public Sub wwPlain(bstack As basetask, mybasket As basket, ByVal what As String, ByVal wi As Long, ByVal Hi As Long, Optional scrollme As Boolean = False, Optional nosettext As Boolean = False, Optional frmt As Long = 0, Optional ByVal skip As Long = 0, Optional res As Long, Optional isAcolumn As Boolean = False, Optional collectit As Boolean = False, Optional nonewline As Boolean)
+Dim ddd As Object, mDoc As Object, para() As String, i As Long
+Dim n As Long, st As Long, st1 As Long, st0 As Long, w As Integer
+Dim PX As Long, PY As Long, nowait As Boolean
+Dim nopage As Boolean
+Dim Buf$, b$, npy As Long, lCount As Long, SCRnum2stop As Long
+Dim nopr As Boolean, nohi As Long, w2 As Long, lastPara As Long
+Dim dv2x15 As Long, Extra As Long, cuts As Long, tabw As Long, olda As Long, lasttab As Long, INTD As Long
+dv2x15 = dv15 * 2
+
+
+If collectit Then Set mDoc = New Document
+Set ddd = bstack.Owner
+If what = vbNullString Then GoTo finish
+para() = Split(what, vbCrLf)
+With mybasket
+' from old code here
+    tParam.iTabLength = .ReportTab
+    tabw = .ReportTab * AverCharSpace(ddd)
+    PX = .curpos
+    PY = .currow
+    If Not nosettext Then
+        If PX >= .mx Then
+            nowait = True
+            PX = 0
+        End If
+    End If
+    If PX > .mx Then nowait = True
+    If wi = 0 Then
+        If nowait Then wi = .Xt * (.mx - PX) Else wi = .mx * .Xt
+    Else
+        If wi <= .mx Then wi = wi * .Xt
+    End If
+    
+    wi = wi - CLng(dv2x15)
+    If wi <= 0 Then Exit Sub
+    If Hi < 0 Then
+        Hi = -Hi - 2
+        nohi = Hi
+        nopr = True
+    End If
+
+    If Not nopr Then
+        If Not nosettext Then
+        If PY = .My And .double Then
+            crNew bstack, mybasket
+            PY = .currow
+        End If
+             LCTbasket ddd, mybasket, PY, PX
+        End If
+        ddd.CurrentX = ddd.CurrentX + dv2x15
+        If Not scrollme Then
+            If Hi >= 0 Then If (.My - PY) * .Yt < Hi Then Hi = (.My - PY) * .Yt
+        Else
+            If Hi > 1 Then
+                If .pageframe <> 0 Then
+                    lCount = holdcontrol(ddd, mybasket)
+                    .pageframe = 0
+                End If
+                SCRnum2stop = holdcontrol(ddd, mybasket)
+            End If
+        End If
+    End If
+    npy = PY
+
+    w2 = wi
+    If bstack.IamThread Then nopage = True
+' -----end old code---------
+
+lastPara = UBound(para)
+If Len(para(lastPara)) = 0 Then lastPara = lastPara - 1
+    For i = LBound(para) To lastPara
+    
+        Buf$ = vbNullString
+nextline:
+        If NOEXECUTION Then Exit For
+        
+        n = LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(para(i)), Len(para(i)), 1, tabw)) * DXP
+'        n = MyTextWidth(ddd, para(i))
+        If n > wi Then
+            st = Len(para(i))
+            st1 = st + 1
+            st0 = 1
+            While st > st0 + 1
+                st1 = (st + st0) \ 2
+                w = AscW(Mid$(para(i), 1, st1))
+                If w > -10241 And w < -9984 Then
+                    
+                    If wi >= LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(para(i)), st1 + 1, 1, tabw)) * DXP Then
+                        st0 = st1
+                    Else
+                        st = st1
+                    End If
+                Else
+                    If wi >= LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(para(i)), st1, 1, tabw)) * DXP Then
+                        st0 = st1
+                    Else
+                        st = st1
+                    End If
+                End If
+            Wend
+            st = rinstr(para(i), "_", Len(para(i)) - st0)
+            st1 = rinstr(para(i), " ", Len(para(i)) - st0)
+            If st > st1 Then
+               st1 = st
+            Else
+                If MyTrimL3Len(Mid$(para(i), 1, st1)) = st1 Then st1 = st0
+      
+            End If
+            If st1 >= Len(para(i)) Then
+                Buf$ = para(i)
+            Else
+                Buf$ = Left$(para(i), st1)
+                     If st1 = st0 Then
+                     If Right$(Buf$, 1) = "_" Then Mid$(Buf$, st1, 1) = "-"
+                        End If
+                para(i) = LTrim(Mid$(para(i), st1 + 1))
+            End If
+             skip = skip - 1
+             If skip < 0 Then
+                 If Len(para(i)) = 0 Then GoTo last
+                 'If frmt > 0 Then
+                    ' If Not nopr Then fullPlainWhere ddd, mybasket, RTrim$(Buf$), w2, frmt, nowait, nonewline ' rtrim
+                 'Else
+                 If Not nopr Then
+                 INTD = 0
+
+                 Extra = 0
+
+                 Select Case frmt
+                 Case 0
+                 INTD = TextWidth(ddd, space$(MyTrimL3Len(Buf$)))
+                            If INTD > 0 Then
+                 Buf$ = Mid$(Buf$, MyTrimL3Len(Buf$) + 1)
+                 ddd.CurrentX = ddd.CurrentX + INTD
+                 End If
+                 Buf$ = RTrim(Buf$)
+                 lasttab = rinstr(Buf$, vbTab)
+                 If lasttab > 0 Then
+                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), lasttab, 1, tabw, ddd.CurrentX \ DXP))
+                 Buf$ = Mid$(Buf$, lasttab + 1)
+                 ddd.CurrentX = ddd.CurrentX + Extra * DXP
+                              
+                 End If
+                 olda = SetTextAlign(ddd.hdc, 0) 'TA_RTLREADING)
+                 cuts = Len(Buf$) - Len(ReplaceStr(" ", "", Buf$))
+                 
+                 Extra = wi \ DXP - INTD \ DXP - Extra - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))
+                 
+                 SetTextJustification ddd.hdc, Extra, cuts
+                 
+                '
+                 TextOut ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$)
+                 
+                 SetTextJustification ddd.hdc, 0, 0
+                 olda = SetTextAlign(ddd.hdc, olda)
+                 Case 1
+                 Buf$ = RTrim(Buf$)
+                 Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))
+                 
+                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+                 Case 2
+                 Buf$ = Trim(Buf$)
+                 Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))) \ 2
+                 
+                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+                 
+                 Case Else
+                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP))
+                 
+                 End Select
+                 
+                 
+                 End If
+                 
+                  '  If Not nopr Then fullPlain ddd, mybasket, RTrim$(Buf$), w2, nowait, nonewline
+                 'End If
+                 If collectit Then mDoc.AppendParagraphOneLine RTrim$(Buf$)
+            
+             End If
+        Else
+            skip = skip - 1
+            If Len(Buf$) > 0 Then para(i) = Mid$(para(i), MyTrimL3Len(para(i)) + 1)
+            Buf$ = para(i)
+            para(i) = vbNullString
+last:
+        If skip >= 0 Then GoTo continue
+        If Hi = 0 And frmt = 0 Then
+        If Not scrollme Then
+        If Not nopr Then
+    
+            MyPrintNew ddd, mybasket.uMineLineSpace, Buf$, , nowait     ';   '************************************************************************************
+    
+            res = ddd.CurrentX
+                    If Trim$(Buf$) = vbNullString Then
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 2) \ .Xt) * .Xt
+                    Else
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 1.2) \ .Xt) * .Xt
+                    End If
+            End If
+            If Not (isAcolumn Or nosettext) Then If Not nonewline Then GoTo jumphere
+            Exit Sub
+        End If
+        If Not nopr Then
+            fullPlainWhere ddd, mybasket, Buf$, w2, frmt, nowait, nonewline
+        End If
+        Else
+        frmt = Abs(frmt)
+        If frmt > 0 Then frmt = frmt Mod 4
+        If frmt >= 0 Then
+                If Not nopr Then
+                INTD = 0
+                Extra = 0
+
+                
+                Select Case frmt
+                Case 1
+                Buf$ = RTrim(Buf$)
+                 Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))
+                 
+                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+                
+                Case 2
+                Buf$ = Trim(Buf$)
+                Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))) \ 2
+                 
+                Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+
+                Case 3, 0
+                INTD = TextWidth(ddd, space$(MyTrimL3Len(Buf$)))
+                If INTD > 0 Then
+                    Buf$ = Mid$(Buf$, MyTrimL3Len(Buf$) + 1)
+                    ddd.CurrentX = ddd.CurrentX + INTD
+                End If
+                Buf$ = RTrim(Buf$)
+                Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP))
+                End Select
+                
+                'fullPlainWhere ddd, mybasket, Buf$, w2, frmt, nowait, nonewline
+                'Debug.Print w2, frmt, nowait, nonewline
+                
+                
+                End If
+       ' Else
+        '        If Not nopr Then fullPlain ddd, mybasket, Buf$, w2, nowait, nonewline  'DDD.Width ' w2
+        End If
+        End If
+   
+        If collectit Then
+        mDoc.AppendParagraphOneLine Trim$(Buf$)
+        End If
+             End If
+                If isAcolumn Then Exit Sub
+                'If UBound(para) = i Then Exit For
+        If skip < 0 Or scrollme Then
+jumphere:
+            lCount = lCount + 1
+            npy = npy + 1
+            
+            If npy >= .My And scrollme Then
+                         If Not nopr Then
+                             If SCRnum2stop > 0 Then
+                                 If lCount >= SCRnum2stop Then
+                                   If Not bstack.toprinter Then
+                                    If Not nowait Then
+                                 
+                                 If Not nopage Then
+                                  ddd.Refresh
+                                     Do
+                
+                                         mywait bstack, 10
+                                    
+                                     Loop Until INKEY$ <> "" Or mouse <> 0 Or NOEXECUTION
+                                     End If
+                                     End If
+                                     End If
+                                     SCRnum2stop = .pageframe
+                                     lCount = 1
+                                 
+                                 End If
+                             End If
+                           If Not bstack.toprinter Then
+                                ddd.Refresh
+                                ScrollUpNew ddd, mybasket
+                            Else
+                              getnextpage
+                              npy = 1
+                          End If
+                End If
+                npy = npy - 1
+                      ''
+         ElseIf npy >= .My Then
+         
+        If Not nopr Then crNew bstack, mybasket
+               npy = npy - 1
+              
+        End If
+      End If
+If Not nopr Then LCTbasket ddd, mybasket, npy, PX: ddd.CurrentX = ddd.CurrentX + dv2x15
+If skip < 0 Then Hi = Hi - 1
+If Hi < 0 Then Exit For
+continue:
+     If Len(para(i)) > 0 Then GoTo nextline
+    Next i
+End With
+finish:
+If scrollme Then
+HoldReset lCount, mybasket
+End If
+res = nohi - Hi
+wi = ddd.CurrentX
+If collectit Then bstack.soros.PushStr mDoc.textDoc
+End Sub
+
+
 
 

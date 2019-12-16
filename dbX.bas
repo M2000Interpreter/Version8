@@ -489,7 +489,7 @@ End If
 isdir = lookfirst
 End Function
 Public Sub fHelp(bstack As basetask, d$, Optional Eng As Boolean = False)
-Dim sql$, b$, p$, c$, gp$, r As Double, bb As Long, i As Long
+Dim SQL$, b$, p$, c$, gp$, r As Double, bb As Long, i As Long
 Dim cd As String, doriginal$, monitor As Long
 d$ = Replace(d$, " ", ChrW(160))
 On Error GoTo E5
@@ -566,7 +566,7 @@ JetPostfix = JetPostfixHelp
 DBUser = vbNullString
 DBUserPassword = vbNullString
 
-cd = App.path
+cd = App.Path
 AddDirSep cd
 
 p$ = Chr(34)
@@ -575,26 +575,26 @@ d$ = doriginal$
 If Right$(d$, 2) = "()" Then d$ = Left$(d$, Len(d$) - 1)
 If Left$(d$, 1) = "#" Then
 If AscW(Mid$(d$, 2, 1) + " ") < 128 Then
-sql$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
+SQL$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
 Else
-sql$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
+SQL$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
 End If
 Else
 If AscW(d$ + " ") < 128 Then
-sql$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
+SQL$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
 Else
-sql$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
+SQL$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
 End If
 End If
 b$ = mylcasefILE(cd & "help2000")
-getrow bstack, p$ & b$ & p$ & c$ & p$ & sql$ & p$ & ",1," & p$ & p$ & c$ & p$ & p$, False, , , True
-sql$ = p$ & b$ & p$ & c$ & p$ & "GROUP" & p$
+getrow bstack, p$ & b$ & p$ & c$ & p$ & SQL$ & p$ & ",1," & p$ & p$ & c$ & p$ & p$, False, , , True
+SQL$ = p$ & b$ & p$ & c$ & p$ & "GROUP" & p$
 If bstack.IsNumber(r) Then
 If bstack.IsString(gp$) Then
 If bstack.IsString(b$) Then
 If bstack.IsString(p$) Then
 If bstack.IsNumber(r) Then
-getrow bstack, sql$ & "," & CStr(1) & "," & Chr(34) & "GROUPNUM" & Chr(34) & "," & Str$(r), False, , , True
+getrow bstack, SQL$ & "," & CStr(1) & "," & Chr(34) & "GROUPNUM" & Chr(34) & "," & Str$(r), False, , , True
 If bstack.IsNumber(r) Then
 If bstack.IsNumber(r) Then
 If bstack.IsString(c$) Then
@@ -669,7 +669,7 @@ End If
 End Function
 Public Function fnames(i As Long, Lang As Long) As String
 Select Case i
-Case 1
+Case 1  '.........11
     Select Case Lang
     Case 1
     fnames = "BOOLEAN"
@@ -677,7 +677,7 @@ Case 1
      fnames = "ΛΟΓΙΚΟΣ"
     End Select
     Exit Function
-Case 2
+Case 2  ' ..........16
     Select Case Lang
     Case 1
     fnames = "BYTE"
@@ -686,7 +686,7 @@ Case 2
     End Select
    Exit Function
 
-Case 3
+Case 3  '............2
         Select Case Lang
     Case 1
     fnames = "INTEGER"
@@ -694,7 +694,7 @@ Case 3
      fnames = "ΑΚΕΡΑΙΟΣ"
     End Select
    Exit Function
-Case 4
+Case 4 '..........3
         Select Case Lang
     Case 1
     fnames = "LONG"
@@ -703,7 +703,7 @@ Case 4
     End Select
    Exit Function
  
-Case 5
+Case 5 ' .............6
         Select Case Lang
     Case 1
     fnames = "CURRENCY"
@@ -712,7 +712,7 @@ Case 5
     End Select
    Exit Function
 
-Case 6
+Case 6 ' ............4
     Select Case Lang
     Case 1
     fnames = "SINGLE"
@@ -721,7 +721,7 @@ Case 6
     End Select
    Exit Function
 
-Case 7
+Case 7 '...........5
     Select Case Lang
     Case 1
     fnames = "DOUBLE"
@@ -729,7 +729,7 @@ Case 7
      fnames = "ΔΙΠΛΟΣ"
     End Select
    Exit Function
-Case 8
+Case 8 ' ..........7
     Select Case Lang
     Case 1
     fnames = "DATEFIELD"
@@ -737,7 +737,7 @@ Case 8
      fnames = "ΗΜΕΡΟΜΗΝΙΑ"
     End Select
    Exit Function
-Case 9 '.....................ole 205
+Case 9 '.....................128
     Select Case Lang
     Case 1
     fnames = "BINARY"
@@ -764,54 +764,159 @@ Case 12 '...........................202
      fnames = "ΥΠΟΜΝΗΜΑ"
     End Select
 Case Else
-fnames = "?"
+fnames = Trim$(Str$(i))
 End Select
 End Function
 
-Public Sub NewBase(bstackstr As basetask, r$)
-Dim base As String, othersettings As String
+Public Function NewBase(bstackstr As basetask, r$, Lang As Long) As Boolean
+Dim base As String, othersettings As String, vv
 If FastSymbol(r$, "1") Then
 ArrBase = 1
-Exit Sub
+NewBase = True
+Exit Function
 ElseIf FastSymbol(r$, "0") Then
 ArrBase = 0
-Exit Sub
+NewBase = True
+Exit Function
 End If
-If Not IsStrExp(bstackstr, r$, base) Then Exit Sub ' make it to give error
+If IsLabelSymbolNew(r$, "ΤΟΠΙΚΗ", "LOCAL", Lang, , , , False) Then
+'
+If Not IsStrExp(bstackstr, r$, base) Then
+MissStringExpr
+Exit Function
+Else
+If getone(base, vv) Then
+Set vv = New Mk2Base
+changeone base, vv
+Else
+Set vv = New Mk2Base
+PushOne base, vv
+End If
+NewBase = True
+End If
+Else
+If Not IsStrExp(bstackstr, r$, base) Then
+MissStringExpr
+Exit Function
+End If
 If FastSymbol(r$, ",") Then
-If Not IsStrExp(bstackstr, r$, othersettings) Then Exit Sub  ' make it to give error
+If Not IsStrExp(bstackstr, r$, othersettings) Then
+MissStringExpr
+Exit Function ' make it to give error
+End If
 End If
  On Error Resume Next
- If Left$(base, 1) = "(" Or JetPostfix = ";" Then Exit Sub ' we can't create in ODBC
+ If Left$(base, 1) = "(" Or JetPostfix = ";" Then Exit Function ' we can't create in ODBC
 If ExtractPath(base) = vbNullString Then base = mylcasefILE(mcd + base)
 If ExtractType(base) = vbNullString Then base = base & ".mdb"
 
 If CFname((base)) <> "" Then
- If Not CanKillFile(base) Then FilePathNotForUser: Exit Sub
+ If Not CanKillFile(base) Then FilePathNotForUser: Exit Function
 ' check to see if is our
 RemoveOneConn base
 If CheckMine(base) Then
 KillFile base
 Err.clear
-
 Else
 MyEr "Can 't delete the Base", "Δεν μπορώ να διαγράψω τη βάση"
 
-Exit Sub
+Exit Function
 End If
 End If
 
- CreateObject("ADOX.Catalog").Create (JetPrefix & base & JetPostfix & othersettings)  'create a new, empty *.mdb-File
+CreateObject("ADOX.Catalog").Create (JetPrefix & base & JetPostfix & othersettings)   'create a new, empty *.mdb-File
+NewBase = True
+End If
+End Function
+Public Function TABLENAMES_mk2(base As String, bstackstr As basetask, r$, Lang As Long) As Boolean
+Dim vv, tables As FastCollection, stac1 As New mStiva, pppp As mArray, i As Long
+Dim mb As Mk2Base, Tablename As String, fieldlist As FastCollection, ma As mArray, j As Long
+Dim indexField As FastCollection, fields As Long
+If getone(base, vv) Then
+Set mb = vv
 
-End Sub
+Set tables = mb.tables()
+If FastSymbol(r$, ",") Then
+    If Not IsStrExp(bstackstr, r$, Tablename) Then
+    MissStringExpr
+    Exit Function
+    End If
+    If Not tables.ExistKey(myUcase(Tablename, True)) Then
+    MyEr "table not exist", "ο πίνακας δεν υπάρχει"
+    Exit Function
+    End If
+    If tables.sValue <> 0 Then
+        MyEr "table not exist", "ο πίνακας δεν υπάρχει"
+        Exit Function
+    End If
+    Set pppp = tables.ValueObj
+    
+    Set fieldlist = pppp.item(1)
+    For i = 0 To fieldlist.count - 1
+        fieldlist.index = i
+        fieldlist.Done = True
+        If fieldlist.sValue = -1 Then
+            fields = fields + 1
+            Set ma = fieldlist.ValueObj
+            stac1.DataStr ma.item(0)
+            stac1.DataStr fnames(ma.item(1), Lang)
+            stac1.DataVal ma.item(2)
+            
+            fieldlist.Done = False
+        
+        End If
+    Next i
+    Set indexField = pppp.item(3)
+    
+    If indexField.count > 0 Then
+    stac1.DataVal indexField.count
+    For j = 0 To pppp.item(3).count - 1
+    indexField.index = j
+    indexField.Done = True
+    
+   
+    stac1.DataStr (Split(indexField.Value, " ")(0))
+    stac1.DataStr inames(-CLng(1 <> (val(Split(indexField.Value, " ")(1) And 1))), Lang)
+    
+    indexField.Done = False
+    Next j
+    End If
+stac1.PushVal indexField.count
+stac1.PushVal fields
+Else
+For i = 0 To tables.count - 1
+tables.index = i
+tables.Done = True
+If tables.sValue = 0 Then
+Set pppp = tables.ValueObj
+    stac1.DataStr pppp.item(20)
+    
+    stac1.DataVal pppp.item(3).count
+End If
+tables.Done = False
+Next i
+stac1.PushVal stac1.count \ 2
+End If
 
-Public Sub TABLENAMES(base As String, bstackstr As basetask, r$, Lang As Long)
-Dim tablename As String, scope As Long, cnt As Long, srl As Long, stac1 As New mStiva
+End If
+bstackstr.soros.MergeTop stac1
+TABLENAMES_mk2 = True
+
+End Function
+Public Function TABLENAMES(base As String, bstackstr As basetask, r$, Lang As Long) As Boolean
+Dim Tablename As String, scope As Long, cnt As Long, srl As Long, stac1 As New mStiva, vv
 Dim myBase  ' variant
 scope = 1
-
+If Len(base) > 0 Then
+If getone(base, vv) Then
+If TypeOf vv Is Mk2Base Then
+TABLENAMES = TABLENAMES_mk2(base, bstackstr, r$, Lang)
+Exit Function
+End If
+End If
+End If
 If FastSymbol(r$, ",") Then
-If IsStrExp(bstackstr, r$, tablename) Then
+If IsStrExp(bstackstr, r$, Tablename) Then
 scope = 2
 
 End If
@@ -826,7 +931,7 @@ End If
         Else
             If ExtractPath(base) = vbNullString Then base = mylcasefILE(mcd + base)
             If ExtractType(base) = vbNullString Then base = base & ".mdb"
-            If Not CanKillFile(base) Then FilePathNotForUser: Exit Sub
+            If Not CanKillFile(base) Then FilePathNotForUser: Exit Function
         End If
     If True Then
         On Error Resume Next
@@ -836,9 +941,9 @@ End If
                 srl = DriveSerial(Left$(base, 3))
                 If srl = 0 And Not GetDosPath(base) = vbNullString Then
                     If Lang = 0 Then
-                        If Not ask("Βάλε το CD/Δισκέτα με το αρχείο " & ExtractName(base)) = vbCancel Then Exit Sub
+                        If Not ask("Βάλε το CD/Δισκέτα με το αρχείο " & ExtractName(base)) = vbCancel Then Exit Function
                     Else
-                        If Not ask("Put CD/Disk with file " & ExtractName(base)) = vbCancel Then Exit Sub
+                        If Not ask("Put CD/Disk with file " & ExtractName(base)) = vbCancel Then Exit Function
                     End If
                 End If
                 If myBase = vbNullString Then
@@ -846,7 +951,7 @@ End If
                         myBase.open JetPrefix & JetPostfix
                         If Err.Number Then
                         MyEr Err.Description, Err.Description
-                        Exit Sub
+                        Exit Function
                         End If
                     Else
                         myBase.open JetPrefix & GetDosPath(base) & ";Mode=Share Deny Write" & JetPostfix & "User Id=" & DBUser & ";Password=" & DBUserPassword & ";" & DBSecurityOFF      'open the Connection
@@ -872,7 +977,7 @@ End If
                         myBase.open JetPrefix & JetPostfix
                         If Err.Number Then
                             MyEr Err.Description, Err.Description
-                            Exit Sub
+                            Exit Function
                         End If
                     Else
                         Err.clear
@@ -902,10 +1007,10 @@ End If
            Set cat.ActiveConnection = myBase
            If cat.ActiveConnection.errors.count > 0 Then
            MyEr "Can't connect to Base", "Δεν μπορώ να συνδεθώ με τη βάση"
-           Exit Sub
+           Exit Function
            End If
-        If cat.TABLES.count > 0 Then
-        For Each TBL In cat.TABLES
+        If cat.tables.count > 0 Then
+        For Each TBL In cat.tables
         
         If TBL.Type = "TABLE" Then
         vindx = False
@@ -936,7 +1041,7 @@ End If
                                             Else
                                             stac1.DataVal CDbl(0)
                                         End If
-         ElseIf tablename = TBL.name Then
+         ElseIf Tablename = TBL.name Then
          cnt = 1
                      rs.open "Select * From [" & TBL.name & "] ;", myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
                                          stac1.Flush
@@ -988,8 +1093,16 @@ End If
                                     
                              Else
                                         stac1.DataStr ftype(.Type, Lang)
+                                        On Error GoTo 10000
+                                        If .properties("ISAUTOINCREMENT") Then
+                                        stac1.DataVal CDbl(-1)
+                                        Else
+10000
                                         stac1.DataVal CDbl(.DEFINEDSIZE)
-                             
+                                        On Error Resume Next
+                                        End If
+
+                                        
                              End If
                      End With
                      Next i
@@ -1027,23 +1140,193 @@ End If
     End If
     End If
      bstackstr.soros.MergeTop stac1
+     TABLENAMES = True
      Else
      RemoveOneConn myBase
      MyEr "No such DATABASE", "Δεν υπάρχει τέτοια βάση δεδομένων"
     End If
 g102:
-End Sub
+End Function
 
-Public Sub append_table(bstackstr As basetask, base As String, r$, ED As Boolean, Optional Lang As Long = -1)
-Dim table$, i&, par$, ok As Boolean, t As Double, j&
+Public Function append_table(bstackstr As basetask, base As String, r$, ED As Boolean, Optional Lang As Long = -1) As Boolean
+Dim table$, i&, par$, ok As Boolean, TT, t As Double, j&, vv, p_acc As mArray, acc As mArray
 Dim gindex As Long
-ok = False
+Dim mb As Mk2Base, tables As FastCollection, pppp As mArray, temp As mArray, fieldlist As FastCollection
+Dim indexField As FastCollection, allkey$, prevkey$
+
+ ok = False
+If getone(base, vv) Then
+If Not TypeOf vv Is Mk2Base Then GoTo noMk2
+Else
+ GoTo noMk2
+End If
+If FastSymbol(r$, ",", True) Then
+    If IsStrExp(bstackstr, r$, table$) Then
+    
+    If Lang <> -1 Then If IsLabelSymbolNew(r$, "ΣΤΟ", "TO", Lang) Then If IsExp(bstackstr, r$, t) Then gindex = CLng(t) Else SyntaxError
+
+    
+        If FastSymbol(r$, ",", True) Then
+        ok = True
+        End If
+    Else
+        MissStringExpr
+    End If
+End If
+If Not ok Then Exit Function
+
+
+Set mb = vv
+Set tables = mb.tables
+If tables.ExistKey(myUcase(table$, True)) Then
+Set pppp = tables.ValueObj
+If gindex > 0 Then
+Set tables = pppp.item(2)
+Set indexField = pppp.item(3)
+Set fieldlist = pppp.item(4)
+If indexField.count > 0 Then
+    If gindex > fieldlist.count + 1 Then gindex = fieldlist.count + 1
+    fieldlist.index = gindex - 1
+    fieldlist.Done = True
+    tables.index = fieldlist.Value
+    tables.Done = True
+    fieldlist.Done = False
+    Set p_acc = tables.ValueObj
+    prevkey$ = fieldlist.KeyToString
+    p_acc.CopyArray acc
+    tables.Done = False
+Else
+    If gindex > tables.count + 1 Then gindex = tables.count + 1
+    tables.index = gindex - 1
+    tables.Done = True
+    Set p_acc = tables.ValueObj
+    p_acc.CopyArray acc
+End If
+
+Else
+Set p_acc = pppp.item(18)
+p_acc.CopyArray acc
+End If
+Set p_acc = pppp.item(17)
+i& = 0
+Set fieldlist = pppp.item(1)
+Do
+TT = 0
+fieldlist.index = p_acc.item(i&)
+fieldlist.Done = True
+Set temp = fieldlist.ValueObj
 
 If FastSymbol(r$, ",") Then
+If i& = 0 And temp.item(4) Then
+    If Not ED Then
+        acc.item(p_acc.item(i&)) = temp.item(5)
+        temp.item(5) = temp.item(5) + 1
+    End If
+End If
+ElseIf IsStrExp(bstackstr, r$, par$) Then
+    If i& = 0 And temp.item(4) Then
+        If Not ED Then
+            acc.item(p_acc.item(i&)) = temp.item(4)
+            temp.item(4) = temp.item(4) + 1
+        End If
+    ElseIf temp.item(2) > 0 Then
+        acc.item(p_acc.item(i&)) = RealLeft(par$, temp.item(2))
+    Else
+        acc.item(p_acc.item(i&)) = par$
+    End If
+    If Not FastSymbol(r$, ",") Then Exit Do
+ElseIf IsExp(bstackstr, r$, TT) Then
+    If i& = 0 And temp.item(4) Then
+        If Not ED Then
+            acc.item(p_acc.item(i&)) = temp.item(4)
+            temp.item(4) = temp.item(4) + 1
+        End If
+    Else
+        acc.item(p_acc.item(i&)) = TT
+    End If
+    If Not FastSymbol(r$, ",") Then Exit Do
+End If
+i& = i& + 1
+Loop Until i& = p_acc.count
+' now we append to table, without checking the keys (its a fault)
+Set tables = pppp.item(2)
+Set indexField = pppp.item(3)
+Set fieldlist = pppp.item(4)
+If indexField.count > 0 Then
+For j& = 0 To indexField.count - 1
+    indexField.index = j&
+    indexField.Done = True
+    If Len(allkey$) = 0 Then
+    allkey$ = indexField.Normalize(acc.item(indexField.sValue))
+    Else
+    allkey$ = allkey$ + ChrW(1) + indexField.Normalize(acc.item(indexField.sValue))
+    End If
+Next j&
+If Len(prevkey$) > 0 Then
+    If prevkey$ <> allkey$ Then
+        If fieldlist.ExistKey(allkey$) Then
+            MyEr "index key not unique", "Το κλειδί δεν είναι μοναδικό"
+            Exit Function
+        End If
+        fieldlist.index = gindex - 1
+        fieldlist.Done = True
+        tables.index = fieldlist.Value
+        ' I have to add logic here for calculating the final bytes for file
+        ' so if the previous is less than the current, we can save to same plase
+        ' else we have to delete this and make a new entry
+        Set tables.ValueObj = acc
+        fieldlist.AddKey allkey$, tables.index
+        fieldlist.Remove prevkey$
+        If pppp.item(5) = 2 Then
+            fieldlist.SortDes
+        Else
+            fieldlist.Sort
+        End If
+    
+    Else
+        fieldlist.index = gindex - 1
+        fieldlist.Done = True
+        tables.index = fieldlist.Value
+        tables.Done = True
+        fieldlist.Done = False
+        Set tables.ValueObj = acc
+        
+    End If
+    append_table = True
+    Exit Function
+Else
+    If fieldlist.ExistKey(allkey$) Then
+        MyEr "index key not unique", "Το κλειδί δεν είναι μοναδικό"
+        Exit Function
+    End If
+    fieldlist.AddKey allkey$, tables.count
+    If pppp.item(5) = 2 Then
+        fieldlist.SortDes
+    Else
+        fieldlist.Sort
+    End If
+End If
+End If
+If gindex > 0 Then
+    tables.index = gindex - 1
+    tables.Done = True
+    Set tables.ValueObj = acc
+Else
+    tables.AddKey tables.count + 1, acc
+    pppp.item(21) = pppp.item(21) + 1
+End If
+tables.Done = False
+append_table = True
+End If
+Exit Function
+
+noMk2:
+If FastSymbol(r$, ",", True) Then
 If IsStrExp(bstackstr, r$, table$) Then
 ok = True
 End If
 End If
+If Not ok Then Exit Function
 If Lang <> -1 Then If IsLabelSymbolNew(r$, "ΣΤΟ", "TO", Lang) Then If IsExp(bstackstr, r$, t) Then gindex = CLng(t) Else SyntaxError
 Dim Id$
   If InStr(UCase(Trim$(table$)) + " ", "SELECT") = 1 Then
@@ -1053,7 +1336,7 @@ Id$ = "SELECT * FROM [" + table$ + "]"
 End If
 
 
-If Not ok Then Exit Sub
+
 
 
 If Left$(base, 1) = "(" Or JetPostfix = ";" Then
@@ -1061,7 +1344,7 @@ If Left$(base, 1) = "(" Or JetPostfix = ";" Then
 Else
     If ExtractPath(base) = vbNullString Then base = mylcasefILE(mcd + base)
     If ExtractType(base) = vbNullString Then base = base & ".mdb"
-    If Not CanKillFile(base) Then FilePathNotForUser: Exit Sub
+    If Not CanKillFile(base) Then FilePathNotForUser: Exit Function
 End If
           On Error Resume Next
           Dim myBase
@@ -1072,13 +1355,13 @@ End If
                 If DriveType(Left$(base, 3)) = "Cd-Rom" Then
                 ' we can do NOTHING...
                     MyEr "Can't update base to a CD-ROM", "Δεν μπορώ να γράψω στη βάση δεδομένων σε CD-ROM"
-                    Exit Sub
+                    Exit Function
                 Else
                 If Left$(base, 1) = "(" Or JetPostfix = ";" Then
                     myBase.open JetPrefix & JetPostfix
                     If Err.Number Then
                         MyEr Err.Description, Err.Description
-                        Exit Sub
+                        Exit Function
                     End If
                 Else
                         Err.clear
@@ -1120,7 +1403,7 @@ RemoveOneConn base
 rec.open Id$, myBase, 3, 4
 If Err.Number Then
 MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
-Exit Sub
+Exit Function
 End If
 End If
    
@@ -1130,7 +1413,7 @@ If gindex > 0 Then
 Err.clear
     rec.MoveLast
     rec.MoveFirst
-    rec.AbsolutePosition = gindex '  - 1
+    rec.absoluteposition = gindex '  - 1
     If Err.Number <> 0 Then
     MyEr "Wrong index for table " & table$, "Λάθος δείκτης για αρχείο " & table$
     End If
@@ -1161,14 +1444,200 @@ Err.clear
 rec.UpdateBatch  ' update be an updatebatch
 If Err.Number > 0 Then
 MyEr "Can't append " & Err.Description, "Αδυναμία προσθήκης:" & Err.Description
+append_table = False
+Else
+append_table = True
 End If
 
-End Sub
+End Function
 Public Sub getrow(bstackstr As basetask, r$, Optional ERL As Boolean = True, Optional Search$ = " = ", Optional Lang As Long = 0, Optional IamHelpFile As Boolean = False)
 
-Dim base As String, table$, from As Long, first$, Second$, ok As Boolean, fr As Double, stac1$, p As Double, i&
+Dim base As String, table$, from As Long, first$, Second$, ok As Boolean, fr As Double, stac1$, p, i&
+Dim mb As Mk2Base, tables As FastCollection, pppp As mArray, temp As mArray, fieldlist As FastCollection, ii As Long, pppp1 As mArray
+Dim vv, IndexList As FastCollection, many As Long, topi As Long, temp2 As mArray, ret As Boolean
+Dim LastRead As Long
 ok = False
 If IsStrExp(bstackstr, r$, base) Then
+    If getone(base, vv) Then
+        If Not TypeOf vv Is Mk2Base Then GoTo noMk2
+    Else
+     GoTo noMk2
+    End If
+    If FastSymbol(r$, ",") Then
+        If IsStrExp(bstackstr, r$, table$) Then
+            If FastSymbol(r$, ",") Then
+                If IsExp(bstackstr, r$, fr) Then
+                    from = CLng(fr)
+                    ok = True
+                    If FastSymbol(r$, ",") Then
+                        ok = False
+                        If IsStrExp(bstackstr, r$, first$) Then
+                            If FastSymbol(r$, ",") Then
+                                If Search$ = vbNullString Then
+                                If Not IsStrExp(bstackstr, r$, Search$) Then
+                                Search$ = " = "
+                                End If
+                                If Not FastSymbol(r$, ",", True) Then Exit Sub
+                                End If
+                                If IsExp(bstackstr, r$, p) Then
+                                    ok = True
+                                ElseIf IsStrExp(bstackstr, r$, Second$) Then
+                                    p = Second$
+                                    ok = True
+                                End If
+                                If ok Then
+                                
+                                Search$ = Trim$(UCase(Search$))
+                                
+                                End If
+                            End If
+                        End If
+                    End If
+                End If
+            End If
+        End If
+    End If
+
+    If ok Then
+        Set mb = vv
+        Set tables = mb.tables
+        If tables.ExistKey(myUcase(table$, True)) Then
+            Set pppp = tables.ValueObj
+            If pppp.item(21) = 0 Then
+                bstackstr.soros.PushVal 0
+                Exit Sub
+            End If
+            If from > pppp.item(21) Then from = 1
+            Set tables = pppp.item(2)
+            Set IndexList = pppp.item(4)
+            many = pppp.item(21)
+            If Len(first$) > 0 Then
+                    Set fieldlist = pppp.item(1)
+                    If fieldlist.ExistKey(myUcase(first$, True)) Then
+                        If fieldlist.sValue <> -1 Then GoTo aError
+                        i& = fieldlist.index
+                        ii = 0
+                        topi = tables.count
+                        many = 0
+                        If IndexList.count > 0 Then
+                        topi = IndexList.count
+                        While ii < topi
+                            IndexList.index = ii
+                            IndexList.Done = True
+                            tables.index = IndexList.Value
+                            tables.Done = True
+                            If tables.sValue = 0 Then
+                                Set temp = tables.ValueObj
+                                If temp.count > i& Then
+                                If temp.CompareItem(i&, p, Search$, ret) Then
+                                    If ret Then
+                                        from = from - 1
+                                        If temp2 Is Nothing Then Set temp2 = temp: LastRead = ii
+                                        If from = 0 Then Set pppp1 = temp: LastRead = ii
+                                        
+                                        many = many + 1
+                                    End If
+                                Else
+                                MyEr "compare can't processed", "η σύγκριση δεν μπορεί να γίνει"
+                                Exit Sub
+                                End If
+                                End If
+                            End If
+                            ii = ii + 1
+                        Wend
+                        Else
+                        While ii < topi
+                            tables.index = ii
+                            tables.Done = True
+                            If tables.sValue = 0 Then
+                                Set temp = tables.ValueObj
+                                If temp.count > i& Then
+                                If temp.CompareItem(i&, p, Search$, ret) Then
+                                
+                                    If ret Then
+                                        from = from - 1
+                                        If temp2 Is Nothing Then Set temp2 = temp
+                                        If from = 0 Then Set pppp1 = temp
+                                        
+                                        many = many + 1
+                                    End If
+                                Else
+                                MyEr "compare can't processed", "η σύγκριση δεν μπορεί να γίνει"
+                                Exit Sub
+                                End If
+                                End If
+                            End If
+                            ii = ii + 1
+                        Wend
+                        End If
+                        If Not pppp1 Is Nothing Then Set temp = pppp1 Else Set temp = temp2
+                        If many = 0 Then
+                        bstackstr.soros.PushVal 0
+                        Exit Sub
+                        
+                        End If
+                        GoTo cont001
+                    Else
+aError:
+                        MyEr "no field " + first$ + " found", "Δεν βρήκα το πεδίο " + first$
+                        Exit Sub
+                    End If
+                
+
+            End If
+
+            ii = 0
+            If IndexList.count > 0 Then
+                topi = IndexList.count
+                
+                While from > 0 And ii < topi
+                    IndexList.index = ii
+                    IndexList.Done = True
+                    tables.index = IndexList.Value
+                    tables.Done = True
+                    If tables.sValue = 0 Then
+                        from = from - 1
+                        If from = 0 Then Set temp = tables.ValueObj: LastRead = ii
+                    End If
+                    ii = ii + 1
+                Wend
+            
+            
+            
+            Else
+            topi = tables.count
+            
+            While from > 0 And ii < topi
+            
+                tables.index = ii
+                tables.Done = True
+                If tables.sValue = 0 Then
+                    from = from - 1
+                    If from = 0 Then Set temp = tables.ValueObj: LastRead = ii
+                End If
+                ii = ii + 1
+            Wend
+            End If
+cont001:
+            pppp.item(22) = -1
+            If Not temp Is Nothing Then
+                pppp.item(22) = LastRead
+                Set pppp1 = pppp.item(17)  ' field indexes
+                For ii = pppp1.count - 1 To 0 Step -1
+                    from = pppp1.item(ii)
+                    If temp.IsStringItem(from) Then
+                        bstackstr.soros.PushStrVariant temp.item(from)
+                    Else
+                        bstackstr.soros.PushVal temp.item(from)
+                    End If
+                Next ii
+                bstackstr.soros.PushVal many
+            End If
+        End If
+    End If
+    Exit Sub
+
+noMk2:
 If FastSymbol(r$, ",") Then
 If IsStrExp(bstackstr, r$, table$) Then
 If FastSymbol(r$, ",") Then
@@ -1217,7 +1686,6 @@ End If
 End If
 End If
 'Dim wrkDefault As Workspace,
-Dim ii As Long
 Dim myBase  ' as variant
 
 
@@ -1306,6 +1774,11 @@ Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
            Else
                MyEr "Maybe Need Jet 4.0 library", "Μαλλον χρειάζεται η Jet 4.0 βιβλιοθήκη ρουτινών"
            End If
+        ElseIf Err.Number <> 0 Then
+        
+            MyEr "Read row, open base: " & Err.Description, "Διάβασμα γραμμής, άνοιγμα βάσης: " & Err.Description
+            Err.clear
+            Exit Sub
         End If
  End If
  End If
@@ -1323,6 +1796,7 @@ Dim LL$
    Set rec = CreateObject("ADODB.Recordset")
  Err.clear
  If myBase.mode = 0 Then myBase.open
+ Err.clear
   rec.open Id$, myBase, 3, 4
 If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
@@ -1360,6 +1834,7 @@ If from >= 0 Then
   rec.Move from - 1
   End If
 End If
+
     For i& = rec.fields.count - 1 To 0 Step -1
 
    Select Case rec.fields(i&).Type
@@ -1387,7 +1862,7 @@ If IsNull(rec.fields(i&)) Then
      bstackstr.soros.PushStr ""
  Else
   
-   bstackstr.soros.PushStr CStr(rec.fields(i&))
+   bstackstr.soros.PushStrVariant rec.fields(i&)
   End If
 Case 11, 12 ' this is the binary field so we can save unicode there
    Case Else
@@ -1420,7 +1895,17 @@ End Sub
 Public Sub GetNames(bstackstr As basetask, r$, bv As Object, Lang)
 Dim base As String, table$, from As Long, many As Long, ok As Boolean, fr As Double, stac1$, i&
 ok = False
+Dim vv
 If IsStrExp(bstackstr, r$, base) Then
+    If getone(base, vv) Then
+        If Not TypeOf vv Is Mk2Base Then GoTo noMk2
+    Else
+     GoTo noMk2
+    End If
+    MyEr "not for m2k base yet", "όχι για βάσεις m2k ακόμα"
+    Exit Sub
+
+noMk2:
 If FastSymbol(r$, ",") Then
 If IsStrExp(bstackstr, r$, table$) Then
 If FastSymbol(r$, ",") Then
@@ -1677,25 +2162,78 @@ End Sub
 
 
 
-Public Sub MyOrder(bstackstr As basetask, r$)
-Dim base As String, tablename As String, fs As String, i&, o As Double, ok As Boolean
+Public Function MyOrder(bstackstr As basetask, r$, Lang As Long) As Boolean
+Dim base As String, Tablename As String, fs As String, i&, o As Double, ok As Boolean
+Dim pppp As mArray
 ok = False
-If IsStrExp(bstackstr, r$, base) Then
-If FastSymbol(r$, ",") Then
-If IsStrExp(bstackstr, r$, tablename) Then
-ok = True
-End If
-End If
+Dim mb As Mk2Base, vv, tables As FastCollection, param As mStiva2
+If Not IsStrExp(bstackstr, r$, base) Then
+MissStringExpr
+Exit Function
 End If
 
-If Not ok Then Exit Sub
+If getone(base, vv) Then
+If Not TypeOf vv Is Mk2Base Then GoTo noMk2
+
+    If FastSymbol(r$, ",", True) Then
+        If IsStrExp(bstackstr, r$, Tablename) Then
+            ok = True
+        Else
+            MissStringExpr
+        End If
+    End If
+If Not ok Then Exit Function
+
+Set mb = vv
+Set tables = mb.tables
+If Not tables.ExistKey(myUcase(Tablename, True)) Then
+MyEr "table not exist", "ο πίνακας δεν υπάρχει"
+Exit Function
+End If
+
+Set param = New mStiva2
+    If FastSymbol(r$, ",") Then
+        Do
+           If IsStrExp(bstackstr, r$, fs) Then
+            If FastSymbol(r$, ",", True) Then
+            If IsExp(bstackstr, r$, o) Then
+            
+            param.DataStr fs
+            param.DataVal o
+            Else
+            MissNumExpr
+            Exit Function
+            End If
+            End If
+            Else
+            MissStringExpr
+            Exit Function
+            End If
+          Loop Until Not FastSymbol(r$, ",")
+    End If
+        param.PushStr Tablename
+        MyOrder = mb.AddIndexes_(param)
+Exit Function
+End If
+noMk2:
+
+    If FastSymbol(r$, ",", True) Then
+        If IsStrExp(bstackstr, r$, Tablename) Then
+            ok = True
+        Else
+            MissStringExpr
+        End If
+    End If
+
+
+If Not ok Then Exit Function
 On Error Resume Next
 If Left$(base, 1) = "(" Or JetPostfix = ";" Then
 'skip this
 Else
     If ExtractPath(base) = vbNullString Then base = mylcasefILE(mcd + base)
     If ExtractType(base) = vbNullString Then base = base & ".mdb"
-    If Not CanKillFile(base) Then FilePathNotForUser: Exit Sub
+    If Not CanKillFile(base) Then FilePathNotForUser: Exit Function
 End If
     
     Dim myBase
@@ -1707,13 +2245,13 @@ End If
                 If DriveType(Left$(base, 3)) = "Cd-Rom" Then
                 ' we can do NOTHING...
                     MyEr "Can't update base to a CD-ROM", "Δεν μπορώ να γράψω στη βάση δεδομένων σε CD-ROM"
-                    Exit Sub
+                    Exit Function
                 Else
                     If Left$(base, 1) = "(" Or JetPostfix = ";" Then
                         myBase.open JetPrefix & JetPostfix
                         If Err.Number Then
                         MyEr Err.Description, Err.Description
-                        Exit Sub
+                        Exit Function
                         End If
                     Else
                         Err.clear
@@ -1756,20 +2294,20 @@ RemoveOneConn base
             
 
 If Err.Number Then
-MyEr Err.Description & " " & tablename, Err.Description & " " & tablename
-Exit Sub
+MyEr Err.Description & " " & Tablename, Err.Description & " " & Tablename
+Exit Function
 End If
 End If
 Err.clear
-mcat.TABLES(tablename).indexes("ndx").Remove
+mcat.tables(Tablename).indexes("ndx").Remove
 Err.clear
-mcat.TABLES(tablename).indexes.Refresh
+mcat.tables(Tablename).indexes.Refresh
 
-   If mcat.TABLES.count > 0 Then
+   If mcat.tables.count > 0 Then
    okntable = True
-        For Each mtable In mcat.TABLES
+        For Each mtable In mcat.tables
         If mtable.Type = "TABLE" Then
-        If mtable.name = tablename Then
+        If mtable.name = Tablename Then
         okntable = False
         Exit For
         End If
@@ -1780,7 +2318,7 @@ mcat.TABLES(tablename).indexes.Refresh
 Else
 t111:
 MyEr "No tables in Database " + ExtractNameOnly(base), "Δεν υπάρχουν αρχεία στη βάση δεδομένων " + ExtractNameOnly(base)
-Exit Sub
+Exit Function
 End If
 ' now we have mtable from mybase
 If mtable Is Nothing Then
@@ -1813,38 +2351,104 @@ Else
         End If
         Wend
         If pIndex.Columns.count > 0 Then
+        If mtable.indexes.count = 1 Then
+        mtable.indexes.Delete pIndex.name
+        End If
         mtable.indexes.Append pIndex
+        
              If Err.Number Then
           '   mtable.Append pIndex
          MyEr Err.Description, Err.Description
-         Exit Sub
+         Exit Function
         End If
-mcat.TABLES.Append mtable
+
+mcat.tables.Append mtable
 Err.clear
-mcat.TABLES.Refresh
+mcat.tables.Refresh
 End If
-    
-End Sub
-Public Sub NewTable(bstackstr As basetask, r$)
+
+MyOrder = True
+End Function
+Public Function NewTable(bstackstr As basetask, r$, Lang As Long) As Boolean
 'BASE As String, tablename As String, ParamArray flds()
-Dim base As String, tablename As String, fs As String, i&, n As Double, l As Double, ok As Boolean
+Dim base As String, Tablename As String, fs As String, i&, n As Double, l As Double, ok As Boolean
+Dim vv, mb As Mk2Base, param As mStiva2, oldl As Double
 ok = False
-If IsStrExp(bstackstr, r$, base) Then
-If FastSymbol(r$, ",") Then
-If IsStrExp(bstackstr, r$, tablename) Then
+
+If Not IsStrExp(bstackstr, r$, base) Then
+    MissStringExpr
+    Exit Function
+Else
+    If getone(base, vv) Then
+    ' what
+    If Not TypeOf vv Is Mk2Base Then GoTo noMk2
+    Else
+        GoTo noMk2
+    End If
+    If Not FastSymbol(r$, ",", True) Then
+    Exit Function
+    End If
+    If Not IsStrExp(bstackstr, r$, Tablename) Then
+    MissStringExpr
+    Exit Function
+    Else
+    Set mb = vv
+    Set param = New mStiva2
+    param.DataVal Tablename
+    mb.AddTables_ param
+    param.Flush
+    
+    If Not FastSymbol(r$, ",") Then
+    NewTable = True
+    Exit Function
+    End If
+    Do
+    NewTable = False
+    If Not IsStrExp(bstackstr, r$, fs) Then
+    MissStringExpr
+    Exit Function
+    End If
+    If Not FastSymbol(r$, ",", True) Then
+    Exit Function
+    End If
+    If Not IsExp(bstackstr, r$, n) Then
+    MissNumExpr
+    Exit Function
+    End If
+    If Not FastSymbol(r$, ",", True) Then
+    Exit Function
+    End If
+    If Not IsExp(bstackstr, r$, l) Then
+    MissNumExpr
+    Exit Function
+    End If
+    param.DataStr fs
+    param.DataVal n
+    param.DataVal l
+    Loop Until Not FastSymbol(r$, ",")
+    param.PushVal Tablename
+    NewTable = mb.AddFields_(param)
+    End If
+    End If
+Exit Function
+noMk2:
+If FastSymbol(r$, ",", True) Then
+If IsStrExp(bstackstr, r$, Tablename) Then
 ok = True
-End If
+Else
+MissStringExpr
 End If
 End If
 
-If Not ok Then Exit Sub
+
+If Not ok Then Exit Function
 On Error Resume Next
 If Left$(base, 1) = "(" Or JetPostfix = ";" Then
 'skip this
 Else
     If ExtractPath(base) = vbNullString Then base = mylcasefILE(mcd + base)
     If ExtractType(base) = vbNullString Then base = base & ".mdb"
-    If Not CanKillFile(base) Then FilePathNotForUser: Exit Sub
+    If Not CanKillFile(base) Then FilePathNotForUser: Exit Function
 End If
     Dim okndx As Boolean, okntable As Boolean, one_ok As Boolean
     ' Dim wrkDefault As Workspace
@@ -1857,13 +2461,13 @@ End If
                 If DriveType(Left$(base, 3)) = "Cd-Rom" Then
                 ' we can do NOTHING...
                     MyEr "Can't update base to a CD-ROM", "Δεν μπορώ να γράψω στη βάση δεδομένων σε CD-ROM"
-                    Exit Sub
+                    Exit Function
                 Else
                 If Left$(base, 1) = "(" Or JetPostfix = ";" Then
                     myBase.open JetPrefix & JetPostfix
                     If Err.Number Then
                     MyEr Err.Description, Err.Description
-                    Exit Sub
+                    Exit Function
                     End If
                 Else
                     Err.clear
@@ -1902,18 +2506,18 @@ RemoveOneConn base
  Set cat.ActiveConnection = myBase
 If Err.Number Then
 MyEr Err.Description & " " & mtable, Err.Description & " " & mtable
-Exit Sub
+Exit Function
 End If
 End If
 
     Set mtable = CreateObject("ADOX.TABLE")
-         
+         Set mtable.parentcatalog = cat
 ' check if table exist
 
-           If cat.TABLES.count > 0 Then
-        For Each mtable In cat.TABLES
+           If cat.tables.count > 0 Then
+        For Each mtable In cat.tables
           If mtable.Type = "TABLE" Then
-        If mtable.name = tablename Then
+        If mtable.name = Tablename Then
         okntable = False
         Exit For
         End If
@@ -1921,7 +2525,8 @@ End If
         Next mtable
        If okntable Then
        Set mtable = CreateObject("ADOX.TABLE")      ' get a fresh one
-        mtable.name = tablename
+        mtable.name = Tablename
+        Set mtable.parentcatalog = cat
        End If
     
     
@@ -1936,15 +2541,31 @@ End If
                                 
                                             If FastSymbol(r$, ",") Then
                                                 If IsExp(bstackstr, r$, l) Then
+                                                If n = 1 Then n = 11: l = 0
+                                                If n = 2 Then n = 16: l = 0
+                                                If n = 3 Then n = 2: l = 0
+                                                If n = 4 Then
+                                                oldl = l
+                                                n = 3: l = 0
+                                                End If
+                                                If n = 5 Then n = 6: l = 0
+                                                If n = 6 Then n = 4: l = 0
+                                                If n = 7 Then n = 5: l = 0
                                                 If n = 8 Then n = 7: l = 0
+                                                If n = 9 Then n = 128
                                                 If n = 10 Then n = 202
                                                 If n = 12 Then n = 203: l = 0
+                                                If n = 16 Then n = 14: l = 0
                                                     If l <> 0 Then
                                                 
                                                      .Append fs, n, l
+                                           
                                                     Else
                                                      .Append fs, n
-                                           
+                                                     If n = 3 And oldl = -1 Then
+                                                     mtable.Columns.item(0).properties("AutoIncrement") = True
+                                                   
+                                                     End If
                                                     End If
                                         
                                                 End If
@@ -1960,30 +2581,28 @@ End If
 End With
         If okntable Then
         
-        cat.TABLES.Append mtable
+        cat.tables.Append mtable
         If Err.Number Then
         If Err.Number = -2147217859 Then
         Err.clear
         Else
          MyEr Err.Description, Err.Description
-         Exit Sub
+         Exit Function
         End If
         
         End If
-        cat.TABLES.Refresh
+        cat.tables.Refresh
         ElseIf Not one_ok Then
-        cat.TABLES.Delete tablename
-        cat.TABLES.Refresh
+        cat.tables.Delete Tablename
+        cat.tables.Refresh
         End If
         
 ' may the objects find the creator...
 
-
+NewTable = okntable
 End If
 
-
-
-End Sub
+End Function
 
 
 Sub BaseCompact(bstackstr As basetask, r$)
@@ -2057,7 +2676,7 @@ End If
 End Sub
 
 Public Function DELfields(bstackstr As basetask, r$) As Boolean
-Dim base$, table$, first$, Second$, ok As Boolean, p As Double
+Dim base$, table$, first$, Second$, ok As Boolean, p As Double, vv
 ok = False
 If IsExp(bstackstr, r$, p) Then
 If bstackstr.lastobj Is Nothing Then
@@ -2097,6 +2716,15 @@ Set aa = Nothing
 Exit Function
 
 ElseIf IsStrExp(bstackstr, r$, base$) Then
+
+    If getone(base, vv) Then
+        If Not TypeOf vv Is Mk2Base Then GoTo noMk2
+    Else
+     GoTo noMk2
+    End If
+    MyEr "not for m2k base yet", "όχι για βάσεις m2k ακόμα"
+    Exit Function
+noMk2:
 If FastSymbol(r$, ",") Then
 If IsStrExp(bstackstr, r$, table$) Then
 If FastSymbol(r$, ",") Then
@@ -2252,6 +2880,12 @@ For i = conCollection.count - 1 To 0 Step -1
 On Error Resume Next
 conCollection.index = i
 If conCollection.IsObj Then
+If TypeOf conCollection.ValueObj Is Mk2Base Then
+' do nothing just throw
+With conCollection.ValueObj
+.Close_
+End With
+Else
 With conCollection.ValueObj
 bb = .ConnectionString <> ""
 If Err.Number = 0 Then
@@ -2269,6 +2903,7 @@ End If
 End If
 End With
 End If
+End If
 conCollection.Remove conCollection.KeyToString
 Err.clear
 
@@ -2279,7 +2914,7 @@ Err.clear
 End Sub
 Public Sub RemoveOneConn(conname)
 On Error Resume Next
-Dim vv
+Dim vv, mb As Mk2Base
 If conCollection Is Nothing Then Exit Sub
 If Not conCollection.ExistKey(conname) Then
     conname = mylcasefILE(conname)
@@ -2292,8 +2927,11 @@ If Not conCollection.ExistKey(conname) Then
     Exit Sub
 Else
 conthere:
-    vv = conCollection(conname)
-    If vv.ConnectionString <> "" Then
+    Set vv = conCollection.ValueObj
+    If TypeOf vv Is Mk2Base Then
+        Set mb = vv
+        mb.Close_
+    ElseIf vv.ConnectionString <> "" Then
     
     If Err.Number = 0 And vv.mode <> 0 Then vv.Close
     Err.clear
@@ -2304,16 +2942,21 @@ End If
 End Sub
 Private Function getone(conname As String, this As Variant) As Boolean
 On Error Resume Next
-Dim v As Variant
 InitMe
 If conCollection.ExistKey(conname) Then
 Set this = conCollection.ValueObj
 getone = True
 End If
 End Function
+Private Sub changeone(conname As String, this As Variant)
+On Error Resume Next
+InitMe
+If conCollection.ExistKey(conname) Then
+Set conCollection.ValueObj = this
+End If
+End Sub
 Public Function getone2(conname As String, this As Variant) As Boolean
 On Error Resume Next
-Dim v As Variant
 InitMe
 
 If conCollection.ExistKey(conname) Then
@@ -2333,9 +2976,9 @@ Select Case a
     Case 0
 ftype = "ΑΔΕΙΟ"
     Case 2
-ftype = "ΨΗΦΙΟ"
-    Case 3
 ftype = "ΑΚΕΡΑΙΟΣ"
+    Case 3
+ftype = "ΜΑΚΡΥΣ"
     Case 4
 ftype = "ΑΠΛΟΣ"
     Case 5
@@ -2359,7 +3002,7 @@ ftype = "IUNKNOWN"
     Case 14
 ftype = "DECIMAL"
     Case 16
-ftype = "TINYINT"
+ftype = "ΨΗΦΙΟ"
     Case 17
 ftype = "UNSIGNEDTINYINT"
     Case 18
@@ -2367,7 +3010,7 @@ ftype = "UNSIGNEDSMALLINT"
     Case 19
 ftype = "UNSIGNEDINT"
     Case 20
-ftype = "ΜΑΚΡΥΣ"   'LONG
+ftype = "BIGINT"
     Case 21
 ftype = "UNSIGNEDBIGINT"
     Case 64
@@ -2421,9 +3064,9 @@ Select Case a
     Case 0
 ftype = "EMPTY"
     Case 2
-ftype = "BYTE"  'SMALLINT
-    Case 3
 ftype = "INTEGER"
+    Case 3
+ftype = "LONG"
     Case 4
 ftype = "SINGLE"
     Case 5
@@ -2447,7 +3090,7 @@ ftype = "IUNKNOWN"
     Case 14
 ftype = "DECIMAL"
     Case 16
-ftype = "TINYINT"
+ftype = "BYTE"
     Case 17
 ftype = "UNSIGNEDTINYINT"
     Case 18
@@ -2514,4 +3157,168 @@ Dim errorObject
  Next
 End Sub
 
+Function Digits(a$, Label$, notrim As Boolean) As Boolean
+Dim a1 As Long, LI As Long, A2 As Long
+LI = Len(a$)
 
+If LI > 0 Then
+If notrim Then
+a1 = 1
+Else
+a1 = MyTrimL(a$)
+End If
+A2 = a1
+If a1 > LI Then a$ = vbNullString: Exit Function
+'If LI > 5 + A2 Then LI = 4 + A2
+If Mid$(a$, a1, 1) Like "[0-9]" Then
+Do While a1 <= LI
+a1 = a1 + 1
+If Not Mid$(a$, a1, 1) Like "[0-9]" Then Exit Do
+
+Loop
+Label$ = Mid$(a$, A2, a1 - A2): a$ = Mid$(a$, a1)
+Digits = True
+End If
+
+End If
+End Function
+Public Sub SQL()
+Dim a$, r$, k As Long, r1$, waittablename As Boolean
+Dim closepar As Long, getonename As Boolean
+a$ = "SELECT * FROM [COMMANDS alfa] WHERE ENGLISH LIKE '" + "MODULE%" + "' AND GROUPNUM = 3"
+a$ = "SELECT [ENGLISH] FROM COMMANDS WHERE GROUPNUM =" + Str$(100) + " ORDER BY [ENGLISH]"
+a$ = "SELECT DISTINCT customer_name FROM depositor d WHERE NOT EXISTS ( SELECT * FROM borrower b WHERE b.customer_name = d.customer_name);"
+Debug.Print a$
+If IsLabelOnly(a$, r$) Then
+Debug.Print "Command:"; r$
+Debug.Print a$
+
+If FastSymbol(a$, "*") Then Debug.Print "ALL"
+
+Do
+k = Len(a$)
+While FastSymbol(a$, "[")
+r$ = Left$(a$, InStr(a$, "]") - 1)
+Debug.Print "Field:"; r$
+a$ = Mid$(a$, Len(r$) + 2)
+Wend
+While FastSymbol(a$, "'")
+r$ = Left$(a$, InStr(a$, "'") - 1)
+Debug.Print "string", r$
+a$ = Mid$(a$, Len(r$) + 2)
+Wend
+If IsLabelOnly(a$, r$) Then
+r$ = UCase(r$)
+Select Case r$
+Case "EXISTS"
+Debug.Print "FLAG??:";
+Case "FROM"
+getonename = False
+Debug.Print "Command:";
+waittablename = True
+Case "GROUP"
+getonename = False
+If IsLabelOnly(a$, r1$) Then
+r1$ = UCase(r1$)
+If Not r1$ = "BY" Then Debug.Print "Missing BY", a$: Exit Sub
+r$ = r$ + " " + r1$
+Debug.Print "Command:";
+waittablename = False
+End If
+Case "ORDER"
+getonename = False
+If IsLabelOnly(a$, r1$) Then
+r1$ = UCase(r1$)
+If Not r1$ = "BY" Then Debug.Print "Missing BY", a$: Exit Sub
+r$ = r$ + " " + r1$
+Debug.Print "Command:";
+waittablename = False
+End If
+Case "WHERE", "HAVING"
+getonename = False
+Debug.Print "Command:";
+waittablename = False
+Case "DISTINCT"
+Debug.Print "Without Doublicates: ";
+Case "AS"
+getonename = False
+r$ = ""
+Debug.Print "Name the result: ";
+Case "MIN(", "MAX(", "COUNT("
+getonename = False
+Debug.Print "Aggregate Function: ";
+closepar = 1
+Case "AVG(", "SUM("   ' numeric inputs
+getonename = False
+Debug.Print "Aggregate Function (for numeric inputs): ";
+closepar = 1
+Case "ASC", "DESC"
+Debug.Print "Order Attribute: ";
+Case "AND", "NOT"
+getonename = False
+Debug.Print "Logic Operator: ";
+Case "LIKE"
+getonename = False
+Debug.Print "Operator: ";
+Case Else
+If getonename Then
+Debug.Print "Alias:";
+Else
+If waittablename Then
+Debug.Print "Table:";
+Else
+Debug.Print "Field:";
+End If
+getonename = True
+End If
+End Select
+Debug.Print r$
+End If
+a$ = LTrim(a$)
+r$ = ""
+Do
+If Len(a$) = 0 Then Exit Do
+If InStr("<=>-+*/", Left$(a$, 1)) > 0 Then
+r$ = r$ + Left$(a$, 1): a$ = Mid$(a$, 2)
+Else
+Exit Do
+End If
+Loop
+If Len(r$) > 0 Then Debug.Print "operator: "; r$: getonename = False
+If Digits(a$, r$, False) Then
+    If Left$(a$, 1) = "." Then
+        r$ = r$ + "."
+        If Digits(a$, r1$, True) Then
+            r$ = r$ + r1$
+            If InStr("eE", Left$(a$, 1)) > 0 Then
+                If InStr("-+", Mid$(a$, 2, 1)) > 0 Then
+                    r1$ = "E" + Mid$(a$, 2, 1)
+                    If Digits(Mid$(a$, 3), (r1$), True) Then
+                        r$ = r$ + r1$
+                        a$ = Mid$(a$, 3)
+                        Digits a$, r1$, True
+                        r$ = r$ + r1$
+                    End If
+                Else
+                    r1$ = "E"
+                    If Digits(Mid$(a$, 2), (r1$), True) Then
+                        r$ = r$ + r1$
+                        a$ = Mid$(a$, 2)
+                        Digits a$, r1$, True
+                        r$ = r$ + r1$
+                    End If
+                End If
+            End If
+        End If
+    End If
+    Debug.Print "Number:", r$: getonename = True
+End If
+While FastSymbol(a$, vbCrLf)
+Wend
+If FastSymbol(a$, "(") Then Debug.Print "Open Parenthesis": closepar = closepar + 1: getonename = False
+If closepar > 0 Then If FastSymbol(a$, ")") Then Debug.Print "Close Parenthesis": closepar = closepar - 1
+If FastSymbol(a$, ",") Then Debug.Print "Another Item (,)": getonename = False
+If FastSymbol(a$, ";") Then Exit Do
+Loop Until k = Len(a$)
+End If
+End Sub

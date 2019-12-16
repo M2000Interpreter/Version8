@@ -37,7 +37,8 @@ Private Type SAFEARRAY1D
 End Type
 Private Width As Long, Height As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
-Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
+Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
+
 Sub Costruct(ByteLen As Long, Optional Times As Long = 1, Optional clearme As Long = 0, Optional executable As Boolean = False, Optional thatbasicitem As Integer)
 
 If mItems <> 0 Then ErrorMes = 1: Exit Sub
@@ -299,6 +300,40 @@ there:
 End If
         
 End Function
+Public Function ExportToByte() As Byte()
+Dim place
+If ErrorMes = 0 And mItems > 0 Then
+
+    On Error GoTo there
+    Dim a1 As SAFEARRAY1D, a() As Byte
+     With a1
+        .cbElements = 1
+        .cDims = 1
+        .onebound(0).lLBound = 0
+        .onebound(0).cElements = SizeByte
+        .pvData = GetPtr(0)
+    End With
+        CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
+
+        place = 1
+        On Error Resume Next
+        ExportToByte = a()
+        If Err.Number > 0 Then Exit Function
+        CopyMemory ByVal VarPtrArray(a), 0&, 4
+       
+  End If
+    
+Exit Function
+there:
+        If place = 1 Then
+                CopyMemory ByVal VarPtrArray(a), 0&, 4
+        End If
+        
+
+End Function
+
+
+
 Public Function putData(F As Long, addr, lengthInBytes As Long) As Boolean
 Dim offset, place
 offset = uintnew(addr) - uintnew(mPtr)

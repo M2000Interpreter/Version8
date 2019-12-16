@@ -1,7 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 3 active-X
-Fix a bug in Cons() function.
+Version 9.9 revision 4 active-X
+Has a lot of changes. Has right to left support, for editor in console, not for forms yet. Has some undocument work, which be document when finished.
+
+George Karras, Kallithea Attikis, Greece.
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

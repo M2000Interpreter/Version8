@@ -37,7 +37,7 @@ Public GroupRef As Object
 'Private mGroupRef As Object
 Public CodeName As String
 Private oldmaxitems As Long
-Public Arr As Boolean
+Public Arr As Boolean, Stable As Boolean
 Public RevOrder As Boolean
 Private Type SAFEArrayPart
    cDims                        As Integer
@@ -51,9 +51,9 @@ Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As 
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
 Private Declare Function VarPtrArray Lib "msvbvm60.dll" Alias "VarPtr" (Ptr() As Any) As Long
-  Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
+  Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
-        Private Declare Sub CopyPart Lib "kernel32" Alias "RtlMoveMemory" _
+        Private Declare Sub CopyPart Lib "KERNEL32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
 Private Declare Function SafeArrayGetDim Lib "OleAut32.dll" (ByVal pSA As Long) As Long
 Private Declare Function SafeArrayLock Lib "OleAut32.dll" (ByVal pSA As Long) As Long
@@ -72,8 +72,10 @@ Private Type SAFEARRAY1D
     cElements As Long
     lLBound As Long
 End Type
+' no second sort allowed per array
+Private sortmult As Long, sortoff As Long, upart As Long, part As Long, col(), Piv, piv1()
 Public index As Long, final As Boolean, refgroup As Object, grouperror As Boolean
-Public RefArray As Variant
+Public refArray As Variant
 Public Sub Compute0(p As Variant, ss$)
 If final Then CantAssignValue: Exit Sub
 Dim v As Long
@@ -169,6 +171,47 @@ End If
 Loop
 
 End Sub
+Public Function CompareItem(v As Long, p As Variant, ss$, ret As Boolean) As Boolean
+ret = False
+On Error GoTo there
+If MyIsNumeric(actualdata(v)) Then
+Select Case ss$
+Case ">"
+ret = actualdata(v) > p
+Case ">="
+ret = actualdata(v) >= p
+Case "<"
+ret = actualdata(v) < p
+Case "<="
+ret = actualdata(v) <= p
+Case "<>"
+ret = actualdata(v) <> p
+Case "="
+ret = actualdata(v) = p
+End Select
+
+Else
+Select Case UCase(ss$)
+Case ">"
+ret = actualdata(v) > p
+Case ">="
+ret = actualdata(v) >= p
+Case "<"
+ret = actualdata(v) < p
+Case "<="
+ret = actualdata(v) <= p
+Case "<>"
+ret = actualdata(v) <> p
+Case "="
+ret = actualdata(v) = p
+Case "LIKE"
+ret = actualdata(v) = Replace$(CStr(p), "%", "*")
+
+End Select
+End If
+CompareItem = True
+there:
+End Function
 Public Sub Compute2(p As Variant, ss$)
 If final Then CantAssignValue: Exit Sub
 Dim v As Long
@@ -244,9 +287,11 @@ Set GroupRef = a
 Arr = False
 End Sub
 Friend Sub ExportArrayNow()
-CopyVariantArray RefArray, actualdata()
+CopyVariantArray refArray, actualdata()
 End Sub
 Friend Sub FixArray()
+Dim zz As Variant
+CopyMemory ByVal VarPtr(refArray), zz, 16
 Dim z As Long, i As Long
 If count <> UBound(actualdata()) - LBound(actualdata) + 1 Then
 i = count
@@ -802,6 +847,8 @@ End If
 nmaxitems1 = nmaxitems - 1
 End Sub
 Public Sub PushEnd()
+Dim z As Variant
+CopyMemory ByVal VarPtr(refArray), z, 16
 On Error GoTo there11
 If ndnum = 0 Then
 dnum = 0
@@ -918,6 +965,8 @@ maxitems1 = 0
 ndnum = 0 ' no actions
 nmaxitems = 1
 nmaxitems1 = 0
+Dim z As Variant
+CopyMemory ByVal VarPtr(refArray), z, 16
 ReDim actualdata(0)
 CodeName = GetAnyName$
 Arr = True
@@ -1200,6 +1249,8 @@ Set actualdata(i) = aa
 Next i
 Else
 If Typename(item) = "Empty" Then
+Dim z As Variant
+CopyMemory ByVal VarPtr(refArray), z, 16
 ReDim actualdata(maxitems)
 ''maxitems = 0
 
@@ -1328,11 +1379,14 @@ ReDim actualdata(0)
 CodeName = GetAnyName$
 Arr = True
 myarrbase = -ArrBase
-RefArray = 0&
+refArray = 0&
 End Sub
 
 Private Sub Class_Terminate()
+Dim z As Variant
+CopyMemory ByVal VarPtr(refArray), z, 16
 Set GroupRef = Nothing
+
 Erase actualdata()
 End Sub
 Private Function GetAnyName$()
@@ -1356,16 +1410,359 @@ End Function
 Function GetCopy() As Variant()
 GetCopy = actualdata
 End Function
-'' Only for test. Not mHandler with t1=3 can be in Groupref
-'Public Property Set GroupRef(RHS)
-'If Not RHS Is Nothing Then
-'If TypeOf RHS Is mHandler Then
-'If RHS.t1 = 3 Then Stop
-'End If
-'End If
-'Set mGroupRef = RHS
-'End Property
-'Public Property Get GroupRef() As Object
-'Set GroupRef = mGroupRef
-'End Property
+Private Sub InsertionSort1(ByVal iMin As Long, ByVal iMax As Long)
+    Dim i As Long
+    Dim j As Long
+    i = iMin + 1
+    iMax = iMax + 1
+    While i < iMax
+        j = i
+        Do While j > iMin
+        If actualdata(j) < actualdata(j - 1) Then
+            SwapVariant actualdata(j), actualdata(j - 1)
+            j = j - 1
+        Else
+            Exit Do
+        End If
+        Loop
+        i = i + 1
+    Wend
+End Sub
+Private Sub InsertionSort(ByVal iMin As Long, ByVal iMax As Long)
+    Dim i As Long
+    Dim j As Long
+    i = iMin + 1
+    iMax = iMax + 1
+    While i < iMax
+        j = i
+        Do While j > iMin
+        If actualdata(j) > actualdata(j - 1) Then
+            SwapVariant actualdata(j), actualdata(j - 1)
+            j = j - 1
+        Else
+            Exit Do
+        End If
+        Loop
+        i = i + 1
+    Wend
+End Sub
+Private Sub QuickSortItemsWithSameKey(ByVal LB As Long, ByVal UB As Long)
+Dim M1 As Long, M2 As Long
+
+  If UB - LB = 1 Then
+     M1 = LB
+
+     If actualdata(M1) < actualdata(UB) Then SwapVariant actualdata(M1), actualdata()
+     Exit Sub
+  ElseIf UB - LB < 7 Then
+  InsertionSort1 LB, UB
+  Exit Sub
+  
+  Else
+    M1 = (LB + UB) \ 2
+   Piv = actualdata(M1)
+   
+           M1 = LB
+   Do While actualdata(M1) > Piv: M1 = M1 + 1: Loop
+    End If
+  
+  M2 = UB
+  Do
+    Do While actualdata(M2) < Piv: M2 = M2 - 1: Loop
+    If M1 <= M2 Then
+      If M1 <> M2 Then SwapVariant actualdata(M1), actualdata(M2)
+      M1 = M1 + 1
+      M2 = M2 - 1
+    End If
+    If M1 > M2 Then Exit Do
+    Do While actualdata(M1) > Piv: M1 = M1 + 1: Loop
+  Loop
+  If LB < M2 Then QuickSortItemsWithSameKey LB, M2
+  If M1 < UB Then QuickSortItemsWithSameKey M1, UB
+End Sub
+Private Sub QuickSortItemsRevWithSameKey(ByVal LB As Long, ByVal UB As Long)
+Dim M1 As Long, M2 As Long
+  If UB - LB = 1 Then
+     M1 = LB
+
+     If actualdata(M1) > actualdata(UB) Then SwapVariant actualdata(M1), actualdata()
+     Exit Sub
+  ElseIf UB - LB < 7 Then
+  InsertionSort LB, UB
+  Exit Sub
+  
+  Else
+    M1 = (LB + UB) \ 2
+   Piv = actualdata(M1)
+   
+           M1 = LB
+   Do While actualdata(M1) < Piv: M1 = M1 + 1: Loop
+  End If
+  
+  M2 = UB
+  Do
+    Do While actualdata(M2) > Piv: M2 = M2 - 1: Loop
+    If M1 <= M2 Then
+      If M1 <> M2 Then SwapVariant actualdata(M1), actualdata(M2)
+      M1 = M1 + 1
+      M2 = M2 - 1
+    End If
+    If M1 > M2 Then Exit Do
+    Do While actualdata(M1) < Piv: M1 = M1 + 1: Loop
+  Loop
+  If LB < M2 Then QuickSortItemsRevWithSameKey LB, M2
+  If M1 < UB Then QuickSortItemsRevWithSameKey M1, UB
+End Sub
+Public Sub SortTuple(Optional low As Long = -1, Optional high As Long = -1)
+Dim i As Long, n As Byte
+If dnum < 1 Then Exit Sub
+If count > 0 Then
+If high = -1 Then high = count - 1
+If high > count - 1 Then high = count - 1
+If low = -1 Then low = 0
+If low >= high Then Exit Sub
+
+For i = low To high
+GetMem1 VarPtr(actualdata(i)), n
+If (n > 8 Or n < 2) And Not n = 14 Then Exit Sub
+Next i
+QuickSortItemsWithSameKey low, high
+
+End If
+End Sub
+Public Sub SortDesTuple(Optional low As Long = -1, Optional high As Long = -1)
+Dim i As Long, n As Byte
+If dnum < 1 Then Exit Sub
+If count > 0 Then
+If high = -1 Then high = count - 1
+If high > count - 1 Then high = count - 1
+If low = -1 Then low = 0
+If low >= high Then Exit Sub
+
+For i = low To high
+GetMem1 VarPtr(actualdata(i)), n
+If (n > 8 Or n < 2) And Not n = 14 Then Exit Sub
+Next i
+QuickSortItemsRevWithSameKey low, high
+End If
+End Sub
+Private Sub InsertionSort10(ByVal iMin As Long, ByVal iMax As Long)
+    Dim i As Long
+    Dim j As Long
+    Dim j1 As Long, j0 As Long, k As Long
+
+    i = iMin + 1
+    iMax = iMax + 1
+    j0 = i * sortmult
+    While i < iMax
+        j = i
+        j1 = j0 + sortoff
+        Do While j > iMin
+        Debug.Print "insertion compare"
+again:
+        On Error GoTo EX1
+        If actualdata(j1) = actualdata(j1 - sortmult) Then
+        part = part + 2
+        If part <= upart Then
+        
+        
+        j1 = j1 - sortoff + col(part - 1)
+        sortoff = col(part - 1)
+        GoTo again
+        End If
+EX1:
+        Exit Do
+        Else
+        
+        If col(part) = 0 Then
+        If actualdata(j1) < actualdata(j1 - sortmult) Then
+            Debug.Print "insertion swap"
+            For k = j1 - sortoff To j1 - sortoff + sortmult - 1
+            SwapVariant actualdata(k), actualdata(k - sortmult)
+            Next k
+            j = j - 1
+            If part <> 3 Then
+                j1 = j1 - sortoff - sortmult + col(2)
+                part = 3
+                sortoff = col(2)
+            Else
+                j1 = j1 - sortmult
+            End If
+        Else
+            Exit Do
+        End If
+        Else
+        If actualdata(j1) > actualdata(j1 - sortmult) Then
+            Debug.Print "insertion swap"
+            For k = j1 - sortoff To j1 - sortoff + sortmult - 1
+            SwapVariant actualdata(k), actualdata(k - sortmult)
+            Next k
+            j = j - 1
+            If part <> 3 Then
+                j1 = j1 - sortoff - sortmult + col(2)
+                part = 3
+                sortoff = col(2)
+            Else
+                j1 = j1 - sortmult
+            End If
+            
+        Else
+            Exit Do
+        End If
+        End If
+        End If
+        Loop
+        If part <> 3 Then
+        part = 3
+        sortoff = col(2)
+        End If
+        i = i + 1
+        j0 = j0 + sortmult
+    Wend
+End Sub
+Private Sub Swap10(ByVal a1, ByVal A2)
+Static k As Long
+If a1 = A2 Then Exit Sub
+Debug.Print "swap ", a1, A2
+a1 = a1 * sortmult
+A2 = A2 * sortmult
+For k = 0 To sortmult - 1
+SwapVariant actualdata(a1 + k), actualdata(A2 + k)
+Next k
+End Sub
+Private Sub FeedPiv(ByVal a1)
+Static k As Long
+On Error Resume Next
+Debug.Print "feed piv "; a1
+a1 = a1 * sortmult
+For k = 0 To sortmult - 1
+    piv1(k) = actualdata(a1 + k)
+Next k
+End Sub
+
+Private Function Compare10(ByVal a1) As Long
+Static k As Long, ret As Long
+On Error Resume Next
+Debug.Print "compare ", a1
+a1 = a1 * sortmult
+For k = 2 To upart - 1 Step 2
+ret = actualdata(a1 + col(k)) = piv1(col(k))
+If ret = 0 Then
+    If actualdata(a1 + col(k)) < piv1(col(k)) Then
+        If col(k + 1) Then
+            Compare10 = -1
+        Else
+            Compare10 = 1
+        End If
+        Exit Function
+    Else
+        If col(k + 1) Then
+            Compare10 = 1
+        Else
+            Compare10 = -1
+        End If
+        Exit Function
+    End If
+End If
+Next k
+' Compare10=0
+End Function
+Private Sub QuickSortItemsWithSameKey10(ByVal LB As Long, ByVal UB As Long)
+Dim M1 As Long, M2 As Long
+
+  If UB - LB < 7 Then
+  Debug.Print LB, UB
+  InsertionSort10 LB, UB
+  Exit Sub
+  
+  End If
+    M1 = (LB + UB) \ 2
+    FeedPiv M1
+    
+    M1 = LB
+    Do While Compare10(M1) = 1: M1 = M1 + 1: Loop
+
+
+  
+  M2 = UB
+  Do
+    Do While Compare10(M2) = -1: M2 = M2 - 1: Loop
+    If M1 <= M2 Then
+      Swap10 M1, M2
+      M1 = M1 + 1
+      M2 = M2 - 1
+    End If
+    If M1 > M2 Then Exit Do
+    Do While Compare10(M1) = 1: M1 = M1 + 1: Loop
+  Loop
+  If LB < M2 Then QuickSortItemsWithSameKey10 LB, M2
+  If M1 < UB Then QuickSortItemsWithSameKey10 M1, UB
+End Sub
+
+Public Sub SortColumns(ParamArray col0())
+If dnum <> 2 Then Exit Sub
+Dim mbase2 As Long
+
+Dim i As Long, pppp As mArray
+GetDnum 1, i, mbase2
+If UBound(col0()) = 0 Then
+If Typename(col0(0)) = "Variant()" Then
+col0() = col0(0)
+ElseIf Typename(col0(0)) = "mHandler" Then
+If col0(0).t1 = 3 Then
+Set pppp = col0(0).objref
+pppp.ExportArrayNow
+col0() = pppp.refArray
+Else
+Exit Sub
+End If
+End If
+
+End If
+col() = col0()
+sortmult = dtable(0)
+If UBound(col()) < 1 Then
+
+ReDim col(4)
+col(0) = 0
+col(1) = count \ sortmult - 1
+col(2) = 0
+col(3) = 0
+ElseIf UBound(col()) < 3 Then
+
+ReDim Preserve col(4)
+col(2) = -mbase2
+col(3) = 0
+GoTo there1
+
+Else
+For i = LBound(col0) To UBound(col0)
+col(i) = CLng(col0(i))
+Next i
+there1:
+If col(1) = -1 Then col(1) = count \ sortmult - 1
+
+If col(1) > count \ sortmult - 1 Then col(1) = count \ sortmult - 1
+If col(0) < 0 Then col(0) = 0
+If col(0) >= col(1) Then Exit Sub
+
+For i = LBound(col) + 2 To UBound(col) - 1 Step 2
+col(i) = col(i) + mbase2
+If col(i) < 0 Or col(i) >= sortmult Then Exit Sub
+'If col(i + 1) <> 0 Then col(i + 1) = 1
+Next i
+
+End If
+sortoff = col(2)
+upart = UBound(col())
+part = 3
+
+ReDim piv1(sortmult)
+If Stable Then
+InsertionSort10 col(0), col(1)
+Else
+QuickSortItemsWithSameKey10 col(0), col(1)
+End If
+ReDim piv1(1)
+End Sub
 

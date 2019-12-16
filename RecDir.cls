@@ -226,13 +226,13 @@ End Function
 
 
 
-Public Property Get path() As String
+Public Property Get Path() As String
 If Len(LastPath) = 0 Then
 Else
 If Right$(LastPath, 1) <> "\" Then
-path = LastPath & "\"
+Path = LastPath & "\"
 Else
-path = LastPath
+Path = LastPath
 End If
 End If
 End Property
@@ -265,7 +265,7 @@ Public Function FindFolder(item As Long) As String
 Dim i As Long, lev As Integer
 lev = Abs(myLevel(item))
 If lev = 1 Then
-FindFolder = path
+FindFolder = Path
 Else
 For i = item - 1 To 0 Step -1
 If Abs(myLevel(i)) < lev Then Exit For
@@ -541,7 +541,6 @@ If foldersonly Or foldersincluded Then
     If fff > 1 Then
     If SortType <> 0 Then
     QuickSortItemsFileNames fold$(), 1, fff      ' we can sort the folders here
-   ' QuickSortItemsNumbers fold$(), 1, fff
     Else
     QuickSortExtended fold$(), 1, fff
     End If
@@ -552,7 +551,6 @@ If maxf > 0 Then
 
     If SortType <> 0 Then
     QuickSortItemsFileNames mf$(), 1, maxf
-    'QuickSortItemsNumbers mf$(), 1, maxf
     Else
     QuickSortExtended mf$(), 1, maxf
     End If
@@ -674,7 +672,7 @@ Dim Piv As String, tmp As String '<- adjust types here, when switching to someth
      Else
        M1 = (LB + UB) \ 2 '+ 1
        Piv = Arr(M1)
-             If compareStr4(Arr(M1), Piv) = 0 Then
+             If compareStr4(Arr(LB), Piv) = 0 Then
                 M2 = UB - 1
                 M1 = LB
                 Piv = Arr(LB)
@@ -1156,79 +1154,8 @@ If compareStr444 = 0 Then compareStr444 = k1
 
 End Function
 
-Sub QuickSortItemsNumbers(Arr() As String, ByVal LB As Long, ByVal UB As Long)
-Dim M1 As Long, M2 As Long
-On Error GoTo abc1
-Dim Piv As String, tmp As String '<- adjust types here, when switching to something different than Long
-     If UB - LB = 1 Then
-     M1 = LB
-       If compareStr4(Arr(M1), Arr(UB)) = 1 Then tmp = Arr(M1): Arr(M1) = Arr(UB): Arr(UB) = tmp
-      Exit Sub
-     Else
-       M1 = (LB + UB) \ 2 '+ 1
-       Piv = Arr(M1)
-             If compareStr4(Arr(M1), Piv) = 0 Then
-                M2 = UB - 1
-                M1 = LB
-                Piv = Arr(LB)
-                
-                Do
-                    M1 = M1 + 1
-                    If M1 > M2 Then
-                        If compareStr4(Arr(UB), Piv) = -1 Then tmp = Arr(LB): Arr(LB) = Arr(UB): Arr(UB) = tmp
-                        Exit Sub
-                    End If
-                Loop Until compareStr4(Arr(M1), Piv) <> 0
-                Piv = Arr(M1)
-                If M1 > LB Then If compareStr4(Arr(LB), Piv) = 1 Then tmp = Arr(LB): Arr(LB) = Arr(M1): Arr(M1) = tmp: Piv = Arr(M1)
-            Else
-                Piv = Arr(M1)
-                M1 = LB
-                Do While compareStr4(Arr(M1), Piv) = -1: M1 = M1 + 1: Loop
-            End If
-    End If
-    M2 = UB
-    Do
-      Do While compareStr4(Arr(M2), Piv) = 1: M2 = M2 - 1: Loop
-      If M1 <= M2 Then
-       If M1 <> M2 Then tmp = Arr(M1): Arr(M1) = Arr(M2): Arr(M2) = tmp
-        M1 = M1 + 1
-        M2 = M2 - 1
-      End If
-      If M1 > M2 Then Exit Do
-      Do While compareStr4(Arr(M1), Piv) = -1: M1 = M1 + 1: Loop
-    Loop
-    If LB < M2 Then QuickSortItemsNumbers Arr, LB, M2
-    If M1 < UB Then QuickSortItemsNumbers Arr, M1, UB
-    Exit Sub
-abc1:
-    
-
-End Sub
-
-Function IsNumberInFilename1(a$, p As Double) As Boolean
-Dim a1 As Long, LI As Long, A2 As Long
-LI = Len(a$)
-If LI > 0 Then
-a1 = 1
-A2 = 1
-If a1 > LI Then a$ = vbNullString: Exit Function
-If LI > 100 + A2 Then LI = 99 + A2
-If Mid$(a$, a1, 1) Like "[0-9]" Then
-Do While a1 <= LI
-a1 = a1 + 1
-If Not Mid$(a$, a1, 1) Like "[0-9]" Then Exit Do
-
-Loop
-p = val(Mid$(a$, A2, a1 - A2)): a$ = Mid$(a$, a1)
-IsNumberInFilename1 = True
-End If
-
-End If
-End Function
 Private Function IsNumberInFilename(a$, d As Double) As Boolean
 Dim a1 As Long
-'Exit Function
 If a$ <> "" Then
 a1 = Len(a$)
 

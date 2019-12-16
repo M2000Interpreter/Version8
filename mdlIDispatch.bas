@@ -105,6 +105,7 @@ Public Function CallByNameFixParamArray _
     Dim lngMax      As Long
 Dim myptr() As Long
 Dim mm As GuiM2000
+Dim mmm As mArray
     ' Get IDispatch from object
     Set IDsp = pobjTarget
 
@@ -137,10 +138,18 @@ passhere:
                
                 For lngLoop = 0 To items - 1 + fixnamearg
                 If Not MyIsNumericPointer(pArgs(lngLoop)) Then
-                If TypeOf pArgs(lngLoop) Is mArray Then
-                    SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop).RefArray
+                If IsNull(pArgs(lngLoop)) Then
+                SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop)
+                ElseIf TypeOf pArgs(lngLoop) Is mArray Then
+                    If Typename(pArgs(lngLoop).refArray) = "Long" Then
+                    Set mmm = pArgs(lngLoop)
+                    mmm.ExportArrayNow
+                    End If
+                    SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop).refArray
+                ElseIf TypeOf pArgs(lngLoop) Is MemBlock Then
+                    varArr(fixnamearg + items - 1 - lngLoop) = pArgs(lngLoop).ExportToByte
                 Else
-                 SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop)
+                    SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop)
                 End If
                 Else
                     SwapVariant varArr(fixnamearg + items - 1 - lngLoop), pArgs(lngLoop)
@@ -243,12 +252,12 @@ conthere:
                    pobjTarget.Modal = mycodeid
                    Dim X As Form, z As Form, zz As Form
                    Set zz = Screen.ActiveForm
-                   If zz.Name = "Form3" Then
+                   If zz.name = "Form3" Then
                    Set zz = zz.lastform
                    End If
                    If Not pobjTarget.IamPopUp Then
                         For Each X In Forms
-                            If X.Visible And X.Name = "GuiM2000" Then
+                            If X.Visible And X.name = "GuiM2000" Then
                                 If Not X Is pobjTarget Then
                                     If X.Enablecontrol Then
                                         X.Modal = mycodeid
@@ -309,7 +318,7 @@ conthere:
                 End If
                 Set z = Nothing
                 For Each X In Forms
-                    If X.Visible And X.Name = "GuiM2000" Then
+                    If X.Visible And X.name = "GuiM2000" Then
                         X.TestModal mycodeid
                         If X.Enablecontrol Then Set z = X
                     End If
@@ -368,37 +377,36 @@ End If
     End If
     Dim where As Long
     If items > 0 Then
-                ' Fill parameters arrays. The array must be
-                ' filled in reverse order.
-                For lngLoop = 0 To items - 1 + fixnamearg
-                where = fixnamearg + items - 1 - lngLoop
-                If VariantIsRef(VarPtr(varArr(where))) Then
+    ' Fill parameters arrays. The array must be
+    ' filled in reverse order.
+        For lngLoop = 0 To items - 1 + fixnamearg
+            where = fixnamearg + items - 1 - lngLoop
+            If VariantIsRef(VarPtr(varArr(where))) Then
                 If Not MyIsNumericPointer(pArgs(lngLoop)) Then
-                If Not MyIsNumericPointer(varArr(where)) Then
-                    If VarType(varArr(where)) = 8204 Then
-                        VarByRefClean VarPtr(varArr(where))
-                        Dim mmm As mArray
-                        Set mmm = pArgs(lngLoop)
-                        mmm.FixArray
-                        Set mmm = Nothing
+                    If Not MyIsNumericPointer(varArr(where)) Then
+                        If VarType(varArr(where)) = 8204 Then
+                            VarByRefClean VarPtr(varArr(where))
+                            Set mmm = pArgs(lngLoop)
+                            mmm.FixArray
+                            Set mmm = Nothing
                         Else
+                            VarByRefCleanRef VarPtr(varArr(where))
+                            SwapVariant varArr(where), pArgs(lngLoop)
+                        End If
+                    Else
                         VarByRefCleanRef VarPtr(varArr(where))
                         SwapVariant varArr(where), pArgs(lngLoop)
                     End If
                 Else
-                    VarByRefCleanRef VarPtr(varArr(where))
-                    SwapVariant varArr(where), pArgs(lngLoop)
+                    VarByRefClean VarPtr(varArr(where))
+                    If pArgs(lngLoop) = vbEmpty Then
+                        SwapVariant varArr(where), pArgs(lngLoop)
                     End If
-                Else
-                VarByRefClean VarPtr(varArr(where))
-                If pArgs(lngLoop) = vbEmpty Then
+                End If
+            Else
                 SwapVariant varArr(where), pArgs(lngLoop)
-                End If
-                End If
-                Else
-                    SwapVariant varArr(where), pArgs(lngLoop)
-                    End If
-                Next
+            End If
+            Next
     End If
     On Error Resume Next
 

@@ -297,7 +297,7 @@ With gList1
 .additemFast "or double click the file list"
 .menuEnabled(21) = False
 .AddSep
-.additemFast "George Karras 2014-2019"
+.additemFast "George Karras 2014-2020"
 .menuEnabled(23) = False
 
 oldLeftMarginPixels = .LeftMarginPixels + 10
@@ -487,7 +487,7 @@ If .Mydir.ReadMark(i) Then
     If .recnowchecked Then
  filetosave = .Mydir.FindFolder(i) + .Mydir.list(i)
     Else
-    filetosave = .Mydir.path + .Mydir.list(i)
+    filetosave = .Mydir.Path + .Mydir.list(i)
     End If
 If ReturnListOfFiles = vbNullString Then
 ReturnListOfFiles = filetosave
@@ -765,7 +765,7 @@ End Sub
 
 
 Private Sub glist3_KeyDown(KeyCode As Integer, shift As Integer)
-If Not mySelector.Mydir.isReadOnly(mySelector.Mydir.path) Then
+If Not mySelector.Mydir.isReadOnly(mySelector.Mydir.Path) Then
 If Not gList3.EditFlag Then
 
 If NewFolder Then
@@ -837,12 +837,12 @@ gList3.backcolor = &H808080
 gList3.ShowMe2
 End Sub
 
-Private Sub glist3_PanLeftRight(Direction As Boolean)
+Private Sub glist3_PanLeftRight(direction As Boolean)
 Dim that As New recDir, TT As Integer
 If TEXT1 = vbNullString Then Exit Sub
 
-If Direction Then
-If mySelector.Mydir.path = vbNullString Then
+If direction Then
+If mySelector.Mydir.Path = vbNullString Then
 If gList2.HeadLine = SelectFolderCaption And TEXT1 <> "" And TEXT1 <> ".." Then
 ReturnFile = TEXT1 & "\"
 Else
@@ -896,7 +896,7 @@ gList3.EditFlag = False
 gList3.NoCaretShow = True
 
 
-ElseIf Not mySelector.Mydir.isReadOnly(mySelector.Mydir.path) Then
+ElseIf Not mySelector.Mydir.isReadOnly(mySelector.Mydir.Path) Then
 If NewFolder Then
 If Not (gList1.ListIndex = -1) Then
 gList1.ListIndex = -1
