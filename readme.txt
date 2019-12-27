@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 4 active-X
-Has a lot of changes. Has right to left support, for editor in console, not for forms yet. Has some undocument work, which be document when finished.
+Version 9.9 revision 5 active-X
+Now EditBox can handle cursor in RTL text.
 
 George Karras, Kallithea Attikis, Greece.
 
@@ -11,7 +11,7 @@ load info
 then press F1 to save info.gsb to M2000 user directory
 
 
-
+To use Help (an mdb database) you need Access 2007 runtime.
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate (optional)

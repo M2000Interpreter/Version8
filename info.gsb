@@ -4651,11 +4651,11 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8.2 for ver 9.9 rev 3 and newer"
+	Report " A collection of modules for tests version 8.2 for ver 9.9 rev 5 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
-		Report 1, "George Karras 2019"
+		Report 1, "George Karras 2020"
 	}
 }
 cls backcolor, row
@@ -12189,10 +12189,12 @@ Module CheckIt {
       With buttonInc,"Caption","Increment" 
       With buttonDec,"Caption","Decrement","Locked", True
       textbox1.value$="0"
- 
+      oldval1=True
+      oldval2=False
+      
       Function controlIncDec(what$){
-            With buttonInc, "locked",  not val(what$)<10
-            With buttonDec, "locked", not val(what$)>0
+            if  oldval1 = not val(what$)<10 then  With buttonInc, "locked",  not val(what$)<10 : oldval1~
+            if oldval2= not val(what$)>0 then With buttonDec, "locked", not val(what$)>0: oldval2~
       }
       finishEnter=false      
       Function TextBox1.ValidString {
@@ -18778,7 +18780,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<3 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<5 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -20267,6 +20269,11 @@ Method Edit1, "Colors", 15, 15
 Method Text1, "Transparent"
 Method Text1, "Colors", 15,15
 m=1 : s=1
+Function Form1.Unload {
+      read new &ok
+      if mm<>0 then thread mm erase : mm=0:ok=true
+      
+}
 Layer Form1 {
                   gradient 7,0
                   hold
@@ -20373,5 +20380,134 @@ Report 2, "ברוכים הבאים الجامعات والكليات" , 4
 Cursor 22, r
 Report 1, "ברוכים הבאים الجامعات والكليات" , 5
 Print
+}
+MODULE SIMPLETXT {Όρισε Φόρμα1 Φόρμα
+Όρισε Κειμ1 Κείμενο Φόρμα Φόρμα1
+Όρισε Κειμ2 Κείμενο Φόρμα Φόρμα1
+Όρισε Κειμ3 Κείμενο Φόρμα Φόρμα1
+θεσηΧ=4000
+Μέθοδος Κειμ1, "Move", θεσηΧ,1200,5000,400
+Μέθοδος Κειμ2, "Move", θεσηΧ,1800,5000,400
+Μέθοδος Κειμ3, "Move", θεσηΧ,2400,5000,400
+νγ$={
+}
+Με Κειμ1, "ShowAlways", Αληθές, "NumberOnly", Αληθές, "Value" ως Τιμ1
+Με Κειμ2, "ShowAlways", Αληθές, "NumberIntOnly",Αληθές, "Value" ως Τιμ2
+Με Κειμ3, "ShowAlways", Αληθές, "UsedAsTextBox", Αληθές,"Text" ως Τιμ3$
+Τιμ1=93.112
+Τιμ2=1456
+Τιμ3$="Μια γραμμή μόνο"
+Συνάρτηση Κειμ1.About {
+      Κάλεσε Τοπικά Φόρμα1.About()
+}
+Συνάρτηση Κειμ2.About {
+      Κάλεσε Τοπικά Φόρμα1.About()
+}
+Συνάρτηση Κειμ3.About {
+      Κάλεσε Τοπικά Φόρμα1.About()
+}
+Συνάρτηση Φόρμα1.About {
+      Επίπεδο Φόρμα1 {
+            Οθόνη  #606060
+            Τύπωσε $(Τρόπος),"Κάνε κλικ εδώ ή πάτα Enter"
+      }
+}
+Συνάρτηση Φόρμα1.Enter {
+      Κάλεσε Τοπικά Φόρμα1.Click()
+}
+Συνάρτηση Φόρμα1.Click {
+      Επίπεδο Φόρμα1 {
+            Τιμ1=Τιμ1+1  \\ δεν δουλεύει το Τιμ1++ γιατί είναι αντικείμενο και όχι μεταβλητή
+            Οθόνη  #606060
+            Τύπωσε Τιμ1, Τιμ2, " Ctrl+F1"
+            Τύπωσε Πάνω $(9), Τιμ3$
+            Ανανέωση
+            Μέθοδος Κειμ1, "Show"
+      }
+}
+Τρόπος=4
+Επίπεδο Φόρμα1 {
+      Γραμματοσειρά "Arial Black"
+      Παράθυρο 16, 10000,4500
+      Πένα 15
+      Οθόνη #202020
+      Οθόνη #606060, Ύψος-2
+      Θέση θεσηΧ, 1200+400
+      Επιγραφή "Ετικέτα ", Γραμματοσειρά$, Τύπος, 0, 1
+      Θέση θεσηΧ, 1800+400
+      Επιγραφή "Άλλη ετικέτα ", Γραμματοσειρά$, Τύπος, 0, 1
+      Θέση θεσηΧ, 2400+400
+      Επιγραφή "Και άλλη ετικέτα ", Γραμματοσειρά$, Τύπος, 0, 1
+      Πένα 13
+      Τύπωσε $(Τρόπος),"Κάνε κλικ εδώ ή πάτα Enter"
+}
+Μέθοδος Φόρμα1, "Show",1
+Όρισε Κειμ1 Τίποτα
+Όρισε Φόρμα1 Τίποτα
+}
+MODULE SIMPLETXTEN {Declare Form1 Form
+Declare text1 editbox Form Form1
+Declare text2 editbox Form Form1
+Declare text3 editbox Form Form1
+PositionX=4000
+Method text1, "Move", PositionX,1200,5000,400
+Method text2, "Move", PositionX,1800,5000,400
+Method text3, "Move", PositionX,2400,5000,400
+nl$={
+}
+
+With text1, "ShowAlways", True, "NumberOnly", True, "Value" As Value1
+With text2, "ShowAlways", True, "NumberIntOnly", True, "Value" As Value2
+With text3, "ShowAlways", True, "UsedAsTextBox", True,"Text" As Value3$
+Value1=93.112
+Value2=1456
+Value3$="One line only"
+Function text1.About {
+      Call Local Form1.About()
+}
+Function text2.About {
+      Call Local Form1.About()
+}
+Function text3.About {
+      Call Local Form1.About()
+}
+Function Form1.About {
+      Layer Form1 {
+            Cls  #606060
+            Print $(Way),"Press right mouse button or Enter"
+      }
+}
+Function Form1.Enter {
+      Call Local Form1.Click()
+}
+Function Form1.Click {
+      Layer Form1 {
+            Value1=Value1+1  \\  Value1++ not work becaue Value1 is an object (linked property)
+            Cls  #606060
+            Print Value1, Value2, " Ctrl+F1"
+            Print Over $(9), Value3$
+            Refresh
+            Method text1, "Show"
+      }
+}
+Way=4
+Layer Form1 {
+      Font "Arial Black"
+      Window 16, 10000,4500
+      Pen 15
+      Cls #202020
+      Cls #606060, Ύψος-2
+      Move PositionX, 1200+400
+      Legend "Label ", Fontname$, Mode, 0, 1
+      Move PositionX, 1800+400
+      Legend "Another Label ", Fontname$, Mode, 0, 1
+      Move PositionX, 2400+400
+      Legend "And another Label ", Fontname$, Mode, 0, 1
+      Pen 13
+      Print $(Way),"Press right mouse button or Enter"
+}
+Method Form1, "Show",1
+Declare text1 Nothing
+Declare Form1 Nothing
 }
 INFO

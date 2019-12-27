@@ -18,6 +18,8 @@ Option Explicit
 Const mway As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP
 Public textinform As String
 Private col() As Long, lastdata As String, thispara As Long
+Private mark1 As Long, mark2 As Long
+
 Private TextPixelOffset As Long, LastSearchType As Long
 Private Brackets As Boolean
 Private nochange As Boolean, sp As String, sp1 As String, sp2 As String
@@ -179,6 +181,7 @@ Private Declare Function CreateRectRgnIndirect Lib "gdi32" (ByRef lpRect As RECT
 Private Declare Function SelectClipRgn Lib "gdi32" (ByVal hDC As Long, ByVal hRgn As Long) As Long
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
+Private Declare Function GetStringTypeExW Lib "kernel32.dll" (ByVal Locale As Long, ByVal dwInfoType As Long, ByVal lpSrcStr As Long, ByVal cchSrc As Long, ByRef lpCharType As Integer) As Long
 Private tmpshow As Boolean
 Private WordOnly As Boolean
 Private ColArr(0 To 15) As Long
@@ -971,12 +974,14 @@ End If
 End If
 If UsedAsTextBox Then
 If Len(content) > glistN.maxchar Then
+IsRTLrun
 Charpos = glistN.maxchar
 glistN.SelStartEventAlways = glistN.SelStart - 1
 Exit Sub
 End If
 End If
 mDoc.TextLine(item + 1) = content
+'IsRTLrun
 WrapMarkedPara
 If all <> mDoc.DocLines Then
     Render
@@ -1006,7 +1011,7 @@ If glistN.ListIndex < 0 Then Exit Sub
 Dim what$, ThatPara As Long, pastchars As Long
 pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
 Charpos = pastchars + glistN.SelStart
-
+'IsRTLrun
 If Not glistN.enabled Then Exit Sub
 tmpshow = False
 If glistN.SelStart = 0 Then
@@ -1088,7 +1093,179 @@ cListCount = all
 End Sub
 
 Private Sub gListN_ExposeRect(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
-Dim a As RECT, b As RECT, i As Long, pastchars As Long, hRgn As Long
+Dim a As RECT, b As RECT, i As Long, tmp As Long
+Dim final$, fbypass As Boolean
+Dim bb As RECT, cc As RECT
+Dim OldColor As Long
+Dim what$, ThatPara As Long
+CopyFromLParamToRect a, thisrect
+b = a
+bb = a
+cc = a
+cc.Left = 0
+If UsedAsTextBox Then
+b.Bottom = a.Bottom - 2
+End If
+Dim skipcolor As Boolean
+OldColor = glistN.ForeColor
+If item < 0 Then  ' this is a headline
+    FillBack thisHDC, b, glistN.CapColor
+    mDoc1.TextParagraphLine2 1, what$, ThatPara, False
+    showparagraphonce = False
+    glistN.HeadlineHeight = mDoc1.DocLines * onelineheight
+    For i = 1 To mDoc1.DocLines
+        PrintItem2 thisHDC, mDoc1.TextLine2(i, False, True), a
+        a.top = a.top + onelineheight
+    Next i
+    'RaiseEvent ExposeRect(item, thisrect, thisHDC, skip)
+    skip = True
+    Exit Sub
+Else
+    showparagraphWork = showparagraph
+    a.top = a.top + glistN.addpixels \ 2
+    mDoc.TextParagraphLine2 item + 1, what$, ThatPara, showparagraph
+    If MarkedTextAny Then
+        showparagraphWork = True
+        If item > BlockTopline And item < BlockBottomline Then
+            FillBack thisHDC, b, SelectionColor
+            SetTextColor thisHDC, SelectionTextColor
+            skipcolor = True
+        ElseIf item = BlockTopline And item <> BlockBottomline Then
+            If BlockEndline < BlockStartLine Then
+                If BlockEndCursor > 1 Then  ' if not leave it as is
+                    b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1))
+                    PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                    final$ = Mid$(glistN.list(item), BlockEndCursor)
+                    fbypass = True
+                End If
+            Else
+                If BlockStartCursor > 1 Then  ' if not leave it as is
+                    b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1))
+                    PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                    final$ = Mid$(glistN.list(item), BlockStartCursor)
+                    fbypass = True
+                 End If
+            End If
+            FillBack thisHDC, b, SelectionColor
+            SetTextColor thisHDC, SelectionTextColor
+            skipcolor = True
+        ElseIf item = BlockBottomline And item <> BlockTopline Then
+            If BlockBottomline = BlockEndline Then
+                If BlockEndCursor <= Len(glistN.list(item)) Then
+                    If BlockEndCursor > 1 Then ' if not leave it as is
+                        b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+                        PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                        final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
+                        fbypass = False
+                    Else
+                        If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor2 RealX1(thisHDC, glistN.SelStart, mDoc.TextLine2(item + 1, showparagraph, NoColor)), OldColor
+                        GoTo conthere
+                    End If
+                End If
+            Else
+                If BlockStartCursor <= Len(glistN.list(item)) Then  ' if not leave it as is
+                    If BlockStartCursor > 1 Then
+                        b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+                        PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                        final$ = Mid$(glistN.list(item), 1, BlockStartCursor - 1)
+                        fbypass = False
+                    Else
+                        If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor2 RealX1(thisHDC, glistN.SelStart, mDoc.TextLine2(item + 1, showparagraph, NoColor)), OldColor
+                        GoTo conthere
+                    End If
+                End If
+            End If
+            FillBack thisHDC, b, SelectionColor
+            a.Right = b.Right + 1
+            SetTextColor thisHDC, SelectionTextColor
+            skipcolor = True
+        ElseIf BlockBottomline = item Then ' in one line only
+            skipcolor = False
+            If BlockEndCursor > BlockStartCursor Then
+                If BlockStartCursor > 0 Then b.Left = b.Left + RealX1(thisHDC, BlockStartCursor, mDoc.TextLine2(item + 1, showparagraph, NoColor))
+                If BlockEndCursor > 0 Then b.Right = RealX1(thisHDC, BlockEndCursor, mDoc.TextLine2(item + 1, showparagraph, NoColor)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+                If b.Left > b.Right Then
+                    tmp = b.Right
+                    b.Right = b.Left
+                    b.Left = tmp
+                End If
+                If BlockStartCursor = 0 Then
+                    final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
+                Else
+                    skipcolor = False
+                    final$ = Mid$(glistN.list(item), BlockStartCursor, BlockEndCursor - BlockStartCursor)
+                End If
+                PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                FillBack thisHDC, b, SelectionColor
+                a.Right = b.Right + 1
+                SetTextColor thisHDC, SelectionTextColor
+            ElseIf BlockEndCursor < BlockStartCursor Then
+                If BlockEndCursor > 0 Then b.Left = b.Left + RealX1(thisHDC, BlockEndCursor, mDoc.TextLine2(item + 1, showparagraph, NoColor))
+                If BlockStartCursor > 0 Then b.Right = RealX1(thisHDC, BlockStartCursor, mDoc.TextLine2(item + 1, showparagraph, NoColor)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+                If b.Left > b.Right Then
+                    tmp = b.Right
+                    b.Right = b.Left
+                    b.Left = tmp
+                End If
+                If BlockEndCursor > 0 Then
+                    final$ = Mid$(glistN.list(item), BlockEndCursor, BlockStartCursor - BlockEndCursor)
+                Else
+                    final$ = Mid$(glistN.list(item), 1, BlockStartCursor - 1)
+                End If
+                PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                FillBack thisHDC, b, SelectionColor
+                a.Right = b.Right + 1
+                SetTextColor thisHDC, SelectionTextColor
+            End If
+            fbypass = False
+        End If
+    ElseIf HighLightParagraph Then
+       If ThatPara = mDoc.MarkParagraphID Then
+        bb = cc
+        bb.top = b.top
+        bb.Bottom = b.Bottom
+        FillBack thisHDC, bb, HighLightColor
+        End If
+    End If
+    If ThatPara = mDoc.MarkParagraphID Then
+        If EditDoc Then
+            If glistN.ListIndex = item Then
+            ' why???
+                If mNoWrap Or (Not skipcolor) Then glistN.ExternalCursor2 RealX1(thisHDC, glistN.SelStart, mDoc.TextLine2(item + 1, showparagraph, NoColor)), OldColor
+            End If
+        ElseIf Not NoMark Then
+            FillBack thisHDC, b, 0
+            SetTextColor thisHDC, SelectionTextColor
+        End If
+    ElseIf Not skipcolor Then
+        SetTextColor thisHDC, glistN.ForeColor
+    End If
+    If final$ <> "" Or fbypass Then
+        If Not fbypass Then
+
+            PrintItem2X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, b, mDoc.lastcolordata(), False
+        Else
+
+             PrintItem2X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, b, mDoc.lastcolordata(), True
+        End If
+        showparagraphWork = False
+    Else
+conthere:
+        If skipcolor Or NoColor Then
+            PrintItem3X thisHDC, mDoc.TextLine2(item + 1, showparagraph, True), a, mDoc.lastcolordata()
+        Else
+            PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+        End If
+    End If
+End If
+SetTextColor thisHDC, OldColor
+showparagraphonce = False
+skip = True
+End Sub
+
+
+Private Sub gListN_ExposeRect2(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
+Dim a As RECT, b As RECT, i As Long, pastchars As Long, hRgn As Long, tmp As Long
 Dim bb As RECT, cc As RECT
 Dim final$, fbypass As Boolean
 Dim OldColor As Long
@@ -1098,50 +1275,40 @@ b = a
 bb = a
 cc = a
 cc.Left = 0
-'CopyFromLParamToRect b, thisrect
 If UsedAsTextBox Then
 b.Bottom = a.Bottom - 2
 End If
 Dim skipcolor As Boolean
 OldColor = glistN.ForeColor
 If item < 0 Then  ' this is a headline
-FillBack thisHDC, b, glistN.CapColor
-  mDoc1.TextParagraphLine2 1, what$, ThatPara, False
-  showparagraphonce = False
-   glistN.HeadlineHeight = mDoc1.DocLines * onelineheight
-
-  For i = 1 To mDoc1.DocLines
-  
-    PrintItem2 thisHDC, mDoc1.TextLine2(i, False, True), a
-    a.top = a.top + onelineheight
-  Next i
- ' RaiseEvent ExposeRect(item, thisrect, thisHDC, skip)
-  skip = True
-   Exit Sub
-   
+    FillBack thisHDC, b, glistN.CapColor
+    mDoc1.TextParagraphLine2 1, what$, ThatPara, False
+    showparagraphonce = False
+    glistN.HeadlineHeight = mDoc1.DocLines * onelineheight
+    For i = 1 To mDoc1.DocLines
+        PrintItem2 thisHDC, mDoc1.TextLine2(i, False, True), a
+        a.top = a.top + onelineheight
+    Next i
+    ' RaiseEvent ExposeRect(item, thisrect, thisHDC, skip)
+    skip = True
+    Exit Sub
 Else
-showparagraphWork = showparagraph
-  ' a.Left = a.Left + 1
+    showparagraphWork = showparagraph
     a.top = a.top + glistN.addpixels \ 2
- 
-    pastchars = mDoc.TextParagraphLine2(item + 1, what$, ThatPara, showparagraph)
-    
-        If MarkedTextAny Then
+    mDoc.TextParagraphLine2 item + 1, what$, ThatPara, showparagraph
+    If MarkedTextAny Then
         showparagraphWork = True
-    If item > BlockTopline And item < BlockBottomline Then
-    
-        FillBack thisHDC, b, SelectionColor
-         SetTextColor thisHDC, SelectionTextColor
-         skipcolor = True
-    ElseIf item = BlockTopline And item <> BlockBottomline Then
-
-        
-             If BlockEndline < BlockStartLine Then
-                 If BlockEndCursor > 1 Then  ' if not leave it as is
-                 b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1))
-                 PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
-                final$ = Mid$(glistN.list(item), BlockEndCursor)
-                fbypass = True
+        If item > BlockTopline And item < BlockBottomline Then
+            FillBack thisHDC, b, SelectionColor
+            SetTextColor thisHDC, SelectionTextColor
+            skipcolor = True
+        ElseIf item = BlockTopline And item <> BlockBottomline Then
+            If BlockEndline < BlockStartLine Then
+                If BlockEndCursor > 1 Then  ' if not leave it as is
+                    b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1))
+                    PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                    final$ = Mid$(glistN.list(item), BlockEndCursor)
+                    fbypass = True
                  End If
              Else
                   If BlockStartCursor > 1 Then  ' if not leave it as is
@@ -1163,13 +1330,13 @@ showparagraphWork = showparagraph
              If BlockBottomline = BlockEndline Then
                  If BlockEndCursor <= Len(glistN.list(item)) Then
                  If BlockEndCursor > 1 Then ' if not leave it as is
-                 b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
-                 PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
-                final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
-             fbypass = False
+                    b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+                    PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                    final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
+                    fbypass = False
                  Else
-                   If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, black
-                  GoTo conthere
+                    If ThatPara = mDoc.MarkParagraphID Then glistN.ExternalCursor glistN.SelStart, what$, black
+                    GoTo conthere
                  End If
                  End If
                  
@@ -1194,39 +1361,35 @@ showparagraphWork = showparagraph
          SetTextColor thisHDC, SelectionTextColor
          skipcolor = True
     ElseIf BlockBottomline = item Then ' in one line only
-     skipcolor = False
+        skipcolor = False
         If BlockEndCursor > BlockStartCursor Then
-         If BlockStartCursor > 1 Then b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1))
-          If BlockEndCursor > 1 Then b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
-          If BlockStartCursor = 0 Then
-     final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
-          Else
-           skipcolor = False
- final$ = Mid$(glistN.list(item), BlockStartCursor, BlockEndCursor - BlockStartCursor)
- End If
-
- PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
-          FillBack thisHDC, b, SelectionColor
-             a.Right = b.Right + 1
-             'a.Left = b.Left + 1
-         SetTextColor thisHDC, SelectionTextColor
+            If BlockStartCursor > 1 Then b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1))
+            If BlockEndCursor > 1 Then b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+            If BlockStartCursor = 0 Then
+                final$ = Mid$(glistN.list(item), 1, BlockEndCursor - 1)
+            Else
+                skipcolor = False
+                final$ = Mid$(glistN.list(item), BlockStartCursor, BlockEndCursor - BlockStartCursor)
+            End If
+            PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+            FillBack thisHDC, b, SelectionColor
+            a.Right = b.Right + 1
+            SetTextColor thisHDC, SelectionTextColor
         ElseIf BlockEndCursor < BlockStartCursor Then
-        If BlockEndCursor > 1 Then b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1))
-        If BlockStartCursor > 1 Then b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
- If BlockEndCursor > 0 Then
- final$ = Mid$(glistN.list(item), BlockEndCursor, BlockStartCursor - BlockEndCursor)
- Else
- final$ = Mid$(glistN.list(item), 1, BlockStartCursor - 1)
- End If
- 
- PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
-                 FillBack thisHDC, b, SelectionColor
-             a.Right = b.Right + 1
-             'a.Left = b.Left + 1
-         SetTextColor thisHDC, SelectionTextColor
+            If BlockEndCursor > 1 Then b.Left = b.Left + glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockEndCursor - 1))
+            If BlockStartCursor > 1 Then b.Right = glistN.UserControlTextWidthPixels(Mid$(glistN.list(item), 1, BlockStartCursor - 1)) + glistN.PanPosPixels + glistN.LeftMarginPixels
+            If BlockEndCursor > 0 Then
+                final$ = Mid$(glistN.list(item), BlockEndCursor, BlockStartCursor - BlockEndCursor)
+            Else
+                final$ = Mid$(glistN.list(item), 1, BlockStartCursor - 1)
+            End If
+            PrintItem1X thisHDC, mDoc.TextLine2(item + 1, showparagraph, NoColor), a, mDoc.lastcolordata()
+                FillBack thisHDC, b, SelectionColor
+                a.Right = b.Right + 1
+                SetTextColor thisHDC, SelectionTextColor
+            End If
+            fbypass = False
         End If
-       fbypass = False
-    End If
  ''  skipcolor = True
 ElseIf HighLightParagraph Then
    If ThatPara = mDoc.MarkParagraphID Then
@@ -6514,7 +6677,182 @@ Public Property Let ReplaceTitleHold(a$)
 ReplaceTitle = a$
 TitleStay = a$ <> ""
 End Property
+Private Sub PrintItem2X(mHdc As Long, ByVal c As String, r As RECT, area As RECT, col() As Long, ver1 As Boolean)
+On Error Resume Next
+Dim cc As String, all As Long, offset As Long, addthis As Long, hRgn As Long
+Dim b As RECT, Origin As Long, tabw As Long, dummy As RECT
+tabw = tParam.iTabLength * glistN.AveCharWith
+Origin = r.Left
+dummy = r
+dummy.top = r.Bottom + 10
+dummy.Bottom = dummy.top + r.Bottom - r.top
+Dim ww$(), items&, i, rleft
+If UBound(col()) < 1 Then
+    b = area
+    hRgn = CreateRectRgnIndirect(b)
+    SelectClipRgn mHdc, hRgn
+    If ver1 Then
+        PrintItem1 mHdc, c, r
+    Else
+        PrintItem mHdc, c, r
+    End If
+    SelectClipRgn mHdc, &H0
+    DeleteObject hRgn
+    Exit Sub
+End If
+If UBound(col()) = 2 Then
+If col(0) = 0 And col(1) = 0 And col(2) = 0 Then GoTo there
+End If
+If UBound(col()) = 1 And (col(0) = 14 Or col(0) = 0 Or col(0) = 7) Then
+there:
+    b = area
+    hRgn = CreateRectRgnIndirect(b)
+    SelectClipRgn mHdc, hRgn
+    If ver1 Then
+        PrintItem1 mHdc, c, r
+    Else
+        PrintItem mHdc, c, r
+    End If
+    SelectClipRgn mHdc, &H0
+    DeleteObject hRgn
+    Exit Sub
+End If
+rleft = r.Left
+all = rleft + glistN.UserControlTextWidthPixels(c)
+r.Left = all
+ww$() = SplitStringUsingArrayNoTab(c, col(), items&)
+
+        If showparagraphonce And ver1 Then
+            cc = "¶"
+            b = area
+        hRgn = CreateRectRgnIndirect(b)
+        SelectClipRgn mHdc, hRgn
+        DrawTextEx mHdc, StrPtr(cc), -1, r, mway, VarPtr(tParam)
+        SelectClipRgn mHdc, &H0
+        DeleteObject hRgn
+            
+        End If
+    cc = vbNullString
+    offset = rleft
+    For i = 0 To items&
+    c = ww$(i)
+    r.Left = offset
+    r.top = r.top + TextPixelOffset
+        b = r
+
+        If b.Right <= area.Left Or b.Left >= area.Right Then
+        hRgn = CreateRectRgnIndirect(dummy)
+        SelectClipRgn mHdc, hRgn
+        offset = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, Origin))
+
+        SelectClipRgn mHdc, &H0
+        DeleteObject hRgn
+         
+        Else
+        hRgn = CreateRectRgnIndirect(area)
+        SelectClipRgn mHdc, hRgn
+         offset = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, Origin))
+
+        SelectClipRgn mHdc, &H0
+        DeleteObject hRgn
+        End If
+        If r.Left > area.Right Then Exit For
+        r.top = r.top - TextPixelOffset
+    Next i
+alfa1:
+r.Left = rleft
+End Sub
+
+Private Sub PrintItem3X(mHdc As Long, ByVal c As String, r As RECT, col() As Long)
+On Error Resume Next
+Dim cc As String, all As Long, offset As Long, addthis As Long
+Dim b As RECT, Origin As Long, tabw As Long
+tabw = tParam.iTabLength * glistN.AveCharWith
+Origin = r.Left
+Dim ww$(), items&, i, rleft
+If UBound(col()) < 1 Then
+    PrintItem1 mHdc, c, r
+    Exit Sub
+End If
+If UBound(col()) = 2 Then
+If col(0) = 0 And col(1) = 0 And col(2) = 0 Then GoTo there
+End If
+If UBound(col()) = 1 And (col(0) = 14 Or col(0) = 0 Or col(0) = 7) Then
+there:
+    PrintItem1 mHdc, c, r
+    Exit Sub
+End If
+rleft = r.Left
+'all = rleft + glistN.UserControlTextWidthPixels(c)
+'r.Left = all
+
+ww$() = SplitStringUsingArrayNoTab(c, col(), items&)
+
+cc = vbNullString
+offset = rleft
+For i = 0 To items&
+    c = ww$(i)
+       r.Left = offset '+ rleft + addthis
+       If r.Left > r.Right Then Exit For
+    r.top = r.top + TextPixelOffset
+    offset = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, Origin))
+    r.top = r.top - TextPixelOffset
+    
+Next i
+r.Left = rleft
+End Sub
+
+
 Private Sub PrintItem1X(mHdc As Long, ByVal c As String, r As RECT, col() As Long)
+On Error Resume Next
+Dim cc As String, all As Long, offset As Long
+Dim b As RECT, Origin As Long, tabw As Long
+tabw = tParam.iTabLength * glistN.AveCharWith
+Origin = r.Left
+Dim ww$(), items&, i, rleft
+If UBound(col()) < 1 Or NoColor Then
+    PrintItem1 mHdc, c, r
+    Exit Sub
+End If
+If UBound(col()) = 2 Then
+If col(0) = 0 And col(1) = 0 And col(2) = 0 Then GoTo there
+End If
+If UBound(col()) = 1 And (col(0) = 14 Or col(0) = 0 Or col(0) = 7) Then
+there:
+    PrintItem1 mHdc, c, r
+    Exit Sub
+End If
+rleft = r.Left
+
+ww$() = SplitStringUsingArrayNoTab(c, col(), items&)
+
+
+offset = rleft
+For i = 0 To items&
+    c = ww$(i)
+       r.Left = offset
+       If r.Left > r.Right Then Exit For
+    r.top = r.top + TextPixelOffset
+    
+    If Not NoColor Then SetTextColor mHdc, M2000(col(i * 2))
+    offset = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, Origin))
+    r.top = r.top - TextPixelOffset
+    
+Next i
+ If r.Left < r.Right Then
+If showparagraphonce Then
+    cc = "¶"
+    SetTextColor mHdc, M2000(14)
+    r.Left = offset
+    DrawTextEx mHdc, StrPtr(cc), -1, r, mway, VarPtr(tParam)
+    cc = vbNullString
+End If
+End If
+r.Left = rleft
+End Sub
+
+
+Private Sub PrintItem1Xold(mHdc As Long, ByVal c As String, r As RECT, col() As Long)
 On Error Resume Next
     Dim cc As String, all As Long, CM As String, offset As Long, addthis As Long, hRgn As Long
     Dim b As RECT
@@ -8805,3 +9143,682 @@ Sub Keyboard(RHS As String)
     InsertTextNoRender = RHS
     Render
 End Sub
+Private Function IsRTLrun() As Boolean
+Dim what$
+mark1 = 0
+mark2 = 0
+what$ = mDoc.TextParagraph(mDoc.MarkParagraphID)
+Dim A2() As Integer, WHAT1$, r As Long, ii As Long
+Dim wr$
+Dim mcharpos As Long
+mcharpos = Charpos
+If Len(what$) = 0 Then GoTo ex1
+If mcharpos > Len(what$) Then mcharpos = Len(what$)
+ReDim A2(Len(what$) + 10)
+If GetStringTypeExW(&HB, 2, StrPtr(what$), Len(what$), A2(0)) = 0 Then Exit Function
+
+'If A2(mcharpos) = 1 Then goto ex1
+For ii = mcharpos To 0 Step -1
+If ii < Len(what$) Then
+If A2(ii) = 2 Then
+mark1 = ii + 1
+End If
+
+If mark1 > 0 And A2(ii) = 1 Then Exit For
+End If
+Next ii
+If mark1 = 0 Then GoTo ex1
+For ii = mark1 - 1 To Len(what$) - 1
+If A2(ii) = 1 Then Exit For
+If ii >= 0 Then
+If A2(ii) = 7 Then
+For r = ii + 1 To Len(what$) - 1
+If A2(r) = 1 Then Exit For
+If A2(r) <> 7 And A2(r) < 10 Then
+If (A2(r) And 2) = 2 Then
+ii = r
+r = -1
+Exit For
+End If
+
+If mark2 > mcharpos Then: r = 0: Exit For
+End If
+Next r
+If r = 0 Then
+Exit For
+ElseIf r <> -1 Then
+ii = r - 1
+End If
+End If
+If (A2(ii) And 2) = 2 And A2(ii) <> 10 Then
+mark2 = ii + 1
+If mark2 > 0 And A2(ii) = 1 Then Exit For
+End If
+End If
+Next ii
+If mark2 < mcharpos Then
+GoTo ex1
+End If
+If mark1 <> 0 And mark2 <> 0 Then
+IsRTLrun = True
+'ManualInform
+End If
+ex1:
+'Debug.Print Mark1, Mark2
+
+    
+End Function
+Private Sub glistN_RTL(thisHDC As Long, item As Long, where As Long, mark10 As Long, mark20 As Long, offset As Long)
+offset = RealX1(thisHDC, where, mDoc.TextLine2(item + 1, showparagraph, NoColor), where, mark10)
+
+End Sub
+Function RealX1(mHdc As Long, ByVal ExtSelStart As Long, ByVal that$, Optional nValue As Long = 0, Optional found As Long = 0) As Long
+If ExtSelStart <= 0 Then ExtSelStart = 1
+Dim ww$(), col() As Long, items&, i, c As String
+Dim rleftacc As Long, original As Long, rx1 As Long, direction As Long
+Dim oldvalue As Long, orx1 As Long, j As Long, nrtl As Boolean
+If Len(that$) = 0 Then
+    nValue = 1: Exit Function
+End If
+If showparagraph Then
+        that$ = Replace(that$, vbTab, ChrW(&H21E5))
+End If
+col() = mDoc.lastcolordata()
+original = ExtSelStart
+If UBound(col()) < 1 Then
+GoTo there
+ElseIf UBound(col()) = 2 Then
+    If col(0) = 0 And col(1) = 0 And col(2) = 0 Then GoTo there
+    ww$() = SplitStringUsingArrayNoTab(that$, col(), items&)
+ElseIf UBound(col()) = 1 And (col(0) = 14 Or col(0) = 0 Or col(0) = 7) Then
+there:
+ReDim ww$(0)
+ww$(0) = that$
+Else
+ww$() = SplitStringUsingArrayNoTab(that$, col(), items&)
+End If
+
+
+Dim M1 As Long, M2 As Long
+Dim dummy As RECT, r As RECT, tabw As Long, offset As Long, hRgn As Long, estX As Long
+tabw = tParam.iTabLength * glistN.AveCharWith
+glistN.UserControlTextMetricsPixels that$, r.Right, r.Bottom
+dummy = r
+dummy.top = r.Bottom + 1
+dummy.Bottom = dummy.top + r.Bottom
+offset = 0
+estX = 0
+hRgn = CreateRectRgnIndirect(dummy)
+SelectClipRgn mHdc, hRgn
+If found > 0 Then
+rx1 = LowWord(GetTabbedTextExtent(mHdc, StrPtr(that$), Len(that$), 1, tabw))
+If rx1 < found Then
+
+c = Right$(that$, 1)
+
+nValue = 1
+RTL3 c, nValue, mark1, mark2, nrtl, M1, M2
+If mark1 <> 0 And mark2 <> 0 Then
+nValue = Len(that$)
+RTL3 that$, nValue, mark1, mark2, nrtl, M1, M2
+nValue = mark1
+GoTo finish
+Else
+nValue = Len(ww(i))
+RTL3 ww(i), nValue, mark1, mark2, nrtl, M1, M2
+If mark1 <> 0 And mark2 <> 0 And nValue >= mark2 Then
+If nValue <= mark2 + 1 Then
+nValue = mark1
+GoTo finish
+Else
+nValue = nValue + 1
+ExtSelStart = nValue
+End If
+Else
+nValue = Len(that$) + 1
+GoTo finish
+End If
+
+End If
+End If
+End If
+For i = 0 To items&
+    c = ww$(i)
+    r.Left = offset
+    rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+    If Len(c) >= ExtSelStart - estX Or (found > 0 And rleftacc > found) Then
+            If Not Len(c) >= ExtSelStart - estX Then
+            ExtSelStart = Len(c) + estX
+            End If
+
+        nValue = ExtSelStart - estX
+
+        RTL3 c, nValue, mark1, mark2, nrtl, M1, M2
+        If nrtl Then
+            Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
+        End If
+        If mark1 = 0 Or mark2 = 0 Then
+        If nValue > 1 Then
+            j = nValue - 1
+            RTL3 c, j, mark1, mark2, nrtl, M1, M2
+            If mark1 <> 0 And mark2 <> 0 And j >= mark1 And j <= mark2 Then
+            If i = items& Then
+            If found > 0 Then
+                rx1 = offset
+                If mark1 > 1 Then
+                    offset = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark1 - 1, 1, tabw, 0))
+                End If
+                c = Mid$(ww(i), mark1, mark2 - mark1 + 1)
+                If nrtl Then
+                    M1 = M1 - mark1 + 1
+                    M2 = M2 - mark1 + 1
+                    Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
+                End If
+                If found > offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c$), 1, tabw, 0)) Then
+                        nValue = mark1 + estX
+                        Exit For
+                    Else
+                        offset = rx1
+                        c = ww$(i)
+                    End If
+                nValue = j + estX
+                End If
+             GoTo here1
+
+            Else
+            nValue = mark2 - 1 + estX 'j - (nValue > mark2)
+            If nValue <= 0 Then nValue = 1
+            If mark1 > 1 Then
+            
+            rx1 = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark2, 1, tabw, 0))
+            If found > 0 Then
+            If rx1 <= found Then
+            nValue = mark1 + estX
+            RealX1 = rx1
+            Exit For
+            End If
+
+            End If
+            RealX1 = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark1 - 1, 1, tabw, 0))
+            
+            End If
+            Exit For
+            
+            End If
+            End If
+        End If
+        ElseIf mark1 <> 0 And mark2 <> 0 And nValue = mark2 + 1 Then
+        If found > 0 Then
+         rx1 = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark2, 1, tabw, 0))
+        If found > rx1 Then
+         nValue = mark1 + estX
+            RealX1 = rx1
+        Exit For
+        End If
+        nValue = mark2
+        End If
+        GoTo here1
+       
+        End If
+
+        If mark1 <> 0 And mark2 <> 0 And nValue >= mark1 And nValue <= mark2 Then
+here1:
+            If mark1 > 1 Then
+                
+                offset = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark1 - 1, 1, tabw, 0))
+            End If
+            If mark1 = nValue And found > 0 Then
+
+            If offset > found Then
+            j = mark1 - 2
+            If j >= 1 Then
+            Do While found < r.Left + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), j, 1, tabw, 0))
+            j = j - 1
+            If j = 0 Then j = 1: Exit Do
+            Loop
+            Else
+                            
+                GoTo nortl
+            End If
+            RTL3 c, j, mark1, mark2, nrtl, M1, M2
+            If mark1 <> 0 And mark2 <> 0 Then
+            nValue = mark2 - (j - mark1) + estX
+            Else
+            nValue = j + 1 + estX
+            End If
+
+            RealX1 = offset
+            Exit For
+            End If
+            End If
+            c = Mid$(ww(i), mark1, mark2 - mark1 + 1)
+            If nrtl Then
+                M1 = M1 - mark1 + 1
+                M2 = M2 - mark1 + 1
+                Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
+            End If
+           
+            If nValue = mark2 + 1 Then
+            If found > 0 Then
+            For j = mark2 - mark1 + 1 To 1 Step -1
+            If found > offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), j, 1, tabw, 0)) Then
+            
+            If j > 1 Then
+            If LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), j, 1, tabw, 0)) > LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), j - 1, 1, tabw, 0)) < 0 Then
+            
+                        nValue = mark2 - (j) + estX
+
+            offset = found
+            Exit For
+            End If
+            End If
+
+            nValue = mark2 - (j - 1) + estX
+
+            offset = found
+            Exit For
+
+            End If
+            Next j
+            If j = 0 Then
+            nValue = mark1 - 1 + estX - 1
+            If nValue <= 0 Then nValue = 1
+            End If
+            Else
+            nValue = mark1 - 1 + estX - 1
+            If nValue <= 0 Then nValue = 1
+            End If
+            
+          
+             RealX1 = offset
+         
+            Exit For
+            ElseIf found > 0 And mark1 = nValue Then
+            If found > offset Then
+             nValue = mark2
+             
+            GoTo conthere
+            Else
+            nValue = mark2 + 1 + estX
+            RealX1 = offset
+            End If
+            
+            
+            Else
+conthere:
+            rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+             If nValue > mark1 Then
+                rx1 = rleftacc - 1 - LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), nValue - mark1, 1, tabw, 0))
+            Else
+                rx1 = rleftacc - 1
+            End If
+            End If
+        If found > 0 Then
+         rx1 = rx1 + 1
+            If found < rx1 Then
+                original = nValue
+                For j = nValue To mark2
+
+                rx1 = rleftacc - LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), j - mark1 + 1, 1, tabw, 0))
+
+                    
+                    original = original + 1
+                    If found >= rx1 Then Exit For
+                Next j
+                
+                j = original
+                If nrtl Then
+                nValue = M2 - ((j + 1 - mark1) - M1) + mark1 + estX
+ 
+                
+                
+                Else
+                
+                
+                If j > mark2 Then
+      
+                  nValue = mark2 + 1 + estX
+                  If nValue = 0 Then nValue = 1
+                      
+                          RealX1 = rx1
+                          Exit For
+                  Else
+                  
+                          nValue = j
+                          RTL3 c, nValue, mark1, mark2, nrtl, M1, M2
+                          If nrtl And j >= M1 And j <= M2 Then
+                          nValue = nValue + 2 + estX
+                          Else
+                          nValue = j + estX
+                          End If
+            
+                  
+                  End If
+              
+                
+                    RealX1 = rx1 + 1
+        End If
+                Else
+                  original = nValue
+                  For j = nValue - 1 To mark1 + 1 Step -1
+                
+                      rx1 = rleftacc - LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), j - mark1, 1, tabw, 0))
+                      If found <= rx1 Then Exit For
+                      original = j
+                      
+                  Next j
+                    j = original
+                If nrtl Then
+                nValue = M2 - ((j + 1 - mark1) - M1) + mark1 + estX
+              Else
+                    
+                    If j < mark1 Then
+                       j = mark1
+                    End If
+                 
+                 
+                 
+                    If nrtl And j - mark1 >= M1 And j - mark1 <= M2 Then
+                    nValue = nValue + estX
+                    Else
+                    nValue = j + estX
+                    End If
+     End If
+
+                    RealX1 = rx1
+
+            End If
+            
+          If found = 0 Then
+                If Mid$(that$, nValue, 1) = " " Then
+         c = Mid$(that$, nValue + 1, 1)
+         If Len(c) > 0 Then
+         RTL3 c, (1), mark1, mark2, nrtl, M1, M2
+         If mark1 = 0 Or mark2 = 0 Then
+         nValue = nValue + 1
+         'If nvalue1 < 1 Then nvalue1 = 1
+         End If
+         End If
+         End If
+         End If
+      Exit For
+     End If
+            
+            If found = 0 And nrtl Then
+            'nValue = ExtSelStart
+            Else
+            nValue = mark2 - (nValue - mark1) + (nValue <> mark2) + estX - 1
+            End If
+            
+If nValue = mark1 And items& = 1 Then
+rx1 = 0
+           
+            
+            End If
+            If nValue = 0 Then nValue = mark2
+       
+            
+            
+            RealX1 = rx1
+            
+        Else ' NO RTL
+nortl:
+            c = Myleft$(c, ExtSelStart - estX - 1)
+            rx1 = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+            If found > 0 Then
+                If found < rx1 Then
+                    nValue = ExtSelStart - 1
+                    If nValue - estX - 1 < 1 Then
+                        RealX1 = offset
+                    Else
+                        c = Myleft$(c, nValue - estX - 1)
+                        j = Len(c)
+                        RTL3 c, j, mark1, mark2, nrtl, M1, M2      ' found=0
+                        If mark1 <> 0 And mark2 <> 0 Then
+                        If j <= mark2 And j >= mark1 Then
+                        nValue = mark2 - (j - mark1) + estX
+                        Else
+                        'nValue = nValue + estX - 1
+                        End If
+                        Else
+                       ' nValue = Len(c) + estX
+                        End If
+                        rx1 = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                    End If
+                    RealX1 = rx1
+                    Exit For
+                Else
+                    RealX1 = rx1
+                    
+                    nValue = original
+                End If
+            Else
+                RealX1 = rx1
+                nValue = ExtSelStart
+            End If
+            
+            Exit For
+        End If
+  
+         RealX1 = rx1
+       ' nValue = ExtSelStart
+        
+        Exit For
+    ElseIf i = items& Then
+        nValue = ExtSelStart - estX
+        RTL3 c, nValue, mark1, mark2, nrtl, M1, M2
+        If mark1 <> 0 And mark2 <> 0 Then
+            If mark2 = Len(c) Then
+                c = Myleft$(ww(i), mark1 - 1)
+                If Len(c) = 0 Then
+                    rleftacc = offset
+                ElseIf nrtl And M2 = mark2 Then
+                rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                  c = ww(i)
+                  
+             '  Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
+               c = Mid$(c, M1, M2 - M1 + 1)
+              '   rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark2 - (M1 - mark1), 1, tabw, 0))
+                ' rleftacc = offset + rleftacc - LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark2 - (M1 - mark1), 1, tabw, 0))
+                rleftacc = rleftacc + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                nValue = M1 - 1
+            Else
+                 rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                End If
+            ElseIf found > 0 Then
+            rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), nValue, 1, tabw, 0))
+        If rleftacc < found Then
+        nValue = original
+
+        End If
+                RealX1 = found
+        GoTo finish
+            End If
+        End If
+    End If
+    offset = rleftacc
+    estX = estX + Len(ww(i))
+Next i
+
+
+If i = items& + 1 Then
+    RealX1 = offset
+    nValue = estX
+End If
+finish:
+SelectClipRgn mHdc, &H0
+DeleteObject hRgn
+End Function
+
+Private Sub RTL3(what As String, where As Long, mark10 As Long, mark20 As Long, numhandle As Boolean, M1 As Long, M2 As Long)
+numhandle = False
+M1 = 0
+M2 = 0
+mark10 = 0
+mark20 = 0
+Dim A2() As Integer, r As Long, ii As Long
+Dim wr$
+Dim mcharpos As Long
+If Len(what) = 0 Then Exit Sub
+
+If where = -1 Then mcharpos = Len(what) Else mcharpos = where - 1
+If mcharpos > Len(what) Then Exit Sub
+ReDim A2(Len(what) + 10)
+
+
+If GetStringTypeExW(&HB, 2, StrPtr(what), Len(what), A2(0)) = 0 Then Exit Sub
+For ii = mcharpos To 0 Step -1
+    If ii < Len(what) Then
+    If A2(ii) = 9 Then
+   If mark10 > 0 Then Exit For
+    Exit Sub
+    End If
+    If A2(ii) = 2 Then
+    mark10 = ii + 1
+    End If
+    If mark10 > 0 And A2(ii) = 1 Then
+    Exit For
+    End If
+    End If
+Next ii
+
+If mark10 = 0 Then Exit Sub
+For ii = mark10 - 1 To Len(what) - 1
+
+    If A2(ii) = 1 Then
+    Exit For
+    End If
+    If ii >= 0 Then
+        If A2(ii) = 7 Then
+            For r = ii + 1 To Len(what) - 1
+                If A2(r) = 1 Then Exit For
+                If A2(r) = 9 Then
+                Exit For
+                End If
+                If A2(r) <> 7 And A2(r) < 11 Then
+                    If (A2(r) And 2) = 2 Then
+                        ii = r
+                        r = -1
+                        Exit For
+                    End If
+                   If mark20 > mcharpos Then: r = 0: Exit For
+                End If
+            Next r
+            If r = 0 Then
+                Exit For
+            ElseIf r <> -1 Then
+                ii = r - 1
+            End If
+        End If
+        If (A2(ii) And 2) = 2 And A2(ii) < 11 And A2(ii) <> 10 Then
+            mark20 = ii + 1
+            If mark20 > 0 And A2(ii) = 1 Then
+            Exit For
+            End If
+        End If
+    End If
+    If A2(ii) = 9 Then
+    If mark20 > 0 Then mark20 = ii
+    Exit For
+    End If
+Next ii
+
+'If mark10 > 0 And mark20 > 0 Then
+there11:
+If mcharpos > 0 Then
+If A2(mcharpos) = 3 And A2(mcharpos - 1) <> 3 Then
+M1 = mcharpos
+M2 = mcharpos
+Else
+M1 = mcharpos - 1
+M2 = mcharpos - 1
+End If
+Else
+Exit Sub
+
+End If
+Dim findme As Long
+
+
+If A2(M1) <> 3 Then Exit Sub
+' find language
+For findme = mcharpos To mark1 Step -1
+If A2(findme) = 2 Then Exit For
+Next findme
+findme = AscW(Mid$(what, findme + 1, 1))
+If findme >= &H600& And findme <= &H6FF& Then
+' arabic language
+                    Do While M1 > 0
+                        If (A2(M1 - 1) > 3 And A2(M1) < 11) And (A2(M1) > 3 And A2(M1) < 10) Then
+
+                        ElseIf A2(M1 - 1) = 4 Then
+                        If M1 > 1 Then
+                        If A2(M1 - 2) >= 10 Then
+                        M1 = M1 - 1
+                        Exit Do
+                        End If
+                        End If
+                        Else
+                        If Not (A2(M1) = 3 Or A2(M1) = 7) Then Exit Do
+                       
+                    End If
+                        M1 = M1 - 1
+                    Loop
+                    Do While M2 < mark2
+                    If (A2(M2 + 1) > 3 And A2(M2) < 11) And (A2(M2) > 3 And A2(M2) < 10) Then
+
+                        Else
+                    If Not (A2(M2) = 3 Or A2(M2) = 7) Then Exit Do
+                    
+                    End If
+                        M2 = M2 + 1
+                    Loop
+Else
+
+Do While M1 > 0
+    If (A2(M1 - 1) > 3 And A2(M1) < 10) Or A2(M1) = 4 Then
+ If A2(M1 - 1) = 4 Then
+ If M1 > 1 Then
+ If A2(M1 - 2) = 11 Then
+ M1 = M1 - 1: Exit Do
+ End If
+ End If
+ ElseIf A2(M1) = 1 Then
+Exit Do
+End If
+    Else
+    If Not (A2(M1) = 3 Or A2(M1) = 7) Then Exit Do
+   
+End If
+    M1 = M1 - 1
+Loop
+Do While M2 < mark2
+
+If A2(M2) > 3 And A2(M2) < 10 Then
+If A2(M2) = 4 Then
+If A2(M2 + 1) <> 3 Then
+Exit Do
+End If
+End If
+    Else
+If Not (A2(M2) = 3 Or A2(M2) = 7) Then Exit Do
+
+End If
+    M2 = M2 + 1
+Loop
+End If
+M1 = M1 + 2
+
+numhandle = True
+If mcharpos = M2 Then
+where = M1 - (M1 = 1)
+
+Else
+where = M2 - (mcharpos - M1)
+
+End If
+
+
+End Sub
+
+

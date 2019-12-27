@@ -16,7 +16,7 @@ Option Explicit
 ' chr(34) is """" maybe somewhere in a module as public
 Const mway As Long = DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP
 Private col() As Long, lastdata As String, thispara As Long
-Private TextPixelOffset As Long, mark1 As Long, mark2 As Long, rtl As Boolean, rcur As Long
+Private TextPixelOffset As Long, mark1 As Long, mark2 As Long
 Public ColorSet As Long, sp As String, sp1 As String, sp2 As String
 Public PreserveRightSpaces As Boolean
 Public NoCenterLineEdit As Boolean
@@ -68,7 +68,7 @@ Public NoMark As Boolean
 Public NoTitle As Boolean
 Public NoColor As Boolean
 Public Title As String
-Public UsedAsTextBox As Boolean  '' only in m2000. Enter exit - use maxchar - No wrap
+Public UsedAsTextBox As Boolean, HighLightColor As Long  '' only in m2000. Enter exit - use maxchar - No wrap
 Private mEditDoc As Boolean
 Public AutoNumber As Boolean
 Public Charpos As Long
@@ -363,6 +363,7 @@ BlockStartPara = BlockEndPara
 BlockStartPos = BlockEndPos
 undopara = -1
 Redopara = -1
+HighLightColor = rgb(66, 66, 66)
 End Sub
 
 Private Sub glistN_addone(that As String)  '
@@ -671,11 +672,8 @@ End Sub
 Private Sub glistN_ChangeListItem(item As Long, content As String)
 Dim selstart2 As Long, checklistindex As Long
 '' only for M2000, use NumberOnly
-
 If NumberOnly Then
 If Not ValidNum(content, False, NumberIntOnly) Then
-
-
 undotext = vbNullString
 content = mDoc.TextLine(item + 1)
 Exit Sub
@@ -683,14 +681,14 @@ End If
 End If
 If UsedAsTextBox Then
 If Len(content) > glistN.maxchar Then
-IsRTLrun
+'IsRTLrun
 Charpos = glistN.maxchar
 glistN.SelStartEventAlways = glistN.SelStart - 1
 Exit Sub
 End If
 End If
 mDoc.TextLine(item + 1) = content
-IsRTLrun
+'IsRTLrun
 WrapMarkedPara
 If all <> mDoc.DocLines Then
     Render
@@ -722,7 +720,7 @@ Dim what$, ThatPara As Long, pastchars As Long
 pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
 Charpos = pastchars + glistN.SelStart
 mDoc.MarkParagraphID = ThatPara
-IsRTLrun
+'IsRTLrun
 If Not glistN.enabled Then Exit Sub
 
 If glistN.SelStart = 0 Then
@@ -811,13 +809,16 @@ Private Sub glistN_ExposeListcount(cListCount As Long)
 cListCount = all
 End Sub
 Private Sub gListN_ExposeRect(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
-Dim a As RECT, b As RECT, i As Long, hRgn As Long, Pad$, mark1 As Long, mark2 As Long, tmp As Long
-
+Dim a As RECT, b As RECT, i As Long, tmp As Long
 Dim final$, fbypass As Boolean
+Dim bb As RECT, cc As RECT
 Dim OldColor As Long
 Dim what$, ThatPara As Long
 CopyFromLParamToRect a, thisrect
-CopyFromLParamToRect b, thisrect
+b = a
+bb = a
+cc = a
+cc.Left = 0
 If UsedAsTextBox Then
 b.Bottom = a.Bottom - 2
 End If
@@ -933,6 +934,13 @@ Else
                 SetTextColor thisHDC, SelectionTextColor
             End If
             fbypass = False
+        End If
+    ElseIf mEditDoc And Not UsedAsTextBox And Not NoColor Then
+       If ThatPara = mDoc.MarkParagraphID Then
+        bb = cc
+        bb.top = b.top
+        bb.Bottom = b.Bottom
+        FillBack thisHDC, bb, HighLightColor
         End If
     End If
     If ThatPara = mDoc.MarkParagraphID Then
@@ -4532,7 +4540,7 @@ r.Left = rleft
 End Sub
 
 
-Private Sub PrintItem1XOLD(mHdc As Long, ByVal c As String, r As RECT, col() As Long)
+Private Sub PrintItem1Xold(mHdc As Long, ByVal c As String, r As RECT, col() As Long)
 On Error Resume Next
     Dim cc As String, all As Long, CM As String, offset As Long, addthis As Long, hRgn As Long
     Dim b As RECT
@@ -4679,6 +4687,7 @@ Dim b As Integer
 
 Select Case ColorSet
 Case 0
+HighLightColor = rgb(66, 66, 66)
 If ch = 13 Then
 M2000 = rgb(&HEE, &HEE, &H33)
 ElseIf ch = 12 Then
@@ -4687,6 +4696,7 @@ Else
 M2000 = QBColor(ch Mod 16)
 End If
 Case 1
+HighLightColor = rgb(166, 166, 166)
 Select Case ch
 Case 7
 M2000 = rgb(&H68, &H68, &H13)
@@ -5206,7 +5216,6 @@ Dim p2 As Long, p1 As Integer, p4 As Long
 End Function
 Private Function IsRTLrun() As Boolean
 Dim what$
-rtl = False
 mark1 = 0
 mark2 = 0
 what$ = mDoc.TextParagraph(mDoc.MarkParagraphID)
@@ -5262,7 +5271,6 @@ If mark2 < mcharpos Then
 GoTo ex1
 End If
 If mark1 <> 0 And mark2 <> 0 Then
-rtl = True
 IsRTLrun = True
 'ManualInform
 End If
@@ -5275,145 +5283,10 @@ Private Sub glistN_RTL(thisHDC As Long, item As Long, where As Long, mark10 As L
 offset = RealX1(thisHDC, where, mDoc.TextLine2(item + 1, showparagraph, NoColor), where, mark10)
 
 End Sub
-Private Sub RTL2(what As String, where As Long, mark10 As Long, mark20 As Long, offset As Long)
-
-mark10 = 0
-mark20 = 0
-Dim A2() As Integer, WHAT1$, r As Long, ii As Long
-Dim wr$
-Dim mcharpos As Long
-If Len(what) = 0 Then GoTo ex1
-If where = -1 Then mcharpos = Len(what) Else mcharpos = where
-ReDim A2(Len(what) + 10)
-If GetStringTypeExW(&HB, 2, StrPtr(what), Len(what), A2(0)) = 0 Then Exit Sub
-For ii = mcharpos To 0 Step -1
-    If ii < Len(what) Then
-    If A2(ii) = 9 Then
-    If mark10 > 0 Then mark10 = ii + 2
-    Exit For
-    End If
-    If A2(ii) = 2 Then
-    mark10 = ii + 1
-    End If
-    If mark10 > 0 And A2(ii) = 1 Then Exit For
-    End If
-Next ii
-
-If mark10 = 0 Then GoTo ex1
-For ii = mark10 - 1 To Len(what) - 1
-
-    If A2(ii) = 1 Then
-    Exit For
-    End If
-    If ii >= 0 Then
-        If A2(ii) = 7 Then
-            For r = ii + 1 To Len(what) - 1
-                If A2(r) = 1 Then Exit For
-                If A2(r) = 9 Then
-                Exit For
-                End If
-                If A2(r) <> 7 And A2(r) < 10 Then
-                    If (A2(r) And 2) = 2 Then
-                        ii = r
-                        r = -1
-                        Exit For
-                    End If
-                   If mark20 > mcharpos Then: r = 0: Exit For
-                End If
-            Next r
-            If r = 0 Then
-                Exit For
-            ElseIf r <> -1 Then
-                ii = r - 1
-            End If
-        End If
-        If (A2(ii) And 2) = 2 And A2(ii) < 10 Then
-            mark20 = ii + 1
-            If mark20 > 0 And A2(ii) = 1 Then Exit For
-        End If
-    End If
-    If A2(ii) = 9 Then
-    If mark20 > 0 Then mark20 = ii
-    Exit For
-    End If
-Next ii
-
-Dim M1 As Long, M2 As Long
-If mark10 > 0 And mark20 > 0 Then
-If mcharpos > 1 Then
-If A2(mcharpos) = 3 Then
-If A2(mcharpos - 1) <> 3 Then
-Do While mcharpos < mark20
-    If A2(mcharpos + 1) = 3 Then
-    where = where + 1
-    mcharpos = mcharpos + 1
-    Else
-    Exit Do
-    End If
-Loop
-Exit Sub
-End If
-End If
-End If
-M1 = mcharpos - 1
-M2 = mcharpos - 1
-If M1 < 0 Or M2 < 0 Then Exit Sub
-If A2(M1) <> 3 Then Exit Sub
-'If Not (A2(m1) And 1) = 1 Then Exit Sub
-Do While M1 > 0
-If Not (A2(M1) And 1) = 1 Then Exit Do
-'If A2(m1) <> 3 Then Exit Do
-
-    M1 = M1 - 1
-Loop
-Do While M2 < mark2
-If Not (A2(M2) And 1) = 1 Then Exit Do
-'If A2(M2) <> 3 Then Exit Do
-    M2 = M2 + 1
-Loop
-M1 = M1 + 2
-where = M2 - (mcharpos - M1) + 1
-offset = -1
-End If
-ex1:
-Exit Sub
-If mark10 > 0 And mark20 > 0 Then
-If mcharpos > 1 Then
-If A2(mcharpos - 1) <> 3 Then
-Do While mcharpos > 1
-    If A2(mcharpos - 2) = 3 Then
-    where = where - 1
-    mcharpos = mcharpos - 1
-    Else
-    Exit Do
-    End If
-Loop
-Else
-If A2(mcharpos - 2) = 2 Then
-Do While mcharpos < mark2
-    If A2(mcharpos + 1) = 3 Then
-    where = where + 1
-    mcharpos = mcharpos + 1
-    Else
-    Exit Do
-    End If
-Loop
-where = where + 1
-ElseIf A2(mcharpos - 1) = 3 Then
-where = where - 1
-End If
-End If
-End If
-End If
-
-End Sub
-
-
-
 Function RealX1(mHdc As Long, ByVal ExtSelStart As Long, ByVal that$, Optional nValue As Long = 0, Optional found As Long = 0) As Long
 If ExtSelStart <= 0 Then ExtSelStart = 1
 Dim ww$(), col() As Long, items&, i, c As String
-Dim rleftacc As Long, original As Long, rx1 As Long, direction As Long, rtl As Boolean
+Dim rleftacc As Long, original As Long, rx1 As Long, direction As Long
 Dim oldvalue As Long, orx1 As Long, j As Long, nrtl As Boolean
 If Len(that$) = 0 Then
     nValue = 1: Exit Function
@@ -5442,7 +5315,7 @@ Dim dummy As RECT, r As RECT, tabw As Long, offset As Long, hRgn As Long, estX A
 tabw = tParam.iTabLength * glistN.AveCharWith
 glistN.UserControlTextMetricsPixels that$, r.Right, r.Bottom
 dummy = r
-dummy.top = r.Bottom + 1
+dummy.top = r.Bottom - 1000
 dummy.Bottom = dummy.top + r.Bottom
 offset = 0
 estX = 0
