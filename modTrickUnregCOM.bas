@@ -52,15 +52,15 @@ Private Declare Function GetMem4 Lib "msvbvm60" ( _
                          ByRef Dst As Any) As Long
 Private Declare Function SysFreeString Lib "oleaut32" ( _
                          ByVal lpbstr As Long) As Long
-Private Declare Function LoadLibrary Lib "kernel32" _
+Private Declare Function LoadLibrary Lib "KERNEL32" _
                          Alias "LoadLibraryW" ( _
                          ByVal lpLibFileName As Long) As Long
-Private Declare Function GetModuleHandle Lib "kernel32" _
+Private Declare Function GetModuleHandle Lib "KERNEL32" _
                          Alias "GetModuleHandleW" ( _
                          ByVal lpModuleName As Long) As Long
-Private Declare Function FreeLibrary Lib "kernel32" ( _
+Private Declare Function FreeLibrary Lib "KERNEL32" ( _
                          ByVal hLibModule As Long) As Long
-Private Declare Function GetProcAddress Lib "kernel32" ( _
+Private Declare Function GetProcAddress Lib "KERNEL32" ( _
                          ByVal hModule As Long, _
                          ByVal lpProcName As String) As Long
 Private Declare Function DispCallFunc Lib "oleaut32" ( _
@@ -76,7 +76,7 @@ Private Declare Function LoadTypeLibEx Lib "oleaut32" ( _
                          ByVal szFile As Long, _
                          ByVal regkind As Long, _
                          ByRef pptlib As IUnknown) As Long
-Private Declare Function memcpy Lib "kernel32" _
+Private Declare Function memcpy Lib "KERNEL32" _
                          Alias "RtlMoveMemory" ( _
                          ByRef Destination As Any, _
                          ByRef Source As Any, _
@@ -208,13 +208,13 @@ Public Enum PARAMFLAGS
 End Enum
 
 Public Type fncinf
-    Name                    As String
+    name                    As String
     addr                    As Long
     params                  As Integer
 End Type
 
 Public Type enmeinf
-    Name                    As String
+    name                    As String
     invkind                 As invokekind
     params                  As Integer
     
@@ -308,7 +308,7 @@ End Function
 
 ' // Get all co-classes described in type library.
 Public Function GetAllCoclasses( _
-                ByRef path As String, _
+                ByRef Path As String, _
                 ByRef listOfClsid() As GUID, _
                 ByRef listOfNames() As String, _
                 ByRef countCoClass As Long) As Boolean
@@ -321,7 +321,7 @@ Public Function GetAllCoclasses( _
     Dim pAttr   As Long
     Dim tKind   As Long
     
-    ret = LoadTypeLibEx(StrPtr(path), REGKIND_NONE, typeLib)
+    ret = LoadTypeLibEx(StrPtr(Path), REGKIND_NONE, typeLib)
     
     If ret Then
         Err.Raise ret
@@ -735,20 +735,20 @@ End Function
                 
 ' // Create object by CLSID and path.
 Public Function CreateObjectEx( _
-                ByRef path As String, _
+                ByRef Path As String, _
                 ByRef Clsid As GUID) As IUnknown
                 
     Dim hLib    As Long
     Dim lpAddr  As Long
     Dim isLoad  As Boolean
     
-    hLib = GetModuleHandle(StrPtr(path))
+    hLib = GetModuleHandle(StrPtr(Path))
     
     If hLib = 0 Then
     
-        hLib = LoadLibrary(StrPtr(path))
+        hLib = LoadLibrary(StrPtr(Path))
         If hLib = 0 Then
-            Err.Raise 53, , error(53) & " " & Chr$(34) & path & Chr$(34)
+            Err.Raise 53, , error(53) & " " & Chr$(34) & Path & Chr$(34)
             Exit Function
         End If
         
@@ -760,7 +760,7 @@ Public Function CreateObjectEx( _
     
     If lpAddr = 0 Then
         If isLoad Then FreeLibrary hLib
-        Err.Raise 453, , "Can't find dll entry point DllGetClasesObject in " & Chr$(34) & path & Chr$(34)
+        Err.Raise 453, , "Can't find dll entry point DllGetClasesObject in " & Chr$(34) & Path & Chr$(34)
         Exit Function
     End If
 
@@ -800,7 +800,7 @@ End Function
 
 ' // Unload DLL if not used.
 Public Function UnloadLibrary( _
-                ByRef path As String) As Boolean
+                ByRef Path As String) As Boolean
                 
     Dim hLib    As Long
     Dim lpAddr  As Long
@@ -808,7 +808,7 @@ Public Function UnloadLibrary( _
     
     If Not isinit Then Exit Function
     
-    hLib = GetModuleHandle(StrPtr(path))
+    hLib = GetModuleHandle(StrPtr(Path))
     If hLib = 0 Then Exit Function
     
     lpAddr = GetProcAddress(hLib, "DllCanUnloadNow")
@@ -1205,7 +1205,8 @@ Private Function VarTypeName(nVarType As Long) As String
         Case 8192
             VarTypeName = "Array"
         Case Else
-            Stop
+        VarTypeName = "type" + Trim(Str$(nVarType))
+            'Stop
     End Select
 End Function
 Private Function stringifyCustomType(ByVal hreftype As Long, pTypeInfo As IUnknown) As String

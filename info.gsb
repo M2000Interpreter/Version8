@@ -2476,7 +2476,7 @@ Declare fs nothing
 }
 MODULE GAME {Module Game2048 {
       \\ 10% 4 and 90% 2
-      Def GetTlleNumber()=If(Random(10)<2->4, 2)
+      Def GetTlleNumber()=If(Random(1,10)=1->4, 2)
       \\ tile
       Def Tile$(x)=If$(x=0->"[    ]", format$("[{0::-4}]", x))
       \\ empty board
@@ -4651,7 +4651,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8.2 for ver 9.9 rev 5 and newer"
+	Report " A collection of modules for tests version 8.4 for ver 9.9 rev 5 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4688,7 +4688,7 @@ title("Useful Statements")
 Report {
 	Help All, Help Print, Help  |	Monitor  (to see switches), shitches
 	(some staments can be used from a module using the Set statement)
-	(Set Monitor - because Monitor is known to Console Interepreter)
+	(Set Monitor - because Monitor is known to Console Interpreter)
 	Edit info  (press esc to exit editor) | Edit "disk_file.gsb"  (to edit from disk - saved at exit)
 	Edit  (no argument) open command editor (we pick in console line using up/down arrows)
 	Save filename   (without quotes, except If we want spaces) | load filename  (filename without "" and type)
@@ -14394,9 +14394,11 @@ MODULE ADDER4BIT {Module  FourBitAdder {
 FourBitAdder
 }
 MODULE BASEG {Print "Wait..."
-
+db.provider ""
+'db.provider "Microsoft.Jet.OLEDB.4.0", "Jet OLEDB", "newpassword"
+db.provider "Microsoft.ACE.OLEDB.12.0","Jet OLEDB", "newpassword"
 \\ remove base if exist in current directory
-base "gSQL"
+base "gSQL4"
 \\ Make a new table and insert values (M2000 use ADOdb with a special connection string)
 \\ data taken from example's of MOSH HAMEDANI for SQL, see this video
 \\ https://www.youtube.com/watch?v=7S_tz1z_5bA
@@ -14424,7 +14426,7 @@ base "gSQL"
 \\ including empty string.
 
 
-execute "gSQL", {
+execute "gSQL4", {
 	CREATE TABLE customers (
 		customer_id AUTOINCREMENT PRIMARY KEY,
 		first_name VARCHAR(50) NOT NULL,
@@ -14453,7 +14455,7 @@ execute "gSQL", {
 report "customers created"
 \\ execute a SELECT query to get a Recordset
 report "Selected customers where Points<1000 in descending order"
-execute "gSQL",{
+execute "gSQL4",{
 	SELECT 	customer_id,
 			last_name,
 			first_name,
@@ -14469,7 +14471,7 @@ Def CheckNull$(a, a$)=If$(type$(a)="Null"->"NULL", a$)
 GetListA() ' value is already in stack
 
 report  "Select customers id where phone is null"
-execute "gSQL",{
+execute "gSQL4",{
 	SELECT 	customer_id,
 			phone
 	FROM 	`customers`
@@ -14478,7 +14480,7 @@ execute "gSQL",{
 }
 GetIDwithNullPhone()    ' value is already in stack
 
-close base "gSQl"
+close base "gSQL4"
 \\ using list to check the variable names
 list
 \\ there are no variables in module, at this moment.
@@ -15495,7 +15497,7 @@ refresh
 With Form1, "visible" as visible
 p=0
 thread {
-      if visible then print "ok" : refresh :  p=ask("test left click on form's layer ","Explain","Test now","") : thread this erase
+      if visible then print "ok" : refresh :  p=ask("test RIGHT click on form's layer ","Explain","Test now","") : thread this erase
 } as k interval 100
 Method Form1,"Show", 1  \\ modal  means wait to return
 \\ we return focus to console
@@ -20496,7 +20498,7 @@ Layer Form1 {
       Window 16, 10000,4500
       Pen 15
       Cls #202020
-      Cls #606060, Ύψος-2
+      Cls #606060, Height-2
       Move PositionX, 1200+400
       Legend "Label ", Fontname$, Mode, 0, 1
       Move PositionX, 1800+400

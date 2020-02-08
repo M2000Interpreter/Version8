@@ -3443,7 +3443,9 @@ If SELECTEDITEM > 0 Then
                       
                                 Else
                            
-                                If InternalCursor Or Not MultiLineEditBox Then ShowMyCaretInTwips RealX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips
+                                If InternalCursor Or Not MultiLineEditBox Then
+                                ShowMyCaretInTwips RealX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips
+                                End If
                                    End If
                                
                                    If Not NoScroll Then If RealX2 > Width * 0.8 * dragslow Then scrollme = scrollme - Width * 0.2 * dragslow: PrepareToShow 10
@@ -5047,7 +5049,7 @@ RaiseEvent PureListOff
 Pos = SelStart
 If Pos <> 0 Then
 Dim mypos As Long, ogt As String, this$
-If Pos <= 0 Then Pos = 1: Stop
+If Pos <= 0 Then Pos = 1  ': Stop
 Epos = Pos
 Do While Pos > 0
 If InStr(1, WordCharLeft, Mid$(mline$, Pos, 1)) Then Exit Do

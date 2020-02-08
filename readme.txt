@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 5 active-X
-Now EditBox can handle cursor in RTL text.
+Version 9.9 revision 6 active-X
+A bug removed from EditBox and Internal Editor, when we break a line after moving cursor to end of line preserving a higher value of cursor from other line.
 
 George Karras, Kallithea Attikis, Greece.
 

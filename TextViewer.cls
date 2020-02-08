@@ -4299,7 +4299,7 @@ there:
         End If
         ns = NLtrim(CurrentParagraph)
         a$ = Myleft$(CurrentParagraph, Len(CurrentParagraph) - Len(ns))
-        
+  If Len(CurrentParagraph) + 1 < Charpos Then Charpos = Len(CurrentParagraph) + 1
  If Len(a$) > Charpos - 1 Then
 SelStartSilent = SelStart - Charpos + Len(a$) + 1
 Else
@@ -5366,7 +5366,7 @@ For i = 0 To items&
 
         RTL3 c, nValue, mark1, mark2, nrtl, M1, M2
         If nrtl Then
-            Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
+            If M2 - M1 > 0 Then Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
         End If
         If mark1 = 0 Or mark2 = 0 Then
         If nValue > 1 Then
@@ -5383,7 +5383,7 @@ For i = 0 To items&
                 If nrtl Then
                     M1 = M1 - mark1 + 1
                     M2 = M2 - mark1 + 1
-                    Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
+                    If M2 - M1 > 0 Then Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
                 End If
                 If found > offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c$), 1, tabw, 0)) Then
                         nValue = mark1 + estX
@@ -5466,7 +5466,7 @@ here1:
             If nrtl Then
                 M1 = M1 - mark1 + 1
                 M2 = M2 - mark1 + 1
-                Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
+                If M2 - M1 > 0 Then Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
             End If
            
             If nValue = mark2 + 1 Then
@@ -5684,32 +5684,25 @@ nortl:
                 If Len(c) = 0 Then
                     rleftacc = offset
                 ElseIf nrtl And M2 = mark2 Then
-                rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
-                  c = ww(i)
-                  
-             '  Mid$(c, M1, M2 - M1 + 1) = StrReverse(Mid$(c, M1, M2 - M1 + 1))
-               c = Mid$(c, M1, M2 - M1 + 1)
-              '   rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark2 - (M1 - mark1), 1, tabw, 0))
-                ' rleftacc = offset + rleftacc - LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), mark2 - (M1 - mark1), 1, tabw, 0))
-                rleftacc = rleftacc + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
-                nValue = M1 - 1
-            Else
-                 rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                    rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                    c = ww(i)
+                    If M2 - M1 > 0 Then c = Mid$(c, M1, M2 - M1 + 1)
+                    rleftacc = rleftacc + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                    nValue = M1 - 1
+                Else
+                     rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), Len(c), 1, tabw, 0))
+                    End If
+                ElseIf found > 0 Then
+                    rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), nValue, 1, tabw, 0))
+                    If rleftacc < found Then nValue = original
+                    RealX1 = found
+                    GoTo finish
                 End If
-            ElseIf found > 0 Then
-            rleftacc = offset + LowWord(TabbedTextOut(mHdc, r.Left, r.top, StrPtr(c), nValue, 1, tabw, 0))
-        If rleftacc < found Then
-        nValue = original
-
-        End If
-                RealX1 = found
-        GoTo finish
             End If
         End If
-    End If
-    offset = rleftacc
-    estX = estX + Len(ww(i))
-Next i
+        offset = rleftacc
+        estX = estX + Len(ww(i))
+    Next i
 
 
 If i = items& + 1 Then
