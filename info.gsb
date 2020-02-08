@@ -4651,7 +4651,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8.4 for ver 9.9 rev 5 and newer"
+	Report " A collection of modules for tests version 8.5 for ver 9.9 rev 5 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -11926,11 +11926,11 @@ MODULE FILETIME {Module CheckIt {
       Close #f
       Print file.stamp("afile")   'it is a number in VB6 date format.
       \\ day format as for Greece
-      Print Str$(File.Stamp("afile"),"hh:nn:ss dd/mm/yyyy") , "utc write time - by default"
-      Print Str$(File.Stamp("afile" ,1),"hh:nn:ss dd/mm/yyyy") , "utc write time, 1"
-      Print  Str$(File.Stamp("afile" ,-1),"hh:nn:ss dd/mm/yyyy"), "local write time, -1"
-      Print Str$(File.Stamp("afile" ,2),"hh:nn:ss dd/mm/yyyy"), "utc creation time, 2"
-      Print  Str$(File.Stamp("afile" ,-2),"hh:nn:ss dd/mm/yyyy"), "local creation time, -2"
+      Print Str$(File.Stamp("afile"),"hh:nn:ss dd/mm/yyyy") , "utc creation time - by default"
+      Print Str$(File.Stamp("afile" ,1),"hh:nn:ss dd/mm/yyyy") , "utc creation time, 1"
+      Print  Str$(File.Stamp("afile" ,-1),"hh:nn:ss dd/mm/yyyy"), "local creation time, -1"
+      Print Str$(File.Stamp("afile" ,2),"hh:nn:ss dd/mm/yyyy"), "utc write time, 2"
+      Print  Str$(File.Stamp("afile" ,-2),"hh:nn:ss dd/mm/yyyy"), "local write time, -2"
 }
 Checkit
 }
