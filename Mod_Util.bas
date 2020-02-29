@@ -11943,8 +11943,8 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   End Select
   Next i
   If FastSymbol2 Then
-  s$ = Mid$(s$, where + 1)
-  ElseIf where > 0 Then
+  s$ = Mid$(s$, where + 2)
+  ElseIf where > 1 Then
   s$ = Mid$(s$, where)
   End If
   

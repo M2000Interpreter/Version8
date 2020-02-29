@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 6 active-X
-A bug removed from EditBox and Internal Editor, when we break a line after moving cursor to end of line preserving a higher value of cursor from other line.
+Version 9.9 revision 7 active-X
+A bug removed from expression evaluator for << operator.
 
 George Karras, Kallithea Attikis, Greece.
 
