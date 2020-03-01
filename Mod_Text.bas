@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 7
+Global Const Revision = 8
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -12615,7 +12615,13 @@ fstr33: '"UNION.DATA$(", "емысг.сеияас$("
   If IsStrExp(bstackstr, a$, s) Then
   
   ElseIf IsExp(bstackstr, a$, p) Then
-  s = ChrW(p)
+  w3 = UINT(p)
+    If w3 >= &H10000 And w3 <= &H10FFFF Then
+        w3 = w3 - &H10000
+        s$ = ChrW(UINT(w3 \ &H400& + &HD800&)) + ChrW(UINT((w3 And &H3FF&) + &HDC00&))
+        Else
+    s$ = ChrW$(cUint(p))
+    End If
   Else
   s = ChrW(0)
   End If

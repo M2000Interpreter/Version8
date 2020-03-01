@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 7 active-X
-A bug removed from expression evaluator for << operator.
+Version 9.9 revision 8 active-X
+Update Union.data$() to handle surrogates (characters above 0x0000FFFF)
 
 George Karras, Kallithea Attikis, Greece.
 
