@@ -1642,6 +1642,7 @@ Dim pixX As Long, pixY As Long
 Dim rTop As Long, rBottom As Long
 Dim lenw&, realR&, realstop&, r1 As Long, WHAT1$, ff As Long, LL$(), must As Long
 If processcr Then
+If Len(what$) = 0 Then Exit Sub
 LL$() = Split(what, vbLf)
 what = LL$(0)
 ff = 0
