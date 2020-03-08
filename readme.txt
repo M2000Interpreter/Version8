@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 9 active-X
-A bug removed (Print to screen using -2 channel in a Print #-2,""; with a zero length string)
+Version 9.9 revision 10 active-X
+A bug removed from colored code in internal editor.
 
 George Karras, Kallithea Attikis, Greece.
 

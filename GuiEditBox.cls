@@ -2499,8 +2499,8 @@ Exit Sub
 End If
 End If
 ' LOOK THIS SECOND TIME
-If k > 1 Then
-If col(k - 1) = thiscolor Then Exit Sub
+If k >= 1 Then
+If k > 1 Then If col(k - 1) = thiscolor Then Exit Sub
 If col(k) >= thispos Then
 
 'If col(k) >= thispos Then
@@ -2531,8 +2531,8 @@ Exit Sub
 End If
 End If
 ' LOOK THIS SECOND TIME
-If k > 1 Then
-If col(k - 1) = thiscolor Then Exit Sub
+If k >= 1 Then
+If k > 1 Then If col(k - 1) = thiscolor Then Exit Sub
 If col(k) = thispos Then
 col(k - 1) = thiscolor: Exit Sub
 End If
