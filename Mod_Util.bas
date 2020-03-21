@@ -11199,6 +11199,7 @@ resp = MyDeclare(ObjFromPtr(basestackLP), rest$, Lang)
 End Sub
 Sub NeoMethod(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = MyMethod(ObjFromPtr(basestackLP), rest$, Lang)
+If LastErNum = -1 Then resp = False
 End Sub
 Sub NeoWith(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = MyWith(ObjFromPtr(basestackLP), rest$, Lang)
@@ -17080,7 +17081,7 @@ For Each a In bstack.CopyInOutCol
 
 If Len(a.ArrArg) > 0 Then
 x1 = rinstr(a.actualvar, a.ArrArg) + Len(a.ArrArg) - 1
-   
+jumphere:
     If neoGetArray(bstack, Left$(a.actualvar, x1), pppp) Then
         If Not pppp.Arr Then GoTo cont123
         If Not NeoGetArrayItem(pppp, bstack, Left$(a.actualvar, x1), w2, Mid$(a.actualvar, x1 + 1)) Then GoTo cont123
@@ -17106,6 +17107,13 @@ Else
         Else
             bstack.SetVar a.actualvar, var(a.localvar)
         End If
+    Else
+    If IsLabelOnly((a.actualvar), what$) > 4 Then
+    x1 = rinstr(a.actualvar, what$) + Len(what$) - 1
+    GoTo jumphere
+    
+    End If
+    
     End If
     ' generic not used
         'If MyIsObject(var(a.localvar)) Then
@@ -24000,4 +24008,97 @@ If Len(what$) = 0 Then Exit Function
     Else
     ReArrangePara = WHAT1$ + wr$
     End If
+End Function
+Function PushParamSUB(basestack As basetask, rest$) As Boolean
+PushParamSUB = True
+
+Dim ps As mStiva, p As Variant, s$, ok As Long
+    Set ps = New mStiva
+    Set basestack.lastobj = Nothing
+                Do
+            If FastSymbol(rest$, "?") Then
+                        ps.DataOptional
+            ElseIf FastSymbol(rest$, "!") Then
+                If IsExp(basestack, rest$, p) Then
+                If basestack.lastobj Is Nothing Then
+                   ps.DataValLong p
+                ElseIf TypeOf basestack.lastobj Is mHandler Then
+                    If TypeOf basestack.lastobj.objref Is mStiva Then
+                        ps.MergeBottom basestack.lastobj.objref
+                    ElseIf TypeOf basestack.lastobj.objref Is mArray Then
+                     ps.MergeBottomCopyArray basestack.lastobj.objref
+                        Else
+                            PushParamSUB = False
+                            MyEr "Expected Stack Object after !", "Περίμενα αντικείμενο τύπου Σωρού μετά το !"
+                            Set basestack.lastobj = Nothing
+                            Exit Function
+                    End If
+                ElseIf TypeOf basestack.lastobj Is mArray Then
+                     ps.MergeBottomCopyArray basestack.lastobj
+                     
+                End If
+                Set basestack.lastobj = Nothing
+                End If
+                ElseIf IsExp(basestack, rest$, p) Then
+        If Not basestack.lastobj Is Nothing Then
+        If TypeOf basestack.lastobj Is mStiva Then
+            Dim mm As mStiva
+            Set mm = basestack.lastobj
+            ps.MergeBottom mm
+            Set mm = Nothing
+        ElseIf Not basestack.lastpointer Is Nothing Then
+            ps.DataObj basestack.lastobj
+            Set basestack.lastpointer = Nothing
+            
+        ElseIf Not basestack.lastobj Is Nothing Then
+           ps.DataObj basestack.lastobj
+
+        End If
+       Set basestack.lastobj = Nothing
+       
+        Else
+            ps.DataVal p
+            
+         End If
+    ElseIf Not LastErNum <> 0 Then
+    If IsStrExp(basestack, rest$, s$) Then
+       
+       
+       If Not basestack.lastpointer Is Nothing Then
+            ps.DataObj basestack.lastobj
+            Set basestack.lastpointer = Nothing
+        ElseIf Not basestack.lastobj Is Nothing Then
+           ps.DataObj basestack.lastobj
+        Else
+            ps.DataStr s$
+        End If
+        Set basestack.lastobj = Nothing
+    ElseIf MaybeIsSymbol(rest$, ",") Then
+        ps.DataOptional
+    ' here
+    End If
+    Else
+  If LastErNum <> 0 Then
+    
+     PushParamSUB = False
+  Exit Do
+    End If
+    End If
+      If LastErNum <> -2 And LastErNum <> 0 Then
+      MyEr "Error in input list", "Πρόβλημα στις παραμέτρους"
+      
+      PushParamSUB = False
+      Exit Do
+      End If
+    If Not FastSymbol(rest$, ",") Then Exit Do
+                Loop
+             With basestack
+             If .SorosNothing Then
+           
+               Set .Sorosref = ps
+             Else
+                .soros.MergeTop ps
+             End If
+             End With
+            
 End Function

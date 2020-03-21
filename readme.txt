@@ -1,7 +1,12 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 10 active-X
-A bug removed from colored code in internal editor.
+Version 9.9 revision 11 active-X
+Better code on passing by reference static variables and array items,
+now return error if these passing aren't in a module or function call, also for
+subroutines excluded these, now raising error.
+
+The Mutex object now works fine. Clock module in info has an example for it.
+The clock can't run two times, because the second one check the mutex and exit early.
 
 George Karras, Kallithea Attikis, Greece.
 

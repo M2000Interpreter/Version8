@@ -4651,7 +4651,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8.5 for ver 9.9 rev 5 and newer"
+	Report " A collection of modules for tests version 8.7 for ver 9.9 rev 11 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4787,8 +4787,7 @@ Report {
 	just press tab before any letter, to delete indentation mark the text shift +End and then press shift tab
 	You can start a indentation with spaces (Default is tab - characrer 9), using shift tab in a clear line, or a line without leading tabs.
 	}, width-12
-title("Indent multiple lines")
-Report {
+title("Indent multiple lines")Report {
 	Mark a block and then press tab or shif tab to move text right or left
 	}, width-12
 title("Functions Keys for Editor")
@@ -9527,8 +9526,7 @@ MODULE COMP {\\ compose lambda functions
 \\ We can put closures (as copy of values, or copy of pointers if a variable is a pointer)
 
 \\ In M2000, there are: Values, Pointers, Refereneces.  Pointers hold Objects. Values maybe objects too. References are just names with no own value or poiner, but refer to another variable
-\\ We can use reference to array items, with an internal copy in copy out, method. First interpreter make a hidden variable, copy the item to that variable, then pass the variable to function or module by reference, and at return copy back the variable to the array item (checking if it can be done, maybe the array has change). We can't pass values to references, except of a string. A reference passed as week reference, a string with the a proper name for the variable, to stack of values (as a value), so a Read statement which has & before a name, search for a string, and then resolve it or not. If not raise error. We can read the string (the weakr reference) and read it any other time (a copy of it), if we know that this variable exist. Also there are "string pointer"
-\\Arrays can passed by reference without copy in copy out (by using a weak reference too)
+\\ We can use reference to array items, with an internal copy in copy out, method. First interpreter make a hidden variable, copy the item to that variable, then pass the variable to function or module by reference, and at return copy back the variable to the array item (checking if it can be done, maybe the array has change). We can't pass values to references, except of a string. A reference passed as week reference, a string with the a proper name for the variable, to stack of values (as a value), so a Read statement which has & before a name, search for a string, and then resolve it or not. If not raise error. We can read the string (the weakr reference) and read it any other time (a copy of it), if we know that this variable exist. Also there are "string pointer"\\Arrays can passed by reference without copy in copy out (by using a weak reference too)
 
 X=10
 k$=weak$(x)
@@ -10007,7 +10005,156 @@ Module OOP {
 	      .Register  PressKeyOne, &B1  \\register event to subject
 	      .Register  PressKeyOne, &B2 
 	      .Register .Eventlist(keylistener(50)) , &B1 
-	      .Register  .Eventlist(Mouselistener(1)) , &B3 
+	      .Register .Eventlist(Mouselistener(1)) , &B3 
+	      .EnableEvents=True  
+	}
+	every 150 {
+	      if EventHandler.observe() then exit
+	      if mouse=2 then exit
+	} 
+}
+OOP
+Keyboard "info"+chr$(13)
+}
+MODULE OOP2 {\\ LIKE OOP1
+\\ MOUSELISENER IS A CLASS WICH USE NOW CLASS LISTENER
+\\ ANY PART AFTER CLASS: IS FOR CINSTRUCTION ONLY, AND NEVER SAVED TO FINAL OBJECT
+\\ SO LISTENER CONSTRUCTOR AND MOUSELISTENER CONSTRUCTOR NOT SAVED, JUS USED ONCE
+\\ THE SAME HOLD FOR KEYLISTENER
+
+
+
+Module OOP {
+	Set Fast
+	cls 1, 0
+	pen 14
+	report 2, "Event Listener"
+	report "Use keys 1, 2 and mouse left, and for exit mouse right"
+	cls, 2
+	class listener {
+	      name$,  yourkey, auto
+	      dim ref$()
+	      module final register {
+	            .auto++
+	            dim .ref$(.auto)
+	            read .ref$(.auto-1)   \\ weak reference
+	      }
+	      function CheckEvent {
+	            =false
+	      }
+	class:
+	      module listener {
+	            read .yourkey
+	            .name$<=format$("{0}({1})", letter$,.yourkey)
+	      }
+	}
+	\\ on way is to make final before adding the listener
+	class mouselistener {
+                  function final CheckEvent {
+                                 =Mouse=.yourkey	                        
+                  }
+	class:
+	      module mouselistener (x) {
+	            this=listener(x, "MousePress")
+	      }
+	}
+	\\ the other way is to add definitions to a group after adding listener
+	\\ also ![] add stack of the call to the next call
+	\\ so we didn't use x variable
+	class keylistener {
+	class:
+	      module keylistener {
+	            a=listener(![], "KeyPress")
+	            group a {
+	                  function final CheckEvent {
+	                        =keypress(.yourkey)
+	                  }
+	            }
+	            this=a
+	      }
+	}
+	class EventHandler {
+	      auto, autoevents, EnableEvents
+	      Dim Events()
+	      class widget {
+	            \\ in classes we can define variables without value
+	            ref$  \\ weak reference
+	            id, caption$, Enabled=True
+	            module linkme {
+	                  read .ref$
+	            }
+	            module widget {  \\ this is used as construction function, but is a module
+	                  read .id
+	                  read .caption$
+	            }
+	            function Callback {
+	                  read some$
+	                  push .ref$ : read &ref  \\ this is the link
+	                  =ref.query(.id, some$, &this)
+	            }
+	      }
+	      function button {    \\ this is the button construction
+	         .auto++
+	         read txt$
+	         makeme =.widget(.auto,txt$)  
+	         makeme.linkme &this
+	         =makeme   \\ we make a group a floating group to export
+	      }
+	      function EventList {
+	            handle=.autoevents  \\ we execute some commands..
+	            .autoevents++
+	            dim .Events(.autoevents)
+	            read .Events(handle)   \\ .. and then we can read function parameter
+	            =handle
+	      }
+	      module register {
+	           read handler, ref$
+	            .Events(handler).register  ref$
+	      }
+	     function observe {
+	     if not .EnableEvents then =true : exit
+	           print "observe for events"
+	           for i=0 to .autoevents-1 {
+	                 for .Events(i) {
+	                        if  .checkevent() then {
+	                              for j=0 to .auto-1 {
+	                                    for this {     \\ we use a for this {} to make temporary variables
+	                                                           \\ because we can't relink a link.  so we make a fresh here
+	\\              the link statement to this:    push  .ref$(j) : read &Link
+	                                          link weak .ref$(j) to &link
+	                                          call link.callback(.name$)
+	                                     }
+	                                }
+	                        }
+	                 }
+	           }
+	     }
+	      function query {
+	            read id, what$, &nicesmallgroup
+	            print under "Inside EventHandler";
+	            print under
+	            print  part "I get a query from a widget object ";id
+	            print
+	            print part "Say:";what$
+	            print
+	            for nicesmallgroup {
+	                  Print part "I get the caption:";.caption$
+	                  print
+	                  =0
+	            }          
+	      }
+	}
+	EventHandler=EventHandler()  \\ create handler
+	B1=EventHandler.button("Button1")  \\ create subjects
+	B2=EventHandler.button("Button2") 
+	B3=EventHandler.button("Button3") 
+	
+	for EventHandler {
+	      PressKeyOne=.Eventlist(keylistener(49))
+	      .Register  PressKeyOne, &B1  \\register event to subject
+	      .Register  PressKeyOne, &B2 
+	      .Register .Eventlist(keylistener(50)) , &B1 
+	      .Register .Eventlist(Mouselistener(1)) , &B3 
 	      .EnableEvents=True  
 	}
 	every 150 {
@@ -11194,7 +11341,7 @@ CLS 15, 0
 FORM 132,68      
 CALENDAR 1966, 1032 ' GREEK
 GOSUB WAITKEY_OR_MOUSE
-FOR I=2019 TO 2025
+FOR I=2020 TO 2026
 CALENDAR I, 1033  ' ENGLISH
 GOSUB WAITKEY_OR_MOUSE
 NEXT I
@@ -15047,6 +15194,15 @@ Sub Press()
 End Sub
 }
 MODULE CLOCK {Αν Έγκυρο(ok) Αλλιως Πληκτρολόγιο "Clock1"+χαρ$(13) : Έξοδος
+Όρισε Μ Μοναδικό      ' Declare m Mutex  : Methos m, "Create", "onename" return error if can't created with ownership
+\\ we can create more than one mutexs in the m, using create
+\\ so now this run only one time for the user. The second time the mutex exist so exit the program early.
+Κάνε Συνέχισε Ως Λογικός
+Δες  {
+      Μέθοδος Μ, "CREATE", "Global\CLOCK10101001"
+      Συνέχισε=Αληθής     
+}
+Αν Συνέχισε Αλλιώς Έξοδος
 Ανανέωση 5000
 Φόρμα
 ομαλά ναί
@@ -15056,8 +15212,9 @@ MODULE CLOCK {Αν Έγκυρο(ok) Αλλιως Πληκτρολόγιο "Clock
 Περιθώριο {Πένα 14}
 Επιφάνεια 220, 5
 \\ ανοίγει με ctrl+f1
-Περί ! "Μ2000 Ρολόι", 10000, 6000,{Ρολόι 12 ωρών, και ξυπνητήρι 12 ωρών
-      Πλήκτρα:
+Περί ! "Μ2000 Ρολόι 12 ωρών - M2000 Clock 12 hours", κλιμαξ.χ*5/7, κλιμαξ.υ*2/3,{
+      Ελληνικά
+            Ξυπνητήρι από 1 λεπτό έως 12 ώρες
             Μεσαίο πλήκτρο του ποντικιού βάζει/βγάζει το ξυπνητήρι/ σταματάει το κουδούνισμα
             Αριστερό/Δεξί πλήκτρο αλλάζει το ξυπνητήρι ανά λεπτό
             Μαζί με το μεσαίο αλλαζει το ξυπνητήρι ανά 10 λεπτά
@@ -15066,6 +15223,17 @@ MODULE CLOCK {Αν Έγκυρο(ok) Αλλιως Πληκτρολόγιο "Clock
             Το κάτω βελάκι βάζει/βγάζει το ξυπνητήρι/ σταματάει το κουδούνισμα
             Το Enter αλλάζει τους δείκτες σε εμφάνιση (ανά ολόκληρες ώρες ή αναλογικά)
             Το διάστημα κλείνει το πρόγραμμα
+            
+      English
+            Alarm for 1 minute to 12hours
+            Middle mouse button set/reset/snooze alarm
+            Left/right mouse button change at step one minute alarm time
+            Using midle button and any of left or right change at step ten minutes
+            Ledt/right arrows on keyboard change at step one minute alarm time
+            pressing up arrow and of left or right on keyboard change at step ten minutes
+            Down arrow used to set/reset/snooze alarm
+            Enter key change clock hour to return analog to minutes time or at hour intervals.
+            Space key exit the clock
       }
 κχ=χ.σημεία-4000
 κυ=4000
@@ -15213,7 +15381,8 @@ MODULE CLOCK {Αν Έγκυρο(ok) Αλλιως Πληκτρολόγιο "Clock
 Οθόνη \\ επαναφορά από το περιορισμό περιοχής της Χρώμα
 Επιφάνεια 255
 Επιφάνεια Κρυψε
-
+Μέθοδος Μ, "DESTROY", "Global\CLOCK10101001"   ' Declare m, "Destroy"
+Όρισε Μ Τίποτα   ' Declare m Nothing
 }
 MODULE BOOK {Class Book {
       \\ these are public but can get value one time
@@ -18003,8 +18172,7 @@ MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake ga
       hFUDGUD2VYAUW4NcB0jDJd7K1srF90EoIJqXSv7FkwCp4WHJ7ujClRpOA+SXS8hV
       uHDCFAcIv2YiGOrF9bbMgnwaIDTMXdLEIrEminfarHZ02D9CvPRorW2Vpg8mPpR4
       LAaE5YMAgk7ELsoSQHhHiDtsEiGk4tYBku78IkBi9iFAZH0QlEfV3U4WRLfFj0yf
-      q22rH5h8FWvtx3WA8HPSUyUvsyA8IUGBKSArLUi6t3ujDctYcb9pQIShJhvMJgIk
-      TUdHf0leyY/zwsyiNAqIf6hBfPw45VDjcSEgZQvMngIIt3h7NiG0WjNQCwCB00HQ
+      q22rH5h8FWvtx3WA8HPSUyUvsyA8IUGBKSArLUi6t3ujDctYcb9pQIShJhvMJgIk      TUdHf0leyY/zwsyiNAqIf6hBfPw45VDjcSEgZQvMngIIt3h7NiG0WjNQCwCB00HQ
       ZsgXANKYccvXVbiczbUWkGO8y5wHCNu4CloADIjV9s4vB4QSAr5aKwHhbEg2IaRa
       7TQgePWC44h/Iyxj1Q2HRrEuBIR0X1rv4hQ2qO05TSy+a/6D6//nx4zysXoUixbY
       vwK4ItMBp+WsAMSzwY5kgU02UQW5GXYrAeGnpJ8JiH0rQMixiIaPFazmqqURQNxT
@@ -18772,7 +18940,17 @@ TestThis
 }
 MODULE INFO {keyboard "UseThis : InfoBasic"+chr$(13)
 }
-MODULE CLOCK1 {keyboard " clock %ok=1 : clear :  info "+chr$(13)
+MODULE CLOCK1 {''keyboard " clock %ok=1 : clear :  info "+chr$(13)
+Report{
+	Wait for loading another m2000.exe which load info.gsb as modules
+	Click on clock and press space to close it
+	Hold mouse down at the center to move the clock
+	Code written in GREEK Language
+	Use ctrl+F1 for help (Greek and English lanugage)
+	To see the code give here: edit clock
+}
+win appdir$+"m2000.exe", {load modules info.gsb: ok=1: clock: end}
+
 }
 MODULE USETHIS {hide
 window mode, window
@@ -19958,7 +20136,9 @@ While z {
 s$="]"
 Report s$
 }
-MODULE COMBO1 {about call { 
+MODULE COMBO1 {\\ module Au is like this with less controls
+
+about call { 
       select case about$ 
       case "is a big name here"
             about  "Title: is a big name here", 8000,6000,"that [is a big name here] easy [too]"
@@ -19972,6 +20152,7 @@ With form1, "Width" as form1.Width, "Height" as form1.Height
 layer Form1 {
 	window 12, 8000,6000;
 	cls #202020
+	max_x=scale.x
 }
 
 declare combo1 combobox form form1
@@ -20027,9 +20208,9 @@ Function but1.click {
 }
 function form1.resize {
 	layer form1 {
-		if form1.width<4000 then form1.width=4000
+		if form1.width<max_x then form1.width=max_x
 		if form1.height<4000 then form1.height=4000
-		move form1.Width-twipsx*3, form1.Height  '-size.y("A","Courier",8)
+		move form1.Width, form1.Height  
 		cls
 		local oldi=italic
 		italic 1
@@ -20511,5 +20692,32 @@ Layer Form1 {
 Method Form1, "Show",1
 Declare text1 Nothing
 Declare Form1 Nothing
+}
+MODULE CONV2 {Module Checkit {
+	k$=lambda$ (m, b as integer=16) -> {
+		if b<2 or b>16 then error "base out of range"
+		if m=0 then ="0" : exit
+		z$="0123456789ABCDEF"	
+		=lambda$ z$, b (m) ->{
+			=if$(m=0->"", lambda$(m div b)+mid$(z$, m mod b + 1, 1))
+		}(m)
+	}
+	k=lambda (m$, b as integer=16) -> {
+		if b<2 or b>16 then error "base out of range"
+		m$=trim$(m$)
+		if m$="0" then =0 : exit
+		z$="0123456789ABCDEF"	
+		=lambda z$, b (m$) ->{
+			=if(Len(m$)=0->0, lambda(mid$(m$,2))+(instr(z$, left$(m$,1))-1)*b**(len(m$)-1))
+		}(m$)
+	}
+	Print k$(0)="0", k("0")=0
+	Print k$(65535)="FFFF", k("FFFF", 16)=65535
+	Print k$(0xF00F)="F00F", k("F00F", 16)=0xF00F
+	Print k$(0xFFFFFFFF)="FFFFFFFF", k("FFFFFFFF", 16)=0xFFFFFFFF
+	Print k$(100, 8)="144", k("144", 8)=100
+	Print k$(100, 2)="1100100", k("1100100", 2)=100
+}
+Checkit
 }
 INFO

@@ -52,7 +52,7 @@ Private mprocess As TaskInterface ' reference to current process maybe same to p
 Private mprocessOk As Boolean ' if i have a process class
 Private threadsnames As ThreadsClass
 Public TaskMain As Boolean
-Public OriginalName$
+Public originalname$
 Private mGroupName$
 Public UseGroupname$
 Public LastClick As Long
@@ -84,6 +84,7 @@ Public IamGlobal As Boolean
 Public numnumlimit As Long
 Public SkipClear As Long
 Public Prof As clsProfiler
+Public modfuncall As Boolean
 Public Sub SetSkip()
     SkipClear = SkipClear + 1
 End Sub
