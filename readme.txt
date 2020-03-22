@@ -1,12 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 11 active-X
-Better code on passing by reference static variables and array items,
-now return error if these passing aren't in a module or function call, also for
-subroutines excluded these, now raising error.
-
-The Mutex object now works fine. Clock module in info has an example for it.
-The clock can't run two times, because the second one check the mutex and exit early.
+Version 9.9 revision 12 active-X
+A bug in Text statement for logging  UTF-16 at append to file removed
 
 George Karras, Kallithea Attikis, Greece.
 

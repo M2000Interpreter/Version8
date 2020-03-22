@@ -1573,7 +1573,7 @@ If nocr Then Exit Do Else PY = PY + 1
 
 If PY >= .My And Not ONELINE Then
 
-If ddd.name = "PrinterDocument1" Then
+If ddd.Name = "PrinterDocument1" Then
 getnextpage
  With nr
  .top = PY * pixY + mb.uMineLineSpace
@@ -1660,7 +1660,7 @@ With mybasket
     PX = .curpos
     PY = .currow
         If PY = .My And .double Then
-            If ddd.name = "PrinterDocument1" Then
+            If ddd.Name = "PrinterDocument1" Then
                         getnextpage
                          With nr
                          .top = PY * pixY + mUAddPixelsTop
@@ -1758,7 +1758,7 @@ checkcombine:
               Else
               
             If c$ = Chr$(7) Then
-            If ddd.name <> "PrinterDocument1" Then Beep
+            If ddd.Name <> "PrinterDocument1" Then Beep
              r = r + 1: realR = realR - 1:
              GoTo cont0
              End If
@@ -1778,7 +1778,7 @@ checkcombine:
                End If
               .curpos = 0
                 If PY + 1 >= .My Then
-                    If ddd.name = "PrinterDocument1" Then
+                    If ddd.Name = "PrinterDocument1" Then
                         getnextpage
                          With nr
                          .top = PY * pixY + mUAddPixelsTop
@@ -1814,7 +1814,7 @@ checkcombine:
             ElseIf c$ = ChrW(10) Then
                 .curpos = 0
                 If PY + 1 = .My Then
-                    If ddd.name = "PrinterDocument1" Then
+                    If ddd.Name = "PrinterDocument1" Then
                         getnextpage
                          With nr
                          .top = PY * pixY + mUAddPixelsTop
@@ -1871,7 +1871,7 @@ cont0:
         
         If PY >= .My And Not ONELINE Then
         
-        If ddd.name = "PrinterDocument1" Then
+        If ddd.Name = "PrinterDocument1" Then
         getnextpage
          With nr
          .top = PY * pixY + mUAddPixelsTop
@@ -1981,7 +1981,7 @@ checkcombine1:
     Else
 CHECK1:
         If c$ = Chr$(7) Then
-            If ddd.name <> "PrinterDocument1" Then Beep
+            If ddd.Name <> "PrinterDocument1" Then Beep
             GoTo cont1
         End If
         If processcr Then
@@ -2003,7 +2003,7 @@ CHECK1:
                     realR& = 0
                     c$ = ""
                 If PY + 1 = .My Then
-                    If ddd.name = "PrinterDocument1" Then
+                    If ddd.Name = "PrinterDocument1" Then
                         getnextpage
                          With nr
                          .top = PY * pixY + mUAddPixelsTop
@@ -2037,7 +2037,7 @@ CHECK1:
             ElseIf c$ = ChrW(10) Then
                 .curpos = 0
                 If PY + 1 >= .My Then
-                    If ddd.name = "PrinterDocument1" Then
+                    If ddd.Name = "PrinterDocument1" Then
                         getnextpage
                          With nr
                          .top = PY * pixY + mUAddPixelsTop
@@ -2106,7 +2106,7 @@ Dim prive As Long
 prive = GetCode(ddd)
 On Error Resume Next
 With players(prive)
-BFONT = ddd.Font.name
+BFONT = ddd.Font.Name
 If Font <> "" Then
 If Size = 0 Then Size = ddd.FontSize
 StoreFont Font, Size, .charset
@@ -2153,7 +2153,7 @@ Dim prive As Long
 prive = GetCode(ddd)
 On Error Resume Next
 With players(prive)
-BFONT = ddd.Font.name
+BFONT = ddd.Font.Name
 If Font <> "" Then
 If Size = 0 Then Size = ddd.FontSize
 StoreFont Font, Size, .charset
@@ -2834,7 +2834,7 @@ Dim PX As Long, PY As Long, OLDFONT As String, OLDSIZE As Long, DEGR As Double
 Dim F As LOGFONT, hPrevFont As Long, hFont As Long, fline$, ruler As Long
 Dim BFONT As String
 On Error Resume Next
-BFONT = ddd.Font.name
+BFONT = ddd.Font.Name
 If ExtraWidth <> 0 Then
 SetTextCharacterExtra ddd.hDC, ExtraWidth
 End If
@@ -2933,7 +2933,7 @@ End Sub
 
 Public Sub nForm(bstack As basetask, TheSize As Single, nW As Long, nH As Long, myLineSpace As Long)
     On Error Resume Next
-    StoreFont bstack.Owner.Font.name, TheSize, bstack.myCharSet
+    StoreFont bstack.Owner.Font.Name, TheSize, bstack.myCharSet
     nH = fonttest.TextHeight("Wq") + myLineSpace * 2
     nW = fonttest.TextWidth("W") + dv15
 End Sub
@@ -3136,7 +3136,7 @@ mSz = mSz * factor
 End If
 dq.FontSize = mSz
 
-StoreFont dq.Font.name, mSz, dq.Font.charset
+StoreFont dq.Font.Name, mSz, dq.Font.charset
 If .double Then
     Dim nowtextheight As Long
     nowtextheight = fonttest.TextHeight("fj")
@@ -3273,7 +3273,7 @@ SetTextBasketBack dq, mybasket
                       nomoveLCTC dq, mybasket, Y&, c& + X&, ins&
                       iamactive = False
            Else
-                If Not (GetForegroundWindow = Screen.ActiveForm.hWnd And Screen.ActiveForm.name = "Form1") Then
+                If Not (GetForegroundWindow = Screen.ActiveForm.hWnd And Screen.ActiveForm.Name = "Form1") Then
                  
                       DestroyCaret
                       nomoveLCTC dq, mybasket, Y&, c& + X&, ins&
@@ -3290,11 +3290,11 @@ SetTextBasketBack dq, mybasket
                 End If
      Else
   If Not Screen.ActiveForm Is Nothing Then
-            If GetForegroundWindow = Screen.ActiveForm.hWnd And Screen.ActiveForm.name = "Form1" Then
+            If GetForegroundWindow = Screen.ActiveForm.hWnd And Screen.ActiveForm.Name = "Form1" Then
            
                           nomoveLCTC dq, mybasket, Y&, c& + X&, ins&
                              iamactive = True
-                              If ShowCaret(dq.hWnd) = 0 And Screen.ActiveForm.name = "Form1" Then
+                              If ShowCaret(dq.hWnd) = 0 And Screen.ActiveForm.Name = "Form1" Then
                                    HideCaret dq.hWnd
                                    .currow = Y&
                                    .curpos = c& + X&
@@ -3628,7 +3628,7 @@ Form1.DIS.backcolor = mycolor(PaperOne)
 If lckfrm = 0 Then
 SetText d
 bstack.Owner.Font.charset = bstack.myCharSet
-StoreFont bstack.Owner.Font.name, SzOne, bstack.myCharSet
+StoreFont bstack.Owner.Font.Name, SzOne, bstack.myCharSet
  
  With players(basketcode)
 .mypen = PenOne
@@ -3764,7 +3764,7 @@ Else
     d.Line (0, spl)-(d.ScaleWidth - dv15, d.ScaleHeight - dv15), .Paper, BF
     End If
     .currow = .mysplit
-ElseIf d.name = "Form1" Or mb.used Then
+ElseIf d.Name = "Form1" Or mb.used Then
 d.Line (0, spl)-(d.ScaleWidth - dv15, d.ScaleHeight - dv15), .Paper, BF
 .curpos = 0
 .currow = .mysplit
@@ -3877,7 +3877,7 @@ Hook Form1.hWnd, Nothing '.glistN
 .glistN.maxchar = 0
 If d.ForeColor = tcol Then
 Set Form1.Point2Me = d
-If d.name = "Form1" Then
+If d.Name = "Form1" Then
 .glistN.SkipForm = False
 Else
 .glistN.SkipForm = True
@@ -3913,12 +3913,12 @@ End If
 .ForeColor = d.ForeColor
 Form1.SetText1
 .glistN.overrideTextHeight = fonttest.TextHeight("fj")
-.Font.name = d.Font.name
+.Font.Name = d.Font.Name
 .Font.Size = d.Font.Size ' SZ 'Int(d.font.Size) Why
 .Font.charset = d.Font.charset
 .Font.Italic = d.Font.Italic
 .Font.bold = d.Font.bold
-.Font.name = d.Font.name
+.Font.Name = d.Font.Name
 .Font.charset = d.Font.charset
 .Font.Size = prive.SZ
 With prive
@@ -3930,7 +3930,7 @@ Form1.TEXT1.Move X& * .Xt + d.Left, Y& * .Yt + d.top, (x1& - X&) * .Xt + .Xt, (y
 End If
 End With
 If d.ForeColor = tcol Then
-If d.name = "Form1" Then
+If d.Name = "Form1" Then
 Form1.TEXT1.glistN.RepaintFromOut d.Image, d.Left, d.top
 Else
 Form1.TEXT1.glistN.RepaintFromOut d.Image, 0, 0
@@ -4063,7 +4063,7 @@ TextEditLineHeight = 1
 .glistN.BorderStyle = 0
 .glistN.BackStyle = 1
 Set Form1.Point2Me = d
-If d.name = "Form1" Then
+If d.Name = "Form1" Then
 .glistN.SkipForm = False
 Else
 .glistN.SkipForm = True
@@ -4137,7 +4137,7 @@ End If
 .glistN.ZOrder 0
 .backcolor = d.backcolor
 .ForeColor = d.ForeColor
-.Font.name = d.Font.name
+.Font.Name = d.Font.Name
 Form1.SetText1
 .glistN.overrideTextHeight = fonttest.TextHeight("fj")
 .Font.Size = d.Font.Size ' SZ 'Int(d.font.Size) Why
@@ -4145,7 +4145,7 @@ Form1.SetText1
 .Font.Italic = d.Font.Italic
 .Font.bold = d.Font.bold
 
-.Font.name = d.Font.name
+.Font.Name = d.Font.Name
 
 .Font.charset = d.Font.charset
 .Font.Size = prive.SZ 'Int(d.font.Size)
@@ -4153,7 +4153,7 @@ If bstack.toback Then
 If maxchar > 0 Then
 
 .Move X& * prive.Xt - ExcludeThisLeft, Y& * prive.Yt, (x1& - X&) * prive.Xt + prive.Xt, (y1& - Y&) * prive.Yt + prive.Yt
-If d.name = "Form1" Then
+If d.Name = "Form1" Then
 .glistN.RepaintFromOut d.Image, d.Left, d.top
 Else
 .glistN.RepaintFromOut d.Image, 0, 0
@@ -4164,7 +4164,7 @@ End If
 Else
 If maxchar > 0 Then
 .Move X& * prive.Xt + d.Left - ExcludeThisLeft, Y& * prive.Yt + d.top, (x1& - X&) * prive.Xt + prive.Xt, (y1& - Y&) * prive.Yt + prive.Yt
-If d.name = "Form1" Then
+If d.Name = "Form1" Then
 .glistN.RepaintFromOut d.Image, d.Left, d.top
 Else
 .glistN.RepaintFromOut d.Image, 0, 0
@@ -4523,11 +4523,11 @@ prive = players(GetCode(d))
 Hook Form1.hWnd, Form1.List1
 Dim ot As Boolean, drop
 With Form1.List1
-.Font.name = d.Font.name
+.Font.Name = d.Font.Name
 Form1.Font.charset = d.Font.charset
 Form1.Font.Strikethrough = False
 .Font.Size = d.Font.Size
-.Font.name = d.Font.name
+.Font.Name = d.Font.Name
 Form1.Font.charset = d.Font.charset
 .Font.Size = d.Font.Size
 If LEVCOLMENU < 2 Then .backcolor = d.ForeColor
@@ -4753,7 +4753,7 @@ oldcodeid = Modalid
 Dim X As Form, zz As Form
 Set zz = Screen.ActiveForm
 For Each X In Forms
-        If X.Visible And X.name = "GuiM2000" Then
+        If X.Visible And X.Name = "GuiM2000" Then
                                    If X.Enablecontrol Then
                                         X.Modal = mycode
                                         X.Enablecontrol = False
@@ -4789,7 +4789,7 @@ Dim z As Form
 Set z = Nothing
 
            For Each X In Forms
-            If X.Visible And X.name = "GuiM2000" Then
+            If X.Visible And X.Name = "GuiM2000" Then
                 If Not X.Enablecontrol Then
                         X.TestModal mycode
                 End If
@@ -4843,9 +4843,9 @@ dd.Font.Size = Size
 Size = dd.Font.Size
 
 ''Sleep 1  '' USED TO GIVE TIME TO LOAD FONT
-If fonttest.FontName = dd.Font.name And dd.Font.Size = fonttest.Font.Size Then
+If fonttest.FontName = dd.Font.Name And dd.Font.Size = fonttest.Font.Size Then
 Else
-StoreFont dd.Font.name, Size, dd.Font.charset
+StoreFont dd.Font.Name, Size, dd.Font.charset
 End If
 .Yt = fonttest.TextHeight("fj")
 .Xt = fonttest.TextWidth("W")
@@ -4913,10 +4913,10 @@ If .Column < 4 Then .Column = 4
 
 .SZ = Size
 
-If dd.name = "Form1" Then
+If dd.Name = "Form1" Then
 ' no change
 Else
-If dd.name <> "dSprite" And Typename(dd) <> "GuiM2000" Then
+If dd.Name <> "dSprite" And Typename(dd) <> "GuiM2000" Then
 Dim mmxx As Long, mmyy As Long, XX As Long, YY As Long
 mmxx = .mx * CLng(.Xt)
 mmyy = .My * CLng(.Yt)
@@ -5031,7 +5031,7 @@ LCTbasketCur dq, prive
 ins& = 0
 Dim fr1 As Long, fr2 As Long, p As Double
 UseEnter = False
-If dq.name = "DIS" Then
+If dq.Name = "DIS" Then
 If Form1.Visible = False Then
     If Not Form3.Visible Then
         Form1.Hide: Sleep 100
@@ -5214,7 +5214,7 @@ Else
 If Screen.ActiveForm Is Nothing Then
 iamactive = False
 Else
-If Screen.ActiveForm.name <> "Form1" Then
+If Screen.ActiveForm.Name <> "Form1" Then
 iamactive = False
 Else
 iamactive = GetForegroundWindow = Screen.ActiveForm.hWnd
@@ -9235,9 +9235,10 @@ Open F$ For Binary As w
 If Append Then Seek #w, LOF(w) + 1
 mode2save = mode2save Mod 10
 If mode2save = 0 Then
-a() = ChrW(&HFEFF)
-Put #w, , a()
-
+If Not Append Then
+    a() = ChrW(&HFEFF)
+    Put #w, , a()
+End If
 ElseIf mode2save = 1 Then
 a() = ChrW(&HFFFE) ' big endian...need swap
 If Not Append Then Put #w, , a()
@@ -9778,7 +9779,7 @@ If Not Screen.ActiveForm Is Nothing Then
 
     Dim X As Form
      For Each X In Forms
-     If X.name = "Form1" Or X.name = "GuiM2000" Or X.name = "Form2" Or X.name = "Form4" Then
+     If X.Name = "Form1" Or X.Name = "GuiM2000" Or X.Name = "Form2" Or X.Name = "Form4" Then
          If X.Visible And X.enabled Then
              If catchit Then X.SetFocus: Exit Sub
              If X.hWnd = GetForegroundWindow Then
@@ -9790,7 +9791,7 @@ If Not Screen.ActiveForm Is Nothing Then
      Next X
      Set X = Nothing
      For Each X In Forms
-     If X.name = "Form1" Or X.name = "GuiM2000" Or X.name = "Form2" Or X.name = "Form4" Then
+     If X.Name = "Form1" Or X.Name = "GuiM2000" Or X.Name = "Form2" Or X.Name = "Form4" Then
          If X.Visible And X.enabled Then X.SetFocus: Exit Sub
              
              
@@ -20705,7 +20706,7 @@ If Typename(var(v)) = "Constant" Then
 Else
     Set myl = var(v)
 End If
-         myl.name = here$
+         myl.Name = here$
             
             myl.CopyToVar basestask, here$ = vbNullString, var()
             'sbf(0).sb = var(i).code$
@@ -21193,7 +21194,7 @@ Dim basketcode As Long, mAddTwipsTop As Long
 
 If Left$(Typename(Scr), 3) = "Gui" Then
 If Typename(Scr) = "GuiM2000" Then FastSymbol rest$, "!": GoTo there1
-ElseIf Scr.name = "Form1" Then
+ElseIf Scr.Name = "Form1" Then
 
 Else
 If FastSymbol(rest$, "!") Then reduce = 0.9
@@ -21209,7 +21210,7 @@ If IsExp(basestack, rest$, p) Then
     If p < 10 Then p = 10
     X = 4
     XX = 4
-    If Scr.name = "DIS" Then
+    If Scr.Name = "DIS" Then
     Do
     Y = CDbl(XX)
     XX = CSng(X)
@@ -21256,7 +21257,7 @@ If IsExp(basestack, rest$, p) Then
         End If
    
 End If
-If FastSymbol(rest$, ";") And Scr.name = "DIS" Then
+If FastSymbol(rest$, ";") And Scr.Name = "DIS" Then
 adjustlinespace = False
 If IsWine Then
     Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top, ScrInfo(Console).Width - 1, ScrInfo(Console).Height - 1
@@ -21272,7 +21273,7 @@ Dim mmx As Long, mmy As Long
 If sX = 0 Then
 SZ = CSng(X)
 mmx = Scr.Width * reduce
- If Scr.name = "DIS" Then
+ If Scr.Name = "DIS" Then
  mmy = CLng(mmx * Form1.Height / Form1.Width) ' WHY 3/4 ??
  Else
  mmy = Scr.Width * reduce
@@ -21281,7 +21282,7 @@ mmx = Scr.Width * reduce
  players(basketcode).uMineLineSpace = mAddTwipsTop
 FrameText Scr, SZ, CLng(w3 * p), mmy, players(basketcode).Paper
 Else
-If Scr.name = "DIS" Then
+If Scr.Name = "DIS" Then
 If (sX * w4) > Form1.Height * reduce Then
 Y = Form1.Height * reduce
 While sX * w4 > Form1.Height * reduce
@@ -21311,7 +21312,7 @@ Loop
 End If
 
 End If
-If Scr.name = "DIS" Then
+If Scr.Name = "DIS" Then
 If Not adjustlinespace Then If Scr.Height * reduce >= Form1.Height * reduce - dv15 Then mAddTwipsTop = dv15 * (((Scr.Height * reduce - sX * w4) / sX / 2) \ dv15)
 End If
 nForm basestack, (X), w3, w4, mAddTwipsTop
@@ -21323,7 +21324,7 @@ mmx = Scr.Width * reduce
 'If mmx < scr.Width Then
 mmy = Scr.Height * reduce
 If adjustlinespace Then
-If Scr.name = "DIS" Then
+If Scr.Name = "DIS" Then
 mAddTwipsTop = dv15 * (((Form1.Height * reduce - sX * w4) / sX / 2) \ dv15)
 
 Else
@@ -21335,12 +21336,12 @@ sX = CLng(sX * w4)
 End If
 players(basketcode).MineLineSpace = mAddTwipsTop
 players(basketcode).uMineLineSpace = mAddTwipsTop
-FrameText Scr, SZ, CLng(w3 * p), CLng(sX), players(basketcode).Paper, Not (Scr.name = "DIS")
+FrameText Scr, SZ, CLng(w3 * p), CLng(sX), players(basketcode).Paper, Not (Scr.Name = "DIS")
 
 End If
 
 
-ElseIf FastSymbol(rest$, ";") And Scr.name = "DIS" Then
+ElseIf FastSymbol(rest$, ";") And Scr.Name = "DIS" Then
 
 
 
@@ -21362,7 +21363,7 @@ With players(-1)
         SetText Form1
         End With
 MyMode Scr
-ElseIf Scr.name = "DIS" Then
+ElseIf Scr.Name = "DIS" Then
 
 w3 = Form1.Left + Scr.Left
 w4 = Form1.top + Scr.top
@@ -22185,13 +22186,13 @@ With players(GetCode(Scr))
     y1 = Scr.Height
     If Left$(Typename(Scr), 3) = "Gui" Then
     Else
-    If Scr.name = "Form1" Then
+    If Scr.Name = "Form1" Then
     DisableTargets q(), -1
     
-    ElseIf Scr.name = "DIS" Then
+    ElseIf Scr.Name = "DIS" Then
     DisableTargets q(), 0
     
-    ElseIf Scr.name = "dSprite" Then
+    ElseIf Scr.Name = "dSprite" Then
     DisableTargets q(), val(Scr.index)
     End If
     End If
@@ -22200,9 +22201,9 @@ With players(GetCode(Scr))
         Scr.Font.Size = .SZ
         If Err.Number > 0 Then
                 MYFONT = "ARIAL"
-                Scr.Font.name = MYFONT
+                Scr.Font.Name = MYFONT
                 Scr.Font.charset = .charset
-                Scr.Font.name = MYFONT
+                Scr.Font.Name = MYFONT
                 Scr.Font.charset = .charset
         End If
         .uMineLineSpace = .MineLineSpace
