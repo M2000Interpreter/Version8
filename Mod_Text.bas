@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 12
+Global Const Revision = 13
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -5214,19 +5214,17 @@ If bstack.soros.Total = 0 Then
 
     ElseIf bstack.soros.StackItemType(1) = "*" Then
         Set bstack.lastobj = bstack.soros.PopObj
+        If TypeOf bstack.lastobj Is mHandler Then
         If bstack.lastobj.t1 <> w1 Then
+pushback:
             bstack.soros.PushObj bstack.lastobj
             Set bstack.lastobj = Nothing
             MyEr "No Proper Object", "Λάθος Αντικείμενο"
             IsNumberNew = False
             Exit Function
         End If
-        If w1 = 1 Then
-        Set useHandler = New mHandler
-            useHandler.t1 = 3
-            Set useHandler.objref = bstack.lastobj
-            Set bstack.lastobj = useHandler
-            Set useHandler = Nothing
+        Else
+            GoTo pushback
         End If
         r = 0
         IsNumberNew = True

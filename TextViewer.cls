@@ -1054,7 +1054,7 @@ ElseIf KeyCode = vbKeyV And (shift And 3) = 2 Then
 Pad$ = GetTextData(13)
 If Pad$ = vbNullString Then Pad$ = Clipboard.GetText(1)
 If Len(CurrentParagraph) + 1 < Charpos Then
-SelStartSilent = CharPosStart - Charpos + 1
+SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
 End If
 If ParaSelStart = 2 And glistN.list(glistN.ListIndex) = vbNullString Then
 SelStart = SelStart - 1
@@ -1667,7 +1667,7 @@ End Sub
 Private Sub glistN_MarkIn()
 If Not glistN.EditFlag Then glistN.MarkNext = 0: Exit Sub
 If Len(CurrentParagraph) + 1 < Charpos Then
-    SelStartSilent = CharPosStart - Charpos + 1
+    SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
 End If
 BlockStartPara = mDoc.MarkParagraphID
 BlockStartPos = ParaSelStart
@@ -1753,7 +1753,7 @@ End Sub
 Private Sub glistN_MarkOut()
 '
 If Len(CurrentParagraph) + 1 < Charpos Then
-    SelStartSilent = CharPosStart - Charpos + 1
+    SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
 End If
 BlockEndPara = mDoc.MarkParagraphID
 BlockEndPos = ParaSelStart

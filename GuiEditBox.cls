@@ -189,7 +189,7 @@ Private ColArr(0 To 15) As Long
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
-Public Sub Construct(there As Form, name$)
+Public Sub Construct(there As Form, Name$)
  mIndex = -1
  Set Callback = there
  On Error Resume Next
@@ -198,9 +198,9 @@ Public Sub Construct(there As Form, name$)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
-Public Sub ConstructArray(there As Form, name$, i As Long)
+Public Sub ConstructArray(there As Form, Name$, i As Long)
  Set Callback = there
  On Error Resume Next
  ctrlName = GetTag$
@@ -209,7 +209,7 @@ Public Sub ConstructArray(there As Form, name$, i As Long)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
 
 Public Sub SetUp()
@@ -236,7 +236,7 @@ MultiLineComment2 = "*/"
 Dim ff As New StdFont
 With Callback
 white = .Controls(1).ForeColor
-ff.name = .CtrlFontName
+ff.Name = .CtrlFontName
 ff.charset = Form1.DIS.Font.charset
 ff.Size = .CtrlFontSize
 ff.bold = .CtrlFontBold
@@ -1588,7 +1588,7 @@ ElseIf KeyCode = vbKeyV And (shift And 3) = 2 Then
         End If
     End If
     If Len(CurrentParagraph) + 1 < Charpos Then
-        SelStartSilent = CharPosStart - Charpos + 1
+        SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
     End If
     If ParaSelStart = 2 And glistN.list(glistN.ListIndex) = vbNullString Then
         SelStart = SelStart - 1
@@ -2210,7 +2210,7 @@ End Sub
 Private Sub glistN_MarkIn()
 If Not glistN.EditFlag Then glistN.MarkNext = 0: Exit Sub
 If Len(CurrentParagraph) + 1 < Charpos Then
-SelStartSilent = CharPosStart - Charpos + 1
+SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
 End If
 BlockStartPara = mDoc.MarkParagraphID
 BlockStartPos = ParaSelStart
@@ -2298,7 +2298,7 @@ End Sub
 Private Sub glistN_MarkOut()
 '
 If Len(CurrentParagraph) + 1 < Charpos Then
-SelStartSilent = CharPosStart - Charpos + 1
+SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
 End If
 BlockEndPara = mDoc.MarkParagraphID
 BlockEndPos = ParaSelStart
@@ -7717,7 +7717,7 @@ Public Sub FontAttr(ThisFontName, Optional ThisMode = -1, Optional ThisBold = Tr
 Dim aa As New StdFont
 If ThisFontName <> "" Then
 
-aa.name = ThisFontName
+aa.Name = ThisFontName
 
 If ThisMode > 7 Then aa.Size = ThisMode Else aa = 7
 aa.bold = ThisBold
@@ -7930,7 +7930,7 @@ glistN.ShowMe
 KeyCode = 0
 Case vbKeyTab
 If Len(CurrentParagraph) + 1 < Charpos Then
-SelStartSilent = CharPosStart - Charpos + 1
+SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
 End If
 
 If UseTab And Not BlockStartPos <> BlockEndPos And (TabControl = 0 Or MyTrimLNoTab(Mid$(CurrentParagraph, 1, Charpos)) < Charpos) Then

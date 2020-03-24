@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 12 active-X
-A bug in Text statement for logging  UTF-16 at append to file removed
+Version 9.9 revision 13 active-X
+Two bugs removed, one on editor and one for Inventory to pop an inventory from stack.
 
 George Karras, Kallithea Attikis, Greece.
 
