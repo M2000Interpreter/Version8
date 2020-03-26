@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 13 active-X
-Two bugs removed, one on editor and one for Inventory to pop an inventory from stack.
+Version 9.9 revision 14 active-X
+A bug which crash the interpreter before open msgbox at last removed
 
 George Karras, Kallithea Attikis, Greece.
 

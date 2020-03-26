@@ -3725,11 +3725,14 @@ SetNormal d
                     players(basketcode).curpos = 0
             players(basketcode).currow = BAR
     End If
+If Not ASKINUSE Then Load NeoMsgBox
 If Not skipthat Then
+
 ProcPen bstack, CStr(mPen)
 ProcCls bstack, "," + CStr(BAR)
 ' dummy = interpret(bstack, "PEN " & CStr(mPen) & ":CLS ," & CStr(BAR))
 End If
+If Not ASKINUSE Then Unload NeoMsgBox
 End If
 If Not skipthat Then
     If Len(COM$) > 0 Then dummy = interpret(bstack, COM$)
