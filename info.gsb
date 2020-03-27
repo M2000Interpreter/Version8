@@ -20789,9 +20789,9 @@ MODULE PHILO {Module Dining_philosophers (whichplan) {
 	PlaceForks=lambda RoundTable (ph as philosopher) -> {
 		Return RoundTable,  (ph+4) mod 5:=Fork,ph mod 5:=Fork 
 	}
-	PlaceAnyFork=lambda RoundTable (ph as philosopher, forkL, forkR) -> {
-		If forkL then Return RoundTable,  (ph+4) mod 5:=Fork
-		If forkR Then Return RoundTable, ph mod 5:=Fork 
+	PlaceAnyFork=lambda RoundTable (ph as philosopher, &ForkL, &ForkR) -> {
+		If ForkL then Return RoundTable,  (ph+4) mod 5:=Fork : ForkL=NoFork
+		If ForkR Then Return RoundTable, ph mod 5:=Fork : ForkR=NoFork
 	}
 	ShowTable=lambda RoundTable -> {
 		m=each(RoundTable)
@@ -20817,13 +20817,13 @@ MODULE PHILO {Module Dining_philosophers (whichplan) {
 		\\ a thread has module scope (except for own static variables, and stack of values)
 		thread {
 			if  energy(f)<1 then {
-					call PlaceAnyFork(f, forkL, forkR)
+					call PlaceAnyFork(f, ForkL, ForkR)
 					energy(f)=0
 					Page$=format$("{0::-12} - ",tick-basetick)+eval$(f)+" - Die"+nl$
 					thread this erase
 			} else	{
 					Page$=format$("{0::-12} - ",tick-basetick)+eval$(f)
-					Page$=if$(forkL=Nofork or forkR=Nofork->" thinking",  " eating"+str$(eatcount))
+					Page$=if$(ForkL=Nofork or ForkR=Nofork->" thinking",  " eating"+str$(eatcount))
 					Page$=if$(R->"- R", " - L")+nl$
 			}
 			if not think then 
@@ -20831,24 +20831,24 @@ MODULE PHILO {Module Dining_philosophers (whichplan) {
 					energy(f)++
 					eatcount--
 					if eatcount>0 then exit
-					Call PlaceForks(f) : forkL=Nofork:forkR=NoFork
+					Call PlaceForks(f) : ForkL=Nofork:ForkR=NoFork
 					eatcount=random(4,8)
 					if MayChangePick then R=random(-1,0)
 					think=true :thread this interval  time_to_think*random(1,5)
 				}
 			else.if energy(f)>70 or critical>5 then
 				{
-					call PlaceAnyFork(f, forkL, forkR)		
+					call PlaceAnyFork(f, &ForkL, &ForkR)
 					if energy(f)>70  then energy(f)=60
 				}
 			else.if R then
-					if forkR=Nofork then forkR=GetRight(f)
-					if forkR=fork and forkL=Nofork then forkL=GetLeft(f)
-					if forkL=fork then think=false:thread this interval  time_to_eat else energy(f)--
+					if ForkR=Nofork then ForkR=GetRight(f)
+					if ForkR=fork and ForkL=Nofork then ForkL=GetLeft(f)
+					if ForkL=fork then think=false:thread this interval  time_to_eat else energy(f)--
 			else
-					if forkL=Nofork then forkL=GetLeft(f)
-					if forkL=fork and forkR=Nofork then forkR=GetRight(f)
-					if forkR=fork then think=false:thread this interval  time_to_eat else energy(f)--
+					if ForkL=Nofork then ForkL=GetLeft(f)
+					if ForkL=fork and ForkR=Nofork then ForkR=GetRight(f)
+					if ForkR=fork then think=false:thread this interval  time_to_eat else energy(f)--
 			end if
 			
 		} as a interval time_to_appear#val(m^)		
@@ -20858,8 +20858,8 @@ MODULE PHILO {Module Dining_philosophers (whichplan) {
 		\\ this statement execute a line of code in thread a
 		thread a execute {
 			\\ this executed on thread execution object
-			static f=eval(m), think=true, forkL=NoFork
-			static forkR=NoFork, eatcount=random(2,5)
+			static f=eval(m), think=true, ForkL=NoFork
+			static ForkR=NoFork, eatcount=random(2,5)
 			static R=-1
 			if MayChangePick then  R=Random(-1,0)
 		}
