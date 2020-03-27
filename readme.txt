@@ -1,7 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 14 active-X
-A bug which crash the interpreter before open msgbox at last removed
+Version 9.9 revision 15 active-X
+An small upgrade to Thread sytem
+
 
 George Karras, Kallithea Attikis, Greece.
 

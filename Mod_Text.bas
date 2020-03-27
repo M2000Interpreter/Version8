@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 14
+Global Const Revision = 15
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -16849,6 +16849,9 @@ contTask:
                         MyDoEvents0 di
                         bstack.TaskMain = bstack.exist(CLng(sp), "_multi") = False
                     Loop Until MOUT Or bstack.TaskMain Or NOEXECUTION Or TaskMaster.QueueCount < 2
+                    If bstack.exist(CLng(sp), "_multi") Then
+                        TaskMaster.Message CLng(sp), 1
+                    End If
                     On Error GoTo 0
                     bstack.TaskMain = False
                     If TaskMaster.PlayMusic Then mute = True
