@@ -18681,14 +18681,14 @@ End Sub
 
 Sub MarkIf(bstack As basetask, a As Long, b As Boolean)
 Dim s As mStiva2
-Set s = bstack.RetStack
+Set s = bstack.retstack
 s.PushVal b
 s.PushVal a
 s.PushVal -3  ' mark for IF
 End Sub
 Function HaveMark(bstack As basetask, a As Long, b As Boolean) As Boolean
 Dim s As mStiva2
-Set s = bstack.RetStack
+Set s = bstack.retstack
 If s.Total >= 3 Then
 HaveMark = s.LookTopVal = -3
 a = s.StackItem(2)
@@ -18697,14 +18697,14 @@ End If
 End Function
 Function HaveMark2(bstack As basetask) As Boolean
 Dim s As mStiva2
-Set s = bstack.RetStack
+Set s = bstack.retstack
 If s.Total >= 3 Then
 If s.LookTopVal = -3 Then s.drop 3: HaveMark2 = True
 End If
 End Function
 Sub DropMark(bstack As basetask)
 Dim s As mStiva2
-Set s = bstack.RetStack
+Set s = bstack.retstack
 If s.Total >= 3 Then
 If s.LookTopVal = -3 Then s.drop 3
 End If
@@ -20481,7 +20481,7 @@ there1:
 bstack.LoadOnly = False
 End Function
 Public Sub PushErrStage(basestack As basetask)
-        With basestack.RetStack
+        With basestack.retstack
                         .PushVal subHash.count
                         .PushVal varhash.count
                         .PushVal sb2used
@@ -20498,7 +20498,7 @@ Dim nok As Boolean, target As Long
         target = basestack.RetStackTotal - Parts
         If target < 0 Then target = 0
         While basestack.RetStackTotal > target
-        With basestack.RetStack
+        With basestack.retstack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -20542,7 +20542,7 @@ Dim nok As Boolean, target As Long
         target = basestack.RetStackTotal - Parts
         If target < 0 Then target = 0
         While basestack.RetStackTotal > target
-        With basestack.RetStack
+        With basestack.retstack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -20588,7 +20588,7 @@ Dim nok As Boolean, target As Long
         target = basestack.RetStackTotal - Parts
         If target < 0 Then target = 0
         While basestack.RetStackTotal > target
-        With basestack.RetStack
+        With basestack.retstack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -20630,7 +20630,7 @@ End Sub
 
 Public Sub PopErrStage(basestack As basetask)
 Dim nok As Boolean
-        With basestack.RetStack
+        With basestack.retstack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -24105,4 +24105,196 @@ Dim ps As mStiva, p As Variant, s$, ok As Long
              End If
              End With
             
+End Function
+Function mydata2(bstack As basetask, rest$, retstack As mStiva) As Boolean
+Dim s$, p As Variant ', vvl As Variant, photo As Object
+mydata2 = True
+Do
+    If FastSymbol(rest$, "!") Then
+                If IsExp(bstack, rest$, p) Then
+                    If bstack.lastobj Is Nothing Then
+                        retstack.DataValLong p
+                    ElseIf TypeOf bstack.lastobj Is mHandler Then
+                        If TypeOf bstack.lastobj.objref Is mStiva Then
+                            retstack.MergeBottom bstack.lastobj.objref
+                        ElseIf TypeOf bstack.lastobj.objref Is mArray Then
+                            retstack.MergeBottomCopyArray bstack.lastobj.objref
+                        Else
+                            mydata2 = False
+                            MyEr "Expected Stack Object or Array after !", "Περίμενα αντικείμενο Σωρό ή πίνακα μετά το !"
+                            Set bstack.lastobj = Nothing
+                            Exit Function
+                        End If
+                        Set bstack.lastobj = Nothing
+                    ElseIf TypeOf bstack.lastobj Is mArray Then
+                        retstack.MergeBottomCopyArray bstack.lastobj
+                        Set bstack.lastobj = Nothing
+                    End If
+                        
+                     End If
+                ElseIf IsExp(bstack, rest$, p) Then
+                  If bstack.lastobj Is Nothing Then
+                      retstack.DataVal p
+                 Else
+                   If TypeOf bstack.lastobj Is mStiva Then
+                   Set bstack.Sorosref = bstack.lastobj
+                   ElseIf TypeOf bstack.lastobj Is VarItem Then
+                    retstack.DataObjVaritem bstack.lastobj
+                      Else
+                      retstack.DataObj bstack.lastobj
+                    Set bstack.lastpointer = Nothing
+                    End If
+                      Set bstack.lastobj = Nothing
+                End If
+        ElseIf IsStrExp(bstack, rest$, s$) Then
+                If bstack.lastobj Is Nothing Then
+                        retstack.DataStr s$
+                Else
+                        retstack.DataObj bstack.lastobj
+                        Set bstack.lastobj = Nothing
+                          Set bstack.lastpointer = Nothing
+                End If
+        Else
+                mydata2 = LastErNum1 = 0
+                Exit Do
+        End If
+        If Not FastSymbol(rest$, ",") Then Exit Do
+        
+Loop
+End Function
+Function IsLabelDot2(bstack As basetask, a$, r$) As Long    'ok
+' for left side...no &
+
+Dim rr&, one As Boolean, c$, firstdot$, gr As Boolean
+r$ = vbNullString
+If a$ = vbNullString Then IsLabelDot2 = 0: Exit Function
+
+a$ = NLtrim$(a$)
+    Do While Len(a$) > 0
+    c$ = Left$(a$, 1)
+    If AscW(c$) < 256 Then
+        Select Case AscW(c$)
+        Case 64  '"@"
+           
+              IsLabelDot2 = 0: a$ = firstdot$ + a$: Exit Function
+
+        Case 63 '"?"
+        If r$ = vbNullString And firstdot$ = vbNullString Then
+        r$ = "?"
+        a$ = Mid$(a$, 2)
+        IsLabelDot2 = 1
+        Exit Function
+    
+        ElseIf firstdot$ = vbNullString Then
+        IsLabelDot2 = 1
+        Exit Function
+        Else
+        IsLabelDot2 = 0
+        Exit Function
+        End If
+        Case 46 '"."
+            If one Then
+            Exit Do
+            Exit Do
+            ElseIf r$ <> "" And Len(a$) > 1 Then
+            If Mid$(a$, 2, 2) = ". " Or Mid$(a$, 2, 1) = " " Then Exit Do
+            r$ = r$ & Left$(a$, 1)
+            a$ = Mid$(a$, 2)
+            rr& = 1
+            Else
+            firstdot$ = firstdot$ + "."
+            a$ = Mid$(a$, 2)
+            End If
+       Case 92, 94, 123 To 126 '"\","^", "{" To "~"
+        Exit Do
+
+        Case 48 To 57, 95 '"0" To "9", "_"
+           If one Then
+            If firstdot$ <> "" Then a$ = firstdot$ + a$
+            Exit Do
+            ElseIf r$ <> "" Then
+            r$ = r$ & Left$(a$, 1)
+            a$ = Mid$(a$, 2)
+            rr& = 1 'is an identifier or floating point variable
+            Else
+            Exit Do
+            End If
+        Case Is < 0, Is > 64 ' >=A and negative
+            If one Then
+            Exit Do
+            Else
+            r$ = r$ & Left$(a$, 1)
+            a$ = Mid$(a$, 2)
+            rr& = 1 'is an identifier or floating point variable
+            End If
+        Case 36 ' "$"
+            If one Then Exit Do
+            If r$ <> "" Then
+            one = True
+            rr& = 3 ' is string variable
+            r$ = r$ & Left$(a$, 1)
+            a$ = Mid$(a$, 2)
+            Else
+            Exit Do
+            End If
+        Case 37 ' "%"
+            If one Then Exit Do
+            If r$ <> "" Then
+            one = True
+            rr& = 4 ' is long variable
+            r$ = r$ & Left$(a$, 1)
+            a$ = Mid$(a$, 2)
+            Else
+            Exit Do
+            End If
+        Case 40 ' "("
+            If r$ <> "" Then
+                            If Mid$(a$, 2, 2) = ")@" Then
+                                    r$ = r$ & "()."
+                                  
+                                 a$ = Mid$(a$, 4)
+                               Else
+                                       Select Case rr&
+                                       Case 1
+                                       rr& = 5 ' float array or function
+                                       Case 3
+                                       rr& = 6 'string array or function
+                                       Case 4
+                                       rr& = 7 ' long array
+                                       Case Else
+                                       Exit Do
+                                       End Select
+                                       r$ = r$ & Left$(a$, 1)
+                                       a$ = Mid$(a$, 2)
+                                   Exit Do
+                            
+                          End If
+               Else
+                        Exit Do
+            
+            End If
+        Case Else
+        Exit Do
+        End Select
+        Else
+            If one Then
+            Exit Do
+            Else
+            gr = True
+            r$ = r$ & Left$(a$, 1)
+            a$ = Mid$(a$, 2)
+            rr& = 1 'is an identifier or floating point variable
+            End If
+        End If
+
+    Loop
+    If Len(firstdot$) > 0 Then
+     r$ = myUcase(r$, gr)
+    rr& = bstack.GetDotNew(r$, Len(firstdot$)) * rr&
+    Else
+       r$ = myUcase(r$, gr)
+       End If
+    IsLabelDot2 = rr&
+   
+
 End Function

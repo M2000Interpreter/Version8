@@ -1452,7 +1452,7 @@ Dim M1 As Long, M2 As Long
   If UB - LB = 1 Then
      M1 = LB
 
-     If actualdata(M1) < actualdata(UB) Then SwapVariant actualdata(M1), actualdata()
+     If actualdata(M1) < actualdata(UB) Then SwapVariant actualdata(M1), actualdata(UB)
      Exit Sub
   ElseIf UB - LB < 7 Then
   InsertionSort1 LB, UB
@@ -1485,7 +1485,7 @@ Dim M1 As Long, M2 As Long
   If UB - LB = 1 Then
      M1 = LB
 
-     If actualdata(M1) > actualdata(UB) Then SwapVariant actualdata(M1), actualdata()
+     If actualdata(M1) > actualdata(UB) Then SwapVariant actualdata(M1), actualdata(UB)
      Exit Sub
   ElseIf UB - LB < 7 Then
   InsertionSort LB, UB
@@ -1560,7 +1560,7 @@ Private Sub InsertionSort10(ByVal iMin As Long, ByVal iMax As Long)
         Do While j > iMin
         Debug.Print "insertion compare"
 again:
-        On Error GoTo EX1
+        On Error GoTo ex1
         If actualdata(j1) = actualdata(j1 - sortmult) Then
         part = part + 2
         If part <= upart Then
@@ -1570,7 +1570,7 @@ again:
         sortoff = col(part - 1)
         GoTo again
         End If
-EX1:
+ex1:
         Exit Do
         Else
         

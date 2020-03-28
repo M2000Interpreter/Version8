@@ -1,10 +1,11 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 15 active-X
-An small upgrade to Thread sytem
-
+Version 9.9 revision 16 active-X
+two bugs removed. New programs in info.gsb. Updated M2000paper.pdf
 
 George Karras, Kallithea Attikis, Greece.
+fotodigitallab@gmail.com
+
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

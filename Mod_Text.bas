@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 15
+Global Const Revision = 16
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -697,7 +697,7 @@ Public Function GetSpecialfolder(CSIDL As Long) As String
     GetSpecialfolder = vbNullString
 End Function
 Public Sub PushStage(basestack As basetask, dummy As Boolean)
-        With basestack.RetStack
+        With basestack.retstack
                basestack.SubLevel = basestack.SubLevel + 1
 
                 If dummy Then
@@ -723,7 +723,7 @@ Public Sub PushStage(basestack As basetask, dummy As Boolean)
        
 End Sub
 Public Sub PopStage(basestack As basetask)
-        With basestack.RetStack
+        With basestack.retstack
         If .LookTopVal = -1 Then
         basestack.SubLevel = basestack.SubLevel - 1
            .drop 1
@@ -911,7 +911,7 @@ jmp1995:
             w$ = safegroup.lasthere + "." + safegroup.GroupName
             bstack.tmpstr = w$ + Left$(b$, 1)
             BackPort b$
-            If Not IsNumberNew(bstack, b$, p, CLng(1), False) Then SpeedGroup = 0: GoTo fastexit
+            If Not IsNumberNew(bstack, b$, p, CLng(1), False) Then SpeedGroup = 0: GoTo fastexit1
             bstack.LastValue = p
             SpeedGroup = 1
             GoTo fastexit
@@ -1040,7 +1040,7 @@ jmp2000:
             w$ = safegroup.lasthere + "." + safegroup.GroupName
             bstack.tmpstr = w$ + Left$(b$, 1)
             BackPort b$
-            If Not IsStr1(bstack, b$, bb$) Then SpeedGroup = 0: GoTo fastexit
+            If Not IsStr1(bstack, b$, bb$) Then SpeedGroup = 0: GoTo fastexit1
             bstack.LastValue = bb$
             SpeedGroup = 1
             GoTo fastexit
@@ -1424,24 +1424,28 @@ mm.DataVal CDbl(v)
 mm.DataObj pppp
 Do While FastSymbol(b$, ",")
 
-y1 = 0
+y1 = -1
 
 
          If Len(b$) < 129 Then
-        i = IsLabelDot("", b$, w$)
+        i = IsLabelDot(vbNullString, b$, w$, y1)
     Else
         rest1$ = Left$(b$, 128)
-        i = IsLabelDot("", rest1$, w$)
+        i = IsLabelDot(vbNullString, rest1$, w$, y1)
         If Len(rest1$) = 0 Then
-            i = IsLabelDot("", b$, w$)
+            i = IsLabelDot(vbNullString, b$, w$, y1)
         Else
             b$ = Mid$(b$, 129 - Len(rest1$))
         End If
     End If
-
-
-
-
+If y1 > 0 Then
+    If Left$(w$, 2) = ".." Then
+     i = -bstack.GetDotNew(w$, y1) * i
+      '  i = Abs(IsLabelBig(bstack, (w$), w$))
+    End If
+Else
+    y1 = 0
+End If
 If i > 4 Then
 'w$ = myUcase(w$)
 Set safegroup = Nothing
@@ -1577,8 +1581,13 @@ y1 = 0
             End If
             End If
                 Else
+                 If w$ = "SUPERCLASS" Or w$ = "ΥΠΕΡΚΛΑΣΗ" Then
             MyEr "Double use of SuperClass", "Διπλή χρήση της Υπερκλάσης"
-            GoTo fastexit
+            Else
+            MissVarName
+            
+            End If
+            GoTo fastexit1
         
         End If
         Else
@@ -1710,7 +1719,7 @@ faultback:
                                       i = 1
                     If bb$ <> "" Then
                             If bb$ = Chr$(0) Then
-                                       If RetStackSize = bstack.RetStackTotal And bstack.RetStack.LookTopVal < 0 Then
+                                       If RetStackSize = bstack.RetStackTotal And bstack.retstack.LookTopVal < 0 Then
                                         ' this is a return form other block
                                          SpeedGroup = 2
                                        SwapStrings b$, bb$
@@ -1719,7 +1728,7 @@ faultback:
                                         End If
                                     If bstack.IsInRetStackNumber(p) Then
                                                        If LastErNum = -1 Then
-                                                                bstack.RetStack.PushVal p
+                                                                bstack.retstack.PushVal p
                                                                 SpeedGroup = 0
                                                                  bstack.addlen = nd&
                                                                 GoTo fastexit
@@ -1764,7 +1773,7 @@ faultback:
                                        
                                     ElseIf bstack.IsInRetStackString(bb$) Then
                                                                  If InStr(bb$, " ") > 0 Then
-                                                                       If subspoint Then bstack.RetStack.PushVal -2 - S3 Else bstack.RetStack.PushVal -1
+                                                                       If subspoint Then bstack.retstack.PushVal -2 - S3 Else bstack.retstack.PushVal -1
                                                                         S3 = bstack.OriginalCode
                                                                         If searchsub(S3, bb$, i, S3) Then
                                                                           subspoint = False
@@ -1802,12 +1811,12 @@ faultback:
                                                                             GoTo subsentry10
                                                                             
                                                                                    Else
-                                                                        bstack.RetStack.drop 6
+                                                                        bstack.retstack.drop 6
                                                                          bstack.addlen = nd&
                                                                                     Exit Do
                                                                         End If
                                                                         Else
-                                                                        bstack.RetStack.drop 6
+                                                                        bstack.retstack.drop 6
                                                                          bstack.addlen = nd&
                                                                                     Exit Do
                                                                         End If
@@ -2107,6 +2116,8 @@ ElseIf Vars < y1 Then
 End If
 
 fastexit:
+SpeedGroup = 1
+fastexit1:
 bstack.ResetSkip
 var2used = Vars
 varhash.ReduceHash Vname, var()
@@ -2117,7 +2128,7 @@ varhash.ReduceHash Vname, var()
  funid.poptop
  strfunid.poptop
  funid.poptop
-SpeedGroup = 1
+
 End Function
 
 
@@ -8605,7 +8616,7 @@ a$ = NLtrim$(a$)
                 IsLabelFileName = 0
             Exit Function
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1
             End If
@@ -8620,13 +8631,13 @@ a$ = NLtrim$(a$)
             Exit Do
            ElseIf r$ <> "" Then
            
-                    r$ = r$ & Left$(a$, 1)
+                    r$ = r$ & c$
                        a$ = Mid$(a$, 2)
            ''
            ElseIf Not Mid$(a$, 2, 1) Like "[0-9]" Then
             
                        If r$ <> "" Then
-                       r$ = r$ & Left$(a$, 1)
+                       r$ = r$ & c$
                       rr& = 1
                                       
                             Else
@@ -8658,7 +8669,7 @@ a$ = NLtrim$(a$)
            If one Then
             Exit Do
             ElseIf r$ <> "" Or dot& Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -8669,7 +8680,7 @@ a$ = NLtrim$(a$)
            If one Then
             Exit Do
             ElseIf r$ <> "" Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
              nocommand = True
             rr& = 1 'is an identifier or floating point variable
@@ -8682,7 +8693,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If one Then
             Exit Do
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -8799,7 +8810,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -8809,7 +8820,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             nocommand = True
             a$ = Mid$(a$, 2)
             Else
@@ -8831,7 +8842,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                 Case Else
                 Exit Do
                 End Select
-                r$ = r$ & Left$(a$, 1)
+                r$ = r$ & c$
                 a$ = Mid$(a$, 2)
                Exit Do
             
@@ -8847,7 +8858,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             Exit Do
             Else
             gr = True
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -8967,7 +8978,7 @@ If Not NoSpace Then a$ = NLtrim$(a$) Else If AscW(a$) = 32 Then Exit Function
                 innerIsLabel = 0
             Exit Function
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1
 '        Exit Do
@@ -8983,13 +8994,13 @@ If Not NoSpace Then a$ = NLtrim$(a$) Else If AscW(a$) = 32 Then Exit Function
             Exit Do
            ElseIf r$ <> "" Then
            
-                    r$ = r$ & Left$(a$, 1)
+                    r$ = r$ & c$
                        a$ = Mid$(a$, 2)
            ''
            ElseIf Not Mid$(a$, 2, 1) Like "[0-9]" Then
             
                        If r$ <> "" Then
-                       r$ = r$ & Left$(a$, 1)
+                       r$ = r$ & c$
                       rr& = 1
                                       
                             Else
@@ -9020,7 +9031,7 @@ If Not NoSpace Then a$ = NLtrim$(a$) Else If AscW(a$) = 32 Then Exit Function
            If one Then
             Exit Do
             ElseIf r$ <> "" Or dot& Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -9031,7 +9042,7 @@ If Not NoSpace Then a$ = NLtrim$(a$) Else If AscW(a$) = 32 Then Exit Function
            If one Then
             Exit Do
             ElseIf r$ <> "" Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -9043,7 +9054,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If one Then
             Exit Do
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9155,7 +9166,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9165,7 +9176,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9186,7 +9197,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                 Case Else
                 Exit Do
                 End Select
-                r$ = r$ & Left$(a$, 1)
+                r$ = r$ & c$
                 a$ = Mid$(a$, 2)
                Exit Do
             
@@ -9207,7 +9218,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             Exit Do
             Else
             gr = True
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9279,7 +9290,7 @@ a$ = NLtrim$(a$)
                 IsLabelDIM = 0
             Exit Function
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1
             End If
@@ -9294,13 +9305,13 @@ a$ = NLtrim$(a$)
             Exit Do
            ElseIf r$ <> "" Then
            
-                    r$ = r$ & Left$(a$, 1)
+                    r$ = r$ & c$
                        a$ = Mid$(a$, 2)
            ''
            ElseIf Not Mid$(a$, 2, 1) Like "[0-9]" Then
             
                        If r$ <> "" Then
-                       r$ = r$ & Left$(a$, 1)
+                       r$ = r$ & c$
                       rr& = 1
                                       
                             Else
@@ -9332,7 +9343,7 @@ a$ = NLtrim$(a$)
            If one Then
             Exit Do
             ElseIf r$ <> "" Or dot& Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -9343,7 +9354,7 @@ a$ = NLtrim$(a$)
            If one Then
             Exit Do
             ElseIf r$ <> "" Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
              rr& = 1 'is an identifier or floating point variable
             Else
@@ -9355,7 +9366,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If one Then
             Exit Do
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9461,7 +9472,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9471,7 +9482,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9492,7 +9503,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                 Case Else
                 Exit Do
                 End Select
-                r$ = r$ & Left$(a$, 1)
+                r$ = r$ & c$
                 a$ = Mid$(a$, 2)
                Exit Do
             
@@ -9508,7 +9519,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             Exit Do
             Else
             gr = True
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9569,13 +9580,13 @@ a$ = NLtrim$(a$)
             If one Then
             Exit Do
            ElseIf r$ <> "" Then
-                    r$ = r$ & Left$(a$, 1)
+                    r$ = r$ & c$
                        a$ = Mid$(a$, 2)
                     
            ElseIf Not Mid$(a$, 2, 1) Like "[0-9]" Then
             
                        If r$ <> "" Then
-                       r$ = r$ & Left$(a$, 1)
+                       r$ = r$ & c$
                       rr& = 1
                                       
                             Else
@@ -9607,7 +9618,7 @@ Exit Do
            If one Then
             Exit Do
             ElseIf r$ <> "" Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
                rr& = 1 'is an identifier or floating point variable
             Else
@@ -9620,7 +9631,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             Exit Do
             Else
             
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9632,7 +9643,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9642,7 +9653,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If r$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
         
             a$ = Mid$(a$, 2)
             Else
@@ -9664,7 +9675,7 @@ Case Is < 0, Is > 64 ' >=A and negative
                 Case Else
                 Exit Do
                 End Select
-                r$ = r$ & Left$(a$, 1)
+                r$ = r$ & c$
                 a$ = Mid$(a$, 2)
                Exit Do
             
@@ -9679,7 +9690,7 @@ Case Is < 0, Is > 64 ' >=A and negative
             If one Then
             Exit Do
             Else
-             r$ = r$ & Left$(a$, 1)
+             r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9815,7 +9826,7 @@ a$ = NLtrim$(a$)
             Exit Do
             ElseIf r$ <> "" And Len(a$) > 1 Then
             If Mid$(a$, 2, 2) = ". " Or Mid$(a$, 2, 1) = " " Then Exit Do
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1
             Else
@@ -9828,7 +9839,7 @@ a$ = NLtrim$(a$)
            If one Then
             Exit Do
             ElseIf r$ <> "" Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -9838,7 +9849,7 @@ a$ = NLtrim$(a$)
             If one Then
             Exit Do
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9847,7 +9858,7 @@ a$ = NLtrim$(a$)
             If r$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9857,7 +9868,7 @@ a$ = NLtrim$(a$)
             If r$ <> "" Then
                 one = True
                 rr& = 4 ' is long variable
-                r$ = r$ & Left$(a$, 1)
+                r$ = r$ & c$
                 a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9870,7 +9881,7 @@ a$ = NLtrim$(a$)
             Exit Do
             Else
             gr = True
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9931,7 +9942,7 @@ a$ = NLtrim$(a$)
             Exit Do
             ElseIf r$ <> "" And Len(a$) > 1 Then
             If Mid$(a$, 2, 2) = ". " Or Mid$(a$, 2, 1) = " " Then Exit Do
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1
             Else
@@ -9948,7 +9959,7 @@ a$ = NLtrim$(a$)
            If one Then
             Exit Do
             ElseIf r$ <> "" Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -9958,7 +9969,7 @@ a$ = NLtrim$(a$)
             If one Then
             Exit Do
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -9967,7 +9978,7 @@ a$ = NLtrim$(a$)
             If r$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9977,7 +9988,7 @@ a$ = NLtrim$(a$)
             If r$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -9999,7 +10010,7 @@ a$ = NLtrim$(a$)
                                        Case Else
                                        Exit Do
                                        End Select
-                                       r$ = r$ & Left$(a$, 1)
+                                       r$ = r$ & c$
                                        a$ = Mid$(a$, 2)
                                    Exit Do
                             
@@ -10016,7 +10027,7 @@ a$ = NLtrim$(a$)
             Exit Do
             Else
             gr = True
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -10029,7 +10040,7 @@ a$ = NLtrim$(a$)
 
 End Function
 
-Function IsLabelDot(where$, a$, r$) As Long  'ok
+Function IsLabelDot(where$, a$, r$, Optional dotnum&) As Long 'ok
 ' for left side...no &
 
 Dim rr&, one As Boolean, c$, firstdot$, gr As Boolean
@@ -10084,7 +10095,7 @@ a$ = NLtrim$(a$)
             If firstdot$ <> "" Then a$ = firstdot$ + a$
             Exit Do
             ElseIf r$ <> "" Then
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -10093,8 +10104,17 @@ a$ = NLtrim$(a$)
         Case Is < 0, Is > 64 ' >=A and negative
             If one Then
             Exit Do
+            ElseIf Len(r$) = 0 Then
+            If firstdot$ = "." Then
+            r$ = "THIS." + c$
+            firstdot$ = vbNullString
             Else
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
+            End If
+            a$ = Mid$(a$, 2)
+            rr& = 1 'is an identifier or floating point variable
+            Else
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
@@ -10103,7 +10123,7 @@ a$ = NLtrim$(a$)
             If r$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -10113,7 +10133,7 @@ a$ = NLtrim$(a$)
             If r$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & Left$(a$, 1)
+            r$ = r$ & c$
             a$ = Mid$(a$, 2)
             Else
             Exit Do
@@ -10135,7 +10155,7 @@ a$ = NLtrim$(a$)
                                        Case Else
                                        Exit Do
                                        End Select
-                                       r$ = r$ & Left$(a$, 1)
+                                       r$ = r$ & c$
                                        a$ = Mid$(a$, 2)
                                    Exit Do
                             
@@ -10152,16 +10172,28 @@ a$ = NLtrim$(a$)
             Exit Do
             Else
             gr = True
-            r$ = r$ & Left$(a$, 1)
+            If firstdot$ = "." Then
+            r$ = "ΑΥΤΟ." + c$
+            firstdot$ = vbNullString
+            Else
+            r$ = r$ & c$
+            End If
             a$ = Mid$(a$, 2)
             rr& = 1 'is an identifier or floating point variable
             End If
         End If
 
     Loop
-       r$ = firstdot$ + myUcase(r$, gr)
+    If Len(firstdot$) = 0 Then
+    r$ = myUcase(r$, gr)
+    ElseIf dotnum& = -1 Then
+        r$ = myUcase(r$, gr)
+        dotnum& = Len(firstdot$)
+    Else
+    r$ = firstdot$ + myUcase(r$, gr)
+    End If
     IsLabelDot = rr&
-   'a$ = LTrim$(a$)
+   
 
 End Function
 Function IsStrExp(basestack As basetask, aa$, rr$, Optional check As Boolean = True) As Boolean
@@ -15520,7 +15552,7 @@ ContExit:
                      PopStagePartContinue2 bstack, bstack.RetStackTotal
                     once = False
                     b$ = Chr$(0)
-                    If bstack.RetStack.Total = 0 Then Execute = 1 Else Execute = 2
+                    If bstack.retstack.Total = 0 Then Execute = 1 Else Execute = 2
                     Exit Function
                 ElseIf IsLabelSymbolNewExp(b$, "ΓΙΑ", "FOR", Lang, Us$) Then
 exitfor:
@@ -15781,8 +15813,8 @@ eos:
                                 sw$ = ss$
                                 sX = p
                                 y1 = True
-                                bstack.RetStack.PushVal 0  ' RETURN LENGTH FROM END OF B$
-                                bstack.RetStack.PushStr w$   ' for check if is the right variable
+                                bstack.retstack.PushVal 0  ' RETURN LENGTH FROM END OF B$
+                                bstack.retstack.PushStr w$   ' for check if is the right variable
                                 TraceStore bstack, nd&, b$, 0
                                 
                                 slct = bstack.addlen
@@ -15839,7 +15871,7 @@ contfor:
                                                         SwapStrings b$, ss$
                                                         Exit Function
                                                     ElseIf Execute = 12 Then
-                                                        bstack.RetStack.drop 2
+                                                        bstack.retstack.drop 2
                                                         Execute = 2
                                                         b$ = ss$
                                                         Exit Function
@@ -15912,7 +15944,7 @@ contfor:
                                                         SwapStrings b$, ss$
                                                         Exit Function
                                                     ElseIf Execute = 12 Then
-                                                        bstack.RetStack.drop 2
+                                                        bstack.retstack.drop 2
                                                         Execute = 2
                                                         b$ = ss$
                                                         Exit Function
@@ -15964,7 +15996,7 @@ contfor:
                                                         SwapStrings b$, ss$
                                                         Exit Function
                                                     ElseIf Execute = 12 Then
-                                                        bstack.RetStack.drop 2
+                                                        bstack.retstack.drop 2
                                                         Execute = 2
                                                         b$ = ss$
                                                         Exit Function
@@ -15993,7 +16025,7 @@ contfor:
                                             Loop
                                         End If
                                         If Execute = 1 And y1 Then
-                                            bstack.RetStack.drop 2
+                                            bstack.retstack.drop 2
                                         End If
                                         x2 = 0  ' need to erased - because reused
                                         y2 = 0
@@ -16098,12 +16130,12 @@ contNext:
                     If bstack.IsInRetStackString(ss$) Then
                         'ss$ = bstack.RetStack.PopStr
                         If ss$ <> w$ Then
-                            bstack.RetStack.PushStr ss$
+                            bstack.retstack.PushStr ss$
                             MissNext
                             Execute = 0
                             Exit Function
                         Else
-                            With bstack.RetStack
+                            With bstack.retstack
                                .drop 1
                                .PushVal Len(b$)
                                .PushStr ss$
@@ -16114,7 +16146,7 @@ contNext:
                 Else
                 ' NEW FOR M2000, WE CAN USE NO VARIABLE
                     If bstack.IsInRetStackString(ss$) Then
-                            With bstack.RetStack
+                            With bstack.retstack
                                .drop 1
                                .PushVal Len(b$)
                                .PushStr ss$
@@ -17236,7 +17268,7 @@ contThenElseIf:
                      If bstack.RetStackTotal > 0 Then
                     If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ.ΑΝ", "ELSE.IF", Lang) Then GoTo contElseIf
                     If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ", "ELSE", Lang) Then GoTo ContElse
-                                                    If bstack.RetStack.LookTopVal = -3 Then
+                                                    If bstack.retstack.LookTopVal = -3 Then
                                                         jump = False
                                                         IFCTRL = 0
                                                     End If
@@ -17533,7 +17565,7 @@ contelseifpass:
                              If bstack.RetStackTotal > 0 Then
                                 If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ.ΑΝ", "ELSE.IF", Lang) Then GoTo contElseIf
                                 If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ", "ELSE", Lang) Then GoTo ContElse
-                                                    If bstack.RetStack.LookTopVal = -3 Then
+                                                    If bstack.retstack.LookTopVal = -3 Then
                                                         jump = False
                                                         IFCTRL = 0
                                                     End If
@@ -17660,7 +17692,7 @@ contif2:
                                         jump = ok
                                        If IFCTRL = 0 Then IFCTRL = 1
                                 Else
-                                    If Not bstack.RetStack.LookTopVal = -3 Then
+                                    If Not bstack.retstack.LookTopVal = -3 Then
                                         jump = ok
                                         If IFCTRL = 0 Then IFCTRL = 1
                                      Else
@@ -17737,7 +17769,7 @@ contif2:
                                 lbl = True
                                     If bstack.RetStackTotal > 0 Then
                                         
-                                    If bstack.RetStack.LookTopVal = -3 Then
+                                    If bstack.retstack.LookTopVal = -3 Then
                                         IFCTRL = 0
                                     End If
                                 End If
@@ -17758,7 +17790,7 @@ contif2:
                                 Execute = 2
                                     If bstack.RetStackTotal > 0 Then
                                         
-                                    If bstack.RetStack.LookTopVal = -3 Then
+                                    If bstack.retstack.LookTopVal = -3 Then
                                         IFCTRL = 0
                                     End If
                                 End If
@@ -17767,7 +17799,7 @@ contif2:
                                 GoTo ContContinue
                             End If
                         Else
-                                 If bstack.RetStack.LookTopVal = -3 Then
+                                 If bstack.retstack.LookTopVal = -3 Then
                                         IFCTRL = 0
                                     End If
                         End If
@@ -17957,7 +17989,7 @@ If bstack.RetStackTotal >= 9 * deep Then
 
             
 Else
-bstack.RetStack.drop bstack.RetStackTotal
+bstack.retstack.drop bstack.RetStackTotal
  End If
   InternalEror
  NOEXECUTION = True
@@ -18020,7 +18052,7 @@ If bstack.RetStackTotal >= 9 * deep Then
 
             
 Else
-bstack.RetStack.drop bstack.RetStackTotal
+bstack.retstack.drop bstack.RetStackTotal
  End If
   InternalEror
  NOEXECUTION = True
@@ -18043,11 +18075,11 @@ contHereFromOn:
                 
                 If FastSymbol(b$, ")") Then
                 PushStage bstack, False
-                bstack.RetStack.PushVal Len(b$)
+                bstack.retstack.PushVal Len(b$)
                 If Lang Then
-                bstack.RetStack.PushStr "SUB " + w$
+                bstack.retstack.PushStr "SUB " + w$
                 Else
-                bstack.RetStack.PushStr "ΡΟΥΤΙΝΑ " + w$
+                bstack.retstack.PushStr "ΡΟΥΤΙΝΑ " + w$
                 End If
                     b$ = Chr$(0)
                     '' here is the fault...execute 2 means loop...
@@ -18066,8 +18098,8 @@ contHereFromOn:
                 once = False
         
                 PushStage bstack, True
-                bstack.RetStack.PushVal Len(b$)
-                bstack.RetStack.PushStr "S " + w$
+                bstack.retstack.PushVal Len(b$)
+                bstack.retstack.PushStr "S " + w$
                 b$ = Chr$(0)
 
                 Execute = 2
@@ -18109,8 +18141,8 @@ contHereFromOn:
 contHere2FromOn:
                       once = False
                               PushStage bstack, True  ' CORRECT FROM REV 45 - VER 8
-                      bstack.RetStack.PushVal Len(b$)
-                     bstack.RetStack.PushStr "* " + w$
+                      bstack.retstack.PushVal Len(b$)
+                     bstack.retstack.PushStr "* " + w$
                 b$ = Chr$(0)
                     bstack.IFCTRL = IFCTRL
                     bstack.jump = jump
@@ -18843,7 +18875,7 @@ subsentry10:
                                       i = 1
                     If bb$ <> "" Then
                             If bb$ = Chr$(0) Then
-                                       If RetStackSize = mystack.RetStackTotal And mystack.RetStack.LookTopVal < 0 Then
+                                       If RetStackSize = mystack.RetStackTotal And mystack.retstack.LookTopVal < 0 Then
                                         ' this is a return form other block
                                          it = 2
                                         frm$ = bb$
@@ -18851,7 +18883,7 @@ subsentry10:
                                         End If
                                     If mystack.IsInRetStackNumber(p) Then
                                                        If LastErNum = -1 Then
-                                                                mystack.RetStack.PushVal p
+                                                                mystack.retstack.PushVal p
                                                                 it = 0
                                                                 GoTo fastexit
                                                         End If
@@ -18906,7 +18938,7 @@ subsentry10:
                                     
                                                                  If InStr(bb$, " ") > 0 Then
                                                                        
-                                                              If subspoint Then mystack.RetStack.PushVal -2 - S3 Else mystack.RetStack.PushVal -1
+                                                              If subspoint Then mystack.retstack.PushVal -2 - S3 Else mystack.retstack.PushVal -1
                                                               
                                                                S3 = mystack.OriginalCode
                                                                         If searchsub(S3, bb$, i, S3) Then
@@ -18946,12 +18978,12 @@ subsentry10:
                                                                             
                                                                                    Else
                                                               
-                                                              mystack.RetStack.drop 6
+                                                              mystack.retstack.drop 6
                                                                                     Exit Do
                                                                         End If
                                                                         Else
                                                               
-                                                              mystack.RetStack.drop 6
+                                                              mystack.retstack.drop 6
                                                                                     Exit Do
                                                                         End If
                                                         End If
@@ -31421,7 +31453,7 @@ thh1:
                                        
                              ElseIf bs.IsInRetStackString(frm$) Then
                                       If InStr(frm$, " ") > 0 Then
-                                   If subspoint Then bs.RetStack.PushVal -2 - S3 Else bs.RetStack.PushVal -1
+                                   If subspoint Then bs.retstack.PushVal -2 - S3 Else bs.retstack.PushVal -1
                                    S3 = x1
                                         If searchsub(S3, frm$, i, S3) Then
                                      
@@ -31442,7 +31474,7 @@ thh1:
 
                                                             MyEr "sub not found", "δεν βρέθηκε η ρουτίνα"
                                                             
-                                                            bs.RetStack.drop 5
+                                                            bs.retstack.drop 5
                                                              GoTo myerror1
                                                              'Exit Do
                                                  End If
@@ -31457,13 +31489,13 @@ thh1:
                                      frm$ = space(p)
                                      End If
                                                     End If
-                                                    bs.RetStack.drop 5
+                                                    bs.retstack.drop 5
                                                                         GoTo myerror1
 
                                                  End If
                                          Else
                                          MyEr "Fault in Return", "Λάθος στην Επιστροφή"
-                                         bs.RetStack.Flush
+                                         bs.retstack.Flush
                                          Exit Do
                                          End If
 
@@ -31510,7 +31542,7 @@ restart = True
                     bs.jump = False
                     If bs.RetStackTotal > 0 Then
                     bs.UseofIf = 0
-                    bs.RetStack.Flush
+                    bs.retstack.Flush
                     End If
     
 
@@ -32048,7 +32080,7 @@ fromfirst0:
     Case 0
          If bstack.RetStackTotal - RetStackSize > 0 Then
     bstack.UseofIf = olduseofif
-    bstack.RetStack.drop bstack.RetStackTotal - RetStackSize
+    bstack.retstack.drop bstack.RetStackTotal - RetStackSize
     End If
         If myLevel <> bstack.SubLevel Then
             b$ = bb$
@@ -32142,7 +32174,7 @@ ALFA12:
             If Len(bb$) > 0 Then
                 If bb$ = Chr$(0) Then
                     If RetStackSize >= bstack.RetStackTotal Then
-                        If bstack.RetStack.LookTopVal < 0 Then
+                        If bstack.retstack.LookTopVal < 0 Then
                             ' this is a return form other block
                             Exec = 2
                             b$ = bb$
@@ -32156,7 +32188,7 @@ ALFA12:
 from123:
                 If bstack.IsInRetStackNumber(p) Then
                     If LastErNum = -1 Then
-                        bstack.RetStack.PushVal p
+                        bstack.retstack.PushVal p
                         Exec = 0
                         Exit Function
                     End If
@@ -32167,7 +32199,7 @@ from123:
                         If RetStackSize <> bstack.RetStackTotal Then
                             MyEr "Problem in return stack", "Πρόβλημα στο σωρό επιστροφής"
                         End If
-                        bstack.RetStack.Flush
+                        bstack.retstack.Flush
                         b$ = vbNullString
                         Exit Function
                     End If
@@ -32184,7 +32216,7 @@ from123:
                 ElseIf bstack.IsInRetStackString(bb$) Then
 findelsesub0:
                     If InStr(bb$, " ") > 0 Then
-                        If subspoint Then bstack.RetStack.PushVal -2 - w3 Else bstack.RetStack.PushVal -1
+                        If subspoint Then bstack.retstack.PushVal -2 - w3 Else bstack.retstack.PushVal -1
                             w3 = bstack.OriginalCode
                             If searchsub(w3, bb$, i, w3) Then
                                 subspoint = False
@@ -32286,13 +32318,13 @@ subsub02:
                                             End If
                                         ElseIf x2 = 1 Then
                                             If LastErNum <> -2 Then
-                                                bstack.RetStack.drop 7 * bstack.SubLevel - myLevel
+                                                bstack.retstack.drop 7 * bstack.SubLevel - myLevel
                                                 b$ = ec$
                                                 Exec = oldexec
                                                 Exit Function
                                             End If
                                             ' NO RETURN...DROP STACK
-                                            bstack.RetStack.drop 2
+                                            bstack.retstack.drop 2
                                             Exit Do
                                         ElseIf x2 = 0 Then
                                                 b$ = bb$
@@ -32305,15 +32337,15 @@ subsub02:
                                     Else
                                         MyEr "sub not found", "δεν βρέθηκε η ρουτίνα"
                                         Exec = 0
-                                        bstack.RetStack.drop 5
+                                        bstack.retstack.drop 5
                                         Exit Do
                                     End If
                                 Else
-                                    bstack.RetStack.drop 5
+                                    bstack.retstack.drop 5
                                     Exit Do
                                 End If
                             Else
-                                bstack.RetStack.drop 1
+                                bstack.retstack.drop 1
                                 b$ = Chr$(0)
                                 Exec = 2
                                 Exit Function
@@ -32437,7 +32469,7 @@ subsub02:
     If Exec > 1 Then
     If bstack.RetStackTotal - RetStackSize > 0 Then
     bstack.UseofIf = olduseofif
-    bstack.RetStack.drop bstack.RetStackTotal - RetStackSize
+    bstack.retstack.drop bstack.RetStackTotal - RetStackSize
     End If
     End If
    bstack.jump = oldjump
