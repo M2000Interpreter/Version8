@@ -100,6 +100,7 @@ there1:
 End Sub
 
 Private Sub Form_Load()
+Form4Loaded = True
 Set LastGlist2 = Nothing
 setupxy = 20 * Helplastfactor
 scrTwips = Screen.TwipsPerPixelX
@@ -126,7 +127,7 @@ If FeedbackExec$ = vbNullString Or Not abt Then
 .WordCharRightButIncluded = ChrW(160) + "("
 .WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9), "#", "%", "&", "$")
 .WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9), "#")
-'.WordCharRightButIncluded = "("
+'
 .WordCharLeftButIncluded = "#$@~"
 Else
 .WordCharLeft = "['"
@@ -311,6 +312,7 @@ label1.Dereference  ' to ensure that no reference hold objects..
 Set label1 = Nothing
 Helplastfactor = 1
 helpSizeDialog = 1
+Form4Loaded = False
 End Sub
 
 Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)

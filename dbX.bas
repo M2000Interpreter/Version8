@@ -489,8 +489,9 @@ End If
 isdir = lookfirst
 End Function
 Public Sub fHelp(bstack As basetask, d$, Optional Eng As Boolean = False)
+Static a As Long, aa As Long, where As Long, there As Long, no_par As Long, dum As Long
 Dim SQL$, b$, p$, c$, gp$, r As Double, bb As Long, i As Long
-Dim cd As String, doriginal$, monitor As Long
+Dim cd As String, doriginal$, monitor As Long, rr$
 d$ = Replace(d$, " ", ChrW(160))
 On Error GoTo E5
 'ON ERROR GoTo 0
@@ -558,16 +559,16 @@ Dim ss$
 Exit Sub
 End If
 
-
-
+cd = App.Path
+AddDirSep cd
+If UseMDBHELP Then
 
 JetPrefix = JetPrefixHelp
 JetPostfix = JetPostfixHelp
 DBUser = vbNullString
 DBUserPassword = vbNullString
 
-cd = App.Path
-AddDirSep cd
+Dim sec$
 
 p$ = Chr(34)
 c$ = ","
@@ -599,16 +600,15 @@ If bstack.IsNumber(r) Then
 If bstack.IsNumber(r) Then
 If bstack.IsString(c$) Then
 ' nothing
-Dim sec$
+checkit:
+
         If Right$(gp$, 1) = "(" Then gp$ = gp$ + ")": p$ = p$ + ")"
         
         If Eng Then
-        sec$ = "Identifier: " + p$ + ", Gr: " + gp$ + vbCrLf
-        gp$ = p$
-        
+            sec$ = "Identifier: " + p$ + ", Gr: " + gp$ + vbCrLf
+            gp$ = p$
         Else
-        gp$ = gp$
-        sec$ = "Αναγνωριστικό: " + gp$ + ", En: " + p$ + vbCrLf
+            sec$ = "Αναγνωριστικό: " + gp$ + ", En: " + p$ + vbCrLf
         End If
         If vH_title$ <> "" Then
             If vH_title$ = gp$ And Form4.Visible = True Then GoTo E5
@@ -630,7 +630,7 @@ Dim sec$
         sHelp gp$, sec$ + c$ & "  " & b$, (ScrInfo(monitor).Width - 1) * 3 / 5, (ScrInfo(monitor).Height - 1) * 4 / 7
     
         vHelp Not Form4.Visible
-        End If
+      End If
     
     End If
 End If
@@ -640,6 +640,73 @@ End If
 End If
 End If
 End If
+Else
+If HelpFile.DocLines = 0 Then
+    rr$ = mylcasefILE(cd + "help2000utf8.dat")
+    
+
+HelpFile.ReadUnicodeOrANSI rr$
+If HelpFile.DocLines = 0 Then Exit Sub
+a = val(HelpFile.TextParagraph(1))
+aa = val(HelpFile.TextParagraph(2 + a))
+where = HelpFile.FindStr(HelpFile.TextParagraph(2 + a + 1 + 2 * aa), 1, no_par, dum)
+End If
+
+If where = 0 Then Exit Sub
+If HelpFile.FindStr("\" + myUcase(doriginal$, True), where, there, dum) Then
+d$ = HelpFile.TextParagraph(there)
+Eng = InStr(d$, "- ") <> 0
+dum = InStr(d$, "'")
+If Eng Then
+c$ = HelpFile.TextParagraph(1 + val(Mid$(d$, dum + 1)))
+'c$ = Mid$(c$, InStr(c$, "," + Chr$(160)) + 2)
+p$ = Mid$(d$, 2, dum - 2)
+b$ = HelpFile.TextParagraph(2 + a + aa + val(Mid$(d$, InStr(d$, "- ") + 2)))
+gp$ = Mid$(b$, 4, InStr(b$, "\") - 4)
+b$ = EscapeStrToString(Mid$(b$, InStr(b$, "\") + 4))
+Else
+c$ = HelpFile.TextParagraph(1 + val(Mid$(d$, dum + 1)))
+'c$ = Mid$(c$, 1, InStr(c$, "," + Chr$(160)) - 1)
+gp$ = Mid$(d$, 2, dum - 2)
+b$ = HelpFile.TextParagraph(2 + a + 1 + there - no_par)
+p$ = Mid$(b$, 4, InStr(b$, "\") - 4)
+b$ = EscapeStrToString(Mid$(b$, InStr(b$, "\") + 4))
+
+
+End If
+
+
+        If Right$(gp$, 1) = "(" Then gp$ = gp$ + ")": p$ = p$ + ")"
+        
+        If Eng Then
+            sec$ = "Identifier: " + p$ + ", Gr: " + gp$ + vbCrLf
+            gp$ = p$
+        Else
+            sec$ = "Αναγνωριστικό: " + gp$ + ", En: " + p$ + vbCrLf
+        End If
+        If vH_title$ <> "" Then
+            If vH_title$ = gp$ And Form4.Visible = True Then GoTo E5
+        End If
+       
+        If Eng Then
+        c$ = "List [" & NLtrim$(Mid$(c$, InStr(c$, ",") + 1)) & "]"
+            
+        Else
+        c$ = "Λίστα [" & Mid$(c$, 1, InStr(c$, ",") - 1) & "]"
+            
+        End If
+          
+        If vH_title$ <> "" Then b$ = "<| " & vH_title$ & vbCrLf & vbCrLf & b$ Else b$ = vbCrLf & b$
+        
+        sHelp gp$, sec$ + c$ & "  " & b$, (ScrInfo(monitor).Width - 1) * 3 / 5, (ScrInfo(monitor).Height - 1) * 4 / 7
+    
+        vHelp Not Form4.Visible
+
+
+
+End If
+End If
+
 E5:
 JetPrefix = JetPrefixUser
 JetPostfix = JetPostfixUser
@@ -1018,7 +1085,7 @@ End If
         If scope <> 2 Then
         
         cnt = cnt + 1
-                            stac1.DataStr TBL.name
+                            stac1.DataStr TBL.Name
                        If TBL.indexes.count > 0 Then
                                          For j = 0 To TBL.indexes.count - 1
                                                    With TBL.indexes(j)
@@ -1041,9 +1108,9 @@ End If
                                             Else
                                             stac1.DataVal CDbl(0)
                                         End If
-         ElseIf Tablename = TBL.name Then
+         ElseIf Tablename = TBL.Name Then
          cnt = 1
-                     rs.open "Select * From [" & TBL.name & "] ;", myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
+                     rs.open "Select * From [" & TBL.Name & "] ;", myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
                                          stac1.Flush
                                         stac1.DataVal CDbl(rs.fields.count)
                                         If TBL.indexes.count > 0 Then
@@ -1066,7 +1133,7 @@ End If
                                         End If
                      For i = 0 To rs.fields.count - 1
                      With rs.fields(i)
-                             stac1.DataStr .name
+                             stac1.DataStr .Name
                              If .Type = 203 And .DEFINEDSIZE >= 536870910# Then
                              
                                          If Lang = 1 Then
@@ -1114,7 +1181,7 @@ End If
                           If (.unique = False) And (.indexnulls = 0) Then
                           stac1.DataVal CDbl(.Columns.count)
                           For k = 0 To .Columns.count - 1
-                            stac1.DataStr .Columns(k).name
+                            stac1.DataStr .Columns(k).Name
                              stac1.DataStr inames(.Columns(k).sortorder, Lang)
                           Next k
                              Exit For
@@ -2307,7 +2374,7 @@ mcat.tables(Tablename).indexes.Refresh
    okntable = True
         For Each mtable In mcat.tables
         If mtable.Type = "TABLE" Then
-        If mtable.name = Tablename Then
+        If mtable.Name = Tablename Then
         okntable = False
         Exit For
         End If
@@ -2331,7 +2398,7 @@ Else
  End If
  Err.clear
    Set pIndex = CreateObject("ADOX.Index")
-    pIndex.name = "ndx"  ' standard
+    pIndex.Name = "ndx"  ' standard
     pIndex.indexnulls = 0 ' standrard
   
         While FastSymbol(r$, ",")
@@ -2352,7 +2419,7 @@ Else
         Wend
         If pIndex.Columns.count > 0 Then
         If mtable.indexes.count = 1 Then
-        mtable.indexes.Delete pIndex.name
+        mtable.indexes.Delete pIndex.Name
         End If
         mtable.indexes.Append pIndex
         
@@ -2517,7 +2584,7 @@ End If
            If cat.tables.count > 0 Then
         For Each mtable In cat.tables
           If mtable.Type = "TABLE" Then
-        If mtable.name = Tablename Then
+        If mtable.Name = Tablename Then
         okntable = False
         Exit For
         End If
@@ -2525,7 +2592,7 @@ End If
         Next mtable
        If okntable Then
        Set mtable = CreateObject("ADOX.TABLE")      ' get a fresh one
-        mtable.name = Tablename
+        mtable.Name = Tablename
         Set mtable.parentcatalog = cat
        End If
     

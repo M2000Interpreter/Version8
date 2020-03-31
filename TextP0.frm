@@ -1295,6 +1295,7 @@ If QRY Then
 INK$ = INK$ & "CLS" & Chr$(13)
 Else
 KeyCode = 0
+If Form4Loaded Then
 If Form4.Visible Then
 Form4.Visible = False
     If TEXT1.Visible Then
@@ -1303,6 +1304,7 @@ Form4.Visible = False
         Form1.SetFocus
     End If
 End If
+End If
 'EXECSTOP
 End If
 End If
@@ -1310,7 +1312,7 @@ Case vbKeyPause  '(this is the break key!!!!!'
 If Forms.count > 5 Then KeyCode = 0: Exit Sub
 If Not TaskMaster Is Nothing Then If TaskMaster.QueueCount > 0 Then KeyCode = 0: Exit Sub
 If QRY Or GFQRY Then
-If Form4.Visible Then Form4.Visible = False
+If Form4Loaded Then If Form4.Visible Then Form4.Visible = False
 i = MOUT
 If ASKINUSE Then
 If BreakMe Then Exit Sub
@@ -1555,21 +1557,21 @@ myBold = False
 
 myCharSet = 0
 With Form1
-.Font.name = MYFONT
+.Font.Name = MYFONT
 .Font.Strikethrough = False
 .Font.Underline = False
 .Font.bold = myBold
-MYFONT = .Font.name
+MYFONT = .Font.Name
     .Font.charset = myCharSet
     .DIS.Font.charset = myCharSet
-    .DIS.Font.name = MYFONT
+    .DIS.Font.Name = MYFONT
     .DIS.Font.bold = myBold
     .TEXT1.Font.charset = myCharSet
-    .TEXT1.Font.name = MYFONT
+    .TEXT1.Font.Name = MYFONT
     .TEXT1.Font.bold = myBold
     
     .List1.charset = myCharSet
-    .List1.Font.name = MYFONT
+    .List1.Font.Name = MYFONT
     .List1.FontBold = myBold
      
 End With
@@ -2105,7 +2107,7 @@ NOEDIT = True: noentrance = False: Exit Sub
 End If
 If KeyCode = vbKeyPause Then
  KeyCode = 0: NOEDIT = True: noentrance = False
- If Form4.Visible Then Form4.Visible = False
+If Form4Loaded Then If Form4.Visible Then Form4.Visible = False
             If Form1.Visible Then
              If TEXT1.Visible Then
                 TEXT1.SetFocus
@@ -2912,6 +2914,10 @@ MYFONT = defFontname
             cc.ValueType = REG_DWORD
             cc.Value = CLng(0)
             priorityOr = False
+                              
+            cc.ValueKey = "MDBHELP"
+            cc.ValueType = REG_DWORD
+            cc.Value = CLng(0)
 Else
 ' *****************************
         If cc.Value = vbNullString Then
@@ -2922,10 +2928,10 @@ Else
         MYFONT = cc.Value
         On Error Resume Next
         
-        Me.Font.name = MYFONT
+        Me.Font.Name = MYFONT
         Me.Font.Italic = False
-        Me.Font.name = MYFONT
-        If Me.Font.name <> MYFONT Then
+        Me.Font.Name = MYFONT
+        If Me.Font.Name <> MYFONT Then
         MYFONT = defFontname
         End If
        
@@ -3031,8 +3037,12 @@ End If
              priorityOr = CLng(cc.Value) = True
             ' cc.ValueKey = "FOR-LIKE-BASIC"
              ' ForLikeBasic = CLng(cc.Value) = True
+             cc.ValueKey = "MDBHELP"
+            cc.ValueType = REG_DWORD
+            UseMDBHELP = cc.Value
         Set cc = Nothing
         End If
+           
        DIS.ForeColor = mycolor(PenOne) ' NOW PEN IS RGB VALUE
             Font.charset = basestack.myCharSet
     Font.bold = basestack.myBold
@@ -3219,7 +3229,7 @@ Set LastGlist = this
 End Sub
 Public Function mybreak1() As Boolean
 Dim i As Long
-If Form4.Visible Then Form4.Visible = False
+If Form4Loaded Then If Form4.Visible Then Form4.Visible = False
 i = MOUT
 If ASKINUSE Then
 If BreakMe Then Exit Function
@@ -3377,7 +3387,7 @@ mycode = Rnd * 12312314
 oldcodeid = Modalid
 
  For Each X In Forms
-                            If X.Visible And X.name = "GuiM2000" Then
+                            If X.Visible And X.Name = "GuiM2000" Then
                      
                            If X.Enablecontrol Then
                                X.Modal = mycode
@@ -3424,7 +3434,7 @@ Dim z As Form
  Set z = Nothing
 
            For Each X In Forms
-            If X.Visible And X.name = "GuiM2000" Then
+            If X.Visible And X.Name = "GuiM2000" Then
             If Not X.Enablecontrol Then X.TestModal mycode
           If X.Enablecontrol Then Set z = X
             End If

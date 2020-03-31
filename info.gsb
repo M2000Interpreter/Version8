@@ -4049,8 +4049,17 @@ RETURN
 }
 MODULE MEDITOR {\\ notepad for M2000 programs (gsb files)
 \\ Use F1 in editor to change to no wrap<->wrap
-
 Clear \\ Clear all variables/objects
+Global aLL$
+Document aLL$
+if exist(appdir$+"help2000utf8.dat") then
+	Global aa, bb, where, no_par
+	Load.doc aLL$, appdir$+"help2000utf8.dat"
+	aa<=Val(paragraph$(aLL$, 1))
+	bb<=Val(paragraph$(aLL$, 2+aa))
+	find aLL$, paragraph$(aLL$,2+aa+1+2*bb)
+	where<=number : no_par<=number: flush
+end if
 Flush \\ Empty the stack
 CurDir$=Dir$
 Title$="M2000 Pad"
@@ -4217,19 +4226,47 @@ Def what$, lastcommand$, mod2run$
 \\ function to retrieve info from help database, help2000.mdb in appdir$
 Def boolean HelpView
 
-Function GetHelp$(&word$, find) {
-	word$=ucase$(word$)
-	Eng=chrcode(word$)<128
-	If find Then
-		Retrieve appdir$+"HELP2000", "Select * FROM [COMMANDS] WHERE "+If$(Eng-> "ENGLISH","DESCRIPTION")+" Like '"+word$+"%'",1,"",""
-	Else
-		Retrieve appdir$+"HELP2000", "COMMANDS",1,If$(Eng->"ENGLISH","DESCRIPTION"),word$
-	End If
-	If number>0 Then
-		read new word1$, hlp$, word2$
-		=If$(Eng->RightPart$(hlp$,"__<ENG>__"), LeftPart$(hlp$,"__<ENG>__")) :	word$=If$(Eng->word2$, word1$)
-	End If
-}
+
+if doc.par(aLL$)=0 then
+	\\ Old for HelpM2000.mdb
+	Function GetHelp$(&word$, findit) {
+		word$=ucase$(word$)
+		Eng=chrcode(word$)<128
+		If  findit Then
+			Retrieve appdir$+"HELP2000", "Select * FROM [COMMANDS] WHERE "+If$(Eng-> "ENGLISH","DESCRIPTION")+" Like '"+word$+"%'",1,"",""
+		Else
+			Retrieve appdir$+"HELP2000", "COMMANDS",1,If$(Eng->"ENGLISH","DESCRIPTION"),word$
+		End If
+		If number>0 Then
+			read new word1$, hlp$, word2$
+			=If$(Eng->RightPart$(hlp$,"__<ENG>__"), LeftPart$(hlp$,"__<ENG>__")) :	word$=If$(Eng->word2$, word1$)
+		End If
+	}
+Else
+	Function GetHelp$(&word$, findit) {
+		word$=ucase$(word$)
+		if findit then
+			find aLL$, "\"+word$, where
+		else
+			find aLL$, "\"+word$+"'", where
+		end if
+		Read Where1
+		if Where1>0 then
+			Read  There : drop
+			Ret$=mid$( Paragraph$(aLL$, There), 2)
+			Word$=leftpart$(Ret$,"'")
+			lbl=Val(Rightpart$(Ret$,"'"))
+			info=Val(Rightpart$(Ret$,"-"))
+			if info=0 then
+				="["+LeftPart$(Paragraph$(aLL$,lbl+1), ", ")+"] "+format$(paragraph$(aLL$, 2+aa+1+There-no_par))
+			else
+				="["+RightPart$(Paragraph$(aLL$,lbl+1), ", ")+"] "+format$(paragraph$(aLL$, 2+aa+bb+info))
+			end if
+		end if
+	}
+End If
+
+
 
 \\ this call using Call Local (otherwise we get error because GetHepl$() isn't a global, or a local to FindWord)
 Function FindWord {
@@ -4488,7 +4525,7 @@ Function Run1.DblClick {
 
 Function File1.DblClick {
 	Read New File1index
-	Local cont, cont2, f$, NL$={
+	Local cont, cont2, f$, nl$={
 	}
 	File1index++
 	\\ Because we want some jumps..we use  On Goto
@@ -4548,7 +4585,7 @@ Save1:
 		Read f$
 		If f$="" Then Exit 
 		If lcase$(file.type$(f$))<>"gsb" Then f$=f$+".gsb"
-		If Exist(f$) Then  If Ask(NL$+"Overwrite"+NL$+f$,Title$)<>1 Then Exit
+		If Exist(f$) Then  If Ask(nl$+"Overwrite"+nl$+f$,Title$)<>1 Then Exit
 		Try ok {
 			Clear BackUp$
 			BackUp$=Pad.Text$
@@ -4651,7 +4688,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8.8 for ver 9.9 rev 16 and newer"
+	Report " A collection of modules for tests version 8.9 for ver 9.9 rev 17 and newer"
 	
 	Pen 5{
 		cursor 0, row-1

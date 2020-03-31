@@ -739,13 +739,19 @@ Do While mycur <> 0 And Not Len(textbuf) > minimumbytes2exit
     For mlines = 1 To para(mycur).lines
         NeoData = NeoData + para(mycur).content(mlines)
     Next mlines
+     
 l = Len(NeoData)
 If Len(textbuf) < thiscur + l Then textbuf = textbuf + space$((thiscur + l) + 100)
 Mid$(textbuf, thiscur, l) = NeoData
 thiscur = thiscur + l
 mycur = DocParaNext(mycur)
 Loop
+If mycur <> 0 Then
+textArray = Left$(textbuf, thiscur - 1) + linebreak2use$
+Else
 textArray = Left$(textbuf, thiscur - 1)
+End If
+
 End Function
 Private Function textString(ByVal linebreak2use$, mycur As Long, minimumbytes2exit As Long) As String
 '
@@ -764,7 +770,11 @@ Mid$(textbuf, thiscur, l) = NeoData
 thiscur = thiscur + l
 mycur = DocParaNext(mycur)
 Loop
+If mycur <> 0 Then
+textString = Left$(textbuf, thiscur - 1) + linebreak2use$
+Else
 textString = Left$(textbuf, thiscur - 1)
+End If
 End Function
 Property Get textDoc() As String
 Attribute textDoc.VB_UserMemId = 0
@@ -2191,6 +2201,8 @@ Next i
 Put #w, , a()
 Wend
 Else
+
+
 While iPos <> 0
 a() = textArray(lf$, iPos, maxmw)
 Put #w, , a()

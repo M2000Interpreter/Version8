@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 16
+Global Const Revision = 17
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -697,7 +697,7 @@ Public Function GetSpecialfolder(CSIDL As Long) As String
     GetSpecialfolder = vbNullString
 End Function
 Public Sub PushStage(basestack As basetask, dummy As Boolean)
-        With basestack.retstack
+        With basestack.RetStack
                basestack.SubLevel = basestack.SubLevel + 1
 
                 If dummy Then
@@ -723,7 +723,7 @@ Public Sub PushStage(basestack As basetask, dummy As Boolean)
        
 End Sub
 Public Sub PopStage(basestack As basetask)
-        With basestack.retstack
+        With basestack.RetStack
         If .LookTopVal = -1 Then
         basestack.SubLevel = basestack.SubLevel - 1
            .drop 1
@@ -1719,7 +1719,7 @@ faultback:
                                       i = 1
                     If bb$ <> "" Then
                             If bb$ = Chr$(0) Then
-                                       If RetStackSize = bstack.RetStackTotal And bstack.retstack.LookTopVal < 0 Then
+                                       If RetStackSize = bstack.RetStackTotal And bstack.RetStack.LookTopVal < 0 Then
                                         ' this is a return form other block
                                          SpeedGroup = 2
                                        SwapStrings b$, bb$
@@ -1728,7 +1728,7 @@ faultback:
                                         End If
                                     If bstack.IsInRetStackNumber(p) Then
                                                        If LastErNum = -1 Then
-                                                                bstack.retstack.PushVal p
+                                                                bstack.RetStack.PushVal p
                                                                 SpeedGroup = 0
                                                                  bstack.addlen = nd&
                                                                 GoTo fastexit
@@ -1773,7 +1773,7 @@ faultback:
                                        
                                     ElseIf bstack.IsInRetStackString(bb$) Then
                                                                  If InStr(bb$, " ") > 0 Then
-                                                                       If subspoint Then bstack.retstack.PushVal -2 - S3 Else bstack.retstack.PushVal -1
+                                                                       If subspoint Then bstack.RetStack.PushVal -2 - S3 Else bstack.RetStack.PushVal -1
                                                                         S3 = bstack.OriginalCode
                                                                         If searchsub(S3, bb$, i, S3) Then
                                                                           subspoint = False
@@ -1811,12 +1811,12 @@ faultback:
                                                                             GoTo subsentry10
                                                                             
                                                                                    Else
-                                                                        bstack.retstack.drop 6
+                                                                        bstack.RetStack.drop 6
                                                                          bstack.addlen = nd&
                                                                                     Exit Do
                                                                         End If
                                                                         Else
-                                                                        bstack.retstack.drop 6
+                                                                        bstack.RetStack.drop 6
                                                                          bstack.addlen = nd&
                                                                                     Exit Do
                                                                         End If
@@ -11597,8 +11597,10 @@ conthere1111:
                 Exit Function
             End If
            
-            
-                
+            Else
+            r$ = q$
+            IsStr1 = FastSymbol(a$, ")", True)
+            Exit Function
             End If
             
          Else
@@ -13287,7 +13289,7 @@ ElseIf IsExp(bstackstr, a$, p) Then
         If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
         IsStr1 = True
         Exit Function
-fstr54: '"ADD.LICENCE$(", "ΒΑΛΕ.ΑΔΕΙΑ$("
+fstr54: '"ADD.LICENSE$(", "ΒΑΛΕ.ΑΔΕΙΑ$("
 If IsStrExp(bstackstr, a$, q$) Then
 If FastSymbol(a$, ",") Then
 If IsStrExp(bstackstr, a$, q1$) Then
@@ -13298,7 +13300,7 @@ On Error Resume Next
         Else
         r$ = Licenses.Add(q$, q1$)
         End If
-        If Err.Number > 0 And Err.Number <> 732 Then MissLicence
+        If Err.Number > 0 And Err.Number <> 732 Then MissLicense
         Err.clear
         On Error GoTo 0
        If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
@@ -13308,7 +13310,7 @@ Else
 Err.clear
 On Error Resume Next
         r$ = Licenses.Add(q$)
-        If Err > 0 And Err.Number <> 732 Then MissLicence
+        If Err > 0 And Err.Number <> 732 Then MissLicense
         Err.clear
         On Error GoTo 0
        If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
@@ -15552,7 +15554,7 @@ ContExit:
                      PopStagePartContinue2 bstack, bstack.RetStackTotal
                     once = False
                     b$ = Chr$(0)
-                    If bstack.retstack.Total = 0 Then Execute = 1 Else Execute = 2
+                    If bstack.RetStack.Total = 0 Then Execute = 1 Else Execute = 2
                     Exit Function
                 ElseIf IsLabelSymbolNewExp(b$, "ΓΙΑ", "FOR", Lang, Us$) Then
 exitfor:
@@ -15813,8 +15815,8 @@ eos:
                                 sw$ = ss$
                                 sX = p
                                 y1 = True
-                                bstack.retstack.PushVal 0  ' RETURN LENGTH FROM END OF B$
-                                bstack.retstack.PushStr w$   ' for check if is the right variable
+                                bstack.RetStack.PushVal 0  ' RETURN LENGTH FROM END OF B$
+                                bstack.RetStack.PushStr w$   ' for check if is the right variable
                                 TraceStore bstack, nd&, b$, 0
                                 
                                 slct = bstack.addlen
@@ -15871,7 +15873,7 @@ contfor:
                                                         SwapStrings b$, ss$
                                                         Exit Function
                                                     ElseIf Execute = 12 Then
-                                                        bstack.retstack.drop 2
+                                                        bstack.RetStack.drop 2
                                                         Execute = 2
                                                         b$ = ss$
                                                         Exit Function
@@ -15944,7 +15946,7 @@ contfor:
                                                         SwapStrings b$, ss$
                                                         Exit Function
                                                     ElseIf Execute = 12 Then
-                                                        bstack.retstack.drop 2
+                                                        bstack.RetStack.drop 2
                                                         Execute = 2
                                                         b$ = ss$
                                                         Exit Function
@@ -15996,7 +15998,7 @@ contfor:
                                                         SwapStrings b$, ss$
                                                         Exit Function
                                                     ElseIf Execute = 12 Then
-                                                        bstack.retstack.drop 2
+                                                        bstack.RetStack.drop 2
                                                         Execute = 2
                                                         b$ = ss$
                                                         Exit Function
@@ -16025,7 +16027,7 @@ contfor:
                                             Loop
                                         End If
                                         If Execute = 1 And y1 Then
-                                            bstack.retstack.drop 2
+                                            bstack.RetStack.drop 2
                                         End If
                                         x2 = 0  ' need to erased - because reused
                                         y2 = 0
@@ -16130,12 +16132,12 @@ contNext:
                     If bstack.IsInRetStackString(ss$) Then
                         'ss$ = bstack.RetStack.PopStr
                         If ss$ <> w$ Then
-                            bstack.retstack.PushStr ss$
+                            bstack.RetStack.PushStr ss$
                             MissNext
                             Execute = 0
                             Exit Function
                         Else
-                            With bstack.retstack
+                            With bstack.RetStack
                                .drop 1
                                .PushVal Len(b$)
                                .PushStr ss$
@@ -16146,7 +16148,7 @@ contNext:
                 Else
                 ' NEW FOR M2000, WE CAN USE NO VARIABLE
                     If bstack.IsInRetStackString(ss$) Then
-                            With bstack.retstack
+                            With bstack.RetStack
                                .drop 1
                                .PushVal Len(b$)
                                .PushStr ss$
@@ -17268,7 +17270,7 @@ contThenElseIf:
                      If bstack.RetStackTotal > 0 Then
                     If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ.ΑΝ", "ELSE.IF", Lang) Then GoTo contElseIf
                     If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ", "ELSE", Lang) Then GoTo ContElse
-                                                    If bstack.retstack.LookTopVal = -3 Then
+                                                    If bstack.RetStack.LookTopVal = -3 Then
                                                         jump = False
                                                         IFCTRL = 0
                                                     End If
@@ -17565,7 +17567,7 @@ contelseifpass:
                              If bstack.RetStackTotal > 0 Then
                                 If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ.ΑΝ", "ELSE.IF", Lang) Then GoTo contElseIf
                                 If IsLabelSymbolNew(b$, "ΑΛΛΙΩΣ", "ELSE", Lang) Then GoTo ContElse
-                                                    If bstack.retstack.LookTopVal = -3 Then
+                                                    If bstack.RetStack.LookTopVal = -3 Then
                                                         jump = False
                                                         IFCTRL = 0
                                                     End If
@@ -17692,7 +17694,7 @@ contif2:
                                         jump = ok
                                        If IFCTRL = 0 Then IFCTRL = 1
                                 Else
-                                    If Not bstack.retstack.LookTopVal = -3 Then
+                                    If Not bstack.RetStack.LookTopVal = -3 Then
                                         jump = ok
                                         If IFCTRL = 0 Then IFCTRL = 1
                                      Else
@@ -17769,7 +17771,7 @@ contif2:
                                 lbl = True
                                     If bstack.RetStackTotal > 0 Then
                                         
-                                    If bstack.retstack.LookTopVal = -3 Then
+                                    If bstack.RetStack.LookTopVal = -3 Then
                                         IFCTRL = 0
                                     End If
                                 End If
@@ -17790,7 +17792,7 @@ contif2:
                                 Execute = 2
                                     If bstack.RetStackTotal > 0 Then
                                         
-                                    If bstack.retstack.LookTopVal = -3 Then
+                                    If bstack.RetStack.LookTopVal = -3 Then
                                         IFCTRL = 0
                                     End If
                                 End If
@@ -17799,7 +17801,7 @@ contif2:
                                 GoTo ContContinue
                             End If
                         Else
-                                 If bstack.retstack.LookTopVal = -3 Then
+                                 If bstack.RetStack.LookTopVal = -3 Then
                                         IFCTRL = 0
                                     End If
                         End If
@@ -17989,7 +17991,7 @@ If bstack.RetStackTotal >= 9 * deep Then
 
             
 Else
-bstack.retstack.drop bstack.RetStackTotal
+bstack.RetStack.drop bstack.RetStackTotal
  End If
   InternalEror
  NOEXECUTION = True
@@ -18052,7 +18054,7 @@ If bstack.RetStackTotal >= 9 * deep Then
 
             
 Else
-bstack.retstack.drop bstack.RetStackTotal
+bstack.RetStack.drop bstack.RetStackTotal
  End If
   InternalEror
  NOEXECUTION = True
@@ -18075,11 +18077,11 @@ contHereFromOn:
                 
                 If FastSymbol(b$, ")") Then
                 PushStage bstack, False
-                bstack.retstack.PushVal Len(b$)
+                bstack.RetStack.PushVal Len(b$)
                 If Lang Then
-                bstack.retstack.PushStr "SUB " + w$
+                bstack.RetStack.PushStr "SUB " + w$
                 Else
-                bstack.retstack.PushStr "ΡΟΥΤΙΝΑ " + w$
+                bstack.RetStack.PushStr "ΡΟΥΤΙΝΑ " + w$
                 End If
                     b$ = Chr$(0)
                     '' here is the fault...execute 2 means loop...
@@ -18098,8 +18100,8 @@ contHereFromOn:
                 once = False
         
                 PushStage bstack, True
-                bstack.retstack.PushVal Len(b$)
-                bstack.retstack.PushStr "S " + w$
+                bstack.RetStack.PushVal Len(b$)
+                bstack.RetStack.PushStr "S " + w$
                 b$ = Chr$(0)
 
                 Execute = 2
@@ -18141,8 +18143,8 @@ contHereFromOn:
 contHere2FromOn:
                       once = False
                               PushStage bstack, True  ' CORRECT FROM REV 45 - VER 8
-                      bstack.retstack.PushVal Len(b$)
-                     bstack.retstack.PushStr "* " + w$
+                      bstack.RetStack.PushVal Len(b$)
+                     bstack.RetStack.PushStr "* " + w$
                 b$ = Chr$(0)
                     bstack.IFCTRL = IFCTRL
                     bstack.jump = jump
@@ -18875,7 +18877,7 @@ subsentry10:
                                       i = 1
                     If bb$ <> "" Then
                             If bb$ = Chr$(0) Then
-                                       If RetStackSize = mystack.RetStackTotal And mystack.retstack.LookTopVal < 0 Then
+                                       If RetStackSize = mystack.RetStackTotal And mystack.RetStack.LookTopVal < 0 Then
                                         ' this is a return form other block
                                          it = 2
                                         frm$ = bb$
@@ -18883,7 +18885,7 @@ subsentry10:
                                         End If
                                     If mystack.IsInRetStackNumber(p) Then
                                                        If LastErNum = -1 Then
-                                                                mystack.retstack.PushVal p
+                                                                mystack.RetStack.PushVal p
                                                                 it = 0
                                                                 GoTo fastexit
                                                         End If
@@ -18938,7 +18940,7 @@ subsentry10:
                                     
                                                                  If InStr(bb$, " ") > 0 Then
                                                                        
-                                                              If subspoint Then mystack.retstack.PushVal -2 - S3 Else mystack.retstack.PushVal -1
+                                                              If subspoint Then mystack.RetStack.PushVal -2 - S3 Else mystack.RetStack.PushVal -1
                                                               
                                                                S3 = mystack.OriginalCode
                                                                         If searchsub(S3, bb$, i, S3) Then
@@ -18978,12 +18980,12 @@ subsentry10:
                                                                             
                                                                                    Else
                                                               
-                                                              mystack.retstack.drop 6
+                                                              mystack.RetStack.drop 6
                                                                                     Exit Do
                                                                         End If
                                                                         Else
                                                               
-                                                              mystack.retstack.drop 6
+                                                              mystack.RetStack.drop 6
                                                                                     Exit Do
                                                                         End If
                                                         End If
@@ -23178,7 +23180,7 @@ prive = GetCode(Scr)
 Dim p As Variant, i As Long, s$, pn&, X As Double, Y As Double, it As Long, F As Long, pa$
 Dim x1 As Long, y1 As Long, frm$, par As Boolean, ohere$, ss$, w$, sX As Double, sY As Double, modname$
 Dim pppp As mArray, hlp$, h&, all$, myobject As Object
-Dim w1 As Long, w2 As Long, w3 As Long, DUM As Boolean, virtualtop As Long
+Dim w1 As Long, w2 As Long, w3 As Long, dum As Boolean, virtualtop As Long
 pn& = 0
 virtualtop = varhash.count - 1
 'GoTo ByPass  '********************************
@@ -30076,8 +30078,10 @@ End If
 Else
 ClearScrNew Scr, players(GetCode(Scr)), CLng(mycolor(.Paper))
 End If
+If Form4Loaded Then
 If Form4.Visible Then
 If Not mHelp And Not abt Then vHelp
+End If
 End If
 End With
 Set Scr = Nothing
@@ -31453,7 +31457,7 @@ thh1:
                                        
                              ElseIf bs.IsInRetStackString(frm$) Then
                                       If InStr(frm$, " ") > 0 Then
-                                   If subspoint Then bs.retstack.PushVal -2 - S3 Else bs.retstack.PushVal -1
+                                   If subspoint Then bs.RetStack.PushVal -2 - S3 Else bs.RetStack.PushVal -1
                                    S3 = x1
                                         If searchsub(S3, frm$, i, S3) Then
                                      
@@ -31474,7 +31478,7 @@ thh1:
 
                                                             MyEr "sub not found", "δεν βρέθηκε η ρουτίνα"
                                                             
-                                                            bs.retstack.drop 5
+                                                            bs.RetStack.drop 5
                                                              GoTo myerror1
                                                              'Exit Do
                                                  End If
@@ -31489,13 +31493,13 @@ thh1:
                                      frm$ = space(p)
                                      End If
                                                     End If
-                                                    bs.retstack.drop 5
+                                                    bs.RetStack.drop 5
                                                                         GoTo myerror1
 
                                                  End If
                                          Else
                                          MyEr "Fault in Return", "Λάθος στην Επιστροφή"
-                                         bs.retstack.Flush
+                                         bs.RetStack.Flush
                                          Exit Do
                                          End If
 
@@ -31542,7 +31546,7 @@ restart = True
                     bs.jump = False
                     If bs.RetStackTotal > 0 Then
                     bs.UseofIf = 0
-                    bs.retstack.Flush
+                    bs.RetStack.Flush
                     End If
     
 
@@ -32080,7 +32084,7 @@ fromfirst0:
     Case 0
          If bstack.RetStackTotal - RetStackSize > 0 Then
     bstack.UseofIf = olduseofif
-    bstack.retstack.drop bstack.RetStackTotal - RetStackSize
+    bstack.RetStack.drop bstack.RetStackTotal - RetStackSize
     End If
         If myLevel <> bstack.SubLevel Then
             b$ = bb$
@@ -32174,7 +32178,7 @@ ALFA12:
             If Len(bb$) > 0 Then
                 If bb$ = Chr$(0) Then
                     If RetStackSize >= bstack.RetStackTotal Then
-                        If bstack.retstack.LookTopVal < 0 Then
+                        If bstack.RetStack.LookTopVal < 0 Then
                             ' this is a return form other block
                             Exec = 2
                             b$ = bb$
@@ -32188,7 +32192,7 @@ ALFA12:
 from123:
                 If bstack.IsInRetStackNumber(p) Then
                     If LastErNum = -1 Then
-                        bstack.retstack.PushVal p
+                        bstack.RetStack.PushVal p
                         Exec = 0
                         Exit Function
                     End If
@@ -32199,7 +32203,7 @@ from123:
                         If RetStackSize <> bstack.RetStackTotal Then
                             MyEr "Problem in return stack", "Πρόβλημα στο σωρό επιστροφής"
                         End If
-                        bstack.retstack.Flush
+                        bstack.RetStack.Flush
                         b$ = vbNullString
                         Exit Function
                     End If
@@ -32216,7 +32220,7 @@ from123:
                 ElseIf bstack.IsInRetStackString(bb$) Then
 findelsesub0:
                     If InStr(bb$, " ") > 0 Then
-                        If subspoint Then bstack.retstack.PushVal -2 - w3 Else bstack.retstack.PushVal -1
+                        If subspoint Then bstack.RetStack.PushVal -2 - w3 Else bstack.RetStack.PushVal -1
                             w3 = bstack.OriginalCode
                             If searchsub(w3, bb$, i, w3) Then
                                 subspoint = False
@@ -32318,13 +32322,13 @@ subsub02:
                                             End If
                                         ElseIf x2 = 1 Then
                                             If LastErNum <> -2 Then
-                                                bstack.retstack.drop 7 * bstack.SubLevel - myLevel
+                                                bstack.RetStack.drop 7 * bstack.SubLevel - myLevel
                                                 b$ = ec$
                                                 Exec = oldexec
                                                 Exit Function
                                             End If
                                             ' NO RETURN...DROP STACK
-                                            bstack.retstack.drop 2
+                                            bstack.RetStack.drop 2
                                             Exit Do
                                         ElseIf x2 = 0 Then
                                                 b$ = bb$
@@ -32337,15 +32341,15 @@ subsub02:
                                     Else
                                         MyEr "sub not found", "δεν βρέθηκε η ρουτίνα"
                                         Exec = 0
-                                        bstack.retstack.drop 5
+                                        bstack.RetStack.drop 5
                                         Exit Do
                                     End If
                                 Else
-                                    bstack.retstack.drop 5
+                                    bstack.RetStack.drop 5
                                     Exit Do
                                 End If
                             Else
-                                bstack.retstack.drop 1
+                                bstack.RetStack.drop 1
                                 b$ = Chr$(0)
                                 Exec = 2
                                 Exit Function
@@ -32469,7 +32473,7 @@ subsub02:
     If Exec > 1 Then
     If bstack.RetStackTotal - RetStackSize > 0 Then
     bstack.UseofIf = olduseofif
-    bstack.retstack.drop bstack.RetStackTotal - RetStackSize
+    bstack.RetStack.drop bstack.RetStackTotal - RetStackSize
     End If
     End If
    bstack.jump = oldjump
@@ -35353,6 +35357,7 @@ bstack.Owner.Font.bold = Abs(p <> 0)
 
 End Sub
 Sub ProcChooseFont(bstack As basetask, Lang As Long)
+If Form4Loaded Then
 If Form4.Visible Then
 Form4.Visible = False
     If Form1.TEXT1.Visible Then
@@ -35360,6 +35365,7 @@ Form4.Visible = False
     Else
         Form1.SetFocus
     End If
+End If
 End If
 DialogSetupLang Lang
 With bstack.Owner
@@ -40402,6 +40408,7 @@ ProcDBUSER = -True
 End Function
 Function ProcChooseOrgan(bstack As basetask, rest$, Lang As Long) As Boolean
 Dim F As Long, i As Long, s$
+If Form4Loaded Then
 If Form4.Visible Then
 Form4.Visible = False
     If Form1.TEXT1.Visible Then
@@ -40409,6 +40416,7 @@ Form4.Visible = False
     Else
         Form1.SetFocus
     End If
+End If
 End If
 Form1.List1.clear
 F = 0
@@ -40424,7 +40432,7 @@ Dim F As Long, i As Long, s$, p As Variant
     Dim iSectCount As Long, iSect As Long, sSections() As String
     Dim iVerCount As Long, iVer As Long, sVersions() As String
       Dim iExeSectCount As Long, iExeSect As Long, sExeSect() As String
-
+If Form4Loaded Then
 If Form4.Visible Then
 Form4.Visible = False
     If Form1.TEXT1.Visible Then
@@ -40432,6 +40440,7 @@ Form4.Visible = False
     Else
         Form1.SetFocus
     End If
+End If
 End If
  Form1.List1.clear
     If MaybeIsSymbol(rest$, "!") Then
@@ -41232,7 +41241,7 @@ bstack.Owner.Font.Italic = (p <> 0)
 ProcItalic = True
 End Function
 Function ProcEditDoc(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim prive As Long, s$, sX As Double, i As Long, DUM As Boolean, frm$
+Dim prive As Long, s$, sX As Double, i As Long, dum As Boolean, frm$
 Dim x1 As Long, y1 As Long, p As Variant, col As Long, oldvalue As Boolean
 Dim pppp As mArray
 If Left$(Typename(bstack.Owner), 3) = "Gui" Then oxiforforms: Exit Function
@@ -41240,7 +41249,7 @@ prive = GetCode(bstack.Owner)
 With players(prive)
 
                 Form1.EditTextWord = Not IsLabelSymbolNew(rest$, "ΚΩΔΙΚΑ", "CODE", Lang)
-                DUM = False
+                dum = False
                     y1 = Abs(IsLabel(bstack, rest$, s$))
                      
                     If y1 = 6 Then
@@ -41285,7 +41294,7 @@ conteditdoc2:
                             Exit Function
                             Else
                             col = CLng(p)
-                            DUM = True
+                            dum = True
                         End If
                         
                     Else
@@ -41301,11 +41310,11 @@ conteditdoc2:
                                     x1 = sX
                                 End If
                                    Form1.TEXT1.Title = frm$ + " "
-                                    Form1.TEXT1.TabWidth = 8 + 2 * DUM
-                                    Form1.TabControl = 8 + 2 * DUM
+                                    Form1.TEXT1.TabWidth = 8 + 2 * dum
+                                    Form1.TabControl = 8 + 2 * dum
                                       oldvalue = Form1.nobypasscheck
                                   Form1.nobypasscheck = False
-                                  ScreenEditDOC bstack, var(i), 0, .mysplit, .mx - 1, .My - 1, x1, DUM, col
+                                  ScreenEditDOC bstack, var(i), 0, .mysplit, .mx - 1, .My - 1, x1, dum, col
                                   Form1.nobypasscheck = oldvalue
                                     var(i).LastSelStart = x1
                                     var(i).ColorEvent = False
@@ -41328,11 +41337,11 @@ conteditdoc2:
                                     x1 = sX
                                 End If
                                     Form1.TEXT1.Title = frm$ + " "
-                                    Form1.TEXT1.TabWidth = 8 + 2 * DUM
-                                    Form1.TabControl = 8 + 2 * DUM
+                                    Form1.TEXT1.TabWidth = 8 + 2 * dum
+                                    Form1.TabControl = 8 + 2 * dum
                                     oldvalue = Form1.nobypasscheck
                                   Form1.nobypasscheck = False
-                                  ScreenEditDOC bstack, pppp.item(i), 0, .mysplit, .mx - 1, .My - 1, x1, DUM, col
+                                  ScreenEditDOC bstack, pppp.item(i), 0, .mysplit, .mx - 1, .My - 1, x1, dum, col
                                   Form1.nobypasscheck = oldvalue
                                     pppp.item(i).LastSelStart = x1
                                      pppp.item(i).ColorEvent = False
@@ -41360,7 +41369,7 @@ crNew bstack, players(prive)
 ProcVersion = True
 End Function
 Function ProcSrcoll(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim prive As Long, p As Variant, DUM As Boolean
+Dim prive As Long, p As Variant, dum As Boolean
 ProcSrcoll = True
 If bstack.toprinter Then
 MyEr "No scrolling for printer document", "Όχι κύλιση για το έγγραφο εκτύπωσης"
@@ -41380,7 +41389,7 @@ ProcSrcoll = False
 SyntaxError
 End If
 Else
- DUM = IsLabelSymbolNew(rest$, "ΑΝΩ", "UP", Lang)
+ dum = IsLabelSymbolNew(rest$, "ΑΝΩ", "UP", Lang)
 ScrollUpNew bstack.Owner, players(prive)
 
 
@@ -43364,9 +43373,9 @@ ProcFind = True
 
 End Function
 Function ProcSaveDoc(entrypoint As Long, basestack As basetask, rest$) As Boolean
-Dim DUM As Boolean, w$, i As Long, s$, pppp As mArray, ss$, p As Variant
+Dim dum As Boolean, w$, i As Long, s$, pppp As mArray, ss$, p As Variant
 Dim x1 As Long, y1 As Long
-If entrypoint = 1 Then DUM = True
+If entrypoint = 1 Then dum = True
     y1 = Abs(IsLabel(basestack, rest$, s$))
          If y1 = 6 Then
                 If neoGetArray(basestack, s$, pppp) Then
@@ -43427,7 +43436,7 @@ If entrypoint = 1 Then DUM = True
                     var(i).lcid = CLng(p)
                     x1 = 3
                     End If
-                     If Not var(i).SaveUnicodeOrAnsi(ss$, x1, DUM) Then
+                     If Not var(i).SaveUnicodeOrAnsi(ss$, x1, dum) Then
                        MyEr "can't save " + ss$, "δεν μπορώ να σώσω " + ss$
                       End If
                       Else
@@ -43456,7 +43465,7 @@ If entrypoint = 1 Then DUM = True
                     pppp.item(i).lcid = CLng(p)
                     x1 = 3
                     End If
-                     If Not pppp.item(i).SaveUnicodeOrAnsi(ss$, x1, DUM) Then
+                     If Not pppp.item(i).SaveUnicodeOrAnsi(ss$, x1, dum) Then
                        MyEr "can't save " + ss$, "δεν μπορώ να σώσω " + ss$
                        Exit Function
                       End If
@@ -43562,16 +43571,16 @@ End If
 ProcDos = True
 End Function
 Function ProcSpeech(basestack As basetask, rest$) As Boolean
-Dim s$, p As Variant, DUM As Boolean
+Dim s$, p As Variant, dum As Boolean
 If IsStrExp(basestack, rest$, s$) Then
 
 If FastSymbol(rest$, "#") Then s$ = "<spell>" & s$ & "</spell>"
-DUM = FastSymbol(rest$, "!")
+dum = FastSymbol(rest$, "!")
 If FastSymbol(rest$, ",") Then ' get voice number
 If Not IsExp(basestack, rest$, p) Then MissNumExpr:  Exit Function
-SPEeCH s$, DUM, CLng(p)
+SPEeCH s$, dum, CLng(p)
 Else
-SPEeCH s$, DUM
+SPEeCH s$, dum
 End If
 End If
 ProcSpeech = True
@@ -43705,7 +43714,7 @@ ProcOpenImage = True
 End Function
 Function ProcOpenFile(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim pa$, ss$, frm$, s$, w$, Scr As Object, x1 As Long, p As Variant, par As Boolean, F As Boolean
-Dim aaa() As String, DUM As Boolean
+Dim aaa() As String, dum As Boolean
 If IsSelectorInUse Then
 SelectorInUse
 Exit Function
@@ -43722,7 +43731,7 @@ par = False
 If FastSymbol(rest$, ",") Then If Not IsStrExp(basestack, rest$, w$) Then Exit Function
 If FastSymbol(rest$, ",") Then If IsExp(basestack, rest$, p) Then par = p <> 0
 If FastSymbol(rest$, ",") Then F = IsExp(basestack, rest$, p) Else p = 0  '' if f is false what???
- DUM = p <> 0
+ dum = p <> 0
 If TypeOf basestack.Owner Is GuiM2000 Then
 Set Scr = basestack.Owner
 Else
@@ -43754,7 +43763,7 @@ If InStr(w$, "|") > 0 Then
     End If
 End If
 
-    If OpenDialog(basestack, Scr, frm$, s$, ss$, w$, Not par, DUM) Then
+    If OpenDialog(basestack, Scr, frm$, s$, ss$, w$, Not par, dum) Then
      If multifileselection Then
         If ReturnListOfFiles <> "" Then
                 aaa() = Split(ReturnListOfFiles, "#")
@@ -44200,9 +44209,9 @@ Dim s$, p As Variant, ss$, X As Double, Y As Double
   ProcSoundRec = True
 End Function
 Function ProcLoadDoc(entrypoint As Long, basestack As basetask, rest$) As Boolean
-Dim DUM As Boolean, pppp As mArray, s$, i As Long, x1 As Long, y1 As Long, frm$, ss$
+Dim dum As Boolean, pppp As mArray, s$, i As Long, x1 As Long, y1 As Long, frm$, ss$
 ProcLoadDoc = True
-If entrypoint = 1 Then DUM = True
+If entrypoint = 1 Then dum = True
       y1 = Abs(IsLabel(basestack, rest$, s$))
 
         If y1 = 6 Then
@@ -44252,10 +44261,10 @@ If entrypoint = 1 Then DUM = True
                 End If
             If basestack.Owner.Name = "GuiM2000" Then
                 Set basestack.Owner.mDoc = var(i)
-                var(i).ReadUnicodeOrANSI ss$, DUM, x1
+                var(i).ReadUnicodeOrANSI ss$, dum, x1
                 Set basestack.Owner.mDoc = Nothing
             Else
-                var(i).ReadUnicodeOrANSI ss$, DUM, x1
+                var(i).ReadUnicodeOrANSI ss$, dum, x1
                 End If
                 If Err.Number > 0 Then Err.clear: Exit Function
                  var(i).ListLoadedType = x1
@@ -44271,7 +44280,7 @@ If entrypoint = 1 Then DUM = True
         ElseIf y1 = 6 Then
                     If Typename(pppp.item(i)) = doc Then
                                     x1 = 2
-                pppp.item(i).ReadUnicodeOrANSI ss$, DUM, x1
+                pppp.item(i).ReadUnicodeOrANSI ss$, dum, x1
                  pppp.item(i).ListLoadedType = x1
                     
                         Else

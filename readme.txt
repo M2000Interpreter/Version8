@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 16 active-X
-two bugs removed. New programs in info.gsb. Updated M2000paper.pdf
+Version 9.9 revision 17 active-X
+New file type for help. Some minor fixes.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

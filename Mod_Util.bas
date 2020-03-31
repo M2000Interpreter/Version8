@@ -5640,7 +5640,7 @@ If abt Then
 .glistN.WordCharRightButIncluded = vbNullString
 .glistN.WordCharLeftButIncluded = vbNullString
 Else
-.glistN.WordCharRightButIncluded = ChrW(160) + "("
+.glistN.WordCharRightButIncluded = ChrW(160) + "#("
 .glistN.WordCharLeft = ConCat(":", "{", "}", "[", "]", ",", "(", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", "@", Chr$(9), "#", "%", "&", "$")
 .glistN.WordCharRight = ConCat(":", "{", "}", "[", "]", ",", ")", "!", ";", "=", ">", "<", "'", """", " ", "+", "-", "/", "*", "^", Chr$(9), "#")
 .glistN.WordCharLeftButIncluded = "#$@~"
@@ -6123,6 +6123,11 @@ If s$ <> "" Then
                 If findstack - 100000 > 0 Then
                     stacksize = findstack - 100000
                 End If
+            ElseIf d$ = "MDB" Then
+                cc.ValueKey = "MDBHELP"
+                cc.ValueType = REG_DWORD
+                cc.Value = CLng(False)
+                UseMDBHELP = False
             Else
             s$ = "-" & d$ & s$
             Exit Do
@@ -6269,6 +6274,11 @@ If IsLabel(basestack1, s$, d$) > 0 Then
                 If findstack - 100000 > 0 Then
                     stacksize = findstack - 100000
                 End If
+        ElseIf d$ = "MDB" Then
+            cc.ValueKey = "MDBHELP"
+            cc.ValueType = REG_DWORD
+            cc.Value = CLng(True)
+            UseMDBHELP = True
         Else
             s$ = "+" & d$ & s$
             Exit Do
@@ -10022,8 +10032,8 @@ End Sub
 Public Sub MissNumExpr()
 MyEr "Missing number expression", "Λείπει αριθμητική παράσταση"
 End Sub
-Public Sub MissLicence()
-MyEr "Missing Licence", "Λείπει Άδεια"
+Public Sub MissLicense()
+MyEr "Missing License", "Λείπει Άδεια"
 End Sub
 Public Sub MissStringExpr()
 MyEr "Missing string expression", "Λείπει αλφαριθμητική παράσταση"
@@ -11136,6 +11146,7 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
         If Use13 Then ss$ = ss$ + " +INP" Else ss$ = ss$ + " -INP"
+        If UseMDBHELP Then ss$ = ss$ + " +MDB" Else ss$ = ss$ + " -MDB"
         wwPlain2 bstack, prive, "Διακόπτες " + ss$, bstack.Owner.Width, 1000, True
         wwPlain2 bstack, prive, "Περί διακοπτών: χρησιμοποίησε την εντολή Βοήθεια Διακόπτες", bstack.Owner.Width, 1000, True
         wwPlain2 bstack, prive, "Οθόνες:" + Str$(DisplayMonitorCount()) + "  η βασική :" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
@@ -11175,6 +11186,7 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
         If Use13 Then ss$ = ss$ + " +INP" Else ss$ = ss$ + " -INP"
+        If UseMDBHELP Then ss$ = ss$ + " +MDB" Else ss$ = ss$ + " -MDB"
         wwPlain2 bstack, prive, "Switches " + ss$, bstack.Owner.Width, 1000, True
         wwPlain2 bstack, prive, "About Switches: use command Help Switches", bstack.Owner.Width, 1000, True
         wwPlain2 bstack, prive, "Screens:" + Str$(DisplayMonitorCount()) + "  Primary is:" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
@@ -11715,6 +11727,7 @@ olamazi
 CallAsk = True
 End Function
 Public Sub olamazi()
+If Form4Loaded Then Exit Sub
 If Form4.Visible Then
 Form4.Visible = False
 If Form1.Visible Then
@@ -17981,7 +17994,7 @@ checkit:
 End Function
 Public Function exeSelect(ExecuteLong, once As Boolean, bstack As basetask, b$, v As Long, Lang As Long) As Boolean
 Dim ok As Boolean, x1 As Long, y1 As Long, sp As Variant, st As Variant, sw$, slct As Long, ss$
-Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&, lbl$
+Dim x2 As Long, y2 As Long, p As Variant, w$, dum As Boolean, i As Long, nd&, lbl$
         exeSelect = True
                 x1 = 0 ' mode numbers using p, sp and st
                 ' x1=2 using sw$ w$ ss$
@@ -18095,11 +18108,11 @@ Dim x2 As Long, y2 As Long, p As Variant, w$, DUM As Boolean, i As Long, nd&, lb
 conthere:
                                                         If FastSymbol(b$, "{") Then  ' block
                                                           ss$ = block(b$)
-                                                            DUM = False
+                                                            dum = False
                                                             i = 1
                                                             ' #3 call a block
                                                             TraceStore bstack, nd&, b$, 0
-                                                            Call executeblock(i, bstack, ss$, False, DUM, , True)
+                                                            Call executeblock(i, bstack, ss$, False, dum, , True)
                                                            TraceRestore bstack, nd&
                                                             
                                                             
@@ -18118,18 +18131,18 @@ conthere:
                                                                 ExecuteLong = 0: Exit Function
                                                             ElseIf i = 2 Then
                                                                 If Len(ss$) > 0 Then b$ = ss$
-                                                                If DUM = True And b$ <> "" Then
+                                                                If dum = True And b$ <> "" Then
                                                                 slct = -1
                                                                 Else
                                                                 GoTo ContGoto
                                                                 End If
                                                             ElseIf i = 3 Then
                                                                 If Len(ss$) > 0 Then b$ = ss$
-                                                               If DUM = True And b$ <> "" Then slct = 0
+                                                               If dum = True And b$ <> "" Then slct = 0
                                                             End If
                                                             End If
                                                         Else   ' or line
-                                                            DUM = True
+                                                            dum = True
                                                         
                                                             i = 1
                                                             IsNumberLabel b$, lbl$
@@ -18146,7 +18159,7 @@ conthere:
                                                             ss$ = GetNextLine(b$) + vbCrLf + "'"
                                                            
                                                             TraceStore bstack, nd&, b$, 3
-                                                            Call executeblock(i, bstack, ss$, once, DUM, True, True)
+                                                            Call executeblock(i, bstack, ss$, once, dum, True, True)
                                                             bstack.addlen = nd&
 
                                                             If i = 0 Then
@@ -18157,7 +18170,7 @@ conthere:
                                                                 ExecuteLong = 1
                                                                 Exit Function
                                                             ElseIf i = 2 Then
-                                                                If DUM = True And Len(ss$) > 0 Then
+                                                                If dum = True And Len(ss$) > 0 Then
                                                                     slct = -1
                                                                 ElseIf Len(ss$) > 0 Then
                                                                     b$ = ss$
@@ -18167,10 +18180,10 @@ conthere:
                                                                 Else
                                                                     ExecuteLong = i
                                                                     b$ = ss$
-                                                                    exeSelect = DUM
+                                                                    exeSelect = dum
                                                                 End If
                                                             ElseIf i = 3 Then
-                                                                If DUM = True And ss$ <> "" Then
+                                                                If dum = True And ss$ <> "" Then
                                                                     slct = 0
                                                                 Else
                                                                     i = 2
@@ -18208,11 +18221,11 @@ conthere:
                                                     b$ = NLtrim$(Mid$(b$, 2))
                                             Else
                                                     ss$ = block(b$)
-                                                    DUM = False
+                                                    dum = False
                                                     i = 1
                                                     ' #7 call block inside Case (Break) ok
                                                     TraceStore bstack, nd&, b$, 0
-                                                            Call executeblock(i, bstack, ss$, False, DUM, , True)
+                                                            Call executeblock(i, bstack, ss$, False, dum, , True)
                                                             TraceRestore bstack, nd&
                                                             If i = 1 Then
                                                             FastSymbol b$, "}"
@@ -18229,7 +18242,7 @@ conthere:
                                                                 ExecuteLong = 0: Exit Function
                                                             ElseIf i = 2 Then
                                                                     If Len(ss$) > 0 Then b$ = ss$
-                                                                    If DUM = True And b$ <> "" Then
+                                                                    If dum = True And b$ <> "" Then
                                                                     slct = -1
                                                                     Else
                                                                     GoTo ContGoto
@@ -18237,7 +18250,7 @@ conthere:
                                                            
                                                              ElseIf i = 3 Then
                                                                     If Len(ss$) > 0 Then b$ = ss$
-                                                                    If DUM = True And b$ <> "" Then slct = 0
+                                                                    If dum = True And b$ <> "" Then slct = 0
         
                                                              End If
                                                             End If
@@ -18245,7 +18258,7 @@ conthere:
                                      
                                         SetNextLine b$
                                       ElseIf slct < 0 Then
-                                                        DUM = True
+                                                        dum = True
                                                    
                                                             i = 1
                                                             ' #8 call one command inside Case (Break) ok
@@ -18254,7 +18267,7 @@ conthere:
                                                             ss$ = GetNextLine(b$) + vbCrLf + "'"
                                                            
                                                             TraceStore bstack, nd&, b$, 3
-                                                            Call executeblock(i, bstack, ss$, once, DUM, True, True)
+                                                            Call executeblock(i, bstack, ss$, once, dum, True, True)
                                                             bstack.addlen = nd&
                                                             If i = 0 Then
                                                                 ExecuteLong = 0: Exit Function
@@ -18263,7 +18276,7 @@ conthere:
                                                                 ExecuteLong = 1
                                                                 Exit Function
                                                             ElseIf i = 2 Then
-                                                                If DUM = True And Len(ss$) > 0 Then
+                                                                If dum = True And Len(ss$) > 0 Then
                                                                     slct = -1
                                                                 ElseIf Len(ss$) > 0 Then
                                                                     b$ = ss$
@@ -18273,10 +18286,10 @@ conthere:
                                                                 Else
                                                                     ExecuteLong = i
                                                                     b$ = ss$
-                                                                    exeSelect = DUM
+                                                                    exeSelect = dum
                                                                 End If
                                                             ElseIf i = 3 Then
-                                                                If DUM = True And ss$ <> "" Then
+                                                                If dum = True And ss$ <> "" Then
                                                                     slct = 0
                                                                 Else
                                                                     i = 2
@@ -18312,11 +18325,11 @@ case1else:
                                     If FastSymbol(b$, "{") Then
                                         ss$ = block(b$)
                                     If slct > 0 Then
-                                                    DUM = False
+                                                    dum = False
                                                     i = 1
                                                     ' #9 call block inside Else
                                                     TraceStore bstack, nd&, b$, 0
-                                                       Call executeblock(i, bstack, ss$, False, DUM, , True)
+                                                       Call executeblock(i, bstack, ss$, False, dum, , True)
                                                        TraceRestore bstack, nd&
                                                        If i = 1 Then
                                                             FastSymbol b$, "}"
@@ -18333,7 +18346,7 @@ case1else:
                                                                 ExecuteLong = 0: Exit Function
                                                             ElseIf i = 2 Then
                                                                         If Len(ss$) > 0 Then b$ = ss$
-                                                                          If DUM = True And b$ <> "" Then
+                                                                          If dum = True And b$ <> "" Then
                                                                             slct = -1
                                                                           ElseIf b$ <> "" Then
                                                                         GoTo ContGoto
@@ -18343,7 +18356,7 @@ case1else:
                                                                         End If
                                                             ElseIf i = 3 Then
                                                             If Len(ss$) > 0 Then b$ = ss$
-                                                                If DUM = True And b$ <> "" Then slct = 0: b$ = Mid$(b$, 2): GetNextLine (ss$)
+                                                                If dum = True And b$ <> "" Then slct = 0: b$ = Mid$(b$, 2): GetNextLine (ss$)
                                                             End If
                                                             End If
                                         Else
@@ -18351,16 +18364,16 @@ case1else:
                                         End If
                                     Else
                                     If slct > 0 Then
-                                                                       DUM = True
+                                                                       dum = True
                                              
                                                             i = 1
                                                             ' #10 call one command inside ELSE
                                                             once = True
-                                                            DUM = True
+                                                            dum = True
                                                             'TraceStore bstack, nd&, b$, 0
                                                             ss$ = GetNextLine(b$) + vbCrLf + "'"
                                                             TraceStore bstack, nd&, b$, 3
-                                                            Call executeblock(i, bstack, ss$, once, DUM, True, True)
+                                                            Call executeblock(i, bstack, ss$, once, dum, True, True)
                                                         
                                                             TraceRestore bstack, nd&
                                                             If i = 0 Then
@@ -18371,7 +18384,7 @@ case1else:
                                                                 Exit Function
                                                             ElseIf i = 2 Then
                                                               
-                                                                          If DUM = True And Len(ss$) > 0 Then
+                                                                          If dum = True And Len(ss$) > 0 Then
                                                                             slct = -1
                                                                           ElseIf Len(ss$) > 0 Then
                                                                             b$ = ss$
@@ -18381,11 +18394,11 @@ case1else:
                                                                           Else
                                                                             ExecuteLong = i
                                                                             b$ = ss$
-                                                                            exeSelect = DUM
+                                                                            exeSelect = dum
                                                                             Exit Function
                                                                         End If
                                                             ElseIf i = 3 Then
-                                                                If DUM = True And ss$ <> "" Then
+                                                                If dum = True And ss$ <> "" Then
                                                                     slct = 0
                                                                 Else
                                                                     i = 2
@@ -18681,14 +18694,14 @@ End Sub
 
 Sub MarkIf(bstack As basetask, a As Long, b As Boolean)
 Dim s As mStiva2
-Set s = bstack.retstack
+Set s = bstack.RetStack
 s.PushVal b
 s.PushVal a
 s.PushVal -3  ' mark for IF
 End Sub
 Function HaveMark(bstack As basetask, a As Long, b As Boolean) As Boolean
 Dim s As mStiva2
-Set s = bstack.retstack
+Set s = bstack.RetStack
 If s.Total >= 3 Then
 HaveMark = s.LookTopVal = -3
 a = s.StackItem(2)
@@ -18697,14 +18710,14 @@ End If
 End Function
 Function HaveMark2(bstack As basetask) As Boolean
 Dim s As mStiva2
-Set s = bstack.retstack
+Set s = bstack.RetStack
 If s.Total >= 3 Then
 If s.LookTopVal = -3 Then s.drop 3: HaveMark2 = True
 End If
 End Function
 Sub DropMark(bstack As basetask)
 Dim s As mStiva2
-Set s = bstack.retstack
+Set s = bstack.RetStack
 If s.Total >= 3 Then
 If s.LookTopVal = -3 Then s.drop 3
 End If
@@ -20481,7 +20494,7 @@ there1:
 bstack.LoadOnly = False
 End Function
 Public Sub PushErrStage(basestack As basetask)
-        With basestack.retstack
+        With basestack.RetStack
                         .PushVal subHash.count
                         .PushVal varhash.count
                         .PushVal sb2used
@@ -20498,7 +20511,7 @@ Dim nok As Boolean, target As Long
         target = basestack.RetStackTotal - Parts
         If target < 0 Then target = 0
         While basestack.RetStackTotal > target
-        With basestack.retstack
+        With basestack.RetStack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -20542,7 +20555,7 @@ Dim nok As Boolean, target As Long
         target = basestack.RetStackTotal - Parts
         If target < 0 Then target = 0
         While basestack.RetStackTotal > target
-        With basestack.retstack
+        With basestack.RetStack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -20588,7 +20601,7 @@ Dim nok As Boolean, target As Long
         target = basestack.RetStackTotal - Parts
         If target < 0 Then target = 0
         While basestack.RetStackTotal > target
-        With basestack.retstack
+        With basestack.RetStack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -20630,7 +20643,7 @@ End Sub
 
 Public Sub PopErrStage(basestack As basetask)
 Dim nok As Boolean
-        With basestack.retstack
+        With basestack.RetStack
         If .LookTopVal = -4 Then
 jumphere:
            .drop 1
@@ -22568,6 +22581,7 @@ conthere:
 If Not (basestack.IamChild Or basestack.IamAnEvent) Then
 abt = False
 End If
+If Form4Loaded Then
 If Form4.Visible Then
 Form4.Visible = False
 If Form1.Visible Then
@@ -22580,8 +22594,8 @@ If Form1.Visible Then
 End If
 Helplastfactor = 1
 helpSizeDialog = 1
-
 Unload Form4
+End If
 End If
 End If
 Exit Function
@@ -22676,7 +22690,7 @@ End Function
 Function ProcRemove(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim ss$
 ProcRemove = True
-If IsLabelSymbolNew(rest$, "ΑΔΕΙΑΣ", "LICENCE", Lang) Then
+If IsLabelSymbolNew(rest$, "ΑΔΕΙΑΣ", "LICENSE", Lang) Then
 If IsStrExp(basestack, rest$, ss$) Then
 Licenses.Remove ss$
 Else
@@ -22771,6 +22785,7 @@ If IsExp(bstack, a$, r, , True) Then
 End Function
 Function IsRecords(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
 Dim VR As Long
+    FastSymbol a$, "#"
     If IsExp(bstack, a$, r, , True) Then
         VR = r Mod 512
         If FLEN(VR) = 0 Then
@@ -22936,7 +22951,7 @@ Function MyDeclare(bstack As basetask, rest$, Lang As Long) As Boolean
 Dim p As Variant, i As Long, s$, pa$
 Dim x1 As Long, y1 As Long, par As Boolean, ss$, w$, what$, Y3 As Boolean
 Dim declobj As Object, ML As Long
-Dim DUM As Boolean
+Dim dum As Boolean
 Dim pppp As mArray
 Dim ii As Long, ev As ComShinkEvent
 MyDeclare = True
@@ -23179,14 +23194,14 @@ MyDeclare = False
                             Licenses.Add s$, w$
                         End If
                         If Err.Number > 0 And Err.Number <> 732 Then
-                        MissLicence
+                        MissLicense
                         Err.clear
                         Else
                         Err.clear
                         CreateitObject var(i), s$, CStr(pa$)
                         If Err.Number > 0 Then
                         Err.clear
-                        MissLicence
+                        MissLicense
                         End If
                         End If
                         Licenses.Remove s$
@@ -23201,7 +23216,7 @@ MyDeclare = False
                 CreateitObject var(i), s$, CStr(pa$)
                      If Err.Number > 0 Then
                         Err.clear
-                        MissLicence
+                        MissLicense
                         End If
                     End If
                     
@@ -23217,14 +23232,14 @@ MyDeclare = False
                  Licenses.Add s$, pa$
                  End If
                      If Err.Number > 0 And Err.Number <> 732 Then
-                        MissLicence
+                        MissLicense
                         Err.clear
                         Else
                         Err.clear
                  CreateitObject var(i), s$
                  If Err.Number > 0 Then
                         Err.clear
-                        MissLicence
+                        MissLicense
                         End If
                         End If
                  Licenses.Remove s$
@@ -23247,7 +23262,7 @@ MyDeclare = False
                 
                  If Err.Number > 0 Then
                         Err.clear
-                        MissLicence
+                        MissLicense
                         ElseIf Y3 <> 0 Then
                         
                          
@@ -24106,19 +24121,19 @@ Dim ps As mStiva, p As Variant, s$, ok As Long
              End With
             
 End Function
-Function mydata2(bstack As basetask, rest$, retstack As mStiva) As Boolean
+Function mydata2(bstack As basetask, rest$, RetStack As mStiva) As Boolean
 Dim s$, p As Variant ', vvl As Variant, photo As Object
 mydata2 = True
 Do
     If FastSymbol(rest$, "!") Then
                 If IsExp(bstack, rest$, p) Then
                     If bstack.lastobj Is Nothing Then
-                        retstack.DataValLong p
+                        RetStack.DataValLong p
                     ElseIf TypeOf bstack.lastobj Is mHandler Then
                         If TypeOf bstack.lastobj.objref Is mStiva Then
-                            retstack.MergeBottom bstack.lastobj.objref
+                            RetStack.MergeBottom bstack.lastobj.objref
                         ElseIf TypeOf bstack.lastobj.objref Is mArray Then
-                            retstack.MergeBottomCopyArray bstack.lastobj.objref
+                            RetStack.MergeBottomCopyArray bstack.lastobj.objref
                         Else
                             mydata2 = False
                             MyEr "Expected Stack Object or Array after !", "Περίμενα αντικείμενο Σωρό ή πίνακα μετά το !"
@@ -24127,30 +24142,30 @@ Do
                         End If
                         Set bstack.lastobj = Nothing
                     ElseIf TypeOf bstack.lastobj Is mArray Then
-                        retstack.MergeBottomCopyArray bstack.lastobj
+                        RetStack.MergeBottomCopyArray bstack.lastobj
                         Set bstack.lastobj = Nothing
                     End If
                         
                      End If
                 ElseIf IsExp(bstack, rest$, p) Then
                   If bstack.lastobj Is Nothing Then
-                      retstack.DataVal p
+                      RetStack.DataVal p
                  Else
                    If TypeOf bstack.lastobj Is mStiva Then
                    Set bstack.Sorosref = bstack.lastobj
                    ElseIf TypeOf bstack.lastobj Is VarItem Then
-                    retstack.DataObjVaritem bstack.lastobj
+                    RetStack.DataObjVaritem bstack.lastobj
                       Else
-                      retstack.DataObj bstack.lastobj
+                      RetStack.DataObj bstack.lastobj
                     Set bstack.lastpointer = Nothing
                     End If
                       Set bstack.lastobj = Nothing
                 End If
         ElseIf IsStrExp(bstack, rest$, s$) Then
                 If bstack.lastobj Is Nothing Then
-                        retstack.DataStr s$
+                        RetStack.DataStr s$
                 Else
-                        retstack.DataObj bstack.lastobj
+                        RetStack.DataObj bstack.lastobj
                         Set bstack.lastobj = Nothing
                           Set bstack.lastpointer = Nothing
                 End If

@@ -224,7 +224,7 @@ End If
   If hideme Then
     reopen2 = False
     reopen4 = False
-    If Form4.Visible Then Form4.Visible = False: reopen4 = True
+    If Form4Loaded Then If Form4.Visible Then Form4.Visible = False: reopen4 = True
     If Form2.Visible Then If trace Then Form2.Visible = False: reopen2 = True
      Timer1_Timer
      once = False

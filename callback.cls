@@ -252,7 +252,7 @@ End If
 End If
 End Property
 Public Sub ExecuteStatement(ByVal code$)
-Dim what$, pos As Long, func As Boolean, param$, drop$
+Dim what$, Pos As Long, func As Boolean, param$, drop$
 If IsLabelOnly(code$, what$) > 4 Then
     func = True
 ElseIf what$ = vbNullString Then
@@ -263,15 +263,15 @@ Call Run(what$)
 Exit Sub
 End If
 Do
- pos = 1
-  drop$ = aheadstatus(code$, True, pos)
-  If drop$ = vbNullString And pos > Len(code$) Then Exit Sub
+ Pos = 1
+  drop$ = aheadstatus(code$, True, Pos)
+  If drop$ = vbNullString And Pos > Len(code$) Then Exit Sub
   If param$ <> "" Then
-  param$ = param$ + ", " + Left$(code$, pos - 1)
+  param$ = param$ + ", " + Left$(code$, Pos - 1)
   Else
-  param$ = Left$(code$, pos - 1)
+  param$ = Left$(code$, Pos - 1)
   End If
-  code$ = Mid$(code$, pos)
+  code$ = Mid$(code$, Pos)
   Loop Until Not FastSymbol(code$, ",")
   If func Then
   Call Run(what$ + " " + param$ + ")")
@@ -280,12 +280,12 @@ Do
   End If
 End Sub
 Public Function Eval(code$) As Variant
-Dim pos As Long, p As Double, s As String, drop$
- pos = 1
-  drop$ = aheadstatus(code$, True, pos)
-  If drop$ = vbNullString And pos > Len(code$) Then Exit Function
+Dim Pos As Long, p As Double, s As String, drop$
+ Pos = 1
+  drop$ = aheadstatus(code$, True, Pos)
+  If drop$ = vbNullString And Pos > Len(code$) Then Exit Function
   If InStr(drop$, "N") Then
-  If IsExp(objref, Left$(code$, pos), p) Then
+  If IsExp(objref, Left$(code$, Pos), p) Then
   If Not objref.lastobj Is Nothing Then
   Set Eval = objref.lastobj
   
@@ -294,7 +294,7 @@ Dim pos As Long, p As Double, s As String, drop$
    End If
   End If
   Else
-  If IsStrExp(objref, Left$(code$, pos), s$) Then
+  If IsStrExp(objref, Left$(code$, Pos), s$) Then
   If Not objref.lastobj Is Nothing Then
       Set Eval = objref.lastobj
   Else
@@ -485,7 +485,7 @@ If vNewValue = 1 Then
     If Form1.Visible Or Form1.TrueVisible Then
     Form1.TrueVisible = Form1.Visible Or Form1.TrueVisible
     Form1.Visible = False
-     If Form4.Visible Then Form4.Visible = False: reopen4 = True
+    If Form4Loaded Then If Form4.Visible Then Form4.Visible = False: reopen4 = True
     If Form2.Visible Then If trace Then Form2.Visible = False: reopen2 = True
     End If
 Else

@@ -296,6 +296,7 @@ Private Declare Function TranslateCharsetInfo Lib "gdi32" ( _
     ByVal dwFlags As Long _
 ) As Long
 Public reopen4 As Boolean, reopen2 As Boolean
+Public HelpFile As New Document, UseMDBHELP As Boolean, Form4Loaded As Boolean
 Public Sub PlaceIcon(a As StdPicture)
 On Error Resume Next
 If UseMe Is Nothing Then Exit Sub
@@ -1654,14 +1655,14 @@ Call SetWindowRgn(.hWnd, myRgn, 0)
 .Tag = Priority
 On Error Resume Next
 .ZOrder 0
-.Font.name = Form1.DIS.Font.name
+.Font.Name = Form1.DIS.Font.Name
 .Font.charset = Form1.DIS.Font.charset
 .Font.Size = SZ
 .Font.Strikethrough = False
 .Font.Underline = False
 .Font.Italic = Form1.DIS.Font.Italic
 .Font.bold = Form1.DIS.Font.bold
-.Font.name = Form1.DIS.Font.name
+.Font.Name = Form1.DIS.Font.Name
 .Font.charset = Form1.DIS.Font.charset
 .Font.Size = SZ
 
@@ -2890,7 +2891,7 @@ ismine = True
 a$ = myUcase(a$, True)
 Select Case a$
 Case "@(", "$(", "~(", "?", "->", "[]"
-Case "ABOUT", "ABOUT$", "ABS(", "ADD.LICENCE$(", "AFTER", "ALWAYS", "AND", "ANGLE", "APPDIR$", "APPEND", "APPEND.DOC", "APPLICATION"
+Case "ABOUT", "ABOUT$", "ABS(", "ADD.LICENSE$(", "AFTER", "ALWAYS", "AND", "ANGLE", "APPDIR$", "APPEND", "APPEND.DOC", "APPLICATION"
 Case "ARRAY", "ARRAY$(", "ARRAY(", "AS", "ASC(", "ASCENDING", "ASK$(", "ASK(", "ATN("
 Case "BACK", "BACKGROUND", "BACKWARD(", "BANK(", "BASE", "BEEP", "BINARY", "BINARY.ADD(", "BINARY.AND(", "BINARY.NEG(", "BINARY.NOT("
 Case "BINARY.OR(", "BINARY.ROTATE(", "BINARY.SHIFT(", "BINARY.XOR(", "BITMAPS", "BMP$(", "BOLD"
@@ -2917,7 +2918,7 @@ Case "IMAGE.X.PIXELS(", "IMAGE.Y(", "IMAGE.Y.PIXELS(", "IN", "INFINITY", "INKEY$
 Case "INSERT", "INSTR(", "INT(", "INTEGER", "INTERVAL", "INTERNET", "INTERNET$", "INVENTORY", "IS", "ISLET", "ISNUM", "ISWINE", "ITALIC"
 Case "JOYPAD", "JOYPAD(", "JOYPAD.ANALOG.X(", "JOYPAD.ANALOG.Y(", "JOYPAD.DIRECTION(", "JPG$(", "KEEP", "KEY$", "KEYBOARD"
 Case "KEYPRESS(", "LAMBDA", "LAMBDA(", "LAMBDA$", "LAMBDA$(", "LAN$", "LATIN", "LAYER", "LAZY$(", "LCASE$(", "LEFT$(", "LEFTPART$(", "LEGEND", "LEN"
-Case "LEN(", "LEN.DISP(", "LET", "LETTER$", "LIB", "LICENCE", "LINE", "LINESPACE", "LINK", "LIST", "LN("
+Case "LEN(", "LEN.DISP(", "LET", "LETTER$", "LIB", "LICENSE", "LINE", "LINESPACE", "LINK", "LIST", "LN("
 Case "LOAD", "LOAD.DOC", "LOCAL", "LOCALE", "LOCALE$(", "LOCALE(", "LOG(", "LONG", "LOOP"
 Case "LOWORD(", "LOWWORD(", "LTRIM$(", "MAIN.TASK", "MAP(", "MARK", "MASTER", "MATCH(", "MAX(", "MAX$(", "MAX.DATA$("
 Case "MAX.DATA(", "MDB(", "MEDIA", "MEDIA.COUNTER", "MEMBER$(", "MEMBER.TYPE$(", "MEMO", "MEMORY", "MENU"
@@ -4150,7 +4151,7 @@ myfun() = Array("FORMAT$(", 1, "лояжг$(", 1, "EVAL$(", 2, "ейжя$(", 2, "ейжяасг$
 , "FUNCTION$(", 36, "сумаятгсг$(", 36, "HEX$(", 37, "дейаен$(", 37, "SHOW$(", 38, "жамеяо$(", 38, "MENU$(", 39, "епикоцг$(", 39, "епикоцес$(", 39 _
 , "REPLACE$(", 40, "аккацг$(", 40, "PATH$(", 41, "топос$(", 41, "UCASE$(", 42, "йеж$(", 42, "LCASE$(", 43, "пеф$(", 43, "STRING$(", 44, "епам$(", 44, "MID$(", 45, "лес$(", 45 _
 , "LEFT$(", 46, "аяис$(", 46, "RIGHT$(", 47, "дени$(", 47, "SND$(", 48, "гво$(", 48, "BMP$(", 49, "еий$(", 49, "JPG$(", 50, "жыто$(", 50 _
-, "TRIM$(", 51, "апой$(", 51, "QUOTE$(", 52, "паяахесг$(", 52, "сыяос$(", 53, "STACK$(", 53, "ADD.LICENCE$(", 54, "баке.адеиа$(", 54 _
+, "TRIM$(", 51, "апой$(", 51, "QUOTE$(", 52, "паяахесг$(", 52, "сыяос$(", 53, "STACK$(", 53, "ADD.LICENSE$(", 54, "баке.адеиа$(", 54 _
 , "ENVELOPE$(", 55, "жайекос$(", 55, "FIELD$(", 56, "педио$(", 56, "DRW$(", 57, "свд$(", 57, "TIME$(", 58, "вяомос$(", 58, "DATE$(", 59, "глеяа$(", 59 _
 , "STR$(", 60, "цяажг$(", 60, "CHRCODE$(", 61, "ваяйыд$(", 61, "CHR$(", 62, "вая$(", 62, "GROUP$(", 63, "олада$(", 63, "PROPERTY$(", 64, "идиотгта$(", 64, "TITLE$(", 65, "титкос$(", 65, "IF$(", 66, "ам$(", 66, "леяос$(", 67, "PIECE$(", 67, "STRREV$(", 68, "амап$(", 68 _
 , "RTRIM$(", 69, "апой.де$(", 69, "LTRIM$(", 70, "апой.ая$(", 70, "STACKITEM(", 1, "тилгсыяоу(", 1, "ARRAY(", 2, "пимайас(", 2, "CONS(", 3, "емысг(", 3, "CAR(", 4, "пяыто(", 4, "CDR(", 5, "еполема(", 5, "VAL(", 6, "тилг(", 6, "аниа(", 6, "EVAL(", 7 _
