@@ -149,6 +149,7 @@ Public vH_y As Long
 Public ttl As Boolean
 Public Const SRCCOPY = &HCC0020
 Public Release As Boolean
+Private Declare Function SetBkMode Lib "gdi32" (ByVal hDC As Long, ByVal nBkMode As Long) As Long
 Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
 Declare Function RoundRect Lib "gdi32" (ByVal hDC As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal Y3 As Long) As Long
 Declare Function UpdateWindow Lib "user32" (ByVal hWnd As Long) As Long
@@ -5412,6 +5413,7 @@ Loop
  
 If Not QRY Then s$ = vbNullString
 dq.FontTransparent = True
+SetBkMode dq.hDC, 1
 QRY = False
 
 Call mouse
@@ -18732,6 +18734,7 @@ Dim pppp As mArray, i1 As Long, Lang As Long
 Dim r1 As Long, r2 As Long
 ' uink$ = VbNullString
 di.FontTransparent = True
+SetBkMode di.hDC, 1
 ohere$ = here$
 If Not ByPass Then here$ = vbNullString
 bstack.LoadOnly = ByPass
@@ -22730,7 +22733,7 @@ If Check2SaveModules Then
 If pagio$ = "GREEK" Then
 BreakMes = "Διακοπή και Επανεκκίνηση" & vbCrLf & "Προσοχή υπάρχουν μη αποθηκευμένες αλλαγές που θα χαθούν"
 Else
-BreakMes = "Break Key - Hard Reset" & vbCrLf & "Warning, changes we lost"
+BreakMes = "Break Key - Hard Reset" & vbCrLf & "Warning, changes lost"
 End If
 Else
 If pagio$ = "GREEK" Then
@@ -22742,7 +22745,7 @@ End If
 End Function
 Function Check2Save() As Boolean
 If Check2SaveModules Then
-Check2Save = MsgBoxN(IIf(pagio$ = "GREEK", "Προσοχή υπάρχουν μη αποθηκευμένες αλλαγές που θα χαθούν", "Warning, changes we lost"), 1, IIf(pagio$ = "GREEK", "Τερματισμός Διερμηνευτή", "Quit Interpreter")) <> 1
+Check2Save = MsgBoxN(IIf(pagio$ = "GREEK", "Προσοχή υπάρχουν μη αποθηκευμένες αλλαγές που θα χαθούν", "Warning, changes lost"), 1, IIf(pagio$ = "GREEK", "Τερματισμός Διερμηνευτή", "Quit Interpreter")) <> 1
 Else
 Check2Save = False
 End If

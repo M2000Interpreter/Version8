@@ -1558,7 +1558,7 @@ Private Sub InsertionSort10(ByVal iMin As Long, ByVal iMax As Long)
         j = i
         j1 = j0 + sortoff
         Do While j > iMin
-        Debug.Print "insertion compare"
+        ''Debug.Print "insertion compare"
 again:
         On Error GoTo ex1
         If actualdata(j1) = actualdata(j1 - sortmult) Then
@@ -1576,7 +1576,7 @@ ex1:
         
         If col(part) = 0 Then
         If actualdata(j1) < actualdata(j1 - sortmult) Then
-            Debug.Print "insertion swap"
+           ' Debug.Print "insertion swap"
             For k = j1 - sortoff To j1 - sortoff + sortmult - 1
             SwapVariant actualdata(k), actualdata(k - sortmult)
             Next k
@@ -1593,7 +1593,7 @@ ex1:
         End If
         Else
         If actualdata(j1) > actualdata(j1 - sortmult) Then
-            Debug.Print "insertion swap"
+           ' Debug.Print "insertion swap"
             For k = j1 - sortoff To j1 - sortoff + sortmult - 1
             SwapVariant actualdata(k), actualdata(k - sortmult)
             Next k
@@ -1623,7 +1623,7 @@ End Sub
 Private Sub Swap10(ByVal a1, ByVal A2)
 Static k As Long
 If a1 = A2 Then Exit Sub
-Debug.Print "swap ", a1, A2
+'Debug.Print "swap ", a1, A2
 a1 = a1 * sortmult
 A2 = A2 * sortmult
 For k = 0 To sortmult - 1
@@ -1633,7 +1633,7 @@ End Sub
 Private Sub FeedPiv(ByVal a1)
 Static k As Long
 On Error Resume Next
-Debug.Print "feed piv "; a1
+'Debug.Print "feed piv "; a1
 a1 = a1 * sortmult
 For k = 0 To sortmult - 1
     piv1(k) = actualdata(a1 + k)
@@ -1643,7 +1643,7 @@ End Sub
 Private Function Compare10(ByVal a1) As Long
 Static k As Long, ret As Long
 On Error Resume Next
-Debug.Print "compare ", a1
+'Debug.Print "compare ", a1
 a1 = a1 * sortmult
 For k = 2 To upart - 1 Step 2
 ret = actualdata(a1 + col(k)) = piv1(col(k))
@@ -1671,7 +1671,7 @@ Private Sub QuickSortItemsWithSameKey10(ByVal LB As Long, ByVal UB As Long)
 Dim M1 As Long, M2 As Long
 
   If UB - LB < 7 Then
-  Debug.Print LB, UB
+  'Debug.Print LB, UB
   InsertionSort10 LB, UB
   Exit Sub
   

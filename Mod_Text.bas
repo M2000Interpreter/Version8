@@ -82,7 +82,7 @@ Public TestShowCode As Boolean, TestShowSub As String, TestShowStart As Long, Wa
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 17
+Global Const Revision = 18
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -655,6 +655,7 @@ Else
 mLid = p
 End If
 nSize = LCMapStringW(mLid, LCMAP_LOWERCASE, StrPtr(a$), nSize, StrPtr(klower), nSize)
+a$ = klower
 If p = 1032 Then
 a$ = a$ & Chr(0)
 a$ = Replace(a$, "ó" & Chr(0), "ò")
@@ -672,8 +673,6 @@ a$ = Replace(a$, "ó+", "ò+")
 a$ = Replace(a$, "ó*", "ò*")
 a$ = Replace(a$, "ó" & vbCr, "ò" & vbCr)
 a$ = Replace(a$, "ó" & vbLf, "ò" & vbLf)
-
-
 End If
 klower = a$
 End Function

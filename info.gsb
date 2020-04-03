@@ -4248,14 +4248,14 @@ Else
 		if findit then
 			find aLL$, "\"+word$, where
 		else
-			find aLL$, "\"+word$+"'", where
+			find aLL$, "\"+word$+"!", where
 		end if
 		Read Where1
 		if Where1>0 then
 			Read  There : drop
 			Ret$=mid$( Paragraph$(aLL$, There), 2)
-			Word$=leftpart$(Ret$,"'")
-			lbl=Val(Rightpart$(Ret$,"'"))
+			Word$=leftpart$(Ret$,"!")
+			lbl=Val(Rightpart$(Ret$,"!"))
 			info=Val(Rightpart$(Ret$,"-"))
 			if info=0 then
 				="["+LeftPart$(Paragraph$(aLL$,lbl+1), ", ")+"] "+format$(paragraph$(aLL$, 2+aa+1+There-no_par))
@@ -4688,7 +4688,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 8.9 for ver 9.9 rev 17 and newer"
+	Report " A collection of modules for tests version 9.0 for ver 9.9 rev 18 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -5758,7 +5758,6 @@ Layer Alfa {
       tm=0
       Thread {
             static internal=1
-'            Refresh 0
             Move 0,0
             Copy 0,0 use screen$
             Part {
@@ -5831,6 +5830,7 @@ Declare Alfa Nothing
 Declare Math Nothing
 Print counter1, counter2
 Title "Demo Complete"
+smooth off
 Set Fast   ' return to normal
 }
 MODULE UPDATE {beep
@@ -16658,10 +16658,11 @@ If Module(Info) Then
 	keyboard "INFOBasic"+chr$(13)
 end if
 }
-MODULE HTMLEDITOR {\\ Version 0.1
+MODULE HTMLEDITOR {\\ Version 0.2
+\\ default set true to Pad
 \\ need some work inside interpreter code
 Clear \\ Clear all variables/objects
-def setagain as boolean
+def setagain as boolean, hidetitle as boolean=True
 if file.name$("A.abc")="a.abc" then
 Set switches "+CASESENSITIVE"
 setagain=true
@@ -16669,6 +16670,7 @@ setagain=true
 End if
 Global Const  CSIDL_MY_DOCUMENTS  = 0x5
 if match("S") then
+hidetile=false
 Filename$=Dir$+letter$
 document first$
 load.doc first$, filename$
@@ -16732,7 +16734,7 @@ With NotePad, "Title" As Caption$, "Visible" As Visible, "TitleHeight" As tHeigh
 With NotePad, "UseIcon", True, "UseReverse", True
 With Pad, "Text" As Pad.text$, "ShowAlways", True,"NoColor", True,"SelLength" as SelLength
 With Pad, "SearchWords", False, "nowrap", False, "linespace", 30
-With Pad, "ReplaceTitle" as InnerInfo$
+With Pad, "ReplaceTitle" as InnerInfo$,"Default", True
 Def TitleStr$(a$)=a$ '   Ucase$(Left$(a$,1))+Mid$(a$,2)
 
 
@@ -17016,12 +17018,12 @@ Function Pad.Word(new alfa$) {
 }
 
 Call Local Notepad.Resize()
-\\ open As moda
-Title "", 0
+\\ open As modal
+if hidetitle then Title "", 0
 after 200 {
 	Call local cs_choose()
 }
-After 100 {Title "", 0}
+\\After 100 {Title "", 0}
 Method NotePad,"Show" , 1
 Declare Pad Nothing
 Declare NotePad Nothing 
@@ -17514,6 +17516,7 @@ Push hBase
 end sub
 }
 MODULE EXPORTHELP {\\ prepare the groups of help database
+
 Print "Greek or English Help File:(G/E)"
 Select Case Ucase$(Key$)
 case "G", "Γ"
@@ -17524,6 +17527,7 @@ Else Case
       Break
 End Select
 Flush
+if isnum or  not exist(appdir$+"HELP2000.mdb") then Error "No mdb (Access) help file found"
 gosub dat
 Read  myGroups
 Dim No(1 to myGroups), name$(1 to myGroups)
@@ -17535,51 +17539,51 @@ Next
 Document GreekInfo$, EnglishInfo$, out$ 
 \\ we have to read from application directory
 Dir AppDir$
+
 For i=1 To myGroups {
 
-     EnglishInfo$=RightPart$(name$(i),", ")
-     GreekInfo$= LeftPart$(name$(i),", ")
-     if  GR Else Swap EnglishInfo$, GreekInfo$
-     GreekInfo$={ - }+EnglishInfo$+{
-     }
-     Print GreekInfo$
-     out$ =  If$(GR->"Ομάδα: ", "Group: ")
-     out$ =  GreekInfo$ 'EnglishInfo$
-     out$ = {
-     }
-     Retrieve "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i)),1,"",""
-     Read mywords
-    
-     If no(i)<>22 or TRUE Then {
-     For j=1 To mywords  {
-            If i=1 then
-                  Retrieve  "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i)) +" ORDER BY [ENGLISH]",j,"","" 
-            Else
-                  Retrieve "HELP2000", "SELECT *FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i))+If$(GR -> ""," ORDER BY [ENGLISH]"),j,"",""
-            End if
-            Drop ' no need this number - is equal to mywords
-            Read GreekName$, HelpText$, EnglishName$, groupnumFrom
-            if  GR Else Swap  GreekName$, EnglishName$
-            if i>1 then
-                  out$ = If$(GR->"Αναγνωριστικό: ", "identifier:  ")
-                  out$ =  GreekName$ + "      ["+ EnglishName$+"]"
-            else
-                  out$ =  "  *  "+Replace$(chr$(160)," ", GreekName$ + "      ["+ EnglishName$+"]")
-            end if
-            out$ =  {
-            }
-            if i>1 then
-                  out$ =  If$(Gr->LeftPart$(HelpText$,"__<ENG>__"), RightPart$(HelpText$,"__<ENG>__"))
-                  out$ =  {
-                  
-                  }
-            end if
+      EnglishInfo$=RightPart$(name$(i),", ")
+      GreekInfo$= LeftPart$(name$(i),", ")
+      if  GR Else Swap EnglishInfo$, GreekInfo$
+      GreekInfo$={ - }+EnglishInfo$+{
       }
-   }
-   Clear GreekInfo$
-   Clear EnglishInfo$  
+      Print GreekInfo$
+      out$ =  If$(GR->"Ομάδα: ", "Group: ")
+      out$ =  GreekInfo$ 'EnglishInfo$
+      out$ = {
+      }
+      Retrieve "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i)),1,"",""
+      Read mywords
+                
+      For j=1 To mywords  {
+       If i=1 then
+            Retrieve  "HELP2000", "SELECT * FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i)) +" ORDER BY [ENGLISH]",j,"","" 
+      Else
+            Retrieve "HELP2000", "SELECT *FROM COMMANDS WHERE GROUPNUM ="+Str$(No(i))+If$(GR -> ""," ORDER BY [ENGLISH]"),j,"",""
+      End if
+      Drop ' no need this number - is equal to mywords
+      Read GreekName$, HelpText$, EnglishName$, groupnumFrom
+      if  GR Else Swap  GreekName$, EnglishName$
+      if i>1 then
+            out$ = If$(GR->"Αναγνωριστικό: ", "identifier:  ")
+            out$ =  GreekName$ + "      ["+ EnglishName$+"]"
+      else
+            out$ =  "  *  "+Replace$(chr$(160)," ", GreekName$ + "      ["+ EnglishName$+"]")
+      end if
+      out$ =  {
+      }
+      if i>1 then
+            out$ =  If$(Gr->LeftPart$(HelpText$,"__<ENG>__"), RightPart$(HelpText$,"__<ENG>__"))
+            out$ =  {
+            
+            }
+      end if
+      }
+      Clear GreekInfo$
+      Clear EnglishInfo$  
    
-} 
+}
+done:
 Print "DONE"
 Flush
 clipboard out$
@@ -17599,16 +17603,16 @@ Data 7,"ΟΡΙΣΜΟΙ, DEFINITIONS"
 Data 25,"ΕΓΓΡΑΦΑ, DOCUMENTS"
 Data 11,"ΧΕΙΡΙΣΜΟΣ ΑΡΧΕΙΩΝ, FILE OPERATIONS"
 Data 8,"ΕΝΤΟΛΕΣ ΚΟΝΣΟΛΑΣ, CONSOLE COMMANDS"
-Data 16,"ΟΘΟΝΗ & ΑΡΧΕΙΑ, SCREEN & FILES"
+Data 16,"ΟΘΟΝΗ ΚΑΙ ΑΡΧΕΙΑ, SCREEN AND FILES"
 Data 24,"ΧΕΙΡΙΣΤΕΣ ΤΗΣ ΤΥΠΩΣΕ, OPERATORS IN PRINT"
-Data 13,"ΣΤΟΧΟΙ & ΕΠΙΛΟΓΗ, TARGET & MENU"
+Data 13,"ΣΤΟΧΟΙ ΚΑΙ ΕΠΙΛΟΓΗ, TARGET AND MENU"
 Data 1,"ΓΡΑΦΙΚΑ 2Δ, DRAWING 2D"
 Data 4,"ΕΝΤΟΛΕΣ ΕΙΚΟΝΩΝ, BITMAP COMMANDS"
 Data 2,"ΒΑΣΕΙΣ ΔΕΔΟΜΕΝΩΝ, DATABASES"
-Data 5,"ΗΧΟΙ & ΤΑΙΝΙΕΣ, SOUNDS AND MOVIES"
+Data 5,"ΗΧΟΙ ΚΑΙ ΤΑΙΝΙΕΣ, SOUNDS AND MOVIES"
 Data 6,"ΕΝΤΟΛΕΣ ΔΕΙΚΤΗ, MOUSE COMMANDS"
 Data 10,"ΕΝΤΟΛΕΣ ΙΣΤΟΥ, BROWSER COMMANDS"
-Data 12,"ΚΟΙΝΕΣ ΦΟΡΜΕΣ, COMMON DIALOGS"
+Data 12,"ΚΟΙΝΕΣ ΦΟΡΜΕΣ, COMMON DIALOGUES"
 Data 19,"ΑΡΙΘΜΗΤΙΚΑ, ARITHMETIC FUNCTIONS"
 Data 20,"ΑΛΦΑΡΙΘΜΗΤΙΚΑ, STRING FUNCTIONS"
 Data 21,"ΜΕΤΑΒΛΗΤΕΣ ΣΥΣΤΗΜΑΤΟΣ, VARS READ ONLY"
@@ -17616,8 +17620,99 @@ Data 23,"ΣΤΑΘΕΡΕΣ, CONSTANTS"
 Data 17,"ΕΚΤΥΠΩΣΕΙΣ, PRINTINGS"
 Print "Dat ok"
 Return
+
 }
-MODULE CHANGEHELP {Base 0  \\ for arrays
+MODULE EXPORTHELPNEW {
+Print "Greek or English Help File:(G/E)"
+Select Case Ucase$(Key$)
+case "G", "Γ"
+      Gr=True : Print "Greek... Περίμενε"
+case "E", "Ε"
+      Gr=False : Print "English...Wait"
+Else Case
+      Break
+End Select
+Flush
+if isnum or  not exist(appdir$+"help2000utf8.dat") then Error "No help2000utf8.dat file found"
+
+
+inventory GroupOrder=22,14,15,3,9,7,25,11,8,16,24,13,1,4,2,5,6,10,12,19,20,21,23,17
+R=lambda GroupOrder (x)->{
+	if exist(GroupOrder, x) then =eval(GroupOrder!)
+}
+Document aLL$, doc$
+Load.doc aLL$, appdir$+"help2000utf8.dat"
+A=Val(paragraph$(aLL$, 1))
+B=Val(paragraph$(aLL$, 2+A))
+dim Base 1, a$(B,4)
+link a$() to a()
+
+for i=1 to B
+	a$(i,1)=mid$(leftpart$(paragraph$(aLL$,2+A+i+(3+GR)*B),"!"),2)
+	a(i,2)=Val(rightpart$(paragraph$(aLL$,2+A+i+(3+GR)*B),"!"))
+	a(i,3)=R(a(i,2))
+	a(i,2)++
+	a(i,4)=If(GR->i, Val(rightpart$(paragraph$(aLL$,2+A+i+3*B),"- ")))
+next i
+sort a(),1,B,3,0,1,0
+m=0
+deli$=","+chr$(160)
+doc$="M2000 "+if$(GR->"Αρχείο Βοήθειας", "Help File")
+grp=each(GroupOrder, 2)
+doc$={
+	
+	}+if$(GR->"ΓΕΝΙΚΑ [GENERAL]", "GENERAL [ΓΕΝΙΚΑ]")+{
+	
+	}
+while grp
+	d$=paragraph$(aLL$, Eval(grp)+1)
+	if len(d$)=0 then continue
+	if GR else
+		d$=piece$(d$,deli$,2)+deli$+piece$(d$,deli$,1)
+	end if
+	doc$=" * "+replace$(", "," [",replace$(chr$(160), " ",d$))+{]
+	
+	}
+end while
+For i=A to B
+	print over
+	print part i
+	refresh
+	if instr(a$(i,1),"_2")>0 then continue
+	if a(i,2)<>m then
+		c$={
+		}+"***"+ Piece$(paragraph$(aLL$, a(i,2)), deli$)(GR+1)+{***
+		
+		}
+		m=a(i,2)
+	else
+		c$={
+		
+		}
+	end if
+	f$=If$(instr(a$(i,1),"(")>0->")","")
+	d$=paragraph$(aLL$,2+A+a(i,4)+B*(GR+1))
+	c$+=If$(GR->"Αναγνωριστικό: ", "identifier:  ")+a$(i,1)+f$+"      ["+Mid$(leftpart$(d$, "\"),4)+f$+{]
+	}+format$(mid$(d$,instr(d$,"\")))
+	doc$=c$
+next i
+print
+doc$={
+}
+FL$=IF$(GR->"GreekHelpFile.doc" , "EnglishHelpFile.doc")
+Save.Doc doc$,FL$, 2
+wait 200
+Win Quote$(Dir$+FL$)
+}
+MODULE CHANGEHELP {
+if not exist(appdir$+"HELP2000.mdb") then {
+	Report {You have to place in appdir$ the HELP2000.mdb
+		Also you may install Access2007 runtime
+		After edit the help file, use Swicth "+mdb" to use mdb file for help
+	}
+	break
+}
+Base 0  \\ for arrays
 Font "Arial"
 menu fill 1,11,0
 menu frame
@@ -17820,18 +17915,18 @@ Data 1,"ΓΡΑΦΙΚΑ 2Δ, DRAWING 2D"
 Data 2,"ΒΑΣΕΙΣ ΔΕΔΟΜΕΝΩΝ, DATABASES"
 Data 3,"ΡΟΗ ΠΡΟΓΡΑΜΜΑΤΟΣ, FLOW CONTROL"
 Data 4,"ΕΝΤΟΛΕΣ ΕΙΚΟΝΩΝ, BITMAP COMMANDS"
-Data 5,"ΗΧΟΙ & ΤΑΙΝΙΕΣ, SOUNDS AND MOVIES"
+Data 5,"ΗΧΟΙ ΚΑΙ ΤΑΙΝΙΕΣ, SOUNDS AND MOVIES"
 Data 6,"ΕΝΤΟΛΕΣ ΔΕΙΚΤΗ, MOUSE COMMANDS"
 Data 7,"ΟΡΙΣΜΟΙ, DEFINITIONS"
 Data 8,"ΕΝΤΟΛΕΣ ΚΟΝΣΟΛΑΣ, CONSOLE COMMANDS"
 Data 9,"ΕΝΤΟΛΕΣ ΣΩΡΟΥ, STACK COMMANDS"
 Data 10,"ΕΝΤΟΛΕΣ ΙΣΤΟΥ, BROWSER COMMANDS"
 Data 11,"ΧΕΙΡΙΣΜΟΣ ΑΡΧΕΙΩΝ, FILE OPERATIONS"
-Data 12,"ΚΟΙΝΕΣ ΦΟΡΜΕΣ, COMMON DIALOGS"
-Data 13,"ΣΤΟΧΟΙ & ΕΠΙΛΟΓΗ, TARGET & MENU"
+Data 12,"ΚΟΙΝΕΣ ΦΟΡΜΕΣ, COMMON DIALOGUES"
+Data 13,"ΣΤΟΧΟΙ ΚΑΙ ΕΠΙΛΟΓΗ, TARGET AND MENU"
 Data 14,"ΔΙΕΡΜΗΝΕΥΤΗΣ, INTERPRETER"
 Data 15,"ΧΕΙΡΙΣΜΟΣ ΤΜΗΜΑΤΩΝ, MODULE COMMANDS"
-Data 16,"ΟΘΟΝΗ & ΑΡΧΕΙΑ, SCREEN & FILES"
+Data 16,"ΟΘΟΝΗ ΚΑΙ ΑΡΧΕΙΑ, SCREEN AND FILES"
 Data 17,"ΕΚΤΥΠΩΣΕΙΣ, PRINTINGS"
 Data 19,"ΑΡΙΘΜΗΤΙΚΑ, ARITHMETIC FUNCTIONS"
 Data 20,"ΑΛΦΑΡΙΘΜΗΤΙΚΑ, STRING FUNCTIONS"
@@ -17916,6 +18011,99 @@ Stack New {
 }
 
 End Sub
+}
+MODULE MAKEHELP {
+if not exist(appdir$+"HELP2000.mdb") then {
+	Report {You have to place in appdir$ the HELP2000.mdb
+		Also you may install Access2007 runtime
+		After edit the help file, use Swicth "-mdb" to use dat file for help
+		To use a new dat file you have to exit  m2000.exe, and start again, becaue the first time we use help with dat file interpreter load it.
+		You can place the Help2000.mdb in USER file. Deletet appdir$+ before "HELP2000.mdb"
+		Don't forget after edit this module to exit and press F1 to save info to USER directory
+	}
+	break
+}
+pen 14 : cls 5
+flush
+\\DIR APPDIR$ \\  from installation folder use this
+Retrieve  APPDIR$+"HELP2000","GROUP", 1,"",""
+Read many
+Flush
+Dim Labels$(1 to 25), ser(1 to many)
+For i=1 to many
+Retrieve  APPDIR$+"HELP2000","GROUP", i,"",""
+drop
+Read where, Labels$(where)
+ser(i)=where
+flush
+next i
+Retrieve  APPDIR$+"HELP2000", "SELECT * FROM COMMANDS",1,"",""
+Read many
+dim ALL(1 to many)
+Document infoGr$, Info$, greek$, english$, no2lang$
+br$={__<ENG>__
+}
+nl$=string$({
+} as json )
+p1=1
+for i=1 to many
+Retrieve APPDIR$+"HELP2000", "SELECT * FROM COMMANDS",i,"",""
+drop
+ALL(i)=Array([])
+Print ALL(i)#val$(2), rightpart$(Labels$(ALL(i)#val(3)), ","+chr$(160))
+Print ALL(i)#val$(0), leftpart$(Labels$(ALL(i)#val(3)), ","+chr$(160))
+greek$="\"+ALL(i)#val$(0)+"!"+str$(ALL(i)#val(3),"")+{
+}
+english$="\"+ALL(i)#val$(2)+"!"+str$(ALL(i)#val(3),"")+"-"+Str$(i)
+if i<many then
+	english$={
+	}
+end if
+if instr(ALL(i)#val$(1), br$)=0 then
+infoone$="GR:"+ALL(i)#val$(0)+nl$+ALL(i)#val$(1)
+info$=infoone$+{
+}
+infoone$="EN:"+ALL(i)#val$(2)+nl$+ALL(i)#val$(1)
+infoGR$=infoone$+{
+}
+no2lang$=ALL(i)#val$(2)+{
+}
+else
+
+infoone$="GR:"+ALL(i)#val$(0)+nl$+string$(rightpart$(ALL(i)#val$(1), br$) as json)
+info$=infoone$+{
+}
+infoone$="EN:"+ALL(i)#val$(2)+nl$+string$(leftpart$(ALL(i)#val$(1), br$) as json)
+infoGR$=infoone$+{
+}
+end if
+
+next
+Method english$, "SetLocaleCompare", 1033
+Method english$, "SetBinaryCompare"
+Sort english$
+Dir User   \\ open this using Win Dir$
+open "Help2000.dat" for wide output as #k
+Print #k, Len(Labels$())
+for i=1 to len(Labels$())
+	Print #k, Labels$(i)
+next i
+Print #k, Many
+Print #k, infoGr$;info$;greek$;english$
+close #k
+Print "No second language"
+report no2lang$
+clear
+Document ALL$, all1$
+Load.doc ALL$, "help2000.dat"
+print filelen("help2000.dat")
+save.doc all$,"help2000utf8.dat", 2   ' utf-8
+print filelen("help2000utf8.dat")
+Try {
+	dir appdir$
+	save.doc all$,"help2000utf8.dat", 2   ' utf-8
+}
+dir user
 }
 MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake game","*Start","Leave")<>1 τότε έξοδος
 Διαφυγή Όχι
@@ -18997,7 +19185,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<16 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<18 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -19126,8 +19314,15 @@ declare d() nothing
 declare form1 nothing
 if exist("m2000.html") then
 	if filelen("m2000.html")>0 then
-		if Ask("Open m2000.html in htmlEdtitor, as other process?")=1 then openhtml "m2000.html" : Print "wait and then use ctrl+tab to get the htmleditor window"
-		if Ask("Open m2000.html in console text editor?")=1 then Edit "m2000.html", 1
+		ok=false
+		if Ask("Open m2000.html in htmlEdtitor, as other process?")=1 then ok=true : Print "wait and then use ctrl+tab to get the htmleditor window"
+		if Ask("Open m2000.html in console text editor?")=1 then
+		if ok then After 500 {openhtml "m2000.html"}
+		Edit "m2000.html", 1
+		else
+		openhtml "m2000.html"
+		end if
+		
 	end if
 end if
 }

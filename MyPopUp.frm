@@ -548,7 +548,7 @@ myobject.SetRowColumn lastgoodnum, 0
 .PromptLineIdent = 0
 lastitem = 0
 .ListindexPrivateUse = -1
-
+myobject.glistN.ShowMe
 
 
 Exit Sub

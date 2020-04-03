@@ -31,16 +31,16 @@ Private Type PicBmp
     reserved As Long
 End Type
 Private Declare Function OleCreatePictureIndirect Lib "olepro32.dll" (PicDesc As PicBmp, RefIID As GUID, ByVal fPictureOwnsHandle As Long, IPic As IPicture) As Long
-Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hdc As Long) As Long
-Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
-Private Declare Function SelectObject Lib "gdi32" (ByVal hdc As Long, ByVal hObject As Long) As Long
-Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hdc As Long, ByVal iCapabilitiy As Long) As Long
-Private Declare Function GetSystemPaletteEntries Lib "gdi32" (ByVal hdc As Long, ByVal wStartIndex As Long, ByVal wNumEntries As Long, lpPaletteEntries As PALETTEENTRY) As Long
+Private Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As Long) As Long
+Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hDC As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
+Private Declare Function SelectObject Lib "gdi32" (ByVal hDC As Long, ByVal hObject As Long) As Long
+Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As Long, ByVal iCapabilitiy As Long) As Long
+Private Declare Function GetSystemPaletteEntries Lib "gdi32" (ByVal hDC As Long, ByVal wStartIndex As Long, ByVal wNumEntries As Long, lpPaletteEntries As PALETTEENTRY) As Long
 Private Declare Function CreatePalette Lib "gdi32" (lpLogPalette As LOGPALETTE) As Long
-Private Declare Function SelectPalette Lib "gdi32" (ByVal hdc As Long, ByVal HPALETTE As Long, ByVal bForceBackground As Long) As Long
-Private Declare Function RealizePalette Lib "gdi32" (ByVal hdc As Long) As Long
-Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
-Private Declare Function DeleteDC Lib "gdi32" (ByVal hdc As Long) As Long
+Private Declare Function SelectPalette Lib "gdi32" (ByVal hDC As Long, ByVal HPALETTE As Long, ByVal bForceBackground As Long) As Long
+Private Declare Function RealizePalette Lib "gdi32" (ByVal hDC As Long) As Long
+Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As Long) As Long
 Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function OpenPrinter Lib "winspool.drv" Alias "OpenPrinterA" (ByVal pPrinterName As String, phPrinter As Long, pDefault As Any) As Long
 Private Declare Function ClosePrinter Lib "winspool.drv" (ByVal hPrinter As Long) As Long
@@ -84,8 +84,8 @@ Type PRINTER_DEFAULTS
 End Type
 ' New Win95 Page Setup dialogs are up to you
 Private Type POINTL
-    x As Long
-    y As Long
+    X As Long
+    Y As Long
 End Type
 Private Type RECT
     Left As Long
@@ -146,12 +146,12 @@ Sub Pprop()
     
     If ThereIsAPrinter = False Then Exit Sub
         
-    Dim x As Printer
-For Each x In Printers
-If x.DeviceName = pname And x.Port = Port Then Exit For
-Next x
+    Dim X As Printer
+For Each X In Printers
+If X.DeviceName = pname And X.Port = Port Then Exit For
+Next X
 Dim gp As Long, td As PRINTER_DEFAULTS
-Call OpenPrinter(x.DeviceName, gp, td)
+Call OpenPrinter(X.DeviceName, gp, td)
 If form5iamloaded Then
 Call PrinterProperties(Form5.hWnd, gp)
 Else
@@ -375,8 +375,12 @@ Dim dv2x15 As Long
 dv2x15 = dv15 * 2
 If collectit Then Set mDoc = New Document
 Set ddd = bstack.Owner
-If what = vbNullString Then GoTo finish
+If what = vbNullString Then
+ReDim para(1)
+para(1) = vbNullString
+Else
 para() = Split(what, vbCrLf)
+End If
 With mybasket
 ' from old code here
     tParam.iTabLength = .ReportTab
@@ -601,8 +605,12 @@ dv2x15 = dv15 * 2
 
 If collectit Then Set mDoc = New Document
 Set ddd = bstack.Owner
-If what = vbNullString Then GoTo finish
+If what = vbNullString Then
+ReDim para(1)
+para(1) = vbNullString
+Else
 para() = Split(what, vbCrLf)
+End If
 With mybasket
 ' from old code here
     tParam.iTabLength = .ReportTab
@@ -665,7 +673,7 @@ If Len(para(lastPara)) = 0 Then lastPara = lastPara - 1
 nextline:
         If NOEXECUTION Then Exit For
         
-        n = LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(para(i)), Len(para(i)), 1, tabw)) * DXP
+        n = LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(para(i)), Len(para(i)), 1, tabw)) * DXP
 '        n = MyTextWidth(ddd, para(i))
         If n > wi Then
             st = Len(para(i))
@@ -676,13 +684,13 @@ nextline:
                 w = AscW(Mid$(para(i), 1, st1))
                 If w > -10241 And w < -9984 Then
                     
-                    If wi >= LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(para(i)), st1 + 1, 1, tabw)) * DXP Then
+                    If wi >= LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(para(i)), st1 + 1, 1, tabw)) * DXP Then
                         st0 = st1
                     Else
                         st = st1
                     End If
                 Else
-                    If wi >= LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(para(i)), st1, 1, tabw)) * DXP Then
+                    If wi >= LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(para(i)), st1, 1, tabw)) * DXP Then
                         st0 = st1
                     Else
                         st = st1
@@ -727,36 +735,36 @@ nextline:
                  Buf$ = RTrim(Buf$)
                  lasttab = rinstr(Buf$, vbTab)
                  If lasttab > 0 Then
-                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), lasttab, 1, tabw, ddd.CurrentX \ DXP))
+                 Extra = LowWord(TabbedTextOut(ddd.hDC, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), lasttab, 1, tabw, ddd.CurrentX \ DXP))
                  Buf$ = Mid$(Buf$, lasttab + 1)
                  ddd.CurrentX = ddd.CurrentX + Extra * DXP
                               
                  End If
-                 olda = SetTextAlign(ddd.hdc, 0) 'TA_RTLREADING)
+                 olda = SetTextAlign(ddd.hDC, 0) 'TA_RTLREADING)
                  cuts = Len(Buf$) - Len(ReplaceStr(" ", "", Buf$))
                  
-                 Extra = wi \ DXP - INTD \ DXP - Extra - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))
+                 Extra = wi \ DXP - INTD \ DXP - Extra - LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(Buf$), Len(Buf$), 1, tabw))
                  
-                 SetTextJustification ddd.hdc, Extra, cuts
+                 SetTextJustification ddd.hDC, Extra, cuts
                  
                 '
-                 TextOut ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$)
+                 TextOut ddd.hDC, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$)
                  
-                 SetTextJustification ddd.hdc, 0, 0
-                 olda = SetTextAlign(ddd.hdc, olda)
+                 SetTextJustification ddd.hDC, 0, 0
+                 olda = SetTextAlign(ddd.hDC, olda)
                  Case 1
                  Buf$ = RTrim(Buf$)
-                 Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))
+                 Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(Buf$), Len(Buf$), 1, tabw))
                  
-                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+                 Extra = LowWord(TabbedTextOut(ddd.hDC, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
                  Case 2
                  Buf$ = Trim(Buf$)
-                 Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))) \ 2
+                 Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(Buf$), Len(Buf$), 1, tabw))) \ 2
                  
-                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+                 Extra = LowWord(TabbedTextOut(ddd.hDC, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
                  
                  Case Else
-                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP))
+                 Extra = LowWord(TabbedTextOut(ddd.hDC, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP))
                  
                  End Select
                  
@@ -806,15 +814,15 @@ last:
                 Select Case frmt
                 Case 1
                 Buf$ = RTrim(Buf$)
-                 Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))
+                 Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(Buf$), Len(Buf$), 1, tabw))
                  
-                 Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+                 Extra = LowWord(TabbedTextOut(ddd.hDC, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
                 
                 Case 2
                 Buf$ = Trim(Buf$)
-                Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hdc, StrPtr(Buf$), Len(Buf$), 1, tabw))) \ 2
+                Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(Buf$), Len(Buf$), 1, tabw))) \ 2
                  
-                Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
+                Extra = LowWord(TabbedTextOut(ddd.hDC, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
 
                 Case 3, 0
                 INTD = TextWidth(ddd, space$(MyTrimL3Len(Buf$)))
@@ -823,17 +831,10 @@ last:
                     ddd.CurrentX = ddd.CurrentX + INTD
                 End If
                 Buf$ = RTrim(Buf$)
-                Extra = LowWord(TabbedTextOut(ddd.hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP))
+                Extra = LowWord(TabbedTextOut(ddd.hDC, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(Buf$), Len(Buf$), 1, tabw, ddd.CurrentX \ DXP))
                 End Select
-                
-                'fullPlainWhere ddd, mybasket, Buf$, w2, frmt, nowait, nonewline
-                'Debug.Print w2, frmt, nowait, nonewline
-                
-                
                 End If
-       ' Else
-        '        If Not nopr Then fullPlain ddd, mybasket, Buf$, w2, nowait, nonewline  'DDD.Width ' w2
-        End If
+         End If
         End If
    
         If collectit Then

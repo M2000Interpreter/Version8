@@ -502,7 +502,7 @@ monitor = FindFormSScreen(Form4)
 End If
 If HelpLastWidth > ScrInfo(monitor).Width Then HelpLastWidth = -1
 doriginal$ = d$
-d$ = Replace(d$, "'", "")
+d$ = Replace(d$, "!", "")
 If d$ <> "" Then If Right$(d$, 1) = "(" Then d$ = d$ + ")"
 If d$ = vbNullString Or d$ = "F12" Then
 d$ = vbNullString
@@ -656,10 +656,9 @@ If where = 0 Then Exit Sub
 If HelpFile.FindStr("\" + myUcase(doriginal$, True), where, there, dum) Then
 d$ = HelpFile.TextParagraph(there)
 Eng = InStr(d$, "- ") <> 0
-dum = InStr(d$, "'")
+dum = InStr(d$, "!")
 If Eng Then
 c$ = HelpFile.TextParagraph(1 + val(Mid$(d$, dum + 1)))
-'c$ = Mid$(c$, InStr(c$, "," + Chr$(160)) + 2)
 p$ = Mid$(d$, 2, dum - 2)
 b$ = HelpFile.TextParagraph(2 + a + aa + val(Mid$(d$, InStr(d$, "- ") + 2)))
 gp$ = Mid$(b$, 4, InStr(b$, "\") - 4)
