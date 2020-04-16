@@ -416,7 +416,7 @@ Private Type TEXTMETRICW
 End Type
 Private tm As TEXTMETRICW
 Private Declare Function GetTextMetrics Lib "gdi32" Alias "GetTextMetricsW" (ByVal hDC As Long, lpMetrics As TEXTMETRICW) As Long
-
+Private LastNumX As Boolean
 Public Function GetLastKeyPressed() As Long
 Dim Message As Msg
 If mynum$ <> "" Then
@@ -1018,6 +1018,7 @@ Exit Sub
          Else
             SelStartEventAlways = SelStart + 1
             RaiseEvent PureListOn
+            
             list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
           RaiseEvent PureListOff
             End If
@@ -1616,7 +1617,7 @@ UKEY$ = ChrW(UINT(i \ &H400& + &HD800&)) + ChrW(UINT((i And &H3FF&) + &HDC00&))
 Else
 UKEY$ = ChrW(i)
 End If
-UserControl_KeyPress 44
+If LastNumX Then UserControl_KeyPress 44
 RefreshNow
 Exit Sub
 End If
@@ -4110,7 +4111,7 @@ If shift = 2 Then
 ElseIf KeyCode = vbKeyF4 Then
 If shift = 4 Then
 On Error Resume Next
-If Parent.name = "GuiM2000" Or Parent.name = "Form2" Or Parent.name = "Form4" Then
+If Parent.Name = "GuiM2000" Or Parent.Name = "Form2" Or Parent.Name = "Form4" Then
 With UserControl.Parent
 .ByeBye
 End With
@@ -4132,18 +4133,20 @@ Case vbKeyAdd, vbKeyInsert
 mynum$ = "&h"
 Case vbKey0 To vbKey9
 mynum$ = mynum$ + Chr$(KeyCode - vbKey0 + 48)
+LastNumX = True
 Case vbKeyNumpad0 To vbKeyNumpad9
+LastNumX = False
 mynum$ = mynum$ + Chr$(KeyCode - vbKeyNumpad0 + 48)
 Case vbKeyA To vbKeyF
 If Left$(mynum$, 1) = "&" Then
 mynum$ = mynum$ + Chr$(KeyCode - vbKeyNumpad0 + 65)
+LastNumX = True
 Else
 mynum$ = vbNullString
 End If
 Case Else
 mynum$ = vbNullString
 End Select
-
 Exit Sub
 End If
 

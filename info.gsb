@@ -171,11 +171,18 @@ print min(a(2-i),a(i)), min(a(2-i), a(i))
 print compare(a(i), a(2-i)), a(2-i), a(i)
 next i
 }
-MODULE B1 {Module FadeScreen  {
+MODULE B1 {Module ViewStatic  {
       static Img1, tempo=1, gx=3, gy=5
       ? tempo, gx, gy
+      tempo++
+      gx++
+      gy++
 }
-FadeScreen      
+clear
+for i=1 to 10
+	ViewStatic
+next   
+clear
 }
 MODULE BB {Print "check mouse buttons"
 Print "Press Esc to exit"
@@ -185,7 +192,8 @@ if mouse.key then { m=true } else m=false
 print not m
 }
 }
-MODULE BB1 {a=mouse
+MODULE BB1 {Print "press mouse button"
+a=mouse
 while not a {a=mouse: print a ,  not -a}
 ? "ok"
 }
@@ -591,8 +599,7 @@ MODULE DD7 {module Checkit {
 Checkit
 }
 MODULE DD8 {Module Pairs {
-      \\ written in version 9.5 rev. 13
-      \\ use Gdi+ antialiasing (not work with Wine in Linux, but we get no error)
+      \\ using Gdi+ antialiasing (not work with Wine in Linux, but we get no error)
       smooth on
       Const center=2, right=3, left=1, blue=1, angle=0, dotline=3
       Const size9pt=9, size11pt=11
@@ -690,7 +697,12 @@ Module Checkit {
 Checkit
 Print a ' a exist always
 }
-MODULE F1 {Group alfa {
+MODULE F1 {Report {
+	OOP part 1
+	We make a group alfa as named group in this module, with a private x variable, and two modules (as methods)
+	We check that alfa.x not exist using valid(alfa.x)
+}
+Group alfa {
       private:
             x=10
       public:
@@ -708,6 +720,19 @@ alfa.incX
 alfa.print   ' print 11
 }
 MODULE F2 {module checkit {
+      Report{
+             OOP part2
+             We make a class b1 which is a function which return a float group (nameless), but not a pointer to a group
+             We make b as pointer of a float group (which made by b1() function)
+             Just for the example we call beta(), a subroutine, which expect a z idenifier whch not exist
+             So we catch this in a Try {} structure
+             Now we make Z as pointer of a new float group using z->b1()
+             We call sub alfa() using a local b as a predefined pointer to a float group b1().
+             If we didin't pass a group or we pass ?, we use b as the predefined
+             If we have something else in stack we get error, so before that type of call we have to know what we have in stack or we can use ?
+      }
+      flush ' we use alfa() with an optional parameter. if stack has wrong type then we get error
+      rem push 1  \\ this raise eror in alfa()
       def long counter=0
       class b1 {
             x=10
@@ -721,6 +746,10 @@ MODULE F2 {module checkit {
       \\ z is a pointer to a new group from b1()
       z->b1()
       \\ now z exist
+      rem {
+             alfa(?)  ' use these  if you use the Push 1 (see above)
+             beta(?)
+      }
       alfa() ' 11 - use of internal pointer to group
       beta() ' 11
       Print b=>x=10 ' true
@@ -736,6 +765,7 @@ MODULE F2 {module checkit {
       beta() ' 15
       Print z=>x=15
       Print counter
+      Rem Flush ' if you use the Push 1
 
       Sub alfa()
             \\ we make a local variable b
@@ -791,9 +821,29 @@ MODULE F3 {Module Checkit {
 }
 Checkit
 }
-MODULE F4 {gosub modules
+MODULE F4 {\\ gosub call subs (subs with () or plain subs)
+\\here we call a plain sub which is like we place the lines between label and return in the code where we call it
+gosub modules
+Report {
+	This is a definition for alfa group with one public variable x
+	group alfa {
+		x=10
+	}
+}
 group alfa {
-x=10
+	x=10
+}
+Report {
+	we make b as pointer to alfa (is a simple reference - is a pointer to a static object)
+	static object means named object, which exist until the get out of scope
+	
+	We have three modules and we call them passing the pointer b
+	In each module we increase x value
+	
+	For first module we pass the b and read it as a group. So we get a new group as a copy
+	For second module we pass the b and read it as pointer so we get the change after the call (this is the default if a in module is a new variable)
+	For third module we pass the pointer by reference s &b, so we get the change after the call
+	
 }
 b->alfa
 checkme b
@@ -827,11 +877,20 @@ Module  checkme3 {
 }
 Return
 }
-MODULE F5 {gosub modules
+MODULE F5 {report {
+	Same as F4 but now we use modules not subs
+	A module has own scope
+	A sub has the scope from where caled
+}
+flush  '' emprty the stack
+gosub modules
 group alfa {
 x=10
 }
 b->alfa
+\\ also here we can call like checkme ?  where ? means get the default value
+\\ but we have to provide the default value before the actual read
+\\ the last moduleget a group pointer by reference so we can't provide a default value
 checkme
 checkme b
 Print b=>x=10
@@ -874,7 +933,11 @@ Return
 
 
 }
-MODULE F6 {Module CheckMe {
+MODULE F6 {\\ using static variables
+\\ a class function is a global one
+\\ from the definition point until the function get out of scope
+\\ here the scope is the checkme and for gloabals the checkit module
+Module CheckMe {
       Class alfa {
             x=1000
       }
@@ -900,7 +963,7 @@ MODULE F6 {Module CheckMe {
             If Exist(cc,"a") Then Print Eval(cc)
      
       }
-     
+      flush  ' empty stack
       Checkit
       Checkit
       Checkit (stack:=5,6,7)
@@ -908,8 +971,10 @@ MODULE F6 {Module CheckMe {
       Checkit
 }
 CheckMe
+Clear  ' clear all static variables
 }
-MODULE F7 {Module checkit {
+MODULE F7 {Report "Using advapi32.SystemFunction036 as external function to make random bytes in a buffer"
+Module checkit {
       Declare random1 lib "advapi32.SystemFunction036" {long lpbuffer, long length}
       Buffer Clear Alfa as long*2
       Print Eval(Alfa,0)
@@ -920,11 +985,25 @@ MODULE F7 {Module checkit {
 }
 checkit
 }
-MODULE F8 {Declare Global CryptAcquireContext Lib "advapi32.CryptAcquireContextW" {Long &hProv, pszContainer$,pszProvider$, long dwProvType, long dwFlags}
+MODULE F8 {Report {
+	Another example using advapi32.dll to declare three external functions
+	We use Constan identifiers at a global level.
+	Also the Global scope end when this module exit
+}
+Declare Global CryptAcquireContext Lib "advapi32.CryptAcquireContextW" {Long &hProv, pszContainer$,pszProvider$, long dwProvType, long dwFlags}
 Declare Global CryptReleaseContext Lib "advapi32.CryptReleaseContext" {Long hProv, Long dwFlags}
 Declare Global CryptGenRandom Lib"advapi32.CryptGenRandom" {Long hProv, Long dwLen, Long &ByRef}
 Global Const PROV_RSA_FULL As Long = 1
 Global Const VERIFY_CONTEXT As Long = 0xF0000000&
+ 
+\\ a call to a function can be done like a procedure call (calling a module)
+\\ we have to drop the return value, because any value except zero raise an error
+\\ we use the clause Void to drop the value
+
+\\ In CryptGenRandom() we pass a Long which is a pointer to a Long variable
+\\ So we say to declaration Long &Byref (then name can be anything, but not a string identifier, we wand number)
+\\ So when we call the CryptGenRandom() we pass the &Rand  where Rand is long variable (it is a variant of type LONG inside)
+
  
 Function  Random2 {
       Long Rand=0, hProv=0
@@ -952,10 +1031,16 @@ k1=Binary.Shift(k,-8)
 Print type$(k1)
 k2=Binary.Rotate(k,-8)
 Print type$(k2)
+\\ binary.add() make the addition of two 32bit numbers and a Mod 2^32,
+\\ so always we cut the overflow bit
+\\ The type interal is Currency, not a long, but it used in this functions like it is a 32bit value
 k3=binary.add(0xFF123456,0xF1234567,0xFFFFFFFF)
 Print type$(k3)
 }
-MODULE URL {Module checkit {
+MODULE URL {Report {See also DD7 module which decoding for URI use internal funations
+Here we see the decoding using M2000 code (slow)
+}
+Module checkit {
       document doc$
       any=lambda (z$)->{=lambda z$ (a$)->instr(z$,a$)>0}
       one=lambda (z$)->{=lambda z$ (a$)->z$=a$}
@@ -1215,7 +1300,10 @@ t=(1,0,1)
 Print c#pos(t) ' 1  means 2nd position
 Print c#pos(3->t) ' 6  means 7th position
 }
-MODULE R1 {Function DispRev$(a$) {
+MODULE R1 {Report {Recerse a string holding the right chaacters in order (not reversed)
+Using StrRev$() we get error in third exanple
+}
+Function DispRev$(a$) {
       i=1: j=Len(a$): if j=0 then ="": exit
       z$=String$(" ",j): j++
       do {
@@ -1232,9 +1320,26 @@ MODULE R1 {Function DispRev$(a$) {
 }
 Print DispRev$("abcd")="dcba"
 Print DispRev$("")=""
-Print DispRev$("s⃝df̅")="f̅ds⃝"
+Print DispRev$("s⃝df̅")="f̅ds⃝", StrRev$("s⃝df")="f̅ds⃝"
 }
-MODULE W1 { Module WeaselAlgorithm {
+MODULE W1 { Report {
+        This is an evolutionary Algorithm, where is a target string, a fitness functions which return a number of how many charachters are at the right position, but no information returned for which character is in wrong position.
+        So we use a random solution as the start point
+        Then algorithm make small changes and produce a number of solutions, and get the better one using the fitness function
+        So the alogrithm produce always a same or better solution in each iteration.
+        Finally we get the solution with the maximum fitness, which means we get the target string.
+        Without the algorithm we need to more then  1.18376868261619E+39 strings to check
+        Or Miliion of computational years.
+        Here the tools to find it are two major:
+              The small random changes
+              The choise of a better solution from a list of solutions
+         And a minor to make it faster
+               After a level of fitness we use less changes (only one character), changing the starting lambda function with another. Lambda functions are first citizens in M2000.
+        
+        From the code the statement Dim a$(1 to gen)<<mutate$(f$) place for each item in a$() a new solution from mutate$() providing a starting string
+               
+ }
+ Module WeaselAlgorithm {
       Print "Evolutionary Algorithm"
       \\ Weasel Algorithm
       \\ Using dynamic array, which expand if no fitness change,
@@ -1292,7 +1397,15 @@ MODULE W1 { Module WeaselAlgorithm {
 }
 WeaselAlgorithm
 }
-MODULE S1 {Module CheckIt {
+MODULE S1 {Report {
+	Drawing 5 spheres using a lambda function each time different, which produce a texture
+	The last one is the Transparent function which read the color of the point where we
+	Aftr the drwaing complete we get it in cliboard as an image (a DIB type) whichw we can import to any application which imports images from clipboard.
+	
+	Press a key
+}
+Push key$: Drop
+Module CheckIt {
       Flush
       Form ! 60, 40    ' use ! to reduce form (for safe area for TV)
       oldback=point  ' read color from 0,0  ' (Mode, Form. and Widow statement reset graphic cursor)
@@ -1330,13 +1443,14 @@ MODULE S1 {Module CheckIt {
       }
       Mystery2=lambda m=1, p=true (c)->{
             c1=c/4+m
-           if p then m+=10
-           Else m=-10
+            if p then m+=10
+            Else m=-10   ' we can break the if statement when e didn't use an if inside
             if m>192 then m-=10 : p=false
             If m<0 then m+=10: p=true
             =Color(c,c,c1)
       }
       Buffer Alfa as byte*8
+      \\ we place the Alfa as a closuer (Alfa is a pointer to a Buffer object)
       Trans =lambda Alfa (c) -> {
             Return Alfa, 0:=-point as long
             Return Alfa, 4:=-color(c,c, c/4+192) as long
@@ -1358,10 +1472,32 @@ MODULE S1 {Module CheckIt {
       Print Part @(0,height),"Press a Key"
       A$=Key$
       Cls oldback
+      Clear ' clear variables
+      \\ addition using clipboard.image$ to read a DIB image to string variable
+      A$=Clipboard.Image$
+      Move 3000, 3000
+      Image A$, 6000    ' produce the image with a width of 6000 twips, and a height based on image ratio of Width/Height
+      Move 3000,1000
+      Image A$, 2000,2000  ' define both width and height (stretching the image)
 }
 Checkit
 }
-MODULE M1 { Module FilterMapFold {
+MODULE M1 {  Print @(tab(1)),
+  Report {
+         This example use code to make functions for filters to fold, and or map an array
+         There are #functions to do that, but here we use code to do these functions (see M2)
+         Se help  #map amd help #filter tp see the use of internal functions
+         
+         
+         You can follow the code using Stop where you want to stop it then use exit statement to exit
+         From stop state you can use List amd Modules ? to see variables and modules in modules list
+         Also you can use print or you can change variables. Try ? C to print C array at the Stop statement (see the code). From editor mark the stop staterment here and press F3 to find it at the lines bellow. Use F2 to serch back.
+         
+         Press a key
+        }, width-tab(1)*2
+Print
+      Push key$: Drop
+Module FilterMapFold {
       Form 80,40
       \\ HasString()
       \\ used to find if an array has strings or numbers
@@ -1575,6 +1711,7 @@ MODULE M1 { Module FilterMapFold {
       \\ so now we can use each(c,1,2) to get the two first items
       \\ and using FilterFold we get the sum ot those two items
       Print FilterFold(each(c,1,2), , sum)
+      Stop
       \\ We can use two dimensional arrays, or more (maximum ten dimensions)
       \\ we can set different base (low bound) for each dimension
       \\ Dim is always like a "Dim Preserve" in VB6
@@ -1650,7 +1787,20 @@ MODULE M1 { Module FilterMapFold {
 FilterMapFold
 
 }
-MODULE H1 { Class HttpStatus {
+MODULE H1 {Form 80, 66
+Cursor tab(1)
+Report {
+	This is an example to show how the light events in a group can be used.
+	The theory about light events have some standards:
+		1,	A call to an Event can be done, although this maybe do not call anything id we don't have a service function to use it
+		2.	A servuce function has the same scope as the module we write to it. It is like we call a subroutine. But this call happen from another module, a group module. So the event call is a call BACK to module which we tie the group with DoEvents. The stack of values in event calls is new one, sp we can't a;ter the module's stack either in group module or in target module (where we tie the group with DoEvents)
+		3.	We can't use multicast call using the light events. We have to use Evemt Object which use a list of functions to call. Event Objects can alter the finction list. The light events can't alter the service funcitons, but we can alter a function as usual by defining another time using tthe same name.  This can't be happen from group module where we call the event.
+		4.	We can make float groups from a group which has light events and we tie it to a module. The internal code in M2000 make a list of weaj references to servixe functions and when we call en event check if the weak reference exist and call it or drop the call if not exist.
+	Prees a key
+	}, width-tab(1)*2
+Print
+Push Key$: Drop
+Class HttpStatus {
 Events "trace", "err","high","low"
 Private:
       myvalue
@@ -1784,8 +1934,144 @@ a(1)=405
 Print Type$(a(1))="Group", InferType$(Eval(a(1)))="Status"
 a(1)++ ' we get high limit, because a(1) has a float group (nameless), and event list inside is the original one.
 b++ ' now we get high limit because b and a(1) show the same nameless (or float) group
+}
+MODULE H2 {\\ The task is simple;
+\\ first we make a class function to produce a group with one variable and a value
+\\ then e make p as a pointer to a float group produced from alfa()
+\\ then we use p=>x to get the x value, and eval(p) to get the group value
 
+\\ Then we want a named group, m, whith a variable m to merge it with a group
+\\ The group is a pointer to a float group in the stack, so we push p to stack
+\\ We use a function which get any group (pointer on not pointer) as m
+\\ then make a z and then we return z as group (using Group(), because without we get the value of z, if z has a value)
 
+\\ We make the same, but now we didn't use the function but we do something else.
+\\ First we have to use a fresh name, say m1, and read from stack as group, so if it is a pointer we get a group from the pointer
+\\ now we can appaned a Y variable, using Group {} or using m1=class1() 
+
+class alfa {
+	x=10
+	value {
+		=.x*2
+	}
+}
+\\ we can use p=pointer(alfa())
+rem
+p=pointer(alfa())
+rem p->alfa()
+Print p=>x, eval(p)=20
+push p
+group m {
+	y=20
+}
+if rnd>.5 then
+	Print "using getGroup(m)"
+	function getGroup(m){
+		group z=m
+		=group(m)
+	}
+else
+	Print "using getGroup(m as group)"
+	function getGroup(m as group){
+		=group(m)
+	}
+end if
+m=getGroup(Group)
+Print m=20, m.x, m.y
+Push p
+Read m1 as group
+if rnd>.5 then
+	Print "using group {}"
+	group m1 {
+		y=20
+	}
+else
+	Print "Using class"
+	class class1 {y=20}
+	\\ Let is like Push class1() : read m1
+	\\ without Let we get error: property can't change (there isn't a set { } session in class alfa)
+	Let m1=class1()
+end if
+Print M1
+M2=Group(M1)
+Print M2.y=20, M2=20
+list
+
+}
+MODULE H3 {\\ Like H2 but p is a special pointer, a reference to alfa
+\\ In h2 a pointer to a float group when deleted or change pointer decrement the pointers number inside the group. So when this number goes to zero (no pointer point to foat group) then the group deleted
+\\ the type of pointer we use here is a reference to a named group.. Internal the pointer holds only a weak reference so if no reference exist we get error when we try to use it
+\\ A named group deleted when the owner (the module or function or block with temporary definitions) end the execution. We can say that a named group is a static group, but the name static used for static variables a subset of variable types which can be used for each call in a module or function or thread with only one time intialization at the Static statement. See Help Static
+\\ Also a named group may use Light Events. Here the "p" event may have or not a Function alfa_p.
+Print "Run this many times, to see all variants"
+counter=0
+group withevents alfa {
+	event "p"
+	x=10
+	value {
+		call event "p", 1
+		=.x*2
+	}
+}
+function alfa_p(x) {
+	counter+=x
+}
+\\ we can use p=pointer(alfa())
+rem
+p=pointer(alfa)
+rem p->alfa
+Print p=>x, eval(p)=20, counter
+push p
+group m {
+	y=20
+}
+if rnd>.5 then
+	Pen 15 {Print "using getGroup(m)"}
+	function getGroup(m){
+		group z=m
+		=group(m)
+	}
+else
+	Pen 11 {Print "using getGroup(m as group)"}
+	function getGroup(m as group){
+		=group(m)
+	}
+end if
+Print counter=1
+m=getGroup(Group)
+Print m=20, m.x, m.y, counter
+m.x++
+print m.x=11, alfa.x=10, p=>x=10
+print m, counter
+Push p
+Read m1 as group
+\\ because m1 has a copy of weak reference to alfa_p and alfa_p exist
+Print counter=3, m1, counter=4
+if rnd>.5 then
+	Pen 12 {Print "using group {}"}
+	\\we get a clear event list, the counter=5 return false
+	group m1 {
+		y=20
+	}
+	Print counter=4, m1, counter=5
+else
+	Pen 13 {Print "Using class in a let statement"}
+	class class1 {y=20}
+	\\ Let is like Push class1() : read m1
+	\\ without Let we get error: property can't change (there isn't a set { } session in class alfa)
+	\\ the error happen if we have a value {} session which make the group as a property
+	Let m1=class1()
+	Print counter=4, m1, counter=5
+end if
+
+M2=Group(m1)
+oldcounter=counter
+Print counter
+Print M2.y=20, M2=20
+Print counter
+if counter=oldcounter then
+	Print "counter not changed because ued the group withevents {} method"
+end if
 }
 MODULE INF { locale 1033
 Module CheckIt {
@@ -1916,7 +2202,13 @@ MODULE CONV { Module Checkit {
 }
 Checkit
 }
-MODULE RAT {Module RationalNumbers {
+MODULE RAT {Report {
+	Rational Numbers
+	Using a class Rational() which give a group object and set operators for evaluation of rational expressions
+	A rational(10,15) is 10/15
+	We can make arrays of rational numbers
+}
+Module RationalNumbers {
       Class Rational {
             numerator as decimal, denominator as decimal
             gcd=lambda->0
@@ -1947,7 +2239,7 @@ MODULE RAT {Module RationalNumbers {
             Function Inverse {
                   if .numerator==0 then Error "Division by zero"
                   ret=This
-                  sign=sgn(ret.numerator) : if sign<0 then ret.numerator-!
+                  sign=Sgn(ret.numerator) : if sign<0 then ret.numerator-!
                   swap ret.numerator, ret.denominator
                   if sign<0 then ret.numerator-!
                   =ret
@@ -1966,16 +2258,16 @@ MODULE RAT {Module RationalNumbers {
             Operator "=" {
                   Read l
                   Def boolean T=True, F=False
-                  if Abs(sgn(l.numerator))+Abs(sgn(.numerator))=0 then Push T: exit
-                  if sgn(l.numerator) <>sgn(.numerator) then Push F : exit
+                  if Abs(Sgn(l.numerator))+Abs(Sgn(.numerator))=0 then Push T: exit
+                  if Sgn(l.numerator) <>Sgn(.numerator) then Push F : exit
                   pcomp=l/this
                   PUSH pcomp.numerator=1 and pcomp.denominator=1
             }
             Operator ">" {
                   Read l
                   Def boolean F
-                  if Abs(sgn(l.numerator))+Abs(sgn(.numerator))=0 then Push F: exit
-                  if sgn(l.numerator)=0 then {
+                  if Abs(Sgn(l.numerator))+Abs(Sgn(.numerator))=0 then Push F: exit
+                  if Sgn(l.numerator)=0 then {
                         PUSH .numerator>0
                   } Else {
                         pcomp=this/l
@@ -1984,7 +2276,7 @@ MODULE RAT {Module RationalNumbers {
             }
             Operator ">=" {
                   Read l
-                  if sgn(l.numerator)=0 then {
+                  if Sgn(l.numerator)=0 then {
                         PUSH .numerator>=0
                   } Else {
                         pcomp=this/l
@@ -1994,8 +2286,8 @@ MODULE RAT {Module RationalNumbers {
             Operator "<" {
                   Read l
                   Def boolean F
-                  if Abs(sgn(l.numerator))+Abs(sgn(.numerator))=0 then Push F: exit
-                  if sgn(l.numerator)=0 then {
+                  if Abs(Sgn(l.numerator))+Abs(Sgn(.numerator))=0 then Push F: exit
+                  if Sgn(l.numerator)=0 then {
                         PUSH .numerator<0
                   } Else {
                         pcomp=this/l
@@ -2004,7 +2296,7 @@ MODULE RAT {Module RationalNumbers {
             }
             Operator "<=" {
                   Read l
-                  if sgn(l.numerator)=0 then {
+                  if Sgn(l.numerator)=0 then {
                         PUSH .numerator<=0
                   } Else {
                         pcomp=this/l
@@ -2013,7 +2305,7 @@ MODULE RAT {Module RationalNumbers {
             }
             Operator "<>" {
                   Read l
-                  if sgn(l.numerator)=0 then {
+                  if Sgn(l.numerator)=0 then {
                         PUSH .numerator<>0
                   } Else {
                         pcomp=this/l
@@ -2034,7 +2326,10 @@ MODULE RAT {Module RationalNumbers {
             }
             class:
             Module Rational (.numerator, .denominator) {
-                  if .denominator<=0 then Error "Positive only denominator"
+                  if .denominator=0 then Error "Zero denominator"
+                  sgn=Sgn(.numerator)*Sgn(.denominator)
+                  .denominator<=abs(.denominator)
+                  .numerator<=abs(.numerator)*sgn
                   gcd1=lambda (a as decimal, b as decimal) -> {
                         if a<b then swap a,b
                         g=a mod b
@@ -2043,19 +2338,27 @@ MODULE RAT {Module RationalNumbers {
                         }
                               =abs(b)
                   }
+                  gdcval=gcd1(abs(.numerator), .denominator)
+                  if gdcval<.denominator then
+                        .denominator<=gdcval
+                        .numerator/=gdcval
+                  end if
                   .gcd<=gcd1
                   .lcm<=lambda gcd=gcd1 (a as decimal, b as decimal) -> {
                         =a/gcd(a,b)*b
                   }
             }
       }
-      Print rational(-3,3)<>rational(-3,3)
+      Print rational(-3,3)<>rational(-3,3)  ' false
       M=Rational(10, 150)
       N=Rational(2, 4)
+      Print "M.real+N.real=";M.real+N.real
+      Print "Z=M+N"
       Z=M+N
-      Print Z.numerator, Z.denominator
       Print 10/150@+2/4@
-      Print Z.real
+      Print "Z.real="; Z.real
+      Print "(";M.numerator;"/"; M.denominator;") + (";N.numerator;"/"; N.denominator;") = (";Z.numerator;"/";Z.denominator;")"
+      Print M.tostring$+ " +"+N.tostring$+" ="+Z.tostring$
       Z=-M+N
       Print Z.numerator, Z.denominator
       Print -10/150@+2/4@
@@ -2089,9 +2392,9 @@ MODULE RAT {Module RationalNumbers {
       Print K(4).toString$
 
            pk->(Z)
-      Print pk=>toString$
+      Print pk=>toString$+" +"
       zzz=pk+pk
-      Print zzz.toString$
+      Print zzz.toString$+ " ="
 
 }
 RationalNumbers
@@ -2289,14 +2592,24 @@ keyboard "Info"+chr$(13)
 }
 MODULE LOGO {smooth off  ' can't use xor with GDI+, so we work with GDI32 (by default)
 Form 80, 50
+Refresh 10000
+Cls 5,0
+Pen 14
 Cursor 0,0
-Gradient 11,0
+Move 0,0
+Fill scale.x,600,5,12
+move 0, 600
+Fill scale.x,800,12,5
+Cursor 3
 drawframeM()
 drawframe2()
 drawframe0()
 drawframe0()
 drawframe0()
-cls, 4
+Move 0, 1400
+Cursor !  ' turn character cursor as near to graphic cursor 
+cls, row
+Refresh 50
 Sub drawframeM()
       local i, n=0
       Move !
@@ -2350,7 +2663,9 @@ Sub drawframe0()
       Cursor !
 End Sub
 }
-MODULE EN {\\ by default Dog=1, Cat=2
+MODULE EN {if version< 9.9 Then 1000
+If revision<19 Then 1000
+\\ by default Dog=1, Cat=2
 \\ we can change it: Dog=0, Cat   ' so now Cat=1
 \\ we can change it: Dog=100, Cat=200
 \\ we can put a new line in place of comma
@@ -2366,14 +2681,26 @@ a++
 Print Eval$(a)="Cat", a=2
 k=Each(Pets)
 While k {
-      Print Eval$(k), Eval(k)
+      Print Eval$(k), Eval(k), k^    ' k^ from 0
       a=Eval(k)
       Print a<Cat
       Alfa(a)
 }
 a=Dog
+
 AlfaByRef(&a)
-Print a=Cat
+
+Print a=Cat  ' true
+Print "a value by name:";@Name$(a)
+\\ k is integer type
+For k=Dog to Cat
+      Print "k value by name:";@Name$(k), type$(k)
+Next
+
+kk=Each(Pets)
+While kk
+      Print @Name2$(kk), @Name$(kk)
+End While
 
 Sub Alfa(b as Pets)
       Print b
@@ -2382,6 +2709,17 @@ Sub AlfaByRef(&b as Pets)
       Print b
       b++
 End Sub
+\\ handle number and Pets type and iterator for Pets Type
+Function Name$(a)
+      local b as Pets
+      b=a
+      =Quote$(Eval$(b))
+End Function
+\\ hanlde only Pets type and iterator of Pets type
+Function Name2$(b as Pets)
+      =Quote$(Eval$(b))
+End Function
+1000  Error "From revision 19, Version 9.9"
 }
 MODULE FS {\\ appdir$ is the application directory. Normally we nevert use it
 \\ dir$ is the current dir
@@ -2391,7 +2729,10 @@ MODULE FS {\\ appdir$ is the application directory. Normally we nevert use it
 Dir user  ' set current directory to M2000 user
 userdir$=dir$
 Declare fs "Scripting.FileSystemObject"
+show_members(fs)
 Method fs, "GetFolder", dir$ as fc
+Print "GetFolder members"
+show_members(fc)
 With fc, "SubFolders" set SubFolders
 Print type$(SubFolders)
 show_members(SubFolders)
@@ -2612,22 +2953,180 @@ Print next_fact(5)
 m=next_fact
 Print m(5)
 }
-MODULE Y {Module Ycombinator {
-      \\ factorial
-      Print lambda (g, x)->{=g(g, x)}(lambda (g, n)->if(n=0->1, n*g(g, n-1)),10)
-       \\ fibonacci
-      Print lambda (g, x)->{=g(g, x)}(lambda (g, n)->if(n<=1->n,g(g, n-1)+g(g, n-2)), 10)
-
-      \\ Using closure in y, y() return function
-      y=lambda (g)->lambda g (x) -> g(g, x)
-    
-      fact=y((lambda (g, n)-> if(n=0->1, n*g(g, n-1))))
-      Print fact(6), fact(24)
-    
-      fib=y(lambda (g, n)->if(n<=1->n,g(g, n-1)+g(g, n-2)))
-      Print fib(10)
+MODULE Y {op=Pen
+Pen 15
+Report {
+	Y combinator in M2000
+	Two versions for two functions 	factorial and fibonacci
+	For example (the Lamnda identifier removed for now)
+	(g, x)->{
+		=g(g, x)
+	}((g, x)->if(x=0->1, x*g(g, x-1)), 24@)
+	
+	We pass by value for first g this: (g, x)->if(x=0->1, x*g(g, x-1))
+	and for x the value 24@ (decimal type)
+	
+	so we call the g function passing by value the same g (lambda functions are first citizen)
+	we never call the current function g (by using lambda() for a reccursion call)
+	
+	so the combinator Y combinbe two functions, the first one and the internal function g which always provide.
+	the result from internal g is either 1 or x*g(g, x-1) depends on value of x.
+	
+	We use If() statement which execute only one part after arrow.
+	
+	a lambda function need the Lambda identifier before and we can provide
+	This is a simple lambda:
+	a=lambda->0
+	? a()=0   ' true
+	Now with a parameter  (it is a simple form without {} and we can use it if we didn't provide a comma after)
+	
+	a=lambda (k)->k**2
+	? a(2)=4
+	Or
+	a=lambda (k)->{
+		' we can use many statements
+		' the = statament never exit the function and is optional (without it a 0 returned)
+		' the function ends with a break, or an exit, or at the end of a block, and on error
+		=k**2
+	}
+	We can execute a lambda without assign a lambda to a variable, just use after arrow {funtion code here}():
+	Print lambda (x)->{=x**2}(2)=4
+	
+	In the curly brackets we have a regular function with one diffrence. If we use closures that closures stay to lambda
+	The closures in lambda can change state if we want. Using lambda() we can call again the same function, but closures are the same for each call
+	If we want a lambda to return a string we use Lambda$ and for recursion lambda$()
+	We can use lambda() and lambfa$() in any regular function.
+	Also we can use &a to pass a lambda in a variable by reference, or &a() to pass the function by reference
+	Passing the variable by reference we can change it and the change return back.
+	Passing the function by reference only pass the code to a new function, but for lambda functions the clousres can be used
+	We can define a closure in the lambda definition proviing a value, or we can just use a copy of an already defined one
+	So we can make generators
+	x=1
+	a=lambda X -> {
+		=X
+		X++
+	}
+	Print a()=1, a()=2
+	See the LambdaExample in the Y code (use Edit Y)
+	
 }
+Module Ycombinator {
+	\\ factorial  - 10@ is a decimal literal (29 digits)
+	Print @(tab(2)), "factorial of 24 = ";lambda (g, x)->{=g(g, x)}(lambda (g, x)->if(x=0->1, x*g(g, x-1)), 24@)
+	\\ fibonacci
+	Print @(tab(2)),"fibonacci 10th = ";lambda (g, x)->{=g(g, x)}(lambda (g, x)->if(x<=1->x,g(g, x-1)+g(g, x-2)), 10)
+	
+	\\ Using closure in y, y() return function
+	y=lambda (g)->lambda g (x) -> g(g, x)
+	
+	fact=y((lambda (g, x)-> if(x=0@->1@, x*g(g, x-1))))
+	Print @(tab(2)), fact(6)," ", fact(24)
+	
+	fib=y(lambda (g, x)->if(x<=1->x,g(g, x-1)+g(g, x-2)))
+	Print @(tab(2)), fib(10)
+}
+Pen 14
 Ycombinator
+Pen 15
+Report {
+	The lambda example
+}
+Pen 14
+Module LambdaExample {
+	x=1
+	a=lambda X -> {
+		=X
+		X++
+	}
+	Print @(tab(2)), a()=1, a()=2
+	b=a
+	Print @(tab(2)), a()=3, a()=4
+	Print @(tab(2)), b()=3, b()=4
+	Module Inner(&z()) {
+		Print @(tab(2)), z(), z()
+	}
+	Inner &b()    ' 5 6
+	Print @(tab(2)), b()=7
+	Module Inner2(z) {
+		Print @(tab(2)), z(), z()
+	}
+	Inner2 b    ' 8 9
+	Print @(tab(2)), b() ' 8
+	Module Inner3(&m, n) {
+		m=n
+	}
+	Inner3 &b, a
+	Print @(tab(2)), b() '5
+	
+}
+Pen 14
+LambdaExample
+Pen 15
+Report {
+	A closure isn't like a static variable. A static variable has a bond with the caller
+	A closure has a bond only with the current lambda
+	Exception exist for those closures which are pointers, we get a copy of pointer, so maybe two lambda share the same closure, because point to same container
+	Containers maybe anything that provide a pointer
+	Groups may or may not provide a pointer.
+	
+	The Counter function use a static variable.
+	When we pass it by reference the C() called inside Inner4 create a new static x
+	Next time this new static used
+	But outside the Inner4 module we use the first static
+	
+	So static variables are not the same as closures.
+	
+}
+Pen 14
+Function Counter {
+	Static x=1
+	=x
+	x++
+}
+Print @(tab(2)), Counter(), Counter()   ' 1 2
+Module Inner4(&C()) {   
+	Print @(tab(2)), C(), C()
+} 
+Inner4 &Counter()     ' 1 2
+Inner4 &Counter()     ' 3 4
+Print @(tab(2)), Counter(), Counter()  ' 3 4
+Pen 15
+report {
+	Except of lambda and regular functions the latest M2000 version has the analogus to subs but as functions
+	We can call these functions as Inner Functions because can exist only in a module or in a function (lammbda or regular function)
+	Code for inner functions always are at the end of code, after END or after END SUB
+	We can make number or string functions. The name of a function used by the subs system, with one exception: We can call an inner function if this function has different name from any of internal functions like Abs() and Sgn().  We can replace Abs() using regular function for a module, but the @Abs() always call the internal original function. So inner functions use the @ character, so first the interpreter check if it is an internal code and then call the inner function.
+	An inner function has the same scope as a sub, has module scope.
+	An inner function use the same stack for values as the module (regular functions and lambdas in an expresion start with a fresh stack of values, if we call them using Call like a module then we pass the module stack).
+	We can't call an inner function using Call or Function() and Funcrion$().
+	Interpreter search for inner function  the first time from the end in current code or from parent original code, but the code executed in the scope of current executed code.
+	Goto can be used inside a Function ...End Function structure, also we can call subs or simple routines from.
+	
+}
+\\ rules for names are like subs, but not like simple routines with Gosub to a label (which we have to use same case label)
+Pen 14
+Print @(tab(2)), @FACTORIAL(24) 
+Print @(tab(2)), @factorial(10)
+Pen 15
+Report {
+	Conclusion:
+	For Y combinator we can use only lanbda functions which we use them as first citizens
+	regular functions and inner functions can't be used.
+	
+	A regular function defined as the code executed. We can change the definition later or using an if before so we can select the code as we wish. Also we can pass it by reference. Also we can pass it to Event objects (which they hold list of functions)
+	
+	An inner function can't change
+	
+	
+}
+Pen OP
+Clear \\ clear all static variables
+End
+Function factorial(x)
+	if x<2 then =1@ : Exit Function
+	=@factorial(x-1)*x
+End Function
+
 }
 MODULE EV {Module CheckEvents {
       \\ we can use standard functions (not lambda functions)
@@ -3531,7 +4030,7 @@ CheckIt
 \\ we can define again the module, and now we get three time each name, but not every time three same names.
 \\ if we change to Threads.Plan Sequential we get always the three same names
 \\ Also in concurrent plan we can use a block to ensure that statements run without other thread executed in parallel.
- 
+\\ Also there is another statement (not used here): Part { code block} As Variable  Look Help Part 
 Module CheckIt {
       Flush  \\ empty stack of values
       Data "Enjoy", "Rosetta", "Code"
@@ -4244,11 +4743,18 @@ if doc.par(aLL$)=0 then
 	}
 Else
 	Function GetHelp$(&word$, findit) {
-		word$=ucase$(word$)
+		Local Nword$=ucase$(word$)
+		
+		select case Nword$
+		case "ΓΕΝΙΚΑ"
+		Nword$="ΟΛΑ"
+		case "GENERAL"
+		Nword$="ALL"
+		End Select
 		if findit then
-			find aLL$, "\"+word$, where
+			find aLL$, "\"+Nword$, where
 		else
-			find aLL$, "\"+word$+"!", where
+			find aLL$, "\"+Nword$+"!", where
 		end if
 		Read Where1
 		if Where1>0 then
@@ -4341,7 +4847,7 @@ ms$={Find Topic
 Use ALL to get a list of all topics}
 Function HelpPad.click {
 	Method  HelpPad, "EditTextView", false
-	If ask(ms$,,,,, what$)=1 Then Read what$ :Call Local FindWord(what$, true)
+	If ask(ms$,,,,, what$)=1 Then Read New what$ :Call Local FindWord(what$, true)
 }
 
 \\ this is the event to do something with a word clicking on heplPad
@@ -4676,9 +5182,19 @@ If Module(Info) Then
 	keyboard "INFOBasic"+chr$(13)
 end if
 }
-MODULE INFOBASIC {
+MODULE INFOBASIC {\\
+\\ Press Esc to exit this editor - look the context drop down menu too (ctrl+F10 also open context dropdown menu)
+\\
+\\
 refresh 10000
-Form ! 80,66
+Form 80, 66
+BackGround {height.pixels=ceil(scale.y / twipsY) : width.pixels=ceil(scale.x / twipsX)}
+Print height.pixels
+if height.pixels=1024 or height.pixels/width.pixels>0.70 then
+      Form  80,66
+else
+     Form   120,80
+  end if
 backcolor=5   'point
 oldpen=14  ' pen
 Pen 0 {
@@ -4688,7 +5204,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 9.0 for ver 9.9 rev 18 and newer"
+	Report " A collection of modules for tests version 9.2 for ver 9.9 rev 19 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -4705,7 +5221,7 @@ Report {
 	You can call any module by name, try Info
 	Modules (Show every loaded module, plus files on user folder)
 	}
-Pen if(pen=7->8,7){
+Pen 15 {
 	Modules ?
 	Print
 }
@@ -4738,7 +5254,7 @@ Report {
 	}
 Fkey Clear
 FKey 1,"Saveme ' save all loaded modules"
-FKey 2,"Edit InfoBasic ' edit this"
+FKey 2,"Logo : Edit InfoBasic : hide : InfoBasic ' edit this"
 FKey 3,"InfoBasic ' this page"
 FKey 4,"M2000_Editor_Information  ' about editor"
 FKey 5,"Demo1  ' 3d Drawing in a Window"
@@ -4778,11 +5294,11 @@ End Sub
 MODULE SAVEME {Print "Wait..."
 Title "Info"
 dir user
-save info, info
+save info, {UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}}
 Print "Done"
 
 }
-MODULE M2000_EDITOR_INFORMATION {if width<>80 and height<>66 then window 10, window : form !80,66
+MODULE M2000_EDITOR_INFORMATION {\\if width<>80 and height<>66 then window 10, window : form !80,66
 thread.plan sequential   ' can run as concurrent too
 linespace twipsY*2
 ' Mode as read only value return the height of layer form in pt. Using Mode we set to the same Mode but we cut extra space (use linespace also)
@@ -4888,7 +5404,8 @@ Report {
 	Make same All
 	Replace word
 	Word Wrap
-	Drag Enabled (by default drop is enabled, to allow drag operation we have to set this)		(drag start when we give a double click inside marked text. By default for inside drop is a cut and paste procedure)
+	Drag Enabled (by default drop is enabled, to allow drag operation we have to set this)
+		(drag start when we give a double click inside marked text. By default for inside drop is a cut and paste procedure)
 		(Shift/Ctrl works also)
 	Color/Short Language
 	Paragraph Mark (show hidden characters, we can edit in this mode)
@@ -4900,7 +5417,10 @@ Report {
 	}, width-12
 title("View code without moving the cursor from position")
 Report {
-	We can scroll up or down using vertical scroll bar. Press left or right or up or down or an key to return to previous view 	Use F1 to change wrap (this also has no affect to cursor).	Move some lines up or down holding down right mouse button. There is a timer which enable quick move.	The same timer enabled when we click the top or bottom areas of the scroll bar control.
+	We can scroll up or down using vertical scroll bar. Press left or right or up or down or an key to return to previous view
+	Use F1 to change wrap (this also has no affect to cursor).
+	Move some lines up or down holding down right mouse button. There is a timer which enable quick move.
+	The same timer enabled when we click the top or bottom areas of the scroll bar control.
 	}, width-12
 title("View/Select code as you change the cursor from position")
 Report {
@@ -4919,7 +5439,8 @@ Report {
 	depending of the position of the "running cursor" (if we miss the drop, the cursor return to starting position).
 	}, width-12
 Press()
-Keyboard "info"+chr$(13)
+cls, -2
+Keyboard "infoBasic"+chr$(13)
 End  ' we can omit this
 Sub title(a$)
 Pen #ffeeff {
@@ -4942,7 +5463,6 @@ Sub Press()
 		}
 		swap col, col2
 	} as threadid interval 250
-\	wait 500	
 	Main.Task 10 {
 		if keypress(1) or keypress(32) then exit
 	rem		if mouse>0 or inkey$<>"" then exit
@@ -5484,20 +6004,18 @@ Print "fault"
 }
 MODULE G11 {t=0
 again:
-{
-loop
 t++
-on t goto 100, 101
+on t goto 100, alfa
 end
 Print 0100
 Print "fault"
 0100 Print "ok1" : Print "100"
-restart
+goto again
 10100 Print "fault"
 exit
 alfa:
 101 Print "ok2", t
-}
+
 }
 MODULE G12 {alfa:
 101  static a=10
@@ -5836,14 +6354,14 @@ Set Fast   ' return to normal
 MODULE UPDATE {beep
 Title "Info"
 dir appdir$
-save info, info
+save info, {UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}}
 if isnum then {
 	drop
 	open "info.bck" for output as #N
 	close #N
 }
 dir user
-save info, info
+save info, {UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}}
 }
 MODULE BJ { Escape Off
  Flush  \\empty Stack, we use optional arguments in Modules
@@ -7623,7 +8141,7 @@ MODULE HU {Module Huffman {
       j=1
       check$=""
       For i=1 to len(a$)
-            d=each(encode)
+            d=each(encode, -1,1)  ' from last to first - works  d=each(encode)  from start
             While d {
                   code$=eval$(d)
                   if mid$(message$, j, len(code$))=code$ then {
@@ -7633,7 +8151,7 @@ MODULE HU {Module Huffman {
             }
       Next i
       Print
-      Print len(message$);" bits ", if$(a$=check$->"Encoding/decoding worked", "Encoding/Decoding failed")
+      Print len(message$);" bits ", if$(a$=check$->"Encoding/decoding done", "Encoding/Decoding failed")
  
  
       Sub Traverse(a, a$)
@@ -7684,6 +8202,7 @@ MODULE RE {Module CheckIt {
       Method ObjRegEx, "Execute", "Myer, Ken" as MyMatches
       Rem : DisplayFunctions(MyMatches)
       \\ we can use Enumerator
+      Print "Using _NewEnum"
       With MyMatches, "_NewEnum" as New Matches
       Rem : DisplayFunctions(Matches)
       With Matches, "Value" as New item$
@@ -7691,6 +8210,7 @@ MODULE RE {Module CheckIt {
            Print Item$
       }
       \\ Or just using the list$()
+      Print "Using Count and Item properties"
       For i=0 to Count-1 : Print List$(i) : Next i
       declare ObjRegEx Nothing
       End
@@ -7973,7 +8493,10 @@ sprite img$,5 ,45,30,40
 clipboard img$
 Title "Shift Console.. complete"
 }
-MODULE GR {\\ Gray Code
+MODULE GR {Report {
+	Gray Code
+	
+}
 Module GrayCode {
       Function bin$(a) {
             a$=""
@@ -8001,7 +8524,10 @@ Module GrayCode {
 GrayCode
 }
 MODULE AC {\\ M2000 Interpreter
-\\ accumulator factory
+report {
+	 Accumulator factory
+	 
+}
 foo=lambda acc=0 (n as double=0) -> {
       if n=0 then =acc : exit 
       acc+=n
@@ -8117,8 +8643,15 @@ put_a_title:
           legend "Μ2000","Arial Black", 90*sc,pi/2,0,0,100 
       } ;
       Move -320*sc, scale.y-10000*sc
-      Fill 2000*sc, 10000*sc, #775566, #221133,1,1
+      Fill 2300*sc, 10000*sc, #221133, #AA8566,1,1
       Path { } ;
+      Move -320*sc, scale.y
+      Pen 0 {
+            \\ transparent background color
+            Color { 
+                legend "Μ2000","Arial Black", 90*sc,pi/2,0,0,100 
+            }
+      }
 Return
 define_module_b:
 Module b {
@@ -8209,7 +8742,7 @@ Class Display {
             Pen 14 { Draw .wi }
             Move .x+.wi/2,.y+200
             Pen 12 {
-                  Legend Format$("Oscilloscope: {0}sec 10x",str$(.counter/10,"000000.0")), "Lucida Console", 11*.sc, 0, 2, 1, 20
+                  Legend Format$("Oscilloscope: {0}sec",str$(.counter/10,"000000.0")), "Lucida Console", 11*.sc, 0, 2, 1, 20
             }
       }
 }
@@ -9558,6 +10091,7 @@ MODULE PP {function dummy {
 }
 Inline Code LibFade
 FadeScreen &Dummy(), 1.7
+Set Fast
 }
 MODULE COMP {\\ compose lambda functions
 \\ We can put closures (as copy of values, or copy of pointers if a variable is a pointer)
@@ -10631,23 +11165,26 @@ Print "Treatment group "
 Print 85, 88, 75, 66, 25, 29, 83, 39, 97
 Print "Control group"
 Print 68, 41, 10, 49, 16, 65, 32, 92, 28, 98
-Print "Please wait  - ctrl-C or Esc to exit"
+Print "Please wait about 4.5 minutes  - Use ctrl-C to exit any time"
 Refresh
 Module Checkit {
       Global data(), treat=0
       data()=(85, 88, 75, 66, 25, 29, 83, 39, 97,68, 41, 10, 49, 16, 65, 32, 92, 28, 98)
-      Function pick(at, remain, accu) {
-            If remain Else =If(accu>treat->1,0):Exit
-            =pick(at-1,remain-1,accu+data(at-1))+If(at>remain->pick(at-1, remain, accu),0)
-      }
       total=1
       For i=0 to 8 {treat+=data(i)}
       For i=19 to 11 {total*=i}
       For i=9 to 1 {total/=i}
-      gt=pick(19,9,0)
+      Profiler
+      gt=@pick(19,9,0)
+      Print "Minutes:";Timecount/1000/60
       le=total-gt
       Print Format$("<= : {0:1}% {1}", 100*le/total, le)
       Print Format$(" > : {0:1}% {1}", 100*gt/total, gt)
+      End
+      Function pick(at, remain, accu)
+            If remain Else =If(accu>treat->1,0):Exit Function
+            =@pick(at-1,remain-1,accu+data(at-1))+If(at>remain->@pick(at-1, remain, accu),0)
+      End Function
 }
 Checkit
 }
@@ -11630,7 +12167,7 @@ FastM2000
 }
 MODULE UTF8 {Module checkit {
       linespace 60
-      Form ! 60,40
+      Form ! 60,45
       Cls,0
       Report 2, "Read a file character by character/UTF8"
       \\ prepare a file
@@ -11654,7 +12191,8 @@ MODULE UTF8 {Module checkit {
             Second line 𐐷
             Third Line
             Ελληνικά Greek Letters
-            ברוכים הבאים 1234
+            Γιω̃ργος diacritic (U+303)
+            1234 ברוכים הבאים abc
             yä®€
             成长汉
             }
@@ -11681,7 +12219,12 @@ MODULE UTF8 {Module checkit {
       Cursor 20
       Report final$, width-20-8
       Print
-      Print #-2, final$
+      Rem Print #-2, final$
+      Document Final$ ' upgrade
+      for i=1 to doc.par(final$)
+            print paragraph$(final$,i)
+      next
+      next
       Sub GetOneUtf8Char(&ch$)
             ch$=""
             if Eof(#f) then Exit Sub
@@ -11708,7 +12251,7 @@ MODULE UTF8 {Module checkit {
       End Sub
 }
 checkit
-Italic 1 : Report "Press any key to return to Info": Italic 0
+Italic 1 : Print Over "Press any key to return to Info": Italic 0
 Push Key$ : Drop
 Keyboard "info"+chr$(13)
 }
@@ -11910,7 +12453,15 @@ Module CheckIt {
 }
 Checkit
 }
-MODULE TTT {Module Tic.Tac.Toe {
+MODULE TTT {Cls
+Report {
+      Tic Tac Toe
+      Player vs Computer
+      (Computer may loose. Find when)
+      
+}
+
+Module Tic.Tac.Toe {
       Dim Board$(1 to 3, 1 to 3)=" "
       WinGame=False
       p=Board$()
@@ -12414,7 +12965,10 @@ Module CheckIt {
 }
 Checkit
 }
-MODULE PRTRY {\\ use printer properties to set number of copies
+MODULE PRTRY {Print "Choose a printer:"; : Printer ?
+Print printername$
+
+\\ use printer properties to set number of copies
 Printer !
 
 if ask("Is printer on","Printing Test","Yes","No")=1 then
@@ -12510,7 +13064,7 @@ MODULE PA15 {Module Puzzle15 {
 \\ BASIC STYLE  FROM COMMODORE BASIC
 \\ http://www.rosettacode.org/wiki/15_Puzzle_Game#COMMODORE_BASIC
 REM {
-I make a function RND() and I set Base for arrays to 1 Also I put some semi colons to Print statement Also I have to put variables after NEXT statements To be actual BASIC compatible we have to set FOR NEXT like BASIC, because for M2000 the direction defined by the starting-ending values, so always we get at least one time the block between FOR NEXT. So we can use:
+I make a function RND() and I set Base for arrays to 1 Also I put some semi colons to Print statement. To be actual BASIC compatible we have to set FOR NEXT like BASIC, because for M2000 the direction defined by the starting-ending values, so always we get at least one time the block between FOR NEXT. So we can use:
 
 SET SWITCHES "+FOR"
 
@@ -12553,7 +13107,7 @@ TRY {
             230   S$=STR$(D(P))
             240   N=LEN(S$)
             250   D$(P) = LEFT$("   ",3-N)+S$+"  "
-            260 NEXT P
+            260 NEXT
             270 PRINT "+-----+-----+-----+-----+"
             280 PRINT "!";D$(1);"!";D$(2);"!";D$(3);"!";D$(4);"!"
             290 PRINT "+-----+-----+-----+-----+"
@@ -12582,7 +13136,7 @@ TRY {
             520 REM' SET PIECES IN CORRECT ORDER FIRST
             530 FOR P=1 TO 15
             540   D(P) = P
-            550 NEXT P
+            550 NEXT
             560 D(16) = 0 : REM' 0 = EMPTY PIECE/SLOT
             570 Z=16      : REM' Z = EMPTY POSITION
             580 PRINT: PRINT "SHUFFLING PIECES";
@@ -12594,7 +13148,7 @@ TRY {
             640   D(Z)=D(R)
             650   Z=R
             660   D(Z)=0
-            670 NEXT N
+            670 NEXT
             680 PRINT CHR$(147)
             690 RETURN
             700 REM
@@ -12633,7 +13187,7 @@ TRY {
             1030 REM' ******************************
             1040 REM' A SMALL DELAY
             1050 FOR T=0 TO 400
-            1060 NEXT T
+            1060 NEXT
             1070 RETURN
 }
 \\ SET BACK THE BASE OF ARRAYS
@@ -13581,7 +14135,13 @@ Module CheckIt {
 }
 Checkit
 }
-MODULE NQ {Module N_queens {
+MODULE NQ {form ! 60,32
+Set Fast !
+Double
+Print "N-Queens"
+Refresh 1000
+Cls,2
+Module N_queens {
 Const l = 9  'number of queens)
 Const b = true  'print option
 Dim a(0 to  l), s(0 to l), u(0 to 4 * l - 2)
@@ -13593,24 +14153,37 @@ For n = 1 To l
 		i-- :j++:p=0:q=-r
 		Do :i++ :u(p)=1:u(q+r)=1:Swap a(i), a(j):p=i-a(i)+n:q=i+a(i)-1:s(i)=j:j=i+1:Until j > n Or u(p) Or u(q + r)
 		If u(p)=0 Then If u(q+r)=0 Then m++ : If b Then Disp()
+		if Esc then Print"Esc" : break
 		j = s(i)
 		While j >= n And i <> 0
 			Do :Swap a(i), a(j) :j--:Until j < i
 			i--:p=i-a(i)+n :q=i+a(i)-1:j = s(i):u(p)=0:u(q+r)=0
 		End While
 	Until i=0
-	Print n, m  'number of queens, number of solutions
+	Print Part @(0),~(15),"Queens:";~(14);n, @(tab(2)), ~(15),"Solutions:";~(14);m
+	if n<l Then Print Under $(7,width),"Press a key",@(0) : Push Key$ : Drop Else Print Under
 Next
 Sub Disp()
-	Pen 14 {Print "n="; n; "m="; m}
+	Pen 14 {Print "n="; n; "    m="; m}
 	For k=1 To n  :For t=1 To n
 		Print If$(a(n-k+1)=t-> "♛", ".");
 	Next :Print : Next
+	Refresh
+	wait 1  ' this is the spot where a thread get time to run
 End Sub
 }
-Double
+Escape Off
+\\ simulate Esc key,using a thread (threads need time, so we use Wait to get it)
+Global Esc=False
+Thread {Esc<=keypress(27)} as M interval 100
+
 Pen 15{N_queens}
+Thread M Erase
+Print
 Normal
+while keypress(27) : Wait 1: End While
+Set Fast
+Escape On
 }
 MODULE MOUSEPOS {Module Checkit {
 	\\ works when console is the active window
@@ -13697,7 +14270,7 @@ MODULE PRI {Module  Prime_decomposition    {
 	Cursor 0, (height-Stack.Size-4) div 2
 	Scroll Split 0
 	Bold 0 : Italic : double
-	Print Part $(6, 6), ~(0,7),"Number" , $(6, tab1 div 2),~(oPen,3,3), "Prime decomposition"
+	Print Part $(6, 6), ~(0,7),"Number", $(6, width-6+1),~(oPen,3,3), "Prime decomposition"
 	Bold oBold : Italic : Normal
 	Print
 	Pen 15 {Print Under}
@@ -14058,7 +14631,7 @@ Mouse.Icon Hide
 Cls #222222,0
 Print @(5,5),
 Pen 7 {
-      Report {Game SoloPong
+      Report {Game SoloPong II
             Press P for pause
             Press space...
             ...to end the game
@@ -14102,7 +14675,10 @@ tx=120
 tm=120
 yp=Mouse.X
 y=yp
+kp=0
+kw=(xd1-xk) div 2
 Thread {
+      if (xm<xk and kp=0) or (xm>xk and kp<>0)  then if keypress(1) then kp=-kw-kp
       yp=y : y=Mouse.Y
 } As nm Interval 25
 Wait 100
@@ -14121,14 +14697,15 @@ Thread {
             tx-! : xm=xa2+500
             tx*=1.5
             Hit
-       } Else.If collide(4, 100, xd1,y-900, xd2, y+900) Then {
-       tx=-Abs(tx) : xm+=tx*Hard
-       tx=min.data(-Int(Log(Abs(y-yp)+2))*45*Hard, tx/2, -120) 
-       tm=Sgn(ym-y)*Abs(Int((ym-y)/10))+Sgn(tm)*30*Hard
-       Hit
+       } Else.If collide(4, 100, xd1+kp,y-900, xd2+kp, y+900) Then {
+	   if kp then hard=1: tz=2
+	   tx=-Abs(tx) : xm+=tx*Hard
+	   tx=min.data(-Int(Log(Abs(y-yp)+2))*45*Hard, tx/2, -120) 
+	   tm=Sgn(ym-y)*Abs(Int((ym-y)/10))+Sgn(tm)*30*Hard
+	   Hit
       }
       Rem 1 : Cursor 0,Height-1 : Print Over $(,8),xm, ym , Abs(y-yp), tx, tm
-      Player 2,,y
+      Player 2,xd1+kp,y
       'Player 4, xm,ym     
       Player 4, xm,ym Use a$,1,0, xm mod 360 size (2*xk-Abs(xm-xk))/xk
       xm+=tx       
@@ -14193,6 +14770,8 @@ Main.Task 100 {
                         Layer {
                               Cls 0, 0
                               Pen 15 {
+                                    Cursor 0, 0
+                                    Print Over $(6),"Solo Pong II"
                                     Cursor 0, Height/2-1
                                     Print Over $(6),"Press P or p to continue.."
                                     Print Under
@@ -14729,14 +15308,17 @@ MODULE EN1 {Module Checkit {
             \\ error, m is an object
             m=100
       }
+      report error$
       Try {
             \\ error not the same type
             m=apple2
       }
+      report error$
       Try {
             \\ read only can't change
             apple2++
       }
+      report error$
       m++
       Print Eval$(m)="cherry", m
       k=Each(Fruit2 end to start) 
@@ -16708,7 +17290,7 @@ first$={<!DOCTYPE html>
 end if
 Flush \\ Empty the stack
 makelist()
-title$="C# Editor"
+title$="Html Editor"
 typ$="html"
 W$=""
 path$="" 
@@ -16913,7 +17495,7 @@ Open1:
            Clear BackUp$
            Load.Doc BackUp$, f$
            
-           Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+           Caption$=TitleStr$(File.Name$(Filename$)) +" - Html Editor"
            lookpath$=file.path$(Filename$)
            \\ silent means here without refresh
            With Pad, "SelStartSilent", 0, "SellengthSilent",0 
@@ -16937,7 +17519,7 @@ Save1:
         Save.Doc BackUp$, f$  ' by default 2 - Utf-8
         filename$=f$
         lookpath$=file.path$(Filename$)
-        Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+        Caption$=TitleStr$(File.Name$(Filename$)) +" - Html Editor"
       }
      If ok Else Beep
      If Not cont Then Exit
@@ -16952,7 +17534,7 @@ Save2:
             Method NotePad, "CloseNow"
       } Else {
             FileName$=Dir$+"Untitled."+typ$
-            Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
+            Caption$=TitleStr$(File.Name$(Filename$)) +" - Html Editor"
             Method Pad, "Resize"
       }
       Exit
@@ -17677,7 +18259,7 @@ end while
 For i=A to B
 	print over
 	print part i
-	refresh
+	refresh 50
 	if instr(a$(i,1),"_2")>0 then continue
 	if a(i,2)<>m then
 		c$={
@@ -18105,7 +18687,11 @@ Try {
 }
 dir user
 }
-MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake game","*Start","Leave")<>1 τότε έξοδος
+MODULE SNAKE {Αν Τοπικό=1032 ή Ελληνικά Τότε {
+      Αν Ρώτα( "Κράτα πατημένο το διάστημα πριν τελειώσει το παιχνίδι για άμεσο τερματισμό","Παιχνίδι Φιδάκι","*Ξεκινάω","Όχι τώρα")<>1 τότε Διέκοψε
+} Αλλιως {
+      Αν Ρώτα( "Press Space to exit before the game end","snake game","*Start","Leave")<>1 τότε Διέκοψε
+}
 Διαφυγή Όχι
 Δυαδικό {
       iVBORw0KGgoAAAANSUhEUgAAAyAAAAKbCAMAAAA61B5YAAAAGFBMVEUgpM3///8B
@@ -18397,7 +18983,8 @@ MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake ga
       hFUDGUD2VYAUW4NcB0jDJd7K1srF90EoIJqXSv7FkwCp4WHJ7ujClRpOA+SXS8hV
       uHDCFAcIv2YiGOrF9bbMgnwaIDTMXdLEIrEminfarHZ02D9CvPRorW2Vpg8mPpR4
       LAaE5YMAgk7ELsoSQHhHiDtsEiGk4tYBku78IkBi9iFAZH0QlEfV3U4WRLfFj0yf
-      q22rH5h8FWvtx3WA8HPSUyUvsyA8IUGBKSArLUi6t3ujDctYcb9pQIShJhvMJgIk      TUdHf0leyY/zwsyiNAqIf6hBfPw45VDjcSEgZQvMngIIt3h7NiG0WjNQCwCB00HQ
+      q22rH5h8FWvtx3WA8HPSUyUvsyA8IUGBKSArLUi6t3ujDctYcb9pQIShJhvMJgIk
+      TUdHf0leyY/zwsyiNAqIf6hBfPw45VDjcSEgZQvMngIIt3h7NiG0WjNQCwCB00HQ
       ZsgXANKYccvXVbiczbUWkGO8y5wHCNu4CloADIjV9s4vB4QSAr5aKwHhbEg2IaRa
       7TQgePWC44h/Iyxj1Q2HRrEuBIR0X1rv4hQ2qO05TSy+a/6D6//nx4zysXoUixbY
       vwK4ItMBp+WsAMSzwY5kgU02UQW5GXYrAeGnpJ8JiH0rQMixiIaPFazmqqURQNxT
@@ -18958,7 +19545,11 @@ MODULE SNAKE {Αν Ρώτα( "Press Space to exit before the game end","snake ga
 }
 Δείξε_Όλα(-1,"")
 Κύλιση Χώρισμα 0  ' όπως το Οθόνη,0 χωρίς να καθαρίσει την οθόνη!
-Αν Ρώτα( "New Game","snake game","*Play","Not now")=1 τότε προς Πάλι_εδώ
+Αν Τοπικό=1032 ή Ελληνικά Τότε {
+      Αν Ρώτα( "Νέο Παιχνίδι","Παιχνίδι Φιδάκι","*Να Παίξω","Όχι τώρα")=1 τότε προς Πάλι_εδώ
+} Αλλιως {
+      Αν Ρώτα( "New Game","snake game","*Play","Not now")=1 τότε προς Πάλι_εδώ
+}
 Αν Τμημα(info) Τότε  Πληκτρολόγιο "info"+χαρ$(13)
 Διαφυγή Ναι
 Θέσε Γρήγορα
@@ -19185,7 +19776,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<18 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<19 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -19329,6 +19920,8 @@ end if
 MODULE CHESSGAME {\\ George Karras, 2019
 \\ Chess Example (a big one)
 \\ Example Using sprites
+\\ Rev. 2
+Set Fast
 Hide
 window 12, window
 if random(1, 3)=1 then
@@ -19632,13 +20225,14 @@ back {
 						end if
 						k$=""
 						if keypress(0x1B) then k$="Y":exit
-						if keypress(0xE4) then  exit
+						if keypress(0x4E) then exit
 						if keypress(0x59) then  k$="Y":exit
-						if keypress(2) then k$="Y": exit
-						if keypress(1) then exit
+						if keypress(1) then k$="Y": exit
+						if keypress(2) then exit
 						
 					}
 				}
+				while not inkey$ ="" {Wait 1}  'drop key any
 				If k$="Y" else
 					\\ if stack has something then RedrawBoard mey use it (because read for optional variable)
 					\\ we can be sure we set the optional value using ?
@@ -19648,7 +20242,6 @@ back {
 					flush ' make empty true (so stack is empty for sure)
 					loop  ' set a flag for restart at end bracket of current block
 				end if
-				while not inkey$ ="" {Wait 1}  'drop key any
 			else
 				move$=lcase$(move$)
 				while len(move$)>0
@@ -19697,7 +20290,7 @@ back {
 			Cls
 			Cursor width, Height
 			Move !
-			Legend "Left Mouse Click or Esc to Quit | Right Mouse Click right of the FEN to continue play | About Ctrl+F1", FontName$, Mode*.7, 0,1, 1,twipsX
+			Legend "Right Mouse Click or Esc to Quit | Left Mouse Click right of the FEN to continue play | About Ctrl+F1", FontName$, Mode*.7, 0,1, 1,twipsX
 			Cursor 0,0
 			Report 2, "Replay the Game,(arrows u/d) or Start a new one setting a new FEN"
 			Print Part $(7,7), "Board FEN: "
@@ -21187,4 +21780,72 @@ End
 370 End Sub
 
 }
-INFO
+MODULE CRAWL {Escape Off
+Hide
+Window 12,0
+Back {
+Ybig=scale.Y
+Window 18,0, 2000;
+Motion.w 0 , Ybig-2000
+Refresh 5000
+
+\\ For changing the decimal character use Locale (Locale 1033 for English, Locale 1032 fro Greek)
+\\ Here we use Locale value in Time$()
+\\ Locale is a statement and a read only value
+
+\\ Greek and Latin statements used for message;s language
+\\ Greek also is a read only variable to read the status for message's language
+If Greek Then
+      m$="Πάτα ένα πλήκτρο στο πληκτρολόγιο για τερματισμό - Πάτα τα πλήκτρα του ποντικιού για να αλλάξεις ταχύτητα στο μήνυμα - "
+Else
+      m$="Press a key on keyboard to end this - Press a key on mouse to change the crawl speed - "
+End If
+fn$="Arial Black"
+sz=48
+mw=Size.X(m$,fn$, sz)
+m1=0
+m2=mw
+my=Scale.y/2-Size.Y("Α", fn$, sz)/2
+ms=twipsX
+t=10
+Cls
+Gradient 4, 12
+if module(ico) then ico 0 : Read ico
+Hold
+Font Fn$
+Pen 14
+Every 1000/60{
+D=Mouse
+If Inkey$<>"" Then
+      Exit
+Else
+      Release
+      Cursor 0,0
+      Print Part $(3,width), Time$(now, 1033+Greek, "hh:mm:ss tt")
+      Move m1, my
+      Pen 15 {
+            Legend m$, fn$, sz
+            If m2<scale.x Then
+                  Move m2, my
+                  Legend m$, fn$, sz
+            End If
+      }
+      If D=4 Then t=1 Else.If D=1 Then t++ Else.If D=2 Then t-=Αν(t>1->1,0)
+      m1-=ms*t
+      m2-=ms*t
+      If m2<0 Then m1=m2+mw: Swap m1, m2
+      if module(ico) then
+            Move  if(keypress(4)->mouse.x,  twipsX*5),0
+            Image ico, scale.x/width*5  ' (twips/character)
+      end if
+      Refresh 5000
+End If
+}
+Cls 11
+}
+\\Window 12,0
+\\Show
+Escape On
+keyboard "info"+chr$(13)
+}
+UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}

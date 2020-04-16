@@ -227,7 +227,7 @@ Private nochange As Boolean, LastSearchType As Long
 Private Declare Function lstrlenW Lib "kernel32.dll" (ByVal psString As Long) As Long
 Private Declare Function EmptyClipboard Lib "user32" () As Long
 Public MY_BACK As New cDIBSection, Back_Back As New cDIBSection
-Private mynum$
+Private mynum$, LastNumX
 Dim OneOnly As Boolean
 Public WithEvents HTML As HTMLDocument
 Attribute HTML.VB_VarHelpID = -1
@@ -410,7 +410,7 @@ UKEY$ = ChrW(UINT(i \ &H400& + &HD800&)) + ChrW(UINT((i And &H3FF&) + &HDC00&))
 Else
 UKEY$ = ChrW(i)
 End If
-Form_KeyPress 44
+If LastNumX Then Form_KeyPress 44
 Refresh
 Exit Sub
 End If
@@ -1156,13 +1156,14 @@ Case vbKeyAdd, vbKeyInsert
 mynum$ = "&h"
 Case vbKey0 To vbKey9
 mynum$ = mynum$ + Chr$(KeyCode - vbKey0 + 48)
-Case vbKey0 To vbKey9
-mynum$ = mynum$ + Chr$(KeyCode - vbKey0 + 48)
+LastNumX = True
 Case vbKeyNumpad0 To vbKeyNumpad9
 mynum$ = mynum$ + Chr$(KeyCode - vbKeyNumpad0 + 48)
+LastNumX = False
 Case vbKeyA To vbKeyF
 If Left$(mynum$, 1) = "&" Then
 mynum$ = mynum$ + Chr$(KeyCode - vbKeyNumpad0 + 65)
+LastNumX = True
 Else
 mynum$ = vbNullString
 End If

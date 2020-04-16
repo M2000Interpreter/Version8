@@ -164,21 +164,29 @@ Dim myCancel As myButton
 Dim all As Long
 Dim novisible As Boolean
 Private mModalid As Variant
-Dim LastActive As gList
+Dim LastActive As gList, yo As Integer
 
 '
 Property Get NeverShow() As Boolean
 NeverShow = Not novisible
 End Property
 
-
-
-
-
-
-
+Private Sub command1_GotFocus(Index As Integer)
+yo = Index
+End Sub
 
 Private Sub command1_KeyDown(Index As Integer, KeyCode As Integer, shift As Integer)
+If KeyCode = 39 Or KeyCode = 40 Then
+KeyCode = 0
+If Index > 0 Then
+If command1(Index - 1).Visible Then command1(Index - 1).SetFocus: Set LastActive = command1(Index - 1)
+End If
+ElseIf KeyCode = 37 Or KeyCode = 38 Then
+If Index < 1 Then
+KeyCode = 0
+If command1(Index + 1).Visible Then command1(Index + 1).SetFocus: Set LastActive = command1(Index + 1)
+End If
+End If
 If KeyCode = vbKeyPause And Not BreakMe Then
 ASKINUSE = False
 ElseIf KeyCode = vbKeyEscape Then
@@ -561,7 +569,7 @@ On Error Resume Next
 Dim sc As Double
 Set Image1.Image = Nothing
 Image1.Width = 0
-If aImage.handle <> 0 Then
+If aImage.Handle <> 0 Then
 Set Image1.Image = aImage
 If (aImage.Width / iwidth) < (aImage.Height / iheight) Then
 sc = aImage.Height / iheight
@@ -582,7 +590,7 @@ On Error Resume Next
 Dim sc As Double
 Set Image1.Image = Nothing
 Image1.Width = 0
-If aImage.handle <> 0 Then
+If aImage.Handle <> 0 Then
 Set Image1.Image = aImage
 Image1.Height = aImage.Height
 Image1.Width = aImage.Width
@@ -648,6 +656,11 @@ If KeyCode = vbKeyEscape Then
 End If
 End Sub
 
+Private Sub gList2_MouseUp(X As Single, Y As Single)
+If command1(yo).Visible Then command1(yo).SetFocus
+
+End Sub
+
 Private Sub gList3_Selected2(item As Long)
 
  command1(0).SetFocus
@@ -671,8 +684,8 @@ If item >= 0 Then
 content = ListPad.TextLine(item + 1)
 End If
 End Sub
-Private Sub ListPad_BreakLine(data As String, datanext As String)
-    gList1.BreakLine data, datanext
+Private Sub ListPad_BreakLine(Data As String, datanext As String)
+    gList1.BreakLine Data, datanext
 End Sub
 
 

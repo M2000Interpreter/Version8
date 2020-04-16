@@ -208,13 +208,13 @@ Public Enum PARAMFLAGS
 End Enum
 
 Public Type fncinf
-    name                    As String
+    Name                    As String
     addr                    As Long
     params                  As Integer
 End Type
 
 Public Type enmeinf
-    name                    As String
+    Name                    As String
     invkind                 As invokekind
     params                  As Integer
     
@@ -1215,15 +1215,35 @@ Dim ppTInfo As Long, pCustTypeInfo As IUnknown, bstrType As String, ret As Long
 
 On Error Resume Next
 ITypeInfo_GetRefTypeInfo pTypeInfo, hreftype, ppTInfo
-If ppTInfo = 0 Or Err Then Err.clear: stringifyCustomType = "UnknownCustomType": Exit Function
+If ppTInfo = 0 Or Err Then
+If Not ppTInfo = 0 Then
 Set pCustTypeInfo = ResolveObjPtrNoRef(ppTInfo)
-    ret = ITypeInfo_GetDocumentation(pCustTypeInfo, -1, bstrType, vbNullString, 0, vbNullString)
-    If ret Then stringifyCustomType = "UnknownCustomType": Exit Function
-stringifyCustomType = bstrType
 Set pCustTypeInfo = Nothing
+End If
+Err.clear: stringifyCustomType = "UnknownCustomType"
+
+
+Exit Function
+End If
+Set pCustTypeInfo = ResolveObjPtrNoRef(ppTInfo)
+    ret = ITypeInfo_GetDocumentation(pCustTypeInfo, 0, bstrType, vbNullString, 0, vbNullString)
+Set pCustTypeInfo = Nothing
+If ret Then stringifyCustomType = "UnknownCustomType": Exit Function
+stringifyCustomType = bstrType
+
 End Function
 Private Function stringifyTypeDesc(TypeDesc As TTYPEDESC, pTypeInfo As IUnknown) As String
 Dim out$, td As TTYPEDESC
+If IsBadCodePtr(TypeDesc.pTypeDesc) Then
+If TypeDesc.vt = VT_PTR Then
+stringifyTypeDesc = "LONG"
+ElseIf TypeDesc.vt = VT_USERDEFINED Then
+stringifyTypeDesc = "USERDEFINED"
+Else
+GoTo a123
+End If
+Exit Function
+End If
 If TypeDesc.vt = VT_PTR Then
     memcpy td, ByVal TypeDesc.pTypeDesc, Len(td)
     stringifyTypeDesc = stringifyTypeDesc(td, pTypeInfo)
@@ -1244,6 +1264,7 @@ If TypeDesc.vt = VT_USERDEFINED Then
     stringifyTypeDesc = stringifyCustomType(td.pTypeDesc, pTypeInfo) ' hreftype=td.pTypeDesc
     Exit Function
 End If
+a123:
 Select Case TypeDesc.vt
 Case VT_I2: stringifyTypeDesc = "Integer"
 Case VT_I4: stringifyTypeDesc = "Long"

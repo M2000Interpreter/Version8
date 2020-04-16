@@ -143,11 +143,86 @@ Public Sub SetVarobJ(ByVal name$, var As Variant)
     Set StaticCollection = New FastCollection
     If Parent Is Nothing Then
     Else
+    Debug.Print "SetVarObj ", "%_" + StaticInUse
     Parent.SetVarobJ "%_" + StaticInUse, StaticCollection
     End If
     End If
-    If Not StaticCollection.Find(name$) Then StaticCollection.AddKey name$
+    If Me.Parent Is Nothing Then
+    
+    Else
+    If Not StaticCollection.Find(name$) Then StaticCollection.AddKey name$: Debug.Print "Addkey ", name$
     Set StaticCollection.ValueObj = var
+    End If
+End Sub
+Public Sub ClearBasket()
+
+    Dim oldname$, name$
+    name$ = "%_" + StaticInUse
+    If StaticCollection Is Nothing Then Exit Sub
+    If Me.IamThread Or Me.IamAnEvent Or Not Me.IamChild Then
+        Set StaticCollection = Nothing
+        Exit Sub
+    End If
+    
+    If Not Parent Is Nothing Then
+        oldname$ = name$
+        
+        If StaticCollection Is Nothing Then Exit Sub
+        name$ = "%_" + Parent.StaticInUse
+        If oldname$ = name$ Then Exit Sub
+        Set StaticCollection = Nothing
+        If Parent.IamThread Or Parent.IamAnEvent Then Exit Sub
+        If Parent.ExistVar(oldname$) Then Parent.StaticCollection.RemoveWithNoFind
+    End If
+    
+End Sub
+Public Sub SetBacket(ByVal name$, var As Variant)
+    Dim paren As basetask
+    If StaticCollection Is Nothing Then
+        Set StaticCollection = New FastCollection
+    End If
+    If Me.IamThread Or Me.IamAnEvent Then Exit Sub
+    If Parent Is Nothing Then
+    
+    Else
+        Set paren = Me
+        Do While paren.StaticInUse = paren.Parent.StaticInUse
+        Set paren = paren.Parent
+        
+        If paren.Parent Is Nothing Then Exit Do
+        
+        Loop
+        If Not paren.Parent Is Nothing Then Set paren = paren.Parent
+        If paren.StaticCollection Is Nothing Then
+            Set paren.StaticCollection = New FastCollection
+        End If
+        If Not paren.StaticCollection.Find(name$) Then paren.StaticCollection.AddKey name$: Debug.Print "Addkey ", name$, paren.StaticInUse
+        
+        Set paren.StaticCollection.ValueObj = var
+        If paren.IamThread Or paren.IamAnEvent Then Exit Sub
+        Dim oldcol As FastCollection
+        Set oldcol = paren.StaticCollection
+        Do While Not paren.Parent Is Nothing
+        
+        name$ = "%_" + paren.StaticInUse
+        Set paren = paren.Parent
+        If paren.IamThread Or paren.IamAnEvent Then Exit Do
+        If paren.StaticCollection Is Nothing Then
+            Set paren.StaticCollection = New FastCollection
+            paren.StaticCollection.AddKey name$
+            Set paren.StaticCollection.ValueObj = oldcol
+        ElseIf paren.StaticCollection.Find(name$) Then
+            
+            ' problem this exist
+        Else
+            paren.StaticCollection.AddKey name$
+        End If
+        Set oldcol = paren.StaticCollection
+        
+        
+        Loop
+    End If
+    
 End Sub
 Public Sub SetVarobJvalue(ByVal name$, var As Variant)
     If Not StaticCollection.Find(name$) Then
@@ -378,6 +453,24 @@ Public Sub ReadVar(ByVal name$, var As Variant)
             If Left$(name$, 1) = "%" Then Set .ValueObj = Nothing
             Else
                     var = .Value
+            End If
+        End If
+    End With
+End Sub
+Public Sub ReadStaticCol(ByVal name$, var As Variant)
+    Dim i As Long, vv As Variant
+    If StaticCollection Is Nothing Then
+    Set var = Nothing
+    Exit Sub
+    End If
+    With StaticCollection
+        If .Find(name$) Then
+            If .IsObj Then
+                    Set var = .ValueObj
+                    
+            
+            Else
+                   Set var = Nothing
             End If
         End If
     End With

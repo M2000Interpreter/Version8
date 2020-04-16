@@ -876,7 +876,23 @@ place HashFunc1(kk), a
 index = a
 Done = True
 End Sub
-
+Friend Sub ItemCreator2(Key As String, nValue As Long, dvalue As Long)
+Dim a As Long, kk As Long
+Done = False
+Sorted = False
+kk = HD(Key)
+' without check
+'If Not AllowSameKey Then If ExistKey2(Key, kk) Then Exit Sub  ' done is false
+a = Malloc()
+With PriveSpace(a)
+    .Key = Key
+    .iValue = nValue
+    .sValue = dvalue
+    .firsthash = kk
+End With
+place HashFunc1(kk), a
+index = -1
+End Sub
 Property Get Percent()
 Percent = 100 * count / hashlen
 End Property

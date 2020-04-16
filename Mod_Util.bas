@@ -1421,6 +1421,8 @@ End Function
 Public Sub CalcRect(mHdc As Long, c As String, r As RECT)
 r.top = 0
 r.Left = 0
+r.Right = 20000
+r.Bottom = 20000
 DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 End Sub
 
@@ -1497,6 +1499,11 @@ Public Function TextWidth(ddd As Object, a$) As Long
 Dim nr As RECT
 CalcRect ddd.hDC, a$, nr
 TextWidth = nr.Right * dv15
+End Function
+Public Function TextWidthPixels(ddd As Object, a$) As Long
+Dim nr As RECT
+CalcRect ddd.hDC, a$, nr
+TextWidthPixels = nr.Right
 End Function
 Private Function TextHeight(ddd As Object, a$) As Long
 Dim nr As RECT
@@ -1636,17 +1643,17 @@ End With
 End Sub
 
 
-Public Sub PlainBaSket(ddd As Object, mybasket As basket, ByVal what As String, Optional ONELINE As Boolean = False, Optional nocr As Boolean = False, Optional plusone As Long = 2, Optional clearline As Boolean = False, Optional processcr As Boolean = False)
+Public Sub PlainBaSket(ddd As Object, mybasket As basket, ByVal what As String, Optional ONELINE As Boolean = False, Optional nocr As Boolean = False, Optional plusone As Long = 2, Optional clearline As Boolean = False, Optional processcr As Boolean = False, Optional semicolon As Boolean = False)
 Dim PX As Long, PY As Long, r As Long, p$, c$, LEAVEME As Boolean, nr As RECT, nr2 As RECT, w As Integer
 Dim p2 As Long, mUAddPixelsTop As Long
 Dim pixX As Long, pixY As Long
 Dim rTop As Long, rBottom As Long
 Dim lenw&, realR&, realstop&, r1 As Long, WHAT1$, ff As Long, LL$(), must As Long
 If processcr Then
-If Len(what$) = 0 Then Exit Sub
-LL$() = Split(what, vbLf)
-what = LL$(0)
-ff = 0
+    If Len(what$) = 0 Then Exit Sub
+    LL$() = Split(what, vbLf)
+    what = LL$(0)
+    ff = 0
 End If
 
 Dim a1() As Integer, A2() As Integer
@@ -1655,26 +1662,24 @@ again:
 nr.Left = 0
 realR& = 0
 
-
 With mybasket
     mUAddPixelsTop = mybasket.uMineLineSpace \ dv15  ' for now
     PX = .curpos
     PY = .currow
-        If PY = .My And .double Then
-            If ddd.Name = "PrinterDocument1" Then
-                        getnextpage
-                         With nr
-                         .top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .top + pixY - p2
-                         End With
-                        PY = 0
-                        .currow = 0
-                        Else
-                        
-                        ScrollUpNew ddd, mybasket
-                        End If
-            PY = .currow
+    If PY = .My And .double Then
+        If ddd.Name = "PrinterDocument1" Then
+            getnextpage
+            With nr
+                .top = PY * pixY + mUAddPixelsTop
+                .Bottom = .top + pixY - p2
+            End With
+            PY = 0
+            .currow = 0
+        Else
+            ScrollUpNew ddd, mybasket
         End If
+        PY = .currow
+    End If
     p2 = mUAddPixelsTop * 2
     pixX = .Xt / dv15
     pixY = .Yt / dv15
@@ -1682,54 +1687,68 @@ With mybasket
         .Left = PX * pixX
         .Right = .Left + pixX
         .top = PY * pixY + mUAddPixelsTop
-         .Bottom = .top + pixY - mUAddPixelsTop * 2
+        .Bottom = .top + pixY - mUAddPixelsTop * 2
     End With
-    
     rTop = PY * pixY
     rBottom = rTop + pixY - plusone
     lenw& = RealLen(what)
     WHAT1$ = what + " "
-      ReDim a1(Len(WHAT1$) + 10)
+    ReDim a1(Len(WHAT1$) + 10)
     ReDim A2(Len(WHAT1$) + 10)
-     Dim skip As Boolean
-     skip = GetStringTypeExW(&HB, 4, StrPtr(WHAT1$), Len(WHAT1$), a1(0)) = 0
-      skip = GetStringTypeExW(&HB, 2, StrPtr(WHAT1$), Len(WHAT1$), A2(0)) = 0 Or skip
-     Dim ii As Long, mark1 As Long, mr As Long, ML As Long
-
-     
-        Do While (lenw& - r) >= .mx - PX And (.mx - PX) > 0
-        
-
+    Dim skip As Boolean
+    skip = GetStringTypeExW(&HB, 4, StrPtr(WHAT1$), Len(WHAT1$), a1(0)) = 0
+    skip = GetStringTypeExW(&HB, 2, StrPtr(WHAT1$), Len(WHAT1$), A2(0)) = 0 Or skip
+    Dim ii As Long, mark1 As Long, mr As Long, ML As Long
+    
+    Do While (lenw& - r) >= .mx - PX And (.mx - PX) > 0
         With nr2
-                .Left = PX * pixX
-                 .Right = mybasket.mx * pixX + 1
-                .top = rTop
-                .Bottom = rBottom
+            .Left = PX * pixX
+            .Right = mybasket.mx * pixX + 1
+            .top = rTop
+            .Bottom = rBottom
         End With
         If ddd.FontTransparent = False Then FillBack ddd.hDC, nr2, .Paper
         ddd.CurrentX = PX * .Xt
         ddd.CurrentY = PY * .Yt + .uMineLineSpace
         r1 = .mx - PX - 1 + r
         If ddd.CurrentX = 0 And clearline Then ddd.Line (0&, PY * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (PY) * .Yt + .Yt - 1 * DYP), .Paper, BF
-            Do
-             If ONELINE And nocr And PX > .mx Then what = vbNullString: Exit Do
+        
+        Do
+            If ONELINE And nocr And PX > .mx Then what = vbNullString: Exit Do
             c$ = Mid$(WHAT1$, r + 1, 1)
-                w = AscW(c$)
-                If w > -10241 And w < -9984 Then
+            w = AscW(c$)
+            If w > -10241 And w < -9984 Then
                 c$ = Mid$(WHAT1$, r + 1, 2)
                 r = r + 1
                 GoTo checkcombine
-                ElseIf A2(r) = 0 And a1(r) = 0 Then
+            ElseIf A2(r) = 0 And a1(r) = 0 Then
                 r = r + 1
                 GoTo cont0
-                ElseIf (A2(r) And 254) = 2 And (a1(r) And &H8000) <> 0 Then
+            ElseIf (A2(r) And 254) = 2 And (a1(r) And &H8000) <> 0 Then
                 mark1 = r + 1
+                If processcr Then
                 For ii = r + 2 To Len(what$)
-                If Not A2(ii) > 2 Then If (A2(ii) And 2) <> 2 And (a1(ii) And 7) = 0 Then Exit For
+                    If Not A2(ii) > 2 Then If (A2(ii) And 2) <> 2 And (a1(ii) And 7) = 0 Then Exit For
+                   If (RealLen(Mid$(what$, mark1, ii - mark1 + 2)) + .curpos) > .mx Then
+                   If TextWidth(ddd, Mid$(what$, mark1, ii - mark1 + 2)) \ .Xt > (.mx - .curpos - 1) Then
+                   c$ = Mid$(what$, mark1, ii - mark1 + 1)
+                
+                LL(ff) = Mid$(what$, mark1 + Len(c$) + 1)
+                If Len(LL(ff)) > 0 Then ff = ff - 1
+                lenw& = r + Len(c$) - 1
+             
+                   
+                   Exit For
+                   End If
+                   End If
                 Next ii
-                 c$ = Mid$(what$, mark1, ii - mark1 + 1)
-                r = r + Len(c$)
-                If ii > mark1 Then r = r - 1
+                Else
+                For ii = r + 2 To Len(what$)
+                    If Not A2(ii) > 2 Then If (A2(ii) And 2) <> 2 And (a1(ii) And 7) = 0 Then Exit For
+                Next ii
+                End If
+                c$ = Mid$(what$, mark1, ii - mark1 + 1)
+                r = r + Len(c$): If ii > mark1 Then r = r - 1
                 mark1 = nr.Right
                 nr.Right = (PX + Len(what$)) * pixX + 1
                 DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX
@@ -1737,159 +1756,138 @@ With mybasket
                 mark1 = mark1 \ .Xt - (mark1 Mod .Xt > 0)
                 nr.Right = nr.Left + mark1 * pixX + 1
                 realR& = realR + mark1
-               
                 ddd.CurrentX = nr.Right * DXP
+                If processcr Then
                 
+                .curpos = 0
+                End If
                 ElseIf nounder32(c$) Then
 checkcombine:
                 If Not skip Then
-                    If (a1(r + 1) And &H8000) = 0 And (a1(r + 1) And 7) <> 0 Then
-                          Do
-                                p$ = Mid$(WHAT1$, r + 2, 1)
-                                If ideographs(p$) Then Exit Do
-                                If Not nounder32(p$) Then Mid$(WHAT1$, r + 2, 1) = " ": Exit Do
-                                c$ = c$ + p$
-                                r = r + 1
-                                If r >= r1 Then Exit Do
-                         Loop Until (a1(r) And 7) = 0
+                    If (a1(r + 1) And &H87F8) = 0 And (a1(r + 1) And 7) <> 0 Then
+                        Do
+                            p$ = Mid$(WHAT1$, r + 2, 1)
+                            If Not nounder32(p$) Then Mid$(WHAT1$, r + 2, 1) = " ": Exit Do
+                            c$ = c$ + p$
+                            r = r + 1
+                            If r >= r1 Then Exit Do
+                         Loop Until (a1(r + 1) And 7) = 0
                      End If
                  End If
-                 
                  DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
-              Else
-              
-            If c$ = Chr$(7) Then
-            If ddd.Name <> "PrinterDocument1" Then Beep
-             r = r + 1: realR = realR - 1:
-             GoTo cont0
-             End If
-
-        If processcr Then
-            realR& = realR + 1
-            If c$ = ChrW(9) Then
-            
-            what$ = space$(.Column - (PX + realR - 1) Mod (.Column + 1)) + Mid$(WHAT1$, r + 2)
-            r = 0
-            .curpos = PX + realR
-            If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
-            GoTo again
-            ElseIf c$ = ChrW(13) Then
-               If Mid$(WHAT1$, r + 2, 1) = ChrW(10) Then
-                            r = r + 1
-               End If
-              .curpos = 0
-                If PY + 1 >= .My Then
-                    If ddd.Name = "PrinterDocument1" Then
-                        getnextpage
-                         With nr
-                         .top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .top + pixY - p2
-                         End With
-                        PY = 0
-                        .currow = 0
-                        Else
-                        
-                        ScrollUpNew ddd, mybasket
-                        End If
-                Else
-                .currow = PY + 1
+            Else
+                If c$ = Chr$(7) Then
+                    If ddd.Name <> "PrinterDocument1" Then Beep
+                    r = r + 1: realR = realR - 1:
+                    GoTo cont0
                 End If
-                ff = ff + 1
-                If ff < UBound(LL) Then
-                    If Right$(LL$(ff), 1) <> vbCr Then
-                        what = LL$(ff) + vbCr
-                    Else
-                    what = LL$(ff)
+                If processcr Then
+                    realR& = realR + 1
+                    If c$ = ChrW(9) Then
+                        what$ = space$(.Column - (PX + realR - 1) Mod (.Column + 1)) + Mid$(WHAT1$, r + 2)
+                        r = 0
+                        .curpos = PX + realR
+                        If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+                        GoTo again
+                    ElseIf c$ = ChrW(13) Then
+                        If Mid$(WHAT1$, r + 2, 1) = ChrW(10) Then r = r + 1
+                        .curpos = 0
+                        If PY + 1 >= .My Then
+                            If ddd.Name = "PrinterDocument1" Then
+                                getnextpage
+                                With nr
+                                    .top = PY * pixY + mUAddPixelsTop
+                                    .Bottom = .top + pixY - p2
+                                End With
+                                PY = 0
+                                .currow = 0
+                            Else
+                                ScrollUpNew ddd, mybasket
+                            End If
+                        Else
+                            .currow = PY + 1
+                        End If
+                        ff = ff + 1
+                        If ff < UBound(LL) Then
+                            If Right$(LL$(ff), 1) <> vbCr Then
+                                what = LL$(ff) + vbCr
+                            Else
+                                what = LL$(ff)
+                            End If
+                            r = 0
+                            GoTo again
+                        ElseIf ff = UBound(LL) Then
+                            what = LL$(ff)
+                            r = 0
+                            GoTo again
+                        Else
+                            Exit Do
+                        End If
+                    ElseIf c$ = ChrW(10) Then
+                        .curpos = 0
+                        If PY + 1 = .My Then
+                            If ddd.Name = "PrinterDocument1" Then
+                                getnextpage
+                                With nr
+                                    .top = PY * pixY + mUAddPixelsTop
+                                    .Bottom = .top + pixY - p2
+                                End With
+                                PY = 0
+                                .currow = 0
+                            Else
+                                ScrollUpNew ddd, mybasket
+                            End If
+                        Else
+                            .currow = PY + 1
+                        End If
+                        what$ = Mid$(WHAT1$, r + 2)
+                        If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+                        r = 0
+                        GoTo again
                     End If
-                    r = 0
-                    GoTo again
-                ElseIf ff = UBound(LL) Then
-                   what = LL$(ff)
-                    r = 0
-                    GoTo again
-                Else
-                    Exit Do
                 End If
-
-        
-            ElseIf c$ = ChrW(10) Then
-                .curpos = 0
-                If PY + 1 = .My Then
-                    If ddd.Name = "PrinterDocument1" Then
-                        getnextpage
-                         With nr
-                         .top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .top + pixY - p2
-                         End With
-                        PY = 0
-                        .currow = 0
-                        Else
-                        
-                        ScrollUpNew ddd, mybasket
-                        End If
-                    
-                    
-                Else
-                .currow = PY + 1
-                End If
-                what$ = Mid$(WHAT1$, r + 2)
-               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
-               r = 0
-                   GoTo again
             End If
-        
-        End If
-  
-              
-              
-              
-            End If
-           r = r + 1
+            r = r + 1
             With nr
-            .Left = .Right
-            .Right = .Left + pixX
+                .Left = .Right
+                .Right = .Left + pixX
             End With
 cont0:
-           ddd.CurrentX = (PX + realR) * .Xt
-        realR = realR + 1
-     
-        If r >= lenw& Then
-         r = lenw& + 1
-        lenw& = lenw& - 1
-        Exit Do
-        End If
-        If realR > .mx - PX - 1 Then Exit Do
-    
-         Loop
-   If realR < .mx - PX - 1 Then
-  GoTo cont1
-  End If
+            ddd.CurrentX = (PX + realR) * .Xt
+            realR = realR + 1
+            If r >= lenw& Then
+                r = lenw& + 1
+                lenw& = lenw& - 1
+                Exit Do
+            End If
+            If realR > .mx - PX - 1 Then Exit Do
+        Loop
+        If realR < .mx - PX - 1 Then GoTo cont1
         .curpos = PX + realR
-
         If Not ONELINE Then PX = 0
-        
         If nocr Then Exit Sub Else PY = PY + 1
-        
         If PY >= .My And Not ONELINE Then
-        
+        If processcr Then
+        If ff < UBound(LL) Then
+        GoTo skipthis
+        End If
+        End If
         If ddd.Name = "PrinterDocument1" Then
-        getnextpage
-         With nr
-         .top = PY * pixY + mUAddPixelsTop
-          .Bottom = .top + pixY - p2
-         End With
-        PY = 0
-        .currow = 0
-        Else
-        
-        ScrollUpNew ddd, mybasket
+                getnextpage
+                With nr
+                    .top = PY * pixY + mUAddPixelsTop
+                    .Bottom = .top + pixY - p2
+                End With
+                PY = 0
+                .currow = 0
+            Else
+                ScrollUpNew ddd, mybasket
+            End If
+            PY = PY - 1
         End If
+skipthis:
         
-        PY = PY - 1
-       
-        End If
         If ONELINE Then
-
             LEAVEME = True
             Exit Do
         Else
@@ -1901,19 +1899,17 @@ cont0:
             End With
             rTop = PY * pixY
             rBottom = rTop + pixY - plusone
-   
-
         End If
         realR& = 0
     Loop
     If LEAVEME Then
-                With mybasket
-                .curpos = PX
-                .currow = PY
-            End With
-    Exit Sub
+        With mybasket
+            .curpos = PX
+            .currow = PY
+        End With
+        Exit Sub
     End If
-     If ddd.FontTransparent = False Then
+    If ddd.FontTransparent = False Then
         With nr2
             .Left = PX * pixX
             .Right = (PX + Len(what$)) * pixX + 1
@@ -1922,178 +1918,165 @@ cont0:
         End With
         FillBack ddd.hDC, nr2, mybasket.Paper
     End If
-realR& = 0
+    realR& = 0
     If Len(what$) > r Then
-
-       ddd.CurrentX = PX * .Xt
-    
-    ddd.CurrentY = PY * .Yt + .uMineLineSpace
+        ddd.CurrentX = PX * .Xt
+        ddd.CurrentY = PY * .Yt + .uMineLineSpace
         If ddd.CurrentX = 0 And clearline Then ddd.Line (0&, PY * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (PY) * .Yt + .Yt - 1 * DYP), .Paper, BF
-
-
-r1 = Len(what$) - 1
-    For r = r To r1
-        c$ = Mid$(WHAT1$, r + 1, 1)
-       
-                        w = AscW(c$)
-                If w > -10241 And w < -9984 Then
+        r1 = Len(what$) - 1
+        For r = r To r1
+            c$ = Mid$(WHAT1$, r + 1, 1)
+            w = AscW(c$)
+            If w > -10241 And w < -9984 Then
                 c$ = Mid$(WHAT1$, r + 1, 2)
                 r = r + 1
                 GoTo checkcombine1
-                ElseIf A2(r) = 0 And a1(r) = 0 Then
+            ElseIf A2(r) = 0 And a1(r) = 0 Then
                 r = r + 1
                 GoTo cont1
-                ElseIf (A2(r) And 254) = 2 And (a1(r) And &H8000) <> 0 Then
+            ElseIf (A2(r) And 254) = 2 And (a1(r) And &H8000) <> 0 Then
                 mark1 = r + 1
                 For ii = r + 2 To Len(what$)
-                If Not A2(ii) > 2 Then If (A2(ii) And 2) <> 2 And (a1(ii) And 7) = 0 Then Exit For
+                    If Not A2(ii) > 2 Then If (A2(ii) And 2) <> 2 And (a1(ii) And 7) = 0 Then Exit For
                 Next ii
                 c$ = Mid$(what$, mark1, ii - mark1 + 1)
                 r = r + Len(c$)
                 If ii > mark1 Then r = r - 1
-                mark1 = nr.Right
-                nr.Right = (PX + Len(what$)) * pixX + 1
+                mark1 = TextWidth(ddd, c$) \ DXP
+                nr.Right = nr.Left + mark1 + 1
                 DrawTextEx ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX, 0
-                mark1 = TextWidth(ddd, c$)
-                mark1 = mark1 \ .Xt - (mark1 Mod .Xt > 0)
-                nr.Right = nr.Left + mark1 * pixX + 1
-                realR& = realR + mark1
-               
-                ddd.CurrentX = nr.Right * DXP
+                .curpos = nr.Right \ pixX
+                realR& = realR + mark1 \ pixX - (mark1 Mod pixX > 0) * 1
+                ddd.CurrentX = .curpos * .Xt
                 If Not processcr Then GoTo contNew
-                GoTo again
-                ElseIf nounder32(c$) Then
-checkcombine1:
-             If Not skip Then
-           If (a1(r + 1) And &H8000) = 0 And (a1(r + 1) And 7) <> 0 Then
-            Do
-                p$ = Mid$(WHAT1$, r + 2, 1)
-                If ideographs(p$) Then Exit Do
-                If Not nounder32(p$) Then Mid$(WHAT1$, r + 2, 1) = " ": Exit Do
-                c$ = c$ + p$
-                r = r + 1
-                If r >= r1 Then Exit Do
-            Loop Until (a1(r) And 7) = 0
-            End If
-         End If
-               
-      ddd.CurrentX = ddd.CurrentX + .Xt
-        
-    Else
-CHECK1:
-        If c$ = Chr$(7) Then
-            If ddd.Name <> "PrinterDocument1" Then Beep
-            GoTo cont1
-        End If
-        If processcr Then
-            realR& = realR + 1
-            If c$ = ChrW(9) Then
-            
-            what$ = space$(.Column - (PX + realR - 1) Mod (.Column + 1)) + Mid$(WHAT1$, r + 2)
-            r = 0
-            .curpos = PX + realR
-            If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
-            GoTo again
-            ElseIf c$ = ChrW(13) Then
-               If Mid$(WHAT1$, r + 2, 1) = ChrW(10) Then
-                    r = r + 1
-                End If
-                    .curpos = 0
-                    PX = 0
-                    ddd.CurrentX = 0
-                    realR& = 0
-                    c$ = ""
-                If PY + 1 = .My Then
-                    If ddd.Name = "PrinterDocument1" Then
-                        getnextpage
-                         With nr
-                         .top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .top + pixY - p2
-                         End With
-                        PY = 0
-                        .currow = 0
-                        Else
-                        
-                        ScrollUpNew ddd, mybasket
-                        End If
-                Else
-                .currow = PY + 1
-                End If
-                ff = ff + 1
-                If ff < UBound(LL) Then
-                    If Right$(LL$(ff), 1) <> vbCr Then
-                        what = LL$(ff) + vbCr
-                    Else
-                    what = LL$(ff)
-                    End If
-                    r = 0
-                    GoTo again
-                ElseIf ff = UBound(LL) Then
-                   what = LL$(ff)
-                    r = 0
-                    GoTo again
-                Else
-                    Exit For
-                End If
-            ElseIf c$ = ChrW(10) Then
-                .curpos = 0
-                If PY + 1 >= .My Then
-                    If ddd.Name = "PrinterDocument1" Then
-                        getnextpage
-                         With nr
-                         .top = PY * pixY + mUAddPixelsTop
-                          .Bottom = .top + pixY - p2
-                         End With
-                        PY = 0
-                        .currow = 0
-                        Else
-                        
-                        ScrollUpNew ddd, mybasket
-                        End If
-                    
-                    
-                Else
-                .currow = PY + 1
                 
-                End If
-                what$ = Mid$(WHAT1$, r + 2)
-               If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
-               r = 0
-               If Len(what$) = 0 Then GoTo contNew
                 GoTo again
+            ElseIf nounder32(c$) Then
+checkcombine1:
+                If Not skip Then
+                    If (a1(r + 1) And &H87F8) = 0 And (a1(r + 1) And 7) <> 0 Then
+                        Do
+                            p$ = Mid$(WHAT1$, r + 2, 1)
+                            If Not nounder32(p$) Then Mid$(WHAT1$, r + 2, 1) = " ": Exit Do
+                            c$ = c$ + p$
+                            r = r + 1
+                            If r >= r1 Then Exit Do
+                        Loop Until (a1(r + 1) And 7) = 0
+                    End If
+                End If
+                ddd.CurrentX = ddd.CurrentX + .Xt
+            Else
+CHECK1:
+                If c$ = Chr$(7) Then
+                    If ddd.Name <> "PrinterDocument1" Then Beep
+                    GoTo cont1
+                End If
+                If processcr Then
+                    realR& = realR + 1
+                    If c$ = ChrW(9) Then
+                        what$ = space$(.Column - (PX + realR - 1) Mod (.Column + 1)) + Mid$(WHAT1$, r + 2)
+                        r = 0
+                        .curpos = PX + realR
+                        If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+                        GoTo again
+                    ElseIf c$ = ChrW(13) Then
+                        If Mid$(WHAT1$, r + 2, 1) = ChrW(10) Then r = r + 1
+                        .curpos = 0
+                        PX = 0
+                        ddd.CurrentX = 0
+                        realR& = 0
+                        c$ = ""
+                        If PY + 1 = .My Then
+                            If ddd.Name = "PrinterDocument1" Then
+                                getnextpage
+                                With nr
+                                    .top = PY * pixY + mUAddPixelsTop
+                                    .Bottom = .top + pixY - p2
+                                End With
+                                PY = 0
+                                .currow = 0
+                            Else
+                                ScrollUpNew ddd, mybasket
+                            End If
+                        Else
+                            .currow = PY + 1
+                        End If
+                        ff = ff + 1
+                        If ff < UBound(LL) Then
+                            If Right$(LL$(ff), 1) <> vbCr Then
+                                what = LL$(ff) + vbCr
+                            Else
+                                what = LL$(ff)
+                            End If
+                            r = 0
+                            GoTo again
+                        ElseIf ff = UBound(LL) Then
+                            what = LL$(ff)
+                            r = 0
+                            GoTo again
+                        Else
+                            Exit For
+                        End If
+                    ElseIf c$ = ChrW(10) Then
+                        .curpos = 0
+                        If PY + 1 >= .My Then
+                            If ddd.Name = "PrinterDocument1" Then
+                                getnextpage
+                                With nr
+                                    .top = PY * pixY + mUAddPixelsTop
+                                    .Bottom = .top + pixY - p2
+                                End With
+                                PY = 0
+                                .currow = 0
+                            Else
+                                ScrollUpNew ddd, mybasket
+                            End If
+                        Else
+                            .currow = PY + 1
+                        End If
+                        what$ = Mid$(WHAT1$, r + 2)
+                        If Len(what$) > 0 Then what$ = Mid$(what$, 1, Len(what$) - 1)
+                        r = 0
+                        If Len(what$) = 0 Then GoTo contNew
+                        GoTo again
+                    End If
+                End If
             End If
-        
+            DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
+            realR& = realR + 1
+contNew:
+            With nr
+               .Left = .Right
+               .Right = .Left + pixX
+            End With
+cont1:
+        Next r
+        If Not processcr Then
+            If semicolon Then
+            ElseIf lenw& > realR& Then
+                realR& = ((realR& + .Column + 1) \ (.Column + 1)) * (.Column + 1)
+            End If
+        ElseIf ff < UBound(LL) Then
+        If ff < UBound(LL) Then
+            r = 0
+            what = Chr$(13)
+            GoTo again
+        End If
+        End If
+        .curpos = PX + realR
+        .currow = PY
+        Exit Sub
+    ElseIf processcr Then
+        If ff < UBound(LL) Then
+            r = 0
+            what = Chr$(13)
+            GoTo again
         End If
     End If
-        
-    DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX
-    realR& = realR + 1
-contNew:
-    With nr
-       .Left = .Right
-       .Right = .Left + pixX
-    End With
-cont1:
-    Next r
-    If Not processcr Then
-    If lenw& > realR& Then
-    realR& = ((realR& + .Column + 1) \ (.Column + 1)) * (.Column + 1)
-    End If
-    End If
-     .curpos = PX + realR
-     .currow = PY
-     Exit Sub
-    ElseIf processcr Then
-    If ff < UBound(LL) Then
-        what = Chr$(13)
     
-    GoTo again
-    End If
-    End If
-
-  .curpos = PX
- .currow = PY
-  End With
+    .curpos = PX
+    .currow = PY
+    End With
 End Sub
 
 
@@ -10644,7 +10627,7 @@ Function GetReturnArray(bstack As basetask, x1 As Long, b$, p As Variant, ss$, p
 
 Do
         If IsExp(bstack, b$, p) Then
-        If x1 = 0 Then If MaybeIsSymbol(b$, ",") Then x1 = 1: Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd
+        If x1 = 0 Then If lookOne(b$, ",") Then x1 = 1: Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd
         If x1 = 0 Then
                 If Len(bstack.originalname$) > 3 Then
                         If Mid$(bstack.originalname$, Len(bstack.originalname$) - 2, 1) = "$" Then
@@ -10669,7 +10652,7 @@ Do
                              
         End If
         ElseIf IsStrExp(bstack, b$, ss$) Then
-            If x1 = 0 Then If MaybeIsSymbol(b$, ",") Then x1 = 1: Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd
+            If x1 = 0 Then If lookOne(b$, ",") Then x1 = 1: Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd
             If x1 = 0 Then
                 If Len(bstack.originalname$) > 3 Then
                     If Mid$(bstack.originalname$, Len(bstack.originalname$) - 2, 1) <> "$" Then
@@ -12048,7 +12031,23 @@ Mid$(a$, i, 1) = d$
 MaybeIsSymbolReplace = True
 End If
 End Function
+Function lookOne(s, c$) As Boolean
+Dim i&, l As Long, cc As Integer
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then Exit Function
+  p2 = StrPtr(s): l = l - 1: GetMem2 StrPtr(c$), cc
 
+  For i = p2 To p2 + l * 2 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160, 7, 9
+    Case cc
+    lookOne = True
+    Case Else
+   Exit Function
+  End Select
+  Next i
+End Function
 Function MaybeIsSymbol(a$, c$) As Boolean
 Dim i As Long
 If a$ = vbNullString Then Exit Function
@@ -13947,7 +13946,7 @@ On Error GoTo 1234
     
 End Function
 Function RevisionPrint(basestack As basetask, rest1$, xa As Long, Lang As Long) As Boolean
-Dim Scr As Object, oldCol As Long, oldFTEXT As Long, oldFTXT As String, oldpen As Long
+Dim Scr As Object, oldcol As Long, oldFTEXT As Long, oldFTXT As String, oldpen As Long
 Dim par As Boolean, i As Long, F As Long, p As Variant, w4 As Boolean, pn&, s$, dlen As Long
 Dim o As Long, w3 As Long, x1 As Long, y1 As Long, X As Double, ColOffset As Long
 Dim work As Boolean, work2 As Long, skiplast As Boolean, ss$, ls As Long, myobject As Object, counter As Long, Counterend As Long, countDir As Long
@@ -14112,7 +14111,7 @@ Select Case myUcase(s$)
         End If
 If F = 1 Then  ''
     work = True
-    oldCol = .Column
+    oldcol = .Column
     Scr.Line (0&, .currow * .Yt)-((.mx - 1) * .Xt + .Xt * 2, (.currow) * .Yt + .Yt - 2 * DYP), .Paper, BF
     LCTbasket Scr, prive, .currow, 0&
     .Column = .mx - 1
@@ -14124,7 +14123,7 @@ If F = 1 Then  ''
     .FTEXT = 4
 ElseIf F = 2 Then
     work = True
-    oldCol = .Column
+    oldcol = .Column
     Scr.Line (0&, (.currow) * .Yt + .Yt - DYP)-((.mx - 1) * .Xt + .Xt * 2, (.currow) * .Yt + .Yt - DYP), .mypen, BF
     crNew basestack, prive
     LCTbasketCur Scr, prive
@@ -14138,7 +14137,7 @@ ElseIf F = 3 Then
 ' we print in a line with lost chars, so controling the start of printing
 ' we can render text, like from a view port Some columns are hidden because they went out of screen;
 work = True
-oldCol = .Column
+oldcol = .Column
 LCTbasket Scr, prive, .currow, 0&
 w4 = True
 oldFTEXT = .FTEXT
@@ -15202,9 +15201,11 @@ End If
                        Scr.CurrentX = w3
             Else
                 If .FTXT <> "" Then
-                PlainBaSket Scr, prive, Format$(s$, .FTXT), , , , clearline
+                PlainBaSket Scr, prive, Format$(s$, .FTXT), , , , clearline, , True
                 Else
-                PlainBaSket Scr, prive, s$, , , , clearline
+                
+                
+                PlainBaSket Scr, prive, s$, , , , clearline, , True
                 End If
                 
             End If
@@ -15281,7 +15282,7 @@ there:
 If w4 <> 0 And par Then
         .FTEXT = oldFTEXT
         .FTXT = oldFTXT
-        .Column = oldCol
+        .Column = oldcol
         If .mypen <> oldpen Then .mypen = oldpen: TextColor Scr, oldpen
         ElseIf par Then
         If pn& > 4 And opn& = 0 Then
@@ -15822,7 +15823,7 @@ lookagain:
                                 pppp.index = w4
                                 If pppp.IsObj Then
                                 Set res = pppp.Value
-                                If MaybeIsSymbol(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
+                                If lookOne(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
                                 Set anything = res
                                 If Not anything Is Nothing Then
                                     If TypeOf anything Is mHandler Then
@@ -15866,7 +15867,7 @@ lookagain:
                                 .objref.index = w4
                                 If .objref.IsObj Then
                                 Set res = .objref.Value
-                                If MaybeIsSymbol(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
+                                If lookOne(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
                                 Set anything = res
                                 If Not anything Is Nothing Then
                                     If TypeOf anything Is mHandler Then
@@ -15913,7 +15914,7 @@ lookagain:
 
                     If .objref.IsObj Then
                         res = .objref.ValueObj
-                                If MaybeIsSymbol(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
+                                If lookOne(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
                                 Set anything = res
                                 If Not anything Is Nothing Then
                                     If TypeOf anything Is mHandler Then
@@ -16835,7 +16836,7 @@ If bb.Done And FastSymbol(rest$, ":=", , 2) Then
         End If
         GoTo there
 
-ElseIf MaybeIsSymbol(rest$, ",") Then
+ElseIf lookOne(rest$, ",") Then
     Do While FastSymbol(rest$, ",")
         ChangeValues = True
         ah = aheadstatus(rest$, False) + " "
@@ -17651,7 +17652,7 @@ MyEr "Only for Inventory object", "Μόνο για αντικείμενο Κατάσταση"
 End Sub
 Function IsEnumAs(bstack As basetask, b$, p) As Boolean
 Dim aaa As mHandler, useHandler As mHandler, ss$, i As Long, that
-If MaybeIsSymbol(b$, ".") Then
+If lookOne(b$, ".") Then
             If IsNumber(bstack, b$, that) Then
                 If bstack.lastobj Is Nothing Then
                     GoTo aa2
@@ -17681,7 +17682,7 @@ conthere1001:
                         Set p = useHandler
                         
                         If FastSymbol(b$, "=") Then
-                            If MaybeIsSymbol(b$, ".") Then
+                            If lookOne(b$, ".") Then
                                 If IsNumber(bstack, b$, that) Then
                                     If Not bstack.lastobj Is Nothing Then
                                         If TypeOf bstack.lastobj Is mHandler Then
@@ -18153,7 +18154,7 @@ conthere:
                                                            IsNumberLabel b$, lbl$
                                                             Wend
                                                             ' #4 call one command
-                                                            If MaybeIsSymbol(b$, "{") Then
+                                                            If lookOne(b$, "{") Then
                                                             GoTo conthere
                                                             End If
                                                             once = True
@@ -21081,7 +21082,9 @@ Public Function TraceThis(bstack As basetask, di As Object, b$, w$, SBB$) As Boo
     Set Form2.Process = bstack
     Exit Function
     Else
-        If WaitShow = 0 Or Len(b$) < WaitShow Then
+    If TestShowBypass Then
+    
+        ElseIf WaitShow = 0 Or Len(b$) < WaitShow Then
             WaitShow = 0
             If bstack.OriginalCode < 0 Then
             lasttracecode = -bstack.OriginalCode
@@ -24095,7 +24098,7 @@ Dim ps As mStiva, p As Variant, s$, ok As Long
             ps.DataStr s$
         End If
         Set basestack.lastobj = Nothing
-    ElseIf MaybeIsSymbol(rest$, ",") Then
+    ElseIf lookOne(rest$, ",") Then
         ps.DataOptional
     ' here
     End If
@@ -24314,5 +24317,128 @@ a$ = NLtrim$(a$)
        End If
     IsLabelDot2 = rr&
    
+
+End Function
+Function ProcDrawWidth(bstack As basetask, rest$) As Boolean
+Dim X As Double, p As Variant, it As Long, ss$, i As Long, x1 As Long, nd&, once As Boolean
+ProcDrawWidth = True
+Dim Scr As Object
+Set Scr = bstack.Owner
+If IsExp(bstack, rest$, p, , True) Then
+    i = Scr.DrawWidth
+    x1 = Scr.DrawStyle
+    If Int(p) < 1 Then p = 1
+    Scr.DrawWidth = p
+   
+        If FastSymbol(rest$, ",") Then
+            If IsExp(bstack, rest$, X, , True) Then
+                On Error Resume Next
+                X = Int(X)
+                If X >= 0 Or X <= 6 Then
+                    Scr.DrawStyle = X
+                    If Err Then X = 0: Scr.DrawStyle = Int(X)
+                    Scr.DrawWidth = p
+                End If
+            End If
+        End If
+   
+    If FastSymbol(rest$, "{") Then
+        ss$ = block(rest$)
+         TraceStore bstack, nd&, rest$, 0
+        If FastSymbol(rest$, "}") Then
+            Call executeblock(it, bstack, ss$, False, once, , True)
+        End If
+        bstack.addlen = nd&
+    Else
+        MissingBlockCode
+    End If
+Else
+MissNumExpr
+End If
+
+If it = 2 Then
+If ss$ = "" Then
+If once Then rest$ = ": Break": If trace Then WaitShow = 2: TestShowSub = vbNullString
+Else
+rest$ = ": Goto " + ss$
+If trace Then WaitShow = 2: TestShowSub = rest$
+End If
+
+it = 1
+End If
+If it <> 1 Then ProcDrawWidth = False: rest$ = ss$ + rest$
+If i <= 0 Then i = 1
+Scr.DrawWidth = i
+Scr.DrawStyle = x1
+
+Set Scr = Nothing
+End Function
+Function ProcCurve(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim par As Boolean, sX As Double, sY As Double, X As Double, Y As Double, x1 As Integer, p As Variant, F As Long
+Dim Scr As Object
+
+Set Scr = bstack.Owner
+ProcCurve = True
+With players(GetCode(Scr))
+If IsLabelSymbolNew(rest$, "ΓΩΝΙΑ", "ANGLE", Lang) Then par = True
+F = 32
+ReDim PLG(F)
+x1 = 1
+PLG(0).X = Scr.ScaleX(.XGRAPH, 1, 3)
+PLG(0).Y = Scr.ScaleY(.YGRAPH, 1, 3)
+Do
+If x1 >= F Then F = F * 2: ReDim Preserve PLG(F)
+If IsExp(bstack, rest$, p) Then
+X = p
+
+If Not FastSymbol(rest$, ",") Then ProcCurve = False: MissNumExpr: Exit Function
+If IsExp(bstack, rest$, p) Then
+If par Then
+sX = X / PI2
+sX = (sX - Fix(sX)) * PI2
+.XGRAPH = .XGRAPH + Cos(sX) * p
+.YGRAPH = .YGRAPH - Sin(sX) * p
+Else
+.XGRAPH = .XGRAPH + CLng(X)
+.YGRAPH = .YGRAPH + CLng(p)
+End If
+PLG(x1).X = Scr.ScaleX(.XGRAPH, 1, 3)
+PLG(x1).Y = Scr.ScaleY(.YGRAPH, 1, 3)
+
+Else
+ ProcCurve = False: MissNumExpr: Exit Function
+End If
+Else
+ ProcCurve = False: MissNumExpr: Exit Function
+End If
+
+x1 = x1 + 1
+Loop Until Not FastSymbol(rest$, ",")
+x1 = x1 - 1
+
+
+
+
+If GDILines And Not .NoGDI Then
+If .pathgdi > 0 Then
+If x1 + 4 >= F Then F = F + 4: ReDim Preserve PLG(F)
+PLG(x1 + 1) = PLG(0)
+PLG(x1 + 2) = PLG(0)
+PLG(x1 + 3) = PLG(0)
+PLG(x1 + 4) = PLG(0)
+    DrawBezierGdi Scr.hDC, .mypen, .pathcolor, .pathfillstyle, Scr.DrawWidth, Scr.DrawStyle, PLG(), CLng(x1 + 4)
+    Else
+    DrawBezierGdi Scr.hDC, .mypen, -1, .pathfillstyle, Scr.DrawWidth, Scr.DrawStyle, PLG(), CLng(x1 + 1)
+End If
+Else
+If PolyBezier(Scr.hDC, PLG(0), x1 + 1) = 0 Then
+BadGraphic
+ Exit Function
+End If
+End If
+Scr.fillstyle = vbSolid
+End With
+MyDoEvents1 Scr
+
 
 End Function

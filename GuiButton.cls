@@ -23,7 +23,7 @@ Dim white As Long, black As Long, dimm1 As Long, dimm2 As Long, shadowcol As Lon
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
-Public Sub Construct(there As Form, name$)
+Public Sub Construct(there As Form, Name$)
  mIndex = -1
  Set Callback = there
  On Error Resume Next
@@ -32,9 +32,9 @@ Public Sub Construct(there As Form, name$)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
-Public Sub ConstructArray(there As Form, name$, i As Long)
+Public Sub ConstructArray(there As Form, Name$, i As Long)
  Set Callback = there
  On Error Resume Next
  ctrlName = GetTag$
@@ -43,7 +43,7 @@ Public Sub ConstructArray(there As Form, name$, i As Long)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
 Public Sub Move(X, Y, Optional w, Optional h)
 If IsMissing(w) Then
@@ -66,7 +66,7 @@ dimm1 = rgb(100, 200, 160)
 dimm2 = rgb(200, 120, 60)
 Dim ff As New StdFont
 With Callback
-ff.name = .CtrlFontName
+ff.Name = .CtrlFontName
 ff.charset = Form1.DIS.Font.charset
 ff.Size = .CtrlFontSize
 ff.bold = .CtrlFontBold
@@ -173,7 +173,8 @@ Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, By
 glistN.ShowMe
 End Sub
 
-Private Sub glistN_PanLeftRight(Direction As Boolean)
+
+Private Sub glistN_PanLeftRight(direction As Boolean)
 
  
    If mIndex >= 0 Then
@@ -225,11 +226,11 @@ Public Property Get Caption() As String
 Caption = mCaptext
 End Property
 
-Public Property Get index() As Long
-index = mIndex
+Public Property Get Index() As Long
+Index = mIndex
 End Property
 
-Public Property Let index(ByVal RHS As Long)
+Public Property Let Index(ByVal RHS As Long)
 mIndex = RHS
 End Property
 Public Property Get enabled() As Long
@@ -275,7 +276,7 @@ Public Sub FontAttr(ThisFontName, Optional ThisMode = -1, Optional ThisBold = Tr
 Dim aa As New StdFont
 If ThisFontName <> "" Then
 
-aa.name = ThisFontName
+aa.Name = ThisFontName
 
 If ThisMode > 7 Then aa.Size = ThisMode Else aa = 7
 aa.bold = ThisBold

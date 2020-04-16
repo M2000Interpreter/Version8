@@ -1,12 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 18 active-X
-A bug removed from lcase$()
-A new dat help file (replaced delimiter ' with !)
-New info.gsb with MAKEHELP (make dat file) and EXPORTHELPNEW (using dat file to export greek or english help)
-Help2000.mdb isn't part of this installation file (you can download it from github)
-Added a Greek pdf file also with the english M2000paper.pdf.
-
+Version 9.9 revision 19 active-X
+A lot of work.
+Intorduce Simple Functions  (simple functions are like subs in a module or a function, reed M2000paper.pdf)
+Update the info.gsb. Fix some examples, and an new added the Crawl (text crawl)
+Update M2000paper.pdf and the greek pdf.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
