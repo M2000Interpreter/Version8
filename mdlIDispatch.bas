@@ -221,6 +221,7 @@ jumphere:
             ElseIf UCase(pstrProcName) = "SHOW" Then
 
                 If pobjTarget.Quit Then MyEr "Form unloaded, use declare again using declare A new Form", "η φόρμα δεν έχει φορτωθεί, χρησιμοποίησε την Όρισε Α Νεα Φορμα": Exit Function
+                CallByName pobjTarget, "ShowTaskBar", VbMethod
                 CallByName pobjTarget, "ShowmeALl", VbMethod
                 If items = 0 Then
                     CallByName pobjTarget, pstrProcName, VbMethod, 0, GiveForm()
@@ -252,12 +253,12 @@ conthere:
                    pobjTarget.Modal = mycodeid
                    Dim X As Form, z As Form, zz As Form
                    Set zz = Screen.ActiveForm
-                   If zz.name = "Form3" Then
+                   If zz.Name = "Form3" Then
                    Set zz = zz.lastform
                    End If
                    If Not pobjTarget.IamPopUp Then
                         For Each X In Forms
-                            If X.Visible And X.name = "GuiM2000" Then
+                            If X.Visible And X.Name = "GuiM2000" Then
                                 If Not X Is pobjTarget Then
                                     If X.Enablecontrol Then
                                         X.Modal = mycodeid
@@ -269,9 +270,11 @@ conthere:
                     End If
                     If pobjTarget.NeverShow Then
                     Modalid = mycodeid
-                    If Not pobjTarget.IamPopUp Then
-                    pobjTarget.Title = pobjTarget.Title
-                    End If
+                    'If Not pobjTarget.IamPopUp Then
+                    ' change this
+                    'pobjTarget.Title = pobjTarget.Title
+                    pobjTarget.ShowTaskBar
+                    'End If
                     If items = 2 Then
                     CallByName pobjTarget, pstrProcName, VbMethod, 0, varArr(1)
                     Else
@@ -318,7 +321,7 @@ conthere:
                 End If
                 Set z = Nothing
                 For Each X In Forms
-                    If X.Visible And X.name = "GuiM2000" Then
+                    If X.Visible And X.Name = "GuiM2000" Then
                         X.TestModal mycodeid
                         If X.Enablecontrol Then Set z = X
                     End If

@@ -1509,24 +1509,25 @@ End If
 Case vbKeyDelete
 If EditFlag Then
 
-If mSelstart = 0 Then mSelstart = 1
-If SelStart > Len(list(SELECTEDITEM - 1)) Then
-If listcount > SELECTEDITEM Then
-If Not NoEvents Then
-
-RaiseEvent LineDown
-RaiseEvent addone(vbCrLf)
-End If
-End If
-Else
- RaiseEvent PureListOn
- val = 1
-RaiseEvent AddSelStart(val, shift)
- RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))
-list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + val)
-RaiseEvent PureListOff
-ShowMe2
-End If
+    If mSelstart = 0 Then mSelstart = 1
+    If SelStart > Len(list(SELECTEDITEM - 1)) Then
+      mSelstart = Len(list(SELECTEDITEM - 1)) + 1
+    If listcount > SELECTEDITEM Then
+    If Not NoEvents Then
+    
+    RaiseEvent LineDown
+    RaiseEvent addone(vbCr)
+    End If
+    End If
+    Else
+     RaiseEvent PureListOn
+     val = 1
+    RaiseEvent AddSelStart(val, shift)
+     RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))
+    list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + val)
+    RaiseEvent PureListOff
+    ShowMe2
+    End If
 End If
 
 Case vbKeyBack

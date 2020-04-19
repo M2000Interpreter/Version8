@@ -8939,31 +8939,51 @@ End Sub
 Sub nosuchfile()
 MyEr "No such file", "Δεν υπάρχει τέτοιο αρχείο"
 End Sub
-Public Function MyDoEvents()
+Public Sub MyDoEventsNoThread()
 On Error GoTo there
 If TaskMaster Is Nothing Then
-DoEvents
-Exit Function
+    DoEvents
+    Exit Sub
 ElseIf Not TaskMaster.Processing And TaskMaster.QueueCount = 0 Then
-        DoEvents
-Exit Function
+    DoEvents
+    Exit Sub
 Else
-If TaskMaster.PlayMusic Then
-                  TaskMaster.OnlyMusic = True
-                      TaskMaster.TimerTick
-                    TaskMaster.OnlyMusic = False
-                 End If
-        TaskMaster.StopProcess
-         TaskMaster.TimerTick
-         DoEvents
-         TaskMaster.StartProcess
-If TaskMaster Is Nothing Then Exit Function
-
+    If TaskMaster.PlayMusic Then
+        TaskMaster.OnlyMusic = True
+        TaskMaster.TimerTick
+        TaskMaster.OnlyMusic = False
+    End If
+    TaskMaster.StopProcess
+    DoEvents
+    TaskMaster.StartProcess
 End If
-Exit Function
+Exit Sub
 there:
 If Not TaskMaster Is Nothing Then TaskMaster.RestEnd1
-End Function
+End Sub
+Public Sub MyDoEvents()
+On Error GoTo there
+If TaskMaster Is Nothing Then
+    DoEvents
+    Exit Sub
+ElseIf Not TaskMaster.Processing And TaskMaster.QueueCount = 0 Then
+    DoEvents
+    Exit Sub
+Else
+    If TaskMaster.PlayMusic Then
+        TaskMaster.OnlyMusic = True
+        TaskMaster.TimerTick
+        TaskMaster.OnlyMusic = False
+    End If
+    TaskMaster.StopProcess
+    TaskMaster.TimerTick
+    DoEvents
+    TaskMaster.StartProcess
+End If
+Exit Sub
+there:
+If Not TaskMaster Is Nothing Then TaskMaster.RestEnd1
+End Sub
 
 Public Function ContainsUTF16(ByRef Source() As Byte, Optional maxsearch As Long = -1) As Long
   Dim i As Long, lUBound As Long, lUBound2 As Long, lUBound3 As Long
@@ -12030,6 +12050,23 @@ If c$ = Mid$(a$, i, 1) Then
 Mid$(a$, i, 1) = d$
 MaybeIsSymbolReplace = True
 End If
+End Function
+Function lookB123(s) As Boolean
+Dim i&, l As Long
+Dim p2 As Long, p1 As Integer, p4 As Long
+  l = Len(s): If l = 0 Then Exit Function
+  p2 = StrPtr(s): l = l - 1
+
+  For i = p2 To p2 + l * 2 Step 2
+  GetMem2 i, p1
+  Select Case p1
+    Case 32, 160, 7, 9
+    Case 13, 39, 92
+    lookB123 = True
+    Case Else
+   Exit Function
+  End Select
+  Next i
 End Function
 Function lookOne(s, c$) As Boolean
 Dim i&, l As Long, cc As Integer
@@ -15716,7 +15753,7 @@ res = 0
 w4 = -1
 If pppp.count > 0 Then
 For w3 = 0 To pppp.count - 1
-If pppp.itemnumeric(w3) Then res = pppp.itemnumeric(w3): w4 = w3: Exit For
+If pppp.MyIsNumeric(w3) Then res = pppp.itemnumeric(w3): w4 = w3: Exit For
 Next w3
 
 For w3 = w3 To pppp.count - 1
@@ -22837,7 +22874,7 @@ what$ = Left$(what$, Len(what$) - 1)
         With aaa
         .MyName = what$
         .modulename = h$
-        .Title = what$ + "(" + LTrim$(Str$(i)) + ")"
+        .TempTitle = what$ + "(" + LTrim$(Str$(i)) + ")"
         .index = i
         End With
         Set aaa = Nothing
@@ -23459,7 +23496,7 @@ Dim pppp As mArray, mmmm As mEvent
                 alfa.index = -1
                 alfa.MyName = what$
                 alfa.modulename = here$
-                alfa.Title = what$
+                alfa.TempTitle = what$
                 Set alfa = Nothing
             Else
                 ProcEvent bstack, "{Read index, msg$, &obj}", 1, y1
@@ -23485,7 +23522,7 @@ Dim pppp As mArray, mmmm As mEvent
                 alfa.index = -1
                 alfa.modulename = here$
                 alfa.ByPass = bp
-                alfa.Title = what$
+                alfa.TempTitle = what$
                 Set mmmm = Nothing
                 Set alfa = Nothing
             Else
@@ -23515,7 +23552,7 @@ contEvArray:
                             .MyName = what$
                             .modulename = here$
                             .ByPass = bp
-                            .Title = what$ + "(" + LTrim$(Str$(i)) + ")"
+                            .TempTitle = what$ + "(" + LTrim$(Str$(i)) + ")"
                             .index = i
                         End With
                     Next i

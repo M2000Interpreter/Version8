@@ -212,19 +212,24 @@ mMyName$ = RHS
 If IamPopUp Then Exit Property
 drawminimized = Not IsWine
 Set icon = Form1.icon
-If mNoTaskBar Then Exit Property
-Set MyForm3 = New Form3
-Set MyForm3.lastform = Me
-MyForm3.Timer1.enabled = False
-ttl = True
-MyForm3.CaptionW = RHS
-MyForm3.WindowState = 0
+
 
 End Property
 Friend Property Get MyName() As String
 MyName = mMyName$
 End Property
-
+Friend Property Let TempTitle(RHS As String)
+On Error Resume Next
+Dim oldenable As Boolean
+oldenable = gList2.enabled
+gList2.enabled = True
+gList2.HeadLine = vbNullString
+If Trim$(RHS) = vbNullString Then RHS = " "
+gList2.HeadLine = RHS
+gList2.HeadlineHeight = gList2.HeightPixels
+gList2.ShowMe
+gList2.enabled = oldenable
+End Property
 
 Property Get Modal() As Double
     Modal = mModalid
@@ -943,7 +948,7 @@ gList2.HeadlineHeight = gList2.HeightPixels
 gList2.SoftEnterFocus
 gList2.TabStop = False
 With gList2.Font
-CtrlFont.name = .name
+CtrlFont.Name = .Name
 CtrlFont.Size = .Size
 CtrlFont.bold = .bold
 End With
@@ -1139,42 +1144,75 @@ End Sub
 Public Property Get Title() As Variant
 Title = gList2.HeadLine
 End Property
+Public Sub ShowTaskBar()
+    If IamPopUp Then Exit Sub
 
+    If mNoTaskBar Then Exit Sub
+    If Not ttl Then
+        drawminimized = Not IsWine
+        If Not MyForm3 Is Nothing Then
+        Else
+            Set MyForm3 = New Form3
+        End If
+        Set MyForm3.lastform = Me
+        MyForm3.Timer1.enabled = False
+        ttl = True
+        MyForm3.WindowState = 0
+    End If
+    MyForm3.CaptionW = gList2.HeadLine
+    MyForm3.Visible = True
+    MyForm3.Refresh
+    If Err Then
+    Err.clear
+    Sleep 10
+    MyForm3.Visible = True
+    
+    End If
+
+
+End Sub
 Public Property Let Title(ByVal vNewValue As Variant)
 ' A WORKAROUND TO CHANGE TITLE WHEN FORM IS DISABLED BY A MODAL FORM
 On Error Resume Next
 Dim oldenable As Boolean
-oldenable = gList2.enabled
-gList2.enabled = True
-gList2.HeadLine = vbNullString
-If Trim$(vNewValue) = vbNullString Then vNewValue = " "
-gList2.HeadLine = vNewValue
-gList2.HeadlineHeight = gList2.HeightPixels
-gList2.ShowMe
-gList2.enabled = oldenable
-If IamPopUp Then Exit Property
-If vNewValue <> "" Then  ' was <> " "
-If mNoTaskBar Then Exit Property
-If Not ttl Then
-drawminimized = Not IsWine
-If Not MyForm3 Is Nothing Then
-Else
-Set MyForm3 = New Form3
-End If
-Set MyForm3.lastform = Me
-MyForm3.Timer1.enabled = False
-ttl = True
-MyForm3.WindowState = 0
-End If
-MyForm3.CaptionW = gList2.HeadLine
-MyForm3.Visible = True
-MyForm3.Refresh
-If Err Then
-Err.clear
-Sleep 10
-MyForm3.Visible = True
+If vNewValue <> vbNullString Then
+  
+    oldenable = gList2.enabled
+    gList2.enabled = True
+    gList2.HeadLine = vbNullString
+    If Trim$(vNewValue) = vbNullString Then vNewValue = " "
+    gList2.HeadLine = vNewValue
+    gList2.HeadlineHeight = gList2.HeightPixels
+    gList2.ShowMe
+    gList2.enabled = oldenable
+    If IamPopUp Then Exit Property
 
-End If
+    If mNoTaskBar Then Exit Property
+    'If Not ttl Then
+     '   drawminimized = Not IsWine
+     '   If Not MyForm3 Is Nothing Then
+     '   Else
+     '       Set MyForm3 = New Form3
+     '   End If
+     '   Set MyForm3.lastform = Me
+     '   MyForm3.Timer1.enabled = False
+     '   ttl = True
+     '   MyForm3.WindowState = 0
+   ' End If
+   If ttl Then
+    MyForm3.CaptionW = gList2.HeadLine
+    MyForm3.Visible = True
+    MyForm3.Refresh
+    If Err Then
+    Err.clear
+    Sleep 10
+    MyForm3.Visible = True
+    End If
+    End If
+Else
+    If ttl Then Unload MyForm3: ttl = False
+    Set MyForm3 = Nothing
+    Exit Property
 End If
 CaptionW = gList2.HeadLine
 End Property
@@ -1245,7 +1283,7 @@ Public Sub FontAttr(ThisFontName, Optional ThisMode = -1, Optional ThisBold = Tr
 Dim aa As New StdFont
 If ThisFontName <> "" Then
 
-aa.name = ThisFontName
+aa.Name = ThisFontName
 
 If ThisMode > 7 Then aa.Size = ThisMode Else aa = 7
 aa.bold = ThisBold
@@ -1261,7 +1299,7 @@ Public Sub CtrlFontAttr(ThisFontName, Optional ThisMode = -1, Optional ThisBold 
 
 If ThisFontName <> "" Then
 
-CtrlFont.name = ThisFontName
+CtrlFont.Name = ThisFontName
 
 If ThisMode > 7 Then CtrlFont.Size = ThisMode Else CtrlFont = 7
 CtrlFont.bold = ThisBold
@@ -1269,7 +1307,7 @@ CtrlFont.bold = ThisBold
 End If
 End Sub
 Public Property Get CtrlFontName()
-    CtrlFontName = CtrlFont.name
+    CtrlFontName = CtrlFont.Name
 End Property
 Public Property Get CtrlFontSize()
     CtrlFontSize = CtrlFont.Size
@@ -1618,10 +1656,10 @@ Friend Sub MinimizeON()
            MyForm3.WindowState = 1
            End If
 End Sub
-Private Sub glistN_PanLeftRight(Direction As Boolean)
+Private Sub glistN_PanLeftRight(direction As Boolean)
 Dim item As Long
 On Error Resume Next
-If Direction = True Then
+If direction = True Then
 item = glistN.ListIndex
 
 If glistN.ListSep(item) Then Exit Sub

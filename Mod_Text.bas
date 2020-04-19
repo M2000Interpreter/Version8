@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 19
+Global Const Revision = 20
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -4798,7 +4798,7 @@ If Not Form1.Visible Then newshow basestack1
 End If
 r = SG * mouse
 If r = 0 Then
-MyDoEvents
+MyDoEventsNoThread
      r = SG * mouse ' MOUB
 End If
     
@@ -15704,7 +15704,7 @@ exitfor:
                 Else
                     If Execute <> 2 Then Execute = 1 Else Execute = 3
                    restartmodule = False
-                    'PopStagePartContinue2 bstack, bstack.RetStackTotal
+                    
                     b$ = vbNullString
                     once = True
                     Exit Function
@@ -17000,7 +17000,7 @@ ContElse:
     
             
             If IFCTRL = 0 Then
-            If MaybeIsSymbol(b$, b123) Then
+            If lookB123(b$) Then
                 If HaveMark(bstack, i, ok) Then
                   If i = 0 Then
                     SyntaxError
@@ -17052,7 +17052,7 @@ findEndif:
                                     Execute = CheckBlock(once): Exit Function
                                 End If
                         b$ = Mid$(b$, 2)
-                    ElseIf MaybeIsSymbol(b$, b123) Then
+                    ElseIf lookB123(b$) Then
                         i = SetNextLineCLR(b$)
                         i = MyTrimLi(b$, i + 1)
                         If i > 0 Then
@@ -17085,7 +17085,7 @@ findEndif:
                         Execute = 2
                         Exit Function
                     End If
-                    If MaybeIsSymbol(b$, b123) Then
+                    If lookB123(b$) Then
                     If Not once Then
                         SetNextLineCLR b$
                         End If
@@ -17536,7 +17536,7 @@ contelseifpass:
                                             sss = Len(b$)
                                           IFCTRL = 0: GoTo again1
                                         End If
-                                        If Not MaybeIsSymbol(b$, b123) Then GoTo contif2
+                                        If Not lookB123(b$) Then GoTo contif2
                                         Else
                                                   b$ = ss$
                                                 once = False
@@ -17643,7 +17643,7 @@ contelseifpass:
                                             sss = Len(b$)
                                           IFCTRL = 0: GoTo again1
                                         End If
-                                        If Not MaybeIsSymbol(b$, b123) Then GoTo contif2
+                                        If Not lookB123(b$) Then GoTo contif2
                                 ElseIf Execute = 2 Then
                                     If ok And Len(ss$) = 0 Then b$ = "BREAK" Else b$ = ss$
                                     once = False
@@ -17715,7 +17715,7 @@ contif:
                 Case "THEN", "тоте"
 
                     If ok Then
-                        If MaybeIsSymbol(b$, b123) Then
+                        If lookB123(b$) Then
                             i = SetNextLineCLR(b$)
                             MarkIf bstack, 1, ok
                             bstack.UseofIf = bstack.UseofIf + 1
@@ -17805,7 +17805,7 @@ contif2:
                                 End If
                     Else
                         
-                    If MaybeIsSymbol(b$, b123) Then
+                    If lookB123(b$) Then
                         i = SetNextLineCLR(b$)
                         MarkIf bstack, 2, jump
                         bstack.UseofIf = bstack.UseofIf + 1
@@ -17928,7 +17928,7 @@ contif2:
                                 IFCTRL = 0
                                 GoTo again1
                             End If
-                            If Not MaybeIsSymbol(b$, b123) Then GoTo contif2
+                            If Not lookB123(b$) Then GoTo contif2
                             IFCTRL = 0
                         ElseIf Execute = 2 Then
                         If ok Then b$ = "BREAK": once = True Else b$ = ss$
@@ -17939,7 +17939,7 @@ contif2:
                     End If
                 Case "ELSE", "аккиыс"
                 
-                    If MaybeIsSymbol(b$, b123) Then
+                    If lookB123(b$) Then
                     
                     
                     If Not ok Then
