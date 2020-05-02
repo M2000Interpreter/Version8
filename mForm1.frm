@@ -113,6 +113,8 @@ End Sub
 
 Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
 If m Is Nothing Then Exit Sub
+On Error Resume Next
+If WindowState = 1 Then Exit Sub
 m.SetFocus
 End Sub
 

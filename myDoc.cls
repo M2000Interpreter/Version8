@@ -812,12 +812,10 @@ Do While mycur <> 0
 If NeoData = vbNullString Then
 If thiscur <> 0 Then NeoData = "<p>" Else thiscur = 1
 Else
-' put color here
-'a$ = ReplaceStr("</", ChrW$(1) + ChrW$(2), NeoData)
-a$ = ReplaceStr("<", ChrW$(3), NeoData)
-a$ = ReplaceStr(">", ChrW$(4), a$)
-a$ = ReplaceStr("  ", ChrW$(7) + ChrW$(7), a$)
-a$ = ReplaceStr(ChrW$(7) + " ", ChrW$(7) + ChrW$(7), a$)
+a$ = Replace$(NeoData, "<", ChrW$(3))
+a$ = Replace$(a$, ">", ChrW$(4))
+a$ = Replace$(a$, "  ", ChrW$(7) + ChrW$(7))
+a$ = Replace$(a$, ChrW$(7) + " ", ChrW$(7) + ChrW$(7))
 If UBound(para(mycur).colordata()) > 0 Then
 mColor() = para(mycur).colordata()
 NeoData = vbNullString
@@ -865,11 +863,9 @@ End If
 
 End If
 
-'a$ = ReplaceStr(ChrW$(1), "&lt;", a$)
-'a$ = ReplaceStr(ChrW$(2), "/", a$)
-a$ = ReplaceStr(ChrW$(3), "&lt;", a$)
-a$ = ReplaceStr(ChrW$(4), "&gt;", a$)
-a$ = ReplaceStr(ChrW$(7), "&nbsp;", a$)
+a$ = Replace$(a$, ChrW$(3), "&lt;")
+a$ = Replace$(a$, ChrW$(4), "&gt;")
+a$ = Replace$(a$, ChrW$(7), "&nbsp;")
 If thiscur <> 0 Then NeoData = "<br />" + a$ Else thiscur = 1: NeoData = a$
 
 End If

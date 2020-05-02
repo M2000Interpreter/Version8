@@ -473,7 +473,12 @@ Public Property Get WindowState() As Variant
 If Not IhaveExtForm Then Exit Property
 WindowState = 1 - CLng(Form1.Visible Or Form1.TrueVisible)
 End Property
+Public Property Let ExtWindowState(ByVal RHS As Variant)
+If Not ExtForm Is Nothing Then
 
+ExtForm.WindowState = RHS
+End If
+End Property
 Public Property Let WindowState(ByVal vNewValue As Variant)
 If Not IhaveExtForm Then
 StopTimer
@@ -490,13 +495,14 @@ If vNewValue = 1 Then
     End If
 Else
         
-        Form1.Visible = Form1.Visible Or Form1.TrueVisible
+        Form1.Visible = Form1.Visible Or Form1.TrueVisible 'Or Forms.count < 5
         If Form1.Visible Then
         If Not trace Then reopen2 = False
         If vH_title$ = vbNullString Then reopen4 = False
         If reopen4 Then Form4.Show , Form1: Form4.Visible = True
         If reopen2 Then Form2.Show , Form1: Form2.Visible = True
         Form1.Show
+        
         End If
         
 End If

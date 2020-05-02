@@ -185,6 +185,8 @@ Private Declare Function GetStringTypeExW Lib "kernel32.dll" (ByVal Locale As Lo
 Private tmpshow As Boolean
 Private WordOnly As Boolean
 Private ColArr(0 To 15) As Long
+Private Declare Function GetForegroundWindow Lib "user32" () As Long
+
 
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
@@ -3390,7 +3392,7 @@ a$ = NLtrim$(a$)
             firstdot$ = firstdot$ + "."
             a$ = Mid$(a$, 2)
             End If
-       Case 92, 94, 123 To 126 '"\","^", "{" To "~"
+       Case 92, 94, 123 To 126, 160 '"\","^", "{" To "~"
         Exit Do
 
         Case 48 To 57, 95 '"0" To "9", "_"
@@ -3600,7 +3602,7 @@ again1:
             a$ = Mid$(a$, 2)
             rr& = 10
         End If
-     Case 64, 91 To 94, 123 To 126  '"\","^", "{" To "~"
+     Case 64, 91 To 94, 123 To 126, 160  '"\","^", "{" To "~"
      
 Exit Do
         
@@ -3710,11 +3712,6 @@ If Len(OpenTag) = 0 Then
             End If
         Case 40 ' "("
             If r$ <> "" And Not ((Len(r$) = 1 And ExtraYes) Or WordOnly) Then
-            ' m2000 specific
-                'If Mid$(a$, 2, 2) = ")@" Then
-                ' r$ = r$ & "()."
-              'a$ = Mid$(a$, 4)
-               ' Else
                 Select Case rr&
                 Case 1, 3, 4
                 rr& = 5
@@ -3876,7 +3873,7 @@ a$ = NLtrim$(a$)
             End If
             Exit Function
         End If
-     Case 92, 94, 123 To 126 '"\","^", "{" To "~"
+     Case 92, 94, 123 To 126, 160 '"\","^", "{" To "~"
 Exit Do
         
         Case 48 To 57, 95 '"0" To "9", "_"
@@ -6503,6 +6500,7 @@ Dim b$, c$, d$, e$, skip As Boolean, tr$, maxw As Long, ns As String, och As Lon
 och = -1
 showparagraphWork = False
 b$ = CurrentParagraph
+If Charpos > Len(b$) + 1 Then SelStartSilent = SelStart - (Charpos - Len(b$) - 1)
 If AutoNumber Then
     If IsNumberLabel(b$, c$) Then
         d$ = NextParagraph: If d$ <> "" Then If IsNumberLabel(d$, e$) Then skip = True

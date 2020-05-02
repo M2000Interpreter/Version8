@@ -320,7 +320,19 @@ End If
 End If
 ttl = False
 If Not F Is Nothing Then
+If F Is Form1 Then
+If Form1.Visible Then
+Form1.SetFocus
+ElseIf Form1.TrueVisible Then
+If Not UseMe Is Nothing Then
+If UseMe.IhaveExtForm Then
+UseMe.ExtWindowState = 1
+End If
+End If
+End If
+Else
 If F.Visible Then F.SetFocus
+End If
 End If
 Err.clear
 End Sub
@@ -3332,25 +3344,7 @@ End Function
 Public Function ScrY() As Long
 ScrY = GetSystemMetrics(SM_CYSCREEN) * dv15
 End Function
-Public Function MyTrimLi(s$, l As Long) As Long
-Dim i&
-Dim p2 As Long, p1 As Integer, p4 As Long
- If l > Len(s) Then MyTrimLi = Len(s) + 1: Exit Function
- If l <= 0 Then MyTrimLi = 1: Exit Function
-  l = l - 1
-  i = Len(s)
-  p2 = StrPtr(s) + l * 2:  p4 = p2 + i * 2
-  For i = p2 To p4 Step 2
-  GetMem2 i, p1
-  Select Case p1
-    Case 32, 160, 9
-    Case Else
-     MyTrimLi = (i - p2) \ 2 + 1 + l
-   Exit Function
-  End Select
-  Next i
- MyTrimLi = Len(s) + 1
-End Function
+
 Public Function MyTrimL3Len(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
@@ -3385,23 +3379,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimL2 = l + 2
 End Function
-Public Function MyTrimL(s$) As Long
-Dim i&, l As Long
-Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(s): If l = 0 Then MyTrimL = 1: Exit Function
-  p2 = StrPtr(s): l = l - 1
-  p4 = p2 + l * 2
-  For i = p2 To p4 Step 2
-  GetMem2 i, p1
-  Select Case p1
-    Case 32, 160, 7, 9
-    Case Else
-     MyTrimL = (i - p2) \ 2 + 1
-   Exit Function
-  End Select
-  Next i
- MyTrimL = l + 2
-End Function
+
 Public Function MyTrimR(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
@@ -3419,40 +3397,8 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimR = l + 2
 End Function
-Public Function MyTrimRNoCr(s$) As Long
-Dim i&, l As Long
-Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(s): If l = 0 Then MyTrimRNoCr = 1: Exit Function
-  p2 = StrPtr(s): l = l - 1
-  p4 = p2 + l * 2
-  For i = p4 To p2 Step -2
-  GetMem2 i, p1
-  Select Case p1
-    Case 32, 160, 9
-    Case Else
-     MyTrimRNoCr = (i - p2) \ 2 + 1
-   Exit Function
-  End Select
-  Next i
- MyTrimRNoCr = l + 2
-End Function
-Public Function MyTrimRStr(s$) As Long
-Dim i&, l As Long
-Dim p2 As Long, p1 As Integer, p4 As Long
-  l = Len(s): If l = 0 Then MyTrimRStr = 1: Exit Function
-  p2 = StrPtr(s): l = l - 1
-  p4 = p2 + l * 2
-  For i = p4 To p2 Step -2
-  GetMem2 i, p1
-  Select Case p1
-    Case 32
-    Case Else
-     MyTrimRStr = (i - p2) \ 2 + 1
-   Exit Function
-  End Select
-  Next i
- MyTrimRStr = l + 2
-End Function
+
+
 Public Function MyTrimL2NoTab(s$) As Long
 Dim i&, l As Long
 Dim p2 As Long, p1 As Integer, p4 As Long
@@ -3470,14 +3416,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long
   Next i
  MyTrimL2NoTab = 0
 End Function
-Sub test3()
-Dim a$, i As Long, j As Long
-a$ = "1234567@@@10"
-i = 6
-j = 11
-j = MyTrimRfrom(a$, i, j)
-Debug.Print Mid$(a$, i, j - i) + "*"
-End Sub
+
 Public Function MyTrimRfrom(s$, st As Long, ByVal en As Long) As Long
 Dim i&
 Dim p2 As Long, p1 As Integer, p4 As Long
@@ -3777,7 +3716,7 @@ p2 = StrPtr(a$): l = l - 1
             'a$ = Mid$(a$, 2)
             End If
             Exit For
-    Case 92, 94, 123 To 126 '"\","^", "{" To "~"
+    Case 92, 94, 123 To 126, 160 '"\","^", "{" To "~"
           Exit For
         
         Case 48 To 57, 95 '"0" To "9", "_"
@@ -4016,7 +3955,7 @@ p2 = StrPtr(a$): l = l - 1
             Else
             firstdot$ = firstdot$ + "."
             End If
-        Case 92, 94, 123 To 126 '"\","^", "{" To "~"
+        Case 92, 94, 123 To 126, 160 '"\","^", "{" To "~"
             Exit For
         Case 48 To 57, 95 '"0" To "9", "_"
            If one Then
@@ -4558,7 +4497,11 @@ zones() = Array("Dateline Standard Time", -12, "UTC-11", -11, "Aleutian Standard
 "Chatham Islands Standard Time", 12.75, "UTC+13", 13, "Tonga Standard Time", 13, "Samoa Standard Time", 13, "Line Islands Standard Time", 14)
 For i = 0 To UBound(zones) - 1 Step 2
 zHash.AddKey zones(i), zones(i + 1)
+If InStr(zones(i), "Standard") > 1 Then
+zHash.AddKey Replace(zones(i), "Standard", "Daylight"), zones(i + 1) + 1
+End If
 Next i
+zHash.Sort
 End Sub
 Public Function HD(a$) As Long
 Dim ret As Long
@@ -4571,4 +4514,29 @@ Dim ret As Long
 ret = HashData(VarPtr(aa), 8, VarPtr(HD1), 4)
 HD1 = HD1 And &H7FFFFFFF
 If HD1 = 0 Then HD1 = 1
+End Function
+Sub Main()
+'' not used
+'' If App.StartMode = vbSModeStandalone Then NeoSubMain
+Dim m As New Callback
+
+m.Run "start"
+If m.Status = 0 Then
+m.Cli Form1.commandW, ">"
+m.Reset
+End If
+m.ShowGui = False
+Debug.Print "ok"
+ResetTokenFinal
+End Sub
+Function ProcWriter(basestack As basetask, rest$, Lang As Long) As Boolean
+Dim prive As Long
+prive = GetCode(basestack.Owner)
+If Lang = 1 Then
+PlainBaSket basestack.Owner, players(prive), "George Karras (C), Kallithea Attikis, Greece 1999-2020"
+Else
+PlainBaSket basestack.Owner, players(prive), ListenUnicode(915, 953, 974, 961, 947, 959, 962, 32, 922, 945, 961, 961, 940, 962, 32, 40, 67, 41, 44, 32, 922, 945, 955, 955, 953, 952, 941, 945, 32, 913, 964, 964, 953, 954, 942, 962, 44, 32, 917, 955, 955, 940, 948, 945, 32, 49, 57, 57, 57, 45, 50, 48, 50, 48)
+End If
+crNew basestack, players(prive)
+ProcWriter = True
 End Function

@@ -40,7 +40,7 @@ Public LastOpen As String
 Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Public PointerPtr As Long
-
+Public ToDelete As Boolean
 Public Property Get Events() As Object
 Set Events = eventlist
 End Property
@@ -81,12 +81,12 @@ If eventlist Is Nothing Then Set eventlist = New FastCollection
 If eventlist.ExistKey(a$) Then Exit Sub
 eventlist.AddKey a$, vbNullString
 End Sub
-Public Function EventFuncPos(a$, retName$, pos As Long) As Boolean
+Public Function EventFuncPos(a$, retName$, Pos As Long) As Boolean
 If eventlist Is Nothing Then EventFuncPos = 0: Exit Function
 With eventlist
 If eventlist.ExistKey(a$) Then
     retName$ = .Value
-    If retName$ <> vbNullString Then pos = .sValue: EventFuncPos = True
+    If retName$ <> vbNullString Then Pos = .sValue: EventFuncPos = True
 End If
 End With
 End Function

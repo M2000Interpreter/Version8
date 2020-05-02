@@ -33,6 +33,7 @@ Private Declare Sub VariantCopy Lib "OleAut32.dll" (ByRef pvargDest As Variant, 
 Private KnownProp As FastCollection
 Private Init As Boolean
 Private Declare Function VarPtrArray Lib "msvbvm60.dll" Alias "VarPtr" (Ptr() As Any) As Long
+Private Declare Function GetForegroundWindow Lib "user32" () As Long
 Public Function FindDISPID(pobjTarget As Object, ByVal pstrProcName As Variant) As Long
 
     Dim IDsp        As IDispatch.IDispatchM2000

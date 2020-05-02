@@ -133,6 +133,27 @@ Set objref.Sorosref = oldsoros
 Set oldsoros = Nothing
 here$ = ohere$
 End Sub
+Private Function GetSubFullName2(nm$, fullname$, retnum As Long) As Boolean
+Dim dummy As Long
+If Len(here$) > 0 Then
+    If Len(here$) > Len(nm$) Then
+        If Mid$(here$, Len(here$) - Len(nm$)) = "." + nm$ Then
+            GetSubFullName2 = subHash.Find2(nm$, retnum, dummy)
+          fullname = nm$: Exit Function
+        End If
+    End If
+End If
+
+If here$ <> "" Then
+     GetSubFullName2 = subHash.Find2(here$ & "." & nm$, retnum, dummy)
+  If GetSubFullName2 Then fullname$ = here$ & "." & nm$: Exit Function
+End If
+
+    GetSubFullName2 = subHash.Find2(nm$, retnum, dummy)
+ If GetSubFullName2 Then fullname$ = nm$
+
+
+End Function
 Public Sub CallModule(modulename$, ParamArray a())
 Static once As Boolean, where As Long, what, full$
 If Status <> 0 Then Exit Sub

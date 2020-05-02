@@ -3079,7 +3079,7 @@ a$ = NLtrim$(a$)
             firstdot$ = firstdot$ + "."
             a$ = Mid$(a$, 2)
             End If
-       Case 92, 94, 123 To 126 '"\","^", "{" To "~"
+       Case 92, 94, 123 To 126, 160 '"\","^", "{" To "~"
         Exit Do
 
         Case 48 To 57, 95 '"0" To "9", "_"
@@ -3184,24 +3184,21 @@ a$ = NLtrim$(a$)
 
 End Function
 Function IsLabelOnly(a$, r$) As Long 'ok
-
 Dim rr&, one As Boolean, c$, dot&, Extra&, num As Boolean
 r$ = vbNullString
 If a$ = vbNullString Then IsLabelOnly = 0: Exit Function
 a$ = NLtrim$(a$)
-    Do While Len(a$) > 0
-     c$ = Left$(a$, 1) 'ANYCHAR HERE
+Do While Len(a$) > 0
+    c$ = Left$(a$, 1) 'ANYCHAR HERE
     If AscW(c$) < 256 Then
         Select Case AscW(c$)
-                Case 35 ' "#"
-        If r$ <> "" Then
-        Exit Do
-        Else
-        
-        r$ = "#"
-           a$ = Mid$(a$, 2)
-          
-          rr& = 10
+        Case 35 ' "#"
+            If r$ <> "" Then
+                Exit Do
+            Else
+                r$ = "#"
+                a$ = Mid$(a$, 2)
+                rr& = 10
            End If
         Case 64  '"@"
            If r$ = vbNullString Then
@@ -3262,7 +3259,7 @@ a$ = NLtrim$(a$)
             End If
             Exit Function
         End If
-     Case 92, 94, 123 To 126 '"\","^", "{" To "~"
+     Case 92, 94, 123 To 126, 160 '"\","^", "{" To "~"
 Exit Do
         
         Case 48 To 57, 95 '"0" To "9", "_"
@@ -4262,6 +4259,7 @@ Dim a$, newid As Long 'mDoc.MarkParagraphID
 Dim b$, c$, d$, e$, skip As Boolean, tr$, maxw As Long, ns As String, och As Long
 showparagraphWork = False
 b$ = CurrentParagraph
+If Charpos > Len(b$) + 1 Then SelStartSilent = SelStart - (Charpos - Len(b$) - 1)
 On Error Resume Next
 If AutoNumber And Not mDoc.IsPart(mDoc.MarkParagraphID) Then
 If IsNumberLabel(b$, c$) Then

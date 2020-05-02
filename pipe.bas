@@ -235,7 +235,7 @@ Private EncbTrans(63) As Byte, EnclPowers8(255) As Long, EnclPowers16(255) As Lo
 Dim lPowers18(63) As Long, bTrans(255) As Byte, lPowers6(63) As Long, lPowers12(63) As Long
 Public Function DateFromString(ByVal sDateIn As String, ByVal lcid As Long) As Date
 
-    Dim HRESULT As Long
+    Dim hResult As Long
     Dim dtOut As Date
 
     ' Do not want user's own settings to override the standard formatting settings
@@ -244,9 +244,9 @@ Public Function DateFromString(ByVal sDateIn As String, ByVal lcid As Long) As D
     Const LOCALE_NOUSEROVERRIDE = &H80000000
 
     ' Do the conversion
-    HRESULT = VarDateFromStr(StrPtr(sDateIn), lcid, LOCALE_NOUSEROVERRIDE, dtOut)
+    hResult = VarDateFromStr(StrPtr(sDateIn), lcid, LOCALE_NOUSEROVERRIDE, dtOut)
 
-    Select Case HRESULT
+    Select Case hResult
 
         Case S_OK:
             DateFromString = dtOut
@@ -310,14 +310,14 @@ Public Function GetUTCDate() As Date
     Dim lngUTCTime As Long
      
     lngUTCTime = GetTimeZoneInformation(tzTime)
-    GetUTCDate = DateAdd("n", tzTime.Bias, Now)
+    GetUTCDate = DateAdd("n", tzTime.Bias + tzTime.DaylightBias, Now)
 End Function
 Public Function GetUTCTime() As Date
     Dim tzTime As TIME_ZONE_INFORMATION
     Dim lngUTCTime As Long
      
     lngUTCTime = GetTimeZoneInformation(tzTime)
-    GetUTCTime = DateAdd("n", tzTime.Bias, Now)
+    GetUTCTime = DateAdd("n", tzTime.Bias + tzTime.DaylightBias, Now)
 End Function
 Public Sub SetUp64()
     Dim lTemp As Long

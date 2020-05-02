@@ -137,12 +137,12 @@ End Type
       Private Declare Function ClosePrinter Lib "winspool.drv" _
       (ByVal hPrinter As Long) As Long
 
-      Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
+      Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
-      Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
-Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
+      Private Declare Function GlobalLock Lib "KERNEL32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "KERNEL32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalAlloc Lib "KERNEL32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalFree Lib "KERNEL32" (ByVal hMem As Long) As Long
 Const GMEM_MOVEABLE = &H2
 Const GMEM_ZEROINIT = &H40
 
@@ -357,7 +357,7 @@ On Error Resume Next
 FileName = mylcasefILE(FileName)
 Dim b As Object
 Set b = CreateObject("wscript.shell")
-EXT = "." & ReplaceStr(".", "", EXT)
+EXT = "." & Replace$(EXT, ".", "")
 If FileName = vbNullString Then Exit Sub
 b.regdelete "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\" & ExtractNameOnly(FileName)
 b.regdelete "HKCR\" & EXT & "\" ', FileType

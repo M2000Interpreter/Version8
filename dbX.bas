@@ -3388,3 +3388,85 @@ If FastSymbol(a$, ";") Then Exit Do
 Loop Until k = Len(a$)
 End If
 End Sub
+Function ProcDBprovider(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim pa$, s$, ss$
+ProcDBprovider = True
+If IsStrExp(bstack, rest$, pa$) Then
+If pa$ = vbNullString Then
+JetPrefixUser = JetPrefixHelp
+JetPostfixUser = JetPostfixHelp
+Else
+' DB.PROVIDER "Microsoft.ACE.OLEDB.12.0","Jet OLEDB","100101"
+' DB.PROVIDER "Microsoft.Jet.OLEDB.4.0", "Jet OLEDB", "100101"
+' DB.PROVIDER "dns=testme;Uid=admin;Pwd=12alfa45", "ODBC", "100101"
+' use (name) for database name
+
+ JetPrefixUser = "Provider=" + pa$ + ";Data Source="  ' normal
+    If FastSymbol(rest$, ",") Then
+       If IsStrExp(bstack, rest$, s$) Then
+          If s$ = vbNullString Then
+             ProcDBprovider = False
+          ElseIf UCase(s$) = "ODBC" Or UCase(s$) = "PATH" Then
+                If FastSymbol(rest$, ",") Then
+                 If IsStrExp(bstack, rest$, ss$) Then
+                 JetPrefixUser = pa$ & ";Password=" & ss$
+                 Else
+                 JetPrefixUser = pa$ & ";Password="
+                 End If
+                Else
+                JetPrefixUser = pa$
+                End If
+                JetPostfixUser = ";"
+          Else
+          
+             If FastSymbol(rest$, ",") Then
+                If IsStrExp(bstack, rest$, ss$) Then
+                   If ss$ = vbNullString Then
+                       JetPostfixUser = ";" & s$ & ":Database Password=100101;"
+                   Else
+                       JetPostfixUser = ";" & s$ & ":Database Password=" & ss$ & ";"
+                   
+                   End If
+                    
+                Else
+                    ProcDBprovider = False
+                End If
+             Else
+                JetPostfixUser = ";" & s$ & ":Database Password=100101;"
+             End If
+          End If
+        Else
+         ProcDBprovider = False
+       End If
+    Else
+       JetPostfixUser = JetPostfixHelp
+
+    End If
+ End If
+ Else
+ JetPrefixUser = JetPrefixHelp
+ 
+End If
+JetPostfix = JetPostfixUser
+JetPrefix = JetPrefixUser
+End Function
+Function ProcDBUSER(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim s$
+ProcDBUSER = -True
+    If IsStrExp(bstack, rest$, s$) Then
+        If s$ = vbNullString Then
+            extDBUser = vbNullString
+            extDBUserPassword = vbNullString
+        Else
+            extDBUser = s$
+        End If
+        If FastSymbol(rest$, ",") Then
+            If Not IsStrExp(bstack, rest$, extDBUserPassword) Then
+                extDBUserPassword = vbNullString
+            End If
+            DBUser = extDBUser
+            DBUserPassword = extDBUserPassword
+        End If
+    End If
+
+End Function

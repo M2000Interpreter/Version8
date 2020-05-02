@@ -97,9 +97,6 @@ volume = 127
     On Error GoTo 0
     Dim midimsg As Long
     instrument instrum, Channel
- ' midimsg = &H90 + ((23 + 43) * &H100) + (127 * &H10000) + Channel
-  '  myBase.Done = False
-'midiOutShortMsg hmidi, midimsg
   Else
 poulos:
 

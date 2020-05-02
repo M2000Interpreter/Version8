@@ -1,5 +1,8 @@
 Attribute VB_Name = "Module3"
 Option Explicit
+Public Declare Function midiOutClose Lib "winmm.dll" (ByVal hMidiOut As Long) As Long
+Public Declare Function midiOutOpen Lib "winmm.dll" (lphMidiOut As Long, ByVal uDeviceID As Long, ByVal dwCallback As Long, ByVal dwInstance As Long, ByVal dwFlags As Long) As Long
+Public Declare Function midiOutShortMsg Lib "winmm.dll" (ByVal hMidiOut As Long, ByVal dwMsg As Long) As Long
 
 
 Const RC_PALETTE As Long = &H100
@@ -741,7 +744,7 @@ nextline:
                               
                  End If
                  olda = SetTextAlign(ddd.hDC, 0) 'TA_RTLREADING)
-                 cuts = Len(Buf$) - Len(ReplaceStr(" ", "", Buf$))
+                 cuts = Len(Buf$) - Len(Replace$(Buf$, " ", ""))
                  
                  Extra = wi \ DXP - INTD \ DXP - Extra - LowWord(GetTabbedTextExtent(ddd.hDC, StrPtr(Buf$), Len(Buf$), 1, tabw))
                  
@@ -902,7 +905,30 @@ res = nohi - Hi
 wi = ddd.CurrentX
 If collectit Then bstack.soros.PushStr mDoc.textDoc
 End Sub
+Public Sub EnableMidi()
+Dim curDevice As Long, rc As Long
 
-
+ If hmidi = 0 Then
+rc = GetFuncPtr("winmm.dll", "midiOutOpen")
+If rc <> 0 Then
+    rc = midiOutOpen(hmidi, curDevice, 0, 0, 0)
+    If (rc <> 0) Then
+       MyEr "Couldn't open midi device - Error #" & rc, "Δεν μπορώ να ανοίξω κανάλι Midi - λάθος #"" & rc"
+    End If
+    End If
+    End If
+End Sub
+Public Sub instrument(insID As Long, Channel As Long)
+EnableMidi
+Dim midimsg As Long
+    midimsg = (insID * 256) + &HC0 + Channel
+    midiOutShortMsg hmidi, midimsg
+End Sub
+Public Sub DisableMidi()
+  If hmidi <> 0 Then
+  midiOutClose (hmidi)
+  hmidi = 0
+  End If
+End Sub
 
 

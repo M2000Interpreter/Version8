@@ -110,6 +110,7 @@ Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, B
 Private Declare Function GetModuleHandle Lib "KERNEL32" Alias "GetModuleHandleA" (ByVal lpModuleName As String) As Long
 Private Declare Function GetCurrentProcess Lib "KERNEL32" () As Long
 Private Declare Function IsWow64Process Lib "KERNEL32" (ByVal hProc As Long, bWow64Process As Boolean) As Long
+Private Declare Function GetForegroundWindow Lib "user32" () As Long
     
 
 Public Function Is64bit() As Boolean

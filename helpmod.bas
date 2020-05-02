@@ -144,7 +144,7 @@ Set oshell = CreateObject("Shell.Application")
 If Not oshell Is Nothing Then
 Set oFolder = oshell.NameSpace(NET_HOOD)
 For Each ofile In oFolder.items
-If ofile.name = vbNullString Then
+If ofile.Name = vbNullString Then
 If all = vbNullString Then
 all = "(" + ofile.GetLink.Path + ")"
 Else
@@ -153,9 +153,9 @@ Else
 
 Else
 If all = vbNullString Then
-all = "(" + ofile.name + ")"
+all = "(" + ofile.Name + ")"
 Else
-     all = all + vbCrLf + "(" + ofile.name + ")"
+     all = all + vbCrLf + "(" + ofile.Name + ")"
      End If
      End If
 Next
@@ -183,7 +183,7 @@ If Not oshell Is Nothing Then
 Set oFolder = oshell.NameSpace(NET_HOOD)
 
 For Each ofile In oFolder.items
-If ofile.name = giveAname Then
+If ofile.Name = giveAname Then
 FindNetworkFolderPath = ofile.GetLink.Path
 Exit For
 End If

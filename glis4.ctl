@@ -5067,7 +5067,12 @@ If InStr(1, WordCharRight, one$) Then Exit Do
 Epos = Epos + 1
 Loop
 If (Epos - Pos - 1) > 0 Then
+    If Pos = 0 Then
+    Pos = MyTrimL(mline$)
+    If Pos > Len(mline$) Then Pos = 0 Else Pos = Pos - 1
+    End If
     this$ = Mid$(mline$, Pos + 1, Epos - Pos - 1)
+    
     RaiseEvent WordMarked(this$)
     If this = vbNullString Or Not EditFlag Then Exit Sub
     oldselstart = SelStart

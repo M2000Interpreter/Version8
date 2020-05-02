@@ -810,7 +810,9 @@ MODULE DD8GRNEW {\\ Like DD8 but better
 }
 Ζεύγη_Τιμών
 }
-MODULE DD9 {a=10
+MODULE DD9 {Report {Execute a Clear statement to erase static variables from console. Static variables reduce a bit the speed of interpreter. Except for static varibales in threads, they erased when a thread erased}
+
+a=10
 Module Checkit {
       if random(10)=1 then Clear ' erase all statics and variables from this level
       Module Checkit {
@@ -2077,17 +2079,17 @@ b++ ' now we get high limit because b and a(1) show the same nameless (or float)
 }
 MODULE H2 {\\ The task is simple;
 \\ first we make a class function to produce a group with one variable and a value
-\\ then e make p as a pointer to a float group produced from alfa()
+\\ then we make p as a pointer to a float group produced from alfa()
 \\ then we use p=>x to get the x value, and eval(p) to get the group value
 
-\\ Then we want a named group, m, whith a variable m to merge it with a group
+\\ Then we want a named group, m, with a variable m to merge it with a group
 \\ The group is a pointer to a float group in the stack, so we push p to stack
 \\ We use a function which get any group (pointer on not pointer) as m
 \\ then make a z and then we return z as group (using Group(), because without we get the value of z, if z has a value)
 
 \\ We make the same, but now we didn't use the function but we do something else.
 \\ First we have to use a fresh name, say m1, and read from stack as group, so if it is a pointer we get a group from the pointer
-\\ now we can appaned a Y variable, using Group {} or using m1=class1() 
+\\ now we can append a Y variable, using Group {} or using m1=class1() 
 
 class alfa {
 	x=10
@@ -2165,20 +2167,21 @@ push p
 group m {
 	y=20
 }
-if rnd>.5 then
-	Pen 15 {Print "using getGroup(m)"}
-	function getGroup(m){
-		group z=m
-		=group(m)
-	}
-else
-	Pen 11 {Print "using getGroup(m as group)"}
-	function getGroup(m as group){
-		=group(m)
-	}
-end if
+Pen 11 {Print "We have a pointer to a group in stack"}
+Stack
+Over
+Pen 11 {Print "Now we have a pointer to a group in stack two times"}
+Stack
+read NewGroup
+def getGroup(m as group)=group(m)
 Print counter=1
-m=getGroup(Group)
+if rnd>.5 then
+	Pen 15 {Print "using Group reading from stack"}
+	m=Group
+else
+	Pen 15 {Print "using getGroup(m)"}
+	m=getGroup(Group)
+end if
 Print m=20, m.x, m.y, counter
 m.x++
 print m.x=11, alfa.x=10, p=>x=10
@@ -2194,6 +2197,7 @@ if rnd>.5 then
 		y=20
 	}
 	Print counter=4, m1, counter=5
+	\\ we can make a group m2 {y=20} and a let m1=m2 to get the y without deleting the event list.
 else
 	Pen 13 {Print "Using class in a let statement"}
 	class class1 {y=20}
@@ -2203,15 +2207,29 @@ else
 	Let m1=class1()
 	Print counter=4, m1, counter=5
 end if
-
-M2=Group(m1)
+def TypeExpression$(val)=type$(val)
+Print "m1 is a group and return a double as value"
+Print type$(m1), TypeExpression$(m1)
+\\ so we get the group not the value using group()
+M2=group(m1)
 oldcounter=counter
 Print counter
 Print M2.y=20, M2=20
 Print counter
 if counter=oldcounter then
-	Print "counter not changed because ued the group withevents {} method"
+	Print "counter not changed because the event listinside group is empty"
 end if
+\\ We can get the value from NewGroup which is a pointer to a group
+\\ but has event list from the original alfa
+Print Eval(NewGroup)
+Print Counter
+\\ we use group(alfa) to get the group, not the value
+\\ now NewerGroup is a real pointer to a copy of alfa
+NewerGroup->(group(alfa))
+Print Eval(NewerGroup)
+\\ event list also copied, and because the actual event service function exist the event served
+Print Counter
+list
 }
 MODULE INF { locale 1033
 Module CheckIt {
@@ -2367,7 +2385,7 @@ Module RationalNumbers {
                   Read l
                   Call Operator "+", -l
             }
-            Operator "*" {
+            Operator high "*" {
                   Read l
                   g1=.gcd(l.numerator,.denominator)
                   g2=.gcd(.numerator, l.denominator)
@@ -2384,7 +2402,7 @@ Module RationalNumbers {
                   if sign<0 then ret.numerator-!
                   =ret
             }
-            Operator "/" {
+            Operator high"/" {
                   Read l
                   call operator "*", l.inverse()
             }
@@ -2403,7 +2421,7 @@ Module RationalNumbers {
                   pcomp=l/this
                   PUSH pcomp.numerator=1 and pcomp.denominator=1
             }
-            Operator ">" {
+            Operator  ">" {
                   Read l
                   Def boolean F
                   if Abs(Sgn(l.numerator))+Abs(Sgn(.numerator))=0 then Push F: exit
@@ -2479,8 +2497,8 @@ Module RationalNumbers {
                               =abs(b)
                   }
                   gdcval=gcd1(abs(.numerator), .denominator)
-                  if gdcval<.denominator then
-                        .denominator<=gdcval
+                  if gdcval<.denominator and gdcval<>0 then
+                        .denominator/=gdcval
                         .numerator/=gdcval
                   end if
                   .gcd<=gcd1
@@ -2499,8 +2517,10 @@ Module RationalNumbers {
       Print "Z.real="; Z.real
       Print "(";M.numerator;"/"; M.denominator;") + (";N.numerator;"/"; N.denominator;") = (";Z.numerator;"/";Z.denominator;")"
       Print M.tostring$+ " +"+N.tostring$+" ="+Z.tostring$
+      Print -10/150@+2/4@
       Z=-M+N
-      Print Z.numerator, Z.denominator
+      Print "-"+M.tostring$+ " +"+N.tostring$+" ="+Z.tostring$
+      Print Z.numerator, Z.denominator, Z.numerator/Z.denominator
       Print -10/150@+2/4@
       Print Z.real
       Z=M-N
@@ -2514,12 +2534,16 @@ Module RationalNumbers {
       Z=M/N
       Print Z.numerator, Z.denominator
       Print (10/150@)/(2/4@)
+      Print z.tostring$
       Print Z.real
+      Print "Z power 2 = ";
+      
       Z=Z.Power(2)
       Print Z.real
+      Print z.tostring$;" = ";eval(z.tostring$)   
       Print Z=Z
-      Print Z=N
-      Print Z=-Z
+      Print Z=N  ' false
+      Print Z=-Z  ' false
       ZZ=-Z
       Print ZZ=ZZ
       Print -Z=-Z
@@ -2531,10 +2555,15 @@ Module RationalNumbers {
       Print M.real
       Print K(4).toString$
 
-           pk->(Z)
+      pk->(Z)
       Print pk=>toString$+" +"
-      zzz=pk+pk
-      Print zzz.toString$+ " ="
+      zzz=k(4)+pk
+      Print zzz.toString$+ " ="+K(4).toString$+" +"+pk=>toString$
+      
+      zzz=Rational(10,1)+Rational(3,1)*Rational(2,1)
+      Print zzz.toString$, zzz.real=16
+      zzz=Rational(10,1)*Rational(3,1)+Rational(2,1)
+      Print zzz.toString$, zzz.real=32
 
 }
 RationalNumbers
@@ -2680,25 +2709,34 @@ Module TestGroup2 {
 }
 TestGroup2
 }
-MODULE PEND { Module Pendulum {
+MODULE PEND {Module Pendulum {
       back()
       degree=180/pi
-      THETA=Pi/2
+      THETA=Pi/2  ' +p/8
       SPEED=0
       G=9.81
-      L=0.5
+      L=0.25
+      Refresh 5000
       Profiler
       lasttimecount=0
-      cc=40 ' 40 ms every draw
+      cc=50
       accold=0
-      Every cc {
-            ACCEL=G*SIN(THETA*degree)/L/50
+      ACCEL=0 'G*SIN(THETA*degree)*L
+      time=now
+      timed=1/24/3600*(cc*1.5)/1000
+            Thread {
+            time+=timed
+            ACCEL=G*SIN(THETA*degree)*L
             SPEED+=ACCEL/cc
             THETA+=SPEED
+            if sgn(accold)<>sgn(ACCEL) then lasttimecount=timecount: Profiler
+            accold=ACCEL
+      } as M interval cc
+      Main.Task 20 {
             Pendulum(THETA)
             if KeyPress(32) Then Exit
       }
-
+      Threads Erase
       Sub back()
             If not IsWine then Smooth On
             Cls 7,0
@@ -2710,7 +2748,7 @@ MODULE PEND { Module Pendulum {
             Hold ' hold this as background
       End Sub
 
-      Sub Pendulum(x)
+      Sub Pendulum(x)          
             x+=pi/2
             Release ' place stored background to screen
             Width scale.x/2000 {
@@ -2720,14 +2758,15 @@ MODULE PEND { Module Pendulum {
                   }
                   Step Angle x, -scale.y/2.5
             }
-            Print @(1,1), lasttimecount
-            if sgn(accold)<>sgn(ACCEL) then lasttimecount=timecount: Profiler
-            accold=ACCEL
-            Refresh 1000
+            cursor 0,1
+            Print time$(time,,"mm:ss"), round(lasttimecount,2), "", time$(now,,"mm:ss"), round((now-time)*100000, 2)
+            refresh 1000
       End Sub
 }
 while inkey$<>"" : end while
+Set Fast!
 Pendulum
+Set Fast
 keyboard "Info"+chr$(13)
 }
 MODULE LOGO {smooth off  ' can't use xor with GDI+, so we work with GDI32 (by default)
@@ -4702,7 +4741,7 @@ end if
 Flush \\ Empty the stack
 CurDir$=Dir$
 Title$="M2000 Pad"
-Title Title$, 0   ' hide the console - 0
+Title "", 0   ' hide the console - 0
 \\ Gui Elements
 Declare NotePad Form
 Declare Pad EditBox Form NotePad
@@ -4981,14 +5020,13 @@ Function Notepad.Resize {
 	}
 }
 
-\\ The HelpPad (for displaying help) use a newer event, the click, which open a message box, as input box
-\\ if the ask() return 1 then in stack of values we get the new value
 ms$={Find Topic
 Use ALL to get a list of all topics}
-Function HelpPad.click {
+Function HelpPad.click1 {
 	Method  HelpPad, "EditTextView", false
 	If ask(ms$,,,,, what$)=1 Then Read New what$ :Call Local FindWord(what$, true)
 }
+
 
 \\ this is the event to do something with a word clicking on heplPad
 Function HelpPad.word {
@@ -5132,7 +5170,7 @@ Function Run1.DblClick {
 		exit
 	else.if Run1index=5 then
 		Clear TestFile$
-		TestFile$={
+		Prototype {
 		Module A {
 			Title "Settings", 0
 			Settings
@@ -5142,7 +5180,7 @@ Function Run1.DblClick {
 			End while
 		}
 		A : End
-		}
+		} as TestFile$
 		Save.Doc TestFile$, "Test1235.gsb"
 		Win appdir$+"m2000.exe", dir$+"Test1235.gsb"
 	else.If ask(if$(Run1index=0->"Module to run","Command(s) to execute"	+UseShow$),,,,,mod2run$)=1 Then
@@ -5293,7 +5331,7 @@ Function Help1.DblClick {
 		A=Ask(info$,Title$,"","")
 	}
 	Case "FIND"
-		Call Local HelpPad.click()
+		Call Local HelpPad.click1()
 	Case "OPEN"
 		Method  HelpPad, "EditTextView", True: Call Local Notepad.Resize()
 	Case "CLOSE"
@@ -5301,10 +5339,22 @@ Function Help1.DblClick {
 	End Select
 	
 }
-Function Pad.Word() {
+\\ This is for clicking a word
+Rem {
+	Function Pad.Word() {
+		Call Local FindWord(letter$, false)
+	}
+}
+Function HelpPad.Word() {
 	Call Local FindWord(letter$, false)
 }
-
+\\ this work with help
+Function Pad.Help {
+	Read New what$ :Call Local FindWord(what$, true)
+}
+Function Pad.About {
+	Call Local FindWord("ALL", true)
+}
 Function Notepad.InfoClick {
 	Read New X
 	If X=0 Then Call Local Help1.DblClick(0)  ' 0 for first menu item
@@ -5327,6 +5377,7 @@ MODULE INFOBASIC {\\
 \\
 \\
 refresh 10000
+if scale.Y<8000 then window 8, window
 Form 80, 66
 BackGround {height.pixels=ceil(scale.y / twipsY) : width.pixels=ceil(scale.x / twipsX)}
 Print height.pixels
@@ -5344,7 +5395,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 9.2 for ver 9.9 rev 19 and newer"
+	Report " A collection of modules for tests version 9.3 for ver 9.9 rev 21 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -5358,6 +5409,7 @@ Clear ' clear local variables
 title("Modules ?")
 Report {
 	Modules ?    (or control+N, display all loaded modules, If nothing loaded display files)
+	Modules ? "","Print"  (search all loaded modules for those who have Print in any case like PrINt)
 	You can call any module by name, try Info
 	Modules (Show every loaded module, plus files on user folder)
 	}
@@ -5367,8 +5419,8 @@ Pen 15 {
 }
 title("List")
 Report {
-	You can see the global variables, If any exist, defined in console
-	Use statement Clear to clear all variables
+	You can see the global variables, If any exist, defined in console  (write A=10 then press F3 )
+	Use statement Clear to clear all variables (including static variables if any)
 	}
 List
 title("Stack")
@@ -5389,8 +5441,7 @@ Report {
 	Use filename  (use info open another info in another console)
 	Dir to show current directory or Dir user to set current dir to user folder
 	Files "GSB","PRINT|FOR" (search files *.gsb for words PRINT and FOR)
-	Win Dir$ | Win Calc | Win Appdir$
-	End (to exit from console)  
+	Win Dir$ | Win Calc | Win Appdir$ |    	End (to exit from console)  
 	}
 Fkey Clear
 FKey 1,"Saveme ' save all loaded modules"
@@ -5987,7 +6038,10 @@ MODULE TEXTOUT {Module UsingEvents {
       While Not EndStream {Wait 10}
       Wait 100
 }
+oldVolume=Volume
+Volume 100
 UsingEvents
+Volume oldVolume
 }
 MODULE MOVEBUTTON {Declare Form1 Form
 Declare Button1 Button Form Form1
@@ -6247,10 +6301,10 @@ While k {
 }
 MODULE DEMO1 {set Fast !
 smooth on
-Rem : 
- Thread.plan sequential
+Rem :
+ Thread.plan sequential : ComputeInterval=20: Rate=60
 \\ we can set Thread.plan before any thread created
-Rem :  Thread.plan concurrent
+Rem : Thread.plan concurrent : ComputeInterval=30 :Rate=120
 \\ concurrent execute one by one statements
 \\ except those in { }
 \\ also from Revision 52 Part {} as variable works fine with it
@@ -6412,7 +6466,7 @@ Layer Alfa {
       ok1=true
       Thread {
             ok1~
-      } as mm interval 1000/25
+      } as mm interval 1000/50
       tm=0
       Thread {
             static internal=1
@@ -6469,9 +6523,9 @@ Function Alfa.Click {
 if IsWine then
       Thread PlayThis interval 1000/30
 else
-      Thread PlayThis interval 1000/120
+      Thread PlayThis interval 1000/Rate
 end if  
-Thread compute interval 10
+Thread compute interval ComputeInterval
 Wait 200
 Method Alfa, "Show"
 \\ Change Task.Main with Every
@@ -6482,6 +6536,7 @@ Task.Main 50 {
       If ExitNow Then Exit
 }
 Threads Erase
+Thread.plan sequential   ' to default plan
 Wait 100  \ some delay here
 Method Alfa, "CloseNow"
 Declare Alfa Nothing
@@ -7000,7 +7055,18 @@ Sub MakeLayer()
 
 End Sub
 }
-MODULE JSON {' Process data in json format
+MODULE JSON {Pen 15 {
+      Report {
+            Press any key or mouse button to continue the report
+            
+      }
+      Wait 200
+      Report {
+            This is the module list. Look at the end of list. We have the new created modules/functions. These will be erased at the exit of the current modu.le.
+            
+      }
+}
+' Process data in json format
 
 ' we can load from external file with Inline "libName"
 ' or multiple files Inline "file1" && "file2"
@@ -7959,6 +8025,7 @@ end sub
 }
 MODULE FL {\\ Slow,  Fast and Fast !
 \\ Normal is Fast
+Smooth off
 Set Fast !
 Rem Try To unhide this line : Test "flowers"
 N=Random(!123567)
@@ -7988,14 +8055,13 @@ Repeat {
             Py(i)+=Dy((j+i) Mod 100) +my1-my
             Let mx1=mx, my1=my
             Move Px(i),Py(i)
-            \\ M2000 have intresting blocks, like the Witdh { } block, to change line width inside it, or Pen {} block to alter pen color,  Path {} block to alter region, area and fill transparency.
             Width 5 {    \\ setting line width
                   Pen #AA6600  {  \\using colors like html hex values
                         nnn+=kk    
                        kkk=Pi-nnn/Pi
                        For q=Pi/8 To 2*Pi-Pi/8 Step Pi/4 {
                               Move Px(i), Py(i)
-                             Path #FF66FF, abs(m) { curve angle Pi/3+q-kkk, Pz(i)/6,Pi/4+q-kkk,Pz(i),Pi+q-kkk,Pz(i)*2/3 }
+                              Path #FF66FF, abs(m) { curve angle Pi/3+q-kkk, Pz(i)/6,Pi/4+q-kkk,Pz(i),Pi+q-kkk,Pz(i)*2/3 }
                         }
                         Move Px(i),Py(i)
                         Circle Fill #FFAA20, Pz(i)/3
@@ -11436,14 +11502,19 @@ MODULE MAZE2 {Module Maze2 {
       \\ depth-first search
       While Inkey$<>"" {}  ' drop keys
       Const View as boolean=True
-again:
+      Def tc
+
       Form 80,50
-      let w=random(2,6)*10, h=random(1,4)*10, slice=w*h div 60
+again:
+      Gradient 5,6
+      Cursor 0,0
+      let w=random(2,6)*10, h=random(1,4)*10, slice=w*h div 30
       let  slice=if(slice=0->1, slice) : counter =1 
       Double
       \\center proportional text double size
       Report 2, Format$("Maze {0}x{1}",w,h)
       Normal
+      Hold
       Refresh
       Set Fast !
       stack new {
@@ -11466,7 +11537,7 @@ again:
                         if status>0 then
                               status--
                               forchoose=forchoose#val(random(0,status))
-                              if status>0 then Push forchoose
+                              Push forchoose
                               OpenDoor(!Entry, !forchoose)
                               if view then counter=if(counter=0->slice, counter-1) : if counter=0 then ShowMaze()      
                         else
@@ -11477,16 +11548,19 @@ again:
                   if empty then exit
                   Read entry
             Always
-            ShowMaze()
-            Print timecount/1000
+            tc= timecount/1000
       }
+       ShowMaze()
+      Cursor 0,Height-1
+      Print Part $(6,width), ~(15,0,0),"Press a key o rmouse button after any drawing of the maze to exit  - "+format$("{0:3}",tc)
+      Refresh
       counter=10
       every 200 {
             counter--
             if inkey$<>"" or mouse<>0 then counter=-1 : exit
             if counter<1 then exit
       }
-      if counter=0 then goto again
+      if counter=0 then Release : goto again
       End
       Sub NewForChoose(x,y)
             Local x1=x-2, x2=x+2, y1=y-2, y2=y+2, arr=(,)
@@ -11510,7 +11584,9 @@ again:
       End Sub
       Sub ShowMaze()
             Refresh 5000
-            cls ,4  ' split screen - preserve lines form 0 to 3
+Rem            cls ,4  ' split screen - preserve lines form 0 to 3
+            Release
+            cursor 0,(height-h) div 2
             Local i, j, t=40-w div 2
             For j=1 to h+1 { Print @(t) : for i=1 to w+1 {Print maze$(i,j);}:Print}
             Print
@@ -11518,7 +11594,9 @@ again:
       End Sub     
 }
 Maze2
+Cursor 0,0
 keyboard "info"+chr$(13)
+
 }
 MODULE MAZE {Module Maze {
       width% = 40
@@ -12244,6 +12322,450 @@ Module Checkit {
 }
 Checkit
 }
+MODULE LINKED_LIST1 {\\ Second Version
+\\ This example use pointers to groups.
+\\ One class which make Node and Null class inside
+\ \ Head and Tail are private
+
+Module Checkit {
+      Form 80, 50
+      Class LList {
+      Private:
+            Group Head, Tail
+            Class Null {}
+      Public:
+            Property Null {Value}
+            Group GetHead {
+                  Value {
+                        link parent Head to Head
+                        ->Head
+                  }
+            }
+            Group GetTail {
+                  Value {
+                        link parent Tail to Tail
+                        ->Tail
+                  }
+            }
+            Function Node {
+                  Group Ret {
+                        group pred, succ
+                        dat=0
+                        Remove {
+                              Print "destroyed", .dat
+                        }
+                  }
+                  Ret.pred->.[Null]
+                  Ret.succ->.[Null]
+                  if match("N") Then Read Ret.dat
+                   ->(Ret)
+            }
+            Module PushTail(k as pointer) {
+                  if .Tail is .[Null] then {
+                        .Head<=k
+                        .Tail<=k
+                  } else {
+                        n=.Tail
+                        .Tail<=k
+                        k=>pred=n=>pred
+                        n=>pred=k
+                        k=>succ=n
+                  }
+            }
+            Function RemoveTail {
+                  n=.Tail
+                  if n is .Head then {
+                        .Head->.[Null]
+                        .Tail->.[Null]
+                  } Else { 
+                        .Tail<=n=>succ
+                        .Tail=>pred=n=>pred
+                        n=>pred->.[Null]
+                  }
+                  for n, This {
+                        .succ->..[Null]
+                        .pred->..[Null]
+                  }
+                  =n
+            }
+            Module PushHead(k as pointer) {
+                  if .head is .[Null] then {
+                        .Head<=k
+                        .Tail<=k
+                  } else {
+                        n=.head
+                        .head<=k
+                        k=>succ=n=>succ
+                        n=>succ=k
+                        k=>pred=n
+                  }
+            }
+            Function RemoveHead {
+                  n=.Head
+                  if n is .Tail then {
+                        .Head->.[Null]
+                        .Tail->.[Null]
+                  } Else { 
+                      .Head<=n=>pred
+                      .Head=>succ=n=>succ
+                       n=>succ->.[Null]
+                   }
+                  for n, This {
+                        .succ->..[Null]
+                        .pred->..[Null]
+                  }
+                  =n
+            }
+            Module RemoveNode(k as pointer) {
+                  pred=k=>pred
+                  succ=k=>succ
+                  if pred is succ then {
+                        if .head is k else Error "Can't remove this node"
+                        k=.RemoveHead()
+                        clear k
+                  } else {
+                       pred=>succ=succ
+                       succ=>pred=pred 
+                  }
+            }
+            Module InsertAfter(k as pointer, n as pointer) {
+                  pred=k=>pred
+                  n=>pred=pred
+                  n=>succ=k
+                  pred=>succ=n
+                  k=>pred=n
+            }
+            Module DeleteAll {
+                  While not .IsEmpty(){
+                        For This {
+                              A=.RemoveTail()
+                              clear A
+                         }
+                  }                  
+            }
+            Remove {
+                  .DeleteAll
+            }
+            Function IsEmpty {
+                  = .Head is .[Null] or .tail is .[Null]
+            }
+      class:
+            Module LList {
+                  .[Null]->.Null()
+                  .Head->.[Null]
+                  .Tail->.[Null]
+            }
+      }
+
+      L=LList()
+      Null=L.Null
+      m->L.Node(100)      
+      L.PushTail m
+      If not L.GetHead is Null then Print L.GetHead=>dat=100
+      for i=101 to 103 {
+            m->L.Node(i)
+            L.PushTail m
+            Print "ok....", i
+      }
+      for i=104 to 106 {
+            m->L.Node(i)
+            L.PushHead m
+            Print "ok....", i
+      }
+ 
+      Print "Use Head to display from last to first"
+      m=L.GetHead
+      do {
+            Print m=>dat
+            m=m=>pred
+      } Until m is Null
+      Print "ok, now find 3rd and remove it"
+      m1=L.GetHead
+      i=1 
+      Index=3
+      While i<Index {
+            if m1 is Null then exit
+            m1=m1=>pred
+            i++
+      }
+      If i<>Index then {
+            Print "List has less than "; Index;" Items"
+      } Else {
+            Print "First add one new node"
+                  newNode->L.Node(1000)
+                  L.InsertAfter m1, newNode
+                  L.RemoveNode m1
+                  clear m1  ' last time m1 used here
+                  newNode=Null
+            Print "ok.............."
+      }
+      Print "Use Tail to display from first to last"
+      m=L.GetTail
+      do {
+            Print m=>dat
+            m=m=>succ
+      } Until m is Null
+ 
+      If rnd<.5 Then 
+      useother=True
+      While not L.IsEmpty(){
+            For This {
+                  \\ we have to use a temporary variable name, here A
+                         A=If(useother->L.RemoveTail(),L.RemoveHead())
+                         ? A=>dat
+                        useother~
+                        \\ now we can try to perform removing
+                        clear A
+             }
+      }
+      Else
+      L.deleteAll
+      End if
+      Print "list is empty:"; If$(L.IsEmpty()->"Yes","No")
+      mm=0
+      for i=50 to 80 {
+            m->L.Node(i)
+            L.PushTail m
+           mm++
+      }
+      m->Null
+      Print "Added ";mm; " nodes"
+      Push Pointer((L))
+}
+Checkit
+Stack
+Print "Press a key for phase 2"
+Print "now Linked_list is a pointer to a group object"
+Push key$ : Drop
+Read Linked_List
+Null=Linked_List=>Null
+m=Linked_List=>GetHead
+While not m is Null
+	Print m=>dat
+	m=m=>pred
+End While
+List
+\\ we have to use Clear. Clear act only if the pointer is the last one.
+\\ Then Linlked_List Remove do a Clear for each node. If we didn't use any extenal pointer for these we get all destroyed.
+Clear Linked_list, Null, m
+Print " now all variables aren't pointers. They have an empty group"
+List
+}
+MODULE LINKED_LIST2 {
+\\ Greek Version for Linked_list1
+Τμήμα ΔεςΤο {
+      Φόρμα 80, 50
+      Κλάση Συνδεδεμένη_Λίστα {
+      Ιδιωτικό:
+            Ομάδα Κεφαλή, Ουρά
+            Κλαση Κανένα {}
+      Δημόσιο:
+      ιδιότητα  Κανένα {Αξία}
+            Συνάρτηση Κόμβος {
+                  Ομάδα Επ {
+                        Ομάδα πίσω, μπροστά
+                        δεδομένο=0
+                        Διαγραφή {
+                              Τύπωσε "καταατράφηκε", .δεδομένο
+                        }
+                  }
+                 επ.πίσω->.[Κανένα]
+                 επ.μπροστά->.[Κανένα]
+                 Αν Ταύτιση("ν") Τότε Διάβασε επ.δεδομένο
+                 ->(επ)
+            }
+            Ομάδα Κόμβος_Κεφαλής {
+                  Αξία {
+                     Ένωσε γονικό Κεφαλή στη Κεφαλή
+                     =Κεφαλή
+                  }
+            }
+            Ομάδα Κόμβος_Ουράς {
+                  Αξία {
+                        Ένωσε γονικό Ουρά στη Ουρά
+                        =Ουρά
+                  }
+            }
+            Τμήμα ΒάλεΣτηνΟυρά (κ ως δείκτης) {
+                  Αν .Ουρά Είναι .[Κανένα] Τότε {
+                        .Κεφαλή<=κ
+                        .Ουρά<=κ
+                  } Αλλιώς {
+                        ν=.Ουρά
+                        .Ουρά<=κ
+                        κ=>πίσω=ν=>πίσω
+                        ν=>πίσω=κ
+                        κ=>μπροστά=ν
+                  }
+            }
+            Συνάρτηση ΑφαίρεσηΟυράς {
+                  ν=.Ουρά
+                  Κανένα=.[Κανένα]
+                  Αν ν Είναι .Κεφαλή Τότε {
+                        .Κεφαλή->Κανένα
+                        .Ουρά->Κανένα
+                  } Αλλιώς { 
+                        .Ουρά<=ν=>μπροστά
+                        .Ουρά=>πίσω=ν=>πίσω
+                        ν=>πίσω->Κανένα
+                  }
+                  Για ν {
+                        .μπροστά->Κανένα
+                        .πίσω->Κανένα
+                  }
+                  =ν
+            }
+            Τμήμα ΒάλεΣτηΚεφαλή (κ ως δείκτης) {
+                  Αν .Κεφαλή Είναι .[Κανένα] Τότε {
+                        .Κεφαλή<=κ
+                        .Ουρά<=κ
+                  } Αλλιώς {
+                        ν=.Κεφαλή
+                        .Κεφαλή<=κ
+                        κ=>μπροστά=ν=>μπροστά
+                        ν=>μπροστά=κ
+                        κ=>πίσω=ν
+                  }
+            }
+            Συνάρτηση ΑφαίρεσηΚεφαλής {
+                  ν=.Κεφαλή
+                  Κανένα=.[Κανένα]
+                  Αν ν Είναι .Ουρά Τότε {
+                        .Κεφαλή->Κανένα
+                        .Ουρά->Κανένα
+                  } Αλλιώς { 
+                      .Κεφαλή<=ν=>πίσω
+                      .Κεφαλή=>μπροστά=ν=>μπροστά
+                       ν=>μπροστά->Κανένα
+                   }
+                  Για ν, Αυτο {
+                        .μπροστά->Κανένα
+                        .πίσω->Κανένα
+                  }
+                  =ν
+            }
+            Τμήμα ΑφαίρεσηΚόμβου(κ ως δείκτης) {
+                  πίσω=κ=>πίσω
+                  μπροστά=κ=>μπροστά
+                  Αν πίσω Είναι μπροστά Τότε {
+                        Αν .Κεφαλή Είναι κ Αλλιώς Λάθος "Δεν μπορώ να διαγράψω αυτό το Κόμβο"
+                        κ=.ΑφαίρεσηΚεφαλής()
+                        Καθαρό κ
+                  } Αλλιώς {
+                       πίσω=>μπροστά=μπροστά
+                       μπροστά=>πίσω=πίσω 
+                  }
+            }
+            Τμήμα ΒάλεΕδώ (κ ως δείκτης, ν ως δείκτης) {
+                  πίσω=κ=>πίσω
+                  ν=>πίσω=πίσω
+                  ν=>μπροστά=κ
+                  πίσω=>μπροστά=ν
+                  κ=>πίσω=ν
+            }
+            Συνάρτηση Είναι_Άδειο {
+                  = .Κεφαλή Είναι .[Κανένα] ή .Ουρά Είναι .[Κανένα]
+            }
+            Τμήμα ΔιέγραψεΛίστα {
+                   Ενώ Όχι .Είναι_Άδειο(){
+                        Για Αυτό {
+                               Α=.ΑφαίρεσηΚεφαλής()
+                               Καθαρό Α
+                        }
+                  }
+            }
+            Διαγραφή {
+                  .ΔιέγραψεΛίστα
+            }
+      Κλάση:
+            Τμήμα Συνδεδεμένη_Λίστα {
+                  .[Κανένα]->.Κανένα()
+                  .Κεφαλή->.[Κανένα]
+                  .Ουρά->.[Κανένα]
+            }
+      }
+      Λ=Συνδεδεμένη_Λίστα()
+      Κανένα=Λ.Κανένα
+      π->Λ.Κόμβος(100)
+      Λ.ΒάλεΣτηνΟυρά π
+      Αν Όχι Λ.Κόμβος_Κεφαλής Είναι Κανένα Τότε Τύπωσε Λ.Κόμβος_Κεφαλής=>δεδομένο=100
+      Για Ι=101 Έως 103 {
+            π->Λ.Κόμβος(Ι)
+            Λ.ΒάλεΣτηνΟυρά π
+            Τύπωσε "Στην Ουρά.....", Ι
+      }
+      Για Ι=104 Έως 106 {
+            π->Λ.Κόμβος(Ι)
+            Λ.ΒάλεΣτηΚεφαλή π
+            Τύπωσε "Στη Κεφαλή....", Ι
+      }
+      Τύπωσε "Χρήση του Λ.Κόμβος_Κεφαλής για να δείξουμε από τη Κεφαλή ως την Ουρά"
+      π=Λ.Κόμβος_Κεφαλής
+      ΜΜ=1
+      Επανέλαβε {
+            Τύπωσε ΜΜ, π=>δεδομένο
+            ΜΜ++
+            π=π=>πίσω
+      } Μέχρι π Είναι Κανένα
+      Τύπωσε "εντάει, τώρα βρές το τρίτο και διέγραψέ το"
+      μ1=Λ.Κόμβος_Κεφαλής
+      Ι=1 
+      δεικτ1=3
+      Ενώ Ι<δεικτ1 {
+            Αν μ1 Είναι Κανένα Τότε Έξοδος
+            μ1=μ1=>πίσω
+            Ι++
+      }
+      Αν Ι<>δεικτ1 Τότε {
+            Τύπωσε "Η λίστα έχει λιγότερα από "; δεικτ1;" στοιχεία"
+      } Αλλιώς {
+            Τύπωσε "Πρώτα θα βάλουμε ένα νέο Κόμβο"
+                 Νέος_Κόμβος->Λ.Κόμβος(1000)
+                  Λ.ΒάλεΕδώ μ1, Νέος_Κόμβος
+                  Λ.ΑφαίρεσηΚόμβου μ1
+                  Καθαρό μ1
+                  Νέος_Κόμβος=Κανένα
+      }
+      Τύπωσε "Χρήση του Λ.Κόμβος_Κεφαλής για να δείξουμε από τη Κεφαλή ως την Ουρά"
+      ΜΜ=1
+      π=Λ.Κόμβος_Κεφαλής
+      Επανέλαβε {
+            Τύπωσε ΜΜ, π=>δεδομένο
+            ΜΜ++
+            π=π=>πίσω
+      } Μέχρι π Είναι Κανένα
+      Τύπωσε "Χρήση του Λ.Κόμβος_Ουράς για να δείξουμε από την Ουρά ως τη Κεφαλή"
+      π=Λ.Κόμβος_Ουράς
+      Επανέλαβε {
+            ΜΜ--
+            Τύπωσε ΜΜ, π=>δεδομένο
+            π=π=>μπροστά
+      } Μέχρι π Είναι Κανένα
+      Λ.ΔιέγραψεΛίστα
+      Για Ι=50 Έως 80 {
+            π->Λ.Κόμβος(Ι)
+            Λ.ΒάλεΣτηΚεφαλή π
+      }
+      Βάλε Δείκτης((Λ))
+}
+ΔεςΤο
+Σωρός
+Τύπωσε "Φάση 2, η Λίστα έχει παραδοθεί με 30 κόμβους"
+Τύπωσε "Πάτα ένα πλήκτρο"
+Βάλε ΚΟΜ$ : Πέτα
+Διάβασε Κ
+Κανένα=Κ=>Κανένα
+π=Κ=>Κόμβος_Ουράς
+Επανέλαβε
+      Τύπωσε π=>δεδομένο
+      π=π=>μπροστά
+Μέχρι π Είναι Κανένα
+Λίστα
+Καθαρό Κ, π, Κανένα
+Λίστα
+Τύπωσε "Οι τρεις μεταβλητές τώρα δείχνουν μια κενή ομαδα (Group), ενώ πριν είχαν δείκτες σε ομάδες"
+
+}
 MODULE LZW {Module FastM2000 {
       plaintext$="TOBEORNOTTOBEORTOBEORNOT"
       Function encodeLZW$(i$) {
@@ -12476,18 +12998,15 @@ checkit
 MODULE PERMALL {Module Checkit {
       Global a$
       Document a$
-      Module Permutations (s){
+      Module Permutations (s as array){
             Module Level (n, s, h)   {
                   If n=1 then {
-                        while Len(s) {
-                              m1=each(h)     
-                              while m1 {
-                                    Print Array$(m1);" ";
-                              }
-                               Print Array$(S)
-                               ToClipBoard()
-                               s=cdr(s)
-                         }
+                        m1=each(h)     
+                        while m1 {
+                              Print Array$(m1);" ";
+                        }
+                         Print Array$(S)
+                         ToClipBoard()
                   } Else {
                         for i=1 to len(s) {
                               call Level n-1, cdr(s),  cons(h, car(s))
@@ -12505,7 +13024,7 @@ MODULE PERMALL {Module Checkit {
                         a$<=b$   ' assign to global need <=
                   End Sub
             }
-            If len(s)=0 then Error 
+            If len(s)=0 then Error "No items to make permutations"
             Head=(,)
             Call Level Len(s),  s, Head
       }
@@ -12519,12 +13038,14 @@ MODULE PERMALL {Module Checkit {
 Checkit
 }
 MODULE PERMSTEP {Module StepByStep {
-      Function PermutationStep (a) {
+      Function PermutationStep (a as array) {
+            \\ a in this c1 has only one item (so we remove the car(a) and place just the a)
             c1=lambda (&f, a) ->{
-                  =car(a)
+                  =a
                   f=true
             }
             m=len(a)
+            if m=0 then Error "No items to make permutations"
             c=c1
             while m>1 {
                   c1=lambda c2=c,p, m=(,) (&f, a) ->{
@@ -13953,9 +14474,11 @@ MODULE PYTH1 {MODULE Pythagoras_Example{
 		CALL pythagoras_tree r, t, 1
 	}
 	r=PI/3
-	pixels=100
-	center_p r, 100*TWIPSX
-	center_p r+PI, 100*TWIPSX
+	pixels=MIN.DATA(SCALE.X, SCALE.Y)/TWIPSX/8
+	Refresh 1000/25
+	center_p r, pixels*TWIPSX
+	center_p r+PI, pixels*TWIPSX
+	Refresh 50
 	CopyImageToClipboard()
  
 	Sub CopyImageToClipboard()
@@ -15836,8 +16359,8 @@ function eertree(s$) {
             Do {
                  k=tree(n).length
                  b=i-k-1
-                  if b>=0 then if mid$(s$,b+1,1)=c$ Then exit
-                  n =tree(n).suffix  
+                 if b>=0 then if mid$(s$,b+1,1)=c$ Then exit
+                 n =tree(n).suffix  
             } Always
             e=tree(n).edges(c$)
             if e>=0 then suffix=e :continue
@@ -15885,6 +16408,7 @@ Palindromes$=Lambda$ children, aString, aLine (Tree)-> {
  }
  
 Print Palindromes$(eertree("eertree"))
+Print Palindromes$(eertree("banana"))
 }
 MODULE COMMON {thread.plan sequential   ' can run as concurrent too
 linespace twipsY*2
@@ -16151,14 +16675,14 @@ MODULE BOOK {Class Book {
       \\ we use a class part, which means a part that exist only at contruction time
 Class:
       Module Book (a$, b$, c as decimal, d as boolean) {
-\\ we use fresh variables to catch a missin value
+      \\ we use fresh variables to catch a missin value
             .title$<=a$
             .des$<=b$
             .price<=c
             .pback<=d
+      }
 }
-}
-m=Book("a","b", 10, true)
+m=Book("a","b", 10, True)
 Rem z=m.price
 Rem Print type$(z)="Decimal"
 try ok {
@@ -16186,42 +16710,41 @@ Public:
 
       }
 }
-group PrintTitle {
+Group PrintTitle {
       function final processBook(AnyBook) { Report format$("    {0}", AnyBook.title$)} 
 }
-group PriceTotaller {
+Group PriceTotaller {
       items, total
       function final processBook(AnyBook) {.items++ :  .total+=AnyBook.price }
-      \\  look the <= operator, if we use = then we define local variables. Items and total are like global but for group only
+      \\  look the <= operator, if we use = then we define local variables. Items and total are like global but for Group only
       module final zero { .total<=0 : .items<=0   }
       function final AveragePrice { if .items>0 then =.total/.items }
 }
 bookDB=bookDB()
-report "First Book DB"
+Report "First Book DB"
 
-      bookDB.AddBook Book("The C Programming Language",  "Brian W. Kernighan and Dennis M. Ritchie", 19.95, true)
-      bookDB.AddBook Book("The Unicode Standard 2.0",  "The Unicode Consortium", 39.95, true)
-      bookDB.AddBook Book("The MS-DOS Encyclopedia", "Ray Duncan", 129.95, false)
-      bookDB.AddBook Book("Dogbert's Clues for the Clueless", "Scott Adams", 12.00, true)
+      bookDB.AddBook Book("The C Programming Language",  "Brian W. Kernighan and Dennis M. Ritchie", 19.95, True)
+      bookDB.AddBook Book("The Unicode Standard 2.0",  "The Unicode Consortium", 39.95, True)
+      bookDB.AddBook Book("The MS-DOS Encyclopedia", "Ray Duncan", 129.95, False)
+      bookDB.AddBook Book("Dogbert's Clues for the Clueless", "Scott Adams", 12.00, True)
       bookDB.ProcessPaperbackBooks &PriceTotaller
-      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      Report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
       bookDB.ProcessPaperbackBooks &PrintTitle
 
-report "Second Book DB"    \\report prints text  proportionally with justifiation
+Report "Second Book DB"    \\Report prints text  proportionally with justifiation
 PriceTotaller.zero
 SecondbookDB=bookDB()
 
-      SecondbookDB.AddBook Book("Any Big Big and Big Tilte",  "Any Author", 3.45, true)
+      SecondbookDB.AddBook Book("Any Big Big and Big Tilte",  "Any Author", 3.45, True)
       SecondbookDB.ProcessPaperbackBooks &PriceTotaller
-      report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
+      Report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
       SecondbookDB.ProcessPaperbackBooks &PrintTitle
 }
-MODULE BOOK1 {booktype$={
+MODULE BOOK1 {prototype {
       local countme=0
       dim t$(), a$(), p(), pb()
       function AddBook {
-
-                   for this {
+            for this {
                   newdim =.countme+1
                   dim .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
                   read .t$(.countme), .a$(.countme), .p(.countme), .pb(.countme)
@@ -16230,12 +16753,12 @@ MODULE BOOK1 {booktype$={
       }
       module ProcessPaperbackBooks {
             read &ProcessBookDelegate 
-                        if .countme<1 then exit
-                        for i=0 to .countme-1 {  
-                              if .pb(i) then call  ProcessBookDelegate.processBook(&this, i) 
-                        }
+            if .countme<1 then exit
+            for i=0 to .countme-1 {  
+                  if .pb(i) then call  ProcessBookDelegate.processBook(&this, i) 
+            }
       }
-}
+} as booktype$
 group PrintTitle {
       function processBook { read &AnyBook, i : Report format$("    {0}", AnyBook.t$(i) )} 
 }
@@ -16267,7 +16790,7 @@ for SecondbookDB {
       call .ProcessPaperbackBooks &PrintTitle
 }
 }
-MODULE BOOK2 {Class BookDB {
+MODULE BOOK2 {class BookDB {
       countme=0
       dim t$(), a$(), p(), pb()
       module AddBook {
@@ -16391,7 +16914,7 @@ SecondbookDB=bookDB()
       SecondbookDB.AddBook Book("Any Big Big and Big Tilte",  "Any Author", 3.45, true)
       SecondbookDB.ProcessPaperbackBooks &PriceTotaller
       report  "Average Paperback Book Price: $" + str$(PriceTotaller.AveragePrice(),"#.##")
-PointerA->SecondbookDB
+      PointerA->SecondbookDB
       PointerA=>ProcessPaperbackBooks &PrintTitle
 \\ PointerA is not a real pointer. Is a weak pointer to a non float group.
 }
@@ -16959,11 +17482,10 @@ Function Notepad.InfoClick {
 	If X=0 Then Call Local Help1.DblClick(0)  ' 0 for first menu item
 }
 Call Local Notepad.Resize()
-\\ open As moda
-Title title$, 0
+\\ open As modal
+Title "", 0
 Call local cs_choose()
 Call Local Bright()
-\\After 100 {Title "", 0}
 Method NotePad,"Show" , 1
 Declare Pad Nothing
 Declare NotePad Nothing 
@@ -18430,11 +18952,11 @@ Win Quote$(Dir$+FL$)
 }
 MODULE CHANGEHELP {
 if not exist(appdir$+"HELP2000.mdb") then {
-	Report {You have to place in appdir$ the HELP2000.mdb
-		Also you may install Access2007 runtime
-		After edit the help file, use Swicth "+mdb" to use mdb file for help
-	}
-	break
+      Report {You have to place in appdir$ the HELP2000.mdb
+            Also you may install Access2007 runtime
+            After edit the help file, use Swicth "+mdb" to use mdb file for help
+      }
+      break
 }
 Base 0  \\ for arrays
 Font "Arial"
@@ -19918,7 +20440,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<19 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<21 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -19928,7 +20450,8 @@ Player 0  ' erase any layer
 \\ Form ! 100,66
 
 }
-MODULE DOWN4 {module OpenHtml (filename$){
+MODULE DOWN4 {thread.plan concurrent 'sequential
+module OpenHtml (filename$){
 	\\ call m2000.exe and then load info without executing commands, and then execute htmleditor passing the filename
 	\\ and last an End command to end the program
 	win appdir$+"m2000.exe","{{load modules info : htmleditor {"+filename$+"}: end}}"
@@ -20018,11 +20541,15 @@ refresh
 m=row
 cls,m
 kk=0
+\\ we use a block in thread so concurrent not happen for each statement in thread but all statements in block executed in once
 thread {
+{
 	cursor 0, m
 	print kk
 	kk++
 	m=row
+
+}
 } as mm interval 10
 While w
 	cursor 0,2
@@ -20048,16 +20575,20 @@ declare form1 nothing
 if exist("m2000.html") then
 	if filelen("m2000.html")>0 then
 		ok=false
-		if Ask("Open m2000.html in htmlEdtitor, as other process?")=1 then ok=true : Print "wait and then use ctrl+tab to get the htmleditor window"
+		if Ask("Open m2000.html in htmlEdtitor, as other process?")=1 then ok=true 
 		if Ask("Open m2000.html in console text editor?")=1 then
-		if ok then After 500 {openhtml "m2000.html"}
-		Edit "m2000.html", 1
+			if ok then After 500 {openhtml "m2000.html"}: Mes()
+			Edit "m2000.html", 1
 		else
-		openhtml "m2000.html"
+			if ok then After 50 {openhtml "m2000.html"}: Mes()
 		end if
 		
 	end if
 end if
+Sub Mes()
+	Print "wait and then use ctrl+tab (or maybe not use it) to get the htmleditor window"
+	Wait 100
+End Sub
 }
 MODULE CHESSGAME {\\ George Karras, 2019
 \\ Chess Example (a big one)
@@ -21105,21 +21636,21 @@ Report s$
 }
 MODULE COMBO1 {\\ module Au is like this with less controls
 
-about call { 
+about call {
       select case about$ 
       case "is a big name here"
-            about  "Title: is a big name here", 8000,6000,"that [is a big name here] easy [too]"
+            about "Title: is a big name here", 8000,6000,"that [is a big name here] easy [too]"
       else
-            about  "Title: too", 8000,6000,"that [is a big name here] easy"+about$
+            about "Title: too", 8000,6000,"that [is a big name here] easy"+about$
       end select
 }
 
 declare form1 form
 With form1, "Width" as form1.Width, "Height" as form1.Height
 layer Form1 {
-	window 12, 8000,6000;
-	cls #202020
-	max_x=scale.x
+      window 12, 8000,6000;
+      cls #202020
+      max_x=scale.x
 }
 
 declare combo1 combobox form form1
@@ -21174,16 +21705,16 @@ Function but1.click {
       } as mono
 }
 function form1.resize {
-	layer form1 {
-		if form1.width<max_x then form1.width=max_x
-		if form1.height<4000 then form1.height=4000
-		move form1.Width, form1.Height  
-		cls
-		local oldi=italic
-		italic 1
-		Legend "Use Ctrl+F1 in textboxes","Courier",8,0,1
-		italic oldi
-	}
+      layer form1 {
+          if form1.width<max_x then form1.width=max_x
+          if form1.height<4000 then form1.height=4000
+          move form1.Width, form1.Height  
+          cls
+          local oldi=italic
+          italic 1
+          Legend "Use Ctrl+F1 in textboxes","Courier",8,0,1
+          italic oldi
+    }
 }
 Call Local form1.resize()
 function form1.unload {
@@ -21198,15 +21729,15 @@ function text1.about {
       about show ""
 }
 Function combo1.dblclick {
-        text1.text$=combo1$
-        title$=combo1$
-        if find(title$)= -1 then {
-         method combo1,"additem",title$ 
-         Method combo1,"Sort"
-         listindex=find(title$)
-         }
-         combo1$=combo1$
-          Method text1,"GetFocus"
+      text1.text$=combo1$
+      title$=combo1$
+      if find(title$)= -1 then {
+            Method combo1,"additem",title$ 
+            Method combo1,"Sort"
+            listindex=find(title$)
+      }
+      combo1$=combo1$
+      Method text1,"GetFocus"
 }
 Function combo1.click {
       if listindex>=0 then  text1.text$=list$(listindex)
@@ -21851,6 +22382,7 @@ Main.Task 1000/4 {
 	if critical>40 or keypress(1) then exit
 }
 threads erase
+thread.plan sequential
 Clipboard Doc$
 }
 Dining_philosophers Random(1,2)
@@ -21890,11 +22422,11 @@ Title("2. Sort Ascending First Column")
 sort A(),1, max, 1,0
 R=20
 Gosub 200
-Title("3. Sort Ascending Second And Third Column, first Ascending")
+Title("3. Sort Ascending Second, Third and First")
 sort A(),1, max, 2,0,3,0,1,0
 R=40
 Gosub 200
-Title("4. Sort Columns Third Descending, Second Ascending, first Ascending")
+Title("4. Sort Columns Third Descending, Second Ascending, First Ascending")
 sort A(),1, max, 3,1,2,0,1,0
 R=60
 Gosub 200
@@ -21948,15 +22480,16 @@ mw=Size.X(m$,fn$, sz)
 m1=0
 m2=mw
 my=Scale.y/2-Size.Y("Α", fn$, sz)/2
-ms=twipsX
-t=10
+ms=twipsX*3
+t=2
 Cls
 Gradient 4, 12
 if module(ico) then ico 0 : Read ico
 Hold
 Font Fn$
 Pen 14
-Every 1000/60{
+refresh 500
+Every 1000/25{
 D=Mouse
 If Inkey$<>"" Then
       Exit
@@ -21972,7 +22505,7 @@ Else
                   Legend m$, fn$, sz
             End If
       }
-      If D=4 Then t=1 Else.If D=1 Then t++ Else.If D=2 Then t-=Αν(t>1->1,0)
+      If D=4 Then t=2 Else.If D=1 Then t+=1 Else.If D=2 Then t-=Αν(t>2->1,0)
       m1-=ms*t
       m2-=ms*t
       If m2<0 Then m1=m2+mw: Swap m1, m2
@@ -21980,14 +22513,339 @@ Else
             Move  if(keypress(4)->mouse.x,  twipsX*5),0
             Image ico, scale.x/width*5  ' (twips/character)
       end if
-      Refresh 5000
+      Refresh
 End If
 }
+set fast
 Cls 11
 }
-\\Window 12,0
+Window 12,0
 \\Show
 Escape On
 keyboard "info"+chr$(13)
+}
+MODULE ZONES {zones=time()
+m=each(zones)
+Menu ' empty menu list
+while m
+      menu + eval$(m!)
+End While
+Print "choose a time zone:";
+\\ now open the menu
+Menu !
+
+if menu then
+      Pen 15 {Print menu$(menu)}
+      Print "From UTC: ";zones(menu$(menu))
+      Print "UTC time: ";time$(time("utc"),1033, "Long Time")
+      Print menu$(menu);": ";time$(ctime(time("utc"), zones(menu$(menu)),0,0),1033, "Long Time")
+      Print "Current OS system time zone: ";
+      Pen 15 {Print time$()}
+End If
+}
+MODULE WIND4 {\\ An old example, new revision.
+Thread.plan sequential
+Global Caption$="M2000 THREAD-INPUT-HANDLE WINDOW"
+Title caption$
+puticon=false
+If module(ico) Then
+ico 0
+read m2000
+puticon=true
+End If
+dim label$(6)
+label$(1)="Basic style Input for input a number", "Field Input - Work the INS key","One line transparent textbox, cut, copy, paste, drag/drop, no menu","Multi line textbox with menu (press esc to exit from editor)","Multi line for documents with transparent background (press Esc to exit from editor)"
+Example=random(1, 5)
+Global messrow
+Escape Off
+Global STATE=0, EXITNOW as boolean=false
+module global mayexit {
+	EXITNOW<=True
+	Try {field new 99: input End }
+	beep
+}
+window.size=random(7,9)
+Hide  \\ prepare Window
+Window 10,0  \\ center full size 10pt letters
+global abX=scale.x/2, abY=scale.y/2,  cur$, prev$
+About ! "Wind4 Module", abX, abY, {
+	This is the help file
+}
+ABout Call {
+	cur$=About$
+	Select case cur$
+	case "Esc"
+	{ ' use block for more than one line after case	
+		About "Text Editing -  Esc", abX, abY, {
+			Just press the Escape key to exit editor
+		}+If$(prev$<>""->"["+prev$+"]","")
+		prev$<=cur$
+	}
+	case "shift F10"
+	{ ' use block for more than one line after case
+		About "Text Editing -  Shift F10", abX, abY, {
+			You can use right mouse click, on editor's text area or left on header.
+			Also you scroll the menu to see all options.
+		}+If$(prev$<>""->"["+prev$+"]","")
+		prev$<=cur$
+	}	
+	case "", "top"
+	{
+		About "Text Editing", abX, abY, {
+		Use [Esc] to exit
+		use [shift F10] for context menu
+		Threr are some combinations with shift for:
+		F2, F3, F4, F5, F9, F10, F12
+		}+If$(prev$<>""->"["+prev$+"]","")
+		prev$<="top"
+	}
+	end select
+}
+Window random(9,14) , scale.x*.1*window.size, scale.y*.1*(window.size-1);  \\centered - random font size
+Form 60, 24
+Form   
+Cls 15,0      \\white bacground - no Split screen
+Gradient 0,9  \\ two colors gradient
+Move 0,0
+Fill scale.x,scale.y/height-25,7,6,0  \\Gradient fill to Window caption
+Pen #FF7766
+\\ Targets are from earlier versions - but works fine
+\\ This is the windows caption. We change only a variable.
+\\ Targets works with globals.
+Pen 14 {
+      Target A,"STATE++",width-2,1,,,5,caption$
+}
+
+Print @(width-2,0);
+Pen 15
+Let IamOut=False
+Let kk=0, MayStart=False
+\\ This is a second target, the X in the right corner
+\\ when we click on it system call mayexit global module
+Target b, {Title caption$,0} ,1,1,6,,5,"_"
+If puticon Then
+	Move twipsx*2, twipsy*2
+	Image m2000, scale.x/width*1.5
+End If
+Print @(width-1,0);
+Target C, "mayexit" ,1,1,6,,5,"X"
+Pen 15
+Print @(4,1);  \\ like Cursor
+Report {This is console as Window by software. We use targets for title and  buttons "_" and  "X" in the right top corner. You can Move the window. Console not support events for user. We can scan targets, using Scan statement. Threads run in background  when we use an input method (one of five options).
+Press some keys and then the return key. Exit by clicking the X in the right up corner.}, width-6
+aa$=Field$("",10)  \\ for second example - change gosub
+If pos>0 Then print
+Let messrow=row   \\ we can use Let instead of messrow<=row+1
+Scroll Split  row+1
+Pen 0
+Refresh 40
+threads erase
+Thread {
+	scan 0.01 : thread this interval 10  \\ repait interval
+	Layer {Cursor 0,messrow : Print  Over  : Print Part ~(0),"waiting..." , kk }
+} as LL : Thread LL interval 10
+Scroll Split 1
+Thread  {   \\ this thread used for moving the Window
+	Layer {
+		Cursor 0,messrow+1 : Print  Over $(4), ~(0, 15), "MOVING"
+		Motion.W Motion.XW-MX+Mouse.X,Motion.YW-MY+MOUSE.Y
+		If Mouse=0 Then {
+			Mouse.icon 1
+			STATE<=0: Cursor 0,messrow+1
+			Print  Over $(4), ~(0, 15), "HOLD": REFRESH
+			After 30  {
+			Try {Cursor 0,messrow+1 : Print  Over  $(9), ~(0,15), Label$(Example)}
+			}
+			Thread this hold
+		}
+	}
+} As Moveme
+Thread moveme hold  \\ not started yet
+Thread moveme interval 100  \\ we set an interval
+MayStart<=True
+
+
+\\ main thread here
+Main.Task 10 {
+	kk++
+	If MayStart Then
+		A$=Inkey$
+		If A$<>"" Then 
+			Layer {
+				Cursor 0,messrow+1 : Print  Over  $(9), ~(0,15), Label$(Example)
+				MayStart~: keyboard A$
+			}
+			Select Case Example
+			Case 1
+				gosub OpenField()
+			Case 2
+				gosub OpenField1()
+			Case 3
+				gosub OpenField2()
+			Case 4
+				gosub OpenField3()
+			Else Case
+				gosub OpenField4()
+			End select
+		End If
+	End If
+	If iamout Then iamout~: Cursor 0,messrow+1 :  Print  Over $(4), ~(0, 15),"You press escape..."  
+	If STATE=1 Then 
+		Mouse.icon 5
+		Cursor 0,messrow+1 : Print  Over $(4), ~(0, 15), "START MOVING"
+		MX=Mouse.X:MY=Mouse.Y   \\ setup now position
+		Thread moveme restart  \\here we restart thread
+		STATE++   \\ and we closed this If
+	End If
+	If exitnow Then exit
+}
+wait 1000
+threads erase 
+targets new
+Cursor 0,messrow+1 : Print  Over $(4), ~(0, 15), "End.."
+Cls #72ff77, messrow+3   \\Split screen from 7 (8th line)
+Cls
+Cursor 0, row-1
+Print Over $(6), ~(15,0,0), "Just press  F1 to choose another input  or press F3 for info"
+Fkey 1, "Wind4"
+Fkey 3,  "info"
+Escape On
+About Call ""
+About ! ""
+Sub OpenField()
+	After 10 {    \\ this is an automatic thread, for one time, After 10 miliseconds
+		Layer {
+			Cursor 10,10
+			for i=1 to 4 : Print Over : Pen 15 { Print under } : next
+			Cursor 10,10
+			A=0
+			Try {Input "Number:", A}
+			If exitnow Then exit
+			Cursor 0,messrow+2 : Print  Over "Field:";A
+			MayStart=True 
+		}
+	}
+End Sub
+Sub OpenField1()     \\this is an alternative by using Field
+	After 10 {
+		Layer {
+			Field 10,10,10 AS aa$
+			If Field=99 Then
+				IamOut=True : aa$=""
+				Field New   \\ Clear feedback from Field statement.
+				A$=Inkey$
+			Else
+				Cursor 0,messrow+2 : Print  Over "Field:";aa$ : aa$=""
+			End If
+			MayStart=True
+			If exitnow Then exit
+		}
+	}
+End Sub
+Sub OpenField2() 
+	After 10 {
+		Layer {
+			Cursor 10,10
+			aa$=inkey$
+			If aa$<" " Then aa$=""
+			Pen 14 { input ! aa$, 10 len=30}
+			If exitnow Then exit
+			If Field<>99 Then Cursor 0,messrow+2 : Print  Over "Field:";aa$ : aa$=""
+			Field New
+			MayStart=True       
+		}
+	}
+End Sub
+Sub OpenField3() 
+	After 10 {
+		Layer {
+			Cursor 10,10
+			Clear aa$
+			aa$=inkey$
+			If asc(aa$)<32 Then aa$=""
+			input ! aa$, 20, 8,"Input", len(aa$)+1
+			If exitnow Then exit            
+			document aa$  \\ upgrade to document
+			Cursor 0,messrow+2 : Print  Over "Field:";paragraph$(aa$,1) : aa$=""
+			MayStart=True       
+		}
+	}
+End Sub
+Sub OpenField4() 
+	After 10 {
+		Layer {
+			Cursor 10,10
+			Clear aa$
+			Document bb$=""  \\ this is a new variable, but not for Sub, Sub ends before this thread run.
+			bb$=inkey$
+			If asc(bb$)<32 Then Clear bb$
+			Scroll Split 10
+			Pen 11 {
+				Edit.Doc bb$, 2,,Pen
+			}
+			If exitnow Then exit
+			Cursor 0,messrow+2 : Print  Over "Field:";paragraph$(bb$,1) 
+			Clear bb$
+			MayStart=True
+		}
+	}
+End Sub
+}
+MODULE WRITEWITH {Report {
+	Write With  stringsep$, decimalse$ [, [JsonFlag], Nouseofchr34]
+	
+	stringsep$		only one char used, if "" then we get the default ","
+	decimalse$	 	only one char used, if "" then we get the default "."
+	jsonflag 		if non zero means enconding string using \n and other characters like json strings
+				so we can put mulrinlie text withoutbreaking the line
+	Nouseofchr34	a  no zero value means no "" araound a string.
+	
+	so Write With "", "" reset the writing using Write
+	
+	The same for Input #
+	We use Input With as Write With
+	We can define different set so we can read with one way and write with another.
+	
+	We can use ANSI or UTF16LE files
+	For ANSI files we have to use LOCALE to set the locale for conversion
+	A Local 1032 used for greek conversion.
+	
+}
+
+
+
+Pen 11{Print "Ansi first"}
+Print "Export csv using tab as seperator, and dot for decimal char"
+open "testnochr34.csv" for output as k
+Write With chr$(9), ".", ,1
+Write #k, "Hello There", "And There", 1212.12, "Bye"
+Close #k
+Document docA$
+Load.Doc docA$, "testnochr34.csv"   ' automatic get the file type
+Print "The file as a string - tabs are expanded"
+Pen 15 {report DocA$}
+Print "ok..."
+Print "Now we use Input # programming the separator and dot"
+open "testnochr34.csv" for input as k
+Input With chr$(9), ".", ,1
+Input #k, A$, B$, C, D$
+Close #k
+Print "Results"
+Print A$, B$, C, D$
+Pen 11{Print "For UTF16LE wide chars"}
+open "testnochr34.csv" for wide output as k
+Write With chr$(9), ".", ,1
+Write #k, "Hello There", "surrogate 𐐷", 1212.12, "1234 ברוכים הבאים abc"
+Close #k
+Document docA$
+Load.Doc docA$, "testnochr34.csv"
+Print "The file as a string - tabs are expanded"
+Pen 15 {report DocA$}
+open "testnochr34.csv" for wide input as k
+Input With chr$(9), ".", ,1
+Input #k, A$, B$, C, D$
+Close #k
+Print "Results"
+Print A$, B$, C, D$
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}

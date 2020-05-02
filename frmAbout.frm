@@ -144,12 +144,13 @@ Private Sub cmdOK_Click()
 End Sub
 
 Private Sub Form_Load()
+    Set picIcon = Me.Icon
     Me.Caption = "About M2000 Interpreter "
     lblVersion.Caption = "Loader Version " & App.Major & "." & App.Minor & "." & App.Revision
     lblTitle.Caption = "M2000"
     lblDescription = "An open source programming language free for use and distribute. Use it AS IS."
     lblDescription = lblDescription + vbCrLf + "George Karras"
-    lblDescription = lblDescription + vbCrLf + "georgekarrad.blogspot.gr"
+    lblDescription = lblDescription + vbCrLf + "georgekarras.blogspot.gr"
     
 End Sub
 

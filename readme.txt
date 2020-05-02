@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 120 active-X
-A bug removed in text editor using Delete key anf Ctrl+Y
+Version 9.9 revision 21 active-X
+A lot of improvements. Updated Info.gsb
 Update M2000paper.pdf and the greek pdf.
 
 George Karras, Kallithea Attikis, Greece.
