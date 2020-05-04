@@ -78,55 +78,89 @@ Public index As Long, final As Boolean, refgroup As Object, grouperror As Boolea
 Public refArray As Variant
 Public Sub Compute0(p As Variant, ss$)
 If final Then CantAssignValue: Exit Sub
-Dim v As Long
+Dim v As Long, sp As Variant
 On Error Resume Next
 v = 0
 Do While v <= Me.UpperMonoLimit
-If MyIsNumeric(actualdata(v)) Then
-                    Select Case ss$
-                                Case "=", "g"
-                                actualdata(v) = p
-                                Case "+"
-                                actualdata(v) = p + actualdata(v)
-                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "*"
-                                 actualdata(v) = p * actualdata(v)
-                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "-"
-                                actualdata(v) = actualdata(v) - p
-                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "/"
-                                If p = 0 Then Exit Do
-                                 actualdata(v) = actualdata(v) / p
-                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                  Case "~", "!!"
-                                 actualdata(v) = -1 - (actualdata(v) <> 0)
-                                 Case "++"
-                                actualdata(v) = 1 + actualdata(v)
-                                Case "--"
-                                actualdata(v) = actualdata(v) - 1
-                                  Case "-!"
-                                actualdata(v) = -actualdata(v)
-                                Case "+="
-                                actualdata(v) = p + actualdata(v)
-                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "*="
-                                 actualdata(v) = p * actualdata(v)
-                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "-="
-                                actualdata(v) = actualdata(v) - p
-                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "/="
-                                If p = 0 Then Exit Do
-                                 actualdata(v) = actualdata(v) / p
-                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                  
-                                 End Select
-                             
-                            
-End If
-                           v = v + 1
-                           Err.clear
+    If MyIsNumeric(actualdata(v)) Then
+        Select Case ss$
+            Case "=", "g"
+            actualdata(v) = p
+            GoTo conthere
+            Case "+"
+            actualdata(v) = p + actualdata(v)
+            Case "*"
+             actualdata(v) = p * actualdata(v)
+            Case "-"
+            actualdata(v) = actualdata(v) - p
+            Case "/"
+            If p = 0 Then Exit Do
+             actualdata(v) = actualdata(v) / p
+            
+              Case "~", "!!"
+             actualdata(v) = -1 - (actualdata(v) <> 0)
+             Case "++"
+            actualdata(v) = 1 + actualdata(v)
+            Case "--"
+            actualdata(v) = actualdata(v) - 1
+              Case "-!"
+            actualdata(v) = -actualdata(v)
+            GoTo conthere
+            Case "+="
+            actualdata(v) = p + actualdata(v)
+        
+            Case "*="
+             actualdata(v) = p * actualdata(v)
+        
+            Case "-="
+            actualdata(v) = actualdata(v) - p
+            
+            Case "/="
+                If p = 0 Then DevZero: Exit Do
+                actualdata(v) = actualdata(v) / p
+                                
+            Case "DIV", "диа"
+                If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                actualdata(v) = Fix(actualdata(v) / p)
+            Case "DIV#", "диа#"
+                If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                If p < 0 Then
+                    actualdata(v) = Int((actualdata(v) - Abs(actualdata(v) - Abs(p) * Int(actualdata(v) / Abs(p)))) / p)
+                Else
+                    actualdata(v) = Int(actualdata(v) / p)
+                End If
+                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+            Case "MOD", "упок", "упокоипо"
+                If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                sp = actualdata(v) - Fix(actualdata(v) / p) * p
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                actualdata(v) = sp
+             Case "MOD#", "упок#", "упокоипо#"
+                 If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                sp = Abs(actualdata(v) - Abs(p) * Int(actualdata(v) / Abs(p)))
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                actualdata(v) = sp
+            Case Else
+                WrongOperator
+                Exit Do
+            End Select
+        End If
+        If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+conthere:
+        v = v + 1
+        Err.clear
 Loop
 
 End Sub
@@ -136,38 +170,39 @@ Dim v As Long
 On Error Resume Next
 v = 0
 Do While v <= Me.UpperMonoLimit
-If MyIsNumeric(actualdata(v)) Then
-                    Select Case ss$
-                                Case "=", "g"
-                                actualdata(v) = p
-                                Case "+"
-                                actualdata(v) = p + actualdata(v)
-                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "*"
-                                 actualdata(v) = p * actualdata(v)
-                                  If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "-"
-                                actualdata(v) = actualdata(v) - p
-                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "/"
-                                If p = 0 Then Exit Do
-                                 actualdata(v) = actualdata(v) / p
-                                  If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                  Case "~", "!!"
-                                 actualdata(v) = -1 - (actualdata(v) <> 0)
-                                 Case "++"
-                                actualdata(v) = 1 + actualdata(v)
-                                Case "--"
-                                actualdata(v) = actualdata(v) - 1
-                                  Case "-!"
-                                actualdata(v) = -actualdata(v)
-                                  
-                                 End Select
-                          
-                            
-End If
-                           v = v + 1
-                           Err.clear
+    If MyIsNumeric(actualdata(v)) Then
+        Select Case ss$
+        Case "=", "g"
+            actualdata(v) = p
+            GoTo conthere
+        Case "+"
+            actualdata(v) = p + actualdata(v)
+        Case "*"
+            actualdata(v) = p * actualdata(v)
+        Case "-"
+        actualdata(v) = actualdata(v) - p
+        If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+        Case "/"
+            If p = 0 Then Exit Do
+            actualdata(v) = actualdata(v) / p
+        Case "~", "!!"
+            actualdata(v) = -1 - (actualdata(v) <> 0)
+            GoTo conthere
+        Case "++"
+            actualdata(v) = 1 + actualdata(v)
+            GoTo conthere
+        Case "--"
+            actualdata(v) = actualdata(v) - 1
+            GoTo conthere
+        Case "-!"
+            actualdata(v) = -actualdata(v)
+            GoTo conthere
+        End Select
+    End If
+    If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+conthere:
+    v = v + 1
+    Err.clear
 Loop
 
 End Sub
@@ -214,57 +249,88 @@ there:
 End Function
 Public Sub Compute2(p As Variant, ss$)
 If final Then CantAssignValue: Exit Sub
-Dim v As Long
+Dim v As Long, sp As Variant
 On Error Resume Next
 v = 0
 Do While v <= Me.UpperMonoLimit
-If MyIsNumeric(actualdata(v)) Then
-                    Select Case ss$
-                                Case "="
-                                actualdata(v) = p
-                                Case "+="
-                                actualdata(v) = actualdata(v) + p
-                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "*="
-                                 actualdata(v) = p * actualdata(v)
-                                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "-="
-                                actualdata(v) = actualdata(v) - p
-                                If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                Case "/="
-                                If MyRound(p, 13) = 0 Then Exit Do
-                                 actualdata(v) = actualdata(v) / p
-                               If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
-                                 End Select
-                               
-                            
-End If
-                           v = v + 1
-                           Err.clear
+    If MyIsNumeric(actualdata(v)) Then
+        Select Case ss$
+            Case "="
+                actualdata(v) = p
+                GoTo conthere
+            Case "+="
+                actualdata(v) = actualdata(v) + p
+            Case "*="
+                actualdata(v) = p * actualdata(v)
+            Case "-="
+                actualdata(v) = actualdata(v) - p
+            Case "/="
+                If p = 0 Then DevZero: Exit Do
+                 actualdata(v) = actualdata(v) / p
+            Case "DIV", "диа"
+                If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                actualdata(v) = Fix(actualdata(v) / p)
+            Case "DIV#", "диа#"
+                If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                If p < 0 Then
+                    actualdata(v) = Int((actualdata(v) - Abs(actualdata(v) - Abs(p) * Int(actualdata(v) / Abs(p)))) / p)
+                Else
+                    actualdata(v) = Int(actualdata(v) / p)
+                End If
+                 If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+            Case "MOD", "упок", "упокоипо"
+                If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                sp = actualdata(v) - Fix(actualdata(v) / p) * p
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                actualdata(v) = sp
+             Case "MOD#", "упок#", "упокоипо#"
+                 If p = 0 Then
+                    DevZero
+                    Exit Do
+                End If
+                sp = Abs(actualdata(v) - Abs(p) * Int(actualdata(v) / Abs(p)))
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                actualdata(v) = sp
+            Case Else
+                WrongOperator
+                Exit Do
+         End Select
+    End If
+conthere:
+    If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
+    v = v + 1
+    Err.clear
 Loop
-
 End Sub
 Public Sub Compute3(ss$)
 Dim v As Long
-If final Then CantAssignValue: Exit Sub
-On Error Resume Next
-v = 0
-Do While v <= Me.UpperMonoLimit
-If MyIsNumeric(actualdata(v)) Then
-                    Select Case ss$
-                                  Case "~"
-                                 actualdata(v) = -1 - (actualdata(v) <> 0)
-                                 Case "++"
-                                actualdata(v) = 1 + actualdata(v)
-                                Case "--"
-                                actualdata(v) = actualdata(v) - 1
-                                  Case "-!"
-                                actualdata(v) = -actualdata(v)
-                                  
-                                 End Select
-End If
-                           v = v + 1
-                           Err.clear
+    If final Then CantAssignValue: Exit Sub
+    On Error Resume Next
+    v = 0
+    Do While v <= Me.UpperMonoLimit
+        If MyIsNumeric(actualdata(v)) Then
+        Select Case ss$
+        Case "~"
+            actualdata(v) = -1 - (actualdata(v) <> 0)
+        Case "++"
+            actualdata(v) = 1 + actualdata(v)
+        Case "--"
+            actualdata(v) = actualdata(v) - 1
+        Case "-!"
+            actualdata(v) = -actualdata(v)
+        End Select
+    End If
+    v = v + 1
+    Err.clear
 Loop
 
 End Sub
@@ -1044,7 +1110,18 @@ Friend Sub SwapItem(curitem As Long, thisvariant)
 SwapVariant actualdata(curitem), thisvariant
 End Sub
 Friend Function IsStringItem(curitem As Long) As Variant
+If Arr Then
 IsStringItem = Typename(actualdata(curitem)) = "String"
+ElseIf curitem < 0 And curitem <> -2 Then
+If GroupRef.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
+If GroupRef.objref.Done Then
+    If GroupRef.objref.IsObj Then
+        
+    Else
+        IsStringItem = Typename(GroupRef.objref.Value) = "String"
+    End If
+End If
+End If
 End Function
 Public Property Get item(curitem As Long) As Variant
 On Error GoTo there1
@@ -1066,15 +1143,6 @@ Else
 If curitem = -2 Then
 Set item = GroupRef
 ElseIf curitem < 0 Then
-' used for test only - no mHandler here
-'If TypeOf GroupRef Is mHandler Then
-'If GroupRef.t1 = 3 Then
-'If MyIsObject(GroupRef.objref.Value) Then
-'Set item = GroupRef.objref.Value
-'Else
-'item = GroupRef.objref.Value
-'End If
-'Else
 If GroupRef.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
 If GroupRef.objref.Done Then
     If GroupRef.objref.IsObj Then
@@ -1144,7 +1212,18 @@ Public Property Let item(curitem As Long, item As Variant)
 
 On Error Resume Next
 If curitem < 0 Then
+If curitem <> -2 Then
+If GroupRef.objref.Done Then
 
+    If MyIsObject(item) Then
+    
+    Else
+        GroupRef.objref.Value = item
+    End If
+    GroupRef.objref.Done = False
+End If
+
+End If
 ElseIf final Then
 If Not MyIsObject(actualdata(curitem)) Then
 If VarType(actualdata(curitem)) = vbEmpty Then
@@ -1181,7 +1260,18 @@ Public Property Let ItemStr(curitem As Long, item As String)
 
 On Error Resume Next
 If curitem < 0 Then
-
+If Not Arr Then
+If curitem <> -2 Then
+If GroupRef.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
+If GroupRef.objref.Done Then
+    If GroupRef.objref.IsObj Then
+        
+    Else
+        GroupRef.objref.Value = item
+    End If
+End If
+End If
+End If
 ElseIf final Then
 If Not MyIsObject(actualdata(curitem)) Then
 If VarType(actualdata(curitem)) = vbEmpty Then

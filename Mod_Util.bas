@@ -401,7 +401,11 @@ againtype:
             Set useHandler = vv
             Select Case useHandler.t1
             Case 1
-                Set fastcol = useHandler.objref
+            If TypeOf useHandler.objref Is mHandler Then
+            Set fastcol = useHandler.objref.objref
+            Else
+            Set fastcol = useHandler.objref
+            End If
                 If FastSymbol(a$, ",") Then
 contHandler:
                     If IsExp(bstackstr, a$, p) Then
@@ -6323,35 +6327,7 @@ Loop
 
 End If
 End Sub
-Function blockStringPOS(s$, Pos As Long) As Boolean
-Dim i As Long, j As Long, c As Long
-Dim a1 As Boolean
-c = Len(s$)
-a1 = True
-i = Pos
-If i > Len(s$) Then Exit Function
-Do
-Select Case AscW(Mid$(s$, i, 1))
-Case 34
-Do While i < c
-i = i + 1
-If AscW(Mid$(s$, i, 1)) = 34 Then Exit Do
-Loop
-Case 123
-j = j - 1
-Case 125
-j = j + 1: If j = 1 Then Exit Do
-End Select
-i = i + 1
-Loop Until i > c
-If j = 1 Then
-blockStringPOS = True
-Pos = i
-Else
-Pos = Len(s$)
-End If
 
-End Function
 
 Sub myesc(b$)
 MyErMacro b$, "Escape", "Διακοπή εκτέλεσης"
@@ -23524,4 +23500,253 @@ Set Scr = Form1.DIS 'bstack.Owner
 prive = GetCode(Scr)
 wwPlain2 bstack, players(prive), ss$, Scr.Width, 1000, True, , 3
 End Sub
+
+Function MyFrame(bstack As basetask, rest$) As Boolean
+Dim prive As Long, x1 As Long, y1 As Long, col As Long, p As Variant
+Dim X As Double, Y As Double, ss$
+MyFrame = True
+prive = GetCode(bstack.Owner)
+With players(prive)
+x1 = 1
+y1 = 1
+col = .mypen
+If FastSymbol(rest$, "@") Then
+If FastSymbol(rest$, "(") Then
+    If IsExp(bstack, rest$, p) Then x1 = Abs(p + .curpos) Mod (.mx + 1)
+    If Not FastSymbol(rest$, ")") Then MissSymbol ")": Exit Function
+Else
+    If IsExp(bstack, rest$, p) Then x1 = Abs(p) Mod (.mx + 1)
+End If
+If FastSymbol(rest$, ",") Then
+    If FastSymbol(rest$, "(") Then
+        If IsExp(bstack, rest$, p) Then y1 = Abs(p + .currow - 1) Mod (.My + 1)
+        If Not FastSymbol(rest$, ")") Then MissSymbol ")": Exit Function
+    
+    Else
+        If IsExp(bstack, rest$, p) Then y1 = Abs(p) Mod (.My + 1)
+    End If
+    '
+    
+End If
+Y = 5
+If FastSymbol(rest$, ",") Then If Not IsExp(bstack, rest$, Y) Then Y = 5
+If FastSymbol(rest$, ",") Then
+If IsExp(bstack, rest$, X) Then
+If FastSymbol(rest$, ",") Then
+If IsExp(bstack, rest$, p) Then
+MyRect bstack.Owner, players(prive), (x1), (y1), (Y), (X), (p)
+Else
+ MyFrame = False: MissNumExpr: Exit Function
+End If
+Else
+MyRect bstack.Owner, players(prive), (x1), (y1), (Y), (X)
+End If
+ElseIf IsStrExp(bstack, rest$, ss$) Then
+MyRect bstack.Owner, players(prive), (x1), (y1), (Y), ss$
+Else
+MyRect bstack.Owner, players(prive), (x1), (y1), 5, "?"
+End If
+Else
+MyRect bstack.Owner, players(prive), (x1), (y1), 6, 0
+End If
+Else
+If IsExp(bstack, rest$, p) Then x1 = Abs(p) Mod .mx
+If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then y1 = Abs(p) Mod .My
+
+x1 = x1 + .curpos - 1
+y1 = y1 + .currow - 1
+If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then BoxColorNew bstack.Owner, players(prive), x1, y1, (p)
+
+
+If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then col = p Else MyFrame = False: MissNumExpr: Exit Function
+
+
+BoxBigNew bstack.Owner, players(prive), x1, y1, col
+End If
+End With
+MyDoEvents1 bstack.Owner
+
+
+End Function
+Function MyMark(bstack As basetask, rest$) As Boolean
+Dim prive As Long, p As Variant, par As Boolean, x1 As Long, y1 As Long, col As Long
+MyMark = True
+prive = GetCode(bstack.Owner)
+With players(prive)
+x1 = 1
+y1 = 1
+col = .mypen
+If IsExp(bstack, rest$, p) Then x1 = Abs(p) Mod .mx
+If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then y1 = Abs(p) Mod .My
+x1 = x1 + .curpos - 1
+y1 = y1 + .currow - 1
+If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then col = p
+
+If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then par = Not (p = 0)
+
+CircleBig bstack.Owner, players(prive), x1, y1, col, par
+End With
+MyDoEvents1 bstack.Owner
+
+
+End Function
+Function MyLineInput(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim F As Long, p As Variant, what$, it As Long, s$, i As Long, prive As Long, frm$
+Dim pppp As mArray
+If IsLabelSymbolNew(rest$, "ΕΙΣΑΓΩΓΗΣ", "INPUT", Lang) Then
+If FastSymbol(rest$, "#") Then
+
+    If Not IsExp(bstack, rest$, p) Then Exit Function
+    If Not FastSymbol(rest$, ",") Then Exit Function
+    F = CLng(MyMod(p, 512))
+    Select Case Abs(IsLabel(bstack, rest$, what$))
+    Case 3
+    MyLineInput = True
+    If uni(F) Then
+    If Not getUniStringlINE(F, s$) Then MyLineInput = False: MyEr "Can't input, not UTF16LE", "Δεν μπορώ να εισάγω, όχι UTF16LE": Exit Function
+    Else
+    getAnsiStringlINE F, s$
+    End If
+    If GetVar(bstack, what$, i) Then
+    CheckVar var(i), s$
+    Else
+    globalvar what$, s$
+    End If
+    Case 6
+    If neoGetArray(bstack, what$, pppp) Then
+
+    If Not NeoGetArrayItem(pppp, bstack, what$, it, rest$) Then Exit Function
+    Else
+    Exit Function
+    End If
+    MyLineInput = True
+    If uni(F) Then
+    If Not getUniStringlINE(F, s$) Then MyLineInput = False: MyEr "Can't input, not UTF16LE", "Δεν μπορώ να εισάγω, όχι UTF16LE": Exit Function
+    Else
+    getAnsiStringlINE F, s$
+    End If
+    If Typename(pppp.item(it)) = doc Then
+    Set pppp.item(it) = New Document
+    If s$ <> "" Then pppp.item(it).textDoc = s$
+    Else
+    pppp.item(it) = s$
+    End If
+    End Select
+Else
+If Not releasemouse Then If Not Form1.Visible Then newshow basestack1
+If bstack.toprinter = True Then oxiforPrinter:   Exit Function
+If Left$(Typename(bstack.Owner), 3) = "Gui" Then oxiforforms: Exit Function
+Select Case Abs(IsLabel(bstack, rest$, what$))
+Case 3
+           prive = GetCode(bstack.Owner)
+                If players(prive).lastprint Then
+                LCTbasket bstack.Owner, players(prive), players(prive).currow, players(prive).curpos
+                players(prive).lastprint = False
+                End If
+QUERY bstack, frm$, s$, 1000, False
+
+                If GetVar(bstack, what$, i) Then
+                        CheckVar var(i), s$
+                Else
+                        globalvar what$, s$
+                End If
+                 MyLineInput = True
+Case 6
+If neoGetArray(bstack, what$, pppp) Then
+                       If Not NeoGetArrayItem(pppp, bstack, what$, it, rest$) Then Exit Function
+                Else
+                 MyEr "No such array", "Δεν υπάρχει τέτοιος πίνακας"
+                       Exit Function
+                End If
+                           prive = GetCode(bstack.Owner)
+                If players(prive).lastprint Then
+                LCTbasket bstack.Owner, players(prive), players(prive).currow, players(prive).curpos
+                players(prive).lastprint = False
+                End If
+QUERY bstack, frm$, s$, 1000, False
+
+ If Typename(pppp.item(it)) = doc Then
+                Set pppp.item(it) = New Document
+                        If s$ <> "" Then pppp.item(it).textDoc = s$
+                Else
+                        pppp.item(it) = s$
+                End If
+                 MyLineInput = True
+End Select
+
+End If
+
+
+End If
+End Function
+
+Function MyLong(basestack As basetask, rest$, Lang As Long, Optional alocal As Boolean) As Boolean
+Dim s$, what$, i As Long, p As Variant
+MyLong = True
+
+     Do While CheckTwoVal(Abs(IsLabel(basestack, rest$, what$)), 1, 4)
+     If basestack.priveflag Then what$ = ChrW(&HFFBF) + what$
+     If Not FastSymbol(rest$, "<") Then  ' get local var first
+            If alocal Then
+            i = globalvar(basestack.GroupName & what$, s$)     ' MAKE ONE  '
+
+             GoTo makeitnow1
+            ElseIf GetlocalVar(basestack.GroupName & what$, i) Then
+            p = var(i)
+            GoTo there01
+            ElseIf GetVar(basestack, basestack.GroupName & what$, i) Then
+             p = var(i)
+            GoTo there01
+            Else
+            i = globalvar(basestack.GroupName & what$, s$)     ' MAKE ONE  '
+
+             GoTo makeitnow1
+            End If
+            ElseIf GetVar(basestack, basestack.GroupName & what$, i) Then
+            
+there01:
+                
+                MakeitObjectLong var(i)
+                On Error Resume Next
+                Err.clear
+                CheckVarLong var(i), CLng(Int(p))
+                If Err > 0 Then
+                If Err.Number = 6 Then MyEr "overflowlong Long", "Υπερχείλιση  μακρύ"
+                Err.clear
+                MyLong = False
+                Exit Function
+                End If
+                GoTo there12
+            Else
+        
+                i = globalvar(basestack.GroupName & what$, s$) ' MAKE ONE
+                If i <> 0 Then
+makeitnow1:
+                    MakeitObjectLong var(i)
+there12:
+                    If FastSymbol(rest$, "=") Then
+                        If IsExp(basestack, rest$, p, , True) Then
+                          On Error Resume Next
+                            Err.clear
+                            CheckVarLong var(i), CLng(Int(p))
+                            If Err > 0 Then
+                            If Err.Number = 6 Then MyEr "overflowlong Long", "Υπερχείλιση  μακρύ"
+                            Err.clear
+                            MyLong = False
+                            Exit Function
+                            End If
+                        Else
+                            MissNumExpr
+                            MyLong = False
+                        End If
+                    Else
+                    ' DO NOTHING
+                    End If
+                End If
+            End If
+     
+     If Not FastSymbol(rest$, ",") Then Exit Do
+     Loop
+End Function
+
 

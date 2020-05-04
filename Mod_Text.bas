@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 21
+Global Const Revision = 22
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -7357,7 +7357,17 @@ syntax1:
                         End If
                         Set bstack.lastobj = Nothing
                             If VarType(p) = vbBoolean Then p = CLng(p)
+                            
                                 If Not FastSymbol(a$, "!") Then s$ = CStr(p): GoTo contlabel
+                                If TypeOf pppp.GroupRef.objref Is mHandler Then
+                                If pppp.GroupRef.objref.indirect = -1 Then
+                                    Set bstack.lastobj = pppp.GroupRef.objref
+                                    Set bstack.lastobj = bstack.lastobj.objref
+                                    Set pppp.GroupRef = New mHandler
+                                    Set pppp.GroupRef.objref = bstack.lastobj
+                                    Set bstack.lastobj = Nothing
+                                End If
+                                End If
                                     With pppp.GroupRef.objref
                                         p = MyRound(p)
                                         If Abs(p) < .count Then
@@ -7418,8 +7428,23 @@ syntax1:
                                     w3 = 0
 contlabel:
                                     Set useHandler = pppp.GroupRef
-                                    If useHandler.t1 <> 1 Or Typename(useHandler.objref) <> "FastCollection" Then Expected "Inventory", "ÊáôÜóôáóç": Exit Function
-                                        Set useFast = useHandler.objref
+                                    If useHandler.t1 = 1 Then
+                                        If Typename(useHandler.objref) <> "FastCollection" Then
+                                            If useHandler.indirect = -1 Then
+                                                Set useFast = useHandler.objref.objref
+                                                Set useHandler.objref = useFast
+                                            Else
+                                                GoTo inv100
+                                            End If
+                                        Else
+                                            Set useFast = useHandler.objref
+                                        End If
+                                    Else
+inv100:                                 Expected "Inventory", "ÊáôÜóôáóç"
+                                        Exit Function
+                                    End If
+                                    
+                                        
                                         With useFast
                                             If .StructLen > 0 Then s$ = myUcase(s$)
                                             If .Find(s$) Then
@@ -21001,6 +21026,7 @@ checkforglobal:
                 If var(k).t1 < 3 Then
                         Set ga = New mArray
                         Set ga.GroupRef = var(k)
+
                         ga.Arr = False
                         
                         neoGetArray = True
@@ -22609,6 +22635,35 @@ Next i
 If j = 0 Then Pos = i: BlockParam2 = True
 End Function
 
+Function blockStringPOS(s$, Pos As Long) As Boolean
+Dim i As Long, j As Long, c As Long
+Dim a1 As Boolean
+c = Len(s$)
+a1 = True
+i = Pos
+If i > Len(s$) Then Exit Function
+Do
+Select Case AscW(Mid$(s$, i, 1))
+Case 34
+Do While i < c
+i = i + 1
+If AscW(Mid$(s$, i, 1)) = 34 Then Exit Do
+Loop
+Case 123
+j = j - 1
+Case 125
+j = j + 1: If j = 1 Then Exit Do
+End Select
+i = i + 1
+Loop Until i > c
+If j = 1 Then
+blockStringPOS = True
+Pos = i
+Else
+Pos = Len(s$)
+End If
+
+End Function
 Function block2(s$) As String
 Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
@@ -22931,6 +22986,11 @@ If Not PP.Arr Then
     Dim ppp$
     If TypeOf PP.GroupRef Is mHandler Then
         If PP.GroupRef.t1 <> 1 Then Expected "Inventory", "ÊáôÜóôáóç": Exit Function
+        If TypeOf PP.GroupRef.objref Is mHandler Then
+        With PP.GroupRef
+        Set .objref = .objref.objref
+        End With
+        End If
             If IsExp(bstack, rst$, p) Then
                 With PP.GroupRef.objref
                     If Not FastSymbol(rst$, "!") Then ppp$ = CStr(p): GoTo contlabel1
@@ -22965,6 +23025,8 @@ contlabel1:
                         End If
                     ElseIf FastSymbol(rst, ")(", , 2) Then
                         GoTo CheckThis
+                    Else
+                    .Done = True
                     End If
                 End With
             End If
@@ -41889,185 +41951,6 @@ End If
 End With
 LCTbasketCur bstack.Owner, players(prive)
 End Function
-Function MyLineInput(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim F As Long, p As Variant, what$, it As Long, s$, i As Long, prive As Long, frm$
-Dim pppp As mArray
-If IsLabelSymbolNew(rest$, "ÅÉÓÁÃÙÃÇÓ", "INPUT", Lang) Then
-If FastSymbol(rest$, "#") Then
-
-    If Not IsExp(bstack, rest$, p) Then Exit Function
-    If Not FastSymbol(rest$, ",") Then Exit Function
-    F = CLng(MyMod(p, 512))
-    Select Case Abs(IsLabel(bstack, rest$, what$))
-    Case 3
-    MyLineInput = True
-    If uni(F) Then
-    If Not getUniStringlINE(F, s$) Then MyLineInput = False: MyEr "Can't input, not UTF16LE", "Äåí ìðïñþ íá åéóÜãù, ü÷é UTF16LE": Exit Function
-    Else
-    getAnsiStringlINE F, s$
-    End If
-    If GetVar(bstack, what$, i) Then
-    CheckVar var(i), s$
-    Else
-    globalvar what$, s$
-    End If
-    Case 6
-    If neoGetArray(bstack, what$, pppp) Then
-
-    If Not NeoGetArrayItem(pppp, bstack, what$, it, rest$) Then Exit Function
-    Else
-    Exit Function
-    End If
-    MyLineInput = True
-    If uni(F) Then
-    If Not getUniStringlINE(F, s$) Then MyLineInput = False: MyEr "Can't input, not UTF16LE", "Äåí ìðïñþ íá åéóÜãù, ü÷é UTF16LE": Exit Function
-    Else
-    getAnsiStringlINE F, s$
-    End If
-    If Typename(pppp.item(it)) = doc Then
-    Set pppp.item(it) = New Document
-    If s$ <> "" Then pppp.item(it).textDoc = s$
-    Else
-    pppp.item(it) = s$
-    End If
-    End Select
-Else
-If Not releasemouse Then If Not Form1.Visible Then newshow basestack1
-If bstack.toprinter = True Then oxiforPrinter:   Exit Function
-If Left$(Typename(bstack.Owner), 3) = "Gui" Then oxiforforms: Exit Function
-Select Case Abs(IsLabel(bstack, rest$, what$))
-Case 3
-           prive = GetCode(bstack.Owner)
-                If players(prive).lastprint Then
-                LCTbasket bstack.Owner, players(prive), players(prive).currow, players(prive).curpos
-                players(prive).lastprint = False
-                End If
-QUERY bstack, frm$, s$, 1000, False
-
-                If GetVar(bstack, what$, i) Then
-                        CheckVar var(i), s$
-                Else
-                        globalvar what$, s$
-                End If
-                 MyLineInput = True
-Case 6
-If neoGetArray(bstack, what$, pppp) Then
-                       If Not NeoGetArrayItem(pppp, bstack, what$, it, rest$) Then Exit Function
-                Else
-                 MyEr "No such array", "Äåí õðÜñ÷åé ôÝôïéïò ðßíáêáò"
-                       Exit Function
-                End If
-                           prive = GetCode(bstack.Owner)
-                If players(prive).lastprint Then
-                LCTbasket bstack.Owner, players(prive), players(prive).currow, players(prive).curpos
-                players(prive).lastprint = False
-                End If
-QUERY bstack, frm$, s$, 1000, False
-
- If Typename(pppp.item(it)) = doc Then
-                Set pppp.item(it) = New Document
-                        If s$ <> "" Then pppp.item(it).textDoc = s$
-                Else
-                        pppp.item(it) = s$
-                End If
-                 MyLineInput = True
-End Select
-
-End If
-
-
-End If
-End Function
-
-Function MyFrame(bstack As basetask, rest$) As Boolean
-Dim prive As Long, x1 As Long, y1 As Long, col As Long, p As Variant
-Dim X As Double, Y As Double, ss$
-MyFrame = True
-prive = GetCode(bstack.Owner)
-With players(prive)
-x1 = 1
-y1 = 1
-col = .mypen
-If FastSymbol(rest$, "@") Then
-If FastSymbol(rest$, "(") Then
-    If IsExp(bstack, rest$, p) Then x1 = Abs(p + .curpos) Mod (.mx + 1)
-    If Not FastSymbol(rest$, ")") Then MissSymbol ")": Exit Function
-Else
-    If IsExp(bstack, rest$, p) Then x1 = Abs(p) Mod (.mx + 1)
-End If
-If FastSymbol(rest$, ",") Then
-    If FastSymbol(rest$, "(") Then
-        If IsExp(bstack, rest$, p) Then y1 = Abs(p + .currow - 1) Mod (.My + 1)
-        If Not FastSymbol(rest$, ")") Then MissSymbol ")": Exit Function
-    
-    Else
-        If IsExp(bstack, rest$, p) Then y1 = Abs(p) Mod (.My + 1)
-    End If
-    '
-    
-End If
-Y = 5
-If FastSymbol(rest$, ",") Then If Not IsExp(bstack, rest$, Y) Then Y = 5
-If FastSymbol(rest$, ",") Then
-If IsExp(bstack, rest$, X) Then
-If FastSymbol(rest$, ",") Then
-If IsExp(bstack, rest$, p) Then
-MyRect bstack.Owner, players(prive), (x1), (y1), (Y), (X), (p)
-Else
- MyFrame = False: MissNumExpr: Exit Function
-End If
-Else
-MyRect bstack.Owner, players(prive), (x1), (y1), (Y), (X)
-End If
-ElseIf IsStrExp(bstack, rest$, ss$) Then
-MyRect bstack.Owner, players(prive), (x1), (y1), (Y), ss$
-Else
-MyRect bstack.Owner, players(prive), (x1), (y1), 5, "?"
-End If
-Else
-MyRect bstack.Owner, players(prive), (x1), (y1), 6, 0
-End If
-Else
-If IsExp(bstack, rest$, p) Then x1 = Abs(p) Mod .mx
-If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then y1 = Abs(p) Mod .My
-
-x1 = x1 + .curpos - 1
-y1 = y1 + .currow - 1
-If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then BoxColorNew bstack.Owner, players(prive), x1, y1, (p)
-
-
-If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then col = p Else MyFrame = False: MissNumExpr: Exit Function
-
-
-BoxBigNew bstack.Owner, players(prive), x1, y1, col
-End If
-End With
-MyDoEvents1 bstack.Owner
-
-
-End Function
-Function MyMark(bstack As basetask, rest$) As Boolean
-Dim prive As Long, p As Variant, par As Boolean, x1 As Long, y1 As Long, col As Long
-MyMark = True
-prive = GetCode(bstack.Owner)
-With players(prive)
-x1 = 1
-y1 = 1
-col = .mypen
-If IsExp(bstack, rest$, p) Then x1 = Abs(p) Mod .mx
-If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then y1 = Abs(p) Mod .My
-x1 = x1 + .curpos - 1
-y1 = y1 + .currow - 1
-If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then col = p
-
-If FastSymbol(rest$, ",") Then If IsExp(bstack, rest$, p) Then par = Not (p = 0)
-
-CircleBig bstack.Owner, players(prive), x1, y1, col, par
-End With
-MyDoEvents1 bstack.Owner
-
-
-End Function
 Function MyMenu(entrypoint As Long, bstack As basetask, rest$, Lang As Long) As Boolean
 Dim prive As Long, p As Variant, par As Boolean, x1 As Long, y1 As Long, col As Long
 Dim frm$, it As Long, s$, F As Long
@@ -44607,74 +44490,6 @@ there1:
 End Function
 Function CheckTwoVal(a, b, c)
 CheckTwoVal = a = b Or a = c
-End Function
-Function MyLong(basestack As basetask, rest$, Lang As Long, Optional alocal As Boolean) As Boolean
-Dim s$, what$, i As Long, p As Variant
-MyLong = True
-
-     Do While CheckTwoVal(Abs(IsLabel(basestack, rest$, what$)), 1, 4)
-     If basestack.priveflag Then what$ = ChrW(&HFFBF) + what$
-     If Not FastSymbol(rest$, "<") Then  ' get local var first
-            If alocal Then
-            i = globalvar(basestack.GroupName & what$, s$)     ' MAKE ONE  '
-
-             GoTo makeitnow1
-            ElseIf GetlocalVar(basestack.GroupName & what$, i) Then
-            p = var(i)
-            GoTo there01
-            ElseIf GetVar(basestack, basestack.GroupName & what$, i) Then
-             p = var(i)
-            GoTo there01
-            Else
-            i = globalvar(basestack.GroupName & what$, s$)     ' MAKE ONE  '
-
-             GoTo makeitnow1
-            End If
-            ElseIf GetVar(basestack, basestack.GroupName & what$, i) Then
-            
-there01:
-                
-                MakeitObjectLong var(i)
-                On Error Resume Next
-                Err.clear
-                CheckVarLong var(i), CLng(Int(p))
-                If Err > 0 Then
-                If Err.Number = 6 Then MyEr "overflowlong Long", "Õðåñ÷åßëéóç  ìáêñý"
-                Err.clear
-                MyLong = False
-                Exit Function
-                End If
-                GoTo there12
-            Else
-        
-                i = globalvar(basestack.GroupName & what$, s$) ' MAKE ONE
-                If i <> 0 Then
-makeitnow1:
-                    MakeitObjectLong var(i)
-there12:
-                    If FastSymbol(rest$, "=") Then
-                        If IsExp(basestack, rest$, p, , True) Then
-                          On Error Resume Next
-                            Err.clear
-                            CheckVarLong var(i), CLng(Int(p))
-                            If Err > 0 Then
-                            If Err.Number = 6 Then MyEr "overflowlong Long", "Õðåñ÷åßëéóç  ìáêñý"
-                            Err.clear
-                            MyLong = False
-                            Exit Function
-                            End If
-                        Else
-                            MissNumExpr
-                            MyLong = False
-                        End If
-                    Else
-                    ' DO NOTHING
-                    End If
-                End If
-            End If
-     
-     If Not FastSymbol(rest$, ",") Then Exit Do
-     Loop
 End Function
 Function MyLink(basestack As basetask, rest$, Lang As Long) As Boolean
 MyLink = True
@@ -50535,13 +50350,12 @@ somethingelse:
                         Mid$(b$, i, 2) = "  "
                         End If
                     ElseIf AscW(b$) = 124 Then
-                        Stop
+                       
                         Mid$(b$, i, 1) = " "
-                        If FastPureLabel(b$, ss$) = 1 Then
-                        ' fix this
-                        ' a|div 100
-                        Stop
-                        
+                        If FastPureLabel(b$, ss$, , , , , False) = 1 Then
+                            ss$ = "@@"
+                        Else
+                            WrongOperator
                         End If
                     Else
                         ss$ = Mid$(b$, i, 1)
@@ -50597,7 +50411,40 @@ somethingelse:
                         var(v) = CInt(var(v) - 1)
                     Case "~"
                         var(v) = CInt(Not CBool(var(v)))
-                        
+                    Case "@@"
+                        FastPureLabel b$, ss$, , True
+                        If Mid$(b$, 1, 1) = "#" Then ss$ = ss$ + "#": Mid$(b$, 1, 1) = " "
+                        If IsExp(bstack, b$, p) Then
+                            If Int(p) = 0 Then
+                                DevZero
+                                Exec1 = 0: ExecuteVar = 8
+                                Exit Function
+                            End If
+                            Select Case ss$
+                            Case "DIV", "ÄÉÁ"
+                                var(v) = Fix(var(v) / p)
+                            Case "DIV#", "ÄÉÁ#"
+                                If p < 0 Then
+                                    var(v) = Int((var(v) - Abs(var(v) - Abs(p) * Int(var(v) / Abs(p)))) / p)
+                                Else
+                                    var(v) = Int(var(v) / p)
+                                End If
+                            Case "MOD", "ÕÐÏË", "ÕÐÏËÏÉÐÏ"
+                                sp = var(v) - Fix(var(v) / p) * p
+                                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                                var(v) = sp
+                            Case "MOD#", "ÕÐÏË#", "ÕÐÏËÏÉÐÏ#"
+                                sp = Abs(var(v) - Abs(p) * Int(var(v) / Abs(p)))
+                                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                                var(v) = sp
+                            Case Else
+                                WrongOperator
+                            End Select
+                            var(v) = CInt(var(v))
+                        Else
+                            GoTo noexpression
+                        End If
+                       
                     Case Else
                     ExecuteVar = 6: Exit Function
                 End Select
@@ -50645,7 +50492,38 @@ somethingelse:
                         var(v) = CLng(var(v) - 1)
                     Case "~"
                         var(v) = CLng(Not CBool(var(v)))
-                        
+                    Case "@@"
+                        FastPureLabel b$, ss$, , True
+                        If Mid$(b$, 1, 1) = "#" Then ss$ = ss$ + "#": Mid$(b$, 1, 1) = " "
+                        If IsExp(bstack, b$, p) Then
+                            If Int(p) = 0 Then
+                                DevZero
+                                Exec1 = 0: ExecuteVar = 8
+                                Exit Function
+                            End If
+                            Select Case ss$
+                            Case "DIV", "ÄÉÁ"
+                             var(v) = CLng(Fix(var(v) / p))
+                            Case "DIV#", "ÄÉÁ#"
+                                If p < 0 Then
+                                    var(v) = CLng((var(v) - Abs(var(v) - Abs(p) * Int(var(v) / Abs(p)))) / p)
+                                Else
+                                    var(v) = CLng(var(v) / p)
+                                End If
+                            Case "MOD", "ÕÐÏË", "ÕÐÏËÏÉÐÏ"
+                                sp = var(v) - Fix(var(v) / p) * p
+                                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                                var(v) = CLng(sp)
+                            Case "MOD#", "ÕÐÏË#", "ÕÐÏËÏÉÐÏ#"
+                                sp = Abs(var(v) - Abs(p) * Int(var(v) / Abs(p)))
+                                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                                var(v) = CLng(sp)
+                            Case Else
+                                WrongOperator
+                            End Select
+                        Else
+                            GoTo noexpression
+                        End If
                     Case Else
                     ExecuteVar = 6: Exit Function
                 End Select
@@ -50736,7 +50614,41 @@ checksyntax:
                         var(v) = CDbl(Not CBool(var(v)))
                         End Select
                     Case "->"
-                    GoTo assignpointer
+                        GoTo assignpointer
+                    Case "@@"
+                        FastPureLabel b$, ss$, , True
+                        If Mid$(b$, 1, 1) = "#" Then ss$ = ss$ + "#": Mid$(b$, 1, 1) = " "
+                        If IsExp(bstack, b$, p) Then
+                            If Int(p) = 0 Then
+                                DevZero
+                                Exec1 = 0: ExecuteVar = 8
+                                Exit Function
+                            End If
+                            Select Case ss$
+                            Case "DIV", "ÄÉÁ"
+    
+                             var(v) = Fix(var(v) / p)
+                            Case "DIV#", "ÄÉÁ#"
+                                If p < 0 Then
+                                    var(v) = Int((var(v) - Abs(var(v) - Abs(p) * Int(var(v) / Abs(p)))) / p)
+                                Else
+                                    var(v) = Int(var(v) / p)
+                                End If
+                            Case "MOD", "ÕÐÏË", "ÕÐÏËÏÉÐÏ"
+                                sp = var(v) - Fix(var(v) / p) * p
+                                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                                var(v) = sp
+                             Case "MOD#", "ÕÐÏË#", "ÕÐÏËÏÉÐÏ#"
+                                sp = Abs(var(v) - Abs(p) * Int(var(v) / Abs(p)))
+                                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                                var(v) = sp
+                            Case Else
+                                WrongOperator
+                            End Select
+                        Else
+                            GoTo noexpression
+                        End If
+                       
                     Case Else
                     Overflow
                     ExecuteVar = 8: Exit Function
@@ -50802,6 +50714,16 @@ here1234:
                     Set myobject = var(v)
                     
                     If CheckIsmArray(myobject) Then
+                    If ss$ = "@@" Then
+                            If FastPureLabel(b$, ss$, , True) Then
+                                If Mid$(b$, 1, 1) = "#" Then ss$ = ss$ + "#": Mid$(b$, 1, 1) = " "
+                              
+                           Else
+                                WrongOperator
+                           End If
+                        End If
+                    
+
                         If IsExp(bstack, b$, p) Then
                             If Not bstack.lastobj Is Nothing Then
                             If TypeOf bstack.lastobj Is mArray Then
@@ -50834,9 +50756,12 @@ here1234:
                             Set myobject = Nothing
                             Set bstack.lastobj = Nothing
                         Else
+                        
                             myobject.Compute3 ss$
                             Set myobject = Nothing
                             Set bstack.lastobj = Nothing
+
+
                         End If
                     ElseIf TypeOf myobject Is mHandler Then
                         If myobject.t1 = 4 Then
@@ -50960,16 +50885,24 @@ checkobject1:
                         End If
                     End If
                 Else
-                    If InStr("/*-+~", Mid$(b$, i, 1)) > 0 Then
+                    If InStr("/*-+~|", Mid$(b$, i, 1)) > 0 Then
                         If InStr("=+-!", Mid$(b$, i + 1, 1)) > 0 Then
                             ss$ = Mid$(b$, i, 2)
                             Mid$(b$, i, 2) = "  "
+                        ElseIf Mid$(b$, i, 1) = "|" Then
+                        Mid$(b$, i, 1) = " "
+                        If FastPureLabel(b$, ss$, , True) = 1 Then
+                            If Mid$(b$, 1, 1) = "#" Then ss$ = ss$ + "#": Mid$(b$, 1, 1) = " "
+                        Else
+                            WrongOperator
+                        End If
+                        
                         Else
                             ss$ = Mid$(b$, i, 1)
                             Mid$(b$, i, 1) = " "
                         End If
                     End If
-                    If Right$(ss$, 1) = "=" Then
+                    If Right$(ss$, 1) = "=" Or Len(ss$) > 2 Then
                     If IsExp(bstack, b$, p) Then
                  If Not bstack.AlterVar(w$, p, ss$, False) Then Exec1 = 0: ExecuteVar = 8: Exit Function
                  Else
@@ -51831,7 +51764,7 @@ End If
 End If
 'On Error Resume Next
 
-If MaybeIsSymbol(b$, ":+-*/~") Or v = -2 Then
+If MaybeIsSymbol(b$, ":+-*/~|") Or v = -2 Then
 here66678:
 With pppp
 If pppp.final Then CantAssignValue: Exec1 = 0: ExecuteVar = 8: Exit Function
@@ -51999,6 +51932,42 @@ contassignhere:
             ExecuteVar = 8
         End If
         Exit Function
+ElseIf IsOperator0(b$, "|") Then
+    If FastPureLabel(b$, ss$, , True) Then
+        If Mid$(b$, 1, 1) = "#" Then ss$ = ss$ + "#": Mid$(b$, 1, 1) = " "
+        If IsExp(bstack, b$, p) Then
+            If Int(p) = 0 Then
+                DevZero
+                Exec1 = 0: ExecuteVar = 8
+                Exit Function
+            End If
+            Select Case ss$
+            Case "DIV", "ÄÉÁ"
+                .item(v) = Fix(.item(v) / p)
+            Case "DIV#", "ÄÉÁ#"
+                If p < 0 Then
+                    .item(v) = Int((.item(v) - Abs(.item(v) - Abs(p) * Int(.item(v) / Abs(p)))) / p)
+                Else
+                    .item(v) = Int(.item(v) / p)
+                End If
+            Case "MOD", "ÕÐÏË", "ÕÐÏËÏÉÐÏ"
+                sp = .item(v) - Fix(.item(v) / p) * p
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                .item(v) = sp
+             Case "MOD#", "ÕÐÏË#", "ÕÐÏËÏÉÐÏ#"
+                sp = Abs(.item(v) - Abs(p) * Int(.item(v) / Abs(p)))
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                .item(v) = sp
+            Case Else
+                WrongOperator
+            End Select
+            
+        Else
+            GoTo noexpression
+        End If
+    Else
+        WrongOperator
+    End If
 ElseIf FastSymbol(b$, "->", , 2) Then
     If Not GetPointer(bstack, b$) Then Exec1 = 0: ExecuteVar = 8: Exit Function
     If Typename(bstack.lastobj) = "Group" Then
@@ -52581,7 +52550,11 @@ Else
         Set bstack.lastobj = Nothing
         End If
         Else
+        If v < 0 And v <> -2 Then
+        NoAssignThere
+        Else
         pppp.GroupRef.Value = ss$
+        End If
         End If
     ElseIf Typename(pppp.item(v)) = "Group" Then
         If pppp.item(v).HasSet Then
@@ -52652,7 +52625,7 @@ Set pppp = pppp.item(v)
 GoTo againintarr
 End If
 End If
-If MaybeIsSymbol(b$, "+-*/~") Then
+If MaybeIsSymbol(b$, "+-*/~|") Then
 On Error Resume Next
 With pppp
 If IsOperator0(b$, "++", 2) Then
@@ -52692,7 +52665,42 @@ ElseIf IsOperator0(b$, "~") Then
             Case Else
                 .item(v) = CDbl(Not CBool(.itemnumeric(v)))
         End Select
-
+ElseIf IsOperator0(b$, "|") Then
+    If FastPureLabel(b$, ss$, , True) Then
+        If Mid$(b$, 1, 1) = "#" Then ss$ = ss$ + "#": Mid$(b$, 1, 1) = " "
+        If IsExp(bstack, b$, p) Then
+            If Int(p) = 0 Then
+                DevZero
+                Exec1 = 0: ExecuteVar = 8
+                Exit Function
+            End If
+            Select Case ss$
+            Case "DIV", "ÄÉÁ"
+             .item(v) = Fix(.item(v) / p)
+            Case "DIV#", "ÄÉÁ#"
+                If p < 0 Then
+                    .item(v) = Int((.item(v) - Abs(.item(v) - Abs(p) * Int(.item(v) / Abs(p)))) / p)
+                Else
+                    .item(v) = Int(.item(v) / p)
+                End If
+            Case "MOD", "ÕÐÏË", "ÕÐÏËÏÉÐÏ"
+                sp = .item(v) - Fix(.item(v) / p) * p
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                .item(v) = sp
+            Case "MOD#", "ÕÐÏË#", "ÕÐÏËÏÉÐÏ#"
+                sp = Abs(.item(v) - Abs(p) * Int(.item(v) / Abs(p)))
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                .item(v) = sp
+            Case Else
+                WrongOperator
+            End Select
+            .item(v) = CInt(.item(v))
+        Else
+            GoTo noexpression
+        End If
+    Else
+      WrongOperator
+    End If
 End If
 End With
 On Error GoTo 0

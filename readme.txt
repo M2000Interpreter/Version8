@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 21 active-X
-A lot of improvements. Updated Info.gsb
+Version 9.9 revision 22 active-X
+New additions for operators |div |mof }div# |mod$
 Update M2000paper.pdf and the greek pdf.
 
 George Karras, Kallithea Attikis, Greece.

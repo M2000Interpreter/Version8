@@ -44,8 +44,8 @@ Private Sub Class_Initialize()
     toplim = -1
 
 End Sub
-Friend Sub ReadVar(where, name$, num As Long)
-    name$ = PriveSpace(where).Key
+Friend Sub ReadVar(where, Name$, num As Long)
+    Name$ = PriveSpace(where).Key
     num = PriveSpace(where).ndx
 End Sub
 Public Property Get lastNDX() As String

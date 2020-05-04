@@ -256,7 +256,7 @@ Public Sub SetVarobJvalue(ByVal Name$, var As Variant)
 End Sub
 
 Function AlterVar(ByVal Name$, p As Variant, ss$, inttype As Boolean) As Boolean
-
+Dim sp As Variant
 If Not StaticCollection.Find(Name$) Then Exit Function
 
   With StaticCollection
@@ -324,23 +324,58 @@ End If
             Case "-", "-="
             .Value = .Value - p
             Case "/", "/="
-            If p = 0 Then
-            
-             Exit Function
+                If p = 0 Then
+                DevZero
+                Exit Function
             End If
             .Value = .Value / p
             Case "!"
             .Value = -1 - (.Value <> 0)
+                
+            
+            Case "DIV", "диа"
+            If p = 0 Then
+                DevZero
+                Exit Function
+            End If
+                .Value = Fix(.Value / p)
+            Case "DIV#", "диа#"
+                If p = 0 Then
+                    DevZero
+                    Exit Function
+                End If
+                If p < 0 Then
+                    .Value = Int((.Value - Abs(.Value - Abs(p) * Int(.Value / Abs(p)))) / p)
+                Else
+                    .Value = Int(.Value / p)
+                End If
+            Case "MOD", "упок", "упокоипо"
+                If p = 0 Then
+                    DevZero
+                    Exit Function
+                End If
+                sp = .Value - Fix(.Value / p) * p
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                .Value = sp
+             Case "MOD#", "упок#", "упокоипо#"
+                 If p = 0 Then
+                    DevZero
+                    Exit Function
+                End If
+                sp = Abs(.Value - Abs(p) * Int(.Value / Abs(p)))
+                If Abs(sp) >= Abs(p) Then sp = sp - sp
+                .Value = sp
+            Case Else
+                WrongOperator
             End Select
             If isLong Then
                 On Error Resume Next
                 .Value = CLng(MyRound(.Value, 0))
                 If Err.Number = 6 Then .Value = CDbl(MyRound(.Value, 0)): Err.clear
-            
             ElseIf inttype Then
-            .Value = MyRound(.Value, 0)
+                .Value = MyRound(.Value, 0)
             Else
-          If VarType(.Value) <> vbDecimal Then .Value = MyRound(.Value, 13)
+                If VarType(.Value) <> vbDecimal Then .Value = MyRound(.Value, 13)
             End If
             End If
             End With
@@ -754,7 +789,7 @@ If Err.Number > 0 Then Err.clear: Exit Function
 If threadsnames.Find(Threadid) Then
     Set aa = threadsnames.ValueObj
 
-    threadsnames.remove Threadid
+    threadsnames.Remove Threadid
     threadsnames.PrevIndex
     aa.thread.Dispose tmAllTasks
     ThrowOne = True
