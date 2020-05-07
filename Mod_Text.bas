@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 22
+Global Const Revision = 23
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -34361,6 +34361,17 @@ ElseIf IsLabelSymbolNew(rest$, "мео", "NEW", Lang) Then
         If ss$ = "S" Then
             lastname$ = here$ + "." + MyTrim(myUcase(Left(rest$, dd - 1), True))
             If Not IsStrExp(bstack, rest$, s$) Then ProcEvent = False: Exit Function
+            If Not lookOne(s$, "{") Then
+            If GetSub(s$, pm) Then
+            If sbf(pm).Extern > 0 Then
+                s$ = "{ call extern" + Str$(sbf(pm).Extern) + "}"
+            Else
+                s$ = "{" + sbf(pm).sb + "}"
+            End If
+            Else
+            s$ = "{CALL VOID " + s$ + "}"
+            End If
+            End If
         ElseIf ss$ = "N" Then
             ss$ = "&" + Left$(rest$, dd)
             If Not IsString(bstack, (ss$), s$) Then
@@ -37293,6 +37304,7 @@ Case 5, 6, 7
                 GoTo er107
             Else
                 s$ = Left$(what$, Len(what$) - 1) + " " + s$
+conter00:
                 If F Then
                     ss$ = here$
                     here$ = vbNullString
@@ -37347,9 +37359,19 @@ arrconthere:
                     varhash.ItemCreator ohere$ & "." & what$, i, True, True
                     End If
                 End If
+
             End If
             MyRead = True
-        
+        Else
+        ' get function
+        If GetSub(s$, i) Then
+        If sbf(i).Extern > 0 Then
+        s$ = Left$(what$, Len(what$) - 1) + " { call extern" + Str$(sbf(x1).Extern) + "}"
+        Else
+        s$ = Left$(what$, Len(what$) - 1) + " {" + sbf(i).sb + "}"
+        End If
+        GoTo conter00
+        End If
         End If
     End If
 End If
@@ -44502,7 +44524,11 @@ Do
     If IsLabelSymbolNew(rest$, "исвмг", "WEAK", Lang) Then
         If IsStrExp(basestack, rest$, ss$) Then
             If GetSub(ss$, x1) Then
+                If sbf(x1).Extern > 0 Then
+                basestack.soros.DataStr "{ call extern" + Str$(sbf(x1).Extern) + "}": x1 = 1: GoTo contlink2
+                Else
                 basestack.soros.DataStr "{" + sbf(x1).sb + "}": x1 = 1: GoTo contlink2
+                End If
             Else
                 basestack.soros.DataStr ss$: x1 = 1: GoTo contlink2
             End If

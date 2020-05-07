@@ -5372,7 +5372,8 @@ If Module(Info) Then
 	keyboard "INFOBasic"+chr$(13)
 end if
 }
-MODULE INFOBASIC {\\
+MODULE INFOBASIC {Set Edit !4   ' 4 chars fpr tabs in edit
+\\
 \\ Press Esc to exit this editor - look the context drop down menu too (ctrl+F10 also open context dropdown menu)
 \\
 \\
@@ -10825,7 +10826,7 @@ Module OOP {
 	            .name$<=format$("{0}({1})", letter$,.yourkey)
 	      }
 	}
-	\\ on way is to make final before adding the listener
+	\\ one way is to make final before adding the listener
 	class mouselistener {
                   function final CheckEvent {
                                  =Mouse=.yourkey	                        
@@ -15649,7 +15650,9 @@ read a$, a
 print val(a$)==a , @(12), a$,@(50), a
 end while
 }
-MODULE LIBDIV {Function ProDiv$ {
+MODULE LIBDIV {\\ use in console EDIT !4
+\\ so tab width change to 4 characters
+Function ProDiv$ {
 	Read a$, b$, pp=10, rd as boolean=false, maxd=-1, dp$="."
 	if pp<0 then error "decimal digits>=0 "
 	if rd then pp++
@@ -15700,15 +15703,14 @@ MODULE LIBDIV {Function ProDiv$ {
 		loop
 	}
 	if mm1<>0 then
-	if mm1=-1 then if left$(v$,1)="0" then v$=mid$(v$,2)
-	if mm1<0 then mm=mm1 : mm1=-2 else mm=2-mm
-
-	 end if
-         if len(a$)>gg and len(a$)>=len(b$) then v$+=string$("0",gg)
-         if maxd>0 then
-         if mm=0 then mm=len(v$)+1
-         v$=left$(v$,maxd+2) :if len(v$)>maxd+1 then rd=true
-         end if
+		if mm1=-1 then if left$(v$,1)="0" then v$=mid$(v$,2)
+		if mm1<0 then mm=mm1 : mm1=-2 else mm=2-mm
+	end if
+	if len(a$)>gg and len(a$)>=len(b$) then v$+=string$("0",gg)
+	if maxd>0 then
+		if mm=0 then mm=len(v$)+1
+		v$=left$(v$,maxd+2) :if len(v$)>maxd+1 then rd=true
+	end if
 	if rd  then
 		bb$=strrev$(v$) :v$="":cc=5
 		for i=1 to len(bb$)
@@ -20725,14 +20727,8 @@ back {
 	}
 	Refresh 60
 	flush
-	' roke white left
-	rem data 2,1,1,3,4,7,4,5,2,2,2,3,5,7,5,5,3,1,2,2,5,5,5,4,5,2,5,3,8,7,8,5,4,1,5,2,1,7,1,5,5,1,3,1,2,7,2,5
-	
-	' roke white right
-	rem data 7,1,8,3,4,7,4,5,7,2,7,3,5,7,5,5,6,1,7,2,5,5,5,4,5,1,7,1,3,7,3,5
 	move$=""
 	refresh
-	rem  goto 1000
 	\\ ctrl+F1 help
 	About  ! "How to play", 14000,9000,{Give one or more moves in one input line.
 		Each move has a letter a number a letter and  final a number
@@ -20752,7 +20748,6 @@ back {
 		You can call this module passing a FEN string as parameter.
 		George Karras
 		}
-	1000
 	Thread {
 		if control$<>"MAIN" then continue
 		mmb=mouse
@@ -21003,6 +20998,7 @@ escape off
 Window 12,0
 form
 form ;
+About ! ""
 end
 Sub SaveGame()
 if freeSlot=1 then exit sub
@@ -21087,7 +21083,6 @@ Sub MakeAmove( &ok, i, j, i1, j1)
 Local z=bold, p$, p1$ : bold 0
 Local t,t1, N=BoardSq(1,1)#val(0), again as boolean, playroke as boolean
 ok=false
-rem if i<1 or i>8 or j>8 or j<1 or i1<1 or i1>8 or j1<1 or j1>8 then beep : exit
 Local rule=true, threat as boolean
 refresh 10000
 Pen 0 {
@@ -21931,9 +21926,9 @@ ExitLoop:
 }
 MODULE TEXTONLY {Declare Form1 Form
 Layer Form1 { Cls 7
-    Move scale.x/2, scale.y/2
-   Pen 14 { Circle Fill 14, 100, 0.5}
-   w=scale.x
+	Move scale.x/2, scale.y/2
+	Pen 14 { Circle Fill 14, 100, 0.5}
+	w=scale.x
  }
 Declare Edit1 EditBox Form Form1
 Declare Text1 TextBox Form Form1
@@ -21951,30 +21946,28 @@ Method Text1, "Transparent"
 Method Text1, "Colors", 15,15
 m=1 : s=1
 Function Form1.Unload {
-      read new &ok
-      if mm<>0 then thread mm erase : mm=0:ok=true
-      
+	read new &ok
+	If mm<>0 then thread mm erase : mm=0:ok=true     
 }
 Layer Form1 {
-                  gradient 7,0
-                  hold
-      Thread {
-            {
-                  Release
-                  Pen 0 { Circle Fill 0, m*100, 0.5}
-                  m+=s
-                  if m>=60 then {
-                        pen random(1,4)
-                         s-!
-                  } else.If m<2 then {
-                         s-!
-                         pen random(1,4)
-                  }
-       
-\\		refresh 5000
-                  method Form1, "RefreshAll"
-            }
-      } as mm interval 1000/24
+	gradient 7,0
+	hold
+	Thread {
+		{
+			Release
+			Pen 0 { Circle Fill 0, m*100, 0.5}
+			m+=s
+			If m>=60 then
+				pen random(1,4)
+				s-!
+			Else.If m<2 then
+				s-!
+				pen random(1,4)
+			End If
+			\\		refresh 5000
+			method Form1, "RefreshAll"
+		}
+	} as mm interval 1000/24
 }
 Method Form1, "Show", 1
 Threads Erase
