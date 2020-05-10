@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 23 active-X
-An small addition for functions references.
+Version 9.9 revision 24 active-X
+some bugs removed
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

@@ -4234,6 +4234,7 @@ Module CheckIt {
 \\ Also if we press Esc we do the same
 }
 CheckIt
+Thread.Plan Sequential
 }
 MODULE LISP {Profiler
 EntryLevel =0
@@ -4677,6 +4678,8 @@ TASK.MAIN 20 {
 \\ UNBLOCK ESCAPE KEY
 ESCAPE ON
 REFRESH 30
+THREADS ERASE
+THREAD.PLAN SEQUENTIAL
 EXIT
 enshow1:
       e1x=6000+RANDOM(2000) : e1y=6000+RANDOM(2000) : e1z=20
@@ -5396,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 9.3 for ver 9.9 rev 21 and newer"
+	Report " A collection of modules for tests version 9.4 for ver 9.9 rev 21 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -10177,7 +10180,11 @@ CompilerExample
 MODULE CC {move scale.x/2, scale.y/2
 legend "This is centered", "Arial", 22,pi/6,2 , 0
 }
-MODULE FADE {Read X, Y
+MODULE FADE {If not match("NN") then
+	Print "Missing two numbers as colors"
+	Exit
+End If
+Read X, Y
 Module FadeScreen (&Paint(), tempo) {
       tempo=abs(tempo)
       move 0,0 
@@ -10770,7 +10777,7 @@ Module OOP {
 	                  Print part "I get the caption:";.caption$
 	                  print
 	                  =0
-	            }          
+	            }
 	      }
 	}
 	EventHandler=EventHandler()  \\ create handler
@@ -13963,6 +13970,7 @@ rem
 			=ans
 			if ansi then locale oldid
 			set fast
+			
 			Sub PrepareBuffer()
 				
 				if l-acc>=64 then
@@ -17190,7 +17198,7 @@ Function Pad.PopUp {
 }
 function cs_choose{
        With Pad, "ColorCollection1", lcase$("|abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield|"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", false, "MultiLineComment1", "/*","MultiLineComment2", "*/"
-      With Pad, "WordCharLeft"," ,+-=/*^()[];<>", "WordCharRight"," .,+-=/*^()[];<>","OtherSymbols","@","UseColon",";"
+      With Pad, "WordCharLeft"," ,+-=/*^()[];<>:?", "WordCharRight"," .,+-=/*^()[];<>?:","OtherSymbols","@","UseColon",";"
       With Pad,"StartSymbols", "+-&|*=></,.1234567890()'"+chr$(34), "StringSep2","'", "EnablePairs", True, "linespace", 30
       With Pad, "SearchWords", True, "nowrap", True, "AllowInsertBrackets",  True, "SpaceIndent", 2, "HighlightParagraph", True
       Method Pad, "ReColor"
@@ -20595,7 +20603,8 @@ End Sub
 MODULE CHESSGAME {\\ George Karras, 2019
 \\ Chess Example (a big one)
 \\ Example Using sprites
-\\ Rev. 2
+\\ Rev. 3
+Thread.plan sequential
 Set Fast
 Hide
 window 12, window

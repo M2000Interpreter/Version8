@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 23
+Global Const Revision = 24
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -34363,11 +34363,11 @@ ElseIf IsLabelSymbolNew(rest$, "мео", "NEW", Lang) Then
             If Not IsStrExp(bstack, rest$, s$) Then ProcEvent = False: Exit Function
             If Not lookOne(s$, "{") Then
             If GetSub(s$, pm) Then
-            If sbf(pm).Extern > 0 Then
-                s$ = "{ call extern" + Str$(sbf(pm).Extern) + "}"
-            Else
-                s$ = "{" + sbf(pm).sb + "}"
-            End If
+                If sbf(pm).Extern > 0 Then
+                    s$ = "{ call extern" + Str$(sbf(pm).Extern) + "}" + sbf(pm).sbgroup
+                Else
+                    s$ = "{" + sbf(pm).sb + "}" + sbf(pm).sbgroup
+                End If
             Else
             s$ = "{CALL VOID " + s$ + "}"
             End If
@@ -37308,7 +37308,7 @@ conter00:
                 If F Then
                     ss$ = here$
                     here$ = vbNullString
-                    If Not MyFunction(0, bstack, s$, 1) Then
+                    If Not MyFunction(0, bstack, s$, 1, , flag2) Then
                         GoTo er106
                         Exit Do
                     Else
@@ -37316,7 +37316,7 @@ conter00:
                     End If
                     here$ = ss$
                 Else
-                    If Not MyFunction(0, bstack, s$, 1) Then
+                    If Not MyFunction(0, bstack, s$, 1, , flag2) Then
                         GoTo er106
                         Exit Do
                     Else
@@ -37365,10 +37365,18 @@ arrconthere:
         Else
         ' get function
         If GetSub(s$, i) Then
+        If Len(sbf(i).sbgroup) > 0 Then
         If sbf(i).Extern > 0 Then
-        s$ = Left$(what$, Len(what$) - 1) + " { call extern" + Str$(sbf(x1).Extern) + "}"
+        s$ = Left$(what$, Len(what$) - 1) + " { call extern" + Str$(sbf(i).Extern) + "}" + sbf(i).sbgroup
+        Else
+        s$ = Left$(what$, Len(what$) - 1) + " {" + sbf(i).sb + "}" + sbf(i).sbgroup
+        End If
+        Else
+        If sbf(i).Extern > 0 Then
+        s$ = Left$(what$, Len(what$) - 1) + " { call extern" + Str$(sbf(i).Extern) + "}"
         Else
         s$ = Left$(what$, Len(what$) - 1) + " {" + sbf(i).sb + "}"
+        End If
         End If
         GoTo conter00
         End If
@@ -44525,9 +44533,9 @@ Do
         If IsStrExp(basestack, rest$, ss$) Then
             If GetSub(ss$, x1) Then
                 If sbf(x1).Extern > 0 Then
-                basestack.soros.DataStr "{ call extern" + Str$(sbf(x1).Extern) + "}": x1 = 1: GoTo contlink2
+                basestack.soros.DataStr "{ call extern" + Str$(sbf(x1).Extern) + "}" + sbf(x1).sbgroup: x1 = 1: GoTo contlink2
                 Else
-                basestack.soros.DataStr "{" + sbf(x1).sb + "}": x1 = 1: GoTo contlink2
+                basestack.soros.DataStr "{" + sbf(x1).sb + "}" + sbf(x1).sbgroup: x1 = 1: GoTo contlink2
                 End If
             Else
                 basestack.soros.DataStr ss$: x1 = 1: GoTo contlink2
