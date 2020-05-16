@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 24 active-X
-some bugs removed
+Version 9.9 revision 25 active-X
+a small bug in sort for tuples of two items;
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

@@ -1542,7 +1542,7 @@ Dim M1 As Long, M2 As Long
   If UB - LB = 1 Then
      M1 = LB
 
-     If actualdata(M1) < actualdata(UB) Then SwapVariant actualdata(M1), actualdata(UB)
+     If actualdata(M1) > actualdata(UB) Then SwapVariant actualdata(M1), actualdata(UB)
      Exit Sub
   ElseIf UB - LB < 7 Then
   InsertionSort1 LB, UB
@@ -1575,7 +1575,7 @@ Dim M1 As Long, M2 As Long
   If UB - LB = 1 Then
      M1 = LB
 
-     If actualdata(M1) > actualdata(UB) Then SwapVariant actualdata(M1), actualdata(UB)
+     If actualdata(M1) < actualdata(UB) Then SwapVariant actualdata(M1), actualdata(UB)
      Exit Sub
   ElseIf UB - LB < 7 Then
   InsertionSort LB, UB

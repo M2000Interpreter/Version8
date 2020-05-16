@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 9.4 for ver 9.9 rev 21 and newer"
+	Report " A collection of modules for tests version 10 for ver 9.9 rev 21 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -22849,5 +22849,382 @@ Input #k, A$, B$, C, D$
 Close #k
 Print "Results"
 Print A$, B$, C, D$
+}
+MODULE DUTCH {Report "Dutch Flag from Dijkstra"
+const center=2
+enum balls {Red, White, Blue}
+fillarray=lambda a=(Red, White, Blue) (size as long=10)-> {
+	if size<1 then size=1
+	randomitem=lambda a->a#val(random(0,2))
+	dim a(size)<<randomitem()
+	=a()
+}
+Display$=lambda$ (s as array) ->{
+	Document r$=eval$(array(s))
+	if len(s)>1 then
+	For i=1 to len(s)-1 {
+		r$=", "+eval$(array(s,i))
+	}
+	end if
+	=r$
+}
+TestSort$=lambda$ (s as array)-> {
+	="unsorted: "
+	x=array(s)
+	for i=1 to len(s)-1 {
+		k=array(s,i)
+		if x>k then break
+		swap x, k
+	}
+	="sorted: "
+}
+Positions=lambda mid=White (a as array) ->{
+	m=len(a)
+	dim Base 0, b(m)=-1
+	low=-1
+	high=m
+	m--
+	i=0
+	medpos=stack
+	link a to a()
+	for i=m to 0 {
+		if a(i)<=mid then exit
+		high--
+		b(high)=high
+	}
+	for i=0 to m {
+		if a(i)>=mid then exit
+		low++
+		b(low)=low
+	}
+	if high-low>1 then
+	for i=low+1 to high-1 {
+		select case a(i)<=>Mid
+		case -1
+			low++ : b(low)=i
+		case 1
+		{
+			high-- :b(high)=i
+			if High<i then swap b(high), b(i)
+		}
+		else case
+			stack medpos {data i}
+		end select
+	}
+	end if
+	if Len(medpos)>0 then
+	dim c()
+	c()=array(medpos)
+	stock c(0) keep len(c()), b(low+1)
+	for i=low+1 to high-1
+   		if b(i)>low and b(i)<high and b(i)<>i then swap b(b(i)), b(i)	
+	next i
+	end if
+	if low>0  then
+		for i=0 to low
+			if b(i)<=low and b(i)<>i then swap b(b(i)), b(i)
+		next 
+	end if
+	if High<m then
+		for i=m to High
+			if b(i)>=High and b(i)<>i then swap b(b(i)), b(i)
+		next 
+	end if
+	=b()
+}
+InPlace=Lambda (&p(), &Final()) ->{
+	def i=0, j=-1, k=-1, many=0
+	for i=0 to len(p())-1
+		if p(i)<>i then
+			j=i
+			z=final(j)
+			do
+				final(j)=final(p(j))
+				k=j
+				j=p(j)
+				p(k)=k
+				many++
+			until j=i
+			final(k)=z
+		end if
+	next
+	=many
+}
+
+
+Dim final(), p(), second(), p1()
+Rem final()=(White,Red,Blue,White,Red, Red, Blue)
+Rem final()=(white, blue, red, blue, white)
+
+final()=fillarray(30)
+Print "Items: ";len(final())
+Report TestSort$(final())+Display$(final())
+\\ backup for final() for second example
+second()=final()
+p()=positions(final())
+\\ backup p() to p1() for second example
+p1()=p()
+
+
+Report Center,  "InPlace"
+rem Print p()   ' show array items
+many=InPlace(&p(), &final())
+rem print p()  ' show array items
+Report TestSort$(final())+Display$(final())
+print "changes: "; many
+
+Report Center, "Using another array to make the changes"
+final()=second()
+\\ using a second array to place only the changes
+item=each(p1())
+many=0
+While item {
+	if item^=array(item) else final(item^)=second(array(item)) : many++
+}
+Report TestSort$(final())+Display$(final())
+print "changes: "; many
+}
+MODULE KNIGHT {Function KnightTour$(StartW=1, StartH=1){
+	def boolean swapH, swapV=True
+	if startW<=4  then swapH=true: StartW=8+1-StartW
+	if startH>4  then swapV=False: StartH=8+1-StartH
+	Let final=8*8, last=final-1, HighValue=final+1
+	Dim Board(1 to 8, 1 to 8), Moves(1 to 8, 1 to 8)=HighValue
+	f=stack:=1,2,3,4,5,6,7,8
+	if 8-StartW=2 and StartH=2 then stack f {shift 1,-8}
+	Function KnightMove(x,w,h) {
+		a=2:b=1:z=1:p=1
+		if x mod 2=1  then swap a,b
+		if x>2 then p-! : if x>4 then swap z, p : if x>6 then p-!
+		w+=z*a
+		h+=p*b
+		if w>=1 and w<=8 and h>=1 and h<=8 then =(w, h) else =(,)
+	}
+	For j=1 to 8 :For i=1 to 8
+	s=stack
+	For k=1 to 8
+		m=KnightMove(stackitem(f, k),i, j)
+		if len(m)>1 then Stack s {data m} 
+	Next : Board(i,j)=s : Next 
+           stack f {shift 1,-8}
+	Next
+	For i=1 to 8 :For j=1 to 8
+	s=Board(i, j)
+	if len(s)>2 then
+		so=queue
+		For k=1 to len(s)
+			m=stackitem(s, k)
+			Append  so, Len(Board(m#val(0), m#val(1))) :=m
+		Next
+		sort ascending so as number
+		s=stack
+		stack s {for k=0 to len(so)-1:data so(k!):next}
+		Board(i,j)=s
+	end if
+	Next :	Next
+	s= Board(StartW, StartH)
+	n=0
+	BackTrack=Stack
+	Moves=1
+	Moves(StartW, StartH)=1
+	Repeat
+	n++
+	While n>len(s) {
+		if Len(BackTrack)=0 then Print "Break", moves : Break
+		Moves--
+		Stack BackTrack {Read s, n}
+		m=stackitem(s, n)
+		Moves(m#val(0), m#val(1))=HighValue
+		n++
+	}
+	m=stackitem(s, n)
+	w=m#val(0)
+	h=m#val(1)
+	if Moves(w, h)>=Moves then
+		if Moves<last then
+		s1=Board(w, h) :ii=-1
+		for i=1 to len(s1){m1=stackitem(s1, i) :if Moves(m1#val(0),m1#val(1))>moves then ii=i-1 : exit
+		}
+		if ii>=0 then
+			Moves++
+			Moves(w,h)=Moves
+			Stack BackTrack {Push n, s}
+			s=s1: n=ii
+		end if
+		else
+			Moves++
+			Moves(w,h)=Moves
+		end if
+	end if
+	until Moves=final
+	Document export$
+	Inventory Tour
+	letters=stack:="a","b","c","d","e","f","g","h"
+	f=stack:=1,2,3,4,5,6,7,8
+	if swapV Else stack f {Shift 1,-8}
+	if swapH then stack letters {Shift 1,-8}
+	For j=1 to 8:For i=1 to 8
+		Append Tour, Moves(i,j) :=stackitem$(letters, i)+str$(stackitem(f, j),"")
+	Next : Next
+	Sort ascending Tour as number
+	one=each(Tour)
+	While one {
+		export$=Eval$(one)
+		if  not one^=last then export$="->"
+		If (one^+1) mod 8=0 then
+		export$={
+		}
+		End if
+	}
+	=export$
+}
+Document ex$
+ex$= {Knight's Tour from a1
+
+}+ KnightTour$()+{Knight's Tour from h1
+
+}+ KnightTour$(8, 1)+{Knight's Tour from a8
+
+}+KnightTour$(1, 8)+{Knight's Tour from h8
+
+}+KnightTour$(8, 8)
+Clipboard ex$
+Report ex$
+}
+MODULE KNIGHTEXP {module Experiment(StartW=1, StartH=1, &mmm){
+	Global ww=8, hh=8
+	def boolean swapH, swapV=True
+	if startW<=ww div 2  then swapH=true: StartW=ww+1-StartW
+	if startH>hh div 2  then swapV=False: StartH=hh+1-StartH
+	Form 80, 32
+	Let final=ww*hh, last=final-1, HighValue=final+1
+	Dim Board(1 to ww, 1 to hh), Moves(1 to ww, 1 to hh)=HighValue
+	f=stack:=1,2,3,4,5,6,7,8
+	if ww-StartW=2 and StartH=2 then stack f {shift 1,-8}
+	Function KnightMove(x,w,h) {
+		a=2:b=1:z=1:p=1
+		if x mod 2=1  then swap a,b
+		if x>2 then p-! : if x>4 then swap z, p : if x>6 then p-!
+		w+=z*a
+		h+=p*b
+		if w>=1 and w<=ww and h>=1 and h<=hh then
+			=(w, h)
+		else
+			=(,)
+		end if
+	}
+	For j=1 to hh
+	For i=1 to ww
+	s=stack
+	For k=1 to 8
+		m=KnightMove(stackitem(f, k),i, j)
+		if len(m)>1 then Stack s {data m} 
+	Next
+	Board(i,j)=s
+	Next 
+           stack f {shift 1,-8}
+	Next
+	For i=1 to ww
+	For j=1 to hh
+	s=Board(i, j)
+	if len(s)>2 then
+	so=queue
+	For k=1 to len(s)
+	m=stackitem(s, k)
+	Append  so, Len(Board(m#val(0), m#val(1))) :=m
+	Next
+	sort ascending so as number
+	s=stack
+	stack s {
+		for k=0 to len(so)-1
+			data so(k!)
+		next
+	}
+	Board(i,j)=s
+	end if
+	Next
+	Next
+	Print "Done"
+	s= Board(StartW, StartH)
+	n=0
+	BackTrack=Stack
+	Moves=1
+	Moves(StartW, StartH)=1
+	mstep=10
+	mm=mstep
+	mmm=0
+	Repeat
+	n++
+	While n>len(s) {
+		if Len(BackTrack)=0 then Print "Break", moves : Break
+		Moves--
+		Stack BackTrack {Read s, n}
+		m=stackitem(s, n)
+		Moves(m#val(0), m#val(1))=HighValue
+		n++
+	}
+	m=stackitem(s, n)
+	w=m#val(0)
+	h=m#val(1)
+	if Moves(w, h)>=Moves then
+		if Moves<last then
+		s1=Board(w, h) :ii=-1
+		for i=1 to len(s1){m1=stackitem(s1, i) :if Moves(m1#val(0),m1#val(1))>moves then ii=i-1 : exit
+		}
+		if ii>=0 then
+			Moves++
+			Moves(w,h)=Moves
+			Stack BackTrack {Push n, s}
+			s=s1: n=ii
+			mm--
+		end if
+		else
+			Moves++
+			Moves(w,h)=Moves
+			mmm+=mm
+			mm=0
+		end if
+	end if
+	if mm Else
+		cls
+		Print "Moves:";Moves
+		sj=hh: sj1=1: if swapV then swap sj, sj1
+		si=1: si1=ww: if swapH then swap si, si1
+		For j=sj to sj1: Print :For i=si to si1
+			Print If(Moves(i,j)<=Moves->Moves(i,j), 0),
+		Next : Next
+		Print
+		mm=mstep
+		mmm+=mm
+		Print mmm
+		refresh 10000
+	end if
+	if mmm>1000 then mmm=-1:  exit
+	until Moves=final
+		cls
+		Print "Moves:";Moves
+		sj=hh: sj1=1: if swapV then swap sj, sj1
+		si=1: si1=ww: if swapH then swap si, si1
+		For j=sj to sj1: Print :For i=si to si1
+			Print If(Moves(i,j)<=Moves->Moves(i,j), 0),
+		Next : Next
+		Print
+		Print mmm
+		Print "DONE"
+		refresh 5000
+}
+dim res(1 to 8, 1 to 8)=0
+for j=8 to 1
+for i=1 to 8
+Experiment i, j, &res(i, j)
+next
+next
+Print
+for j=8 to 1
+for i=1 to 8
+Print  res(i, j),
+next
+Print
+next
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}
