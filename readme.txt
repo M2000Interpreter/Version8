@@ -1,7 +1,8 @@
 M2000 Interpreter and Environment
 
 Version 9.9 revision 25 active-X
-a small bug in sort for tuples of two items;
+Version of Setup 0002
+Some changes to info.gsb and to GreekManual.pdf
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 10 for ver 9.9 rev 21 and newer"
+	Report " A collection of modules for tests version 11 for ver 9.9 rev 21 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -15833,8 +15833,8 @@ FourBitAdder
 }
 MODULE BASEG {Print "Wait..."
 db.provider ""
-'db.provider "Microsoft.Jet.OLEDB.4.0", "Jet OLEDB", "newpassword"
-db.provider "Microsoft.ACE.OLEDB.12.0","Jet OLEDB", "newpassword"
+db.provider "Microsoft.Jet.OLEDB.4.0", "Jet OLEDB", "newpassword"
+'db.provider "Microsoft.ACE.OLEDB.12.0","Jet OLEDB", "newpassword"
 \\ remove base if exist in current directory
 base "gSQL4"
 \\ Make a new table and insert values (M2000 use ADOdb with a special connection string)
@@ -20603,7 +20603,13 @@ End Sub
 MODULE CHESSGAME {\\ George Karras, 2019
 \\ Chess Example (a big one)
 \\ Example Using sprites
-\\ Rev. 3
+\\ Rev. 4
+chessfont$="Arial Unicode MS"
+Font chessfont$
+if not Fontname$="Arial Unicode MS" then
+	chessfont$="DejaVu Sans"
+end if
+Font "Verdana"
 Thread.plan sequential
 Set Fast
 Hide
@@ -20727,7 +20733,7 @@ back {
 	move 0,downlimit
 	fill  sx,sy, 5
 	Layer {
-		font "Arial"
+		font "Verdanal"
 		mode thismode, sx,sy
 		motion center
 		motion, downlimit
@@ -21044,7 +21050,7 @@ Sub DrawEmptyBoard(leftmargin, topmargin, squarewidth, labelcolor)
 	Repeat
 	N=N1
 	N1+=.25
-	Until K1<size.Y("A","Arial", N1)
+	Until K1<size.Y("A",chessfont$, N1)
 	topmargin-=l
 	leftmargin-=l
 	move leftmargin+l,topmargin+l
@@ -21061,7 +21067,7 @@ Sub DrawEmptyBoard(leftmargin, topmargin, squarewidth, labelcolor)
 		move d, topmargin
 		if i<9 then
 			step 0, k
-			Pen labelcolor{Legend str$(9-i,""), "Arial", M,0,2}
+			Pen labelcolor{Legend str$(9-i,""), chessfont$, M,0,2}
 			step 0, -k
 			else
 			N=M
@@ -21076,7 +21082,7 @@ Sub DrawEmptyBoard(leftmargin, topmargin, squarewidth, labelcolor)
 			else
 				step k, k
 				pen labelcolor {
-					Legend mid$("abcdefgh",j,1), "Arial", N, 0, 2
+					Legend mid$("abcdefgh",j,1), chessfont$, N, 0, 2
 				}
 			end If
 			d+=k
@@ -21319,7 +21325,7 @@ Pen 0 {
 		Append OnBoard, i1*9+j1:=t
 	end if
 	return t, 8:=p$
-	move t#val(1), t#val(2): Legend p$, "Arial", N, 0, 2,0
+	move t#val(1), t#val(2): Legend p$, chessfont$, N, 0, 2,0
 	move t#val(3)+twipsx*2, t#val(4)+twipsy*2
 	if t#val(9) then floodfill  ,,color1 else floodfill , , color2
 	if again then read  i, j, i1, j1 : Restart
@@ -21343,7 +21349,7 @@ Pen 0 {
 			fill t#val(7), t#val(7),15
 			p$=t#val$(8)
 			
-			if p$=" " else move t#val(1), t#val(2): Legend p$, "Arial", N, 0, 2,0
+			if p$=" " else move t#val(1), t#val(2): Legend p$, chessfont$, N, 0, 2,0
 			move t#val(3)+twipsx*2, t#val(4)+twipsy*2	
 			if t#val(9) then floodfill  ,,color1 else floodfill , , color2
 		Next
@@ -22458,11 +22464,11 @@ End
 }
 MODULE CRAWL {Escape Off
 Hide
-Window 12,0
+Window 12,1
 Back {
 Ybig=scale.Y
 Window 18,0, 2000;
-Motion.w 0 , Ybig-2000
+Motion.w Motion.wx , Ybig-2000
 Refresh 5000
 
 \\ For changing the decimal character use Locale (Locale 1033 for English, Locale 1032 fro Greek)
@@ -23226,5 +23232,70 @@ Print  res(i, j),
 next
 Print
 next
+}
+MODULE ABC {chessgame {rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e4 1 1
+r1bqkbnr/pppppppp/2n5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 2 2
+r1bqkbnr/pppppppp/2n5/8/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 3 2
+r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq e5 4 3
+r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 5 3
+r1bqkbnr/ppp2ppp/2n5/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq d5 6 4
+r1bqkbnr/ppp2ppp/2n5/1B1pp3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 7 4
+r1bqkbnr/1pp2ppp/p1n5/1B1pp3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 8 5
+r1bqkbnr/1pp2ppp/p1B5/3pp3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 5
+r1bqkbnr/2p2ppp/p1p5/3pp3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 6
+r1bqkbnr/2p2ppp/p1p5/3pN3/4P3/8/PPPP1PPP/RNBQK2R b KQkq - 0 6
+r1bqkbnr/2p3pp/p1p2p2/3pN3/4P3/8/PPPP1PPP/RNBQK2R w KQkq - 1 7
+r1bqkbnr/2p3pp/p1N2p2/3p4/4P3/8/PPPP1PPP/RNBQK2R b KQkq - 0 7
+r1b1kbnr/2pq2pp/p1N2p2/3p4/4P3/8/PPPP1PPP/RNBQK2R w KQkq - 1 8
+r1b1kbnr/2pq2pp/p4p2/N2p4/4P3/8/PPPP1PPP/RNBQK2R b KQkq - 2 8
+r1b1kb1r/2pqn1pp/p4p2/N2p4/4P3/8/PPPP1PPP/RNBQK2R w KQkq - 3 9
+r1b1kb1r/2pqn1pp/p4p2/N2p4/4P3/8/PPPP1PPP/RNBQ1RK1 b kq - 5 9
+r1b1kb1r/2p1n1pp/p4p2/Nq1p4/4P3/8/PPPP1PPP/RNBQ1RK1 w kq - 6 10
+r1b1kb1r/2p1n1pp/p4p2/1q1p4/4P3/1N6/PPPP1PPP/RNBQ1RK1 b kq - 7 10
+r3kb1r/1bp1n1pp/p4p2/1q1p4/4P3/1N6/PPPP1PPP/RNBQ1RK1 w kq - 8 11
+r3kb1r/1bp1n1pp/p4p2/1q1p4/3PP3/1N6/PPP2PPP/RNBQ1RK1 b kq d4 9 11
+r3kb1r/1bp1n1pp/p4p2/1q6/3Pp3/1N6/PPP2PPP/RNBQ1RK1 w kq - 0 12
+r3kb1r/1bp1n1pp/p4p2/1q6/3Pp3/1NP5/PP3PPP/RNBQ1RK1 b kq - 1 12
+r3kb1r/1bp3pp/p4p2/1q3n2/3Pp3/1NP5/PP3PPP/RNBQ1RK1 w kq - 2 13
+r3kb1r/1bp3pp/p4p2/1q3n2/3Pp3/1NP5/PP3PPP/RNBQR1K1 b kq - 3 13
+r3k2r/1bp1b1pp/p4p2/1q3n2/3Pp3/1NP5/PP3PPP/RNBQR1K1 w kq - 4 14
+r3k2r/1bp1b1pp/p4p2/1q3n2/3Pp3/1NP2P2/PP4PP/RNBQR1K1 b kq - 5 14
+r3k2r/1bp1b1pp/p4p2/1q3n2/3P4/1NP2p2/PP4PP/RNBQR1K1 w kq - 0 15
+r3k2r/1bp1b1pp/p4p2/1q3n2/3P4/1NP2P2/PP5P/RNBQR1K1 b kq - 0 15
+r3k2r/1bp1b1pp/p4p2/1q6/3P4/1NP2Pn1/PP5P/RNBQR1K1 w kq - 1 16
+r3k2r/1bp1b1pp/p4p2/1qN5/3P4/2P2Pn1/PP5P/RNBQR1K1 b kq - 2 16
+r3k2r/2p1b1pp/p4p2/1qN5/3P4/2P2bn1/PP5P/RNBQR1K1 w kq - 0 17
+r3k2r/2p1b1pp/p4p2/1qN5/3P4/2P2Qn1/PP5P/RNB1R1K1 b kq - 0 17
+2kr3r/2p1b1pp/p4p2/1qN5/3P4/2P2Qn1/PP5P/RNB1R1K1 w - - 2 18
+2kr3r/2p1b1pp/p4p2/1qN5/3P4/2P3Q1/PP5P/RNB1R1K1 b - - 0 18
+2kr3r/2p3pp/p4p2/1qb5/3P4/2P3Q1/PP5P/RNB1R1K1 w - - 0 19
+2kr3r/2p3pp/p4p2/1qP5/8/2P3Q1/PP5P/RNB1R1K1 b - - 0 19
+2krr3/2p3pp/p4p2/1qP5/8/2P3Q1/PP5P/RNB1R1K1 w - - 1 20
+2krR3/2p3pp/p4p2/1qP5/8/2P3Q1/PP5P/RNB3K1 b - - 0 20
+2krR3/2p3pp/p4p2/2q5/8/2P3Q1/PP5P/RNB3K1 w - - 0 21
+2kr4/2p3pp/p4p2/2q5/8/2P1R1Q1/PP5P/RNB3K1 b - - 1 21
+2k5/2p3pp/p4p2/2q5/8/2P1R1Q1/PP5P/RNBr2K1 w - - 2 22
+2k5/2p3pp/p4p2/2q5/8/2P1R1Q1/PP4KP/RNBr4 b - - 3 22
+2k5/2p3pp/p4p2/2q5/8/2P1R1Q1/PP4KP/RNr5 w - - 0 23
+2k5/2p3pp/p4p2/2q5/8/2P1R3/PP3QKP/RNr5 b - - 1 23
+2k5/2p3pp/p4p2/6q1/8/2P1R3/PP3QKP/RNr5 w - - 2 24
+2k5/2p3pp/p4p2/6q1/8/2P3R1/PP3QKP/RNr5 b - - 3 24
+2k5/2p3pp/p4p2/3q4/8/2P3R1/PP3QKP/RNr5 w - - 4 25
+2k5/2p3pp/p4p2/3q4/8/2P2R2/PP3QKP/RNr5 b - - 5 25
+1k6/2p3pp/p4p2/3q4/8/2P2R2/PP3QKP/RNr5 w - - 6 26
+1k6/2p3pp/p4p2/3q4/P7/2P2R2/1P3QKP/RNr5 b - a4 7 26
+1k6/2p3pp/p4p2/8/P7/2P2R2/1P3QKP/RNrq4 w - - 8 27
+1k6/2p3pp/p4p2/8/P2Q4/2P2R2/1P4KP/RNrq4 b - - 9 27
+1k6/2p3pp/p4p2/8/P2Q4/2P2R2/1P4KP/RNr4q w - - 10 28
+1k6/2p3pp/p4p2/8/P2Q4/2P2R2/1P3K1P/RNr4q b - - 11 28
+1k6/2p3pp/p4p2/8/P2Q4/2P2R2/1P3K1q/RNr5 w - - 0 29
+1k6/2p3pp/p4p2/8/P2Q4/2P1KR2/1P5q/RNr5 b - - 1 29
+1k6/2p3pp/p4p2/8/P2Q4/2P1KR2/1P5q/RN2r3 w - - 2 30
+1k6/2p3pp/p4p2/8/P2Q4/2PK1R2/1P5q/RN2r3 b - - 3 30
+1k6/2p3pp/p4p2/8/P2Q4/2PK1R2/1P2q3/RN2r3 w - - 4 31
+
+
+}
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}
