@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 25 active-X
-Version of Setup 0002
-Some changes to info.gsb and to GreekManual.pdf
+Version 9.9 revision 26 active-X
+Fix an issue from rev 21, when a set function in a group object get indexes.
+(before rev21 works fine)
+
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

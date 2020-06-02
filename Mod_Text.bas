@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 25
+Global Const Revision = 26
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -22978,7 +22978,7 @@ End If
 If noObject And PP.IHaveClass Then Exit Function
 Dim dn As Long, dd As Long, w3 As Long, sp$, lim As Long
 Dim p As Variant
-If v$ <> "" Then sp$ = ")"
+If Len(v$) > 0 Then sp$ = ")"
 again123:
 dd = 0
 dn = 0
@@ -23032,7 +23032,8 @@ contlabel1:
             End If
         ElseIf TypeOf PP.GroupRef Is Group Then
             If Not fromstr Then
-                If PP.GroupRef.HasParameters Then
+            If rightexpr Then
+            ElseIf PP.GroupRef.HasParameters Then
                     If Not PP.GroupRef.HasStrValue Then
                         If Len(rst$) > 0 Then
                             bstack.tmpstr = v$ + Left$(rst$, 1)

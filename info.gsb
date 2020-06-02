@@ -2217,7 +2217,7 @@ Print counter
 Print M2.y=20, M2=20
 Print counter
 if counter=oldcounter then
-	Print "counter not changed because the event listinside group is empty"
+	Print "counter not changed because the event list inside group is empty"
 end if
 \\ We can get the value from NewGroup which is a pointer to a group
 \\ but has event list from the original alfa
@@ -15836,7 +15836,7 @@ db.provider ""
 db.provider "Microsoft.Jet.OLEDB.4.0", "Jet OLEDB", "newpassword"
 'db.provider "Microsoft.ACE.OLEDB.12.0","Jet OLEDB", "newpassword"
 \\ remove base if exist in current directory
-base "gSQL4"
+base "mdbfile"
 \\ Make a new table and insert values (M2000 use ADOdb with a special connection string)
 \\ data taken from example's of MOSH HAMEDANI for SQL, see this video
 \\ https://www.youtube.com/watch?v=7S_tz1z_5bA
@@ -15864,7 +15864,7 @@ base "gSQL4"
 \\ including empty string.
 
 
-execute "gSQL4", {
+execute "mdbfile", {
 	CREATE TABLE customers (
 		customer_id AUTOINCREMENT PRIMARY KEY,
 		first_name VARCHAR(50) NOT NULL,
@@ -15893,7 +15893,7 @@ execute "gSQL4", {
 report "customers created"
 \\ execute a SELECT query to get a Recordset
 report "Selected customers where Points<1000 in descending order"
-execute "gSQL4",{
+execute "mdbfile",{
 	SELECT 	customer_id,
 			last_name,
 			first_name,
@@ -15909,7 +15909,7 @@ Def CheckNull$(a, a$)=If$(type$(a)="Null"->"NULL", a$)
 GetListA() ' value is already in stack
 
 report  "Select customers id where phone is null"
-execute "gSQL4",{
+execute "mdbfile",{
 	SELECT 	customer_id,
 			phone
 	FROM 	`customers`
@@ -15918,7 +15918,7 @@ execute "gSQL4",{
 }
 GetIDwithNullPhone()    ' value is already in stack
 
-close base "gSQL4"
+close base "mdbfile"
 \\ using list to check the variable names
 list
 \\ there are no variables in module, at this moment.
