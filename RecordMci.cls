@@ -14,7 +14,7 @@ Attribute VB_Exposed = True
 Option Explicit
 Private Declare Function mciGetErrorString Lib "winmm.dll" Alias "mciGetErrorStringA" (ByVal dwError As Long, ByVal lpstrBuffer As String, ByVal uLength As Long) As Long 'Get the error message of the mcidevice if any
 Private Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal lpstrReturnString As String, ByVal uReturnLength As Long, ByVal hwndCallback As Long) As Long 'Send command strings to the mci device
-Private data As String * 128 ' Used to store our return data
+Private Data As String * 128 ' Used to store our return data
 Public error As Long ' Used to store our error message
 Public Height As Long
 Public Width As Long
@@ -105,14 +105,14 @@ End Sub
 Public Function getPositionInMS() As Long
     'Get the position of the movie in milliseconds
     error = mciSendString("set capture time format ms", 0, 0, 0)
-    error = mciSendString("status capture position", data, 128, 0)
-    getPositionInMS = val(data)
+    error = mciSendString("status capture position", Data, 128, 0)
+    getPositionInMS = val(StrPart(Data))
 End Function
 Public Function getLengthInMS() As Long
     'Get the position of the movie in milliseconds
     error = mciSendString("set capture time format ms", 0, 0, 0)
-    error = mciSendString("status capture length", data, 128, 0)
-    getLengthInMS = val(data)
+    error = mciSendString("status capture length", Data, 128, 0)
+    getLengthInMS = val(StrPart(Data))
 End Function
 Sub recStop()
 error = mciSendString("stop capture", 0, 0, 0)
@@ -130,9 +130,9 @@ Public Function setVolume(Value As Long)
 End Function
 Public Function isRecPlaying() As Boolean
     Dim isPlaying As String
-    error = mciSendString("status capture mode", data, 128, 0)
+    error = mciSendString("status capture mode", Data, 128, 0)
     MyDoEvents
-    isPlaying = Left(data, 7)
+    isPlaying = Left(StrPart(Data), 7)
     If isPlaying = "playing" And Not NOEXECUTION Then
         isRecPlaying = True
     Else
@@ -149,8 +149,8 @@ error = mciSendString(CommandString, 0&, 0, 0)
 
 End Sub
 Function AnyMciValue(CommandString As String)
- error = mciSendString(CommandString, data, 128, 0)
-    AnyMciValue = val(data)
+ error = mciSendString(CommandString, Data, 128, 0)
+    AnyMciValue = val(StrPart(Data))
 End Function
 Public Function checkError() As String
     'A very useful function for getting any errors
@@ -173,3 +173,6 @@ error = mciSendString(Terminate, 0, 0, 0)
 
 End If
 End Sub
+Private Function StrPart(sBuffer As String)
+StrPart = Left$(sBuffer, InStr(sBuffer, Chr$(0)) - 1)
+End Function

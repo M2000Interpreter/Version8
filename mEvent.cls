@@ -127,12 +127,12 @@ Hash() = anyhash()
 toplim = anyTopLim
 End Sub
 
-Friend Sub ReadVar(where, name$, func As String)
-    name$ = PriveSpace(where).Key
+Friend Sub ReadVar(where, Name$, func As String)
+    Name$ = PriveSpace(where).Key
     func = PriveSpace(where).ndx
 End Sub
-Friend Sub ReadVarEx(where, name$, func As String, Extra As Long)
-    name$ = PriveSpace(where).Key
+Friend Sub ReadVarEx(where, Name$, func As String, Extra As Long)
+    Name$ = PriveSpace(where).Key
     func = PriveSpace(where).ndx
     Extra = PriveSpace(where).firsthash
 End Sub
@@ -143,7 +143,7 @@ Private Sub ExpandHash()
     hashlen = hashlen * 2 + 3
     
     ReDim Hash(hashlen) As Long
-    For i = 0 To MaxSpace \ 2 - 1
+    For i = 0 To toplim
 
     place HashFunc2(i), i
     Next i
@@ -189,9 +189,9 @@ Friend Sub ReduceHash(newTop As Long)
                 MaxSpace = 2 * (newTop + 1) + 1
                 
                 ReDim Preserve PriveSpace(MaxSpace) As GenItem
-                
-                ReDim Hash(MaxSpace * 2 + 3)
-               hashlen = MaxSpace * 2 + 3
+                hashlen = MaxSpace * 2 + 3
+                ReDim Hash(hashlen)
+               
              '  reHash...
              toplim = newTop - 1
             For i = 0 To toplim

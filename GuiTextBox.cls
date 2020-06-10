@@ -73,7 +73,7 @@ Private Declare Function GetStringTypeExW Lib "kernel32.dll" (ByVal Locale As Lo
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
-Public Sub Construct(there As Form, name$)
+Public Sub Construct(there As Form, Name$)
  mIndex = -1
  Set Callback = there
  On Error Resume Next
@@ -82,9 +82,9 @@ Public Sub Construct(there As Form, name$)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
-Public Sub ConstructArray(there As Form, name$, i As Long)
+Public Sub ConstructArray(there As Form, Name$, i As Long)
  Set Callback = there
  On Error Resume Next
  ctrlName = GetTag$
@@ -93,7 +93,7 @@ Public Sub ConstructArray(there As Form, name$, i As Long)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
 Public Property Get Text() As String
 If glistN.listcount = 0 Then
@@ -183,7 +183,7 @@ dimm2 = rgb(200, 120, 60)
 Dim ff As New StdFont
 With Callback
 white = .Controls(1).ForeColor
-ff.name = .CtrlFontName
+ff.Name = .CtrlFontName
 ff.charset = Form1.DIS.Font.charset
 ff.Size = .CtrlFontSize
 ff.bold = .CtrlFontBold
@@ -1132,18 +1132,17 @@ sr1 = Clipboard.GetText(1)
 If (OpenClipboard(0) <> 0) Then
 
         
-        If (GetBinaryData(lFormatId, bData())) Then
+    If (GetBinaryData(lFormatId, bData())) Then
         sr = bData
-    
-     If IsWine Then
+        
+        If IsWine Then
             sr1 = Myleft$(sr, Len(sr1))
             GetTextData = Myleft$(sr1, Len(sr1))
-    Else
-                GetTextData = Myleft$(sr, Len(sr1))
-    End If
-    
-          
+        Else
+            GetTextData = Myleft$(sr, Len(sr1))
         End If
+
+    End If
 
 End If
 CloseClipboard
@@ -1219,7 +1218,7 @@ Public Sub FontAttr(ThisFontName, Optional ThisMode = -1, Optional ThisBold = Tr
 Dim aa As New StdFont
 If ThisFontName <> "" Then
 
-aa.name = ThisFontName
+aa.Name = ThisFontName
 
 If ThisMode > 7 Then aa.Size = ThisMode Else aa = 7
 aa.bold = ThisBold

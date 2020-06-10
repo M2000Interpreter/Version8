@@ -194,18 +194,16 @@ sr1 = Clipboard.GetText(1)
 If (OpenClipboard(0) <> 0) Then
 
         
-        If (GetBinaryData(lFormatId, bData())) Then
+    If (GetBinaryData(lFormatId, bData())) Then
         sr = bData
-    
-     If IsWine Then
-            sr1 = Left$(sr, Len(sr1))
-            GetTextData = Left$(sr1, Len(sr1))
-    Else
-                GetTextData = Left$(sr, Len(sr1))
-    End If
-    
-          
+        
+        If IsWine Then
+            sr1 = Myleft$(sr, Len(sr1))
+            GetTextData = Myleft$(sr1, Len(sr1))
+        Else
+            GetTextData = Myleft$(sr, Len(sr1))
         End If
+    End If
 
 End If
 CloseClipboard
@@ -742,12 +740,12 @@ ThatData = UndoDoc.textDoc
 End Sub
 
 Private Sub glistN_DragPasteData(ThatData As String)
-
-Dim a() As String, k As Long
+Dim a() As String, k As Long, a77$
+a77$ = space$(EditTabWidth)
 If Not glistN.UseTab Then
 
 a() = Split(ThatData, ChrW(9))
-PasteDoc Join(a(), "    ")
+PasteDoc Join(a(), a77$)
 Else
 PasteDoc ThatData
 End If
@@ -1068,7 +1066,7 @@ End If
 End If
 
 SelText = Pad$
-RemoveUndo Pad$
+RemoveUndo SelText
 
 KeyCode = 0
 'mDoc.WrapAgainColorBlock mDoc.MarkParagraphID, mDoc.MarkParagraphID
@@ -2096,7 +2094,9 @@ again:
 If RTrim$(a$) = vbNullString Then
 If pos2 > 0 Then
 If col((UBound(col()) \ 2) * 2) <> lastcol Then
+If pos2 < k Then
 addone pos2 + 1, lastcol
+End If
 ElseIf UBound(col()) < 2 Then
 addone pos2, lastcol
 End If
@@ -2848,9 +2848,11 @@ If kind = 0 Then
            If pos2 <= k Then
                 drop$ = block(a$)
                 If Len(drop$) > 0 Then
+                
                     ColorizeInnerStatements drop$, k - Len(a$), pos2, localfeedthis
-           
+
                     If Len(a$) > 0 Then ColorizeInnerStatements a$, k, pos2, localfeedthis
+          
                     drop$ = vbNullString
                 Else
                 ColorizeInnerStatements a$, k, pos2, localfeedthis
@@ -3992,7 +3994,7 @@ RHS = glistN.list(0)
 glistN.list(0) = Pad$
 If Not glistN.list(0) = Pad$ Then glistN.list(0) = RHS
 Else
-mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, RHS
+mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, RHS, , , Not NoColor
 End If
 Render
 End If

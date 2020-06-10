@@ -310,18 +310,17 @@ sr1 = Clipboard.GetText(1)
 If (OpenClipboard(0) <> 0) Then
 
         
-        If (GetBinaryData(lFormatId, bData())) Then
+    If (GetBinaryData(lFormatId, bData())) Then
         sr = bData
-    
-     If IsWine Then
+        
+        If IsWine Then
             sr1 = Myleft$(sr, Len(sr1))
             GetTextData = Myleft$(sr1, Len(sr1))
-    Else
-                GetTextData = Myleft$(sr, Len(sr1))
-    End If
-    
-          
+        Else
+            GetTextData = Myleft$(sr, Len(sr1))
         End If
+
+    End If
 
 End If
 CloseClipboard
@@ -1603,7 +1602,7 @@ ElseIf KeyCode = vbKeyV And (shift And 3) = 2 Then
     End If
     End If
     SelText = Pad$
-    RemoveUndo Pad$
+    RemoveUndo SelText
     KeyCode = 0
     ReColorBlock
 ElseIf KeyCode = vbKeyA And (shift And 3) = 2 Then
@@ -2789,7 +2788,6 @@ addone pos2, lastcol
 pos2 = pos2 + 1
     GoTo herestr
     ElseIf Myleft$(a$, 2) = "/>" Then
-  '  Exit Sub
     pos2 = k - Len(a$) + 1
     
     
@@ -2802,7 +2800,6 @@ pos2 = pos2 + 1
      pos2 = k - Len(a$) + 1
     a$ = Mid$(a$, 2)
 
-   ' If feedthis = 1 Then a$ = "": pos2 = k: Exit Sub
    If feedthis = 1 Then feedthis = 0
             If pos2 > 0 Then
                 addone pos2, 14
@@ -4271,7 +4268,9 @@ again:
 If RTrim$(a$) = vbNullString Then
 If pos2 > 0 Then
 If col((UBound(col()) \ 2) * 2) <> lastcol Then
+If pos2 < k Then
 addone2000 pos2 + 1, lastcol
+End If
 ElseIf UBound(col()) < 2 Then
 addone2000 pos2, lastcol
 End If
@@ -6249,7 +6248,7 @@ RHS = glistN.list(0)
  glistN.list(0) = Pad$
 If Not glistN.list(0) = Pad$ Then glistN.list(0) = RHS: undotext = vbNullString
 Else
-mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, RHS
+mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, RHS, , , Not NoColor
 End If
 Render
 End If
@@ -7451,9 +7450,15 @@ Do While Pos <= Len(a$)
                 part$ = "S"
                 Pos = Pos + 1
                 Do While Pos <= Len(a$)
+                    If Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "\" + Right$(stringsep2, 1) Then GoTo cont001
+                    
+                    End If
                     If Mid$(a$, Pos, 1) = Right$(stringsep2, 1) Then Exit Do
                     If Asc(Mid$(a$, Pos, 1)) < 32 Then Exit Do
+cont001:
                     Pos = Pos + 1
+                    
                 Loop
             If Pos > Len(a$) Then Pos = Len(a$)
             End If
@@ -7461,8 +7466,15 @@ Do While Pos <= Len(a$)
             part$ = "S"
             Pos = Pos + 1
             Do While Pos <= Len(a$)
+                     If Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "\" + Right$(StringSep, 1) Then GoTo cont002
+                    
+                    End If
+                
+
                 If Mid$(a$, Pos, 1) = StringSep Then Exit Do
                 If Asc(Mid$(a$, Pos, 1)) < 32 Then Exit Do
+cont002:
                 Pos = Pos + 1
             Loop
             If Pos > Len(a$) Then Pos = Len(a$)
@@ -7479,9 +7491,7 @@ Do While Pos <= Len(a$)
                 Pos = Pos + 1
             Loop
             If Pos > Len(a$) Then Pos = Len(a$)
-        'ElseIf InStr(StartSymbols + Chr$(0), w$) > 0 Then
-          '            b$ = "N"
-             
+           
         
         ElseIf w$ = "(" Or w$ = "[" Then
         
@@ -9199,10 +9209,10 @@ GoTo ex1
 End If
 If mark1 <> 0 And mark2 <> 0 Then
 IsRTLrun = True
-'ManualInform
+
 End If
 ex1:
-'Debug.Print Mark1, Mark2
+
 
     
 End Function

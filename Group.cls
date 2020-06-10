@@ -24,6 +24,7 @@ Dim bank As mArray
 Dim mTeam As Boolean
 Dim LinkToGroup As Object
 Dim mTag As String
+Public Patch As String
 Public IamGlobal As Boolean, IamRef As Boolean
 Public HasValue As Boolean, HasSet As Boolean, HasStrValue As Boolean, HasParameters As Boolean
 Public HasParametersSet As Boolean
@@ -40,7 +41,7 @@ Public LastOpen As String
 Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Public PointerPtr As Long
-Public ToDelete As Boolean
+Public ToDelete As Boolean, HasRemove As Boolean
 Public Property Get Events() As Object
 Set Events = eventlist
 End Property
@@ -227,7 +228,12 @@ End If
 End Sub
 Public Sub PokeItem(cursor As Long, item)
 ' used in the float mode
+'Debug.Print Typename$(item)
+If Typename$(item) = "String" Then
+'If item = vbNullString Then Stop
+End If
 If IsObject(item) Then
+
 Set bank.item(cursor) = item
 Else
 ' always last two items are for local vars and functions
@@ -348,10 +354,42 @@ Set OwnSoros = New mStiva2
 End Sub
 
 Private Sub Class_Terminate()
-Set SuperClassList = Nothing
+Dim myobject As Object
+Dim iLastErNum As Long, iLastErNum1 As Long
 Set eventlist = Nothing
-If IamFloatGroup Then EndFloat
-Set LinkToGroup = Nothing
+If IamApointer Then
+    If Not LinkToGroup Is Nothing Then
+        If LinkToGroup.IamFloatGroup Then
+            If LinkToGroup.HasRemove Then
+                If Not LinkToGroup.ToDelete Then
+                     If LinkToGroup.refcount1 = 0 Then
+                        LinkToGroup.ToDelete = True
+                        iLastErNum = LastErNum
+                        iLastErNum1 = LastErNum1
+                        LastErNum = 0
+                        LastErNum1 = 0
+                        ProcessOperRemove link
+                        LastErNum = iLastErNum
+                        LastErNum1 = iLastErNum1
+                    End If
+                End If
+            End If
+        
+        End If
+    End If
+ElseIf FloatGroup And Not ToDelete And HasRemove Then
+                  
+                        iLastErNum = LastErNum
+                        iLastErNum1 = LastErNum1
+                        LastErNum = 0
+                        LastErNum1 = 0
+                        ProcessOperRemove Me
+                        LastErNum = iLastErNum
+                        LastErNum1 = iLastErNum1
+End If
+'Set bank = Nothing
+'Set SuperClassList = Nothing
+'Set LinkToGroup = Nothing
 End Sub
 
 Public Property Get edittag() As String

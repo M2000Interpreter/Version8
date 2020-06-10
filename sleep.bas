@@ -642,9 +642,7 @@ End If
     hTimer = CreateWaitableTimer(0, True, "")
     
     If Err.LastDllError = ERROR_ALREADY_EXISTS Then
-        ' If the timer already exists, it does not hurt to open it
-        ' as long as the person who is trying to open it has the
-        ' proper access rights.
+
         DoEvents
         Exit Sub
         
@@ -659,10 +657,6 @@ End If
     
     dblDelay = CDbl(lNumberOf10ThmiliSeconds) * 1000
     
-    ' By setting the high/low time to a negative number, it tells
-    ' the Wait (in SetWaitableTimer) to use an offset time as
-    ' opposed to a hardcoded time. If it were positive, it would
-    ' try to convert the value to GMT.
     ft.dwHighDateTime = -CLng(dblDelay / dblUnits) - 1
     dblDelayLow = -dblUnits * (dblDelay / dblUnits - _
         Fix(dblDelay / dblUnits))
@@ -679,18 +673,13 @@ End If
     lRet = SetWaitableTimer(hTimer, ft, 0, 0, 0, False)
     Dim handlepopup As Boolean, lastpopup As Long
     Do
-        ' QS_ALLINPUT means that MsgWaitForMultipleObjects will
-        ' return every time the thread in which it is running gets
-        ' a message. If you wanted to handle messages in here you could,
-        ' but by calling Doevents you are letting DefWindowProc
-        ' do its normal windows message handling---Like DDE, etc.
-        lBusy = MsgWaitForMultipleObjects(1, hTimer, False, _
+         lBusy = MsgWaitForMultipleObjects(1, hTimer, False, _
             INFINITE, QS_ALLINPUT&)
            
                   DoEvents
             If Not Screen.ActiveForm Is Nothing Then
                     If TypeOf Screen.ActiveForm Is GuiM2000 Then
-                        '    Debug.Print Screen.ActiveForm.PopUpMenuVal
+
                         If Not handlepopup Then
                             If Screen.ActiveForm.PopUpMenuVal Then
                             lastpopup = Screen.ActiveForm.hDC
@@ -710,7 +699,6 @@ Else
 
 End If
 Loop Until lBusy = WAIT_OBJECT_0
-    ' Close the handles when you are done with them.
     CloseHandle hTimer
 If Not TaskMaster Is Nothing Then TaskMaster.RestEnd
 End Sub

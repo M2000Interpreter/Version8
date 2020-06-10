@@ -221,7 +221,7 @@ Private Function ObjExt_Invoke(this As EventSink, _
     Set objext = ResolveObjPtr(this.pClass)
 
     ' forward the event
-    objext.FireEvent dispIdMember, pDispParams
+    objext.fireevent dispIdMember, pDispParams
 End Function
 
 Public Function CreateEventSink(IID As GUID, objext As ComShinkEvent) As Object
@@ -314,7 +314,7 @@ Dim btASM As Long
              VirtualUnlock btASM, MAXCODE
         VirtualFree btASM, MAXCODE, MEM_DECOMMIT
         VirtualFree btASM, 0, MEM_RELEASE
-    '    Debug.Print btASM
+
     once = False
 End Function
 

@@ -17,7 +17,7 @@ Option Explicit
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Public LoadOnly As Boolean, NoRun As Boolean
 Public CheckUnReferenceGui As Long
-Public callx1 As Long
+Public callx1 As Long, tpointer As Long
 Public RRCOUNTER As Long
 Public callohere As String
 Public addlen As Long, NoFuncError As Boolean, CallW As String, fHere$, strg As Boolean
@@ -85,6 +85,7 @@ Public SkipClear As Long
 Public Prof As clsProfiler
 Public modfuncall As Boolean
 Public restpart$
+
 Public Sub SetSkip()
     SkipClear = SkipClear + 1
 End Sub
@@ -519,7 +520,6 @@ End If
 End Sub
 
 Public Sub MoveNameDot(a$)
-
 If a$ = vbNullString Then Exit Sub
 If curdotcol < dotcolmax Then
     curdotcol = curdotcol + 1
@@ -533,14 +533,29 @@ If Look2Parent Then GetDotNew = Parent.GetDotNew(a$, dotnum&): Exit Function
 
 If curdotcol = 0 Then
 If Len(UseGroupname) > 0 Then
- If InStr(a$, "(") > 0 Then
+ If Right(a$, 1) = "(" Then
  If AscW(Left$(a$, 1)) > 255 Then
  a$ = "ауто." + a$
  Else
  a$ = "THIS." + a$
  End If
- Else
- a$ = UseGroupname + a$
+ ElseIf Len(a$) = 0 Then
+    If tpointer > 0 Then
+        a$ = var(tpointer).Patch + "."
+    Else
+        a$ = "THIS"
+    End If
+Else
+a$ = UseGroupname + a$
+
+  'If AscW(Left$(a$, 1)) > 255 Then
+ 'a$ = "ауто." + a$
+ 'If a$ = "ауто.х" Then Stop
+ 'Else
+ 'a$ = "THIS." + a$
+ 'End If
+  
+ ' a$ = this + a$
  End If
 
  
@@ -568,7 +583,9 @@ Else
   If Left$(dotcol(dotnum), 1) = "*" And Not clear Then
     a$ = Mid$(dotcol(dotnum), 2) + "." + a$
   Else
+
     a$ = dotcol(dotnum) + "." + a$
+
     End If
     
 If Left$(a$, 1) = "." Then
@@ -589,6 +606,9 @@ End If
     End If
 aaa:
     GetDotNew = True
+If Len(here$) > 0 Then
+If Left$(a$, Len(here$) + 1) = here$ + "." Then a$ = Mid$(a$, Len(here$) + 2)
+End If
 End Function
 
 Public Function GetDot(a$, st&) As Boolean
@@ -1006,8 +1026,8 @@ r = soros.PopStr
 IsInStackString = True
 End If
 End Function
+
 Private Sub Class_Terminate()
-' debug.print "basestack terminate"
 Me.ThrowThreads
 If IamChild Then Set MyParent.lastobj = lastobj
 Set LastEnum = Nothing
@@ -1069,4 +1089,5 @@ End Property
 Public Property Let IamLambda(ByVal RHS As Variant)
 mIamlambda = RHS
 End Property
+
 

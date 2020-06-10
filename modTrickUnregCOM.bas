@@ -490,8 +490,8 @@ Public Function GetAllMembers(mList As FastCollection, obj As Object _
             Case INVOKE_PROPERTY_PUTREF:
                 strName = "Property Set " + strName
             End Select
-    mList.ToEnd            ' move to last
-'          Debug.Print strName
+            mList.ToEnd            ' move to last
+
           ProcTask2 basestack1
           hlp = fncdsc.cParams
             If hlp > 0 Then

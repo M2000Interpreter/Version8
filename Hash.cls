@@ -25,7 +25,7 @@ Option Explicit
  End Type
 '
 Private PriveSpace() As item
-Dim MaxSpace As Long
+Public MaxSpace As Long
 Dim hashlen As Long
 Dim toplim As Long
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
@@ -61,20 +61,24 @@ Private Sub ExpandHash()
     hashlen = hashlen * 2 + 3
     
     ReDim Hash(hashlen) As Long
-    For i = 0 To MaxSpace \ 2 - 1
-
-    place HashFunc2(i), i
+    For i = 0 To toplim
+        place HashFunc2(i), i
     Next i
+    
 End Sub
 
 
 Friend Sub ReduceHash(newTop As Long, v())
+Static entrance As Long
+Dim aa As Variant, ditem As item, ditemcl As item
+    ditemcl.ndx = -1
     Dim i As Long
      If toplim < newTop Then Exit Sub
+     entrance = entrance + 1
      For i = toplim To newTop Step -1
-       With PriveSpace(i)
-        
-    
+        ditem = PriveSpace(i)
+        PriveSpace(i) = ditemcl
+       With ditem
         If .Pleft > 0 Then
             Hash(.lastpos) = .Pleft
             .Key = vbNullString
@@ -85,8 +89,11 @@ Friend Sub ReduceHash(newTop As Long, v())
         End If
         If .KeyType = 0 And .ndx >= 0 Then
             If IsObject(v(.ndx)) Then
+             Set aa = v(.ndx)
              Set v(.ndx) = Nothing
+             Set aa = v(.ndx)
             End If
+            
             v(.ndx) = Empty
             End If
         .KeyType = 0
@@ -97,26 +104,31 @@ Friend Sub ReduceHash(newTop As Long, v())
         End With
 
     Next i
-    If MaxSpace >= 6000 Then
-    
-    If MaxSpace - newTop + 1 > 2 * newTop + 2 Then
-        MaxSpace = 2 * (newTop + 1) + 1
-        ReDim Preserve PriveSpace(MaxSpace) As item
-        
-        ReDim Hash(MaxSpace * 2 + 3)
-       hashlen = MaxSpace * 2 + 3
-     '  reHash...
-     toplim = newTop - 1
-    For i = 0 To toplim
-        place HashFunc2(i), i
-    Next i
+If entrance = 1 Then
+    If MaxSpace >= 6004 Then
+        If MaxSpace - newTop + 1 > 2 * newTop + 2 Then
+            If newTop > 3000 Then
+                MaxSpace = 2 * (newTop + 1) + 1
+            Else
+                MaxSpace = 6003
+            End If
+            ReDim Preserve PriveSpace(MaxSpace) As item
+            
+            ReDim Hash(MaxSpace * 2 + 3)
+            hashlen = MaxSpace * 2 + 3
+            '  reHash...
+            toplim = newTop - 1
+            For i = 0 To toplim
+                place HashFunc2(i), i
+            Next i
+        Else
+            toplim = newTop - 1
+        End If
     Else
-     toplim = newTop - 1
+        toplim = newTop - 1
     End If
-Else
- toplim = newTop - 1
-    End If
-   
+End If
+entrance = entrance - 1
 End Sub
 
 Private Function Malloc() As Long
@@ -130,6 +142,11 @@ Private Function Malloc() As Long
         toplim = toplim + 1
         Malloc = toplim
 End Function
+Friend Sub Expand(NewMaxSpace As Long)
+           MaxSpace = NewMaxSpace
+           ReDim Preserve PriveSpace(MaxSpace) As item
+           If MaxSpace > hashlen Then ExpandHash
+End Sub
 Property Get count()
 count = toplim + 1
 End Property
@@ -220,7 +237,6 @@ End Function
 Friend Sub ItemCreator(Key As String, num As Long, Optional isref As Boolean = False, Optional isglobal As Boolean = False, Optional deftype As Boolean = False)
 Dim a As Long
 a = Malloc()
-
 On Error GoTo exxx
 place HashFunc(Key), a
 With PriveSpace(a)
@@ -269,7 +285,6 @@ End Function
 
 Private Function HashFunc(a$)
 HashFunc = HD(a$) Mod hashlen
-'Debug.Print HashFunc, hashlen, a$
 End Function
 
 

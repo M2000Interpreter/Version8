@@ -502,9 +502,9 @@ Private Sub ReduceHash(newTop As Long)
                 toplim = -1
                 MaxSpace = 5
                 ReDim PriveSpace(MaxSpace) As item
-                
-                ReDim Hash(MaxSpace * 2 + 3)
                 hashlen = MaxSpace * 2 + 3
+                ReDim Hash(hashlen)
+                
             ElseIf MaxSpace > 40 Then
                 MaxSpace = 5
                 ReDim Preserve PriveSpace(MaxSpace) As item
@@ -516,8 +516,8 @@ Private Sub ReduceHash(newTop As Long)
     Else
             If MaxSpace - newTop + 1 > 2 * newTop + 2 Then
             MaxSpace = 2 * (newTop + 1) + 1
-            ReDim Preserve PriveSpace(MaxSpace) As item
             hashlen = MaxSpace * 2 + 3
+            ReDim Preserve PriveSpace(MaxSpace) As item
             ReHash
     End If
    End If

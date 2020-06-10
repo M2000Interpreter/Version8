@@ -2448,14 +2448,13 @@ If (OpenClipboard(0) <> 0) Then
         
         If (GetBinaryData(lFormatId, bData())) Then
         sr = bData
-    If IsWine Then
-            sr1 = Left$(sr, Len(sr1))
-            GetTextData = Left$(sr1, Len(sr1))
-    Else
-                GetTextData = Left$(sr, Len(sr1))
-    End If
+        If IsWine Then
+                sr1 = Left$(sr, Len(sr1))
+                GetTextData = Left$(sr1, Len(sr1))
+        Else
+                    GetTextData = Left$(sr, Len(sr1))
         End If
-
+        End If
 End If
 CloseClipboard
 End Function
@@ -2681,46 +2680,8 @@ Sub MoveStringToVariant(ByRef s$, ByRef a As Variant)
    CopyMemory ByVal VarPtr(a) + 8, ByVal VarPtr(s$), 4
    CopyMemory ByVal VarPtr(s$), ByVal VarPtr(t), 4
 End Sub
-Sub testthat()
-Dim a() As Byte, n As Byte
-
-ReDim a(10)
-Dim vv As Variant
-vv = a()
-GetMem1 VarPtr(vv), n
-Debug.Print n, VarType(a)
-GetMem1 VarPtr(vv) + 1, n
-Debug.Print n
-Debug.Print VarPtr(vv), VarPtr(vv)
-
-End Sub
-Sub testthis()
-Dim aa As New FastCollection, i As Long, k As Currency, b() As Byte
-ReDim b(3)
-b(0) = 1
-b(1) = 2
-b(2) = 3
-
-aa.FeedSCol3 b
-For k = 500 To 1 Step -1
-aa.AddKey "alfa" + Chr$(65 + Rnd * 25) + Chr$(1) & Int(3 * Rnd) & Chr$(1) & k, "beta"
-
-'aa.AddKey aa.MakeCompKey("alfa" + Chr$(65 + Rnd * 25), Int(3 * Rnd), k), "beta"
-Next k
 
 
-For i = 0 To aa.count - 1
-    aa.index = i
-  Debug.Print aa.KeyToString ', aa.Pos
-Next i
-Debug.Print aa.count, aa.Percent
-aa.Sort
-'If aa.ExistSecondKey(400) Then Debug.Print "Exist", aa.KeyToString
-For i = 0 To 10
-    aa.index = i
-  Debug.Print aa.KeyToString ', aa.Pos
-Next i
-End Sub
 Sub OptVariant(ByRef VarOpt)
 Dim t(0 To 3) As Long
 t(0) = 10 ' VT_ERROR
@@ -2907,7 +2868,7 @@ Case "ABOUT", "ABOUT$", "ABS(", "ADD.LICENSE$(", "AFTER", "ALWAYS", "AND", "ANGL
 Case "ARRAY", "ARRAY$(", "ARRAY(", "AS", "ASC(", "ASCENDING", "ASK$(", "ASK(", "ATN("
 Case "BACK", "BACKGROUND", "BACKWARD(", "BANK(", "BASE", "BEEP", "BINARY", "BINARY.ADD(", "BINARY.AND(", "BINARY.NEG(", "BINARY.NOT("
 Case "BINARY.OR(", "BINARY.ROTATE(", "BINARY.SHIFT(", "BINARY.XOR(", "BITMAPS", "BMP$(", "BOLD"
-Case "BOOLEAN", "BORDER", "BREAK", "BROWSER", "BROWSER$", "BUFFER", "BUFFER(", "BYTE", "CALL", "CASE", "CAT", "CAR("
+Case "BOOLEAN", "BORDER", "BREAK", "BROWSER", "BROWSER$", "BUFFER", "BUFFER(", "BYTE", "CALL", "CASE", "CASCADE", "CAT", "CAR("
 Case "CDATE(", "CDR(", "CEIL(", "CENTER", "CHANGE", "CHARSET", "CHOOSE.COLOR", "CHOOSE.FONT", "CHOOSE.OBJECT", "CHOOSE.ORGAN"
 Case "CHR$(", "CHRCODE$(", "CHRCODE(", "CIRCLE", "CLASS", "CLEAR", "CLIPBOARD", "CLIPBOARD$", "CLIPBOARD.IMAGE$"
 Case "CLOSE", "CLS", "CODE", "CODEPAGE", "COLLIDE(", "COLOR", "COLOR(", "COLORS"

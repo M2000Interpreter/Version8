@@ -836,7 +836,7 @@ TEXT1.ParaSelStart = l
 TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 TEXT1.SelText = neo$
-TEXT1.RemoveUndo neo$
+TEXT1.RemoveUndo TEXT1.SelText
 Exit Do
 ElseIf l - addthat < i1 Then
 i1 = i1 + Len(neo$) - Len(s$)
@@ -852,7 +852,7 @@ TEXT1.ParaSelStart = l
 TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 TEXT1.SelText = neo$
-TEXT1.RemoveUndo neo$
+TEXT1.RemoveUndo TEXT1.SelText
 TEXT1.GroupUndo
 '''l = l + Len(neo$)
 
@@ -884,7 +884,7 @@ TEXT1.ParaSelStart = l
 TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 TEXT1.SelText = neo$
-TEXT1.RemoveUndo neo$
+TEXT1.RemoveUndo TEXT1.SelText
 Exit Do
 ElseIf l - addthat < i1 Then
 i1 = i1 + Len(neo$) - Len(s$)
@@ -901,7 +901,7 @@ TEXT1.SelLength = Len(s$)
 TEXT1.AddUndo ""
 
 TEXT1.SelText = neo$
-TEXT1.RemoveUndo neo
+TEXT1.RemoveUndo TEXT1.SelText
 TEXT1.GroupUndo
 l = l + Len(neo$)
 
@@ -3089,7 +3089,7 @@ If .ParaSelStart = 2 And .glistN.list(.glistN.ListIndex) = vbNullString Then
 End If
 .AddUndo ""
 .SelText = aa$
-.RemoveUndo aa$
+.RemoveUndo .SelText
 End With
 End Sub
 Public Sub mn4sub()

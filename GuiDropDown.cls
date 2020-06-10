@@ -42,7 +42,7 @@ Private Sub glistN_CtrlPlusF1()
       Callback.Callback mesCtrlName + ".About()"
       End If
 End Sub
- Public Sub Construct(there As Form, name$)
+ Public Sub Construct(there As Form, Name$)
  Dim PadGui As GuiM2000
  mIndex = -1
  Set Callback = there
@@ -68,9 +68,9 @@ End With
  'glistN.NoWheel = True
  Textbox.glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
- Public Sub ConstructArray(there As Form, name$, i As Long)
+ Public Sub ConstructArray(there As Form, Name$, i As Long)
  mIndex = i
  Set Callback = there
  Dim PadGui As GuiM2000
@@ -97,7 +97,7 @@ End With
  'glistN.NoWheel = True
  Textbox.glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
 
 Public Sub Move(X, Y, Optional w, Optional h)
@@ -127,7 +127,7 @@ Public Sub FontAttr(ThisFontName, Optional ThisMode = -1, Optional ThisBold = Tr
 Dim aa As New StdFont
 If ThisFontName <> "" Then
 
-aa.name = ThisFontName
+aa.Name = ThisFontName
 
 If ThisMode > 7 Then aa.Size = ThisMode Else aa = 7
 aa.bold = ThisBold
@@ -190,9 +190,9 @@ End Property
 Property Get menuEnabled(item As Long) As Boolean
 menuEnabled = Not glistN.ListSep(item)
 End Property
-Public Function GetMenuId(Id$, pos As Long) As Boolean
+Public Function GetMenuId(Id$, Pos As Long) As Boolean
 '
-GetMenuId = glistN.GetMenuId(Id$, pos)
+GetMenuId = glistN.GetMenuId(Id$, Pos)
 End Function
 Property Get Id(item As Long) As String
 '
@@ -262,9 +262,9 @@ Pad.Visible = False
 End If
 End Sub
 
-Private Sub glistN_PanLeftRight(Direction As Boolean)
+Private Sub glistN_PanLeftRight(direction As Boolean)
 Dim item As Long
-If Direction = True Then
+If direction = True Then
 item = glistN.ListIndex
 If mMenuStyle Then
 If glistN.ListSep(item) Then Exit Sub
@@ -434,7 +434,7 @@ End If
 If Callback.Controls(ctrlName).Height * gl < VirtualScreenHeight() * 2 / 5 Then
 
 Pad.Height = Callback.Controls(ctrlName).Height * gl
-'Debug.Print Pad.Height
+
 glistN.restrictLines = gl
 Else
 glistN.restrictLines = (VirtualScreenHeight() * 2 / 5) \ Callback.Controls(ctrlName).Height
@@ -507,8 +507,8 @@ End If
 
 
 End Sub
-Function Myleft$(a As Variant, pos As Variant)
-Myleft$ = Mid$(a, 1, pos)
+Function Myleft$(a As Variant, Pos As Variant)
+Myleft$ = Mid$(a, 1, Pos)
 End Function
 
 Private Sub TextBox_KeyPress(KeyAscii As Integer)
@@ -849,11 +849,11 @@ Public Sub SetUp()
 Dim ff As New StdFont
 Dim ff1 As New StdFont
 With Callback
-ff.name = .CtrlFontName
+ff.Name = .CtrlFontName
 ff.charset = Form1.DIS.Font.charset
 ff.Size = .CtrlFontSize
 ff.bold = .CtrlFontBold
-ff1.name = .CtrlFontName
+ff1.Name = .CtrlFontName
 ff1.charset = Form1.DIS.Font.charset
 ff1.Size = .CtrlFontSize
 ff1.bold = .CtrlFontBold

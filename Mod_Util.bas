@@ -12,6 +12,7 @@ End Type
 Dim FontList As FastCollection
 Public Trush() As VarItem
 Public TrushCount As Long, TrushWait As Boolean
+Public Nonbsp As Boolean
 Const b123 = vbCr + "'\"
 Const b1234 = vbCr + "'\:"
 Public k1 As Long, Kform As Boolean
@@ -6015,11 +6016,11 @@ Dim cc As cRegistry
 Set cc = New cRegistry
 cc.temp = fornow
 cc.ClassKey = HKEY_CURRENT_USER
-    cc.SectionKey = basickey
+cc.SectionKey = basickey
 Dim d$, w$, p As Long, b As Long
 If s$ <> "" Then
     Do While FastSymbol(s$, "-")
-            If IsLabel(basestack1, s$, d$) > 0 Then
+        If IsLabel(basestack1, s$, d$) > 0 Then
             d$ = UCase(d$)
             If d$ = "TEST" Then
                 STq = False
@@ -6029,9 +6030,8 @@ If s$ <> "" Then
                 Form2.label1(0) = vbNullString
                 Form2.label1(1) = vbNullString
                 Form2.label1(2) = vbNullString
-                 TestShowSub = vbNullString
- TestShowStart = 0
-   
+                TestShowSub = vbNullString
+                TestShowStart = 0
                 stackshow basestack1
                 Form1.Show , Form5
                 If Form3.Visible Then Form3.skiptimer = True: Form3.WindowState = 0
@@ -6040,121 +6040,107 @@ If s$ <> "" Then
                 If ttl Then Form3.WindowState = vbNormal Else Form1.Show , Form5
                 NORUN1 = True
             ElseIf d$ = "INP" Then
-            Use13 = False
+                Use13 = False
             ElseIf d$ = "FONT" Then
             ' + LOAD NEW
                 cc.ValueKey = "FONT"
-                    cc.ValueType = REG_SZ
-               cc.Value = "Monospac821Greek BT"
+                cc.ValueType = REG_SZ
+                cc.Value = "Monospac821Greek BT"
             ElseIf d$ = "SEC" Then
-                    cc.ValueKey = "NEWSECURENAMES"
+                cc.ValueKey = "NEWSECURENAMES"
                 cc.ValueType = REG_DWORD
                 cc.Value = 0
                 SecureNames = False
             ElseIf d$ = "DIV" Then
                 cc.ValueKey = "DIV"
-                    cc.ValueType = REG_DWORD
-                  cc.Value = 0
-                  UseIntDiv = False
+                cc.ValueType = REG_DWORD
+                cc.Value = 0
+                UseIntDiv = False
             ElseIf d$ = "LINESPACE" Then
                 cc.ValueKey = "LINESPACE"
-                    cc.ValueType = REG_DWORD
-               
-                  cc.Value = 0
+                cc.ValueType = REG_DWORD
+                cc.Value = 0
             ElseIf d$ = "SIZE" Then
                 cc.ValueKey = "SIZE"
-                    cc.ValueType = REG_DWORD
-               
-                  cc.Value = 15
-                 
-                 
+                cc.ValueType = REG_DWORD
+                cc.Value = 15
             ElseIf d$ = "PEN" Then
                 cc.ValueKey = "PEN"
-                    cc.ValueType = REG_DWORD
-                  cc.Value = 0
-                      cc.ValueKey = "PAPER"
-                    cc.ValueType = REG_DWORD
-                  cc.Value = 7
-                  
+                cc.ValueType = REG_DWORD
+                cc.Value = 0
+                cc.ValueKey = "PAPER"
+                cc.ValueType = REG_DWORD
+                cc.Value = 7
             ElseIf d$ = "BOLD" Then
-             cc.ValueKey = "BOLD"
-                   cc.ValueType = REG_DWORD
-                 
-                  cc.Value = 0
-                 
-            
+                cc.ValueKey = "BOLD"
+                cc.ValueType = REG_DWORD
+                cc.Value = 0
             ElseIf d$ = "PAPER" Then
                 cc.ValueKey = "PAPER"
-                    cc.ValueType = REG_DWORD
-                  cc.Value = 7
-                   cc.ValueKey = "PEN"
-                    cc.ValueType = REG_DWORD
-                  cc.Value = 0
-                   
+                cc.ValueType = REG_DWORD
+                cc.Value = 7
+                cc.ValueKey = "PEN"
+                cc.ValueType = REG_DWORD
+                cc.Value = 0
             ElseIf d$ = "GREEK" Then
-          
                 If Not fornow Then
-                     cc.ValueKey = "COMMAND"
+                    cc.ValueKey = "COMMAND"
                     cc.ValueType = REG_SZ
                     cc.Value = "LATIN"
                 End If
                 pagio$ = "LATIN"
             ElseIf d$ = "DARK" Then
-            If Not fornow Then
-                cc.ValueKey = "HTML"
-                cc.ValueType = REG_SZ
-                cc.Value = "BRIGHT"
-            End If
-            pagiohtml$ = "BRIGHT"
+                If Not fornow Then
+                     cc.ValueKey = "HTML"
+                     cc.ValueType = REG_SZ
+                     cc.Value = "BRIGHT"
+                End If
+                pagiohtml$ = "BRIGHT"
             ElseIf d$ = "CASESENSITIVE" Then
-
-            If Not fornow Then
-                cc.ValueKey = "CASESENSITIVE"
-                cc.ValueType = REG_SZ
-                cc.Value = "NO"
-            End If
-            casesensitive = False
-            
+                If Not fornow Then
+                    cc.ValueKey = "CASESENSITIVE"
+                    cc.ValueType = REG_SZ
+                    cc.Value = "NO"
+                End If
+                casesensitive = False
+            ElseIf d$ = "NBS" Then
+                Nonbsp = True
             ElseIf d$ = "RDB" Then
-            RoundDouble = False
+                RoundDouble = False
             ElseIf d$ = "EXT" Then
-            wide = False
+                wide = False
             ElseIf d$ = "TAB" Then
-            UseTabInForm1Text1 = False
+                UseTabInForm1Text1 = False
             ElseIf d$ = "SBL" Then
-            ShowBooleanAsString = False
+                ShowBooleanAsString = False
             ElseIf d$ = "DIM" Then
-            DimLikeBasic = False
+                DimLikeBasic = False
             ElseIf d$ = "FOR" Then
-           ' cc.ValueKey = "FOR-LIKE-BASIC"
-           ' cc.ValueType = REG_DWORD
-            'cc.Value = CLng(0)
-            ForLikeBasic = False
+                ForLikeBasic = False
             ElseIf d$ = "PRI" Then
-            cc.ValueKey = "PRIORITY-OR"
-            cc.ValueType = REG_DWORD
-            cc.Value = CLng(0)  ' FALSE IS WRONG VALUE HERE
-            priorityOr = False
+                cc.ValueKey = "PRIORITY-OR"
+                cc.ValueType = REG_DWORD
+                cc.Value = CLng(0)  ' FALSE IS WRONG VALUE HERE
+                priorityOr = False
             ElseIf d$ = "REG" Then
-            gsb_file False
+                gsb_file False
             ElseIf d$ = "DEC" Then
-            cc.ValueKey = "DEC"
-             cc.ValueType = REG_DWORD
-                    cc.Value = CLng(0)
-                    mNoUseDec = False
-                    CheckDec
+                cc.ValueKey = "DEC"
+                cc.ValueType = REG_DWORD
+                cc.Value = CLng(0)
+                mNoUseDec = False
+                CheckDec
             ElseIf d$ = "TXT" Then
-            cc.ValueKey = "TEXTCOMPARE"
-             cc.ValueType = REG_DWORD
-                    cc.Value = CLng(0)
-                    mTextCompare = False
-                    
+                cc.ValueKey = "TEXTCOMPARE"
+                cc.ValueType = REG_DWORD
+                cc.Value = CLng(0)
+                mTextCompare = False
             ElseIf d$ = "REC" Then
-               cc.ValueKey = "FUNCDEEP"  ' RESET
-             cc.ValueType = REG_DWORD
-                    cc.Value = 300
-                    If m_bInIDE Then funcdeep = 128
-                    ' funcdeep not used - but functionality stay there for old dll's
+                cc.ValueKey = "FUNCDEEP"  ' RESET
+                cc.ValueType = REG_DWORD
+                cc.Value = 300
+                If m_bInIDE Then funcdeep = 128
+                 ' funcdeep not used - but functionality stay there for old dll's
                 ClaimStack
                 If findstack - 100000 > 0 Then
                     stacksize = findstack - 100000
@@ -6165,170 +6151,161 @@ If s$ <> "" Then
                 cc.Value = CLng(False)
                 UseMDBHELP = False
             Else
-            s$ = "-" & d$ & s$
-            Exit Do
+                s$ = "-" & d$ & s$
+                Exit Do
             End If
-            Else
-        Exit Do
+        Else
+            Exit Do
         End If
         Sleep 2
     Loop
-Do While FastSymbol(s$, "+")
-If IsLabel(basestack1, s$, d$) > 0 Then
+    Do While FastSymbol(s$, "+")
+        If IsLabel(basestack1, s$, d$) > 0 Then
             d$ = UCase(d$)
-    If d$ = "TEST" Then
-            STq = False
-            STEXIT = False
-            STbyST = True
-            Form2.Show , Form1
-            Form2.label1(0) = vbNullString
-            Form2.label1(1) = vbNullString
-            Form2.label1(2) = vbNullString
-             TestShowSub = vbNullString
- TestShowStart = 0
-
-            stackshow basestack1
-            
-            Form1.Show , Form5
-            If Form3.Visible Then Form3.skiptimer = True: Form3.WindowState = 0
-            trace = True
-        ElseIf d$ = "REG" Then
-        gsb_file
-        ElseIf d$ = "INP" Then
-            Use13 = True
-        ElseIf d$ = "FONT" Then
-    ' + LOAD NEW
-        cc.ValueKey = "FONT"
-            cc.ValueType = REG_SZ
-            If ISSTRINGA(s$, w$) Then cc.Value = w$
+            If d$ = "TEST" Then
+                STq = False
+                STEXIT = False
+                STbyST = True
+                Form2.Show , Form1
+                Form2.label1(0) = vbNullString
+                Form2.label1(1) = vbNullString
+                Form2.label1(2) = vbNullString
+                TestShowSub = vbNullString
+                TestShowStart = 0
+                stackshow basestack1
+                Form1.Show , Form5
+                If Form3.Visible Then Form3.skiptimer = True: Form3.WindowState = 0
+                trace = True
+                ElseIf d$ = "REG" Then
+                gsb_file
+            ElseIf d$ = "INP" Then
+                Use13 = True
+            ElseIf d$ = "FONT" Then
+                ' + LOAD NEW
+                cc.ValueKey = "FONT"
+                cc.ValueType = REG_SZ
+                If ISSTRINGA(s$, w$) Then cc.Value = w$
             ElseIf d$ = "SEC" Then
-                    cc.ValueKey = "NEWSECURENAMES"
+                cc.ValueKey = "NEWSECURENAMES"
                 cc.ValueType = REG_DWORD
                 cc.Value = -1
                 SecureNames = True
             ElseIf d$ = "DIV" Then
                 cc.ValueKey = "DIV"
-                    cc.ValueType = REG_DWORD
-                  cc.Value = -1
-                  UseIntDiv = True
-        ElseIf d$ = "LINESPACE" Then
-            cc.ValueKey = "LINESPACE"
                 cc.ValueType = REG_DWORD
-            If IsNumberLabel(s$, w$) Then If val(w$) >= 0 And val(w$) <= 60 * dv15 Then cc.Value = CLng(val(w$) * 2)
-               
-        ElseIf d$ = "SIZE" Then
-            cc.ValueKey = "SIZE"
-            cc.ValueType = REG_DWORD
-            If IsNumberLabel(s$, w$) Then If val(w$) >= 8 And val(w$) <= 48 Then cc.Value = CLng(val(w$))
-          
-        ElseIf d$ = "PEN" Then
-            cc.ValueKey = "PAPER"
-            cc.ValueType = REG_DWORD
-            p = cc.Value
-            cc.ValueKey = "PEN"
-            cc.ValueType = REG_DWORD
-            If IsNumberLabel(s$, w$) Then
-                If p = val(w$) Then p = 15 - p Else p = val(w$) Mod 16
-                cc.Value = CLng(val(p))
-            End If
-        ElseIf d$ = "BOLD" Then
+                cc.Value = -1
+                UseIntDiv = True
+            ElseIf d$ = "LINESPACE" Then
+                cc.ValueKey = "LINESPACE"
+                cc.ValueType = REG_DWORD
+                If IsNumberLabel(s$, w$) Then If val(w$) >= 0 And val(w$) <= 60 * dv15 Then cc.Value = CLng(val(w$) * 2)
+            ElseIf d$ = "SIZE" Then
+                cc.ValueKey = "SIZE"
+                cc.ValueType = REG_DWORD
+                If IsNumberLabel(s$, w$) Then If val(w$) >= 8 And val(w$) <= 48 Then cc.Value = CLng(val(w$))
+            ElseIf d$ = "PEN" Then
+                cc.ValueKey = "PAPER"
+                cc.ValueType = REG_DWORD
+                p = cc.Value
+                cc.ValueKey = "PEN"
+                cc.ValueType = REG_DWORD
+                If IsNumberLabel(s$, w$) Then
+                    If p = val(w$) Then p = 15 - p Else p = val(w$) Mod 16
+                    cc.Value = CLng(val(p))
+                End If
+            ElseIf d$ = "BOLD" Then
                 cc.ValueKey = "BOLD"
                 cc.ValueType = REG_DWORD
                 cc.Value = 1
                 If IsNumberLabel(s$, w$) Then cc.Value = CLng(val(w$) Mod 16)
-                
-        ElseIf d$ = "PAPER" Then
+            ElseIf d$ = "PAPER" Then
                 cc.ValueKey = "PEN"
                 cc.ValueType = REG_DWORD
                 p = cc.Value
                 cc.ValueKey = "PAPER"
                 cc.ValueType = REG_DWORD
                 If IsNumberLabel(s$, w$) Then
-                If p = val(w$) Then p = 15 - p Else p = val(w$) Mod 16
+                    If p = val(w$) Then p = 15 - p Else p = val(w$) Mod 16
                     cc.Value = CLng(val(p))
                 End If
-        ElseIf d$ = "GREEK" Then
-
+            ElseIf d$ = "GREEK" Then
                 If Not fornow Then
-                cc.ValueKey = "COMMAND"
-                cc.ValueType = REG_SZ
-                cc.Value = "GREEK"
+                    cc.ValueKey = "COMMAND"
+                    cc.ValueType = REG_SZ
+                    cc.Value = "GREEK"
                 End If
                 pagio$ = "GREEK"
-        ElseIf d$ = "DARK" Then
-         If Not fornow Then
-              cc.ValueKey = "HTML"
-                 cc.ValueType = REG_SZ
+            ElseIf d$ = "DARK" Then
+                If Not fornow Then
+                    cc.ValueKey = "HTML"
+                    cc.ValueType = REG_SZ
                     cc.Value = "DARK"
-                    End If
+                End If
                 pagiohtml$ = "DARK"
-        ElseIf d$ = "CASESENSITIVE" Then
-                 If Not fornow Then
-                  cc.ValueKey = "CASESENSITIVE"
-                cc.ValueType = REG_SZ
-                cc.Value = "YES"
+            ElseIf d$ = "CASESENSITIVE" Then
+                If Not fornow Then
+                    cc.ValueKey = "CASESENSITIVE"
+                    cc.ValueType = REG_SZ
+                    cc.Value = "YES"
                 End If
                 casesensitive = True
-                
-          ElseIf d$ = "RDB" Then
-            RoundDouble = True
+            ElseIf d$ = "NBS" Then
+                Nonbsp = False
+            ElseIf d$ = "RDB" Then
+                RoundDouble = True
             ElseIf d$ = "EXT" Then
-            wide = True
-           ElseIf d$ = "TAB" Then
-            UseTabInForm1Text1 = True
-           ElseIf d$ = "SBL" Then
-            ShowBooleanAsString = True
-         ElseIf d$ = "DIM" Then
-            DimLikeBasic = True
-         ElseIf d$ = "FOR" Then
-          '  cc.ValueKey = "FOR-LIKE-BASIC"
-           ' cc.ValueType = REG_DWORD
-           ' cc.Value = CLng(True)
-             ForLikeBasic = True
-        ElseIf d$ = "PRI" Then
-        cc.ValueKey = "PRIORITY-OR"
+                wide = True
+            ElseIf d$ = "TAB" Then
+                UseTabInForm1Text1 = True
+            ElseIf d$ = "SBL" Then
+                ShowBooleanAsString = True
+            ElseIf d$ = "DIM" Then
+                DimLikeBasic = True
+            ElseIf d$ = "FOR" Then
+                ForLikeBasic = True
+            ElseIf d$ = "PRI" Then
+                cc.ValueKey = "PRIORITY-OR"
                 cc.ValueType = REG_DWORD
                 cc.Value = CLng(True)
-            priorityOr = True
+                priorityOr = True
             ElseIf d$ = "TXT" Then
-            cc.ValueKey = "TEXTCOMPARE"
-             cc.ValueType = REG_DWORD
-                    cc.Value = CLng(True)
-                    mTextCompare = True
-        ElseIf d$ = "DEC" Then
-            cc.ValueKey = "DEC"
-             cc.ValueType = REG_DWORD
-                    cc.Value = CLng(True)
-                    mNoUseDec = True
-                    CheckDec
-        ElseIf d$ = "REC" Then
-               cc.ValueKey = "FUNCDEEP"  ' RESET
-             cc.ValueType = REG_DWORD
-             funcdeep = 3260
-                    cc.Value = 3260 ' SET REVISION DEFAULT
-        ClaimStack
+                cc.ValueKey = "TEXTCOMPARE"
+                cc.ValueType = REG_DWORD
+                cc.Value = CLng(True)
+                mTextCompare = True
+            ElseIf d$ = "DEC" Then
+                cc.ValueKey = "DEC"
+                cc.ValueType = REG_DWORD
+                cc.Value = CLng(True)
+                mNoUseDec = True
+                CheckDec
+            ElseIf d$ = "REC" Then
+                cc.ValueKey = "FUNCDEEP"  ' RESET
+                cc.ValueType = REG_DWORD
+                funcdeep = 3260
+                cc.Value = 3260 ' SET REVISION DEFAULT
+                ClaimStack
                 If findstack - 100000 > 0 Then
                     stacksize = findstack - 100000
                 End If
-        ElseIf d$ = "MDB" Then
-            cc.ValueKey = "MDBHELP"
-            cc.ValueType = REG_DWORD
-            cc.Value = CLng(True)
-            UseMDBHELP = True
+            ElseIf d$ = "MDB" Then
+                cc.ValueKey = "MDBHELP"
+                cc.ValueType = REG_DWORD
+                cc.Value = CLng(True)
+                UseMDBHELP = True
+            Else
+                s$ = "+" & d$ & s$
+                Exit Do
+            End If
         Else
-            s$ = "+" & d$ & s$
             Exit Do
         End If
-    Else
-    Exit Do
-    End If
-Sleep 2
-Loop
-
+        Sleep 2
+    Loop
 End If
 End Sub
-
-
+    
+    
 Sub myesc(b$)
 MyErMacro b$, "Escape", "ÄéáêïðÞ åêôÝëåóçò"
 End Sub
@@ -7819,9 +7796,9 @@ End Sub
 Public Function StringToEscapeStr(RHS As String, Optional json As Boolean = False) As String
 Dim i As Long, cursor As Long, ch As String
 cursor = 0
-Dim DEL As String
+Dim del As String
 Dim H9F As String
-DEL = ChrW(127)
+del = ChrW(127)
 H9F = ChrW(&H9F)
 For i = 1 To Len(RHS)
                 ch = Mid$(RHS, i, 1)
@@ -7840,7 +7817,7 @@ For i = 1 To Len(RHS)
                     Case vbTab:      ch = "\t"
                     Case vbBack:     ch = "\b"
                     Case vbFormFeed: ch = "\f"
-                    Case Is < " ", DEL To H9F
+                    Case Is < " ", del To H9F
                         ch = "\u" & Right$("000" & Hex$(AscW(ch)), 4)
                 End Select
                 If cursor + Len(ch) > Len(StringToEscapeStr) Then StringToEscapeStr = StringToEscapeStr + space$(500)
@@ -8312,25 +8289,24 @@ Dim varv As New Group
         .IamApointer = True
         .BeginFloat 2
         Set .Sorosref = v.soros
-        If Not v.IamFloatGroup Then
-       If Len(usethisname) > 0 Then
-       If glob Then
-         .IamGlobal = True
-       Else
-        .lasthere = here$
-        
-        End If
-        .GroupName = usethisname
-       Else
-       If Not .IamGlobal Then
-       
-        .lasthere = here$
-        End If
-       
-        If Len(v.GroupName) > 1 Then
-            .GroupName = Mid$(v.GroupName, 1, Len(v.GroupName) - 1)
-        End If
-        End If
+        If v.IamFloatGroup Then
+        v.ToDelete = False
+        Else
+            If Len(usethisname) > 0 Then
+                If glob Then
+                    .IamGlobal = True
+                Else
+                    .lasthere = here$
+                End If
+                .GroupName = usethisname
+            Else
+                If Not .IamGlobal Then
+                    .lasthere = here$
+                End If
+                If Len(v.GroupName) > 1 Then
+                    .GroupName = Mid$(v.GroupName, 1, Len(v.GroupName) - 1)
+                End If
+            End If
         End If
     End With
      Set varv.LinkRef = v
@@ -8356,18 +8332,24 @@ Dim a As Group, pppp As mArray
     
 End Function
 Function BoxGroupVar(aGroup As Variant) As mArray
+            Dim bGroup As Group
+            Set bGroup = aGroup
             Set BoxGroupVar = New mArray
             BoxGroupVar.PushDim 1
             BoxGroupVar.PushEnd
             BoxGroupVar.Arr = True
+            bGroup.ToDelete = True
             Set BoxGroupVar.item(0) = aGroup
 End Function
 
 Function BoxGroupObj(aGroup As Object) As mArray
+            Dim bGroup As Group
+            Set bGroup = aGroup
             Set BoxGroupObj = New mArray
             BoxGroupObj.PushDim 1
             BoxGroupObj.PushEnd
             BoxGroupObj.Arr = True
+            bGroup.ToDelete = True
             Set BoxGroupObj.item(0) = aGroup
 End Function
 
@@ -8398,16 +8380,7 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If priorityOr Then ss$ = ss$ + " +PRI" Else ss$ = ss$ + " -PRI"
         If Not mNoUseDec Then ss$ = ss$ + " -DEC" Else ss$ = ss$ + " +DEC"
         If mNoUseDec <> NoUseDec Then ss$ = ss$ + "(ðáñÜêáìøç)"
-        If mTextCompare Then ss$ = ss$ + " +TXT" Else ss$ = ss$ + " -TXT"
-        If ForLikeBasic Then ss$ = ss$ + " +FOR" Else ss$ = ss$ + " -FOR"
-        If DimLikeBasic Then ss$ = ss$ + " +DIM" Else ss$ = ss$ + " -DIM"
-        If ShowBooleanAsString Then ss$ = ss$ + " +SBL" Else ss$ = ss$ + " -SBL"
-        If wide Then ss$ = ss$ + " +EXT" Else ss$ = ss$ + " -EXT"
-        If RoundDouble Then ss$ = ss$ + " +RDB" Else ss$ = ss$ + " -RDB"
-        If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
-        If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
-        If Use13 Then ss$ = ss$ + " +INP" Else ss$ = ss$ + " -INP"
-        If UseMDBHELP Then ss$ = ss$ + " +MDB" Else ss$ = ss$ + " -MDB"
+GoSub part2
         wwPlain2 bstack, prive, "Äéáêüðôåò " + ss$, bstack.Owner.Width, 1000, True
         wwPlain2 bstack, prive, "Ðåñß äéáêïðôþí: ÷ñçóéìïðïßçóå ôçí åíôïëÞ ÂïÞèåéá Äéáêüðôåò", bstack.Owner.Width, 1000, True
         wwPlain2 bstack, prive, "Ïèüíåò:" + Str$(DisplayMonitorCount()) + "  ç âáóéêÞ :" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
@@ -8438,6 +8411,15 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If priorityOr Then ss$ = ss$ + " +PRI" Else ss$ = ss$ + " -PRI"
         If Not mNoUseDec Then ss$ = ss$ + " -DEC" Else ss$ = ss$ + " +DEC"
         If mNoUseDec <> NoUseDec Then ss$ = ss$ + "(bypass)"
+        GoSub part2
+        wwPlain2 bstack, prive, "Switches " + ss$, bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "About Switches: use command Help Switches", bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Screens:" + Str$(DisplayMonitorCount()) + "  Primary is:" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "This form is in screen:" + Str$(FindFormSScreen(di) + 1), bstack.Owner.Width, 1000, True
+        wwPlain2 bstack, prive, "Console is in screen:" + Str$(Console + 1), bstack.Owner.Width, 1000, True
+    End If
+Exit Sub
+part2:
         If mTextCompare Then ss$ = ss$ + " +TXT" Else ss$ = ss$ + " -TXT"
         If ForLikeBasic Then ss$ = ss$ + " +FOR" Else ss$ = ss$ + " -FOR"
         If DimLikeBasic Then ss$ = ss$ + " +DIM" Else ss$ = ss$ + " -DIM"
@@ -8447,13 +8429,8 @@ Sub monitor(bstack As basetask, prive As basket, Lang As Long)
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
         If Use13 Then ss$ = ss$ + " +INP" Else ss$ = ss$ + " -INP"
-        If UseMDBHELP Then ss$ = ss$ + " +MDB" Else ss$ = ss$ + " -MDB"
-        wwPlain2 bstack, prive, "Switches " + ss$, bstack.Owner.Width, 1000, True
-        wwPlain2 bstack, prive, "About Switches: use command Help Switches", bstack.Owner.Width, 1000, True
-        wwPlain2 bstack, prive, "Screens:" + Str$(DisplayMonitorCount()) + "  Primary is:" + Str$(FindPrimary + 1), bstack.Owner.Width, 1000, True
-        wwPlain2 bstack, prive, "This form is in screen:" + Str$(FindFormSScreen(di) + 1), bstack.Owner.Width, 1000, True
-        wwPlain2 bstack, prive, "Console is in screen:" + Str$(Console + 1), bstack.Owner.Width, 1000, True
-    End If
+        If Nonbsp Then ss$ = ss$ + " -NBS" Else ss$ = ss$ + " +NBS"
+        Return
 End Sub
 Sub NeoSwap(basestackLP As Long, rest$, Lang As Long, resp As Boolean)
 resp = MySwap(ObjFromPtr(basestackLP), rest$, Lang)
@@ -10096,10 +10073,10 @@ If a1 > Len(a$) Then a1 = Len(a$) + 1
         a$ = Mid$(a$, a1)
         IsNumberD2 = True
     ElseIf MaybeIsSymbol(a$, "ÁáØøTtFf") Then
-        If Fast3NoSpace(a$, "ÁËÇÈÅÓ", 6, "ÁËÇÈÇÓ", 6, "TRUE", 4, 6) Then
+        If Fast3Varl(a$, "ÁËÇÈÅÓ", 6, "ÁËÇÈÇÓ", 6, "TRUE", 4, 6) Then
             d = True
             IsNumberD2 = True
-        ElseIf Fast3NoSpace(a$, "ØÅÕÄÅÓ", 6, "ØÅÕÄÇÓ", 6, "FALSE", 5, 6) Then
+        ElseIf Fast3Varl(a$, "ØÅÕÄÅÓ", 6, "ØÅÕÄÇÓ", 6, "FALSE", 5, 6) Then
             d = False
             IsNumberD2 = True
         Else
@@ -13140,6 +13117,9 @@ If Left$(ah, 1) = "N" Or InStr(ah, "l") > 0 Then
       Set bb.ValueObj = bstack.lastobj
     End If
         Set bstack.lastobj = Nothing
+        If TypeOf bb.ValueObj Is Group Then
+        bb.ValueObj.ToDelete = False
+        End If
     Else
         bb.Value = p
     End If
@@ -13159,8 +13139,12 @@ ElseIf Left$(ah, 1) = "S" Then
     Else
     
         Set bb.ValueObj = bstack.lastobj
+        
     End If
         Set bstack.lastobj = Nothing
+             If TypeOf bb.ValueObj Is Group Then
+        bb.ValueObj.ToDelete = False
+        End If
     Else
         bb.Value = s$
     End If
@@ -16737,6 +16721,8 @@ a(0) = GetName(a(0))
 s$ = Join(a(), ".")
 End If
 End If
+'s$ = Replace(s$, ChrW(&HFFBF), "")
+'s$ = Replace(s$, ChrW(&H1FFF), "")
 If h& = -1 Then
 Else
 'If InStr(s$, ChrW(&HFFBF)) > 0 And False Then   '*******************
@@ -16971,6 +16957,7 @@ If TypeOf var(h&) Is Constant Then
     Err.clear
     End If
 Else
+
 If TypeOf var(h&) Is Group Then
 If var(h&).IamApointer Then
 s$ = s$ & "*[" & Typename(var(h&)) & "]"
@@ -17084,9 +17071,6 @@ If uni(tofile) Then
 
     End If
 End If
-
-
-
 End If
 End If
     If tofile < -1 Then
@@ -18174,7 +18158,7 @@ goNothing:
                 Loop
                 ss$ = s$ + CleanStr(ss$, vbCrLf)
                 s$ = vbNullString
-                SpaceForVar i
+                i = AllocVar()
                 Set declobj = New stdCallFunction
                 If IsLabelSymbolNew(rest$, "ÙÓ", "AS", Lang) Then
                 If Not IsExp(bstack, rest$, p) Then
@@ -19888,8 +19872,12 @@ Do
                    ElseIf TypeOf bstack.lastobj Is VarItem Then
                     soros.DataObjVaritem bstack.lastobj
                       Else
+                      If TypeOf bstack.lastobj Is Group Then
+                      bstack.lastobj.ToDelete = False
+                      End If
                       soros.DataObj bstack.lastobj
-                    Set bstack.lastpointer = Nothing
+                      Set bstack.lastpointer = Nothing
+                      
                     End If
                       Set bstack.lastobj = Nothing
                 End If
@@ -23749,4 +23737,367 @@ there12:
      Loop
 End Function
 
+Function ProcSoundRec(basestack As basetask, rest$, Lang As Long) As Boolean
+' not tested yet...
+Dim s$, p As Variant, ss$, X As Double, Y As Double
+    If IsLabelSymbolNew(rest$, "ÍÅÁ", "NEW", Lang) Then
+    Set sRec = New RecordMci
+    sRec.Rec_Initialize
+    If IsStrExp(basestack, rest$, s$) Then
+    
+    sRec.FileName = s$
+    End If
+    If FastSymbol(rest$, ",") Then
+    If IsExp(basestack, rest$, p, , True) Then
+    ' hz
+        If IsLabelSymbolLatin(rest$, "STEREO") Then
+        sRec.Stereo
+        Else
+        sRec.Mono
+        End If
+        If IsLabelSymbolLatin(rest$, "HIFI") Then
+        sRec.Bit16
+        Else
+        sRec.Bit8
+        End If
+        sRec.QualityAny p
+    End If
+    Else
+        sRec.RecFast
+    End If
+    ElseIf Not (sRec Is Nothing) Then
+    ss$ = vbNullString
+    If IsLabelSymbolNewExp(rest$, "ÅÉÓÁÃÙÃÇ", "INSERT", Lang, ss$) Then
+        sRec.Capture True
+    ElseIf IsLabelSymbolNewExp(rest$, "ÁËËÁÃÇ", "OVERWRITE", Lang, ss$) Then
+        sRec.ReCapture
+    ElseIf IsLabelSymbolNewExp(rest$, "ÁÐÏÊÏÐÇ", "DELETE", Lang, ss$) Then
+            If IsExp(basestack, rest$, X, , True) Then
+            Else
+                X = 0
+            End If
+            If IsLabelSymbolNew(rest$, "ÅÙÓ", "TO", Lang) Then
+                If Not IsExp(basestack, rest$, Y, , True) Then
+                    Y = sRec.getLengthInMS
+                End If
+            Else
+                Y = sRec.getLengthInMS
+            End If
+            sRec.CutRecordMs X, Y
+    ElseIf IsLabelSymbolNewExp(rest$, "STOP", "ÄÉÁÊÏÐÇ", Lang, ss$) Then
+        sRec.recStop
+    ElseIf IsLabelSymbolNewExp(rest$, "ÄÏÊÉÌÇ", "TEST", Lang, ss$) Then
+        sRec.recPlay
+    ElseIf IsLabelSymbolNewExp(rest$, "ÈÅÓÇ", "POS", Lang, ss$) Then
+        If sRec.isRecPlaying Then
+            If IsExp(basestack, rest$, X, , True) Then
+            sRec.recPlayFromMs X
+            Else
+            sRec.recPlay
+            End If
+        Else
+        ' SEEK
+            If IsExp(basestack, rest$, X, , True) Then
+            sRec.oneMCI "seek capture to " & CStr(CLng(X))
+            Else
+            sRec.oneMCI "seek capture to 0"
+            End If
+        End If
+    ElseIf IsLabelSymbolNewExp(rest$, "ÓÙÓÅ", "SAVE", Lang, ss$) Then
+        If IsStrExp(basestack, rest$, s$) Then
+            sRec.SaveAs s$
+        Else
+            sRec.Save
+        End If
+    ElseIf IsLabelSymbolNewExp(rest$, "ÊËÅÉÓÅ", "END", Lang, ss$) Then
+        Set sRec = Nothing
+    End If
+    Else
+        
+        MyEr "You don't have new recording", "Äåí Ý÷åéò åôïéìÜóåé íÝá ç÷ïãñÜöçóç"
+    End If
+  ProcSoundRec = True
+End Function
+
+Public Function ScanTarget(j() As target, ByVal X As Long, ByVal Y As Long, ByVal myl As Long) As Long
+Dim iu&, Id&, i&, XX&, YY&
+
+iu& = LBound(j())
+Id& = UBound(j())
+ScanTarget = -1
+For i& = iu& To Id&
+With j(i&)
+If .Enable And .layer = myl Then
+XX& = X \ .Xt
+YY& = Y \ .Yt
+If .Lx <= XX& And .tx >= XX& And .ly <= YY& And .ty >= YY& Then
+ScanTarget = i&
+Exit For
+End If
+End If
+End With
+Next i&
+End Function
+Function ProcMedia(basestack As basetask, rest$, Lang As Long) As Boolean
+Dim Scr As Object
+Dim s$, ss$, X As Double, Y As Double
+Set Scr = basestack.Owner
+On Error Resume Next
+ProcMedia = True
+If IsLabelSymbolNew(rest$, "ÖÏÑÔÙÓÅ", "LOAD", Lang) Then
+            If AVIUP Then
+                  AVI.GETLOST
+                  MyDoEvents
+            End If
+            If IsStrExp(basestack, rest$, s$) Then
+                If s$ <> "" Then
+                    If ExtractType(s$) = vbNullString Then s$ = s$ & ".avi"
+                    If CFname(s$) = vbNullString Then
+                        s$ = mcd & s$: If CFname(s$) = vbNullString Then Exit Function
+                    Else
+                        s$ = CFname(s$)
+                    End If
+                Else
+                    Set Scr = Nothing
+                    ProcMedia = True  ' ??????????
+                    Exit Function
+                End If
+                avifile = s$
+                Load AVI
+                
+                MediaPlayer1.playMovie
+                MediaPlayer1.pauseMovie
+                
+                MediaPlayer1.setPositionTo 0
+                Sleep 2
+                MyDoEvents
+                AVIRUN = False
+                    If Form1.Visible Then Form1.SetFocus
+                    MediaPlayer1.setLeftVolume vol * 10
+                    MediaPlayer1.setRightVolume vol * 10
+                    
+                
+            End If
+            Set Scr = Nothing
+            ProcMedia = True
+            Exit Function
+            
+    ElseIf AVIUP Then
+    ss$ = vbNullString
+        If IsLabelSymbolNewExp(rest$, "ÄÅÉÎÅ", "SHOW", Lang, ss$) Then
+            'If Not AVIRUN Then MediaPlayer1.playMovie: MediaPlayer1.pauseMovie
+            If Scr.Name = "GuiM2000" Then
+            If Scr.Visible Then
+                AVI.Show , Scr
+      End If
+                Set Scr = Nothing
+                ProcMedia = True
+                Exit Function
+           
+                
+            Else
+                If Form1.Visible Then
+                AVI.Show , Form1
+                Else
+                AVI.Show , Form5
+                End If
+               
+                AVI.ZOrder 0
+             AVI.SetFocus
+                MyDoEvents
+                Set Scr = Nothing
+                ProcMedia = True
+                Exit Function
+       End If
+        ElseIf IsLabelSymbolNewExp(rest$, "ÊÑÕØÅ", "HIDE", Lang, ss$) Then
+                AVI.Hide
+                Set Scr = Nothing
+                ProcMedia = True
+                Exit Function
+        ElseIf IsLabelSymbolNewExp(rest$, "ÊÑÁÔÇÓÅ", "PAUSE", Lang, ss$) Then
+                If MediaPlayer1.isMoviePlaying Then MediaPlayer1.pauseMovie
+                Set Scr = Nothing
+                ProcMedia = True
+                Exit Function
+        ElseIf IsLabelSymbolNewExp(rest$, "ÐÁÉÎÅ", "PLAY", Lang, ss$) Then
+        
+                If Not AVIRUN Then
+                AVI.Timer1.Interval = MediaPlayer1.getLengthInMS - MediaPlayer1.getPositionInMS
+                AVI.Avi2Up
+                End If
+        
+                MyDoEvents
+                Set Scr = Nothing
+                ProcMedia = True
+                Exit Function
+        ElseIf IsLabelSymbolNewExp(rest$, "ÎÅÊÉÍÁ", "RESTART", Lang, ss$) Then
+                    If Not MediaPlayer1.isMoviePlaying Then
+                    
+                         MediaPlayer1.playMovie
+                         
+                    Else
+                         MediaPlayer1.resumeMovie
+                    End If
+                    MyDoEvents
+                    AVIRUN = False
+                    Set Scr = Nothing
+                    ProcMedia = True
+                    Exit Function
+        ElseIf IsLabelSymbolNewExp(rest$, "ÓÔÏ", "TO", Lang, ss$) Then
+                    If IsExp(basestack, rest$, X) Then
+                        If MediaPlayer1.getLengthInMS > 0 Then MediaPlayer1.setPositionTo X
+                        
+                    End If
+                    Set Scr = Nothing
+                    ProcMedia = True
+                    Exit Function
+
+        End If
+    End If
+    ss$ = vbNullString
+' do nothing until here
+If IsExp(basestack, rest$, X) Then
+   
+            If FastSymbol(rest$, ",") Then
+    
+             UseAviSize = False
+    AviSizeX = 0
+    AviSizeY = 0
+    aviX = 0
+    aviY = 0
+    UseAviSize = False
+    UseAviXY = True: aviX = CLng(X): aviY = 0
+            If IsExp(basestack, rest$, Y) Then aviY = CLng(Y) Else ProcMedia = False: UseAviXY = False: aviX = 0
+            Else ' SPECIAL
+            If MediaPlayer1.getLengthInMS > 0 Then
+                If X < 0 Then
+                MediaPlayer1.pauseMovie
+                AVIRUN = MediaPlayer1.isMoviePlaying
+                If Scr.Name <> "Printer" Then
+                If Scr.Visible Then Scr.SetFocus
+                End If
+                ElseIf X = 0 Then
+                          
+                MediaPlayer1.playMovie
+                MyDoEvents
+                Else
+                MediaPlayer1.setPositionTo X
+                End If
+                ProcMedia = True
+        Else
+        ProcMedia = False
+        End If
+        Set Scr = Nothing
+        Exit Function
+            End If
+            If aviX = 0 Then UseAviXY = False
+            If FastSymbol(rest$, ",") Then
+                    If IsExp(basestack, rest$, X) Then AviSizeX = CLng(X) Else rest$ = "," & rest$
+                If FastSymbol(rest$, ",") Then
+            If IsExp(basestack, rest$, X) Then AviSizeY = CLng(X) Else rest$ = "," & rest$
+                End If
+                UseAviSize = (Abs(AviSizeY) + Abs(AviSizeX)) <> 0 Or (aviX = 0 And aviY = 0)
+                
+            End If
+            If Not FastSymbol(rest$, ",") Then
+                   If AVIUP Then
+                   If UseAviXY And UseAviSize Then
+                   AVI.Move aviX, aviY, AviSizeX, AviSizeY
+                   MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
+                   ElseIf UseAviXY Then
+                   AVI.Move aviX, aviY
+                    MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
+                    ElseIf UseAviSize Then
+                     AVI.Move AVI.Left, AVI.top, AviSizeX, AviSizeY
+                   MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
+                    End If
+           Else
+                   If AVIRUN Or AVIUP Then
+                AVI.GETLOST
+            End If
+           
+            End If
+            Set Scr = Nothing
+            Exit Function
+            
+            End If
+      
+ElseIf FastSymbol(rest$, ";") Then
+'MediaPlayer1.closeMovie
+    UseAviXY = False
+    UseAviSize = False
+    AviSizeX = 0
+    AviSizeY = 0
+    aviX = 0
+    aviY = 0
+    AVI.GETLOST
+Else
+ 
+'MediaPlayer1.closeMovie
+If AVIRUN Or AVIUP Then
+                AVI.GETLOST
+              
+            End If
+  
+End If
+
+Do
+ProcTask2 basestack
+
+ If Not MediaPlayer1.isMoviePlaying Then AVIRUN = False
+Loop Until Not AVIRUN Or NOEXECUTION
+
+Do While IsStrExp(basestack, rest$, s$)
+If s$ <> "" Then
+If ExtractType(s$) = vbNullString Then s$ = s$ & ".avi"
+    If CFname(s$) = vbNullString Then
+        s$ = mcd & s$: If CFname(s$) = vbNullString Then Set Scr = Nothing: Exit Function
+
+    Else
+        s$ = CFname(s$)
+    End If
+    Else
+    AVI.GETLOST
+    Exit Do
+End If
+avifile = s$
+Load AVI
+AVI.Avi2Up
+AVI.Show
+Sleep 5
+
+If AVIRUN Then
+If Form1.Visible Then Form1.SetFocus
+MediaPlayer1.setLeftVolume vol * 10
+MediaPlayer1.setRightVolume vol * 10
+
+End If
+If FastSymbol(rest$, ",") Then
+If AVIRUN Then
+Do
+ AVIRUN = MediaPlayer1.isMoviePlaying
+ ProcTask2 basestack
+' sleep 5
+
+Loop Until AVIRUN = False Or NOEXECUTION
+End If
+Else
+If FastSymbol(rest$, ";") Then
+If AVIRUN Then
+Do
+ AVIRUN = MediaPlayer1.isMoviePlaying
+ProcTask2 basestack
+ ' sleep 5
+
+Loop Until AVIRUN = False Or NOEXECUTION
+End If
+End If
+Exit Do
+End If
+Loop
+Set Scr = Nothing
+Exit Function
+
+
+End Function
 

@@ -49,7 +49,7 @@ Private Sub ExpandHash()
     hashlen = hashlen * 2 + 3
     
     ReDim Hash(hashlen) As Long
-    For i = 0 To MaxSpace \ 2 - 1
+    For i = 0 To toplim
     place HashFunc2(i), i
     Next i
 End Sub

@@ -374,15 +374,14 @@ If (OpenClipboard(0) <> 0) Then
         
         If (GetBinaryData(lFormatId, bData())) Then
         sr = bData
-    
-     If IsWine Then
-            sr1 = Left$(sr, Len(sr1))
-            GetTextData = Left$(sr1, Len(sr1))
-    Else
-                GetTextData = Left$(sr, Len(sr1))
-    End If
-    
-          
+        
+        If IsWine Then
+        sr1 = Left$(sr, Len(sr1))
+        GetTextData = Left$(sr1, Len(sr1))
+        Else
+        GetTextData = Left$(sr, Len(sr1))
+        End If
+
         End If
 
 End If

@@ -831,10 +831,12 @@ Dim subgroup As Object, sub2 As Object, myArray As mArray, mySecondArray As mArr
                 mygroup2.HasSet = .HasSet
                 mygroup2.HasParameters = .HasParameters
                 mygroup2.HasParametersSet = .HasParametersSet
+                mygroup2.HasRemove = .HasRemove
              Set mygroup2.SuperClassList = .SuperClassList
                 Set mygroup2.Events = .Events
                 mygroup2.highpriorityoper = .highpriorityoper
                 mygroup2.HasUnary = .HasUnary
+                mygroup2.ToDelete = .ToDelete
             End With
             Set myobject2 = mygroup2
 End Sub

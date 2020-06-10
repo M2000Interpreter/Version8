@@ -38,8 +38,8 @@ Private Sub Class_Initialize()
     toplim = -1
 
 End Sub
-Friend Sub ReadVar(where, name$, num As Long)
-    name$ = PriveSpace(where).Key
+Friend Sub ReadVar(where, Name$, num As Long)
+    Name$ = PriveSpace(where).Key
     num = PriveSpace(where).ndx
 End Sub
 
@@ -50,7 +50,7 @@ Private Sub ExpandHash()
     hashlen = hashlen * 2 + 3
     
     ReDim Hash(hashlen) As Long
-    For i = 0 To MaxSpace \ 2 - 1
+    For i = 0 To toplim
 
     place HashFunc2(i), i
     Next i
@@ -98,9 +98,9 @@ If newTop = 0 Or newTop > toplim Then Exit Sub
                 MaxSpace = 2 * (newTop + 1) + 1
                 
                 ReDim Preserve PriveSpace(MaxSpace) As item
-                
-                ReDim Hash(MaxSpace * 2 + 3)
-               hashlen = MaxSpace * 2 + 3
+                hashlen = MaxSpace * 2 + 3
+                ReDim Hash(hashlen)
+               
              '  reHash...
              toplim = newTop - 1
             For i = 0 To toplim

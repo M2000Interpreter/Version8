@@ -22,7 +22,7 @@ Option Explicit
  End Type
 '
 Private PriveSpace() As item
-Dim MaxSpace As Long
+Public MaxSpace As Long
 Dim hashlen As Long
 Dim toplim As Long
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
@@ -35,8 +35,8 @@ Private Sub Class_Initialize()
     hashlen = MaxSpace * 2 + 3
     toplim = -1
 End Sub
-Friend Sub ReadVar(where, name$, num As Long)
-    name$ = PriveSpace(where).Key
+Friend Sub ReadVar(where, Name$, num As Long)
+    Name$ = PriveSpace(where).Key
     num = PriveSpace(where).ndx
 End Sub
 
@@ -47,10 +47,14 @@ Private Sub ExpandHash()
     hashlen = hashlen * 2 + 3
     
     ReDim Hash(hashlen) As Long
-    For i = 0 To MaxSpace \ 2 - 1
-
+    For i = 0 To toplim
     place HashFunc2(i), i
     Next i
+End Sub
+Friend Sub Expand(NewMaxSpace As Long)
+           MaxSpace = NewMaxSpace
+           ReDim Preserve PriveSpace(MaxSpace) As item
+           If MaxSpace > hashlen Then ExpandHash
 End Sub
 Friend Sub ReduceHash(newTop As Long, v() As modfun)
     Dim i As Long
@@ -103,9 +107,9 @@ Friend Sub ReduceHash(newTop As Long, v() As modfun)
                 MaxSpace = 2 * (newTop + 1) + 1
                 
                 ReDim Preserve PriveSpace(MaxSpace) As item
-                
-                ReDim Hash(MaxSpace * 2 + 3)
-               hashlen = MaxSpace * 2 + 3
+                hashlen = MaxSpace * 2 + 3
+                ReDim Hash(hashlen)
+               
              '  reHash...
              toplim = newTop - 1
             For i = 0 To toplim
@@ -217,6 +221,7 @@ End Function
 Friend Sub ItemCreator(Key As String, num As Long, Optional isref As Boolean = False)
 Dim a As Long
 a = Malloc()
+If Left$(Key, 1) = "." Then Stop
 place HashFunc(Key), a
 With PriveSpace(a)
     .ndx = num

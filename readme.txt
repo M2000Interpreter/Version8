@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 26 active-X
-Fix an issue from rev 21, when a set function in a group object get indexes.
-(before rev21 works fine)
+Version 9.9 revision 28 active-X
+Update for interpreter, info file and the two manuals (pdf)
+Supposed to be 99.9% of a completed task
 
 
 George Karras, Kallithea Attikis, Greece.

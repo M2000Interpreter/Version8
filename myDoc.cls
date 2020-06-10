@@ -799,9 +799,11 @@ textDoc = Left$(textDoc, thiscur - 1)
 End If
 End Sub
 Function textHtmlDoc(colortable() As String) As String
-Dim mlines As Long, NeoData As String
+Dim mlines As Long, NeoData As String, a77$
  Dim mycur As Long, thiscur, l As Long, a$, mColor() As Long, qu$
  qu$ = """"
+ a77$ = space$(EditTabWidth)
+ a77$ = Replace(a77$, " ", "&nbsp;")
 mycur = DocParaNext(0)
 textHtmlDoc = space$(500)
 Do While mycur <> 0
@@ -812,6 +814,7 @@ Do While mycur <> 0
 If NeoData = vbNullString Then
 If thiscur <> 0 Then NeoData = "<p>" Else thiscur = 1
 Else
+
 a$ = Replace$(NeoData, "<", ChrW$(3))
 a$ = Replace$(a$, ">", ChrW$(4))
 a$ = Replace$(a$, "  ", ChrW$(7) + ChrW$(7))
@@ -867,7 +870,9 @@ a$ = Replace$(a$, ChrW$(3), "&lt;")
 a$ = Replace$(a$, ChrW$(4), "&gt;")
 a$ = Replace$(a$, ChrW$(7), "&nbsp;")
 If thiscur <> 0 Then NeoData = "<br />" + a$ Else thiscur = 1: NeoData = a$
-
+End If
+If Nonbsp Then
+NeoData = Replace$(NeoData, vbTab, a77$)
 End If
 l = Len(NeoData)
 If Len(textHtmlDoc) < thiscur + l Then textHtmlDoc = textHtmlDoc + space$((thiscur + l) + 100)
@@ -879,10 +884,9 @@ If Typename(thiscur) = "Empty" Then
 
 Else
 If InStr(textHtmlDoc, vbTab) > 0 Then
-' preserve tabs
-textHtmlDoc = "<pre>" + Left$(textHtmlDoc, thiscur - 1) + vbCrLf + "</pre>"
+    textHtmlDoc = "<pre>" + Left$(textHtmlDoc, thiscur - 1) + vbCrLf + "</pre>"
 Else
-textHtmlDoc = Left$(textHtmlDoc, thiscur - 1) + vbCrLf
+    textHtmlDoc = Left$(textHtmlDoc, thiscur - 1) + vbCrLf
 End If
 End If
 End Function
@@ -916,7 +920,7 @@ Mid$(b$, cur, Len(NeoData)) = NeoData
 cur = cur + Len(NeoData)
 End Sub
 
-Public Sub InsertDoc(ByVal ParaNum As Long, fromPos As Long, norawtext As String, Optional TabWidth As Long = 0, Optional gotonextfree As Boolean = False)
+Public Sub InsertDoc(ByVal ParaNum As Long, fromPos As Long, norawtext As String, Optional TabWidth As Long = 0, Optional gotonextfree As Boolean = False, Optional removenbsp As Boolean = False)
     Dim t_text As String, once As Boolean
     Dim a() As String, t() As String
     Dim b$
@@ -936,7 +940,16 @@ Dim i As Long, k As Long, j As Long, ii As Long
     i = LBound(a())
     Do
     If i > UBound(a()) Then Exit Do
-    
+    If Left$(a(i), 1) = Chr$(160) Then
+
+    Dim jj As Long
+    If removenbsp Then
+    For jj = 1 To Len(a(i))
+    If Mid$(a(i), jj, 1) <> Chr$(160) Then Mid$(a(i), 1, jj - 1) = space$(jj - 1): Exit For
+    Next jj
+   ' If Left$(a(i), 1) = Chr$(160) Then a(i) = space$(Len(a(i)))
+    End If
+    End If
     If TabWidth > 0 Then
     t() = Split(a(i), Chr(9))
     k = LBound(t())

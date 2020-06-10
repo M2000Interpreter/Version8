@@ -1134,7 +1134,6 @@ Private Function NormQuat(v As QuatType) As Double
     NormQuat = Sqr(v.w * v.w + v.X * v.X + v.Y * v.Y + v.z * v.z)
 End Function
 
-' debug
 Public Function QuatString(a As Long, Optional frm$ = "#0.00000") As String
     Dim q As QuatType
     q = GetQuatType(a)

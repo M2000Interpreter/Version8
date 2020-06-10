@@ -395,7 +395,7 @@ Private Function GetMemberName(obj As Object, ByVal dispid As Long, IID As GUID,
 
     ' GetNames
     hRet = CallPointer(oTypeInfo.GetNames, pTypeInfo, dispid, VarPtr(strName), 1, VarPtr(pcNames))
-   ' Debug.Print pcNames
+
 finalize:
     If Len(strName) = 0 Then
         ' no string... :(
@@ -436,7 +436,7 @@ If exclude.ExistKey(dispid) Then Exit Sub
     vParams = pvGetParamArray(params, NumVar)
 
    On Error Resume Next
-    Debug.Print "FireEvent", strEvent, what$
+   ' Debug.Print "FireEvent", strEvent, what$
 
  If Not CallEventFromCOM(Me, strEvent, what$, NumVar, vParams(), delme, ItemIndex) Then
     MyEr "Problem With Event: " + strEvent, "Πρόβλημα με το γεγονός: " + strEvent

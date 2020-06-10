@@ -990,6 +990,7 @@ bDnum = dnum
 End Function
 
 Public Function SerialItem(item As Variant, cursor As Long, Command As Long) As Boolean
+Dim aa As Variant
 If Command = 1 Then
 If dnum = 0 Then Exit Function
 If cursor < 0 Or cursor >= maxitems Then Exit Function
@@ -1020,7 +1021,6 @@ item = limit(cursor)
 End If
 End If
 ElseIf Command = 7 Then  'erase all data
-Dim aa As Variant
 Fill aa
 ElseIf Command = 8 Then
 If dnum = 1 Then
@@ -1031,8 +1031,7 @@ maxitems1 = 0
 ndnum = 0 ' no actions
 nmaxitems = 1
 nmaxitems1 = 0
-Dim z As Variant
-CopyMemory ByVal VarPtr(refArray), z, 16
+CopyMemory ByVal VarPtr(refArray), aa, 16
 ReDim actualdata(0)
 CodeName = GetAnyName$
 Arr = True
@@ -1335,6 +1334,7 @@ Dim i As Long
 If IHaveClass Then
 For i = 0 To maxitems - 1
 CopyGroupObj GroupRef, aa, True
+aa.ToDelete = False
 Set actualdata(i) = aa
 Next i
 Else
@@ -1422,9 +1422,11 @@ Dim mygroup2 As New Group
                 mygroup2.HasParameters = myobject.HasParameters
                 mygroup2.HasParametersSet = myobject.HasParametersSet
                 Set mygroup2.SuperClassList = myobject.SuperClassList
+                mygroup2.HasRemove = myobject.HasRemove
                 'If Not GroupRef Is Nothing Then
                 If LinkToMe Then
                     Set mygroup2.LinkRef = myobject
+                    mygroup2.link.ToDelete = True
                 Else
                     .PeekItem x1, vvl
                     mygroup2.PokeItem x1, vvl
@@ -1432,6 +1434,7 @@ Dim mygroup2 As New Group
                 Set mygroup2.Events = .Events
                 mygroup2.highpriorityoper = .highpriorityoper
                 mygroup2.HasUnary = .HasUnary
+                mygroup2.ToDelete = False
                 End If
             End With
          Set myobject2 = mygroup2
