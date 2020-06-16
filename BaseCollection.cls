@@ -183,7 +183,8 @@ Dim dummy As Long, dummy1 As Long
     If Done Then lastkey = Normalize(RHS)
 End Sub
 Public Sub RemoveWithNoFind()
-If AllowSameKey Then Exit Sub
+'If AllowSameKey Then Exit Sub
+Dim new_item As item
 Dim k As Long, k1 As Long, vvv As Variant, top1 As Long
 If toplim < 0 Then Exit Sub
 top1 = toplim
@@ -196,13 +197,15 @@ If Done Then
         Hash(PriveSpace(index).lastpos) = PriveSpace(index).Pleft
 
         End If
-        SwapVariant vvv, PriveSpace(top1).iValue
-        PriveSpace(index).iValue = -1
-        PriveSpace(index) = PriveSpace(top1)
-        Dim new_item As item
-        PriveSpace(top1) = new_item
-        SwapVariant vvv, PriveSpace(index).iValue
-        
+        If top1 = index Then
+            PriveSpace(top1) = new_item
+        Else
+            SwapVariant vvv, PriveSpace(top1).iValue
+            PriveSpace(index).iValue = -1
+            PriveSpace(index) = PriveSpace(top1)
+            PriveSpace(top1) = new_item
+            SwapVariant vvv, PriveSpace(index).iValue
+        End If
         k = Hash1(PriveSpace(index).lastpos1) - 1
         If k = top1 Then
             Hash1(PriveSpace(index).lastpos1) = index + 1
@@ -241,7 +244,7 @@ here:
 End If
 End Sub
 Public Sub drop(RHS)
-If Not AllowSameKey Then Exit Sub
+'If Not AllowSameKey Then Exit Sub
 RHS = RHS - 1
 If (toplim - RHS) >= 0 And (RHS >= 0) Then
 Dim i As Long
@@ -249,13 +252,12 @@ For i = toplim To RHS Step -1
        With PriveSpace(i)
         If .Pleft > 0 Then
             Hash(.lastpos) = .Pleft
-            .Key = vbNullString
-            .iValue = CDbl(0)
             .Pleft = 0
         Else
             Hash(.lastpos) = 0
-            .Key = vbNullString
         End If
+        .Key = vbNullString
+        .iValue = CDbl(0)
         If .Pleft1 > 0 Then
             Hash1(.lastpos1) = .Pleft1
             .KeyC = 0

@@ -65,7 +65,7 @@ Public Sub ToKey(RHS)
     If Done Then lastkey = CLng(RHS)
 End Sub
 Public Sub RemoveWithNoFind()
-
+Dim new_item As item
 Dim k As Long, k1 As Long, vvv As Variant, top1 As Long
 If toplim < 0 Then Exit Sub
 top1 = toplim
@@ -78,12 +78,15 @@ If Done Then
         Hash(PriveSpace(index).lastpos) = PriveSpace(index).Pleft
 
         End If
-        SwapVariant vvv, PriveSpace(top1).iValue
-        PriveSpace(index).iValue = -1
-        PriveSpace(index) = PriveSpace(top1)
-        Dim new_item As item
-        PriveSpace(top1) = new_item
-        SwapVariant vvv, PriveSpace(index).iValue
+        If top1 = index Then
+            PriveSpace(top1) = new_item
+        Else
+            SwapVariant vvv, PriveSpace(top1).iValue
+            PriveSpace(index).iValue = -1
+            PriveSpace(index) = PriveSpace(top1)
+            PriveSpace(top1) = new_item
+            SwapVariant vvv, PriveSpace(index).iValue
+        End If
         k = Hash(PriveSpace(index).lastpos) - 1
         If k = top1 Then
             ' we have to give the new position to Hash()

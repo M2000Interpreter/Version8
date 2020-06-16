@@ -11,7 +11,7 @@
             Module Reset (x){
                   For SuperClass {
                         .counter<=x
-                  }                  
+                  }
             }
 }
 a=alfa
@@ -217,7 +217,7 @@ MODULE D {\\ Identifiers in Greek language
 Αρχικοποίηση:
       Συνάρτηση ΤιμήΛατινικού$(λατ$) {
             Άδειασε
-             ="άκυρο"           
+             ="άκυρο"
             Αν Φίλτρο$(λατ$,"MDCLXVI")<>"" Τότε Έξοδος
             \\ θα μπουν ανάποδα, το τελευταίο πρώτο.
             Βάλε "CM", "MD", "Q","CD", "MD","W", "XC", "DL", "E","XL", "X","R", "IX","V","T", "IV","I","Y"
@@ -1479,7 +1479,7 @@ MODULE W1 { Report {
                After a level of fitness we use less changes (only one character), changing the starting lambda function with another. Lambda functions are first citizens in M2000.
         
         From the code the statement Dim a$(1 to gen)<<mutate$(f$) place for each item in a$() a new solution from mutate$() providing a starting string
-               
+        
  }
  Module WeaselAlgorithm {
       Print "Evolutionary Algorithm"
@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 12 for ver 9.9 rev 28 and newer"
+	Report " A collection of modules for tests version 12 for ver 9.9 rev 29 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -20600,7 +20600,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<21 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<29 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -24247,5 +24247,91 @@ MODULE OOP_GR_EX {Δρομέας 5
         Τύπωσε "Δεν μπορεί να γίνει η παραγγελία"
     Τέλος Αν
 Τέλος Ρουτίνας
+}
+MODULE FORMTARGET {\\ FROM 9.9 REVISION 29
+\\ WE CAN PLACE TARGETS ON FORMS
+\\ TARGETS ARE LIGHTWEIGHT OBJECTS
+\\ WE MAKE IT ONCE
+
+\\ STATEMENTS:
+\\ TARGET  (2 VARIATIONS, ONE TO DEFINE AND ONE TO ENABLE/DISABLE)
+\\ CHANGE  WE HAVE NAMED ARGUMENTS HERE
+\\ TARGETS NEW  (WE CAN ERASE PER FORM)
+\\ THEY DON'T NEED A SCAN STATEMENT (USED FOR CONSOLE ONLY)
+\\ OLD VERSIONS OF M2000 AND THE LAST ONE CAN USE THE BASIC TARGETS
+
+\\ FORM TARGETS VS BASIC TARGETS
+\\ BASIC TARGETS CAN BE USED TO EXECUTE A LINE OF STATEMENST AT GLOBAL SCOPE
+\\ FORM TARGETS EXECUTE CODE AT THE SAME SCOPE WHERE FORM DEFINED
+
+\\ EACH TARGET HAS TWO FUNCTIONALITIES:
+\\ BASIC TARGET:  SEND KEYS TO CONSOLE/EXECUTE CODE TO GLOBAL SCOPE
+\\ FORM TARGET:  SEND EVENT TARGET/ EXECUTE CODE TO MODULE SCOPE
+\\ EVENT TARGET IS COMMON FOR ALL TARGETS, SENDING THE HANDLER OF TARGET
+
+
+\\ ONE PARAMETER BEFORE THE LASTING TEXT:
+\\ CAN BE 1 TO 9 FOR POSITION OF TEXT, +10 TO USE "SEND" FUNCTION
+\\ +100 TO USE PROPORTIONAL TEXT RENDERING.
+\\ A 5 IS CENTER VERTICAL END HORIZONTAL.
+
+\\ BASIC TARGETS CAN BE USED IN 34 LAYERS: BACKGROUND, CONSOLE, PLAYERS (32 MAX).
+\\ TO SCAN FOR THEM WE USE SCAN STATEMENT USING A NUMBER FOR A TIME WINDOW.
+
+\\ TARGETS VS BUTTONS ON FORMS
+\\ A BUTTON IS A CONTROL, WITH METHODS AND PROPERTIES.
+\\ TAB AND SHIFT TAB CAN CHOOSE ANY ENABLED BUTTON TO GET FOCUS
+\\ TARGETS HAVE NO FOCUS. USED ONLY WITH MOUSE
+\\ EACH TARGET IS AN ARRAY OF DATA TO BE USED FOR RENDERING AND SCANNING
+\\ SCANNING HAPPEN AT THE MOUSE DOWN EVENT. SO TARGETS GET A CLICK ONLY
+\\ BUTTONS GET DOUBLE CLICK, OR SHIFT CAPTION LEFT, OR ENTER, BUT NOT A SIMPLE CLICK
+
+
+
+Declare form1 Form
+m=false
+Module zz {
+	\\ target call zz to own object
+	\\ so we have to use Layer {} to send to console
+	Layer {
+		print "ok", timecount
+		refresh
+		}
+	change A, text "ok"
+}
+Function form1.MouseDown {
+	Stack
+	refresh
+}
+Function form1.Target {
+	\\ normal events executed to console
+	\\ so we have to use Layer to redirect to Form1 layer
+	Print "target:", number, A
+	Refresh
+	Layer Form1 {
+		Target A, m
+		if m then
+			change A, back 2
+		else
+			change A, back 0
+		end if
+	}
+	m~
+}
+Layer form1 {
+	window 12, 12000, 8000
+	form 32, 20
+	motion.w;  ' center window
+	cls #333333, 0
+	cursor 4, 4
+	\\ we use immediate execution, in this module
+	\\ so we call zz as this module (call local pass current scope to zz)
+	target A, "call local zz", 10, 3, 2,15, 105, "press me"
+	cursor 4, 8
+	\\ 115 means 5 center, 10 use target event, 100 proportional font rendering
+	target B,"z", 10, 3, 5,15, 115, "press me too"
+}
+Method form1,"show",1
+Declare form1 nothing
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}

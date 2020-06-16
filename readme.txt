@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 28 active-X
-Update for interpreter, info file and the two manuals (pdf)
-Supposed to be 99.9% of a completed task
+Version 9.9 revision 29 active-X
+1. Some minor bugs on Editor and EditBox removed 
+3. New: Targets for Forms, an example included in info file
+
 
 
 George Karras, Kallithea Attikis, Greece.

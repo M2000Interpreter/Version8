@@ -71,7 +71,7 @@ Public Title As String
 Public UsedAsTextBox As Boolean, HighLightColor As Long  '' only in m2000. Enter exit - use maxchar - No wrap
 Private mEditDoc As Boolean
 Public AutoNumber As Boolean
-Public Charpos As Long
+Public Charpos As Long, expandCharPos As Long
 Public showparagraph As Boolean
 Private showparagraphWork As Boolean
 Public SelectionColor As Long
@@ -374,15 +374,19 @@ undopara = mDoc.MarkParagraphID
 undotext = that
 undopos = SelStart
 undomode = 2
-
+ElseIf that = vbCr Then
+PushUndo
+undopara = mDoc.MarkParagraphID
+undotext = vbCrLf
+undopos = SelStart
+undomode = 1
 ElseIf undomode = 1 And undotext <> "" Then
 If undopos = SelStart Then
 ' we add after
 undotext = undotext + that
 ElseIf undopos = SelStart + 1 Then
-
-undotext = that + undotext
-undopos = SelStart
+    undotext = that + undotext
+    undopos = SelStart
 Else
 GoTo there
 End If
@@ -393,8 +397,8 @@ undopara = mDoc.MarkParagraphID
 undotext = that
 undopos = SelStart ' always the left side of char - so 0 is inside
 undomode = 1
-End If
 
+End If
 End Sub
 Public Sub AddUndo(that As String)
 If Not enabled Then Exit Sub
@@ -419,6 +423,12 @@ End Sub
 Public Sub RemoveUndo(that As String)
 ClearRedo
 If that = vbCrLf Then
+PushUndo
+undopara = mDoc.MarkParagraphID
+undotext = that
+undopos = SelStart
+undomode = 3
+ElseIf that = vbCr Then
 PushUndo
 undopara = mDoc.MarkParagraphID
 undotext = that
@@ -532,6 +542,16 @@ Private Sub glistN_DragOverCursor(ok As Boolean)
 ok = True
 End Sub
 
+Private Sub glistN_ExpandSelStart(val As Long)
+If val < 1 Then val = 1
+If expandCharPos > val Then val = expandCharPos
+End Sub
+Private Sub glistN_SetExpandSS(val As Long)
+expandCharPos = val
+End Sub
+Private Sub glistN_DelExpandSS()
+expandCharPos = 0
+End Sub
 Private Sub glistN_Fkey(a As Integer)
 Dim s$
 If Me.UsedAsTextBox Then
@@ -570,6 +590,7 @@ Yes = HaveMarkedText
 End Sub
 
 Private Sub glistN_MarkCut(ThatData As String)
+expandCharPos = 0
 ThatData = undotext
 End Sub
 
@@ -618,7 +639,6 @@ End Sub
 Private Sub glistN_RemoveOne(that As String)
 ' push undo removeone
 If Not enabled Then Exit Sub
-
 ClearRedo
 If that = vbCrLf Then
 PushUndo
@@ -717,18 +737,34 @@ If glistN.ListIndex < 0 Then Exit Sub
 Dim what$, ThatPara As Long, pastchars As Long
 pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
 Charpos = pastchars + glistN.SelStart
+If expandCharPos > 0 Then
+If expandCharPos <> glistN.SelStart Then
+If Len(what$) + 1 >= expandCharPos Then
+    'If expandCharPos > glistN.SelStart Then
+        glistN.SelStartNoEvents = expandCharPos
+    'End If
+Else
+glistN.SelStartNoEvents = Len(what$) + 1
+
+End If
+End If
+End If
 mDoc.MarkParagraphID = ThatPara
-'IsRTLrun
+
 If Not glistN.enabled Then Exit Sub
 
 If glistN.SelStart = 0 Then
-
 RaiseEvent inform(glistN.ListIndex + 1, 1)
 Else
 RaiseEvent inform(glistN.ListIndex + 1, glistN.SelStart)
 End If
 If NoCenterLineEdit Then Exit Sub
-If LastListIndex <> glistN.ListIndex Then LastListIndex = glistN.ListIndex: glistN.ShowMe
+
+If LastListIndex <> glistN.ListIndex Then
+
+LastListIndex = glistN.ListIndex: glistN.ShowMe
+
+End If
 
 End Sub
 
@@ -1051,9 +1087,6 @@ KeyCode = 0
 ElseIf KeyCode = vbKeyV And (shift And 3) = 2 Then
 Pad$ = GetTextData(13)
 If Pad$ = vbNullString Then Pad$ = Clipboard.GetText(1)
-If Len(CurrentParagraph) + 1 < Charpos Then
-SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
-End If
 If ParaSelStart = 2 And glistN.list(glistN.ListIndex) = vbNullString Then
 SelStart = SelStart - 1
 End If
@@ -1087,6 +1120,7 @@ undopara = Redopara
 undopos = Redopos
 undotext = Redotext
 undomode = Redomode
+If undomode = 2 Then undopos = Redopos - 2
 undoprev = Redoprev
 b = enabled
 enabled = False
@@ -1162,6 +1196,7 @@ PushRedo
 Redopara = undopara
 Redopos = undopos
 Redotext = undotext
+If undomode = 2 Then Redopos = undopos + 2
 Redomode = undomode
 Redoprev = undoprev
 
@@ -1311,7 +1346,7 @@ mDoc.ReWritePara mDoc.MarkParagraphID, mDoc.TextParagraph(mDoc.MarkParagraphID) 
  all = mDoc.DocLines
 ClearRedo
 PushUndo
-undotext = vbCrLf
+undotext = ""
 undopara = mDoc.MarkParagraphID
 undopos = SelStart
 undomode = 2
@@ -1664,9 +1699,7 @@ End Sub
 
 Private Sub glistN_MarkIn()
 If Not glistN.EditFlag Then glistN.MarkNext = 0: Exit Sub
-If Len(CurrentParagraph) + 1 < Charpos Then
-    SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
-End If
+expandCharPos = 0
 BlockStartPara = mDoc.MarkParagraphID
 BlockStartPos = ParaSelStart
 BlockStartCursor = glistN.SelStart '- 1
@@ -1750,9 +1783,7 @@ End If
 End Sub
 Private Sub glistN_MarkOut()
 '
-If Len(CurrentParagraph) + 1 < Charpos Then
-    SelStartSilent = CharPosStart - Charpos + 1 + Len(CurrentParagraph)
-End If
+expandCharPos = 0
 BlockEndPara = mDoc.MarkParagraphID
 BlockEndPos = ParaSelStart
 BlockEndline = glistN.ListIndex
@@ -1798,8 +1829,6 @@ Dim what$, ThatPara As Long
    mDoc.TextParagraphLine2 item, what$, ThatPara, showparagraphWork And showparagraph
    mDoc.MarkParagraphID = ThatPara
 End Sub
-
-
 Private Sub glistN_Selected2(item As Long)
 If undomode = 1 And undotext <> "" Then PushUndo
 If ClickInsideMarkedText Then
@@ -1809,13 +1838,9 @@ glistN.MarkNext = 4
 glistN.DragNow
 End If
 End Sub
-
 Private Sub glistN_ShowExternalCursor()
 glistN.PrepareToShow 5
 End Sub
-
-
-
 Private Sub glistN_SplitLine()
 '
 Dim b$, dummy As Long, a As Long
@@ -1872,6 +1897,7 @@ End Sub
 
 
 Private Sub glistN_SubSelStart(val As Long, shift As Integer)
+expandCharPos = 0
 Dim w As Long, a$, l As Long, b$
 If HaveMarkedText And Not (shift And 1) = 1 Then
 BlockStartPara = BlockEndPara
@@ -1927,6 +1953,7 @@ If Charpos < 2 Or NumberOnly Or NumberIntOnly Then Exit Sub
 End Sub
 
 Private Sub glistN_AddSelStart(val As Long, shift As Integer)
+expandCharPos = 0
 If NumberOnly Or NumberIntOnly Then Exit Sub
 Dim w As Long, a$, l As Long, b$
 If HaveMarkedText And Not (shift And 1) = 1 Then
@@ -4260,6 +4287,7 @@ Public Function AutoIntNewLine() As Boolean
 Dim a$, newid As Long 'mDoc.MarkParagraphID
 Dim b$, c$, d$, e$, skip As Boolean, tr$, maxw As Long, ns As String, och As Long
 showparagraphWork = False
+expandCharPos = 0
 b$ = CurrentParagraph
 If Charpos > Len(b$) + 1 Then SelStartSilent = SelStart - (Charpos - Len(b$) - 1)
 On Error Resume Next
@@ -4299,7 +4327,6 @@ there:
         End If
         ns = NLtrim(CurrentParagraph)
         a$ = Myleft$(CurrentParagraph, Len(CurrentParagraph) - Len(ns))
-  If Len(CurrentParagraph) + 1 < Charpos Then Charpos = Len(CurrentParagraph) + 1
  If Len(a$) > Charpos - 1 Then
 SelStartSilent = SelStart - Charpos + Len(a$) + 1
 Else
@@ -5275,9 +5302,7 @@ IsRTLrun = True
 'ManualInform
 End If
 ex1:
-'Debug.Print Mark1, Mark2
-
-    
+   
 End Function
 Private Sub glistN_RTL(thisHDC As Long, item As Long, where As Long, mark10 As Long, mark20 As Long, offset As Long)
 offset = RealX1(thisHDC, where, mDoc.TextLine2(item + 1, showparagraph, NoColor), where, mark10)

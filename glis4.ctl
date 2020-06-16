@@ -270,7 +270,9 @@ Event AddSelStart(val As Long, shift As Integer)
 Event SubSelStart(val As Long, shift As Integer)
 Event rtl(thisHDC As Long, item As Long, where As Long, mark10 As Long, mark20 As Long, offset As Long)
 Event RTL2(s$, where As Long, mark10 As Long, mark20 As Long, offset As Long)
-
+Event DelExpandSS()
+Event SetExpandSS(val As Long)
+Event ExpandSelStart(val As Long)
 Event Fkey(a As Integer)
 Private state As Boolean
 Private secreset As Boolean
@@ -1011,20 +1013,25 @@ Exit Sub
            RaiseEvent RemoveOne(kk$)
            
          If KeyAscii = 44 And Len(kk$) = 2 Then
+         RaiseEvent SetExpandSS(mSelstart + 2)
          SelStartEventAlways = SelStart + 2
          RaiseEvent PureListOn
          list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 3) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 2)
           RaiseEvent PureListOff
          Else
+         RaiseEvent SetExpandSS(mSelstart + 1)
             SelStartEventAlways = SelStart + 1
+            RaiseEvent DelExpandSS
             RaiseEvent PureListOn
             
             list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 2) + kk$ + Mid$(list(SELECTEDITEM - 1), SelStart - 1)
+            
           RaiseEvent PureListOff
+          
             End If
 
-      
-               
+
+RaiseEvent SetExpandSS(mSelstart)
         
            '
             Else
@@ -1250,6 +1257,7 @@ End If
 Select Case KeyCode
 Case vbKeyHome
 If EditFlag Then
+RaiseEvent DelExpandSS
 If mSelstart = 1 Then
 mSelstart = Len(list(ListIndex)) - Len(NLtrim(list(ListIndex))) + 1
 Else
@@ -1267,12 +1275,14 @@ End If
 Case vbKeyEnd
 If EditFlag Then
 mSelstart = Len(list(ListIndex)) + 1
+RaiseEvent SetExpandSS(mSelstart)
 Else
     ShowThis listcount
     Do While Not (Not ListSep(ListIndex) Or ListIndex = 0)
         ShowThis SELECTEDITEM - 1
     Loop
     If ListSep(ListIndex) Then ListIndex = LastListIndex
+    RaiseEvent SetExpandSS(mSelstart)
     RaiseEvent ChangeSelStart(SelStart)
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 End If
@@ -1318,6 +1328,7 @@ If Spinner Then Exit Sub
    
     End If
     If Not MultiLineEditBox Then If ListSep(ListIndex) Then ListIndex = LastListIndex
+     
      RaiseEvent ChangeSelStart(SelStart)
 '     If MultiLineEditBox Then FindRealCursor ListIndex
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
@@ -1355,8 +1366,10 @@ If Spinner Then Exit Sub
    
     End If
     If Not MultiLineEditBox Then If ListSep(ListIndex) Then ListIndex = LastListIndex
-  
-    SelStartEventAlways = SelStart
+    
+  ' RaiseEvent ExpandSelStart(mSelstart)
+    'SelStartEventAlways = SelStart
+    RaiseEvent ChangeSelStart(SelStart)
    ' If MultiLineEditBox Then FindRealCursor ListIndex
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
     If shift <> 0 Then
@@ -1422,6 +1435,7 @@ If mSelstart = 0 Then mSelstart = 1
      RaiseEvent PushUndoIfMarked
      RaiseEvent MarkDelete(False)
  enabled = bb
+
  RaiseEvent PureListOn
  If shift = 5 Then
  list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) & ChrW(&H2007) & Mid$(list(SELECTEDITEM - 1), SelStart)
@@ -1436,6 +1450,7 @@ If mSelstart = 0 Then mSelstart = 1
  End If
  RaiseEvent PureListOff
 SelStartEventAlways = SelStart + 1
+RaiseEvent SetExpandSS(mSelstart)
 KeyCode = 0
 PrepareToShow 10
 End If
@@ -1462,39 +1477,43 @@ End If
 End If
 End If
 Case vbKeyLeft
+RaiseEvent DelExpandSS
 If EditFlag Then
 val = 1
 RaiseEvent SubSelStart(val, shift)
-
-
 If MultiLineEditBox Then
 If SelStart > val Then
 mSelstart = SelStart - val
+If shift = 0 Then RaiseEvent SetExpandSS(mSelstart)
 RaiseEvent MayRefresh(bb)
 If bb Then ShowMe2
 ElseIf ListIndex > 0 Then
 ShowThis SELECTEDITEM - 1
 mSelstart = Len(list(ListIndex)) + 1
+If shift = 0 Then RaiseEvent SetExpandSS(mSelstart)
 If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 
 End If
 ElseIf SelStart > val Then
 mSelstart = SelStart - val
+If shift = 0 Then RaiseEvent SetExpandSS(mSelstart)
 End If
 End If
 Case vbKeyRight
 If EditFlag Then
 val = 1
-RaiseEvent AddSelStart(val, shift)
+If shift = 0 Then RaiseEvent AddSelStart(val, shift)
 If MultiLineEditBox Then
 If SelStart <= Len(list(SELECTEDITEM - 1)) - val + 1 Then
 
 mSelstart = SelStart + val
+If shift = 0 Then RaiseEvent SetExpandSS(mSelstart)
 RaiseEvent MayRefresh(bb)
 If bb Then ShowMe2
 ElseIf ListIndex < listcount - 1 Then
 ListindexPrivateUse = ListIndex + 1
 mSelstart = 1
+If shift = 0 Then RaiseEvent SetExpandSS(mSelstart)
 If (SELECTEDITEM - topitem) > lines + 1 Then topitem = topitem + 1
 If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
 
@@ -1503,13 +1522,13 @@ End If
 Else
 If SelStart <= Len(list(SELECTEDITEM - 1)) - val + 1 Then
 mSelstart = SelStart + val
+If shift = 0 Then RaiseEvent SetExpandSS(mSelstart)
 End If
 End If
 End If
 Case vbKeyDelete
 If EditFlag Then
-
-    If mSelstart = 0 Then mSelstart = 1
+   If mSelstart = 0 Then mSelstart = 1
     If SelStart > Len(list(SELECTEDITEM - 1)) Then
       mSelstart = Len(list(SELECTEDITEM - 1)) + 1
     If listcount > SELECTEDITEM Then
@@ -1525,6 +1544,7 @@ If EditFlag Then
     RaiseEvent AddSelStart(val, shift)
      RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))
     list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + val)
+    RaiseEvent SetExpandSS(mSelstart)
     RaiseEvent PureListOff
     ShowMe2
     End If
@@ -1541,19 +1561,19 @@ If EditFlag Then
         RaiseEvent addone(Mid$(list(SELECTEDITEM - 1), SelStart, val))
 
         list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) + Mid$(list(SELECTEDITEM - 1), SelStart + val)
-
+        RaiseEvent SetExpandSS(mSelstart)
         RaiseEvent PureListOff
         ShowMe2  'refresh now
     Else
         If mSelstart = 0 Then mSelstart = 1
-        
+        RaiseEvent SetExpandSS(mSelstart)
         If Not NoEvents Then RaiseEvent LineUp
     End If
 End If
 Case vbKeyReturn
 If MultiLineEditBox Then
-
 RaiseEvent SplitLine
+RaiseEvent SetExpandSS(mSelstart)
 RaiseEvent RemoveOne(vbCrLf)
 Else
 RaiseEvent EnterOnly
@@ -1888,6 +1908,7 @@ If (cX > ScaleWidth / 4 And cX < ScaleWidth * 3 / 4) And scrollme = 0 Then X = l
              REALCUR SELECTEDITEM - 1, cX - scrollme, dummy, mSelstart
       
               mSelstart = mSelstart + 1
+              'RaiseEvent SetExpandSS(mSelstart)
                 RaiseEvent ChangeSelStart(mSelstart)
             End If
  If MultiLineEditBox And (Button = 1) Then
@@ -1922,7 +1943,7 @@ If (cX > ScaleWidth / 4 And cX < ScaleWidth * 3 / 4) And scrollme = 0 Then X = l
 
              REALCUR SELECTEDITEM - 1, cX - scrollme, dummy, mSelstart
               mSelstart = mSelstart + 1
-      
+         '  RaiseEvent SetExpandSS(mSelstart)
            RaiseEvent ChangeSelStart(mSelstart)
 
              End If
@@ -2081,7 +2102,9 @@ If (Button And 3) > 0 And myEnabled Then
             If Not BlockItemcount Then
                 REALCUR SELECTEDITEM - 1, cX - scrollme, dummy, mSelstart
                 mSelstart = mSelstart + 1
+                RaiseEvent SetExpandSS(mSelstart)
                 RaiseEvent ChangeSelStart(mSelstart)
+                
             End If
             RaiseEvent selected(SELECTEDITEM)  ' broadcast
          End If
@@ -2582,7 +2605,9 @@ On Error GoTo nnn1
 If itemcount = 0 Or BlockItemcount Then
 If list(item) <> b$ Then
 'RaiseEvent PureListOff
+
 RaiseEvent ChangeListItem(item, b$)
+
 End If
 
 Exit Property
@@ -4835,7 +4860,19 @@ End Property
 Public Property Let PreserveNpixelsHeaderRightTwips(ByVal RHS As Long)
 mPreserveNpixelsHeaderRight = RHS
 End Property
+Public Property Let SelStartNoEvents(RHS As Long)
+'Dim checkline As Long
+'RaiseEvent PromptLine(checkline)
+'If PromptLineIdent > 0 And (ListIndex = checkline) And PromptLineIdent >= RHS Then RHS = PromptLineIdent + 1
+'If Not (mSelstart = RHS) Then
+'mSelstart = RHS
+'Else
+mSelstart = RHS
+If mSelstart < 1 Then mSelstart = 1
+'End If
 
+
+End Property
 
 Public Property Get SelStart() As Long
 If mSelstart < 1 Then
@@ -5011,15 +5048,15 @@ c$ = Left$(list(ListIndex), SelStart - 1)
 End If
 
 thatwidth = UserControlTextWidth(c$) + LeftMarginPixels * scrTwips
-If mSelstart > Len(c$) Then Exit Sub
+''If mSelstart > Len(c$) Then Exit Sub
 Dim where As Long, oldmselstart As Long
 oldmselstart = mSelstart
 REALCUR tothere, thatwidth, (dummy1), where
-If Len(list(tothere)) < Len(c$) And oldmselstart > Len(list(tothere)) Then
-mSelstart = oldmselstart
-Else
+'If Len(list(tothere)) < Len(c$) And oldmselstart > Len(list(tothere)) Then
+'mSelstart = oldmselstart
+'Else
 mSelstart = where + 1
-End If
+'End If
 
 End Sub
 

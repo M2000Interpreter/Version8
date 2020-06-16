@@ -422,34 +422,14 @@ Else
 uintnew = a
 End If
 End Function
-Function add32b(ByVal a As Currency, ByVal b As Currency) As Currency
-Dim a1 As Long, b1 As Long, acc1 As Long, acc2 As Long
-a1 = cUlng(a)
-b1 = cUlng(b)
-CopyMemory ByVal VarPtr(acc1), ByVal VarPtr(a1), 2
-CopyMemory ByVal VarPtr(a1), ByVal VarPtr(a1) + 2, 2
-acc1 = acc1 + (b1 And &HFFFF&)
-
-CopyMemory ByVal VarPtr(acc2), ByVal VarPtr(b1) + 2, 2
-If (acc1 And &HFFFF0000) > 0 Then
-acc2 = acc2 + 1 + (a1 And &HFFFF&)
-Else
-acc2 = acc2 + (a1 And &HFFFF&)
-End If
-CopyMemory ByVal VarPtr(acc1) + 2, ByVal VarPtr(acc2), 2
-If acc1 < 0 Then
-add32b = CCur(acc1) + 4294967296@
-Else
-add32b = CCur(acc1)
-End If
-
-End Function
 Function add32(ByVal a As Currency, ByVal b As Currency) As Currency
-If a < 0 Then a = 0 Else If a > 4294967295@ Then a = Int(a / 4294967296@)
-If b < 0 Then b = 0 Else If b > 4294967295@ Then b = Int(b / 4294967296@)
-add32 = a + b
-If add32 > 4294967295@ Then add32 = add32 - 4294967296@
+While a < 0: a = a + 4294967296@: Wend
+While b < 0: b = b + 4294967296@: Wend
+a = a + b
+While a > 4294967296@: a = a - 4294967296@: Wend
+add32 = a
 End Function
+
 Function HexToUnsigned(s$) As Currency
 Dim a As Double
 a = CLng("&h" + s$)

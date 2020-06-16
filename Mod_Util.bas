@@ -1110,11 +1110,12 @@ End Sub
 Sub BoxColorNew(dqq As Object, mb As basket, x1&, y1&, c As Long)
 Dim addpixels As Long
 With mb
-If InternalLeadingSpace() = 0 And .MineLineSpace = 0 Then
-addpixels = 0
-Else
+'If InternalLeadingSpace() = 0 And .MineLineSpace = 0 Then
 addpixels = 2
-End If
+
+'Else
+'addpixels = 2
+'End If
 
 dqq.Line (.curpos * .Xt, .currow * .Yt)-(x1& * .Xt + .Xt - 2 * DXP, y1& * .Yt + .Yt - addpixels * DYP), mycolor(c), BF
 End With
@@ -9355,14 +9356,16 @@ Function IsBinaryOr(bstack As basetask, a$, r As Variant, SG As Variant) As Bool
 End Function
 Function IsBinaryAdd(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
     Dim p As Variant
+    On Error Resume Next
     If IsExp(bstack, a$, r, , True) Then
             If FastSymbol(a$, ",") Then
                 If IsExp(bstack, a$, p, , True) Then
-                    r = add32b(r, p)
-                    
+                    r = add32(r, p)
+                    If Err.Number Then r = add32(Int(r / 4294967296@), p): Err.clear
                     While FastSymbol(a$, ",")
                     If Not IsExp(bstack, a$, p, , True) Then MissNumExpr: Exit Function
-                    r = add32b(r, p)
+                    r = add32(r, p)
+                    If Err.Number Then r = add32(r, Int(p / 4294967296@)): Err.clear
                     Wend
                     If SG < 0 Then r = -r
                     IsBinaryAdd = FastSymbol(a$, ")", True)
@@ -10854,10 +10857,12 @@ ElseIf d.Name = "Form1" Then
 .layer = -1
 ElseIf d.Name = "dSprite" Then
 .layer = d.index
+Else
+.layer = GetCode(d)
 End If
 End With
-If F <> -1 Then BoxBigNew d, prive, xl& - 1, yl&, F
-If b <> -1 Then BoxColorNew d, prive, xl& - 1, yl&, b
+If F <> &H81000000 Then BoxBigNew d, prive, xl& - 1, yl&, F
+If b <> &H81000000 Then BoxColorNew d, prive, xl& - 1, yl&, b
 If Id& < 100 Then
     Tag$ = Left$(Tag$, xl& - X&)
     If Tag$ <> "" Then
@@ -12743,59 +12748,77 @@ Dim useHandler As mHandler
 End Function
 Sub targetsMyExec(MyExec As Long, b$, bb$, v As Long, di As Object, w$, bstack As basetask, VarStat As Boolean, temphere$)
 Dim x1 As Long, y1 As Long, x2 As Long, y2 As Long, SBB$, nd&, p As Variant
+Dim notglobal As Boolean, GuiForm As GuiM2000
+notglobal = TypeOf bstack.Owner Is GuiM2000
 
-If Abs(IsLabel(bstack, b$, w$)) = 1 Then
-                    If Not GetVar(bstack, w$, v) Then
-                     v = globalvar(w$, 0#, , VarStat, temphere$)
+     If Abs(IsLabel(bstack, b$, w$)) = 1 Then
+         If Not GetVar(bstack, w$, v) Then
+             v = globalvar(w$, 0#, , VarStat, temphere$)
+         Else
+             If var(v) >= 330000 And Not notglobal Then
+                MyEr "wrong target handler", "λάθος χειριστής στόχου"
+                MyExec = 0
+                Exit Sub
+             End If
+         End If
+     Else
+         MyExec = 0
+         Exit Sub
+     End If
 
-                               
-                    End If
-                Else
-                    MyExec = 0
-                    Exit Sub
-                End If
-                If Not FastSymbol(b$, ",") Then
-                    MyExec = 0
-                    Exit Sub
-                ElseIf IsStrExp(bstack, b$, bb$) Then
-                If NocharsInLine(bb$) Then MyExec = 0: Exit Sub
-                With players(GetCode(di))
-               '' SetTextSZ di, Sz
-               '' LCT di, yPos, xPos
-                x1 = 1
-                y1 = 1
-                x2 = -1
-                y2 = -1
-                nd& = 0
-                SBB$ = vbNullString
-                On Error GoTo err123
-                If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then x1 = Abs(p) Mod (.mx + 1)
-                If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then y1 = Abs(p) Mod (.My + 1)
-                If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then x2 = CLng(Fix(p))
-                If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then y2 = CLng(Fix(p))
-                If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then nd& = Abs(p)
-                If FastSymbol(b$, ",") Then If Not IsStrExp(bstack, b$, SBB$) Then MyExec = 0: Exit Sub
+     If Not FastSymbol(b$, ",") Then
+         MyExec = 0
+         Exit Sub
+     ElseIf IsStrExp(bstack, b$, bb$) Then
+     If NocharsInLine(bb$) Then MyExec = 0: Exit Sub
+     With players(GetCode(di))
+        x1 = 1
+        y1 = 1
+        x2 = &H81000000
+        y2 = &H81000000
+        nd& = 0
+        SBB$ = vbNullString
+        On Error GoTo err123
+        If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then x1 = Abs(p) Mod (.mx + 1)
+        If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then y1 = Abs(p) Mod (.My + 1)
+        If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then x2 = CLng(Fix(p))
+        If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then y2 = CLng(Fix(p))
+        If FastSymbol(b$, ",") Then If IsExp(bstack, b$, p, , True) Then nd& = Abs(p)
+        If FastSymbol(b$, ",") Then If Not IsStrExp(bstack, b$, SBB$) Then MyExec = 0: Exit Sub
 err123:
-                        If Err.Number = 6 Then
-                                Overflow
-                                MyExec = 0
-                                Exit Sub
-                                End If
-                Targets = False
-                MyDoEvents1 Form1
-       
-                ReDim Preserve q(UBound(q()) + 1)
-                q(UBound(q()) - 1) = BoxTarget(bstack, x1, y1, x2, y2, SBB$, nd&, bb$, .Xt, .Yt, .uMineLineSpace)
-                End With
-                var(v) = UBound(q()) - 1
-                Targets = True
-                ElseIf IsExp(bstack, b$, p, , True) Then
-                  q(var(v)).Enable = Not (p = 0)
-                  RTarget bstack, q(var(v))
-                Else
-                  MyExec = 0
-                  Exit Sub
-                End If
+        If Err.Number = 6 Then
+            Overflow
+            MyExec = 0
+            Exit Sub
+        End If
+    
+        If Not notglobal Then
+            Targets = False
+            MyDoEvents1 Form1
+            ReDim Preserve q(UBound(q()) + 1)
+            q(UBound(q()) - 1) = BoxTarget(bstack, x1, y1, x2, y2, SBB$, nd&, bb$, .Xt, .Yt, .uMineLineSpace)
+            var(v) = UBound(q()) - 1
+            Targets = True
+        Else
+            Set GuiForm = di
+            var(v) = GuiForm.AddTarget(BoxTarget(bstack, x1, y1, x2, y2, SBB$, nd&, bb$, .Xt, .Yt, .uMineLineSpace))
+        End If
+    End With
+ElseIf IsExp(bstack, b$, p, , True) Then
+    If Not notglobal Then
+    If var(v) < 320000 Then
+    
+        q(var(v)).Enable = Not (p = 0)
+        RTarget bstack, q(var(v))
+        End If
+    Else
+    Set GuiForm = di
+    GuiForm.EnableTarget bstack, var(v), p
+    End If
+Else
+    MyExec = 0
+    Exit Sub
+End If
 End Sub
 
 Function ProcUSE(basestack As basetask, rest$, Lang As Long) As Boolean
@@ -14323,7 +14346,7 @@ err123456:
                 interpret = False: here$ = ohere$: GoTo there1
                 
                 End If
-              Targets = False
+                Targets = False
                 ReDim Preserve q(UBound(q()) + 1)
               
                 q(UBound(q()) - 1) = BoxTarget(bstack, x1, y1, x2, y2, SBR$, nd&, ss$, .Xt, .Yt, .uMineLineSpace)
@@ -17256,7 +17279,9 @@ With players(GetCode(Scr))
     DisableTargets q(), 0
     
     ElseIf Scr.Name = "dSprite" Then
-    DisableTargets q(), val(Scr.index)
+        DisableTargets q(), val(Scr.index)
+    ElseIf TypeOf Scr Is GuiM2000 Then
+        Scr.DisAllTargets
     End If
     End If
     If .SZ < 4 Then .SZ = 4

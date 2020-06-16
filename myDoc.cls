@@ -942,11 +942,11 @@ Dim i As Long, k As Long, j As Long, ii As Long
     If i > UBound(a()) Then Exit Do
     If Left$(a(i), 1) = Chr$(160) Then
 
-    Dim jj As Long
+    Dim JJ As Long
     If removenbsp Then
-    For jj = 1 To Len(a(i))
-    If Mid$(a(i), jj, 1) <> Chr$(160) Then Mid$(a(i), 1, jj - 1) = space$(jj - 1): Exit For
-    Next jj
+    For JJ = 1 To Len(a(i))
+    If Mid$(a(i), JJ, 1) <> Chr$(160) Then Mid$(a(i), 1, JJ - 1) = space$(JJ - 1): Exit For
+    Next JJ
    ' If Left$(a(i), 1) = Chr$(160) Then a(i) = space$(Len(a(i)))
     End If
     End If
@@ -2132,7 +2132,7 @@ On Error GoTo t12345
 lf$ = choose(ListLoadedType \ 10 + 1, vbCrLf, vbLf, vbCr)
 If Abs(mode2save \ 10) > 0 Then
 ' overide loaded status
-lf$ = choose(mode2save \ 10 + 1, vbCrLf, vbLf, vbCr)
+lf$ = choose((mode2save \ 10) Mod 3 + 1, vbCrLf, vbLf, vbCr)
 End If
 mode2save = mode2save Mod 10
 If Not Append Then

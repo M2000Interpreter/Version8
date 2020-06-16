@@ -80,6 +80,7 @@ Public IamBusy As Boolean
 Public useclid As Long
 Private UseUcaseKeys As Boolean, Sorted As Boolean
 Private uScol() As Byte, useSCol As Boolean
+Private entrance As Long
 Dim ZeroItem As item, Piv As item, swapb(100) As Byte
 
 
@@ -215,8 +216,8 @@ Public Sub ToKey(RHS)
     If Done Then lastkey = Normalize(RHS)
 End Sub
 Public Sub RemoveWithNoFind()
-If AllowSameKey Then Exit Sub
-
+'If AllowSameKey Then Exit Sub
+Dim new_item As item
 Dim k As Long, k1 As Long, vvv As Variant, top1 As Long
 If toplim < 0 Then Exit Sub
 top1 = toplim
@@ -230,12 +231,15 @@ Sorted = False
         Hash(PriveSpace(index).lastpos) = PriveSpace(index).Pleft
 
         End If
-        SwapVariant vvv, PriveSpace(top1).iValue
-        PriveSpace(index).iValue = -1
-        PriveSpace(index) = PriveSpace(top1)
-        Dim new_item As item
-        PriveSpace(top1) = new_item
-        SwapVariant vvv, PriveSpace(index).iValue
+        If top1 = index Then
+            PriveSpace(top1) = new_item
+        Else
+            SwapVariant vvv, PriveSpace(top1).iValue
+            PriveSpace(index).iValue = -1
+            PriveSpace(index) = PriveSpace(top1)
+            PriveSpace(top1) = new_item
+            SwapVariant vvv, PriveSpace(index).iValue
+        End If
         k = Hash(PriveSpace(index).lastpos) - 1
         If k = top1 Then
             ' we have to give the new position to Hash()
@@ -262,7 +266,7 @@ here:
 End If
 End Sub
 Public Sub drop(RHS)
-If Not AllowSameKey Then Exit Sub
+'If Not AllowSameKey Then Exit Sub
 RHS = RHS - 1
 If (toplim - RHS) >= 0 And (RHS >= 0) Then
 Dim i As Long
@@ -270,13 +274,12 @@ For i = toplim To RHS Step -1
        With PriveSpace(i)
         If .Pleft > 0 Then
             Hash(.lastpos) = .Pleft
-            .Key = vbNullString
-            .iValue = CDbl(0)
             .Pleft = 0
         Else
             Hash(.lastpos) = 0
-            .Key = vbNullString
         End If
+        .Key = vbNullString
+        .iValue = CDbl(0)
         End With
 toplim = RHS - 1
   ReduceHash toplim
@@ -316,12 +319,16 @@ If Find2(RHS, Parndx, ndx) Then
         ' We have to get change top1 to ndx, maybe we remove top1
         ' we can check this but it is faster to not check this (more often top1 isn't ndx)
         ' Using SwapVariant we can swap any kind of Variant, including objects (swaping pointers only)
+        If top1 = ndx Then
+        PriveSpace(top1) = new_item
+        Else
         SwapVariant vvv, PriveSpace(top1).iValue
         PriveSpace(ndx).iValue = -1 ' is good to pass a number - so we break any pointer to object
         PriveSpace(ndx) = PriveSpace(top1) ' now we perform a copy (no objects included)
         PriveSpace(top1) = new_item
         ' so now we put back iValue (maybe is an object)
         SwapVariant vvv, PriveSpace(ndx).iValue
+        End If
         ' here Lastpos is from previous PriveSpace(top1) which is PriveSpace(ndx)
         k = Hash(PriveSpace(ndx).lastpos) - 1
         If k = top1 Then
@@ -496,6 +503,8 @@ End Function
 
 
 Private Sub ReduceHash(newTop As Long)
+entrance = entrance + 1
+If entrance > 0 Then Exit Sub
     If newTop <= 5 Then
             If newTop < 0 Then
                 newTop = -1
@@ -521,6 +530,7 @@ Private Sub ReduceHash(newTop As Long)
             ReHash
     End If
    End If
+   entrance = entrance - 1
 End Sub
 Public Function Normalize(Key) As String
 

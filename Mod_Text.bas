@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 28
+Global Const Revision = 29
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -22948,8 +22948,10 @@ If .layer = 0 Then
 Set dd = Form1.DIS
 ElseIf .layer = -1 Then
 Set dd = Form1
-ElseIf .layer > 0 Then
+ElseIf .layer > 0 And .layer < 33 Then
 Set dd = Form1.dSprite(.layer)
+Else
+Set dd = d
 End If
 
 prive.Xt = .Xt
@@ -22961,8 +22963,8 @@ prive.SZ = .SZ
 End With
 dd.FontSize = prive.SZ
 LCTbasket dd, prive, Y&, X&
-If F <> -1 Then BoxBigNew dd, prive, xl& - 1, yl&, F
-If b <> -1 Then BoxColorNew dd, prive, xl& - 1, yl&, b
+If F <> &H81000000 Then BoxBigNew dd, prive, xl& - 1, yl&, F
+If b <> &H81000000 Then BoxColorNew dd, prive, xl& - 1, yl&, b
 If Id& < 100 Then
 
     Tag$ = Left$(Tag$, xl& - X&)
@@ -22989,7 +22991,6 @@ If Id& < 100 Then
     LCTbasket dd, prive, Y&, X&
     dd.FontTransparent = True
     dd.ForeColor = mycolor(prive.mypen)
-    ' Εδώ πρέπει να δώ σε ποιο basetask θα τυπώνει ο στόχος...
        PlainBaSket dd, prive, Tag$, True, True
     End If
     End If
@@ -40754,6 +40755,7 @@ conthere:
             If FastSymbol(rest$, "=") Then
              GoTo there12
              Else
+             var(i).objref.drop 0
              GoTo makeitnow1
              End If
            ' use global inventory for global ' change from revision 19-version 8.7
@@ -40775,6 +40777,7 @@ lookglobal:
              End If
             End If
             ElseIf GetVar(bstack, bstack.GroupName & what$, i, True) Then
+            var(i).objref.drop 0
              GoTo makeitnow1
             Else
         
@@ -41095,20 +41098,30 @@ End If
 
 End Function
 Function ProcTargets(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim GuiForm As GuiM2000
+If TypeOf bstack.Owner Is GuiM2000 Then Set GuiForm = bstack.Owner
 If Lang = 1 Then
-If IsLabelSymbolLatin(rest$, "NEW") Then
-If Targets Then
-Targets = False
-End If
-ReDim q(0) As target
-End If
+    If IsLabelSymbolLatin(rest$, "NEW") Then
+        If Not GuiForm Is Nothing Then
+            GuiForm.ClearTargets
+        Else
+            If Targets Then
+                Targets = False
+            End If
+            ReDim q(0) As target
+        End If
+    End If
 Else
-If IsLabelSymbol(rest$, "ΝΕΟΙ") Then
-If Targets Then
-Targets = False
-End If
-ReDim q(0) As target
-End If
+    If IsLabelSymbol(rest$, "ΝΕΟΙ") Then
+        If Not GuiForm Is Nothing Then
+            GuiForm.ClearTargets
+        Else
+            If Targets Then
+                Targets = False
+            End If
+            ReDim q(0) As target
+        End If
+    End If
 End If
 ProcTargets = True
 End Function
@@ -41636,9 +41649,13 @@ End If
 
 End Function
 Function ProcCHANGE(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim p As Variant, X As Double, w$
+Dim p As Variant, X As Double, w$, GuiForm As GuiM2000
 If IsExp(bstack, rest$, p) Then
 p = CLng(p)
+If TypeOf bstack.Owner Is GuiM2000 Then
+Set GuiForm = bstack.Owner
+GuiForm.RenderTarget bstack, rest$, Lang, p
+Else
 If p >= 0 And p < UBound(q()) Then
      
               '
@@ -41657,6 +41674,7 @@ End If
 
 Wend
 RTarget bstack, q(p)
+End If
 End If
 ProcCHANGE = True
 End If

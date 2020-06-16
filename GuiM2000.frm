@@ -142,12 +142,62 @@ Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal OleStr As Long,
 Private Const WM_GETTEXT = &HD
 Private Const WM_GETTEXTLENGTH = &HE
 Private Const WM_SETTEXT = &HC
+Private Targets As Boolean, q() As target
 Public NoHook As Boolean
 Dim lastitem As Long, safeform As LongHash
 Friend Property Set safe(RHS As Object)
 Set safeform = RHS
 End Property
+Public Sub DisAllTargets()
+DisableTargets q(), prive
+End Sub
+Public Sub RenderTarget(bstack As basetask, rest$, Lang As Long, tHandle As Variant)
+Dim p, w$, X
+If tHandle \ 10000 <> prive Then
+MyEr "target not for this form", "ï óôü÷ïò äåí åßíáé ãéá áõôÞ ôç öüñìá"
+Exit Sub
+End If
+p = tHandle Mod 10000
+If p >= 0 And p < UBound(q()) Then
+     
+              '
+While FastSymbol(rest$, ",")
+If IsLabelSymbolNew(rest$, "ÖÑÁÓÇ", "TEXT", Lang) Then
+If IsStrExp(bstack, rest$, w$) Then q(p).Tag = w$
+ElseIf IsLabelSymbolNew(rest$, "ÐÅÍÁ", "PEN", Lang) Then
+If IsExp(bstack, rest$, X) Then q(p).pen = X
+ElseIf IsLabelSymbolNew(rest$, "ÖÏÍÔÏ", "BACK", Lang) Then
+If IsExp(bstack, rest$, X) Then q(p).back = X
+ElseIf IsLabelSymbolNew(rest$, "ÐËÁÉÓÉÏ", "BORDER", Lang) Then
+If IsExp(bstack, rest$, X) Then q(p).fore = X
+ElseIf IsLabelSymbolNew(rest$, "ÏÄÇÃÉÁ", "COMMAND", Lang) Then
+If IsStrExp(bstack, rest$, w$) Then q(p).Comm = w$
+End If
 
+Wend
+RTarget bstack, q(p)
+End If
+End Sub
+Friend Function AddTarget(t As target) As Long
+            If UBound(q()) < 9999 Then
+                Targets = False
+                ReDim Preserve q(UBound(q()) + 1)
+                q(UBound(q()) - 1) = t
+                AddTarget = prive * 10000 + UBound(q()) - 1
+                Targets = True
+            End If
+End Function
+Friend Sub EnableTarget(bstack As basetask, ByVal tHandle As Variant, p As Variant)
+        If tHandle \ 10000 = prive Then
+        tHandle = tHandle Mod 10000
+        q(tHandle).Enable = Not (p = 0)
+        RTarget bstack, q(tHandle)
+        End If
+End Sub
+Public Sub ClearTargets()
+    Targets = False
+    ReDim q(0) As target
+End Sub
 Public Property Let CaptionW(ByVal NewValue As String)
 If mNoCaption Then Exit Property
 If LenB(NewValue) = 0 Then NewValue = "M2000"
@@ -366,7 +416,7 @@ Private Sub Form_Click()
 On Error Resume Next
 If gList2.Visible Then gList2.SetFocus
 If mIndex > -1 Then
-    Callback mMyName$ + ".Click(" + CStr(index) + ")"
+    Callback mMyName$ + ".Click(" + CStr(Index) + ")"
 Else
     Callback mMyName$ + ".Click()"
 End If
@@ -458,6 +508,7 @@ End Sub
 
 Private Sub Form_Initialize()
 mEnabled = True
+ClearTargets
 End Sub
 Private Sub Form_KeyPress(KeyAscii As Integer)
 On Error Resume Next
@@ -486,7 +537,7 @@ End Sub
 
 Private Sub Form_LostFocus()
 If mIndex > -1 Then
-    Callback mMyName$ + ".LostFocus(" + CStr(index) + ")"
+    Callback mMyName$ + ".LostFocus(" + CStr(Index) + ")"
 Else
     Callback mMyName$ + ".LostFocus()"
 End If
@@ -496,13 +547,55 @@ End If
 End Sub
 
 Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Dim bstack As basetask, oldhere$
+
+
 If Not Relax Then
 
 
 
 Relax = True
+
+Dim sel&
+
+If Button > 0 And Targets Then
+    sel& = ScanTarget(q(), CLng(X), CLng(Y), prive)
+    If sel& >= 0 Then
+        If Button = 1 Then
+
+            
+            Select Case q(sel&).Id Mod 100
+            Case Is < 10
+                SwapStrings here$, oldhere$
+                here$ = modulename
+                Set bstack = New basetask
+                Set bstack.Owner = Me
+                Set bstack.Sorosref = New mStiva
+                If Execute(bstack, (q(sel&).Comm), False) = 0 Then Beep
+                SwapStrings here$, oldhere$
+                
+            Case Else
+            
+            If mIndex > -1 Then
+                Callback mMyName$ + ".Target" + "(" + CStr(Index) + "," + Str(sel& + prive * 10000) + ")"
+            Else
+                Callback mMyName$ + ".Target" + "(" + Str(sel& + prive * 10000) + ")"
+            End If
+
+            End Select
+            
+        End If
+        
+        Button = 0
+        Relax = False
+        Exit Sub
+    End If
+End If
+
+
+
 If mIndex > -1 Then
-    Callback mMyName$ + ".MouseDown(" + CStr(index) + "," + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
+    Callback mMyName$ + ".MouseDown(" + CStr(Index) + "," + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
 Else
     Callback mMyName$ + ".MouseDown(" + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
 End If
@@ -518,7 +611,7 @@ If Not Relax Then
 Relax = True
 
 If mIndex > -1 Then
-Callback mMyName$ + ".MouseMove(" + CStr(index) + "," + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
+Callback mMyName$ + ".MouseMove(" + CStr(Index) + "," + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
 Else
 Callback mMyName$ + ".MouseMove(" + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
 End If
@@ -533,7 +626,7 @@ If Not Relax Then
 Relax = True
 
 If mIndex > -1 Then
-Callback mMyName$ + ".MouseUp(" + CStr(index) + "," + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
+Callback mMyName$ + ".MouseUp(" + CStr(Index) + "," + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
 Else
 Callback mMyName$ + ".MouseUp(" + CStr(Button) + "," + CStr(shift) + "," + CStr(X) + "," + CStr(Y) + ")"
 End If
@@ -587,7 +680,7 @@ End If
 gList2.ShowMe
 If Stored Then Exit Sub
   If mIndex >= 0 Then
-   Callback mMyName$ + ".Blink(" + Str(index) + "," + Str(Face) + ")"
+   Callback mMyName$ + ".Blink(" + Str(Index) + "," + Str(Face) + ")"
    Else
       Callback mMyName$ + ".Blink(" + Str(Face) + ")"
       End If
@@ -628,7 +721,7 @@ Stored = False
 End Sub
 Private Sub gList2_CtrlPlusF1()
     If mIndex > -1 Then
-        Callback mMyName$ + ".About(" + CStr(index) + ")"
+        Callback mMyName$ + ".About(" + CStr(Index) + ")"
     Else
         Callback mMyName$ + ".About()"
     End If
@@ -636,7 +729,7 @@ End Sub
 
 Private Sub gList2_EnterOnly()
     If mIndex > -1 Then
-        Callback mMyName$ + ".Enter(" + CStr(index) + ")"
+        Callback mMyName$ + ".Enter(" + CStr(Index) + ")"
     Else
         Callback mMyName$ + ".Enter()"
     End If
@@ -693,7 +786,7 @@ If gList2.SingleClickCheck(Button, item, X, Y, setupxy * (1 + 2 * infopos) / 2, 
             OpenInfo
         Else
             If mIndex > -1 Then
-                Callback mMyName$ + ".Info(" + CStr(index) + "," + CStr(X) + "," + CStr(Y) + ")"
+                Callback mMyName$ + ".Info(" + CStr(Index) + "," + CStr(X) + "," + CStr(Y) + ")"
             Else
                 Callback mMyName$ + ".Info(" + CStr(X) + "," + CStr(Y) + ")"
             End If
@@ -757,7 +850,7 @@ If mSizable And mShowMaximize Then
             End With
         End If
         If mIndex > -1 Then
-           Callback mMyName$ + ".Resize(" + CStr(index) + ")"
+           Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
         Else
            Callback mMyName$ + ".Resize()"
         End If
@@ -765,14 +858,14 @@ If mSizable And mShowMaximize Then
         If IhaveLastPos Then
                 
                 If mIndex > -1 Then
-                    Callback mMyName$ + ".Maximized(" + CStr(index) + ")"
+                    Callback mMyName$ + ".Maximized(" + CStr(Index) + ")"
                 Else
                     Callback mMyName$ + ".Maximized()"
                 End If
                 MenuSet 2
         Else
                 If mIndex > -1 Then
-                    Callback mMyName$ + ".Restored(" + CStr(index) + ")"
+                    Callback mMyName$ + ".Restored(" + CStr(Index) + ")"
                 Else
                     Callback mMyName$ + ".Restored()"
                 End If
@@ -799,7 +892,7 @@ If gList2.SingleClickCheck(Button, item, X, Y, gList2.WidthPixels - setupxy * (1
             OpenInfo
         Else
             If mIndex > -1 Then
-                Callback mMyName$ + ".Info(" + CStr(index) + "," + CStr(X) + "," + CStr(Y) + ")"
+                Callback mMyName$ + ".Info(" + CStr(Index) + "," + CStr(X) + "," + CStr(Y) + ")"
             Else
                 Callback mMyName$ + ".Info(" + CStr(X) + "," + CStr(Y) + ")"
             End If
@@ -854,20 +947,20 @@ If mSizable And mShowMaximize Then
             
         End If
         If mIndex > -1 Then
-           Callback mMyName$ + ".Resize(" + CStr(index) + ")"
+           Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
         Else
            Callback mMyName$ + ".Resize()"
         End If
         If IhaveLastPos Then
                 If mIndex > -1 Then
-                    Callback mMyName$ + ".Maximized(" + CStr(index) + ")"
+                    Callback mMyName$ + ".Maximized(" + CStr(Index) + ")"
                 Else
                     Callback mMyName$ + ".Maximized()"
                 End If
                 MenuSet 2
         Else
                 If mIndex > -1 Then
-                    Callback mMyName$ + ".Restored(" + CStr(index) + ")"
+                    Callback mMyName$ + ".Restored(" + CStr(Index) + ")"
                 Else
                     Callback mMyName$ + ".Restrored()"
                 End If
@@ -1216,11 +1309,11 @@ Else
 End If
 CaptionW = gList2.HeadLine
 End Property
-Public Property Get index() As Long
-index = mIndex
+Public Property Get Index() As Long
+Index = mIndex
 End Property
 
-Public Property Let index(ByVal RHS As Long)
+Public Property Let Index(ByVal RHS As Long)
 mIndex = RHS
 End Property
 Public Sub CloseNow()
@@ -1243,9 +1336,9 @@ Set w = Nothing
 Unload Me
     End If
 End Sub
-Public Function Control(index) As Object
+Public Function Control(Index) As Object
 On Error Resume Next
-Set Control = Controls(index)
+Set Control = Controls(Index)
 If Err > 0 Then Set Control = Me
 End Function
 Public Sub Opacity(mAlpha, Optional mlColor = 0, Optional mTRMODE = 0)
@@ -1364,7 +1457,7 @@ Dim VR(2)
 VR(0) = KeyCode
 VR(1) = shift
 If mIndex > -1 Then
-    CallbackNow mMyName$ + ".KeyDown(" + CStr(index) + ")", VR()
+    CallbackNow mMyName$ + ".KeyDown(" + CStr(Index) + ")", VR()
 Else
     CallbackNow mMyName$ + ".KeyDown()", VR()
 End If
@@ -1556,7 +1649,7 @@ If Not Relax Then
                 Move Left, top, Width + addX, Height + addy
                 IhaveLastPos = False
                 If mIndex > -1 Then
-                    Callback mMyName$ + ".Resize(" + CStr(index) + ")"
+                    Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
                 Else
                     Callback mMyName$ + ".Resize()"
                 End If
@@ -1690,7 +1783,7 @@ Case 2
 Case 3
     If Maximize(True) Then
             If mIndex > -1 Then
-           Callback mMyName$ + ".Resize(" + CStr(index) + ")"
+           Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
         Else
            Callback mMyName$ + ".Resize()"
         End If
@@ -1699,7 +1792,7 @@ Case 3
 Case 4
     If Maximize(False) Then
             If mIndex > -1 Then
-           Callback mMyName$ + ".Resize(" + CStr(index) + ")"
+           Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
         Else
            Callback mMyName$ + ".Resize()"
         End If
@@ -1758,7 +1851,7 @@ Case 2
 Case 3
     If Maximize(True) Then
             If mIndex > -1 Then
-           Callback mMyName$ + ".Resize(" + CStr(index) + ")"
+           Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
         Else
            Callback mMyName$ + ".Resize()"
         End If
@@ -1767,7 +1860,7 @@ Case 3
 Case 4
     If Maximize(False) Then
             If mIndex > -1 Then
-           Callback mMyName$ + ".Resize(" + CStr(index) + ")"
+           Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
         Else
            Callback mMyName$ + ".Resize()"
         End If

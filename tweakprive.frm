@@ -733,7 +733,7 @@ cc.ClassKey = HKEY_CURRENT_USER
         MYFONT = cc.Value
     combo1.Text = cc.Value
 Err.clear
-DIS.Font.name = MYFONT
+DIS.Font.Name = MYFONT
 If Err.Number > 0 Then
 Err.clear
 MYFONT = "Verdana"
@@ -881,6 +881,7 @@ Set combo1.Textbox = textbox2
 Set combo1.Container = gList3
 combo1.locked = False
 combo1.AutoComplete = True
+combo1.Textbox.ShowAlways = True
 If TweakLang = 0 Then
 combo1.Label = "Όνομα Γραμματοσειράς"
 Else
@@ -948,7 +949,7 @@ gList11.restrictLines = 6
 gList11.CenterText = True
 gList11.VerticalCenterText = True
 
-gList11.Text = "Warning: There is no " & vbCrLf & "warning about this " & vbCrLf & "software except that" & vbCrLf & "is given AS-IS" & vbCrLf & vbCrLf & "George Karras 1999-2019 ©"
+gList11.Text = "Warning: There is no " & vbCrLf & "warning about this " & vbCrLf & "software except that" & vbCrLf & "is given AS-IS" & vbCrLf & vbCrLf & "George Karras 1999-2020 ©"
 
 height1 = 6450 * DYP / 15
 width1 = 9900 * DXP / 15
@@ -1059,7 +1060,7 @@ Else
 myCommand.Caption = "OK"
 End If
   Set myCommand.Callback = Me
-  myCommand.index = 1
+  myCommand.Index = 1
 myCommand.enabled = True
 Set myUnicode = New myButton
 Set myUnicode.Container = command1(1)
@@ -1072,7 +1073,7 @@ End If
 myUnicode.enabled = True
 Set myCancel = New myButton
 Set myCancel.Container = command1(2)
-myCancel.index = 2
+myCancel.Index = 2
 If TweakLang = 0 Then
 myCancel.Caption = "ΑΚΥΡΟ"
 Else
@@ -1133,12 +1134,14 @@ End Sub
 
 
 Private Sub gList1_ChangeListItem(item As Long, content As String)
-If combo1.ListText <> "" Then DIS.Font.name = combo1.ListText: playall
+If combo1.ListText <> "" Then DIS.Font.Name = combo1.ListText: playall
 End Sub
 
 Private Sub gList11_SpecialColor(rgbcolor As Long)
 rgbcolor = rgb(255, 200, 100)
 End Sub
+
+
 
 Private Sub gList2_ExposeRect(ByVal item As Long, ByVal thisrect As Long, ByVal thisHDC As Long, skip As Boolean)
 If item = -1 Then
@@ -1190,19 +1193,19 @@ DIS.Font.Italic = False
 If b$ = "GREEK" Then
 DIS.Font.Size = tbSize.Value
 DIS.Font.charset = 161
-DIS.Font.name = c$
+DIS.Font.Name = c$
 DIS.Font.Italic = False
 DIS.Font.Size = tbSize.Value
 DIS.Font.charset = 161
-DIS.Font.name = c$
+DIS.Font.Name = c$
 Else
 DIS.Font.Size = tbSize.Value
 DIS.Font.charset = 0
-DIS.Font.name = c$
+DIS.Font.Name = c$
 DIS.Font.Italic = False
 DIS.Font.Size = tbSize.Value
 DIS.Font.charset = 0
-DIS.Font.name = c$
+DIS.Font.Name = c$
 
 End If
 
@@ -1216,12 +1219,12 @@ DIS.ShowMe2
 
 End Sub
 
-Private Sub InterPress_Press(index As Long)
-If index = 1 Then
+Private Sub InterPress_Press(Index As Long)
+If Index = 1 Then
 
 Command111_Click
 'Unload Me  'remove this line
-ElseIf index = 2 Then
+ElseIf Index = 2 Then
 ShutMe
 Else
 If myUnicode.Caption = "Unicode Preview" Then

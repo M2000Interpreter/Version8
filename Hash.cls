@@ -31,6 +31,7 @@ Dim toplim As Long
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Private index As Long
 Private Hash() As Long
+Private entrance As Long
 Public Sub BigSize(n As Long)
     MaxSpace = n
     ReDim PriveSpace(MaxSpace) As item, Hash(MaxSpace * 2 + 3)
@@ -69,7 +70,6 @@ End Sub
 
 
 Friend Sub ReduceHash(newTop As Long, v())
-Static entrance As Long
 Dim aa As Variant, ditem As item, ditemcl As item
     ditemcl.ndx = -1
     Dim i As Long

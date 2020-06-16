@@ -240,7 +240,7 @@ ret = actualdata(v) <> p
 Case "="
 ret = actualdata(v) = p
 Case "LIKE"
-ret = actualdata(v) = Replace$(CStr(p), "%", "*")
+ret = actualdata(v) Like Replace$(CStr(p), "%", "*")
 
 End Select
 End If
