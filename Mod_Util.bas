@@ -486,7 +486,7 @@ contarr0:
 
                                             Set pppp = useHandler.objref
                                                 If IsExp(bstackstr, a$, p) Then
-                                                   pppp.index = p
+                                                   pppp.Index = p
                                                     If MyIsObject(pppp.Value) Then
                                                          Set vv = pppp.Value
                                                          wasarr = False
@@ -528,7 +528,7 @@ contarr1:
 
             If IsExp(bstackstr, a$, p) Then
 
-                pppp.index = p
+                pppp.Index = p
                 If MyIsObject(pppp.Value) Then
                      Set vv = pppp.Value
                      wasarr = False
@@ -842,7 +842,7 @@ Public Sub RemoveAllFonts()
 Dim i As Long, FntFileName As String, Inc As Integer, rc As Long
 If FontList Is Nothing Then Exit Sub
 For i = 0 To FontList.count - 1
-    FontList.index = i
+    FontList.Index = i
     FntFileName = FontList.KeyToString
     Inc = 0
     FntFileName = mylcasefILE(FntFileName)
@@ -8824,8 +8824,8 @@ Sub GetGuiM2000(r$)
 Dim aaa As GuiM2000
 If TypeOf Screen.ActiveForm Is GuiM2000 Then
 Set aaa = Screen.ActiveForm
-                  If aaa.index > -1 Then
-                  r$ = myUcase(aaa.MyName$ + "(" + CStr(aaa.index) + ")", True)
+                  If aaa.Index > -1 Then
+                  r$ = myUcase(aaa.MyName$ + "(" + CStr(aaa.Index) + ")", True)
                   Else
                   r$ = myUcase(aaa.MyName$, True)
                   End If
@@ -10856,7 +10856,7 @@ If d.Name = "DIS" Then
 ElseIf d.Name = "Form1" Then
 .layer = -1
 ElseIf d.Name = "dSprite" Then
-.layer = d.index
+.layer = d.Index
 Else
 .layer = GetCode(d)
 End If
@@ -11380,7 +11380,7 @@ lookagain:
                                     Exit Function
                                 End If
                                 Set pppp = .objref
-                                pppp.index = w4
+                                pppp.Index = w4
                                 If pppp.IsObj Then
                                 Set res = pppp.Value
                                 If lookOne(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
@@ -11424,7 +11424,7 @@ lookagain:
                                     Exit Function
                                 End If
                              
-                                .objref.index = w4
+                                .objref.Index = w4
                                 If .objref.IsObj Then
                                 Set res = .objref.Value
                                 If lookOne(a$, ",") Then w2 = w4: Set bstack.lastobj = res: GoTo lookagain
@@ -11470,7 +11470,7 @@ lookagain:
                         End If
                     
 
-                        .objref.index = w4
+                        .objref.Index = w4
                         .objref.Done = True
 
                     If .objref.IsObj Then
@@ -11645,7 +11645,7 @@ If .t1 = 3 Then
             End If
         
 
-            .objref.index = w4
+            .objref.Index = w4
             .objref.Done = True
 
         If .objref.IsObj Then
@@ -12439,7 +12439,7 @@ ElseIf lookOne(rest$, ",") Then
                         GoTo there
                 
                 End If
-lastindex = bb.index
+lastindex = bb.Index
                 
                 If FastSymbol(rest$, ":=", , 2) Then
                     ah = aheadstatus(rest$, False) + " "
@@ -12449,7 +12449,7 @@ lastindex = bb.index
                             GoTo there
                         End If
                         ChangeValues = True
-                        bb.index = lastindex
+                        bb.Index = lastindex
                         If Not bstack.lastobj Is Nothing Then
                             Set bb.ValueObj = bstack.lastobj
                             Set bstack.lastobj = Nothing
@@ -12462,7 +12462,7 @@ lastindex = bb.index
                             GoTo there
                         End If
                         ChangeValues = True
-                        bb.index = lastindex
+                        bb.Index = lastindex
                         If Not bstack.lastobj Is Nothing Then
                             Set bb.ValueObj = bstack.lastobj
                             Set bstack.lastobj = Nothing
@@ -13120,7 +13120,7 @@ Else
         GoTo there
 
 End If
-lastindex = bb.index
+lastindex = bb.Index
 If FastSymbol(rest$, ":=", , 2) Then
 ah = aheadstatus(rest$, False) + " "
 If Left$(ah, 1) = "N" Or InStr(ah, "l") > 0 Then
@@ -13128,7 +13128,7 @@ If Left$(ah, 1) = "N" Or InStr(ah, "l") > 0 Then
         AddInventory = False
         GoTo there
     End If
-    bb.index = lastindex
+    bb.Index = lastindex
     If Not bstack.lastobj Is Nothing Then
     If TypeOf bstack.lastobj Is mArray Then
         Set pppp = New mArray
@@ -13152,7 +13152,7 @@ ElseIf Left$(ah, 1) = "S" Then
         AddInventory = False
         GoTo there
     End If
-    bb.index = lastindex
+    bb.Index = lastindex
     If Not bstack.lastobj Is Nothing Then
     If TypeOf bstack.lastobj Is mArray Then
         Set pppp = New mArray
@@ -13385,7 +13385,7 @@ againtype:
                         If Not fastcol.Find(p) Then GoTo keynotexist
                         
                             If fastcol.IsObj Then
-                                w2 = fastcol.index
+                                w2 = fastcol.Index
                                ' Set prev = v
                             
                                 Set v = fastcol.ValueObj
@@ -13396,7 +13396,7 @@ againtype:
                             End If
                         ElseIf IsStrExp(bstackstr, a$, s$) Then
                             If fastcol.IsObj Then
-                                w2 = fastcol.index
+                                w2 = fastcol.Index
                                ' Set prev = v
                                 Set v = fastcol.ValueObj
                                 GoTo againtype
@@ -13444,7 +13444,7 @@ checkit:
                                         If r$ = "mArray" Then
                                             Set pppp = useHandler.objref
                                                 If IsExp(bstackstr, a$, p) Then
-                                                   pppp.index = p
+                                                   pppp.Index = p
                                                     If MyIsObject(pppp.Value) Then
                                                     w2 = p
                                                    ' Set prev = v
@@ -13852,9 +13852,9 @@ noexpression:
                     If IsExp(bstack, b$, p) Then
                                 If FastSymbol(b$, "@") Then
                                     If IsExp(bstack, b$, sp) Then
-                                        var(v).index = p: sp = 0
+                                        var(v).Index = p: sp = 0
                                     ElseIf IsStrExp(bstack, b$, ss$) Then
-                                        var(v).index = ss$: ss$ = vbNullString
+                                        var(v).Index = ss$: ss$ = vbNullString
                                     End If
                                     var(v).UseIndex = True
                                 End If
@@ -14136,13 +14136,13 @@ somethingelse:
                         ElseIf ss$ = "++" Then
                         If myobject.index_start < myobject.objref.count - 1 Then
                             myobject.index_start = myobject.index_start + 1
-                            myobject.objref.index = myobject.index_start
+                            myobject.objref.Index = myobject.index_start
                             myobject.index_cursor = myobject.objref.Value
                         End If
                         ElseIf ss$ = "--" Then
                     If myobject.index_start > 0 Then
                             myobject.index_start = myobject.index_start - 1
-                            myobject.objref.index = myobject.index_start
+                            myobject.objref.Index = myobject.index_start
                             myobject.index_cursor = myobject.objref.Value
                         End If
                         ElseIf ss$ = "-!" Then
@@ -15263,6 +15263,57 @@ Else
 interpret = False: here$ = ohere$: GoTo there1
 End If
 Case Else
+If FastSymbol(b$, "(") Then
+            i = 1
+            x1 = 0
+            While Len(aheadstatus(b$, False, i)) > 0
+                x1 = i - 1
+                i = i + 1
+            Wend
+            ss$ = Left$(b$, x1)
+            If x1 > 0 And MyTrim(ss$) <> vbNullString Then
+                Mid$(b$, 1, x1) = space$(x1)
+                If FastSymbol(b$, ")", True) Then
+                    If FastSymbol(b$, "=") Then
+                        If IsExp(bstack, b$, p) Then
+                            If Not bstack.lastobj Is Nothing Then
+                                If TypeOf bstack.lastobj Is mArray Then
+                                Set pppp = bstack.lastobj
+                                GoTo wehavearray
+                                ElseIf TypeOf bstack.lastobj Is mHandler Then
+                                    If CheckIsmArray(bstack.lastobj) Then
+                                        Set pppp = bstack.lastobj.objref
+wehavearray:
+                                        Set bstack.lastobj = Nothing
+                                        Set myobject = bstack.soros
+                                        Set bstack.Sorosref = New mStiva
+                                        bstack.soros.MergeBottomCopyArray pppp
+                                        If Not MyRead(1, bstack, ss$, 1) Then
+                                            Set bstack.lastobj = Nothing
+                                            Set bstack.Sorosref = myobject
+                                            interpret = False
+                                            Exit Function
+                                        End If
+                                        Set bstack.lastobj = Nothing
+                                        Set bstack.Sorosref = myobject
+                                        Set myobject = Nothing
+                                        GoTo loopcontinue1
+                                    Else
+a123321:                                    NotArray
+                                            interpret = False
+                                            Exit Function
+                                    End If
+                                End If
+                            End If
+                        End If
+                    End If
+                End If
+            End If
+        GoTo a123321
+        End If
+
+
+
 If MaybeIsSymbol(b$, ",-+*/_!@()[];<>|~`'\") Then
 SyntaxError
 End If
@@ -17039,7 +17090,7 @@ If Not bstack.StaticCollection Is Nothing Then
 Dim st1 As Long, mList As FastCollection
 Set mList = bstack.StaticCollection
 For st1 = 1 To mList.count
-mList.index = st1 - 1
+mList.Index = st1 - 1
 If Left$(mList.KeyToString, 2) <> "%_" Then
 If s$ <> "" Then s$ = s$ + ", "
 If mList.IsObj Then
@@ -17279,7 +17330,7 @@ With players(GetCode(Scr))
     DisableTargets q(), 0
     
     ElseIf Scr.Name = "dSprite" Then
-        DisableTargets q(), val(Scr.index)
+        DisableTargets q(), val(Scr.Index)
     ElseIf TypeOf Scr Is GuiM2000 Then
         Scr.DisAllTargets
     End If
@@ -17519,7 +17570,7 @@ ElseIf Scr.Name = "DIS" Then
 DisableTargets q(), 0
 
 ElseIf Scr.Name = "dSprite" Then
-DisableTargets q(), val(Scr.index)
+DisableTargets q(), val(Scr.Index)
 End If
 End If
 If IsExp(bstack, rest$, p) Then
@@ -17932,7 +17983,7 @@ what$ = Left$(what$, Len(what$) - 1)
         .MyName = what$
         .modulename = h$
         .TempTitle = what$ + "(" + LTrim$(Str$(i)) + ")"
-        .index = i
+        .Index = i
         End With
         Set aaa = Nothing
     Case "GuiButton"
@@ -18550,7 +18601,7 @@ Dim pppp As mArray, mmmm As mEvent
                 Set alfa = var(i)
                 Set alfa.safe = getSafeFormList()
                 Set alfa.EventObj = var(y1)
-                alfa.index = -1
+                alfa.Index = -1
                 alfa.MyName = what$
                 alfa.modulename = here$
                 alfa.TempTitle = what$
@@ -18576,7 +18627,7 @@ Dim pppp As mArray, mmmm As mEvent
                     .GenItemCreator LTrim$(Str(i * 456)), "{ Module " + here$ + vbCrLf + "try { Call local " + here$ + "." + bstack.GroupName + what$ + "() } }" + here$ + "." + bstack.GroupName
                 End With
                 alfa.MyName = what$
-                alfa.index = -1
+                alfa.Index = -1
                 alfa.modulename = here$
                 alfa.ByPass = bp
                 alfa.TempTitle = what$
@@ -18610,7 +18661,7 @@ contEvArray:
                             .modulename = here$
                             .ByPass = bp
                             .TempTitle = what$ + "(" + LTrim$(Str$(i)) + ")"
-                            .index = i
+                            .Index = i
                         End With
                     Next i
                     Set aaa = Nothing
@@ -20270,7 +20321,7 @@ If Scr.Name = "Form1" Then
 ElseIf Scr.Name = "DIS" Then
     DisableTargets q(), 0
 ElseIf Scr.Name = "dSprite" Then
-    DisableTargets q(), val(Scr.index)
+    DisableTargets q(), val(Scr.Index)
 End If
 End If
 With players(GetCode(Scr))
@@ -22721,7 +22772,7 @@ If ProcChooseObj(basestack, again$, Lang) Then
 ' list1 is a glist control
 If Form1.List1.ListIndex = -1 Then ProcList = True: Exit Function
     If Form1.List1.listcount > 0 Then
-                ObjectCatalog.index = Form1.List1.ListIndex
+                ObjectCatalog.Index = Form1.List1.ListIndex
         If Not usemodule Then
                 basestack.soros.PushStr ObjectCatalog.Value
                 ProcList = MyReport(basestack, "letter$", Lang)
@@ -23047,7 +23098,7 @@ End If
     If lookOne(rest$, "!") Then
             ObjectCatalog.Done = True
             For i = 0 To ObjectCatalog.count - 1
-                ObjectCatalog.index = i
+                ObjectCatalog.Index = i
                 Form1.List1.additemFast ObjectCatalog.KeyToString
                 
             Next i
@@ -23106,7 +23157,7 @@ End If
             ObjectCatalog.Sort
             ObjectCatalog.Done = True
             For i = 0 To ObjectCatalog.count - 1
-                ObjectCatalog.index = i
+                ObjectCatalog.Index = i
                 Form1.List1.additemFast ObjectCatalog.KeyToString
                 
             Next i

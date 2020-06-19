@@ -1182,7 +1182,6 @@ End Sub
 
 
 Private Sub UserControl_Initialize()
-Debug.Print
 tParam.cbSize = LenB(tParam)
 tParam.iTabLength = 4
 mTabStop = True
@@ -1328,8 +1327,8 @@ If Spinner Then Exit Sub
    
     End If
     If Not MultiLineEditBox Then If ListSep(ListIndex) Then ListIndex = LastListIndex
-     
-     RaiseEvent ChangeSelStart(SelStart)
+     RaiseEvent ExpandSelStart((mSelstart))
+     RaiseEvent ChangeSelStart((mSelstart))
 '     If MultiLineEditBox Then FindRealCursor ListIndex
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
        If shift <> 0 Then
@@ -1367,9 +1366,10 @@ If Spinner Then Exit Sub
     End If
     If Not MultiLineEditBox Then If ListSep(ListIndex) Then ListIndex = LastListIndex
     
-  ' RaiseEvent ExpandSelStart(mSelstart)
+  RaiseEvent ExpandSelStart((mSelstart))
     'SelStartEventAlways = SelStart
-    RaiseEvent ChangeSelStart(SelStart)
+    RaiseEvent ChangeSelStart((mSelstart))
+    
    ' If MultiLineEditBox Then FindRealCursor ListIndex
     If Not NoEvents Then If SELECTEDITEM > 0 Then RaiseEvent selected(SELECTEDITEM)
     If shift <> 0 Then
@@ -1435,8 +1435,10 @@ If mSelstart = 0 Then mSelstart = 1
      RaiseEvent PushUndoIfMarked
      RaiseEvent MarkDelete(False)
  enabled = bb
-
- RaiseEvent PureListOn
+'RaiseEvent SetExpandSS(mSelstart + 1)
+            SelStartEventAlways = SelStart
+            RaiseEvent DelExpandSS
+ 'RaiseEvent PureListOn
  If shift = 5 Then
  list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) & ChrW(&H2007) & Mid$(list(SELECTEDITEM - 1), SelStart)
  RaiseEvent RemoveOne(ChrW(&H2007))
@@ -1502,7 +1504,7 @@ End If
 Case vbKeyRight
 If EditFlag Then
 val = 1
-If shift = 0 Then RaiseEvent AddSelStart(val, shift)
+RaiseEvent AddSelStart(val, shift)
 If MultiLineEditBox Then
 If SelStart <= Len(list(SELECTEDITEM - 1)) - val + 1 Then
 

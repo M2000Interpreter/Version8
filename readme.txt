@@ -1,8 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 29 active-X
-1. Some minor bugs on Editor and EditBox removed 
-3. New: Targets for Forms, an example included in info file
+Version 9.9 revision 20 active-X
+1. Fix the bugs from Editor and EditBox from 29 and 28 revision
+2. Multi assign  (A, B)=("Alfa", 1000)
+3. New module in Info file MultiAssign (example of use)
 
 
 

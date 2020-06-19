@@ -1025,19 +1025,6 @@ If glistN.ListIndex < 0 Then Exit Sub
 Dim what$, ThatPara As Long, pastchars As Long
 pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
 Charpos = pastchars + glistN.SelStart
-If expandCharPos > 0 Then
-If expandCharPos <> glistN.SelStart Then
-If Len(what$) + 1 >= expandCharPos Then
-    'If expandCharPos > glistN.SelStart Then
-        glistN.SelStartNoEvents = expandCharPos
-   ' End If
-Else
-glistN.SelStartNoEvents = Len(what$) + 1
-
-End If
-End If
-End If
-'IsRTLrun
 If Not glistN.enabled Then Exit Sub
 tmpshow = False
 If glistN.SelStart = 0 Then
@@ -1497,6 +1484,7 @@ End Sub
 
 Public Sub Render()
 If mDoc.busy Then Exit Sub
+
 Dim selstart2 As Long
 mDoc.busy = True
 all = mDoc.DocLines
@@ -1521,6 +1509,7 @@ End If
 aaa:
 glistN.ScrollToSilent glistN.ScrollFrom
 If glistN.enabled Then glistN.ShowPan
+'expandCharPos = glistN.SelStart
 mDoc.busy = False
 End Sub
 
@@ -1555,7 +1544,7 @@ Dim VR(2)
 VR(0) = KeyCode
 VR(1) = shift
 If mIndex > -1 Then
-    Callback.CallbackNow mesCtrlName + ".KeyDown(" + CStr(index) + ")", VR()
+    Callback.CallbackNow mesCtrlName + ".KeyDown(" + CStr(Index) + ")", VR()
 Else
     Callback.CallbackNow mesCtrlName + ".KeyDown()", VR()
 End If
@@ -1709,7 +1698,10 @@ glistN_SplitLine
 End If
 
 enabled = b
-If Not undoprev Then glistN.ShowPan
+If Not undoprev Then
+glistN.ShowPan
+ManualInform
+End If
 If Not PopRedo Then
 Redopara = -1
 'Redoprev = False
@@ -1774,8 +1766,10 @@ Else
         InsertText = undotext
 End If
 enabled = b
-If Not undoprev Then glistN.ShowPan
-
+If Not undoprev Then
+glistN.ShowPan
+ManualInform
+End If
 End If
  If Not PopUndo Then
  ClearUndo
@@ -4367,6 +4361,9 @@ End If
  pos2 = k - Len(a$) + 1
 Wend
 End If
+If onetime And MaybeIsSymbol(a$, "(") Then
+GoTo CheckThis
+End If
 drop$ = "@(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 If kind = 0 Then
 If IsSymbol(a$, "@") Then
@@ -6024,6 +6021,8 @@ Para2 = 0
 PosPara2 = 0
 Para3 = 0
 PosPara3 = 0
+expandCharPos = 0
+Charpos = 0
 BlockStartPara = 0
 BlockStartPos = 1
 BlockStartLine = 0
@@ -6537,6 +6536,7 @@ och = -1
 showparagraphWork = False
 b$ = CurrentParagraph
 If Charpos > Len(b$) + 1 Then SelStartSilent = SelStart - (Charpos - Len(b$) - 1)
+FixCharPos
 If AutoNumber Then
     If IsNumberLabel(b$, c$) Then
         d$ = NextParagraph: If d$ <> "" Then If IsNumberLabel(d$, e$) Then skip = True
@@ -7778,11 +7778,11 @@ End Property
 Public Property Let locked(ByVal RHS As Boolean)
 glistN.enabled = Not RHS
 End Property
-Public Property Get index() As Long
-index = mIndex
+Public Property Get Index() As Long
+Index = mIndex
 End Property
 
-Public Property Let index(ByVal RHS As Long)
+Public Property Let Index(ByVal RHS As Long)
 mIndex = RHS
 End Property
 
@@ -9865,11 +9865,25 @@ End Sub
 
 Private Sub glistN_ExpandSelStart(val As Long)
 If val < 1 Then val = 1
-If expandCharPos > val Then val = expandCharPos
+glistN.SelStartNoEvents = expandCharPos
+val = expandCharPos
+FixCharPos
+expandCharPos = val
 End Sub
 Private Sub glistN_SetExpandSS(val As Long)
 expandCharPos = val
 End Sub
 Private Sub glistN_DelExpandSS()
 expandCharPos = 0
+
+End Sub
+Private Sub FixCharPos()
+Dim what$, ThatPara As Long, pastchars As Long
+pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
+If Len(what$) + 1 < glistN.SelStart Then
+    Charpos = pastchars + Len(what$) + 1
+    glistN.SelStartNoEvents = Len(what$) + 1
+Else
+    Charpos = pastchars + glistN.SelStart
+End If
 End Sub

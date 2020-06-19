@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 12 for ver 9.9 rev 29 and newer"
+	Report " A collection of modules for tests version 12 for ver 9.9 rev 30 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -20600,7 +20600,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<29 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<30 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -24333,5 +24333,31 @@ Layer form1 {
 }
 Method form1,"show",1
 Declare form1 nothing
+}
+MODULE MULTIASSIGN {Dim B(10)=0
+(A,B$,B(1))=(100, "Yes", 4)
+Print A, B$, B(1)
+\\ global X, Y
+Set (X,Y)=(4, 5)
+Print X, Y
+\\ global shadow old global
+Set (New X, Y)=(5, 6)
+Push (A, B(1))
+\\ Set exexute in command line, so A and B(1) isn't visible
+\\ we have to place values in stack, so the Set statement get the current stack
+\\ and array return the array
+Set (X, Y)=Array
+Print X, Y
+List
+\\ define a multi return value as array
+Function Alfa(){
+	=100, 200
+}
+(M, N)=Alfa()
+Print M, N
+Dim Z()
+Z()=(1,2)
+(M, N)=Z()
+Print M, N
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}

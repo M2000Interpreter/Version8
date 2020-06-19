@@ -544,7 +544,10 @@ End Sub
 
 Private Sub glistN_ExpandSelStart(val As Long)
 If val < 1 Then val = 1
-If expandCharPos > val Then val = expandCharPos
+glistN.SelStartNoEvents = expandCharPos
+val = expandCharPos
+FixCharPos
+expandCharPos = val
 End Sub
 Private Sub glistN_SetExpandSS(val As Long)
 expandCharPos = val
@@ -552,6 +555,17 @@ End Sub
 Private Sub glistN_DelExpandSS()
 expandCharPos = 0
 End Sub
+Private Sub FixCharPos()
+Dim what$, ThatPara As Long, pastchars As Long
+pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
+If Len(what$) + 1 < glistN.SelStart Then
+    Charpos = pastchars + Len(what$) + 1
+    glistN.SelStartNoEvents = Len(what$) + 1
+Else
+    Charpos = pastchars + glistN.SelStart
+End If
+End Sub
+
 Private Sub glistN_Fkey(a As Integer)
 Dim s$
 If Me.UsedAsTextBox Then
@@ -737,18 +751,7 @@ If glistN.ListIndex < 0 Then Exit Sub
 Dim what$, ThatPara As Long, pastchars As Long
 pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
 Charpos = pastchars + glistN.SelStart
-If expandCharPos > 0 Then
-If expandCharPos <> glistN.SelStart Then
-If Len(what$) + 1 >= expandCharPos Then
-    'If expandCharPos > glistN.SelStart Then
-        glistN.SelStartNoEvents = expandCharPos
-    'End If
-Else
-glistN.SelStartNoEvents = Len(what$) + 1
 
-End If
-End If
-End If
 mDoc.MarkParagraphID = ThatPara
 
 If Not glistN.enabled Then Exit Sub
@@ -1170,11 +1173,14 @@ glistN_SplitLine
 End If
 
 enabled = b
-'If Not NoCenterLineEdit Then
-'glistN.ShowMe
-'Else
-If Not undoprev Then glistN.ShowPan
-'End If
+If Not undoprev Then
+glistN.ShowPan
+If glistN.SelStart = 0 Then
+RaiseEvent inform(glistN.ListIndex + 1, 1)
+Else
+RaiseEvent inform(glistN.ListIndex + 1, glistN.SelStart)
+End If
+End If
 If Not PopRedo Then
 Redopara = -1
 Redotext = vbNullString
@@ -1238,11 +1244,15 @@ Else
         InsertText = undotext
 End If
 enabled = b
-'If Not NoCenterLineEdit Then
-'glistN.ShowMe
-'Else
-If Not undoprev Then glistN.ShowPan
-'End If
+If Not undoprev Then
+glistN.ShowPan
+If glistN.SelStart = 0 Then
+RaiseEvent inform(glistN.ListIndex + 1, 1)
+Else
+RaiseEvent inform(glistN.ListIndex + 1, glistN.SelStart)
+End If
+
+End If
 
 End If
  If Not PopUndo Then
@@ -2182,6 +2192,9 @@ addone 1, 14
 End If
  pos2 = k - Len(a$) + 1
 Wend
+End If
+If onetime And MaybeIsSymbol(a$, "(") Then
+GoTo CheckThis
 End If
 drop$ = "@(": kind = Abs(FastSymbol(a$, drop$, , 2)) * 4
 If kind = 0 Then
@@ -3722,6 +3735,8 @@ Set mDoc = New Document
 mDoc.ColorEvent = Not NoColor
 mDoc.textDoc = RHS
 all = mDoc.DocLines
+expandCharPos = 0
+Charpos = 0
 BlockStartPara = 0
 BlockStartPos = 1
 BlockStartLine = 0
@@ -3752,6 +3767,8 @@ Set mDoc = New Document
 mDoc.ColorEvent = Not NoColor
 mDoc.textDoc2 = RHS
 all = mDoc.DocLines
+expandCharPos = 0
+Charpos = 0
 BlockStartPara = 0
 BlockStartPos = 1
 BlockStartLine = 0
@@ -4289,7 +4306,9 @@ Dim b$, c$, d$, e$, skip As Boolean, tr$, maxw As Long, ns As String, och As Lon
 showparagraphWork = False
 expandCharPos = 0
 b$ = CurrentParagraph
+' FIND CHARPOSNOW
 If Charpos > Len(b$) + 1 Then SelStartSilent = SelStart - (Charpos - Len(b$) - 1)
+FixCharPos
 On Error Resume Next
 If AutoNumber And Not mDoc.IsPart(mDoc.MarkParagraphID) Then
 If IsNumberLabel(b$, c$) Then

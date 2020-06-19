@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 29
+Global Const Revision = 30
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -7021,10 +7021,10 @@ contAr2:
                 End If
                 If Left$(a$, 1) = "." Then
                 ' LOOK FOR GROUP
-                    w2 = -pppp.GroupRef.objref.index - 2
+                    w2 = -pppp.GroupRef.objref.Index - 2
                     GoTo contgroup
                 ElseIf FastSymbol(a$, "(") Then
-                    w2 = -pppp.GroupRef.objref.index - 2
+                    w2 = -pppp.GroupRef.objref.Index - 2
                     GoTo contlambdahere
                 Else
                     Set bstack.lastobj = pppp
@@ -7393,7 +7393,7 @@ syntax1:
                                     Set pppp = anything.objref
                                     w2 = CLng(p)
                                     If pppp.count > w2 And w2 >= 0 Then
-                                        pppp.index = w2
+                                        pppp.Index = w2
                                         If MyIsObject(pppp.Value) Then
                                             FastSymbol a$, ")"
                                             GoTo contAr22
@@ -7429,9 +7429,9 @@ syntax1:
                                         p = MyRound(p)
                                         If Abs(p) < .count Then
                                             If p < 0 Then
-                                                .index = .count + MyRound(p)
+                                                .Index = .count + MyRound(p)
                                             Else
-                                                .index = MyRound(p)
+                                                .Index = MyRound(p)
                                             End If
                                             .Done = True
                                             '' what??? here here here
@@ -7454,7 +7454,7 @@ syntax1:
                                                         w2 = -2
                                                         GoTo contgroup
                                                     End If
-                                                    w2 = -.index - 100
+                                                    w2 = -.Index - 100
                                                     If TypeOf .ValueObj Is lambda Then GoTo contlambdahere
                                                     If TypeOf .ValueObj Is mArray Then
                                                         Set pppp = .ValueObj
@@ -7507,12 +7507,12 @@ inv100:                                 Expected "Inventory", " ·Ù‹ÛÙ·ÛÁ"
                                             If .Find(s$) Then
                                                 IsNumberNew = FastSymbol(a$, ")")
                                                 If Left$(a$, 1) = "." Then
-                                                    w2 = -.index - 100
+                                                    w2 = -.Index - 100
                                                     GoTo contgroup
                                                 ElseIf Left$(a$, 1) = "(" Then
                                                     Mid$(a$, 1, 1) = " "
                                                     If .IsObj Then
-                                                    w2 = -.index - 100
+                                                    w2 = -.Index - 100
                                                     If TypeOf .ValueObj Is lambda Then GoTo contlambdahere
                                                     If TypeOf .ValueObj Is mArray Then
                                                         Set pppp = .ValueObj
@@ -7542,7 +7542,7 @@ inv100:                                 Expected "Inventory", " ·Ù‹ÛÙ·ÛÁ"
                                     Set userGroup = .ValueObj
                                     If userGroup.HasValue Then
                                     
-                                        w2 = -.index - 100
+                                        w2 = -.Index - 100
                                         GoTo contgroup
                                         Else
                                         r = 0
@@ -7669,9 +7669,9 @@ contgrouppar:
                 Else
 contreadprop:
                     If IsExp(bstack, a$, p) Then
-                        pppp.GroupRef.index = p
+                        pppp.GroupRef.Index = p
                     ElseIf IsStrExp(bstack, a$, s$) Then
-                        pppp.GroupRef.index = s$  '' this is for propreference class
+                        pppp.GroupRef.Index = s$  '' this is for propreference class
                     End If
                 End If
                 If TypeOf pppp.GroupRef Is mHandler Then
@@ -11237,9 +11237,9 @@ fstr2: '"EVAL$(", "≈ ÷—$(", "≈ ÷—¡”«$("
                 p = MyRound(p)
                If Abs(p) < .objref.count Then
               If p < 0 Then
-                .objref.index = .objref.count + MyRound(p)
+                .objref.Index = .objref.count + MyRound(p)
               Else
-                .objref.index = MyRound(p)
+                .objref.Index = MyRound(p)
                 End If
              
                 .objref.Done = True
@@ -11255,7 +11255,7 @@ fstr2: '"EVAL$(", "≈ ÷—$(", "≈ ÷—¡”«$("
                 End If
                 ElseIf .objref.Done Or w >= 0 Then
                     If w >= 0 Then
-                        .objref.index = w
+                        .objref.Index = w
                         .objref.Done = True
                     End If
                     If FastSymbol(a$, "!") Then
@@ -11274,7 +11274,7 @@ fstr2: '"EVAL$(", "≈ ÷—$(", "≈ ÷—¡”«$("
                     End If
             ElseIf .t1 = 4 Then
             
-            If w = -1 Then anything.objref.index = anything.index_start
+            If w = -1 Then anything.objref.Index = anything.index_start
             r$ = anything.objref.KeyToString()
             Set bstackstr.lastobj = Nothing
             Else ' IS A MEMBLOCK
@@ -12297,7 +12297,7 @@ check999100:
                             w = r
                         Else
                             IsStr1 = FastSymbol(a$, ")", True)
-                            w = pppp.index
+                            w = pppp.Index
                         End If
                         If Not IsStr1 Then Exit Function
                     GoTo check999100
@@ -13861,9 +13861,9 @@ contrightstrpar:
                If FastSymbol(a$, "!") Then
                  If Abs(p) < .count Then
                  If p < 0 Then
-                   .index = .count + MyRound(p)
+                   .Index = .count + MyRound(p)
                  Else
-                   .index = MyRound(p)
+                   .Index = MyRound(p)
                    End If
                    Else
                
@@ -13899,7 +13899,7 @@ contrightstrpar:
                r$ = .ValueObj.textDoc
                ElseIf TypeOf .ValueObj Is Group Then
                 Set anything = pppp.GroupRef.objref
-                dd = anything.index
+                dd = anything.Index
                Set pppp = New mArray: pppp.PushDim (1): pppp.PushEnd: pppp.Arr = True
                Set pppp.item(0) = .ValueObj
               w2 = 0
@@ -13909,13 +13909,13 @@ contrightstrpar:
                 IsStr1 = SpeedGroup(bstackstr, pppp, "VAL$", q$, a$, w2) = 1
                 'bstackstr.GroupName = r$
                         r$ = bstackstr.LastValue
-                       anything.index = dd
+                       anything.Index = dd
                         Set .ValueObj = pppp.item(0)
                         Set pppp.item(0) = Nothing
                         Exit Function
                 ElseIf TypeOf .ValueObj Is PropReference Then
                ' r$ = VbNullString
-               .ValueObj.index = p
+               .ValueObj.Index = p
                r$ = .ValueObj.Value
                
                  IsStr1 = IsStr1 And FastSymbol(a$, ")")
@@ -13974,7 +13974,7 @@ contrightstrpar:
         Else
 contreadprop:
             If IsExp(bstackstr, a$, p) Then
-                pppp.GroupRef.index = p
+                pppp.GroupRef.Index = p
                 On Error Resume Next
                 r$ = pppp.GroupRef.Value
                 If Err.Number > 0 Then
@@ -13989,7 +13989,7 @@ contreadprop:
                 End If
                 End If
             ElseIf IsStrExp(bstackstr, a$, r$) Then
-                pppp.GroupRef.index = r$
+                pppp.GroupRef.Index = r$
                 r$ = pppp.GroupRef.Value
             ElseIf Typename(pppp.GroupRef) = "PropReference" Then
                 Set bstackstr.lastobj = pppp '.GroupRef
@@ -15160,6 +15160,54 @@ one = True
 again4:
     Select Case x1
     Case 0
+        If FastSymbol(b$, "(") Then
+            i = 1
+            x1 = 0
+            While Len(aheadstatus(b$, False, i)) > 0
+                x1 = i - 1
+                i = i + 1
+            Wend
+            ss$ = Left$(b$, x1)
+            If x1 > 0 And MyTrim(ss$) <> vbNullString Then
+                Mid$(b$, 1, x1) = space$(x1)
+                If FastSymbol(b$, ")", True) Then
+                    If FastSymbol(b$, "=") Then
+                        If IsExp(bstack, b$, p) Then
+                            If Not bstack.lastobj Is Nothing Then
+                                If TypeOf bstack.lastobj Is mArray Then
+                                Set pppp = bstack.lastobj
+                                GoTo wehavearray
+                                ElseIf TypeOf bstack.lastobj Is mHandler Then
+                                    If CheckIsmArray(bstack.lastobj) Then
+                                        Set pppp = bstack.lastobj.objref
+wehavearray:
+                                        Set bstack.lastobj = Nothing
+                                        Set myobject = bstack.soros
+                                        Set bstack.Sorosref = New mStiva
+                                        bstack.soros.MergeBottomCopyArray pppp
+                                        If Not MyRead(1, bstack, ss$, 1) Then
+                                            Set bstack.lastobj = Nothing
+                                            Set bstack.Sorosref = myobject
+                                            Execute = 0
+                                            Exit Function
+                                        End If
+                                        Set bstack.lastobj = Nothing
+                                        Set bstack.Sorosref = myobject
+                                        Set myobject = Nothing
+                                        GoTo loopagain
+                                    Else
+a123321:                                    NotArray
+                                            Execute = 0
+                                            Exit Function
+                                    End If
+                                End If
+                            End If
+                        End If
+                    End If
+                End If
+            End If
+        GoTo a123321
+        End If
         one = False
     Case 1234
         GoTo jumpforCR
@@ -15251,7 +15299,7 @@ BypassGlobalComm:
 BypassComm:
                     If bstack.commnum = 0 Then
                         w$ = "@" + w$
-                    ElseIf bstack.commnum > comhash.index Then
+                    ElseIf bstack.commnum > comhash.Index Then
                         w$ = "@" + w$
                     Else
                         iscom = True
@@ -16467,7 +16515,7 @@ contdo:
                                                     Else
                                                         p = .lastobj.index_cursor > .lastobj.index_End
                                                     End If
-                                                    If p Then myobject.index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
+                                                    If p Then myobject.Index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
                                                 End If
                                                 p = Not p
                                             ElseIf .lastobj.IamEnum Then
@@ -16527,7 +16575,7 @@ contdo:
                                                     Else
                                                         p = .lastobj.index_cursor > .lastobj.index_End
                                                     End If
-                                                    If p Then myobject.index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
+                                                    If p Then myobject.Index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
                                                 End If
                                                 p = Not p
                                             ElseIf .lastobj.IamEnum Then
@@ -16632,7 +16680,7 @@ getanother:
                                 End If
                                 p = .lastobj.index_End <> -1 And Not myobject.IsEmpty
                                 If p Then
-                                    myobject.index = .lastobj.index_start
+                                    myobject.Index = .lastobj.index_start
                                     .lastobj.index_cursor = .lastobj.index_start
                                     If .lastobj.index_start <= .lastobj.index_End Then v = 1 Else v = -1
                                 End If
@@ -16790,7 +16838,7 @@ another1:
                                                     Else
                                                         p = .lastobj.index_cursor > .lastobj.index_End
                                                     End If
-                                                    If p Then myobject.index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
+                                                    If p Then myobject.Index = .lastobj.index_cursor + v: .lastobj.index_cursor = .lastobj.index_cursor + v
                                                 End If
                                             ElseIf .lastobj.IamEnum Then
                                                 p = .lastobj.Iterate()
@@ -23080,12 +23128,12 @@ If Not PP.Arr Then
                     p = MyRound(p)
                     If Abs(p) < .count Then
                         If p < 0 Then
-                            .index = .count + Int(p)
+                            .Index = .count + Int(p)
                         Else
-                            .index = Int(p)
+                            .Index = Int(p)
                         End If
-                        .index = p
-                        offset = -.index - 100
+                        .Index = p
+                        offset = -.Index - 100
                         .Done = True
                     Else
                         MyEr "Index out of limits", "ƒÂﬂÍÙÁÚ ÂÍÙ¸Ú ÔÒﬂ˘Ì"
@@ -23099,7 +23147,7 @@ contlabel1:
                         NeoGetArrayItem = False
                         Exit Function
                     Else
-                        offset = -.index - 100
+                        offset = -.Index - 100
                         
                     End If
                     If Typename(.ValueObj) = "Group" Then
@@ -23151,9 +23199,9 @@ contprop:
             Dim aprop As PropReference
             Set aprop = PP.GroupRef
             If IsExp(bstack, rst$, p) Then
-                aprop.index = p
+                aprop.Index = p
             ElseIf IsStrExp(bstack, rst$, ppp$) Then
-                aprop.index = ppp$
+                aprop.Index = ppp$
             End If
             aprop.UseIndex = True
             Set aprop = Nothing
@@ -33932,7 +33980,7 @@ GetCode = -1
 ElseIf dq Is Form1.PrinterDocument1 Then
 GetCode = -2
 ElseIf dq.Name = "dSprite" Then
-    GetCode = val("0" & Form1.dSprite(dq.index).Tag)
+    GetCode = val("0" & Form1.dSprite(dq.Index).Tag)
 End If
 End If
 End Function
@@ -34339,8 +34387,8 @@ Dim i As Long
 If a Is Nothing Then GoTo conthere1
 i = a.VarIndex
 bstack.soros.DataStr aString$
-If gui.index >= 0 Then
-bstack.soros.DataVal gui.index
+If gui.Index >= 0 Then
+bstack.soros.DataVal gui.Index
 End If
 bstack.soros.DataObj gui
 
@@ -34406,7 +34454,7 @@ bstack.IamAnEvent = True
 Dim i As Long
 If a Is Nothing Then GoTo conthere0
 i = a.VarIndex
-uIndex = gui.index
+uIndex = gui.Index
 If uIndex >= 0 Then
 bstack.soros.DataVal CDbl(uIndex)
 uIndex = 1
@@ -34569,19 +34617,19 @@ extreme = extr
 escok = olescok
 End Function
 
-Sub ProcMethodArray(bstack As basetask, pppp As mArray, index As Long, co$, rest$, Lang As Long, ifier0 As Boolean)
+Sub ProcMethodArray(bstack As basetask, pppp As mArray, Index As Long, co$, rest$, Lang As Long, ifier0 As Boolean)
 Dim VR(1)
-Set VR(0) = pppp.item(index)
+Set VR(0) = pppp.item(Index)
 On Error Resume Next
 ProcMethod bstack, VR(), 0, co$, rest$, Lang, ifier0
  ifier0 = (Err = 0) And ifier0
           Err.clear
 End Sub
-Sub ProcPropertyArray(bstack As basetask, pppp As mArray, index As Long, co$, rest$, Lang As Long, ifier0 As Boolean, Optional usethis As Long)
+Sub ProcPropertyArray(bstack As basetask, pppp As mArray, Index As Long, co$, rest$, Lang As Long, ifier0 As Boolean, Optional usethis As Long)
         Dim VR(1)
-        If VarType(pppp.item(index)) <> vbEmpty Then
+        If VarType(pppp.item(Index)) <> vbEmpty Then
         
-        Set VR(0) = pppp.item(index)
+        Set VR(0) = pppp.item(Index)
         On Error Resume Next
           ProcProperty bstack, VR(), 0, co$, rest$, Lang, True, usethis
   ifier0 = Err = 0
@@ -37567,7 +37615,7 @@ contpointer:
                     Set myobject = myobject.objref.objref
                     useHandler.index_cursor = myobject.Value
                     Set useHandler.objref = myobject
-                    useHandler.index_start = myobject.index
+                    useHandler.index_start = myobject.Index
                      
                     
                     useHandler.sign = 1
@@ -43271,7 +43319,7 @@ Dim i As Long, j As Long, part$
 If here$ <> "" Then where$ = here$ + "." + where$
 With EventObj
     For i = 0 To .count - 1
-    .index = i
+    .Index = i
     .Done = True
     If .Value = vbNullString Then
         .Value = where$ + "_" + .KeyToString + "()"
@@ -46476,13 +46524,13 @@ checkIterator:
                 If bstack.lastobj.indirect >= 0 Then
                     Set pppp = var(bstack.lastobj.indirect)
                     If bstack.lastobj.UseIterator Then
-                    pppp.index = bstack.lastobj.index_cursor
+                    pppp.Index = bstack.lastobj.index_cursor
                     End If
                     GoTo check123678
                 ElseIf TypeOf bstack.lastobj.objref Is mArray Then
                     Set pppp = bstack.lastobj.objref
                     If bstack.lastobj.UseIterator Then
-                    pppp.index = bstack.lastobj.index_cursor
+                    pppp.Index = bstack.lastobj.index_cursor
                     End If
                     If bstack.lastobj.UseIterator Then
                     If Not pppp.Arr Then NotArray: Exit Function
@@ -46493,7 +46541,7 @@ checkIterator:
                         w1 = r
                     Else
                         IsArrayFun = FastSymbol(a$, ")", True)
-                        w1 = pppp.index
+                        w1 = pppp.Index
                     End If
                     If Not IsArrayFun Then Exit Function
                     GoTo checkIterator
@@ -47772,7 +47820,7 @@ handlehandlers:
                         End If
                     On Error GoTo there12
                     If w3 >= 0 Then
-                        .objref.index = w3
+                        .objref.Index = w3
                         .objref.Done = True
                     End If
                     If .objref.Done Then
@@ -47781,7 +47829,7 @@ handlehandlers:
                         If SG < 0 Then r = -r
                         Set bstack.lastobj = Nothing
                         ElseIf FastSymbol(a$, "!") Then
-                            r = .objref.index
+                            r = .objref.Index
                             If SG < 0 Then r = -r
                             Set bstack.lastobj = Nothing
                         Else
@@ -47982,7 +48030,7 @@ errortext1:
                Else
                aa.index_cursor = anything.objref.Value
                Set aa.objref = anything.objref
-               aa.index_start = anything.objref.index
+               aa.index_start = anything.objref.Index
                r = aa.index_cursor
                End If
                aa.t1 = 4
@@ -50080,9 +50128,9 @@ noexpression1:
                     If IsExp(bstack, b$, p) Then
                                 If FastSymbol(b$, "@") Then
                                     If IsExp(bstack, b$, sp) Then
-                                        var(v).index = p: sp = 0
+                                        var(v).Index = p: sp = 0
                                     ElseIf IsStrExp(bstack, b$, ss$) Then
-                                        var(v).index = ss$: ss$ = vbNullString
+                                        var(v).Index = ss$: ss$ = vbNullString
                                     End If
                                     var(v).UseIndex = True
                                 End If
@@ -50660,13 +50708,13 @@ here1234:
                         ElseIf ss$ = "++" Then
                         If myobject.index_start < myobject.objref.count - 1 Then
                             myobject.index_start = myobject.index_start + 1
-                            myobject.objref.index = myobject.index_start
+                            myobject.objref.Index = myobject.index_start
                             myobject.index_cursor = myobject.objref.Value
                         End If
                         ElseIf ss$ = "--" Then
                     If myobject.index_start > 0 Then
                             myobject.index_start = myobject.index_start - 1
-                            myobject.objref.index = myobject.index_start
+                            myobject.objref.Index = myobject.index_start
                             myobject.index_cursor = myobject.objref.Value
                         End If
                         ElseIf ss$ = "-!" Then
@@ -51004,9 +51052,9 @@ assignvaluestr1:
                   If Typename(var(v)) = "PropReference" Then
                         If FastSymbol(b$, "@") Then
                             If IsExp(bstack, b$, sp) Then
-                            var(v).index = p: sp = 0
+                            var(v).Index = p: sp = 0
                         ElseIf IsStrExp(bstack, b$, sw$) Then
-                        var(v).index = sw$: sw$ = vbNullString
+                        var(v).Index = sw$: sw$ = vbNullString
                         End If
                          var(v).UseIndex = True
                         End If
@@ -51178,9 +51226,9 @@ again12345:
                  If Typename(var(v)) = "PropReference" Then
                         If FastSymbol(b$, "@") Then
                             If IsExp(bstack, b$, sp) Then
-                            var(v).index = p: sp = 0
+                            var(v).Index = p: sp = 0
                             ElseIf IsStrExp(bstack, b$, sw$) Then
-                            var(v).index = sw$: sw$ = vbNullString
+                            var(v).Index = sw$: sw$ = vbNullString
                             End If
                              var(v).UseIndex = True
                         End If
@@ -51314,9 +51362,9 @@ assignvalue100:
                 If Typename(var(v)) = "PropReference" Then
                   If FastSymbol(b$, "@") Then
                             If IsExp(bstack, b$, sp) Then
-                            var(v).index = p: sp = 0
+                            var(v).Index = p: sp = 0
                         ElseIf IsStrExp(bstack, b$, ss$) Then
-                        var(v).index = ss$: ss$ = vbNullString
+                        var(v).Index = ss$: ss$ = vbNullString
                         End If
                          var(v).UseIndex = True
                         End If
@@ -53497,7 +53545,7 @@ Else
     End If
     End If
     
-    myobject.index = counter
+    myobject.Index = counter
     If myobject.IsEmpty Then
         s$ = " "
         counter = counter + countDir
@@ -55008,7 +55056,7 @@ ContGoto:
               End If
 End Function
 
-Function GetArrayReference(bstack As basetask, a$, v$, PP, Result As mArray, index As Long) As Boolean
+Function GetArrayReference(bstack As basetask, a$, v$, PP, Result As mArray, Index As Long) As Boolean
 Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
 If PP Is Nothing Then Exit Function
 If Not TypeOf PP Is mArray Then
@@ -55079,7 +55127,7 @@ p = 0
                     
                     
                         Set Result = pppp
-                        index = w2
+                        Index = w2
     End If
 End Function
 
