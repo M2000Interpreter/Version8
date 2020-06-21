@@ -17355,7 +17355,7 @@ End With
 End Sub
 Function ProcSave(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim pa$, w$, s$, col As Long, prg$, x1 As Long, par As Boolean, i As Long, noUse As Long, lcl As Boolean
-Dim askme As Boolean
+Dim askme As Boolean, k As Long, m As Long
 If lckfrm <> 0 Then MyEr "Save is locked", "« ·ÔËﬁÍÂıÛÁ ÂﬂÌ·È ÍÎÂÈ‰˘Ï›ÌÁ": rest$ = vbNullString: Exit Function
 lcl = IsLabelSymbolNew(rest$, "‘œ–… ¡", "LOCAL", Lang) Or basestack.IamChild Or basestack.IamAnEvent
 x1 = Abs(IsLabelFileName(basestack, rest, pa$, , s$))
@@ -17391,20 +17391,37 @@ If x1 <> 0 Then
                 If Right$(sbf(col).sb, 2) <> vbCrLf Then sbf(col).sb = sbf(col).sb + vbCrLf
                 If Lang Then
                 
-                        If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Function " & s$ + "()" + vbCrLf) Then Exit Function
+                                If Not blockCheck(sbf(col).sb, DialogLang, noUse, "Function " & s$ + "()" + vbCrLf) Then Exit Function
+                                If sbf(col).IamAClass Then
+
+                                k = InStr(sbf(col).sb, vbCrLf)
+                                m = rinstr(sbf(col).sb, vbCrLf + vbCrLf)
+                                k = InStr(k + 1, sbf(col).sb, "{")
+                                prg$ = "CLASS " + Left$(sbf(col).goodname, Len(sbf(col).goodname) - 2) + " {" + Mid$(sbf(col).sb, k + 3, m - k - 3)
+                               
+                               
+                                Else
                                 prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
                                 If lcl Then
                                     prg$ = "FUNCTION " + prg$
                                 Else
                                     prg$ = "FUNCTION GLOBAL " + prg$
                                 End If
+                                End If
                         Else
                                 If Not blockCheck(sbf(col).sb, DialogLang, noUse, "”ıÌ‹ÒÙÁÛÁ " & s$ + "()" + vbCrLf) Then Exit Function
+                                If sbf(col).IamAClass Then
+                                k = InStr(sbf(col).sb, vbCrLf)
+                                m = rinstr(sbf(col).sb, vbCrLf + vbCrLf)
+                                k = InStr(k + 1, sbf(col).sb, "{")
+                                prg$ = " À¡”« " + Left$(sbf(col).goodname, Len(sbf(col).goodname) - 2) + " {" + Mid$(sbf(col).sb, k + 3, m - k - 3)
+                                Else
                                 prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
                                 If lcl Then
                                     prg$ = "”’Õ¡—‘«”« " + prg$
                                 Else
                                     prg$ = "”’Õ¡—‘«”« √≈Õ… « " + prg$
+                                End If
                                 End If
                         End If
                 End If

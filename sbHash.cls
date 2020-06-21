@@ -28,7 +28,7 @@ Dim toplim As Long
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Private lastfind As String
 Private Hash() As Long
-Public index As Long
+Public Index As Long
 Private Sub Class_Initialize()
     MaxSpace = 10
     ReDim PriveSpace(MaxSpace) As item, Hash(MaxSpace * 2 + 3)
@@ -78,8 +78,9 @@ Friend Sub ReduceHash(newTop As Long, v() As modfun)
             v(.ndx).goodname = vbNullString
             v(.ndx).locked = False
             v(.ndx).tpointer = 0
+            v(.ndx).IamAClass = False
             Set v(.ndx).subs = Nothing
-            End If
+        End If
         .KeyType = 0
         .ndx = -1
             
@@ -179,7 +180,7 @@ k = Hash(HashFunc(Key)) - 1
 If k >= 0 Then
 Do
     If PriveSpace(k).Key = Key Then
-    num = PriveSpace(k).ndx: Find = True: lastfind = Key: index = k: Exit Function
+    num = PriveSpace(k).ndx: Find = True: lastfind = Key: Index = k: Exit Function
     End If
      k = PriveSpace(k).Pleft - 1
 Loop Until k < 0
@@ -198,7 +199,7 @@ Do
     With PriveSpace(k)
     If .Key = Key Then
     internal = .KeyType
-    num = .ndx: Find2 = True: lastfind = Key: index = k: Exit Function
+    num = .ndx: Find2 = True: lastfind = Key: Index = k: Exit Function
     End If
      k = .Pleft - 1
      End With
