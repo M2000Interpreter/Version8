@@ -299,7 +299,7 @@ Else
 undopos = CharPosStart
 End If
 undomode = 0
-mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, thisdoc
+mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, (thisdoc)
 'ReColorBlock
 Render
 End Sub
@@ -1074,10 +1074,15 @@ ThatData = UndoDoc.textDoc
 End Sub
 
 Private Sub glistN_DragPasteData(ThatData As String)
-Dim a() As String, k As Long
+Dim a() As String, k As Long, a77$
+a77$ = space$(EditTabWidth)
+If Not glistN.UseTab Then
+
 a() = Split(ThatData, ChrW(9))
-OldPar = 0
-PasteDoc Join(a(), "    ")
+PasteDoc Join(a(), a77$)
+Else
+PasteDoc ThatData
+End If
 RelocateMarkedText
 
 End Sub

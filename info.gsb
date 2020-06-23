@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 12 for ver 9.9 rev 30 and newer"
+	Report " A collection of modules for tests version 12.5 for ver 9.9 rev 32 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -14470,6 +14470,91 @@ C.Message "Unable to Process Order ORD1 Dated D1 For Customer C1.", FunctionalEr
 C.Message "Order Dispatched.",FunctionalMessage
 Call C.Dispose()  ' no need we use weak refrences (automatic created If poiner produced for named groups
 }
+MODULE CHAIN1 {\\ Chain of Responsibility design pattern 
+
+Form 80,50
+Global enum LogLevel    {
+		None = 0,
+		Info = 1, 
+		Debug = 2, 
+		Warning = 4,
+		Error = 8,   
+		FunctionalMessage = 16, 
+		FunctionalError = 32, 
+		All = 63
+		}
+Class Logger {
+Private:
+	logMask=0&
+	Group NextLogger
+	Module super (z) {
+		.logMask<=z
+		Class EmptyLogger {
+			Null
+		}
+		.NextLogger<=Pointer(EmptyLogger())
+	}
+Public:
+	Module Final Message(msg$, severity) {
+		If not Valid(.NextLogger=>Null) Then
+			.NextLogger=>Message msg$, severity
+		End If
+		If Binary.And(.logMask ,severity)<>0 Then
+			.WriteMessage msg$
+		End If
+	}
+	Module WriteMessage (m$) {
+		Print m$
+	}
+	Module Final SetNext ( p as pointer) {
+		.NextLogger<=p
+	}
+	Function Final Dispose {
+		x=valid(.NextLogger=>Dispose())
+		Clear .NextLogger
+	}
+}
+Class MessageTypeHolder {
+	message$="nothing yet"
+	Module  Final WriteMessage (m$) {
+		Print .message$+": " + m$
+	}
+}
+Class ConsoleLogger as  MessageTypeHolder as Logger {
+Class:
+	Module ConsoleLogger {
+		.message$<="Writing to console"
+		.super
+	}
+}
+Class EmailLogger as MessageTypeHolder  as Logger {
+Class:
+	Module EmailLogger {
+		.message$<="Sending via email"
+		.super
+	}
+}
+Class FileLogger as MessageTypeHolder  as Logger {
+Class:
+	Module FileLogger {
+		.message$<="Writing to Log File"
+		.super
+	}
+}
+A=ConsoleLogger(All)
+B=EmailLogger(FunctionalMessage+FunctionalError)
+C=FileLogger(Warning+Error)
+C.SetNext Pointer(B)
+B.SetNext Pointer(A)
+
+C.Message "Entering function ProcessOrder().", Debug
+C.Message "Order record retrieved.", Info
+C.Message "Customer Address details missing in Branch DataBase.", Warning
+C.Message "Customer Address details missing in Organization DataBase.", Error
+C.Message "Unable to Process Order ORD1 Dated D1 For Customer C1.", FunctionalError
+C.Message "Order Dispatched.",FunctionalMessage
+Call C.Dispose()  ' no need we use weak refrences (automatic created If poiner produced for named groups
+}
 MODULE CHAIN2 {\\ Chain of Responsibility design pattern  2
 \\ example from https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
 \\ This example use real pointers to groups
@@ -20600,7 +20685,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<30 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<32 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -23926,7 +24011,7 @@ Try ok  {
 \\ but we check Error if we have error deeper
 If ok Then Print "Error not in Try at first level"
 If Error Then
-	Print "Error from somethog we call  in Try Block"
+	Print "Error from something we call  in Try Block"
 	Print "B=A";Error$
 	Print "Error value now is 0. Each time we read Error change to "; Error
 End if
@@ -24359,5 +24444,398 @@ Dim Z()
 Z()=(1,2)
 (M, N)=Z()
 Print M, N
+}
+MODULE CLASS1 {Form 80,50
+\\ counters supposed we provide them from a file
+global LastCustomerId=100, ReportId=80
+\\
+class person {
+Private:
+	name$, address$, phone$, id
+class:
+	module person (.name$, .address$, .phone$) {
+		LastCustomerId++
+		.id<=LastCustomerId
+	}	
+}
+
+class customer as person {
+	Inventory sales
+	Class bill {
+	Private:
+		day$, time$, id
+	Public:
+		\\ read only property (is a group inside group)
+		Property euro {value}
+		Function Key$ {
+			=.day$+"/"+.time$+"#"+str$(.id,"")
+		}
+	class:
+		Module bill (.day$, .time$, .id, .[euro]) {
+		}
+	}
+	Module CustomerData {
+		ReportId++
+		Print "Report date:"; Date$(Today)
+		Print "ReportId:";ReportId
+		Print "Customer:";.id
+		Print "Name",.name$
+		Print "Address",.address$
+		Print "Phone", .phone$
+		Print "Transactions:";len(.sales)
+		m=each(.sales)
+		sum=0
+		While m {
+			bill=eval(m)
+			sum+=bill.euro
+		}
+		Print "Total Euro:";sum
+	}
+	Module InsertBill (bill) {
+		try {
+			Print "New bill:";bill.key$();" for customer ";.id
+			Append .sales, bill.key$():=bill
+		}
+	}
+Class:
+	Module customer (Where, This) {
+		append where, .id:=This
+	}
+}
+
+Inventory Customers
+Pen 15 {Print "Adding to Customers"}
+For This {
+	\\ this is a block for temporary definitions
+	K=Customer(Customers, person("George","Athens","0912399"))
+	K.CustomerData
+	\\ after that box K deleted
+}
+Pen 15 {Print "Using key to customers to add bills"}
+For Customers(LastCustomerId) {
+	.InsertBill .bill("20200522", "18:33", 1023, 100)
+	.InsertBill .bill("20200526", "09:10", 3129, 150)
+	.InsertBill .bill("20200530", "13:20", 5418, 25)
+	.CustomerData
+}
+Pen 15 {Print "Using Iterator 1 - working at original data"}
+M=each(Customers)
+While M {
+	\\ we extract key using eval$(M!)
+	\\ so we can work from original data
+	For Customers(eval$(M!)) {
+		.CustomerData
+	}
+}
+Pen 15 {Print "Using Iterator 2  - working at a copy of data"}
+M=each(Customers)
+While M {
+	\\ or using a copy of data
+	K=Eval(M)
+	For K  {
+		.CustomerData
+	}
+}
+}
+MODULE JAVALIKE {\\ to bypass a function we can use this
+\\ function alfa {=.beta(![])}
+\\ [] is the current stack and when we read it, we get a pointer and leave an empty stack as current stack
+\\ so anything we pass to alfa() passed to .beta(), the dot is This, so to This.Beta()
+
+\\ here we use toString$() to call super.toString$() without parameteres
+\\ For modules is very easy because a module get the current stack
+\\ so if we have a member Module alfa {.beta} calling alfa 10,20 is like calling .beta 10, 20 (and all other values the current stack have)
+
+\\ Constructros are modules but called from functionw so they get the function's stack (a new one)
+\\ Also a constructor skip the erasing phase (the function which call the module do this)
+\\ We need this because we can expand the This object.
+
+
+Report {
+	there is no super like java super in M2000 when we use inheritance through classes
+	see Superclass (example SUP) which is something differnent
+	}
+
+
+class Shape {
+private:
+    super.X, super.Y
+    Function super.toString$(a=10) {
+        ="Shape(" + str$(.super.X,"") + ", " + str$(.super.Y,"") + ")"
+    }
+public:
+       Module final setPosition (px, py) {
+           .super.X <= px
+           .super.Y <= py
+       }
+        Function toString$() {
+        =.super.toString$()
+    }
+}
+class MoveShape {
+      Module MoveRelative(xr, yr) {
+            .super.X+=xr
+            .super.Y+=yr
+      }
+}
+class Circle as MoveShape as Shape {
+private:
+    radius
+public:
+    Module setRadius (r) {
+        .radius <= r
+    }
+    Function toString$() {
+        = .super.toString$() + ": Circle(" + str$(.radius,"") + ")"
+    }
+}
+
+class Rectangle as MoveShape  as Shape {
+private:
+    height, width
+public:
+    module setDimensions (h,w) {
+        .height <= h
+        .width <= w
+    }
+    Function toString$() {
+       = .super.toString$() + ": Rectangle(" + str$(.height,"") + " x " + str$(.width,"") + ")"
+    }
+}
+c =Circle()
+r = Rectangle()
+
+r.setPosition 1, 2
+r.setDimensions 50, 50
+c.setPosition 3, 4
+c.setRadius 10
+Print r.tostring$()
+Print c.tostring$()
+r.MoveRelative 100,100
+c.MoveRelative -50,-50
+Print r.tostring$()
+Print c.tostring$()
+
+Report  {
+	wokring with pointers like in c++
+	pointers in M2000 are objects, so null pointer (pc->0&) isn't a zero, but an empty Group (object)
+	}
+pc->circle()
+pr->rectangle()
+pr=>setPosition 1, 2
+pr=>setDimensions 50, 50
+pc=>setPosition 3, 4
+pc=>setRadius 10
+Print pr=>tostring$()
+Print pc=>tostring$()
+\\ we can open up to ten objects (from one to ten dots, normaly one to three)
+\\ if we use nestef for object {} also we have up to ten objects in total
+\\ every for object {} is an area for temporary definitions, after exit from brackets
+\\ any new definition erased.
+For pr, pc {
+	.MoveRelative 100,100
+	..MoveRelative -50,-50
+	Print .tostring$()
+	Print ..tostring$()
+}
+
+}
+MODULE ΚΛΑΣΗ1 {Κλάση Ζώο {
+Ιδιωτικό:
+	πόδια=0
+	ήχος$="τίποτα"
+Δημόσιο:
+	Συνάρτηση Τελική ΠόσαΠόδια() {
+		=.πόδια
+	}
+	Συνάρτηση ΚάνωΉχο$() {
+		=.ήχος$
+	}
+}
+Κλάση Κατοικίδιο ως Ζώο {
+Ιδιωτικό:	
+	όνομα$
+	Μήνυμα$="Με φωνάζουν {0} και είμαι κατοικίδιο με {1} πόδια και όλη μέρα {2}"	
+Δημόσιο:
+	Συνάρτηση Μήνυμα$() {
+		=.Μήνυμα$
+	}
+	Συνάρτηση ΜεΦωνάζουν$() {
+		=.όνομα$
+	}
+Κλάση:
+	Τμήμα Κατοικίδιο {
+		Διάβασε .όνομα$, .ήχος$, .πόδια
+	}
+}
+Κλάση Σκύλος ως Κατοικίδιο {
+	Συνάρτηση ΜεΦωνάζουν$() {
+		=.όνομα$+" και είμαι σκύλος"
+	}
+Κλάση:
+	Τμήμα Σκύλος(.Όνομα$)	{
+		.πόδια<=4
+		.ήχος$<="γαβγίζω"
+	}
+}
+Κλάση Γάτα ως Κατοικίδιο {
+	Συνάρτηση ΜεΦωνάζουν$() {
+		=.όνομα$+" και είμαι γάτα"
+	}
+Κλάση:
+	Τμήμα Γάτα(.Όνομα$)	{
+		.πόδια<=4
+		.ήχος$<="νιαουρίζω"
+	}
+}
+Κλάση Πουλί ως Κατοικίδιο {
+Ιδιωτικό:
+	τύπος$="κάτι"
+	Μήνυμα$="Με φωνάζουν {0} με {1} πόδια και φτερά και όλη μέρα {2}"
+Δημόσιο:
+	Συνάρτηση ΜεΦωνάζουν$() {
+		=.όνομα$+" και είμαι "+.τύπος$
+	}
+Κλάση:
+	Τμήμα Πουλί(.Όνομα$, .τύπος$)	{
+		.πόδια<=2
+		.ήχος$<="κελαηδάω"
+	}	
+}
+Εγγραφο ΌλαΜαζι$={Τελική Αναφορά
+}
+Αζορ=Σκύλος("Αζόρ")
+Τι(Αζορ)
+Ψιψίνα=Γάτα("Ψιψίνα")
+Τι(Ψιψίνα)
+Φλοξ=Πουλί("Φλοξ", "καναρίνι")
+Τι(Φλοξ)
+ΆλλοΚατοικίδιο=Κατοικίδιο("Ντορή", "χλιμιντρίζω", 4)
+Τι(ΆλλοΚατοικίδιο)
+\\ στέλνουμε στο πρόχειρο την αναφορά
+Πρόχειρο ΌλαΜαζι$
+
+Τέλος
+\\ Η ρουτίνα δέχεται οτιδήποτε είναι κατοικίδιο
+\\ έτσι δέχεται Κατοικίδιο, Γάτα, Σκύλος, Πουλί
+Ρουτίνα Τι(Α ως Ομάδα)
+	Τοπική Εξ$=Μορφή$(Α.Μήνυμα$(),Α.ΜεΦωνάζουν$(), Α.ΠόσαΠόδια(), Α.ΚάνωΉχο$())
+	ΌλαΜαζι$=Εξ$+{
+	}
+	Αναφορά Εξ$
+Τέλος Ρουτίνας
+}
+MODULE PRIVATE {\\ example for private class, and private group made from private class
+class beta {
+private:
+	class alfa {
+	private:
+		m=10
+		c=0
+	public:
+		group counter {
+			value {
+				link parent c to c
+				=c
+			}
+		}
+		value {
+			=.m
+			.c++
+		}
+		set {
+			read .m
+			.c++
+		}
+	}
+	alfa M
+	dim a()
+Public:
+	Module Doit {
+		Print  .M, .M, .M, .M.counter=3
+		Push 1,2,3
+		Read .M, .M, .M
+		Print .M.counter=6
+		.M<=10
+		Print .M
+		Print .M.counter=8
+		dim .a(5)=group(.M)
+		For i=0 to 4:.a(i)=i:Next
+		for i=0 to 4
+			Print .a(i), .a(i).counter=10
+		next
+		z=list:= 1:=group(.M), 2:=group(.M)
+		Print z(1), z(2)
+		Print z(1).counter=9, z(2).counter=9
+		Print type$(z,1)="Group"
+		Return z, 1:=500
+		Print type$(z,1)="Double"
+		p->z(2)
+		Print p=>counter=9
+		p=>=1234
+		Print p=>counter=10
+		Print  eval(p)=1234
+		Print p=>counter=11
+		Print eval(z(2))=1234
+		Print p=>counter=12
+		k=.A()
+		\\ k#eval(3) execute value { } from a copy of A(3)
+		Print k#eval(3)=3
+		\\ k#val(3) extract a copy of group
+		MM=k#val(3)
+		Print MM.counter=10
+		Print .A(3)=3, .A(3).counter=11
+		\\ pointers may change where points to
+		p->.A(3)
+		Print eval(p)=3, p=>counter=12, .a(3).counter=12
+		\\ dot is This.
+		Print This.a(3).counter=12
+	}
+}
+Z=beta()
+Z.Doit
+List
+Modules ?
+}
+MODULE PRV_STR {\\ a simple example 2 - class in class in class
+\\ creating classes which return string value
+class delta {
+class:
+	class beta {
+	Private:
+		class z$ {
+		private:
+			what$
+			val=counter
+		public:
+			value {
+				=.what$+str$(.val)
+			}
+		class:
+			\\ constructor
+			module z (.what$) {
+			counter++
+			}
+		}
+		z$ k("hello"), m("yes")
+	Public:
+		module doit {
+			print .k$, .m$
+		}
+	}
+	\\ constructor
+	module delta {
+		global counter=500
+		b=.beta()
+		b.doit
+		c=.beta()
+		c.doit
+		this=.beta()
+	}
+}
+z=delta()
+z.doit
+\\List
+\\Modules ?
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}

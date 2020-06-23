@@ -172,7 +172,7 @@ Else
 undopos = CharPosStart
 End If
 undomode = 0
-mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, thisdoc
+mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, (thisdoc)
 Render
 End Sub
 Public Sub PasteText(thisdoc As String)
@@ -635,6 +635,7 @@ undopara = BlockEndPara
 undotext = that
 undomode = 1
 undopos = SelStart
+Debug.Print "PushMark2Undo"
 End Sub
 
 Private Sub glistN_PushUndoIfMarked()
@@ -1131,6 +1132,7 @@ SelLength = 0
 If Redomode = 3 Then
 SelStart = Redopos - 2
 Else
+
 SelStart = Redopos
 End If
 If Redomode = 0 Or Redomode = 5 Then ' now we do the opposite
@@ -4303,8 +4305,9 @@ Public Function AutoIntNewLine() As Boolean
 ' if autonumber
 Dim a$, newid As Long 'mDoc.MarkParagraphID
 Dim b$, c$, d$, e$, skip As Boolean, tr$, maxw As Long, ns As String, och As Long
+
 showparagraphWork = False
-expandCharPos = 0
+
 b$ = CurrentParagraph
 ' FIND CHARPOSNOW
 If Charpos > Len(b$) + 1 Then SelStartSilent = SelStart - (Charpos - Len(b$) - 1)

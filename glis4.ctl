@@ -1438,7 +1438,7 @@ If mSelstart = 0 Then mSelstart = 1
 'RaiseEvent SetExpandSS(mSelstart + 1)
             SelStartEventAlways = SelStart
             RaiseEvent DelExpandSS
- 'RaiseEvent PureListOn
+ RaiseEvent PureListOn
  If shift = 5 Then
  list(SELECTEDITEM - 1) = Left$(list(SELECTEDITEM - 1), SelStart - 1) & ChrW(&H2007) & Mid$(list(SELECTEDITEM - 1), SelStart)
  RaiseEvent RemoveOne(ChrW(&H2007))
@@ -3498,12 +3498,14 @@ If SELECTEDITEM > 0 Then
                                         Line (0, (SELECTEDITEM - topitem) * YYT + mHeadlineHeightTwips)-(0 + UserControl.Width, (SELECTEDITEM - topitem - 1) * YYT + mHeadlineHeightTwips), 0, B
                            
                                    End If
+      
                 End If
-
+            Else
+        RaiseEvent PureListOff
         
         End If
         Else
-
+        
         HideCaret (hWnd)
     End If
 Else

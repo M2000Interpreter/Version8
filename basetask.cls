@@ -103,6 +103,7 @@ Vname = varhash.count + ByName
 End Sub
 Public Sub CopyStrip(bst As basetask)
 With bst
+Set .Owner = Owner
 .StaticInUse = StaticInUse
 .OriginalCode = OriginalCode
 Set .StaticCollection = StaticCollection
@@ -276,13 +277,13 @@ If Not StaticCollection.Find(Name$) Then Exit Function
         If ss$ = "++" Then
                         If myobject.index_start < myobject.objref.count - 1 Then
                             myobject.index_start = myobject.index_start + 1
-                            myobject.objref.index = myobject.index_start
+                            myobject.objref.Index = myobject.index_start
                             myobject.index_cursor = myobject.objref.Value
                         End If
         ElseIf ss$ = "--" Then
                     If myobject.index_start > 0 Then
                             myobject.index_start = myobject.index_start - 1
-                            myobject.objref.index = myobject.index_start
+                            myobject.objref.Index = myobject.index_start
                             myobject.index_cursor = myobject.objref.Value
                         End If
         ElseIf ss$ = "-!" Then
@@ -533,31 +534,22 @@ If Look2Parent Then GetDotNew = Parent.GetDotNew(a$, dotnum&): Exit Function
 
 If curdotcol = 0 Then
 If Len(UseGroupname) > 0 Then
- If Right(a$, 1) = "(" Then
- If AscW(Left$(a$, 1)) > 255 Then
- a$ = "ауто." + a$
- Else
- a$ = "THIS." + a$
- End If
- ElseIf Len(a$) = 0 Then
-    If tpointer > 0 Then
-        a$ = var(tpointer).Patch + "."
+    If Right(a$, 1) = "(" Then
+        If AscW(Left$(a$, 1)) > 255 Then
+       
+        a$ = "ауто." + a$
+       Else
+        a$ = "THIS." + a$
+       End If
+    ElseIf Len(a$) = 0 Then
+       If tpointer > 0 Then
+           a$ = var(tpointer).Patch + "."
+       Else
+           a$ = "THIS"
+       End If
     Else
-        a$ = "THIS"
+       a$ = UseGroupname + a$
     End If
-Else
-a$ = UseGroupname + a$
-
-  'If AscW(Left$(a$, 1)) > 255 Then
- 'a$ = "ауто." + a$
- 'If a$ = "ауто.х" Then Stop
- 'Else
- 'a$ = "THIS." + a$
- 'End If
-  
- ' a$ = this + a$
- End If
-
  
  End If
 Else
