@@ -32,7 +32,6 @@ Public SuperClassList As Object
 Public IamSuperClass As Boolean
 Private eventlist As FastCollection  ' we have to copy this
 Public highpriorityoper As String
-Public leftoper$  ' we have to copy this
 Public HasUnary As Boolean
 Public IamApointer As Boolean, lasthere$
 Public original As Long
@@ -41,7 +40,54 @@ Public LastOpen As String
 Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Public PointerPtr As Long
-Public ToDelete As Boolean, HasRemove As Boolean
+Public ToDelete As Boolean, HasRemove As Boolean, mytypes As Collection
+Friend Property Let PutIs(RHS As String)
+If mytypes Is Nothing Then
+    Set mytypes = New Collection
+    mytypes.Add RHS, RHS
+Else
+On Error Resume Next
+    mytypes.Add RHS, RHS
+End If
+End Property
+Function TypeGroup(RHS) As Boolean
+If Not mytypes Is Nothing Then
+    On Error Resume Next
+    TypeGroup = Len(mytypes(RHS))
+    Err.clear
+End If
+End Function
+Private Function TypeGroupNow(RHS) As Boolean
+    On Error Resume Next
+    TypeGroupNow = Len(mytypes(RHS))
+End Function
+Sub mergeTypes(RHS As Collection)
+Dim extypes As Collection, k
+Set extypes = RHS
+If extypes Is Nothing Then Exit Sub
+If mytypes Is RHS Then
+    Set mytypes = New Collection
+End If
+For Each k In extypes
+    PutIs = k
+Next
+End Sub
+Function MatchTypes(RHS As Collection) As Boolean
+Dim extypes As Collection, k, counter As Long
+Set extypes = RHS
+If extypes Is Nothing Then Exit Function
+If mytypes Is Nothing Then Exit Function
+If mytypes Is RHS Then
+    MatchTypes = True
+    Exit Function
+End If
+If mytypes.count <> extypes.count Then Exit Function
+For Each k In extypes
+    If Not TypeGroupNow(k) Then Exit Function
+    counter = counter + 1
+Next
+MatchTypes = mytypes.count = counter
+End Function
 Public Property Get Events() As Object
 Set Events = eventlist
 End Property
@@ -101,11 +147,11 @@ s = OwnSoros.StackItem(i)
 If Left$(s$, 1) = "*" Then
 AllSoros.DataStr "*" + topname$ + GroupName + Mid$(s, 2)
  If Not IsObject(v(val(Split(s)(1)))) Then Set v(val(Split(s)(1))) = New Group
- If here$ <> "" And Not IamGlobal Then
- Set vv = v(val(Split(s)(1))).PrepareSoros(v(), here$ + "." + GroupName)
- Else
- Set vv = v(val(Split(s)(1))).PrepareSoros(v(), GroupName)
- End If
+' If here$ <> "" And Not IamGlobal Then
+ Set vv = v(val(Split(s)(1))).PrepareSoros(v(), Patch + ".")
+' Else
+ Set vv = v(val(Split(s)(1))).PrepareSoros(v(), topname$ + GroupName)
+ 'End If
  
 AllSoros.MergeBottom vv
 Else
@@ -409,6 +455,7 @@ Set SuperClassList = Nothing
 If IamFloatGroup Then EndFloat
 Set LinkToGroup = Nothing
 Set OwnSoros = New mStiva2
+Set mytypes = Nothing
 HasValue = False
 HasSet = False
 HasStrValue = False

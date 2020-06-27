@@ -74,7 +74,7 @@ Private Type SAFEARRAY1D
 End Type
 ' no second sort allowed per array
 Private sortmult As Long, sortoff As Long, upart As Long, part As Long, col(), Piv, piv1()
-Public index As Long, final As Boolean, refgroup As Object, grouperror As Boolean
+Public Index As Long, final As Boolean, refgroup As Object, grouperror As Boolean
 Public refArray As Variant
 Public Sub Compute0(p As Variant, ss$)
 If final Then CantAssignValue: Exit Sub
@@ -335,16 +335,16 @@ Loop
 
 End Sub
 Property Get Value() As Variant
-If index >= 0 And index <= maxitems1 Then
+If Index >= 0 And Index <= maxitems1 Then
 
-If IsObject(actualdata(index)) Then
-    If Typename(actualdata(index)) = "PropReference" Then
-        Value = actualdata(index)
+If IsObject(actualdata(Index)) Then
+    If Typename(actualdata(Index)) = "PropReference" Then
+        Value = actualdata(Index)
     Else
-        Set Value = actualdata(index)
+        Set Value = actualdata(Index)
     End If
 Else
-Value = actualdata(index)
+Value = actualdata(Index)
 End If
 End If
 End Property
@@ -1300,7 +1300,7 @@ If curitem < 0 Then
 If Not GroupRef Is Nothing Then
     If TypeOf GroupRef Is mHandler Then
         If GroupRef.t1 = 1 Then
-            GroupRef.objref.index = Abs(curitem + 100)
+            GroupRef.objref.Index = Abs(curitem + 100)
             GroupRef.objref.Done = True
             Set GroupRef.objref.ValueObj = item
             Exit Property
@@ -1435,6 +1435,7 @@ Dim mygroup2 As New Group
                 mygroup2.highpriorityoper = .highpriorityoper
                 mygroup2.HasUnary = .HasUnary
                 mygroup2.ToDelete = False
+                Set mygroup2.mytypes = .mytypes
                 End If
             End With
          Set myobject2 = mygroup2
@@ -1443,18 +1444,18 @@ Property Get IsEmpty() As Variant
 IsEmpty = dnum = 0
 End Property
 Function IsObj() As Boolean
-If index >= 0 And index <= maxitems1 Then
-If IsObject(actualdata(index)) Then
+If Index >= 0 And Index <= maxitems1 Then
+If IsObject(actualdata(Index)) Then
     IsObj = True
 End If
 End If
 End Function
 Function IsEnum(p As Variant) As Boolean
 Dim obj As mHandler
-If index >= 0 And index <= maxitems1 Then
-If IsObject(actualdata(index)) Then
-If Typename(actualdata(index)) = "mHandler" Then
-    Set obj = actualdata(index)
+If Index >= 0 And Index <= maxitems1 Then
+If IsObject(actualdata(Index)) Then
+If Typename(actualdata(Index)) = "mHandler" Then
+    Set obj = actualdata(Index)
     IsEnum = obj.t1 = 4
     If IsEnum Then p = obj.index_cursor * obj.sign
 End If

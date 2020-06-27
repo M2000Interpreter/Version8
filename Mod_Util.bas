@@ -17384,6 +17384,8 @@ If x1 <> 0 Then
       
            For i = subHash.count - 1 To 0 Step -1
        subHash.ReadVar i, s$, col
+       If Not Len(sbf(col).sbgroup) > 0 Then
+       
                 If Right$(s$, 2) = "()" Then
                 If Not InStr(s$, ChrW(&H1FFF)) > 0 Then
                 s$ = Left$(s$, Len(s$) - 2)
@@ -17397,7 +17399,7 @@ If x1 <> 0 Then
                                 k = InStr(sbf(col).sb, vbCrLf)
                                 m = rinstr(sbf(col).sb, vbCrLf + vbCrLf)
                                 k = InStr(k + 1, sbf(col).sb, "{")
-                                prg$ = "CLASS " + Left$(sbf(col).goodname, Len(sbf(col).goodname) - 2) + " {" + Mid$(sbf(col).sb, k + 3, m - k - 3)
+                                prg$ = "CLASS " + Left$(sbf(col).goodname, Len(sbf(col).goodname) - 2) + " {" + Mid$(sbf(col).sb, k + 3, m - k - 3) + vbCrLf + prg$
                                
                                
                                 Else
@@ -17414,7 +17416,7 @@ If x1 <> 0 Then
                                 k = InStr(sbf(col).sb, vbCrLf)
                                 m = rinstr(sbf(col).sb, vbCrLf + vbCrLf)
                                 k = InStr(k + 1, sbf(col).sb, "{")
-                                prg$ = " À¡”« " + Left$(sbf(col).goodname, Len(sbf(col).goodname) - 2) + " {" + Mid$(sbf(col).sb, k + 3, m - k - 3)
+                                prg$ = " À¡”« " + Left$(sbf(col).goodname, Len(sbf(col).goodname) - 2) + " {" + Mid$(sbf(col).sb, k + 3, m - k - 3) + vbCrLf + prg$
                                 Else
                                 prg$ = s$ & " {" & sbf(col).sb & "}" & vbCrLf + prg$
                                 If lcl Then
@@ -17445,6 +17447,7 @@ If x1 <> 0 Then
                                 End If
                         End If
                 End If
+        End If
         Next i
         w$ = vbNullString
         If FastSymbol(rest$, "@@", , 2) Then

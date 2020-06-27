@@ -598,9 +598,9 @@ End If
     End If
 aaa:
     GetDotNew = True
-If Len(here$) > 0 Then
-If Left$(a$, Len(here$) + 1) = here$ + "." Then a$ = Mid$(a$, Len(here$) + 2)
-End If
+'If Len(here$) > 0 Then
+'If Left$(a$, Len(here$) + 1) = here$ + "." Then a$ = Mid$(a$, Len(here$) + 2)
+'End If
 End Function
 
 Public Function GetDot(a$, st&) As Boolean

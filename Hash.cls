@@ -29,7 +29,7 @@ Public MaxSpace As Long
 Dim hashlen As Long
 Dim toplim As Long
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
-Private index As Long
+Private Index As Long
 Private Hash() As Long
 Private entrance As Long
 Public Sub BigSize(n As Long)
@@ -49,11 +49,19 @@ Friend Sub ReadVar(where, Name$, num As Long)
     Name$ = PriveSpace(where).Key
     num = PriveSpace(where).ndx
 End Sub
-Public Property Get lastNDX() As String
-lastNDX = PriveSpace(index).ndx
+Public Property Get lastNDX() As Long
+If Index < 0 Then
+lastNDX = 0
+Else
+lastNDX = PriveSpace(Index).ndx
+End If
 End Property
 Public Property Get lastkey() As String
-lastkey = PriveSpace(index).Key
+If Index < 0 Then
+lastkey = vbCrLf
+Else
+lastkey = PriveSpace(Index).Key
+End If
 End Property
 
 Private Sub ExpandHash()
@@ -160,7 +168,7 @@ k = Hash(HashFunc(Key)) - 1
 If k >= 0 Then
 Do
     If PriveSpace(k).Key = Key Then
-    num = PriveSpace(k).ndx: Find2 = True: index = k:  checktype = PriveSpace(k).originaltype: isglobal = PriveSpace(k).globalvar: Exit Function
+    num = PriveSpace(k).ndx: Find2 = True: Index = k:  checktype = PriveSpace(k).originaltype: isglobal = PriveSpace(k).globalvar: Exit Function
     End If
      k = PriveSpace(k).Pleft - 1
 Loop Until k < 0
@@ -176,7 +184,7 @@ k = Hash(HashFunc(Key)) - 1
 If k >= 0 Then
 Do
     If PriveSpace(k).Key = Key Then
-    num = PriveSpace(k).ndx: Find3 = True: index = k: isglobal = PriveSpace(k).globalvar: Exit Function
+    num = PriveSpace(k).ndx: Find3 = True: Index = k: isglobal = PriveSpace(k).globalvar: Exit Function
     End If
      k = PriveSpace(k).Pleft - 1
 Loop Until k < 0
@@ -192,7 +200,7 @@ k = Hash(HashFunc(Key)) - 1
 If k >= 0 Then
 Do
     If PriveSpace(k).Key = Key Then
-    num = PriveSpace(k).ndx: Find = True: index = k: Exit Function
+    num = PriveSpace(k).ndx: Find = True: Index = k: Exit Function
     End If
      k = PriveSpace(k).Pleft - 1
 Loop Until k < 0
@@ -286,7 +294,9 @@ End Function
 Private Function HashFunc(a$)
 HashFunc = HD(a$) Mod hashlen
 End Function
-
+Sub flat()
+Index = -1
+End Sub
 
 
 

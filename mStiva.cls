@@ -16,7 +16,7 @@ Private mstack As New Collection
 Private mMany As Long
 Dim BeginFrom As Long
 ' interface for iteration
-Public index As Long
+Public Index As Long
 ' new idea to not include a VarItem
 ' we place three items, the slot, the type (or subtype), the data.
 ' so each item is a multiple of three
@@ -837,6 +837,7 @@ Dim subgroup As Object, sub2 As Object, myArray As mArray, mySecondArray As mArr
                 mygroup2.highpriorityoper = .highpriorityoper
                 mygroup2.HasUnary = .HasUnary
                 mygroup2.ToDelete = .ToDelete
+                Set mygroup2.mytypes = .mytypes
             End With
             Set myobject2 = mygroup2
 End Sub
@@ -849,8 +850,8 @@ Next i
 End Function
 Property Get Value() As Variant
 Dim aa As VarItem
-If index >= 0 And index < mMany Then
-    Set aa = mstack.item(index + 1)
+If Index >= 0 And Index < mMany Then
+    Set aa = mstack.item(Index + 1)
     If aa.slot = 1 Then
         Set Value = aa.mItem
     Else
@@ -860,8 +861,8 @@ End If
 End Property
 Function IsObj() As Boolean
 Dim aa As VarItem
-If index >= 0 And index < mMany Then
-    Set aa = mstack.item(index + 1)
+If Index >= 0 And Index < mMany Then
+    Set aa = mstack.item(Index + 1)
     If aa.slot = 1 Then
         IsObj = True
     End If
@@ -869,8 +870,8 @@ End If
 End Function
 Function IsEnum(p As Variant) As Boolean
 Dim aa As VarItem, obj As mHandler
-If index >= 0 And index < mMany Then
-    Set aa = mstack.item(index + 1)
+If Index >= 0 And Index < mMany Then
+    Set aa = mstack.item(Index + 1)
     If aa.slot = 1 Then
     If Typename(aa.mItem) = "mHandler" Then
         Set obj = aa.mItem

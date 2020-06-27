@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 12.5 for ver 9.9 rev 32 and newer"
+	Report " A collection of modules for tests version 14 for ver 9.9 rev 33 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -12718,7 +12718,7 @@ MODULE LINKED_LIST2 {
                         Ομάδα πίσω, μπροστά
                         δεδομένο=0
                         Διαγραφή {
-                              Τύπωσε "καταατράφηκε", .δεδομένο
+                              Τύπωσε "καταστράφηκε", .δεδομένο
                         }
                   }
                  επ.πίσω->.[Κανένα]
@@ -20685,7 +20685,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<32 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<33 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -24445,7 +24445,8 @@ Z()=(1,2)
 (M, N)=Z()
 Print M, N
 }
-MODULE CLASS1 {Form 80,50
+MODULE CLASS1 {\\ update with types
+Form 80,50
 \\ counters supposed we provide them from a file
 global LastCustomerId=100, ReportId=80
 \\
@@ -24491,14 +24492,15 @@ class customer as person {
 		}
 		Print "Total Euro:";sum
 	}
-	Module InsertBill (bill) {
+	Module InsertBill (bill as bill) {
 		try {
 			Print "New bill:";bill.key$();" for customer ";.id
 			Append .sales, bill.key$():=bill
 		}
 	}
 Class:
-	Module customer (Where, This) {
+	Module customer (Where, m as person) {
+		this<=m
 		append where, .id:=This
 	}
 }
@@ -24509,7 +24511,7 @@ For This {
 	\\ this is a block for temporary definitions
 	K=Customer(Customers, person("George","Athens","0912399"))
 	K.CustomerData
-	\\ after that box K deleted
+	\\ after that group K deleted
 }
 Pen 15 {Print "Using key to customers to add bills"}
 For Customers(LastCustomerId) {
@@ -24546,7 +24548,7 @@ MODULE JAVALIKE {\\ to bypass a function we can use this
 \\ For modules is very easy because a module get the current stack
 \\ so if we have a member Module alfa {.beta} calling alfa 10,20 is like calling .beta 10, 20 (and all other values the current stack have)
 
-\\ Constructros are modules but called from functionw so they get the function's stack (a new one)
+\\ Constructors are modules but called from functions so they get the function's stack (a new one)
 \\ Also a constructor skip the erasing phase (the function which call the module do this)
 \\ We need this because we can expand the This object.
 
@@ -24594,6 +24596,13 @@ class Rectangle as MoveShape  as Shape {
 private:
     height, width
 public:
+      Module MoveLeftSide (p as *Rectangle) {
+      \\ for same type objects private members are like public
+           for This, p {
+               .super.X<=..super.X+..width
+               .super.Y<=..super.Y
+           }
+      }
     module setDimensions (h,w) {
         .height <= h
         .width <= w
@@ -24638,7 +24647,10 @@ For pr, pc {
 	Print .tostring$()
 	Print ..tostring$()
 }
-
+pr2->rectangle()
+pr2=>SetDimensions 30, 30
+pr2=>MoveLeftSide pr
+Print pr2=>toString$()
 }
 MODULE ΚΛΑΣΗ1 {Κλάση Ζώο {
 Ιδιωτικό:
@@ -24801,6 +24813,7 @@ MODULE PRV_STR {\\ a simple example 2 - class in class in class
 \\ creating classes which return string value
 class delta {
 class:
+private:
 	class beta {
 	Private:
 		class z$ {
@@ -24821,9 +24834,14 @@ class:
 	Public:
 		module doit {
 			print .k$, .m$
+			print .k is type z, .m is type z
+		}
+		Function ExtractTwo {
+			=(.k, .m)
 		}
 	}
 	\\ constructor
+public:
 	module delta {
 		global counter=500
 		b=.beta()
@@ -24834,8 +24852,577 @@ class:
 	}
 }
 z=delta()
-z.doit
-\\List
-\\Modules ?
+print z is type delta
+print z is type beta
+List
+Modules ?
+module check (k as beta) {
+	k.doit
+}
+
+check z
+
+module check2 (&k as beta) {
+	k.doit
+}
+
+(A1, A2)=z.ExtractTwo()
+
+Print A1$, A2$
+Print A1 is type z, A2 is type z
+\\ we make a group to have same type
+Group Trait$ {
+	type:z
+	Value (a as z, b as z) {
+		="two names: "+a.what$+"/"+b.what$
+	}
+}
+Print Trait$(A1, A2)
+\\ now with no type
+Group Trait2 {
+	Function Two$(a as z, b as z) {
+		="two names: "+a.what$+"/"+b.what$
+	}
+}
+A3=A1 with Trait2
+Print A3 is type z
+Print A3.Two$(A1, A2)
+
+
+}
+MODULE GROUPTYPES {\\ from revision 33 version 9.9 we have group types
+Report {First Example
+Theory:
+	Static groups may have a type or not.
+	We can add one or more types by hand, using type: Type1, Type2, ...
+	If a group created by other group automatic add types from that group
+	if a group merged another group  automatic add that types from that group
+	The type list inside group hold uniqe names
+Practice:
+	Call a method passing by reference checking for type. Private variables are available as public when objects have the same type. If two objects have no type then we have no equal types by default.
+	
+}
+Group alfa {
+\\ we can place any number of types
+type: mytype1, mytype2
+private:
+		x=10, y=50
+		L=lambda (k)->k*2+5
+public:
+	module process (&m as mytype1) {
+		m.x++
+		m.y+=m.L(3)
+	}
+	module changeL(fun) {
+		.L<=fun
+	}
+	function toString$ {
+		=format$("x={0} y={1}", .x, .y)
+	}
+	
+}
+beta=alfa
+beta.changeL (lambda->1)
+alfa.process &beta
+Print beta.tostring$()
+
+Report {
+
+Second Example
+
+Theory:
+	A class definition automatic add a type: classname
+	A class can be extended using previously dedined classes
+	When we extent a class we say that as inheritance at source
+	When we merge a group from another we say that as ingeritance at object
+	A class can be in module level, or as group/class member
+	In module level a class is global, until the end of module/function/sub execution, or the statement  For <object> { }, where the definition executed.
+	In a class/group the class definition can be public or private.
+Pracite:
+	We define a class with an inner class and a group defined from inner class, The inner group define operator "="  and when we place a same type group process the operator process the operator using the private variables from the other group (is a copy of the other group). If the type isn't the same return false.
+	We define false as boolean, because in M2000 true is double -1, and false is double 0, but all comparisons return boolean true and false. Any identtifier from M2000 vocabulary can be used localy in variables and modules definitions, except for those identifiers which used for flow control (like If, Repeat, While)
+}
+class delta {
+	class zeta {
+	private:
+		x=10, y=50
+	public:
+		operator "=" {
+			def boolean false
+			read other
+			if other is type zeta then
+				push .x=other.x and .y=other.y
+			else
+				push false
+			end if
+		}
+	}
+	zeta One, Two
+}
+delta=delta()
+Print delta is type delta
+Print delta.One=delta.Two
+Print delta.one=delta
+
+\\third example using pointers and types for group pointers too
+Report {
+
+Third Example
+
+Theory:
+	We can use pointers to groups. there are two kinds of pointers (this is hidden in use, except fron one condition as describe later)
+	A true pointer hold the group alive. When no pointer point to a group the group deleted. We make a group pointer from any no named Group
+	A false pointer hold the weak reference of a named Group (a static object). When the object erased, the false pointer hold the weak reference and nothing happen until we want to use it. Then the weak reference can't resolved to a real reference and we get an error.
+	If Alfa is a group then M->Alfa or M=Pointer(Alfa) get a false pointer.
+	To get a true pointer we use Parenthesis so M->(Alfa) or M=Pointer((A)) make a copy of A (as an unamed group) and the pass an object to it
+	If we have an group in an array say ata A(5) then there we have an unamed group so M->A(5) give a true pointer.
+	We can interchange values to pointers from any kind true or false.
+	A M->0& place a pointer to an empty Group. There isn't a Null value. We can use group.count(M) to check for number of variable/arrays member.
+	
+	A trait: We define a group to add it to a final group, replacing a function, without a type
+	We use final to those methods (modules, functions, operators) which can't changed if further merging happen at source or object ihhertitance.
+	
+Pracrice:
+	We make class prive with private and public members. We make class epsilon as prive extenting with operator, and two functions, plus a constructor and a deconstructor. We start make some pointers from the class. The M3 is an epsilon type with a trait. So M3 has a class of types epsilon and prive, which are inheritance in code  plus a trait (with no type) which is inheritance at object level
+	 We can use the pointers to operate the equal operator. From two functions add5() and sub5() we place pointer checking the type, and return a pointer for a new defined same type object, without calling the constructor because we make it using a copy of current object, and becaue has the same type we can change private variables too.
+}
+class prive {
+private:
+	x, y
+public:
+	function ToString$ {
+		=format$("private data: x={0}, y={1}", .x, .y)
+	}
+}
+class epsilon as prive {
+public:
+	operator final "=" {
+			def boolean false
+			\\ convert other to group if not,  for sure
+			read other as group
+			if other is type epsilon then
+				push .x=other.x and .y=other.y
+			else
+				push false
+			end if
+	}
+	
+	function final add5(other as *epsilon) {
+		\\ we get a pointer from a copy of this
+		\\ because m is in a same type object
+		\\ we have access to private variables
+		m->(this)
+		\\ I add some spaces for clarity
+		m=>x <= other=>x + 5
+		m=>y <= other=>y + 5
+		=m
+	}
+	
+	function final sub5(other as *epsilon) {
+		\\ we get a copy of this
+		m=this
+		\\ I add some spaces for clarity
+		m.x <= other=>x - 5
+		m.y <= other=>y - 5
+		\\ now we make a pointer from a copy of m
+		->(m)
+		\\ this way we make two copies
+		Print "call the remove member for a named group, only using Clear"
+		clear m
+	}
+	
+	remove {
+		print "epsilon removed"
+	}
+class:
+	module epsilon (.x, .y) {
+		print "epsilon created"
+	}
+}
+\\ used as mixin  - we need it as Group, with no type
+Group ReplaceTostring {
+	function ToString$ {
+		=format$("private data: x={0}, y={1} from replaced function", .x, .y)
+	}
+}
+M1->epsilon(10,40)   ' create one
+Print M1=>ToString$()
+M2->epsilon(10, 40) '  2 created until now
+M3->(epsilon(30,40)  with ReplaceToString) ' 3 created until now through constructor.
+Print M3 is type epsilon
+Print M3=>tostring$()
+Print M1=M2, M2=M3
+M4=M3=>add5(M3)  ' 4 created, the 4th without constructor.
+Print M4=>tostring$()
+M5=M4=>sub5(M3)  
+Print M5=>tostring$()
+}
+MODULE TRAVERSAL2 {Report {
+          Tree traversal
+                   1
+                  / \
+                 /   \
+                /     \
+               2       3
+              / \     /
+             4   5   6
+            /       / \
+           7       8   9
+
+} 
+Pen 15 {Report "Using types in class Node"}
+Print
+Module OOP {
+      Class Node {
+      private:
+            \\ Pointer() of Pointer(0) is the Null type pointer
+            x, LeftNode=Pointer(), RightNode=Pointer()
+      Public:
+            Module preorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T)
+                        If T is type Null Then Exit sub
+                        call visitor(T=>x)
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module inorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T)
+                        If T is type Null Then Exit sub
+                        printtree(T=>LeftNode)
+                        call visitor(T=>x)
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module postorder (visitor) {
+                  T->This
+                  printtree(T)
+                  sub printtree(T)
+                        If T is type Null Then Exit sub
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)            
+                        call visitor(T=>x)
+                  end sub
+            }
+            Module level_order (visitor){
+                  M=stack:= Pointer(This)
+                  \\ using M as FIFO
+                  Stack M {
+                        if empty then exit
+                        Read T
+                        if T is type Node Then
+                              call visitor(T=>x)
+                              Data T=>LeftNode, T=>RightNode
+                        end if
+                        Loop
+                  }
+            }
+            remove {
+                   print format$("node {0} destroyed", .x)
+            }
+      Class:
+            Module Node {
+                  Read .x, .LeftNode, .RightNode
+            }
+      }
+      \\ Function NodeTree return a pointer to a new Node
+      Function NodeTree {
+            \\ ![] pass currrent stack to Node()
+            ->Node(![])
+      }
+      \\ Tree is type Node
+
+      Tree=NodeTree(1, NodeTree(2,NodeTree(4, NodeTree(7)), NodeTree(5)), NodeTree(3, NodeTree(6, NodeTree(8), NodeTree(9))))
+ 
+      printnum=lambda (title$) -> {
+            Print
+            Print title$;
+            =lambda (x)-> {
+                  Print x;" ";
+            }
+      }
+      Tree=>preorder printnum("preorder:    ")
+      Tree=>inorder printnum("inorder:     ")
+      Tree=>postorder printnum("postorder:   ")
+      Tree=>level_order printnum("level-order: ")
+      Print
+      Print
+}
+OOP
+
+Pen 15 {Report "Using types and  inheritance: a class Tree as a class Node, which returns a pointer to Tree object"}
+Print
+
+Module OOP {
+      Class Node {
+      private:
+            \\ Pointer() of Pointer(0) is the Null type pointer
+            x, LeftNode=Pointer(), RightNode=Pointer()
+      Public:
+            Module preorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T)
+                        If T is type Null Then Exit sub
+                        call visitor(T=>x)
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module inorder (visitor){
+                  T->This
+                  printtree(T)
+                  sub printtree(T)
+                        If T is type Null Then Exit sub
+                        printtree(T=>LeftNode)
+                        call visitor(T=>x)
+                        printtree(T=>RightNode)
+                  end sub
+            }
+            Module postorder (visitor) {
+                  T->This
+                  printtree(T)
+                  sub printtree(T)
+                        If T is type Null Then Exit sub
+                        printtree(T=>LeftNode)
+                        printtree(T=>RightNode)            
+                        call visitor(T=>x)
+                  end sub
+            }
+            Module level_order (visitor){
+                  M=stack:= Pointer(This)
+                  \\ using M as FIFO
+                  Stack M {
+                        if empty then exit
+                        Read T
+                        if T is type Null Else
+                              call visitor(T=>x)
+                              Data T=>LeftNode, T=>RightNode
+                        end if
+                        Loop
+                  }
+            }
+            remove {
+                   print format$("node {0} destroyed", .x)
+            }
+      }     
+     Class Tree as Node {
+            value (xval) {
+                  .LeftNode<=Pointer()
+                  .RightNode<=Pointer()
+                  Read ? .LeftNode, .RightNode
+                  .x<=xval
+                  ->(This) 
+            }          
+	
+      }
+      \\ now NodeTree is a static group with value which generate other trees.
+      \\ Tree is type Tree 
+      NodeTree=Tree()      
+      Tree=NodeTree(1, NodeTree(2,NodeTree(4, NodeTree(7)), NodeTree(5)), NodeTree(3, NodeTree(6, NodeTree(8), NodeTree(9))))
+
+      printnum=lambda (title$) -> {
+            Print
+            Print title$;
+            =lambda (x)-> {
+                  Print x;" ";
+            }
+      }
+      Tree=>preorder printnum("preorder:    ")
+      Tree=>inorder printnum("inorder:     ")
+      Tree=>postorder printnum("postorder:   ")
+      Tree=>level_order printnum("level-order: ")
+      Print
+      Print
+}
+OOP
+
+Pen 15 {Report "Using types and inner class Node in a class Tree which returns a pointer to Node object"}
+Print
+
+
+Module OOP {
+      Class Tree {
+      Pivate:     
+            Class Node {
+            private:
+                  \\ Pointer() of Pointer(0) is the Null type pointer
+                  x, LeftNode=Pointer(), RightNode=Pointer()
+            Public:
+                  Module preorder (visitor){
+                        T->This
+                        printtree(T)
+                        sub printtree(T)
+                              If T is type Null Then Exit sub
+                              call visitor(T=>x)
+                              printtree(T=>LeftNode)
+                              printtree(T=>RightNode)
+                        end sub
+                  }
+                  Module inorder (visitor){
+                        T->This
+                        printtree(T)
+                        sub printtree(T)
+                              If T is type Null Then Exit sub
+                              printtree(T=>LeftNode)
+                              call visitor(T=>x)
+                              printtree(T=>RightNode)
+                        end sub
+                  }
+                  Module postorder (visitor) {
+                        T->This
+                        printtree(T)
+                        sub printtree(T)
+                              If T is type Null Then Exit sub
+                              printtree(T=>LeftNode)
+                              printtree(T=>RightNode)            
+                              call visitor(T=>x)
+                        end sub
+                  }
+                  Module level_order (visitor){
+                        M=stack:= Pointer(This)
+                        \\ using M as FIFO
+                        Stack M {
+                              if empty then exit
+                              Read T
+                              if T is type Node Then
+                                    call visitor(T=>x)
+                                    Data T=>LeftNode, T=>RightNode
+                              end if
+                              Loop
+                        }
+                  }
+            remove {
+                   print format$("node {0} destroyed", .x)
+            }
+            Class:
+                  Module Node {
+                        Read .x, .LeftNode, .RightNode
+                  }
+            }
+      public:
+            value (xval as double) {
+                  Rem {
+                        LeftNode=Pointer()
+                        RightNode=Pointer()
+                        Read ? LeftNode, RightNode
+                        ->.Node(xval,LeftNode, RightNode)
+                  }
+                  ->.Node(xval,![])
+            }          
+	
+      }
+      \\ now NodeTree is a static group with a private Node class
+      \\ return a pointer to a Node object
+      \\ Tree is type Node
+      NodeTree=Tree()      
+      Tree=NodeTree(1, NodeTree(2,NodeTree(4, NodeTree(7)), NodeTree(5)), NodeTree(3, NodeTree(6, NodeTree(8), NodeTree(9))))
+      
+      printnum=lambda (title$) -> {
+            Print
+            Print title$;
+            =lambda (x)-> {
+                  Print x;" ";
+            }
+      }
+      Tree=>preorder printnum("preorder:    ")
+      Tree=>inorder printnum("inorder:     ")
+      Tree=>postorder printnum("postorder:   ")
+      Tree=>level_order printnum("level-order: ")
+      Print
+      Print
+}
+OOP
+}
+MODULE GRTYPES {module UsingNamedObjects {
+	\\ private members used as public inside a method
+	\\ for any object.
+	class alfa {
+	private:
+		dim a()
+	public:
+		module changethis (&p as alfa) {
+			\\ m is a pointer to array (mArray object)
+			\\ p.a() not work outside an alfa type method
+			m=p.a()
+			\\ pointer to arrays have some operators
+			m+=10
+			Print type$(m)
+		}
+		module PrintMe {
+			\\ we can use .a() or this.a()
+			print this.a()
+		}
+		Remove {
+			Print "alfa type object deleted"
+		}
+	class:
+		module alfa (n) {
+			\\ redim array
+			dim .a(10)=n
+		}
+	}
+	
+	b=alfa(3)
+	c=alfa(6)
+	b.PrintMe
+	c.PrintMe
+	\\ So now we pass pointer c to b.changethis
+	b.changethis &b
+	b.changethis &c
+	b.PrintMe
+	c.PrintMe
+	\\ only manual we can call the remove function for named objects
+	Clear b, c
+}
+UsingNamedObjects
+
+module UsingPointersToObjects {
+	\\ private members used as public inside a method
+	\\ for any object.
+	class alfa {
+	private:
+		dim a()
+	public:
+		module changethis (p as *alfa) {
+			\\ m is a pointer to array (mArray object)
+			\\ p=>a() not work outside an alfa type method
+			m=p=>a()
+			\\ pointer to arrays have some operators
+			m+=10
+			Print type$(m)
+		}
+		module PrintMe {
+			\\ we can use .a() or this.a()
+			print this.a()
+		}
+		Remove {
+			Print "alfa type object deleted"
+		}
+	class:
+		module alfa (n) {
+			\\ redim array
+			dim .a(10)=n
+		}
+	}
+	
+	b->alfa(3)
+	c->alfa(6)
+	b=>PrintMe
+	c=>PrintMe
+	\\ So now we pass pointer c to b.changethis
+	b=>changethis b
+	b=>changethis c
+	b=>PrintMe
+	c=>PrintMe
+	\\ now b and c erased
+	\\ and because no other pointers hold the objects, destroyed.
+	\\ so the remove function call automatic
+}
+UsingPointersToObjects
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}
