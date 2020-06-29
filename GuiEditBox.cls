@@ -1046,22 +1046,26 @@ On Error Resume Next
 
 If LastListIndex <> glistN.ListIndex Then
 
-LastListIndex = glistN.ListIndex: glistN.ShowMe
-
-End If
+LastListIndex = glistN.ListIndex
+If Not tmpshow Then
 If NoCenterLineEdit Then
-If LastListIndex <> glistN.ListIndex Then
-
-LastListIndex = glistN.ListIndex: If Not tmpshow Then glistN.ShowMe
+glistN.ShowMe2
 Else
-If Not tmpshow Then glistN.ShowMe2
-End If
-
-Else
-
-
 glistN.ShowMe
-If Not tmpshow Then glistN.ShowMe2
+End If
+End If
+End If
+Exit Sub
+If NoCenterLineEdit Then
+    If LastListIndex <> glistN.ListIndex Then
+        LastListIndex = glistN.ListIndex:  glistN.ShowMe: If Not tmpshow Then glistN.ShowMe2
+    Else
+        If Not tmpshow Then glistN.ShowMe2
+    End If
+
+Else
+    glistN.ShowMe
+    If Not tmpshow Then glistN.ShowMe2
 End If
 
 End Sub

@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 14 for ver 9.9 rev 33 and newer"
+	Report " A collection of modules for tests version 15 for ver 9.9 rev 33 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -24544,7 +24544,7 @@ MODULE JAVALIKE {\\ to bypass a function we can use this
 \\ [] is the current stack and when we read it, we get a pointer and leave an empty stack as current stack
 \\ so anything we pass to alfa() passed to .beta(), the dot is This, so to This.Beta()
 
-\\ here we use toString$() to call super.toString$() without parameteres
+\\ here we use toString$() to call super.toString$() without parameters
 \\ For modules is very easy because a module get the current stack
 \\ so if we have a member Module alfa {.beta} calling alfa 10,20 is like calling .beta 10, 20 (and all other values the current stack have)
 
@@ -25247,7 +25247,7 @@ Print
 
 Module OOP {
       Class Tree {
-      Pivate:     
+      Private:     
             Class Node {
             private:
                   \\ Pointer() of Pointer(0) is the Null type pointer
@@ -25424,5 +25424,347 @@ module UsingPointersToObjects {
 	\\ so the remove function call automatic
 }
 UsingPointersToObjects
+}
+MODULE FIRSTWINDOW {Title "Example#1"
+Pen 14
+Cls 5,0
+Thread.plan concurrent
+Function Dec3$ { =Str$(Number/1000,"####0.000")}
+Function Dec$ { =Str$(Number,"####0.000")}
+Declare Form1 Form
+Method Form1, "FontAttr", "Tahoma", 48
+Method Form1, "CtrlFontAttr", "Tahoma", 24
+Layer Form1 {
+      Window 14, 12000,8000
+      Font "Verdana"
+      Print $(4,8) \ Proportional and  8 char width for columns
+}
+Declare Text1 TextBox Form Form1
+Method Text1,"move", 3000, 2000, 8000, 900
+With Text1, "Prompt", "Name: ", "MaxCharLength", 30+6
+
+Declare Spinner TextBox Form Form1
+Def Alone as boolean
+\\\ spinner values: ShowBar, MinValue , MaxValue , LargeValue.
+\\Range include MinValue and MaxValue
+\\ So we have integers (sign long) but we can display it like a float
+
+Method Spinner "Spinner", True, 0,2000,30
+Method Spinner "Move", 3000, 3000, 8000, 900
+With Spinner, "Prompt", "A_Value: ",  "Value" as Spi, "VarText" as  Feed$, "ThisKind"," units"
+\\ Spinner is a textbox with some advanced performance
+\\ We use ValidString to check every new value
+\\ we use SpinnerValue to format the value
+\\ Inside ValidString we use "Value" as Spi, to cut off higher or lower values.
+
+Function Spinner.SpinnerValue {
+            Read val
+            Feed$=Dec3$(val)
+            }
+
+Function Spinner.ValidString {
+            \\ this function called direct from textbox
+            Read  New &this$, &thispos
+            Local Alfa
+            Try {     
+                  \\ Spi is an alias for Value property      
+                Alfa=val(this$)*1000 : Spi= Alfa :  Alfa=Spi
+            }
+            if valid(Alfa) then {
+                  this$=dec3$(Alfa)
+            } else {
+                  thispos=1000
+      }
+}
+Feed$=Dec$(1.34)
+
+Declare CheckBox1 CheckBox Form Form1
+Method CheckBox1 "Move", 3000, 4000, 8000, 900
+With CheckBox1,"Caption", "Check This Please", "Checked" as CheckGet, "CheckReset" as CheckPut
+CheckPut=True
+
+
+Declare Button1 Button Form Form1
+Method Button1 "Move", 3000, 5000, 8000, 900
+With Button1,"Caption", "Reset CheckButton"
+
+Function Button1.Click {
+      CheckPut= Not CheckGet
+      \\ No Event Fired, so we make here the change
+      If CheckGet Then {
+            With Button1,"Caption", "Reset CheckButton"
+      } Else {
+            With Button1,"Caption", "Set CheckButton"
+      }
+}
+
+Function CheckBox1.Changed {
+      Read Val
+      Layer Form1 {Print "CheckBox Value ";Val}
+      If Val Then {
+            With Button1,"Caption", "Reset CheckButton"
+      } Else {
+            With Button1,"Caption", "Set CheckButton"
+      }
+}
+Function CheckBox1.Click {
+      Read Val
+      Layer Form1 {Print "CheckBox Value ";Val}    
+}
+
+With Form1, "Title", "First Window", "visible" as visible
+Method Form1,"Show"
+Layer Form1 {
+      Cls 1,0
+      Scroll Split 2  \\ scroll from 3rd line - same as Cls ,2
+      Cursor 0, Height/2-1  
+      Report 2, "Hello World"
+}
+
+With Text1, "VarText" as VarText$
+Thread {
+      Static work  \\ we use it for trash bin
+      if alone then continue
+           if not empty then work=ask(letter$,"Four Controls in M2000") : Flush \\ stack is empty now
+
+} as worker interval 100
+Function Text1.Click {
+      Layer Form1 {Print "click" }
+}
+Function Text1.Enter {
+      Layer Form1 {Print VarText$ }
+}
+Function Spinner.Enter {
+      Layer Form1 {Pen 15 {Print Val(Feed$)}}
+}
+Function Form1.Click {
+      \\ we can push values to Thread Stack for Values
+      \\ Data push at bottom, Push push at top
+      \\ always we pop from top we Read Variables or
+      \\ immediate with Number/Letter$
+      Document Doc$={Hello There 
+      }
+      Doc$="This is your name "+VarText$+{
+      }
+      Doc$="This is a value "+Feed$+{
+      }
+      Doc$="The CheckBox is "+Str$(CheckGet,{;"Checked";"No Checked";})+{
+      }
+      Thread worker Execute Data Doc$
+      Clear Doc$
+}
+
+\\ some nice background tasks
+kk=0
+Thread {      
+      kk++
+      layer  {
+            layer  Form1 {
+                  print kk
+                  part {
+                      refresh 
+                  } as alone
+            }
+            Draw To Random(Scale.x), Random(Scale.y), Random(7,15)
+      }
+} As Print2Form Interval 50
+
+\\  main loop
+Main.Task 50 {
+       if not visible then exit
+}
+Threads Erase
+Thread.plan sequential
+Declare Form1 Nothing
+}
+MODULE POLYGONS {module drawPolygon {
+      read n, d
+      s=d*3
+      d4=d/4
+      for i=1 to n {
+            width 4 {      
+                  draw angle i*pi/(n/2), s/n
+            }
+      }
+      step -d4, -d4
+      floodfill ,,5
+      step d4, d4
+      step d
+}
+module clearScreen {
+window 12, 14000,10000;
+cursor 0,0
+gradient 6,1
+double
+path  {
+      report 2 , "POLYGON EXAMPLE"
+};    
+normal
+gradient 4,13,0
+\* RESET THE path
+move 0,0
+path {
+      polygon 0, x.twips, 0,0,y.twips,-x.twips,0,0,-y.twips
+};
+cursor 0,0
+double
+width 2 {
+color  {
+      report 2 , "POLYGON EXAMPLE"
+}
+}
+normal
+}
+clearScreen
+show
+s=scale.x/sqrt(87.6)
+top=scale.y/sqrt(8.2)
+move s, top
+for i = 3 to 11 {
+      drawPolygon i, s
+}
+move s, top+s
+for i = 12 to 19 {
+      drawPolygon i, s
+}
+move s, top+2*s
+for i = 19 to 12 {
+      drawPolygon i, s
+}
+move s, top+3*s
+for i = 11 to 3 {
+      drawPolygon i, s
+}
+copy "this.bmp"    'export to bmp
+A$=KEY$ ' Wait for a keypress
+if module(info) then info
+}
+MODULE GRAPHGR {οθόνη 1,0   \\ μπλε χρώμα, χωρίς χωριστή οθόνη
+κ=0
+ανανέωση 50
+\\ κάνουμε την αυτόματη ανανέωση πιο αργή, ανά 5 δευτερόλεπτα
+πάχος 1, 3 {  \\ αξονική γραμμή - μόνο για πάχος 1
+      θέση  χ.σημεία, υ.σημεία/2
+      χάραξε -χ.σημεία
+      θέση  χ.σημεία/2, υ.σημεία
+      χάραξε , -υ.σημεία
+      }
+για ν=3 έως 63 {
+      α=ν/2/πι
+      β=χ.σημεία/3/ν+ν*10
+      \\ απόλυτη θέση
+      θέση  χ.σημεία/2, υ.σημεία/2
+      κ+=πι/10
+      λ=1
+      για ι=1 έως ν {
+           πάχος λ {
+                 \\ πολικές συντεταγμένες: απόλυτη γωνία σε ακτίνια, σχετική απόσταση
+                 \\ η χάραξε  έχει τρεις μορφές
+                 \\ χάραξε γωνία  απόλυτη_γωνία,  απόσταση  [, χρώμα]
+                 \\ χάραξε απόσταση_κατά_χ [, απόσταση_κατά_ψ [, χρώμα]]
+                 \\ χάραξε έως απόλυτη_θέση_χ, απόλυτη_θέση_ψ [, χρώμα]
+                  χάραξε γωνία ι/α+Κ, β, χρώμα(255*ν/24, 255*ι/ν, 255-255*ι/ν)
+            }
+            λ=3-λ
+      }
+}
+\\ τώρα επαναφέρουμε την αυτόματη ανανέωση ανά 0.025 δευτερόλεπτα
+ανανέωση 25
+}
+MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
+Ομαλά Ναι
+ζβ=πι/32 \\ αν βάλουμε 48 κάνει πιο ωραία καμπύλη
+ζβ1=ζβ/2 \\ αν βάλουμε αντί για 2 μεγαλύτερο θα δούμε άλλα σχέδια
+ζ=πι+ζβ*8
+ζ1=ζβ1*16
+\\ στο μέσον!
+κχ=χ.σημεια/2
+κυ=υ.σημεια/2
+μκ=Μικρό.Σειράς(χ.σημεια, υ.σημεια)*.3
+ανανεωση 2000 \\ για να μην εμφανίσει αλλαγές της οθόνης, εκτός αν θέλουμε!
+διπλα
+φοντο 1,5
+δρομεας 0,0
+αναφορα 2,"Παράδειγμα Χρήσης Γραφικών με τη Μ2000"
+κανονικα
+γ(μκ,κχ,κυ,πι/4)
+μκ2=μκ δια 2
+Άδειασε  ' αδειάζει το σωρό
+κκ=ψευδες
+κρατησε   \\ σώνουμε προσωρινά την εικόνα
+πάχος 3 { \\ βάζουμε πάχος στις γραμμές μας
+      καθε 10 {
+            αφησε  \\ αντί να σβήσουμε βάζουμε ότι έχουμε σταθερό
+            θεση κχ, κυ
+            βήμα γωνια (πι/2+πι/4)+ζ,μκ2 \\ η θέση του εσωτερικού κύκλου
+            κ(μκ2,θέση.χ, θέση.υ, -ζ1, &κκ) \\ την πρώτη φορά απλά παίρνει τα σημεία
+            \\ η κ κάθε άλλη φορά θα σώνει την οθόνη χωρίς τον εσωτερικό κύκλο
+            δ(μκ2,θέση.χ,θέση.υ,-ζ1, 1) \\ τυπώνει το κύκλο
+            \\ με την ανανέωση εμφανίζουμε τις αλλαγές 
+            ανανεωση 2000
+            αν ενκομ$<>"" η δείκτης τοτε εξοδος
+            ζ+=ζβ
+           αν κκ τότε{ αν ζ>4*πι τότε κκ=ψευδής} αλλιώς άδειασε
+            ζ1+=ζβ1*2
+      }
+}
+Αδειασε
+Θέσε Γρήγορα
+Ρουτίνα δ(α, Χ, Ψ, ζ, τρικ)
+      παχος 2,3 {
+            \\ άξονες  -- ενώ απ' έξω έχουμε αλλάξει το πάχος σε 2
+            βημα γωνια ζ+πι/4, -α
+            κυκλος α/16
+            βημα γωνια ζ+πι/4, -α 
+            κυκλος α/16
+            χαραξε γωνια ζ+πι/4 , α*3
+            κυκλος α/16 
+            χαραξε γωνια ζ+πι/4 , α
+            κυκλος α/16 
+            θεση Χ, Ψ
+            βημα γωνια ζ-πι/4,-α*2
+            κυκλος α/16
+            χαραξε γωνια ζ-πι/4,α*4
+            κυκλος α/16
+      }
+      θεση Χ, Ψ
+      κυκλος α
+Τέλος Ρουτίνας
+Ρουτίνα κ(α, Χ, Ψ, ζ, &σχεδιασε)
+      θεση Χ, Ψ
+      βημα γωνια ζ+πι/4, -α*2
+      Σειρά θέση.χ, θεση.υ
+      βημα γωνια ζ+πι/4 , α*4
+      Σειρά θέση.χ, θεση.υ
+      θεση Χ, Ψ
+      βημα γωνια ζ-πι/4,-α*2
+      Σειρά θέση.χ, θεση.υ
+      βημα γωνια ζ-πι/4,α*4
+      Σειρά θέση.χ, θεση.υ
+      Αν σχεδίασε τοτε
+            Για ι=1 εως 4
+                  θεση αριθμός, αριθμός
+                  πάνω 8,2   ' δυο φορές το Πάνω 8
+                  χαραξε εως αριθμός, αριθμός, ι+8
+            Επόμενο
+            κράτησε \\ σωνει την οθόνη
+      Τέλος Αν
+      σχεδιασε=αληθης 
+      θεση Χ,Ψ
+Τέλος Ρουτίνας
+Ρουτίνα Γ(α, Χ, Ψ, ζ)
+      θεση Χ, Ψ
+      πάχος 2 {
+            κυκλος α
+            κυκλος α/2,1,7 
+            παχος 1,3 {
+                  βημα γωνια ζ+πι/4, -α*1.05
+                  χαραξε γωνια ζ+πι/4 , α*2.1
+                  θεση Χ, Ψ
+                  βημα γωνια ζ-πι/4,-α*1.05
+                  χαραξε γωνια ζ-πι/4,α*2.1
+            }
+      }
+Τέλος Ρουτίνας
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}
