@@ -60,6 +60,7 @@ End Function
 Private Function TypeGroupNow(RHS) As Boolean
     On Error Resume Next
     TypeGroupNow = Len(mytypes(RHS))
+    Err.clear
 End Function
 Sub mergeTypes(RHS As Collection)
 Dim extypes As Collection, k

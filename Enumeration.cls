@@ -19,7 +19,7 @@ Private Type item
     iValue As Variant
 End Type
 Public Done As Boolean
-Public index As Long
+Public Index As Long
 Private PriveSpace() As item
 Dim MaxSpace As Long
 Dim toplim As Long
@@ -30,10 +30,10 @@ Private Sub Class_Initialize()
 End Sub
 Property Get Value() As Variant
 Done = False
-If index = -1 Then
+If Index = -1 Then
 Else
     Done = True
-    Value = PriveSpace(index).iValue
+    Value = PriveSpace(Index).iValue
     
 End If
 End Property
@@ -62,7 +62,7 @@ Dim a As Long
 a = Malloc()
 With PriveSpace(a)
     .Key = Key
-    .KeyUCase = myUcase(Key)
+    .KeyUCase = myUcase(Key, True)
     .iValue = nValue
 End With
 End Sub
@@ -115,7 +115,7 @@ End If
 Set SearchValue = New mHandler
 End Function
 Public Property Get KeyToString() As Variant
-    If index <> -1 Then KeyToString = PriveSpace(index).Key
+    If Index <> -1 Then KeyToString = PriveSpace(Index).Key
 End Property
 
 Private Sub Class_Terminate()

@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 34
+Global Const Revision = 35
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -25572,7 +25572,12 @@ againgroup:
                     End If
                     Set var(v).objref = myobject
                     Set stripstack1.lastobj = Nothing
-                  
+                    ElseIf TypeOf myobject Is mHandler Then
+                    Set useHandler = myobject
+                    If CheckDeepAny(myobject) Then
+                    Set var(v) = myobject
+                    Set stripstack1.lastobj = Nothing
+                    End If
                     End If
                 End If
             ElseIf VarType(var(v)) = vbLong Then
@@ -25875,26 +25880,27 @@ End If
     If neoGetArray(stripstack1, w$, pppp, , glob) Then
         If Not NeoGetArrayItem(pppp, stripstack1, w$, v, rest$) Then ExecuteGroupStruct = 0:  Exit Function
         On Error Resume Next
-        
+jumphere:
         If Not FastSymbol(rest$, "=", True) Then
+        SyntaxError
+           ExecuteGroupStruct = 0: Exit Function
         End If
-        If Not IsExp(stripstack1, rest$, p) Then
-            If LastErNum <> -2 Then MissNumExpr
+        Set myobject = Nothing
+        If pppp.Arr Then
+        If getData(stripstack1, rest$, myobject) Then
+            FeedArray pppp, v, myobject
+        Else
             ExecuteGroupStruct = 0: Exit Function
         End If
-        If pppp.Arr Then
-            pppp.item(v) = p
-            Do While FastSymbol(rest$, ",")
-                    If pppp.UpperMonoLimit > v Then
-                        v = v + 1
-                        If Not IsExp(stripstack1, rest$, p) Then ExecuteGroupStruct = 0:   Exit Function
-                        pppp.item(v) = p
-                    Else
-                        Exit Do
-                    End If
-            Loop
         Else
-            pppp.GroupRef.Value = p
+          ' Why
+          ' If Not IsExp(stripstack1, rest$, p) Then
+          '      If LastErNum <> -2 Then MissNumExpr
+          '      ExecuteGroupStruct = 0: Exit Function
+          '  End If
+           ' pppp.GroupRef.Value = p
+           SyntaxError
+           ExecuteGroupStruct = 0: Exit Function
         End If
         lcl = False
     Else
@@ -25910,74 +25916,8 @@ GoTo contVar
 End If
 If neoGetArray(stripstack1, w$, pppp, , glob) Then
 If Not NeoGetArrayItem(pppp, stripstack1, w$, v, rest$) Then ExecuteGroupStruct = 0:   Exit Function
-On Error Resume Next
-
-If Not FastSymbol(rest$, "=") Then
-  If FastSymbol(rest$, ":=", , 2) Then
-    ss$ = Left$(aheadstatus(rest$), 1)
-        If ss$ = "S" Then
-        If Not IsStrExp(stripstack1, rest$, ss$) Then ExecuteGroupStruct = 0:      Exit Function
-        Else
-        If Not IsExp(stripstack1, rest$, p) Then ExecuteGroupStruct = 0:    Exit Function
-        ss$ = Trim$(Str$(p))
-        End If
-             If Not MyIsObject(pppp.item(v)) Then
-          pppp.item(v) = ss$
-          Else
-        CheckVar pppp.item(v), ss$
-        
-        End If
-        Do While FastSymbol(rest$, ",")
-        If pppp.UpperMonoLimit > v Then
-        v = v + 1
-          ss$ = Left$(aheadstatus(rest$), 1)
-                        If ss$ = "S" Then
-        If Not IsStrExp(stripstack1, rest$, ss$) Then ExecuteGroupStruct = 0:     Exit Function
-        Else
-        If Not IsExp(stripstack1, rest$, p) Then ExecuteGroupStruct = 0:   Exit Function
-        ss$ = Trim$(Str$(p))
-        End If
-        
-                If Not MyIsObject(pppp.item(v)) Then
-                  pppp.item(v) = ss$
-                  Else
-                CheckVar pppp.item(v), ss$
-                
-                End If
-        Else
-        Exit Do
-        End If
-        Loop
-   lcl = False
-    Else
-        ExecuteGroupStruct = 0:   Exit Function
-    End If
-Else
-If Not IsStrExp(stripstack1, rest$, ss$) Then
-     ExecuteGroupStruct = 0:   Exit Function
-     End If
-    If Not MyIsObject(pppp.item(v)) Then
-        pppp.item(v) = ss$
-    Else
-        CheckVar pppp.item(v), ss$
-    End If
-        Do While FastSymbol(rest$, ",")
-        If pppp.UpperMonoLimit > v Then
-        v = v + 1
-        If Not IsStrExp(stripstack1, rest$, ss$) Then ExecuteGroupStruct = 0:   Exit Function
-        
-        If Not MyIsObject(pppp.item(v)) Then
-          pppp.item(v) = ss$
-          Else
-        CheckVar pppp.item(v), ss$
-        
-        End If
-        Else
-        Exit Do
-        End If
-        Loop
-        lcl = False
-End If
+    On Error Resume Next
+    GoTo jumphere
 Else
 ExecuteGroupStruct = 0:   Exit Function
 End If
@@ -35248,11 +35188,6 @@ contcallhere:
                     bs.fHere = Left$(ss$, rinstr(ss$, ".") - 1)
                     s$ = here$
                     here$ = bs.fHere
-                   ' If Len(here$) > 0 Then
-                   ' i = iRVAL22(here$)
-                   ' bs.UseGroupname = sbf(i).sbgroup
-                   ' bs.tpointer = sbf(i).tpointer
-                   ' End If
                     bs.Look2Parent = False
                     PushStage basestack, False
                     bs.SetSkip
@@ -36813,14 +36748,23 @@ itisinumber:
                     End If
                 Else
 there182741:
-If TypeOf var(i) Is Constant Then
-                CantAssignValue
-Else
-                    GoTo er104
+                    If TypeOf var(i) Is Constant Then
+                                    CantAssignValue
+                                    Exit Function
+                    ElseIf TypeOf var(i) Is mHandler Then
+                        If var(i).t1 <> 4 Then GoTo er104
+                        Set useHandler = var(i)
+                        Set myobject = useHandler.objref.SearchValue(p, ok)
+                        If ok Then
+                            Set var(i) = myobject
+                        Else
+                            GoTo er112
+                        End If
+                    Else
+                        GoTo er104
                     End If
-                    Exit Function
+
                 End If
-      
         Else
             If checktype Then
             If ihavetype Then
@@ -37565,7 +37509,12 @@ conter00:
                         Exit Do
                     Else
                         sbf(bstack.IndexSub).sbgroup = s$
-                        sbf(bstack.IndexSub).tpointer = bstack.tpointer
+                        i = Len(s$)
+                        If i > 0 Then
+                            If varhash.Find(Left$(s$, i - 1), i) Then sbf(bstack.IndexSub).tpointer = i
+                        Else
+                            sbf(bstack.IndexSub).tpointer = 0
+                        End If
                     End If
                     here$ = ss$
                 Else
@@ -37574,7 +37523,12 @@ conter00:
                         Exit Do
                     Else
                         sbf(bstack.IndexSub).sbgroup = s$
-                        sbf(bstack.IndexSub).tpointer = bstack.tpointer
+                        i = Len(s$)
+                        If i > 0 Then
+                            If varhash.Find(Left$(s$, i - 1), i) Then sbf(bstack.IndexSub).tpointer = i
+                        Else
+                            sbf(bstack.IndexSub).tpointer = 0
+                        End If
                     End If
                 End If
                 MyRead = True
@@ -37781,9 +37735,12 @@ contread123:
                     ' no second time
                     If Not myobject Is Nothing Then
                     If TypeOf myobject Is mHandler Then
+                        
                         Set useHandler = myobject
-                        If useHandler.t1 = 1 Then
                         s$ = myUcase(s$)
+                        If useHandler.t1 = 1 Then
+                        ff = 0
+                        
                         If Not Fast2Varl(s$, " ¡‘¡”‘¡”«", 9, "INVENTORY", 9, 9, ff) Then
                         If useHandler.objref.IsQueue Then
                             If Not Fast2Varl(s$, "œ’—¡", 4, "QUEUE", 5, 5, ff) Then GoTo er103
@@ -37791,6 +37748,17 @@ contread123:
                             If Not Fast2Varl(s$, "À…”‘¡", 5, "LIST", 4, 5, ff) Then GoTo er103
                         End If
                         End If
+                        ElseIf useHandler.t1 = 3 Then
+                        ff = 0
+                        If Fast2Varl(s$, "–…Õ¡ ¡”", 7, "ARRAY", 5, 7, ff) Then
+                            If Not CheckIsmArray(myobject) Then GoTo er103
+                        ElseIf Fast2Varl(s$, "”Ÿ—œ”", 5, "STACK", 5, 5, ff) Then
+                            If Not CheckIsmStiva(myobject) Then GoTo er103
+                        Else
+                            GoTo er103
+                        End If
+                        Else
+                        GoTo er103
                         End If
                     End If
                     End If
@@ -37802,8 +37770,13 @@ contread123:
                     Set var(i) = New mHandler
                     var(i).t1 = 3
                    Set var(i).objref = myobject
-                    'Set pppp = Nothing
+                    If Fast2VarNoTrim(rest$, "Ÿ”", 2, "AS", 2, 3, ff) Then
+                   
+                    If Not Fast2Varl(rest$, "–…Õ¡ ¡”", 7, "ARRAY", 5, 7, ff) Then GoTo er103
+
+                    End If
                     Set myobject = Nothing
+                    
                 ElseIf MyIsNumeric(var(i)) Then
                 If Not myobject Is Nothing Then
                 If TypeOf myobject Is Group Then
@@ -37822,6 +37795,7 @@ contread123:
                     GoTo er103
                     End If
                     Exit Function
+                    
                 End If
 cont10101:
         Else
@@ -37911,10 +37885,25 @@ errgr:
                     GoTo contpointer
                     ElseIf Not Fast2Varl(rest$, "œÃ¡ƒ¡", 5, "GROUP", 5, 5, ff) Then
                         If FastSymbol(rest$, "*") Then
-                            If FastPureLabel(rest$, s$, , , True) <> 1 Then GoTo errgr
+                               If FastPureLabel(rest$, s$, , True) <> 1 Then SyntaxError: MyRead = False: Exit Function
+                                If Not myobject.IamApointer Then GoTo errgr
+                                If myobject.link.IamFloatGroup Then
+                                    If Not myobject.link.TypeGroup(s$) Then GoTo errgr
+                                Else
+                                    If Len(myobject.lasthere) = 0 Then
+                                    If GetVar(bstack, myobject.GroupName, it, True) Then
+                                        If Not myobject.TypeGroup(s$) Then GoTo errgr
+                                    End If
+                                    Else
+                                        If GetVar(bstack, myobject.lasthere + "." + myobject.GroupName, it, True) Then
+                                            If Not myobject.TypeGroup(s$) Then GoTo errgr
+                                        End If
+                                    End If
+                                    it = 0
+                                End If
                             GoTo contpointer
                         ElseIf myobject.IamApointer Then
-                            If FastPureLabel(rest$, s$, , , True) = 1 Then
+                            If FastPureLabel(rest$, s$, , True) = 1 Then
                                 If myobject.link.IamFloatGroup Then
                                     If Not myobject.link.TypeGroup(s$) Then GoTo errgr
                                     GoTo oop0
@@ -38047,44 +38036,44 @@ contpointer:
                             Exit Function
                     End If
                 ElseIf myobject.t1 = 3 Then
-                    If Not Fast2Varl(rest$, "–…Õ¡ ¡”", 7, "ARRAY", 5, 7, ff) Then
-                    If Not Fast2Varl(rest$, "”Ÿ—œ”", 5, "STACK", 5, 5, ff) Then
-                    If Typename(myobject.objref) = "mHandler" Then
+                    If Fast2Varl(rest$, "–…Õ¡ ¡”", 7, "ARRAY", 5, 7, ff) Then
+                        If Not CheckIsmArray(myobject) Then GoTo er103
+                    ElseIf Fast2Varl(rest$, "”Ÿ—œ”", 5, "STACK", 5, 5, ff) Then
+                        If Not CheckIsmStiva(myobject) Then GoTo er103
+                    ElseIf Typename(myobject.objref) = "mHandler" Then
                     
-                    If myobject.objref.t1 = 4 Then
-                    If FastType(rest$, myobject.objref.objref.EnumName) Then
-                    Set useHandler = New mHandler
-                    useHandler.t1 = 4
-                    
-                    
-                    Set myobject = myobject.objref.objref
-                    useHandler.index_cursor = myobject.Value
-                    Set useHandler.objref = myobject
-                    useHandler.index_start = myobject.Index
-                     
-                    
-                    useHandler.sign = 1
-                    Set myobject = useHandler
-                    GoTo t14
-                    
-                    End If
-                    End If
-                   End If
-
-                            WrongObject
-                            MyRead = False
-                            Exit Function
+                        If myobject.objref.t1 = 4 Then
+                            If FastType(rest$, myobject.objref.objref.EnumName) Then
+                                Set useHandler = New mHandler
+                                useHandler.t1 = 4
+                                
+                                
+                                Set myobject = myobject.objref.objref
+                                useHandler.index_cursor = myobject.Value
+                                Set useHandler.objref = myobject
+                                useHandler.index_start = myobject.Index
+                                 
+                                
+                                useHandler.sign = 1
+                                Set myobject = useHandler
+                                GoTo t14
                             End If
-                    
+                         End If
+                   Else
+                        WrongObject
+                        MyRead = False
+                        Exit Function
                     End If
                     
                 ElseIf myobject.t1 = 4 Then
-                    If Not FastType(rest$, myobject.objref.EnumName) Then
-                    
-                        p = myobject.index_cursor
-                        Set myobject = Nothing
-                        GoTo conthereEnum
-                    ElseIf FastSymbol(rest$, "=") Then
+                    If FastPureLabel(rest$, s$, , True) = 1 Then
+                    If Not s$ = myUcase(myobject.objref.EnumName, True) Then
+                        GoTo er112
+                    End If
+                    Else
+                        GoTo er112
+                    End If
+                    If FastSymbol(rest$, "=") Then
                     ' drop type
                     If FastPureLabel(rest$, s$, , , True) <> 1 Then
                         MyRead = False
@@ -38175,14 +38164,13 @@ conthereEnum:
                         p = X
                         Set myobject = myobject.objref.SearchValue(p, ok)
                         If ok Then
-                            Set var(i) = myobject
+                            Set p = myobject
                             
-                            Set myobject = Nothing
-                            GoTo loopcont123
+                            ' GoTo loopcont123
                         Else
-                          ExpectedEnumType
-                          MyRead = False
-                          Exit Function
+                            ExpectedEnumType
+                            MyRead = False
+                            Exit Function
                         End If
                     
                     End If
@@ -38221,6 +38209,16 @@ messnotype:
 there18274:
 If TypeOf var(i) Is Constant Then
                 CantAssignValue
+ElseIf TypeOf var(i) Is mHandler Then
+                        If var(i).t1 <> 4 Then GoTo er104
+                        Set useHandler = var(i)
+                        Set myobject = useHandler.objref.SearchValue(p, ok)
+                        If ok Then
+                            Set var(i) = myobject
+                            GoTo cont112233
+                        Else
+                            GoTo er112
+                        End If
 Else
                     GoTo er104
                     End If
@@ -38261,6 +38259,7 @@ Else
         Else
                 globalvar what$, p
         End If
+cont112233:
     p = 0#
     ElseIf bs.IsOptional Then
         MyRead = True
@@ -39053,6 +39052,10 @@ er110:
 er111:
             MyEr "Missing String literal", "ƒÂÌ ‚ÒﬁÍ· ÛÙ·ËÂÒﬁ ·Îˆ·ÒÈËÏÁÙÈÍﬁ"
             MyRead = False
+er112:
+            MyEr "Wrong Enumeration type", "À‹ËÔÚ Ù˝ÔÚ ··ÒÈËÏÁÙﬁ"
+            MyRead = False
+            Exit Function
 End Function
 Function AssignTypeNumeric(v, i As Long) As Boolean
 If VarType(v) = i Then AssignTypeNumeric = True: Exit Function
@@ -56347,6 +56350,32 @@ If TypeOf obj Is mHandler Then
 End If
 If Not obj Is Nothing Then
 If TypeOf obj Is mArray Then If obj.Arr Then CheckIsmArray = True: Set oldobj = Nothing: Exit Function
+End If
+Set obj = oldobj
+End Function
+Public Function CheckIsmStiva(obj As Object) As Boolean
+Dim oldobj As Object
+If obj Is Nothing Then Exit Function
+Set oldobj = obj
+
+Dim kk As Long
+again:
+If kk > 20 Then Set obj = oldobj: Exit Function
+If TypeOf obj Is mHandler Then
+    If obj.t1 = 3 Then
+        If obj.indirect >= 0 And obj.indirect <= var2used Then
+                Set obj = var(obj.indirect)
+                kk = kk + 1
+                GoTo again
+        Else
+                Set obj = obj.objref
+        End If
+
+    End If
+    
+End If
+If Not obj Is Nothing Then
+If TypeOf obj Is mStiva Then CheckIsmStiva = True: Set oldobj = Nothing: Exit Function
 End If
 Set obj = oldobj
 End Function

@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 34 active-X
-A smal fix in EditBox (from M2000 GUI system)
-There are some new modules in info file using the new additions
+Version 9.9 revision 35 active-X
+A bug removed for functions members of groups when passed by reference. The bug start exist from the last3 or 4 revisions.
+A new module BOOK4 show the fix. Exist in updated info file. See instructions bellow.
 
 
 George Karras, Kallithea Attikis, Greece.
@@ -14,8 +14,6 @@ dir appdir$
 load info
 then press F1 to save info.gsb to M2000 user directory
 
-
-To use Help (an mdb database) you need Access 2007 runtime.
 
 From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate (optional)

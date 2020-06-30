@@ -5399,7 +5399,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 15 for ver 9.9 rev 33 and newer"
+	Report " A collection of modules for tests version 16 for ver 9.9 rev 33 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -17162,6 +17162,55 @@ SecondbookDB=bookDB()
       PointerA=>ProcessPaperbackBooks &PrintTitle
 \\ PointerA is not a real pointer. Is a weak pointer to a non float group.
 }
+MODULE BOOK4 {\\ we pass a group function by reference
+class booktype {
+      local countme=0
+      dim t$(), a$(), p(), pb()
+      module AddBook {
+                  newdim =.countme+1
+                  dim .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
+                  read .t$(.countme), .a$(.countme), .p(.countme), .pb(.countme)
+                  .countme++
+      }
+      module ProcessPaperbackBooks {
+            read &AnyFunction()
+            if .countme<1 then exit
+            for i=0 to .countme-1 {  
+                  if .pb(i) then call  AnyFunction(&this, i) 
+            }
+      }
+}
+function PrintTitle {
+      read &AnyBook, i : Report format$("    {0}", AnyBook.t$(i) )
+}
+class PriceTotaller {
+      local items, total
+      function processBook { read &AnyBook, i : for this {.items++ : for Anybook {.total+=..p(i)  } }}
+      module zero { .total<=0 : .items<=0 }  
+      function  AveragePrice { if .items>0 then =.total/.items }
+}
+bookDB=booktype()
+PriceTotaller1=PriceTotaller()
+report "First Book DB"
+for bookDB {
+      .AddBook"The C Programming Language",  "Brian W. Kernighan and Dennis M. Ritchie", 19.95, true
+      .AddBook"The Unicode Standard 2.0",  "The Unicode Consortium", 39.95, true
+      .AddBook"The MS-DOS Encyclopedia", "Ray Duncan", 129.95, false
+      .AddBook"Dogbert's Clues for the Clueless", "Scott Adams", 12.00, true
+      .ProcessPaperbackBooks &PriceTotaller1.processBook()
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller1.AveragePrice(),"#.##")
+      .ProcessPaperbackBooks &PrintTitle()
+}
+report "Second Book DB"   
+PriceTotaller2=PriceTotaller()
+SecondbookDB=booktype()
+for SecondbookDB {
+      .AddBook "Any Big Big and Big Tilte",  "Any Author", 3.45, true
+      .ProcessPaperbackBooks &PriceTotaller2.processBook()
+      report  "Average Paperback Book Price: $" + str$(PriceTotaller2.AveragePrice(),"#.##")
+      .ProcessPaperbackBooks &PrintTitle()
+}
+}
 MODULE POPUP {title "",0
 Declare Form1 Form
 Declare aPopUpForm Form
@@ -20685,7 +20734,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<33 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<35 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -25693,7 +25742,7 @@ MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
 κκ=ψευδες
 κρατησε   \\ σώνουμε προσωρινά την εικόνα
 πάχος 3 { \\ βάζουμε πάχος στις γραμμές μας
-      καθε 10 {
+      καθε 60 {
             αφησε  \\ αντί να σβήσουμε βάζουμε ότι έχουμε σταθερό
             θεση κχ, κυ
             βήμα γωνια (πι/2+πι/4)+ζ,μκ2 \\ η θέση του εσωτερικού κύκλου
@@ -25702,9 +25751,9 @@ MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
             δ(μκ2,θέση.χ,θέση.υ,-ζ1, 1) \\ τυπώνει το κύκλο
             \\ με την ανανέωση εμφανίζουμε τις αλλαγές 
             ανανεωση 2000
-            αν ενκομ$<>"" η δείκτης τοτε εξοδος
+            αν πατημένο(1)  τοτε εξοδος
             ζ+=ζβ
-           αν κκ τότε{ αν ζ>4*πι τότε κκ=ψευδής} αλλιώς άδειασε
+            αν κκ τότε{ αν ζ>4*πι τότε κκ=ψευδής} αλλιώς άδειασε
             ζ1+=ζβ1*2
       }
 }
