@@ -4744,7 +4744,7 @@ end if
 Flush \\ Empty the stack
 CurDir$=Dir$
 Title$="M2000 Pad"
-\\Title "", 0   ' hide the console - 0
+Title "", 0   ' hide the console - 0
 \\ Gui Elements
 Declare NotePad Form
 Declare Pad EditBox Form NotePad
@@ -5404,7 +5404,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 17 for ver 9.9 rev 33 and newer"
+	Report " A collection of modules for tests version 18 for ver 9.9 rev 33 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -17488,7 +17488,7 @@ function cs_choose{
        With Pad, "ColorCollection1", lcase$("|abstract|as|base|bool|break|byte|case|catch|char|checked|class|const|continue|decimal|default|delegate|do|double|else|enum|event|explicit|extern|false|finally|fixed|float|for|foreach|goto|if|implicit|in|int|interface|internal|is|lock|long|namespace|new|null|object|operator|out|override|params|private|protected|public|readonly|ref|return|sbyte|sealed|short|sizeof|stackalloc|static|string|struct|switch|this|throw|True|try|typeof|uint|ulong|unchecked|unsafe|ushort|using|using|static|virtual|void|volatile|while|add|alias|ascending|async|await|by|descending|dynamic|equals|from|get|global|group|into|join|let|nameof|on|orderby|partial|remove|select|set|value|var|when|where|yield|"),"NoColor", False, "UseCase", True,"ExtraFront", "_", "LineComment2", "", "CommentSymbols","[/][/]", "ComSymbolsWidth", 2, "CommentLineLight", false, "MultiLineComment1", "/*","MultiLineComment2", "*/"
       With Pad, "WordCharLeft"," ,+-=/*^()[];<>:?", "WordCharRight"," .,+-=/*^()[];<>?:","OtherSymbols","@","UseColon",";"
       With Pad,"StartSymbols", "+-&|*=></,.1234567890()'"+chr$(34), "StringSep2","'", "EnablePairs", True, "linespace", 30
-      With Pad, "SearchWords", True, "nowrap", True, "AllowInsertBrackets",  True, "SpaceIndent", 2, "HighlightParagraph", True
+      With Pad, "SearchWords", True, "nowrap", True, "AllowInsertBrackets",  True, "SpaceIndent", 2, "HighlightParagraph", True, "Default", True
       Method Pad, "ReColor"
       Method Pad, "Show"
 }

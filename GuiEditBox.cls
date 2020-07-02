@@ -24,10 +24,10 @@ Private TextPixelOffset As Long, LastSearchType As Long
 Private Brackets As Boolean
 Private nochange As Boolean, sp As String, sp1 As String, sp2 As String
 Private TabControl As Long
-Private LineCommandSep As String
+Private mNoCenterLineEdit As Boolean, LineCommandSep As String
 Public PreserveRightSpaces As Boolean
 Public HighLightParagraph As Boolean, HighLightColor As Long
-Public NoCenterLineEdit As Boolean, UseHtmlColors As Boolean
+Public UseHtmlColors As Boolean
 Dim profundo As New clsProfiler
 Public SeekNextLine As Boolean
 Public ShadowMarks As Boolean
@@ -278,7 +278,7 @@ End Sub
 Sub Show()
 If glistN Is Nothing Then Exit Sub
 TextPixelOffset = Int(glistN.TextHeightOffset)
-tmpshow = True
+If tmpshow Then tmpshow = False: Exit Sub
 glistN.PrepareToShow 5
 End Sub
 Public Sub PasteDoc(thisdoc As String)
@@ -752,7 +752,6 @@ End If
 
 End Sub
 Private Sub glistN_CheckLostFocus()
-
 If Not locked Then
 If mStayOpen And Not SkipProcAtExitFocus Then
 glistN.NoCaretShow = NoMark
@@ -840,7 +839,6 @@ expandCharPos = 0
 ThatData = undotext
 End Sub
 Private Sub glistN_DragOverDone(a As Boolean)
-
 If Not mDoc.InvalidPara(OldPar) Then
         a = True
         SelLengthSilent = 0
@@ -1027,11 +1025,12 @@ End Sub
 
 Private Sub glistN_ChangeSelStart(thisselstart As Long)
 If glistN.ListIndex < 0 Then Exit Sub
-Dim what$, ThatPara As Long, pastchars As Long
+Dim what$, ThatPara As Long, pastchars As Long, oldpanpos As Long
 pastchars = mDoc.TextParagraphLine2(glistN.ListIndex + 1, what$, ThatPara, False)
 Charpos = pastchars + glistN.SelStart
 If Not glistN.enabled Then Exit Sub
-tmpshow = False
+oldpanpos = glistN.PanPos
+tmpshow = True
 If glistN.SelStart = 0 Then
 inform glistN.ListIndex + 1, 1
   If mIndex >= 0 Then
@@ -1052,14 +1051,22 @@ On Error Resume Next
 If LastListIndex <> glistN.ListIndex Then
 
 LastListIndex = glistN.ListIndex
-If Not tmpshow Then
-If NoCenterLineEdit Then
-glistN.ShowMe2
+
+    If NoCenterLineEdit Then
+       If Not tmpshow Then glistN.ShowMe2
+    Else
+    tmpshow = False
+    If oldpanpos <> glistN.PanPos Then Show Else glistN.ShowMe
+    End If
 Else
-glistN.ShowMe
+If NoCenterLineEdit Then
+ 'glistN.ShowPan
+Else
+Show
 End If
+    
 End If
-End If
+tmpshow = False
 Exit Sub
 If NoCenterLineEdit Then
     If LastListIndex <> glistN.ListIndex Then
@@ -1521,8 +1528,14 @@ glistN.ScrollToSilent glistN.ListIndex - glistN.lines / 2
 End If
 End If
 aaa:
+
 glistN.ScrollToSilent glistN.ScrollFrom
+
+If Not mNoCenterLineEdit Then
 If glistN.enabled Then glistN.ShowPan
+Else
+If glistN.enabled Then glistN.ShowMe2
+End If
 'expandCharPos = glistN.SelStart
 mDoc.busy = False
 End Sub
@@ -5006,7 +5019,6 @@ Dim drop$, Data As String
 Data = Replace(data1, vbTab, " ")
 Dim feedthis As Long, oldpara As Long
 oldpara = thispara
-
 If mDoc.startfrom(thispara) <> 0 Then
 If mDoc.startfrom(thispara) <> thispara Then
 drop$ = Data
@@ -5167,14 +5179,14 @@ End If
 Wend
 End If
 If kind = 0 Then
-If IsSymbol(a$, "@") Then
-        If pos2 > 0 Then
-        addone pos2, 14
-        Else
-        addone 1, 14
-        End If
-     pos2 = k - Len(a$) + 1
-End If
+'If IsSymbol(a$, "@") Then
+      '  If pos2 > 0 Then
+     '   addone pos2, 14
+    '    Else
+   '     addone 1, 14
+  '      End If
+ '    pos2 = k - Len(a$) + 1
+'End If
 End If
 
 kind = IsLabelDot("", a$, drop$)
@@ -6586,7 +6598,6 @@ there:
         End If
         ns = NLtrim(CurrentParagraph)
         a$ = Myleft$(CurrentParagraph, Len(CurrentParagraph) - Len(ns))
- 'If Len(CurrentParagraph) + 1 < Charpos Then Charpos = Len(CurrentParagraph) + 1
  If Len(a$) > Charpos - 1 Then
 SelStartSilent = SelStart - Charpos + Len(a$) + 1
 Else
@@ -9901,3 +9912,12 @@ Else
     Charpos = pastchars + glistN.SelStart
 End If
 End Sub
+
+Public Property Get NoCenterLineEdit() As Boolean
+NoCenterLineEdit = mNoCenterLineEdit
+End Property
+
+Public Property Let NoCenterLineEdit(ByVal RHS As Boolean)
+mNoCenterLineEdit = RHS
+glistN.OverrideShow = Not RHS
+End Property

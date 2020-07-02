@@ -1067,7 +1067,11 @@ Else
     If Not enabled Then Exit Sub
 
     If listcount > 0 Or MultiLineEditBox Then
+    If OverrideShow Then
+       ShowMe
+    Else
       ShowMe2
+    End If
     Else
     
       ShowMe
@@ -2320,6 +2324,7 @@ If Not ok Then
         Timer3.enabled = True
         Effect = vbDropEffectNone
         HideCaretOnexit = True
+        If caretCreated Then caretCreated = False: DestroyCaret
         MovePos X, Y
         If CBool(shift And 1) Then chooseshow
     End If
@@ -4854,7 +4859,6 @@ Shape Shape1
 Shape Shape2
 Shape Shape3
 a = GdiFlush()
-'If Not OverrideShow Then
 UserControl.Refresh
 End Sub
 Public Property Get PreserveNpixelsHeaderRightTwips() As Long
@@ -4972,7 +4976,11 @@ CalcNewFont
  PropertyChanged "Font"
 End Property
 Public Sub ExternalCursor(ByVal ExtSelStart, that$, Curcolor As Long)
-If HideCaretOnexit Then Exit Sub
+If HideCaretOnexit Then
+If caretCreated Then caretCreated = False: DestroyCaret
+Exit Sub
+End If
+
  Dim REALX As Long, RealX2 As Long, myt1
  myt1 = myt - scrTwips * 2
 If ExtSelStart <= 0 Then ExtSelStart = 1
@@ -5006,35 +5014,39 @@ End Sub
 
 
 Public Sub ExternalCursor2(ByVal REALX As Long, Curcolor As Long)
-If HideCaretOnexit Then Exit Sub
- Dim RealX2 As Long, myt1
- myt1 = myt - scrTwips * 2
+If HideCaretOnexit Then
+    If caretCreated Then caretCreated = False: DestroyCaret
+    Exit Sub
+End If
+If marvel Then missMouseClick = False
+Dim RealX2 As Long, myt1
+myt1 = myt - scrTwips * 2
 
-                                             DrawStyle = vbNormal
-             
-                                   REALX = REALX * scrTwips + LeftMarginPixels * scrTwips
-              
-                                    RealX2 = scrollme + REALX
-                                    If (Not marvel) And (havefocus And Not Noflashingcaret) Then
-                                          ShowMyCaretInTwips RealX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips + scrTwips
-                                    Else
-                                    If caretCreated Then caretCreated = False: DestroyCaret
-                                              DrawMode = vbCopyPen
-                    'If Not NoCaretShow Then
-                    If Not missMouseClick Then
-                    Line (RealX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips + scrTwips)-(RealX2 + scrTwips, (SELECTEDITEM - topitem - 1) * myt + myt1 + mHeadlineHeightTwips), Curcolor, BF
-                    End If
-                                            ' DrawMode = vbCopyPen
-                                 End If
-                                 
+DrawStyle = vbNormal
 
-                                   If Not NoScroll Then If RealX2 > Width * 0.8 * dragslow Then scrollme = scrollme - Width * 0.2 * dragslow: PrepareToShow 10
-                                   If RealX2 - Width * 0.2 * dragslow < 0 Then
-                              If Not NoScroll Then
-                              scrollme = scrollme + Width * 0.2 * dragslow
-                              If scrollme > 0 Then scrollme = 0 Else PrepareToShow 10
-                                   End If
-                                   End If
+REALX = REALX * scrTwips + LeftMarginPixels * scrTwips
+
+RealX2 = scrollme + REALX
+If (Not marvel) And (havefocus And Not Noflashingcaret) Then
+    ShowMyCaretInTwips RealX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips + scrTwips
+Else
+    If caretCreated Then caretCreated = False: DestroyCaret
+    DrawMode = vbCopyPen
+    'If Not NoCaretShow Then
+    If Not missMouseClick Then
+        Line (RealX2, (SELECTEDITEM - topitem - 1) * myt + mHeadlineHeightTwips + scrTwips)-(RealX2 + scrTwips, (SELECTEDITEM - topitem - 1) * myt + myt1 + mHeadlineHeightTwips), Curcolor, BF
+    End If
+    ' DrawMode = vbCopyPen
+End If
+
+
+If Not NoScroll Then If RealX2 > Width * 0.8 * dragslow Then scrollme = scrollme - Width * 0.2 * dragslow: PrepareToShow 10
+If RealX2 - Width * 0.2 * dragslow < 0 Then
+    If Not NoScroll Then
+        scrollme = scrollme + Width * 0.2 * dragslow
+        If scrollme > 0 Then scrollme = 0 Else PrepareToShow 10
+    End If
+End If
                      
 
 End Sub
