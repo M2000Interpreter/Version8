@@ -743,7 +743,9 @@ glistN.NoCaretShow = NoMark
 glistN.ForeColor = white
 glistN.backcolor = dimm1
 End If
+If Not NoCenterLineEdit Then
 glistN.ShowMe
+End If
 Else
 mNoColor = True
 End If
@@ -762,7 +764,9 @@ BlockStartPara = BlockEndPara
 BlockStartPos = BlockEndPos
 glistN.MarkNext = 0
 End If
+If Not NoCenterLineEdit Then
 glistN.ShowPan
+End If
 End If
 
 Exit Sub
@@ -776,6 +780,7 @@ If glistN.BackStyle <> 1 Then
 
 glistN.backcolor = dimm2
 End If
+
 glistN.PanPos = 0: glistN.PrepareToShow
 
 Else
@@ -1647,7 +1652,7 @@ ElseIf KeyCode = vbKeyY And (shift And 3) = 2 Then
 ' Redo
 profundo.MARKONE
 againY:
-If profundo.MARKTWO > 1000 Then ProcTask2 basestack1: profundo.MARKONE
+If profundo.MARKTWO > 1000 Then ProcTask2 Basestack1: profundo.MARKONE
 If Redopara <> -1 Then
 
 PushUndo
@@ -1725,7 +1730,7 @@ ElseIf KeyCode = vbKeyZ And (shift And 3) = 2 Then
 ' undopos now is selstart
 profundo.MARKONE
 againZ:
-If profundo.MARKTWO > 1000 Then ProcTask2 basestack1: profundo.MARKONE
+If profundo.MARKTWO > 1000 Then ProcTask2 Basestack1: profundo.MARKONE
 If undopara <> -1 Then
 ' seve to redo...
 PushRedo
@@ -2044,7 +2049,7 @@ blockKeyboard = True
 MyDoEvents
 blockKeyboard = False
  On Error Resume Next
- ProcTask2 basestack1
+ ProcTask2 Basestack1
 'mywait basestack1, 10
 
 If Not mNoColor Then SimpleHtmlData pp2
@@ -8420,7 +8425,7 @@ w = 1
 l = 0
 safety = safety + 1
 End If
-If prof1.MARKTWO > 1000 Then ProcTask2 basestack1: prof1.MARKTWO
+If prof1.MARKTWO > 1000 Then ProcTask2 Basestack1: prof1.MARKTWO
 Loop Until safety = 2 Or KeyPressed(16)
 glistN.dropkey = False
 
@@ -8466,7 +8471,7 @@ w = 1
 l = 0
 safety = safety + 1
 End If
-If prof1.MARKTWO > 1000 Then ProcTask2 basestack1: prof1.MARKTWO
+If prof1.MARKTWO > 1000 Then ProcTask2 Basestack1: prof1.MARKTWO
 Loop Until safety = 2 Or KeyPressed(16)
 glistN.dropkey = False
 End If
@@ -8597,7 +8602,7 @@ MyPopUp.Visible = True
 MyPopUp.ZOrder 0
 
         Do While MyPopUp.Visible
-   ProcTask2 basestack1
+   ProcTask2 Basestack1
    If Not Screen.ActiveForm Is Nothing Then
 If GetForegroundWindow <> Screen.ActiveForm.hWnd Then MyPopUp.Visible = False
 End If

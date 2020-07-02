@@ -4744,7 +4744,7 @@ end if
 Flush \\ Empty the stack
 CurDir$=Dir$
 Title$="M2000 Pad"
-Title "", 0   ' hide the console - 0
+\\Title "", 0   ' hide the console - 0
 \\ Gui Elements
 Declare NotePad Form
 Declare Pad EditBox Form NotePad
@@ -4886,7 +4886,7 @@ For This {
 \\ always Def make local variables. We can set a type before for all non typed names after
 \\ or we can use as type and give a first value (not an expression here).
 \\ by defailt false is the va;ue for boolean type, so the =false not needed
-Def boolean LoadState=false,  old_status=false
+Def boolean LoadState=false,  old_status=false, lastword$
 
  \\ We need some properties with inexes, so we make these as arrays 
  \\ They look as arrays but they are objects (PropReference)
@@ -4957,13 +4957,14 @@ End If
 
 
 \\ this call using Call Local (otherwise we get error because GetHepl$() isn't a global, or a local to FindWord)
-Function FindWord {
+Function FindWord() {
 	read new word$, find=false
 	Local hlp$=GetHelp$(&Word$, find)
 	If len(hlp$) Else Exit
+	lastword$=word$
 	HelpText$=word$+nl$+hlp$
 	If not helpview Then helpview=true : helpenabled=true
-	Call Local Notepad.Resize()
+	Call Local Notepad.Resize(true)
 }
 
 \\this call using Call Local too, because inform1 is in this module scope
@@ -4994,6 +4995,8 @@ Function NotePad.Unload(New &Ok) {
 \\ we can change this in code if we change the font of title (because a new TitleHeight  prodced), or if we remove the header (make it invinsible)
 def onetime=true
 Function Notepad.Resize {
+	Local FromHelp=false
+	if match("N") then Read FromHelp
 	Layer NotePad { Cls Color(255, 160, 0) ,0}
 	With NotePad, "Width" as NP.Width, "Height" as NP.Height, "TitleHeight" as tHeight
 	tHeight1=theight*2
@@ -5005,6 +5008,7 @@ Function Notepad.Resize {
 		Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*160, tHeight
 		onetime=false
 	End if
+	local oldhelpshow=helpshow
 	If NP.height>1800 Then {
 		If helpview Then
 			local free=NP.Height-tHeight1-twipsX*3
@@ -5018,7 +5022,11 @@ Function Notepad.Resize {
 			Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsX*3
 		End If
 		With Pad, "NoWrap" as NoWrap
-		If Not NoWrap Then Method Pad,"Resize"
+		If  Not NoWrap or not FromHelp Then
+			Method Pad,"Resize"
+		Else
+			if helpshow then if not oldhelpshow then Method Pad,"Resize"
+		End If
 		Method HelpPad, "resize"
 	}
 }
@@ -5027,6 +5035,7 @@ ms$={Find Topic
 Use ALL to get a list of all topics}
 Function HelpPad.click1 {
 	Method  HelpPad, "EditTextView", false
+	what$=lastword$
 	If ask(ms$,,,,, what$)=1 Then Read New what$ :Call Local FindWord(what$, true)
 }
 
@@ -5047,6 +5056,8 @@ Function Pad.KeyDown {
 		After 20{
 			Call Local Run1.DblClick(0)
 		}
+	else.if kc=70 and shf=2 then
+		kc=112
 	End If
 }
 
@@ -5326,32 +5337,26 @@ Function Help1.DblClick {
 	{
 		Local A, info$
 		Info$={
-			This is an example
-			of a notepad for M2000 Programs
-			written in M2000
-			and run in M2000 Environment
+			This is an example of a notepad for M2000 Programs written in M2000 and run in M2000 Environment. Choose a blue word and press ctrl+f1 or F for help.
 			}
 		A=Ask(info$,Title$,"","")
 	}
 	Case "FIND"
 		Call Local HelpPad.click1()
 	Case "OPEN"
-		Method  HelpPad, "EditTextView", True: Call Local Notepad.Resize()
+		Method  HelpPad, "EditTextView", True: Call Local Notepad.Resize(true)
 	Case "CLOSE"
-		Method  HelpPad, "EditTextView", false : HelpView=false: Call Local Notepad.Resize()
+		Method  HelpPad, "EditTextView", false : HelpView=false: Call Local Notepad.Resize(true)
 	End Select
 	
-}
-\\ This is for clicking a word
-Rem {
-	Function Pad.Word() {
-		Call Local FindWord(letter$, false)
-	}
 }
 Function HelpPad.Word() {
 	Call Local FindWord(letter$, false)
 }
 \\ this work with help
+Function Pad.Word() {
+	lastword$=letter$
+}
 Function Pad.Help {
 	Read New what$ :Call Local FindWord(what$, true)
 }
@@ -5399,7 +5404,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 16 for ver 9.9 rev 33 and newer"
+	Report " A collection of modules for tests version 17 for ver 9.9 rev 33 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -24779,7 +24784,7 @@ MODULE ΚΛΑΣΗ1 {Κλάση Ζώο {
 Τέλος
 \\ Η ρουτίνα δέχεται οτιδήποτε είναι κατοικίδιο
 \\ έτσι δέχεται Κατοικίδιο, Γάτα, Σκύλος, Πουλί
-Ρουτίνα Τι(Α ως Ομάδα)
+Ρουτίνα Τι(Α ως Κατοικίδιο)
 	Τοπική Εξ$=Μορφή$(Α.Μήνυμα$(),Α.ΜεΦωνάζουν$(), Α.ΠόσαΠόδια(), Α.ΚάνωΉχο$())
 	ΌλαΜαζι$=Εξ$+{
 	}
@@ -25815,5 +25820,89 @@ MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
             }
       }
 Τέλος Ρουτίνας
+}
+MODULE CLASS1EN {Class Animal {
+Private:
+	legs=0
+	sound$="nothing"
+Public:
+	Function Final Legs() {
+		=.legs
+	}
+	Function DoSound$() {
+		=.sound$
+	}
+}
+Class Pet as Animal {
+Private:	
+	name$
+	message$="They call me {0} and I am a Pet and I have {1} legs and all day {2}"	
+Public:
+	Function message$() {
+		=.message$
+	}
+	Function CallMe$() {
+		=.name$
+	}
+Class:
+	Module Pet {
+		Read .name$, .sound$, .legs
+	}
+}
+Class Dog as Pet {
+	Function CallMe$() {
+		=.name$+" and I am a Dog"
+	}
+Class:
+	Module Dog(.name$)	{
+		.legs<=4
+		.sound$<="bark"
+	}
+}
+Class Cat as Pet {
+	Function CallMe$() {
+		=.name$+" and I am a Cat"
+	}
+Class:
+	Module Cat(.name$)	{
+		.legs<=4
+		.sound$<="meow"
+	}
+}
+Class Bird as Pet {
+Private:
+	kind$="something"
+	message$="They call me {0} and I have {1} legs and wings and all day {2}"
+Public:
+	Function CallMe$() {
+		=.name$+" and I am a "+.kind$
+	}
+Class:
+	Module Bird(.name$, .kind$)	{
+		.legs<=2
+		.sound$<="sing"
+	}	
+}
+Document AllTogether$={Final Report
+}
+Azor=Dog("Azor")
+What(Azor)
+Minnie=Cat("Minnie")
+What(Minnie)
+Goldie=Bird("Goldie", "canary")
+What(Goldie)
+ΆλλοΚατοικίδιο=Pet("Dolly", "neigh", 4)
+What(ΆλλοΚατοικίδιο)
+
+Clipboard AllTogether$
+
+End
+
+Sub What(a as Pet)
+	Local exp$=Format$(a.Message$(),a.CallMe$(), a.Legs(), a.DoSound$())
+	AllTogether$=exp$+{
+	}
+	Report exp$
+End Sub
 }
 UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}

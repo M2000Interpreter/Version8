@@ -347,11 +347,11 @@ If vNumber = 0 Then vNumber = 1
 If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
 If Typename(sapi) = "Nothing" Then Beep: Exit Sub
 If sapi.getvoices().count > 0 Then
-If sapi.getvoices().count <= vNumber Or sapi.getvoices().count < 1 Then vNumber = 1
+If sapi.getvoices().count < vNumber Or sapi.getvoices().count < 1 Then vNumber = 1
  With sapi
          Set .Voice = .getvoices.item(vNumber - 1)
        If BOY Then
-         .volume = vol
+         .volume = IIf(vol = 0, 0, 50 + vol \ 2)
         
          .Rate = 2
        ' boy
@@ -360,7 +360,7 @@ If sapi.getvoices().count <= vNumber Or sapi.getvoices().count < 1 Then vNumber 
          
          'man
        .Rate = 1
-       .volume = vol
+       .volume = IIf(vol = 0, 0, 50 + vol \ 2)
          .Speak "<pitch absmiddle='-5'>" & a$
          End If
        End With

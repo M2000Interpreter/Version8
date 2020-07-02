@@ -653,7 +653,10 @@ where = HelpFile.FindStr(HelpFile.TextParagraph(2 + a + 1 + 2 * aa), 1, no_par, 
 End If
 
 If where = 0 Then Exit Sub
-If HelpFile.FindStr("\" + myUcase(doriginal$, True), where, there, dum) Then
+If HelpFile.FindStr("\" + myUcase(doriginal$, True) + "!", where, there, dum) Then
+GoTo th111
+ElseIf HelpFile.FindStr("\" + myUcase(doriginal$, True), where, there, dum) Then
+th111:
 d$ = HelpFile.TextParagraph(there)
 Eng = InStr(d$, "- ") <> 0
 dum = InStr(d$, "!")
@@ -919,7 +922,7 @@ If FastSymbol(r$, ",") Then
     
     Set fieldlist = pppp.item(1)
     For i = 0 To fieldlist.count - 1
-        fieldlist.index = i
+        fieldlist.Index = i
         fieldlist.Done = True
         If fieldlist.sValue = -1 Then
             fields = fields + 1
@@ -937,7 +940,7 @@ If FastSymbol(r$, ",") Then
     If indexField.count > 0 Then
     stac1.DataVal indexField.count
     For j = 0 To pppp.item(3).count - 1
-    indexField.index = j
+    indexField.Index = j
     indexField.Done = True
     
    
@@ -951,7 +954,7 @@ stac1.PushVal indexField.count
 stac1.PushVal fields
 Else
 For i = 0 To tables.count - 1
-tables.index = i
+tables.Index = i
 tables.Done = True
 If tables.sValue = 0 Then
 Set pppp = tables.ValueObj
@@ -1252,9 +1255,9 @@ Set indexField = pppp.item(3)
 Set fieldlist = pppp.item(4)
 If indexField.count > 0 Then
     If gindex > fieldlist.count + 1 Then gindex = fieldlist.count + 1
-    fieldlist.index = gindex - 1
+    fieldlist.Index = gindex - 1
     fieldlist.Done = True
-    tables.index = fieldlist.Value
+    tables.Index = fieldlist.Value
     tables.Done = True
     fieldlist.Done = False
     Set p_acc = tables.ValueObj
@@ -1263,7 +1266,7 @@ If indexField.count > 0 Then
     tables.Done = False
 Else
     If gindex > tables.count + 1 Then gindex = tables.count + 1
-    tables.index = gindex - 1
+    tables.Index = gindex - 1
     tables.Done = True
     Set p_acc = tables.ValueObj
     p_acc.CopyArray acc
@@ -1278,7 +1281,7 @@ i& = 0
 Set fieldlist = pppp.item(1)
 Do
 TT = 0
-fieldlist.index = p_acc.item(i&)
+fieldlist.Index = p_acc.item(i&)
 fieldlist.Done = True
 Set temp = fieldlist.ValueObj
 
@@ -1320,7 +1323,7 @@ Set indexField = pppp.item(3)
 Set fieldlist = pppp.item(4)
 If indexField.count > 0 Then
 For j& = 0 To indexField.count - 1
-    indexField.index = j&
+    indexField.Index = j&
     indexField.Done = True
     If Len(allkey$) = 0 Then
     allkey$ = indexField.Normalize(acc.item(indexField.sValue))
@@ -1334,14 +1337,14 @@ If Len(prevkey$) > 0 Then
             MyEr "index key not unique", "Το κλειδί δεν είναι μοναδικό"
             Exit Function
         End If
-        fieldlist.index = gindex - 1
+        fieldlist.Index = gindex - 1
         fieldlist.Done = True
-        tables.index = fieldlist.Value
+        tables.Index = fieldlist.Value
         ' I have to add logic here for calculating the final bytes for file
         ' so if the previous is less than the current, we can save to same plase
         ' else we have to delete this and make a new entry
         Set tables.ValueObj = acc
-        fieldlist.AddKey allkey$, tables.index
+        fieldlist.AddKey allkey$, tables.Index
         fieldlist.Remove prevkey$
         If pppp.item(5) = 2 Then
             fieldlist.SortDes
@@ -1350,9 +1353,9 @@ If Len(prevkey$) > 0 Then
         End If
     
     Else
-        fieldlist.index = gindex - 1
+        fieldlist.Index = gindex - 1
         fieldlist.Done = True
-        tables.index = fieldlist.Value
+        tables.Index = fieldlist.Value
         tables.Done = True
         fieldlist.Done = False
         Set tables.ValueObj = acc
@@ -1374,7 +1377,7 @@ Else
 End If
 End If
 If gindex > 0 Then
-    tables.index = gindex - 1
+    tables.Index = gindex - 1
     tables.Done = True
     Set tables.ValueObj = acc
 Else
@@ -1483,7 +1486,12 @@ Err.clear
     If Err.Number <> 0 Then
     MyEr "Wrong index for table " & table$, "Λάθος δείκτης για αρχείο " & table$
     End If
+ElseIf rec.EOF Then
+    MyEr "Record not found", "Η Εγγραφή δεν βρέθηκε"
+    append_table = False
+    Exit Function
 Else
+
     rec.MoveLast
 End If
 ' rec.Edit  no need for undo
@@ -1581,16 +1589,16 @@ If IsStrExp(bstackstr, r$, base) Then
                     Set fieldlist = pppp.item(1)
                     If fieldlist.ExistKey(myUcase(first$, True)) Then
                         If fieldlist.sValue <> -1 Then GoTo aError
-                        i& = fieldlist.index
+                        i& = fieldlist.Index
                         ii = 0
                         topi = tables.count
                         many = 0
                         If IndexList.count > 0 Then
                         topi = IndexList.count
                         While ii < topi
-                            IndexList.index = ii
+                            IndexList.Index = ii
                             IndexList.Done = True
-                            tables.index = IndexList.Value
+                            tables.Index = IndexList.Value
                             tables.Done = True
                             If tables.sValue = 0 Then
                                 Set temp = tables.ValueObj
@@ -1613,7 +1621,7 @@ If IsStrExp(bstackstr, r$, base) Then
                         Wend
                         Else
                         While ii < topi
-                            tables.index = ii
+                            tables.Index = ii
                             tables.Done = True
                             If tables.sValue = 0 Then
                                 Set temp = tables.ValueObj
@@ -1657,9 +1665,9 @@ aError:
                 topi = IndexList.count
                 
                 While from > 0 And ii < topi
-                    IndexList.index = ii
+                    IndexList.Index = ii
                     IndexList.Done = True
-                    tables.index = IndexList.Value
+                    tables.Index = IndexList.Value
                     tables.Done = True
                     If tables.sValue = 0 Then
                         from = from - 1
@@ -1675,7 +1683,7 @@ aError:
             
             While from > 0 And ii < topi
             
-                tables.index = ii
+                tables.Index = ii
                 tables.Done = True
                 If tables.sValue = 0 Then
                     from = from - 1
@@ -2944,7 +2952,7 @@ Dim i As Long
 Err.clear
 For i = conCollection.count - 1 To 0 Step -1
 On Error Resume Next
-conCollection.index = i
+conCollection.Index = i
 If conCollection.IsObj Then
 If TypeOf conCollection.ValueObj Is Mk2Base Then
 ' do nothing just throw

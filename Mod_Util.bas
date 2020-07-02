@@ -3032,7 +3032,7 @@ p = .Yt / dv15
 r = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.top), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.top + p), SRCCOPY)
 
  
- ar.top = ar.Bottom - p
+  ar.top = ar.Bottom - p
 FillBack d.hDC, ar, .Paper
 .curpos = 0
 .currow = .My - 1
@@ -3361,7 +3361,7 @@ SetTextBasketBack dq, mybasket
         If Fkey > 0 Then
         If FK$(Fkey) <> "" And Fkey <> 13 Then
             cc$ = FK$(Fkey)
-            interpret basestack1, cc$
+            interpret Basestack1, cc$
         
         End If
         Fkey = 0
@@ -3893,7 +3893,7 @@ End If
 i = back.LastSelStart
 Dim aaaa As Document, tcol As Long, trans As Boolean
 If usecol Then tcol = mycolor(col) Else tcol = d.backcolor
-If Not Form1.Visible Then newshow basestack1
+If Not Form1.Visible Then newshow Basestack1
 
 'd.Enabled = False
 If Not bstack.toback Then d.TabStop = False
@@ -4085,7 +4085,7 @@ d.Parent.lockme = True
 Else
 d.lockme = True
 End If
-If Not Form1.Visible Then newshow basestack1
+If Not Form1.Visible Then newshow Basestack1
 d.Visible = True
 If d.Visible Then d.SetFocus
 With Form1.TEXT1
@@ -5241,7 +5241,7 @@ Else
 
   End If
     If bstack Is Nothing Then
-    Set bstack = basestack1
+    Set bstack = Basestack1
     NOEXECUTION = True
     MOUT = True
      Modalid = 0
@@ -6021,7 +6021,7 @@ cc.SectionKey = basickey
 Dim d$, w$, p As Long, b As Long
 If s$ <> "" Then
     Do While FastSymbol(s$, "-")
-        If IsLabel(basestack1, s$, d$) > 0 Then
+        If IsLabel(Basestack1, s$, d$) > 0 Then
             d$ = UCase(d$)
             If d$ = "TEST" Then
                 STq = False
@@ -6033,7 +6033,7 @@ If s$ <> "" Then
                 Form2.label1(2) = vbNullString
                 TestShowSub = vbNullString
                 TestShowStart = 0
-                stackshow basestack1
+                stackshow Basestack1
                 Form1.Show , Form5
                 If Form3.Visible Then Form3.skiptimer = True: Form3.WindowState = 0
                 trace = True
@@ -6161,7 +6161,7 @@ If s$ <> "" Then
         Sleep 2
     Loop
     Do While FastSymbol(s$, "+")
-        If IsLabel(basestack1, s$, d$) > 0 Then
+        If IsLabel(Basestack1, s$, d$) > 0 Then
             d$ = UCase(d$)
             If d$ = "TEST" Then
                 STq = False
@@ -6173,7 +6173,7 @@ If s$ <> "" Then
                 Form2.label1(2) = vbNullString
                 TestShowSub = vbNullString
                 TestShowStart = 0
-                stackshow basestack1
+                stackshow Basestack1
                 Form1.Show , Form5
                 If Form3.Visible Then Form3.skiptimer = True: Form3.WindowState = 0
                 trace = True
@@ -13803,7 +13803,7 @@ checkobject:
                                     bstack.soros.PushObj bstack.lastobj
                                     Set bstack.lastobj = Nothing
                                 End If
-                                NeoCall2 ObjPtr(bstack), w$ + "." + ChrW(&H1FFF) + ":=()", ok
+                                NeoCall2 bstack, w$ + "." + ChrW(&H1FFF) + ":=()", ok
                             ElseIf bstack.lastobj Is Nothing Then
                                 NeedAGroupInRightExpression
                                 interpret = False
@@ -14086,7 +14086,7 @@ somethingelse:
                             Set bstack.lastobj = Nothing
                         End If
                     End If
-                    NeoCall2 ObjPtr(bstack), w$ + "." + ChrW(&H1FFF) + ss$ + "()", ok
+                    NeoCall2 bstack, w$ + "." + ChrW(&H1FFF) + ss$ + "()", ok
                     If Not ok Then
                         If LastErNum = 0 Then
                             MisOperatror (ss$)
@@ -14585,7 +14585,7 @@ If ss$ <> "" Then
                                 bstack.soros.PushObj bstack.lastobj
                                 Set bstack.lastobj = Nothing
                             End If
-                            NeoCall2 ObjPtr(bstack), Left$(w$, Len(w$) - 1) + "." + ChrW(&H1FFF) + sw$ + "()", ok
+                            NeoCall2 bstack, Left$(w$, Len(w$) - 1) + "." + ChrW(&H1FFF) + sw$ + "()", ok
                     If Not ok Then
                         If LastErNum = 0 Then
                             MisOperatror (ss$)
@@ -17488,7 +17488,7 @@ If x1 <> 0 Then
         Else
         If Not SaveUnicode(pa$ + "1", prg$, 2) Then BadFilename: Exit Function
         End If
-        ProcTask2 basestack1
+        ProcTask2 Basestack1
         If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".gsb") <> "" Then
             If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1") <> "" Then
                 KillFile ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
@@ -17496,7 +17496,7 @@ If x1 <> 0 Then
             RenameFile2 pa$, ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
             askme = True
         End If
-     ProcTask2 basestack1
+     ProcTask2 Basestack1
      
         If askme Then
                 
@@ -21318,7 +21318,7 @@ If IsStrExp(basestack, rest$, s$) Then
             If Not FastSymbol(rest$, "}") Then Set Scr = Nothing: newStart = False: Exit Function
                 End If
                 End If
-            original basestack1, s$  ' set...
+            original Basestack1, s$  ' set...
             
 Else
     MyEr "", ""
@@ -21338,9 +21338,9 @@ Else
     players(DisForm).ReportTab = ReportTabWidth
     Form1.Cls
     
-    original basestack1, ""
-    MyNew basestack1, "", 1
-    MyClear basestack1, ""
+    original Basestack1, ""
+    MyNew Basestack1, "", 1
+    MyClear Basestack1, ""
 
     basestack.soros.Flush
 
@@ -21368,7 +21368,7 @@ If Not Form1.Visible And Form1.TrueVisible Then
 If UseMe Is Nothing Then
 Form3.skiptimer = True
 Form3.Visible = True: If Form3.WindowState = 0 Then Form3.Move VirtualScreenWidth() + 2000, VirtualScreenHeight() + 2000
-mywait basestack1, 100
+mywait Basestack1, 100
 Form3.CaptionWsilent = ExtractNameOnly(cLine)
 Else
 PlaceCaption ExtractNameOnly(cLine)
@@ -21376,7 +21376,7 @@ If Err.Number > 0 Then
 Err.clear: Set UseMe = Nothing
 Form3.skiptimer = True
 Form3.Visible = True: If Form3.WindowState = 0 Then Form3.Move VirtualScreenWidth() + 2000, VirtualScreenHeight() + 2000
-mywait basestack1, 100
+mywait Basestack1, 100
 Form3.CaptionWsilent = ExtractNameOnly(cLine)
 End If
 End If
@@ -21644,7 +21644,7 @@ MyDoEvents0 basestack.Owner
 If Fkey > 0 Then
 If FK$(Fkey) <> "" Then
     s$ = FK$(Fkey)
-    MyScan = interpret(basestack1, s$)
+    MyScan = interpret(Basestack1, s$)
 Fkey = 0
 End If
 End If
@@ -23717,7 +23717,7 @@ If FastSymbol(rest$, "#") Then
     End If
     End Select
 Else
-If Not releasemouse Then If Not Form1.Visible Then newshow basestack1
+If Not releasemouse Then If Not Form1.Visible Then newshow Basestack1
 If bstack.toprinter = True Then oxiforPrinter:   Exit Function
 If Left$(Typename(bstack.Owner), 3) = "Gui" Then oxiforforms: Exit Function
 Select Case Abs(IsLabel(bstack, rest$, what$))

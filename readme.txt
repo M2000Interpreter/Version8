@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 35 active-X
-A bug removed for functions members of groups when passed by reference. The bug start exist from the last3 or 4 revisions.
-A new module BOOK4 show the fix. Exist in updated info file. See instructions bellow.
+Version 9.9 revision 36 active-X
+A bug removed
+Updated info file
 
 
 George Karras, Kallithea Attikis, Greece.
