@@ -1,8 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 37 active-X
-Fix EditBox freestyle enable/disable (shift f9)
-Updated info file
+Version 9.9 revision 38 active-X
+from static variables removed a bug.
 
 
 George Karras, Kallithea Attikis, Greece.

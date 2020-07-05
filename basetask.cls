@@ -177,11 +177,13 @@ Public Sub ClearBasket()
     End If
     
 End Sub
-Public Sub SetBacket(ByVal Name$, var As Variant)
-    Dim paren As basetask
+Public Sub SetBacket(ByVal Name$)
+    Dim paren As basetask, var As Variant
     If StaticCollection Is Nothing Then
         Set StaticCollection = New FastCollection
+        
     End If
+    Set var = StaticCollection
     If Me.IamThread Or Me.IamAnEvent Then Exit Sub
     If Parent Is Nothing Then
     
@@ -209,18 +211,20 @@ Public Sub SetBacket(ByVal Name$, var As Variant)
         Set paren = paren.Parent
         If paren.IamThread Or paren.IamAnEvent Then Exit Do
         If paren.StaticCollection Is Nothing Then
+        
             Set paren.StaticCollection = New FastCollection
             paren.StaticCollection.AddKey Name$
             Set paren.StaticCollection.ValueObj = oldcol
-        ElseIf paren.StaticCollection.Find(Name$) Then
             
+        ElseIf paren.StaticCollection.Find(Name$) Then
+        
+            Exit Do
             ' problem this exist
         Else
             paren.StaticCollection.AddKey Name$
+            Set paren.StaticCollection.ValueObj = oldcol
         End If
         Set oldcol = paren.StaticCollection
-        
-        
         Loop
     End If
     

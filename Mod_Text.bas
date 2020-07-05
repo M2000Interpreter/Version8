@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 37
+Global Const Revision = 38
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -14609,7 +14609,7 @@ If bstack.StaticCollection Is Nothing Then
 
 Set bstack.StaticCollection = New FastCollection
 If Not bstack.IamThread Then
-    bstack.SetBacket "%_" + bstack.StaticInUse, bstack.StaticCollection
+    bstack.SetBacket "%_" + bstack.StaticInUse
 End If
 End If
 Do
@@ -18968,7 +18968,7 @@ End If
  ' prepare function for static variables
 If iRVAL(basestack.StaticInUse, 0) = 0 Then
     mystack.StaticInUse = RVAL(basestack.StaticInUse, 1) + "." + what$ + mystack.StaticInUse
-    If Not basestack Is Basestack1 Then
+  '  If Not basestack Is Basestack1 Then
         If Not basestack.StaticCollection Is Nothing Then
             If basestack.ExistVar("%_" + mystack.StaticInUse$) Then
                 basestack.ReadStaticCol "%_" + mystack.StaticInUse$, vvv
@@ -18976,7 +18976,7 @@ If iRVAL(basestack.StaticInUse, 0) = 0 Then
                 Set vvv = Nothing
             End If
         End If
-    End If
+   ' End If
 ElseIf basestack.OriginalCode = mystack.OriginalCode Then
     mystack.StaticInUse = basestack.StaticInUse
     Set mystack.StaticCollection = basestack.StaticCollection
@@ -34997,12 +34997,6 @@ Dim flag As Boolean, it As Long, what$, s$, x1 As Long, ss$, bs As basetask, vvl
 Dim c As Constant, myl As lambda, a As Group
 Set basestack = ObjFromPtr(basestackLP)
 If Fast2VarNoTrim(rest$, "текестг", 7, "OPERATOR", 8, 9, F) Then
-'If IsLabelSymbolNew(rest$, "текестг", "OPERATOR", Lang) Then
-' 0 for gre
-' 1 for eng
-'If F - 1 <> Lang Then
-' problem with the language
-'End If
     If ISSTRINGA(rest$, s$) Then
 contoper:
         If ThisPointer(basestack, x1) Then
@@ -35364,7 +35358,8 @@ reenter2:
             bs.tpointer = sbf(x1).tpointer
             bs.OriginalCode = x1
             bs.SetV
-            If Len(here$) = 0 Then
+             If Len(here$) = 0 Then
+               ' bs.StaticInUse = what$
                 here$ = what$
                 Call GoFunc(bs, what$, rest$, vvl, , x1)
                 here$ = vbNullString
