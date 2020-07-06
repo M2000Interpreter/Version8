@@ -14502,24 +14502,37 @@ contnoproper:
                     
                     ElseIf Not Identifier(bstack, w$, b$, Not comhash.Find(w$, i1), Lang) Then
                     
-                            If NOEXECUTION Then
+                        If NOEXECUTION Then
                             MyEr "", ""
                             interpret = False
-                            End If
-                            here$ = ohere$: GoTo there1
-                            ElseIf bstack.callx1 > 0 Then
-                              If lckfrm > 0 Then lckfrm = sb2used + 1
-                              If bstack.NoRun Then
-                              bstack.callx1 = 0
-                              bstack.callohere = vbNullString
-                              b$ = NLtrim(b$)
-                              SetNextLineNL b$
+                        End If
+                        here$ = ohere$: GoTo there1
+                    ElseIf bstack.callx1 > 0 Then
+                        If lckfrm > 0 Then lckfrm = sb2used + 1
+                            If bstack.NoRun Then
+                                bstack.callx1 = 0
+                                bstack.callohere = vbNullString
+                                b$ = NLtrim(b$)
+                                SetNextLineNL b$
                               ElseIf Not ProcModuleEntry(bstack, "", 0, b$, Lang) Then
-                                          If MOUT And b$ = vbNullString Then
+                                If MOUT And b$ = vbNullString Then
                                 Else
                                     MyErMacro b$, "unknown identifier " & w$, "’γνωστο αναγνωριστικό " & w$
                                 End If
+                            
+                            
                              End If
+                            
+                            If bstack.Parent Is Nothing Then
+                                If NOEXECUTION Then
+                                    NOEXECUTION = False
+                                    MyEr "", ""
+                                    Set Basestack1.Sorosref = New mStiva
+                                    b$ = vbNullString
+                                     ClearState
+                                End If
+                               
+                            End If
                     End If
                     
                 End Select

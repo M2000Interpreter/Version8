@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 39 active-X
-Call a lambda function using Call lambda() inside a lambda funtction now work for greek identifiers.
+Version 9.9 revision 40 active-X
+Fix an error - PermStep and PermAll examples now run ok.
 
 
 George Karras, Kallithea Attikis, Greece.

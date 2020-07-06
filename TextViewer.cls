@@ -571,7 +571,7 @@ Dim s$
 If Me.UsedAsTextBox Then
 If FK$(a) <> "" Then
     s$ = FK$(a)
-    interpret basestack1, s$
+    interpret Basestack1, s$
 Fkey = 0
 End If
 a = 0
@@ -1115,7 +1115,7 @@ ElseIf KeyCode = vbKeyY And (shift And 3) = 2 Then
 ' Redo
 profundo.MARKONE
 againY:
-If profundo.MARKTWO > 1000 Then ProcTask2 basestack1: profundo.MARKONE
+If profundo.MARKTWO > 1000 Then ProcTask2 Basestack1: profundo.MARKONE
 If Redopara <> -1 Then
 
 PushUndo
@@ -1197,7 +1197,7 @@ ElseIf KeyCode = vbKeyZ And (shift And 3) = 2 Then
 ' undopos now is selstart
 profundo.MARKONE
 againZ:
-If profundo.MARKTWO > 1000 Then ProcTask2 basestack1: profundo.MARKONE
+If profundo.MARKTWO > 1000 Then ProcTask2 Basestack1: profundo.MARKONE
 If undopara <> -1 Then
 ' seve to redo...
 PushRedo
@@ -1512,7 +1512,7 @@ blockKeyboard = True
 MyDoEvents
 blockKeyboard = False
  On Error Resume Next
- ProcTask2 basestack1
+ ProcTask2 Basestack1
 ''mywait basestack1, 10
 
 If Not NoColor Then SimpleHtmlData pp2
@@ -4745,7 +4745,7 @@ Else
 M2000 = QBColor(ch Mod 16)
 End If
 Case 1
-HighLightColor = rgb(166, 166, 166)
+HighLightColor = rgb(220, 220, 245)
 Select Case ch
 Case 7
 M2000 = rgb(&H68, &H68, &H13)

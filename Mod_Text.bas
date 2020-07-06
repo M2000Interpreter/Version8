@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 39
+Global Const Revision = 40
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -6903,17 +6903,17 @@ GoTo contAr1
 Else
 skiphere:
 If Len(bstack.UseGroupname) > 0 Then
-If InStr(s1$, bstack.UseGroupname) = 1 Then
-
-s1$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(s1$, Len(bstack.UseGroupname) + 1)
-If GetSub(s1$, v1&) Then GoTo contAr1
-End If
+    If InStr(s1$, bstack.UseGroupname) = 1 Then
+        s1$ = bstack.UseGroupname + ChrW(&HFFBF) + Mid$(s1$, Len(bstack.UseGroupname) + 1)
+        If GetSub(s1$, v1&) Then GoTo contAr1
+    End If
 End If
 If Right$(s1$, 1) = ")" Then
     If here$ Like "*." + s1$ Then
         subHash.ItemCreatorNoSwap s1$, bstack.OriginalCode, True
         GoTo contAr1
     ElseIf s1$ = "LAMBDA()" Then
+contlambda01:
         If bstack.IamLambda Then
             s1$ = bstack.FuncRec
         Else
@@ -6924,7 +6924,9 @@ If Right$(s1$, 1) = ")" Then
             v1& = bstack.OriginalCode
            ElseIf Not GetSub(s1$, v1&) Then
                If here$ Like "*." + s1$ Then
-                   subHash.ItemCreatorNoSwap s1$, bstack.OriginalCode, True
+                  ' subHash.ItemCreatorNoSwap s1$, bstack.OriginalCode, True
+                  s1$ = sbf(bstack.OriginalCode).goodname
+                   v1& = bstack.OriginalCode
                Else
                    GoTo skiperror
                End If
@@ -6932,23 +6934,7 @@ If Right$(s1$, 1) = ")" Then
         End If
         GoTo contAr1
     ElseIf s1$ = "калда()" Then
-        If bstack.IamLambda Then
-            s1$ = bstack.FuncRec
-        Else
-           s1$ = Mid$(here$, rinstr(here$, "].") + 2)
-       If Right$(here$, 2) = "()" And bstack.UseGroupname = vbNullString Then
-
-            s1$ = sbf(bstack.OriginalCode).goodname
-            v1& = bstack.OriginalCode
-           ElseIf Not GetSub(s1$, v1&) Then
-               If here$ Like "*." + s1$ Then
-                   subHash.ItemCreatorNoSwap s1$, bstack.OriginalCode, True
-               Else
-                   GoTo skiperror
-               End If
-           End If
-        End If
-        GoTo contAr1
+        GoTo contlambda01
 Else
              If Right$(s1$, 3) <> "$()" Then
         
@@ -6975,7 +6961,8 @@ GoTo skiperror
 End If
 If GetSub(s1$, v1&) Then
 contAr1:
-s1$ = Trim$(s1$)
+'s1$ = Trim$(s1$)
+
     If bstack.NoFuncError Then
     
     CallNext bstack, a$, par, p, v$
@@ -6998,9 +6985,6 @@ Else
     nbstack.tpointer = sbf(v1&).tpointer
     nbstack.SetV
     If GoFunc(nbstack, s1$, a$, p) Then
-       ' If Not nbstack.StaticCollection Is Nothing Then
-     ' bstack.Parent.SetVarobJ "%_" + nbstack.StaticInUse, nbstack.StaticCollection
-     '   End If
         If lookOne(a$, "#") Then
         Set nbstack.lastobj = Nothing
         If Typename(bstack.lastobj) = "Group" Then
@@ -8201,7 +8185,7 @@ conthere1:
            If r$ = vbNullString Then
               a$ = Mid$(a$, 2)
               iscommand = True
-              ElseIf Mid$(a$, 2, 1) <> "(" And r$ <> "" Then
+              ElseIf Mid$(a$, 2, 1) <> "(" And Len(r$) > 0 Then
             r$ = r$ & "."
               a$ = Mid$(a$, 2)
               Else
@@ -8217,11 +8201,11 @@ conthere1:
         Case 46 '"."
             If one Then
                 Exit Do
-            ElseIf r$ <> "" Then
+            ElseIf Len(r$) > 0 Then
                 r$ = r$ & Left$(a$, 1)
                 a$ = Mid$(a$, 2)
             ElseIf Not Mid$(a$, 2, 1) Like "[0-9]" Then
-                If r$ <> "" Then
+                If Len(r$) > 0 Then
                     r$ = r$ & Left$(a$, 1)
                     rr& = 1
                 Else
@@ -8245,7 +8229,7 @@ conthere1:
         Case 48 To 57, 95 '"0" To "9", "_"  ' old ,"\"
             If one Then
                 Exit Do
-            ElseIf r$ <> "" Then
+            ElseIf Len(r$) > 0 Then
                 r$ = r$ & c$
                 a$ = Mid$(a$, 2)
                 rr& = 1 'is an identifier or floating point variable
@@ -8556,7 +8540,7 @@ cont123:
             End If
             Case 36 ' "$"
        If one Then Exit Do
-            If r$ <> "" Then
+            If Len(r$) > 0 Then
             one = True
             rr& = 3 ' is string variable
             r$ = r$ & Left$(a$, 1)
@@ -8566,7 +8550,7 @@ cont123:
             End If
         Case 37 ' "%"
             If one Then Exit Do
-            If r$ <> "" Then
+            If Len(r$) > 0 Then
             one = True
             rr& = 4 ' is long variable
             r$ = r$ & Left$(a$, 1)
@@ -8582,7 +8566,7 @@ cont123:
         r$ = r$ & Left$(a$, 2)
                 a$ = Mid$(a$, 3)
         Case 40 ' "("
-            If r$ <> "" Then
+            If Len(r$) > 0 Then
                 If Mid$(a$, 2, 2) = ")@" Then
                  r$ = r$ & "()."
                 a$ = Mid$(a$, 4)
@@ -8634,7 +8618,7 @@ cont1234:
     If dot& Then
 havedot:
         nocommand = True
-            If r$ <> "" Then
+            If Len(r$) > 0 Then
                 rr& = bstack.GetDotNew(rrr$, dot&) * rr&
                 nocommand = rr&
             Else
@@ -13751,6 +13735,13 @@ itisarrayorfunction:
             ElseIf GetSub2(bstackstr, q1$, w1&) Then
                 GoTo contStrFun
             Else
+            If Len(bstackstr.UseGroupname) > 0 Then
+            If InStr(q1$, bstackstr.UseGroupname) = 1 Then
+            q1$ = bstackstr.UseGroupname + ChrW(&HFFBF) + Mid$(q1$, Len(bstackstr.UseGroupname) + 1)
+            If GetSub(q1$, w1&) Then GoTo contStrFun
+
+            End If
+            End If
                 GoTo skiperrorStr
             End If
             
@@ -13768,14 +13759,8 @@ itisarrayorfunction:
             Else
             If Len(bstackstr.UseGroupname) > 0 Then
             If InStr(q1$, bstackstr.UseGroupname) = 1 Then
-            
-            
-            If neoGetArray(bstackstr, "THIS." + ChrW(&HFFBF) + Mid$(q$, Len(bstackstr.UseGroupname) + 1), pppp, , True) Then
-                GoTo contStrArr
-            Else
             q1$ = bstackstr.UseGroupname + ChrW(&HFFBF) + Mid$(q1$, Len(bstackstr.UseGroupname) + 1)
             If GetSub(q1$, w1&) Then GoTo contStrFun
-            End If
             End If
             End If
 
@@ -14117,6 +14102,7 @@ skiperrorStr:
             
  GoTo contStrFun
         ElseIf q1$ = "LAMBDA$()" Then
+contlambda01:
             If bstackstr.IamLambda Then
              q1$ = bstackstr.FuncRec
              Else
@@ -14127,7 +14113,9 @@ skiperrorStr:
             w1& = bstackstr.OriginalCode
            ElseIf Not GetSub(q1$, w1&) Then
                 If here$ Like "*." + q1$ Then
-                subHash.ItemCreatorNoSwap q1$, bstackstr.OriginalCode, True
+                'subHash.ItemCreatorNoSwap q1$, bstackstr.OriginalCode, True
+                    q1$ = sbf(bstackstr.OriginalCode).goodname
+                    w1& = bstackstr.OriginalCode
                 Else
                 GoTo skiperrorStr
                 End If
@@ -14135,23 +14123,7 @@ skiperrorStr:
              End If
              GoTo contStrFun
         ElseIf q1$ = "калда$()" Then
-            If bstackstr.IamLambda Then
-             q1$ = bstackstr.FuncRec
-             Else
-             q1$ = Mid$(here$, rinstr(here$, "].") + 2)
-                    If Right$(here$, 2) = "()" And bstackstr.UseGroupname = vbNullString Then
-
-            q1$ = sbf(bstackstr.OriginalCode).goodname
-            w1& = bstackstr.OriginalCode
-           ElseIf Not GetSub(q1$, w1&) Then
-                    If here$ Like "*." + q1$ Then
-                    subHash.ItemCreatorNoSwap q1$, bstackstr.OriginalCode, True
-                    Else
-                    GoTo skiperrorStr
-                    End If
-                    End If
-             End If
-             GoTo contStrFun
+            GoTo contlambda01
         End If
 End If
         If strfunidbackup.Find(q$, w2) Then GoTo findthird
@@ -15054,6 +15026,9 @@ sss = Len(b$): lbl = True
 
 Do While Len(b$) <> LLL
     If NOEXECUTION Then
+    NOEXECUTION = False
+    MyClear bstack, ""
+    NOEXECUTION = True
         MyEr "", ""
         k1 = 0
         REFRESHRATE = 40
@@ -35468,16 +35443,23 @@ myerror1:
                     If Lang = 1 Then
                         If what$ = "LAMBDA(" Then
 again111:
-                            ss$ = Mid$(here$, rinstr(here$, "].") + 2)
-                            If Right$(here$, 2) = "()" Then
-                                If basestack.UseGroupname = vbNullString Then
-                                    it = GetSub(ss$, x1)
-                                Else
-                                    it = GetSub(ss$, x1)
-                                    If Not it Then
-                                        If basestack.FuncRec <> vbNullString Then
-                                            ss$ = basestack.FuncRec
-                                            it = GetSub(ss$, x1)
+                            If basestack.IamLambda Then
+                            ss$ = basestack.FuncRec
+                            it = GetSub(ss$, x1)
+                            Else
+                                ss$ = Mid$(here$, rinstr(here$, "].") + 2)
+                                If Right$(here$, 2) = "()" Then
+                                    If Right$(here$, 2) = "()" And basestack.UseGroupname = vbNullString Then
+                                        ss$ = sbf(basestack.OriginalCode).goodname
+                                        x1 = basestack.OriginalCode
+                                        it = 1
+                                    Else
+                                        it = GetSub(ss$, x1)
+                                        If Not it Then
+                                            If here$ Like "*." + ss$ Then
+                                                x1 = basestack.OriginalCode
+                                                it = 1
+                                            End If
                                         End If
                                     End If
                                 End If
@@ -37260,6 +37242,8 @@ checkconstant:
                                         Exit Function
                                     End If
                                 End If
+                            ElseIf TypeOf var(i).objref Is mStiva Then
+                                If Not Fast2Varl(rest$, "сыяос", 5, "STACK", 5, 5, ff) Then MyRead = False: MissType: Exit Function
                             ElseIf TypeOf var(i).objref Is MemBlock Then
                                 If Not Fast2Varl(rest$, "диаяхяысг", 9, "BUFFER", 6, 9, ff) Then MyRead = False: MissType: Exit Function
                             ElseIf var(i).t1 = 4 Then
@@ -38006,8 +37990,16 @@ contpointer:
                 ElseIf myobject.t1 = 3 Then
                     If Fast2Varl(rest$, "пимайас", 7, "ARRAY", 5, 7, ff) Then
                         If Not CheckIsmArray(myobject) Then GoTo er103
+                        Set useHandler = New mHandler
+                        Set useHandler.objref = myobject
+                        useHandler.t1 = 3
+                        Set myobject = useHandler
                     ElseIf Fast2Varl(rest$, "сыяос", 5, "STACK", 5, 5, ff) Then
                         If Not CheckIsmStiva(myobject) Then GoTo er103
+                        Set useHandler = New mHandler
+                        Set useHandler.objref = myobject
+                        useHandler.t1 = 3
+                        Set myobject = useHandler
                     ElseIf Typename(myobject.objref) = "mHandler" Then
                     
                         If myobject.objref.t1 = 4 Then
@@ -42526,13 +42518,7 @@ If x1 < 0 Then
             If F + x1 > .mx Then x1 = .mx - F - 1
             If it > .My \ 2 Then it = .My \ 2
             If CLng(.My - y1) < it Then  ' need space above
-                If .My - y1 > 2 Then  ' if we have space under
-                    it = .My - .currow - 1
-                    
-                Else  ' no we dont have
-                   y1 = .My - it - 1
-                
-                End If
+                 y1 = .currow - it
             End If
 
             If Not Form1.Visible Then newshow Basestack1: MyDoEvents
@@ -47779,6 +47765,7 @@ len1234:
                         Exit Function
                     End If
                 Else
+                    IsLen = FastSymbol(a$, ")", True)
                     r = SG * -1
 
                 End If
@@ -47789,6 +47776,7 @@ len1234:
                 Set bstack.lastobj = Nothing
                 Exit Function
         Else
+                IsLen = FastSymbol(a$, ")", True)
                 r = SG * -1
                 
         
@@ -56401,7 +56389,33 @@ Set obj = oldobj
 End Function
 
 
-
+Sub ClearState()
+Basestack1.IamAnEvent = False
+abt = False
+Set comhash = New sbHash
+allcommands comhash
+Set numid = New idHash
+Set funid = New idHash
+Set strid = New idHash
+Set strfunid = New idHash
+NumberId numid, funid
+StringId strid, strfunid
+NoOptimum = False
+NERR = False
+TaskMaster.Dispose
+CloseAllConnections
+CleanupLibHandles
+If Not NOEDIT Then
+NOEDIT = True
+Else
+If QRY Then QRY = False
+End If
+' restore DB.Provider for User
+JetPrefixUser = JetPrefixHelp
+JetPostfixUser = JetPostfixHelp
+' SET ARRAY BASE TO ZERO
+ArrBase = 0
+End Sub
 
 
 

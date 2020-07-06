@@ -5431,13 +5431,13 @@ Report {
 	You can see the global variables, If any exist, defined in console  (write A=10 then press F3 )
 	Use statement Clear to clear all variables (including static variables if any)
 	}
-List
+Pen 11 {List}
 title("Stack")
 Report {
 	You can see the stack of values, If has any value
 	Use statement Flush to empty the stack
 	}
-Stack
+Pen 11 {Stack}
 title("Useful Statements")
 Report {
 	Help All, Help Print, Help  |	Monitor  (to see switches), shitches
@@ -5474,7 +5474,9 @@ FKey 14,"Pend  ' Pendulum Animation"
 FKey 20,"Pong  ' SoloPong - for one player"
 Fkey 21, "minesweeper  ' edit the code to change the game board size"
 Title("Fkey")
-Fkey
+Report {
+Fkey + Enter to see the Function Keys
+}
 \\title("M2000 Writer")
 \\Keyboard "Writer"+chr$(13)
 show
@@ -5492,7 +5494,7 @@ End Sub
 MODULE SAVEME {Print "Wait..."
 Title "Info"
 dir user
-save info, {UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}}
+save info, {UseThis : InfoBasic :Fkey: Pen 15 {Print "Press F3 now"}}
 Print "Done"
 
 }
@@ -6556,14 +6558,14 @@ Set Fast   ' return to normal
 MODULE UPDATE {beep
 Title "Info"
 dir appdir$
-save info, {UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}}
+save info, {UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}}
 if isnum then {
 	drop
 	open "info.bck" for output as #N
 	close #N
 }
 dir user
-save info, {UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}}
+save info, {UseThis : InfoBasic : Fkey: Pen 15 {Print "Press F3 now"}}
 }
 MODULE BJ { Escape Off
  Flush  \\empty Stack, we use optional arguments in Modules
@@ -16943,7 +16945,7 @@ Rem Print type$(m.price)="Constant"
 Class BookDB {
 Private:
       countme=0
-      dim p()
+      dim base 0, p()
 Public:
       module final AddBook {
             newdim =.countme+1
@@ -16995,7 +16997,7 @@ MODULE BOOK1 {prototype {
       function AddBook {
             for this {
                   newdim =.countme+1
-                  dim .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
+                  dim base 0, .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
                   read .t$(.countme), .a$(.countme), .p(.countme), .pb(.countme)
                   .countme++
             }
@@ -17044,7 +17046,7 @@ MODULE BOOK2 {class BookDB {
       dim t$(), a$(), p(), pb()
       module AddBook {
             newdim =.countme+1
-            dim .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
+            dim base 0, .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
             read .t$(.countme), .a$(.countme), .p(.countme), .pb(.countme)
             .countme++
       }
@@ -17170,7 +17172,7 @@ SecondbookDB=bookDB()
 MODULE BOOK4 {\\ we pass a group function by reference
 class booktype {
       local countme=0
-      dim t$(), a$(), p(), pb()
+      dim base 0,  t$(), a$(), p(), pb()
       module AddBook {
                   newdim =.countme+1
                   dim .t$(newdim), .a$(newdim), .p(newdim), .pb(newdim)      
@@ -20717,7 +20719,8 @@ MODULE MAXITEM {Module TestThis {
 }
 TestThis
 }
-MODULE INFO {keyboard "UseThis : InfoBasic"+chr$(13)
+MODULE INFO {keyboard "UseThis : InfoBasic : Fkey"+chr$(13)
+
 }
 MODULE CLOCK1 {''keyboard " clock %ok=1 : clear :  info "+chr$(13)
 Report{
@@ -25905,4 +25908,4 @@ Sub What(a as Pet)
 	Report exp$
 End Sub
 }
-UseThis : InfoBasic : Pen 15 {Print "Press F3 now"}
+UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}
