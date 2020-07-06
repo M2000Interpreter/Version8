@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 40 active-X
-Fix an error - PermStep and PermAll examples now run ok.
+Version 9.9 revision 41 active-X
+Fix an error so now program BJ executed as usual (in info.gsb)
 
 
 George Karras, Kallithea Attikis, Greece.

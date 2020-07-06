@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 40
+Global Const Revision = 41
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -41221,7 +41221,15 @@ conthere:
             If FastSymbol(rest$, "=") Then
              GoTo there12
              Else
-             var(i).objref.drop 0
+                If MyIsObject(var(i)) Then
+                If TypeOf var(i) Is mHandler Then
+                    If var(i).t1 = 1 Then
+                        If Not var(i).objref Is Nothing Then
+                            var(i).objref.drop 0
+                        End If
+                    End If
+                    End If
+                End If
              GoTo makeitnow1
              End If
            ' use global inventory for global ' change from revision 19-version 8.7
@@ -41243,7 +41251,16 @@ lookglobal:
              End If
             End If
             ElseIf GetVar(bstack, bstack.GroupName & what$, i, True) Then
-            var(i).objref.drop 0
+            
+            If MyIsObject(var(i)) Then
+                If TypeOf var(i) Is mHandler Then
+                    If var(i).t1 = 1 Then
+                        If Not var(i).objref Is Nothing Then
+                            var(i).objref.drop 0
+                        End If
+                    End If
+                End If
+            End If
              GoTo makeitnow1
             Else
         
