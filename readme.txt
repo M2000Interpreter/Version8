@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 38 active-X
-from static variables removed a bug.
+Version 9.9 revision 39 active-X
+Call a lambda function using Call lambda() inside a lambda funtction now work for greek identifiers.
 
 
 George Karras, Kallithea Attikis, Greece.

@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 38
+Global Const Revision = 39
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -35464,24 +35464,34 @@ myerror1:
                         MakeThisSub basestack, ss$
                         it = GetSub(ss$, x1)
                     End If
-                ElseIf what$ = "LAMBDA(" Then
+                Else
+                    If Lang = 1 Then
+                        If what$ = "LAMBDA(" Then
 again111:
-                    ss$ = Mid$(here$, rinstr(here$, "].") + 2)
-                    If Right$(here$, 2) = "()" Then
-                        If basestack.UseGroupname = vbNullString Then
-                            it = GetSub(ss$, x1)
-                        Else
-                            it = GetSub(ss$, x1)
-                            If Not it Then
-                                If basestack.FuncRec <> vbNullString Then
-                                    ss$ = basestack.FuncRec
+                            ss$ = Mid$(here$, rinstr(here$, "].") + 2)
+                            If Right$(here$, 2) = "()" Then
+                                If basestack.UseGroupname = vbNullString Then
                                     it = GetSub(ss$, x1)
+                                Else
+                                    it = GetSub(ss$, x1)
+                                    If Not it Then
+                                        If basestack.FuncRec <> vbNullString Then
+                                            ss$ = basestack.FuncRec
+                                            it = GetSub(ss$, x1)
+                                        End If
+                                    End If
                                 End If
                             End If
+                        ElseIf what$ = "LAMBDA$(" Then
+                            GoTo again111
+                        End If
+                    Else
+                        If what$ = "калда(" Then
+                            GoTo again111
+                        ElseIf what$ = "калда$(" Then
+                            GoTo again111
                         End If
                     End If
-                ElseIf what$ = "LAMBDA$(" Then
-                    GoTo again111
                 End If
             End If
         End If
