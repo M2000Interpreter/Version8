@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 42
+Global Const Revision = 43
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -2926,7 +2926,15 @@ getnextnum:
                 If Not TypeOf bstack.lastobj Is Group Then MissingGroup: IsExpA = False: Exit Function
                 If Not bstack.lastpointer Is Nothing Then
                     If bstack.lastpointer.IamFloatGroup Then
-                Set bstack.lastobj = bstack.lastpointer
+                    If bstack.lastpointer Is NullGroup Then
+                        Set bstack.lastobj = New Group
+                        bstack.lastobj.BeginFloat 0
+                        bstack.lastobj.EndFloat
+                    Else
+                        Set bstack.lastobj = bstack.lastpointer
+                        
+                   
+                End If
                 Else
                 With bstack.lastobj
                     ut$ = "Group(" + .lasthere + "." + .GroupName + ")"
@@ -3206,7 +3214,13 @@ a1290456:
                             If TypeOf bstack.lastobj Is Group Then
                                 If Not bstack.lastpointer Is Nothing Then
                                     If bstack.lastpointer.IamFloatGroup Then
+                                      If bstack.lastpointer Is NullGroup Then
+                                            Set bstack.lastobj = New Group
+                                            bstack.lastobj.BeginFloat 0
+                                            bstack.lastobj.EndFloat
+                                        Else
                                         Set bstack.lastobj = bstack.lastpointer
+                                        End If
                                     Else
                                         With bstack.lastobj
                                             ut$ = "Group(" + .lasthere + "." + .GroupName + ")"
@@ -27708,11 +27722,17 @@ Set myobject = myobject1
 Set ThisGroup = var(i)
 If myobject.IamApointer Then
     If ThisGroup.IamApointer Then Set var(i) = myobject: Exit Sub
-    If myobject.link.IamFloatGroup Or ThisGroup.soros.Total = 0 Then
+    If myobject.link.IamFloatGroup And ThisGroup.soros.Total = 0 Then
         Set var(i) = myobject
         Exit Sub
     ElseIf myobject.link.IamFloatGroup Then
+    If myobject.link Is NullGroup Then
+        Set myobject = New Group
+        myobject.BeginFloat 0
+        myobject.EndFloat
+    Else
         Set myobject = CopyGroupObj(myobject.link)
+        End If
     Else
         SwapStrings ohere$, here$
         here$ = myobject.lasthere
@@ -37929,7 +37949,14 @@ errgr:
                     If myobject.IamApointer Then
                     If myobject.link.IamFloatGroup Then
 oop0:
+                        If myobject.link Is NullGroup Then
+                        Set myobject = New Group
+                        myobject.BeginFloat 0
+                        myobject.EndFloat
+                        UnFloatGroup bstack, bstack.GroupName & what$, i, myobject, here$ = vbNullString Or Len(bstack.UseGroupname) > 0
+                        Else
                         UnFloatGroup bstack, bstack.GroupName & what$, i, myobject.link, here$ = vbNullString Or Len(bstack.UseGroupname) > 0
+                        End If
                     Else
                     CopyPointerRef bstack, myobject
 oop1:

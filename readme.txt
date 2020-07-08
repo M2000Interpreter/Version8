@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 41 active-X
-Clear a named group works better now in OOP.
+Version 9.9 revision 43 active-X
+Final Revision
 
 
 George Karras, Kallithea Attikis, Greece.
