@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
 Version 9.9 revision 41 active-X
-Fix an error so now program BJ executed as usual (in info.gsb)
+Clear a named group works better now in OOP.
 
 
 George Karras, Kallithea Attikis, Greece.

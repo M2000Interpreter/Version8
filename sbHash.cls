@@ -57,7 +57,7 @@ Friend Sub Expand(NewMaxSpace As Long)
            If MaxSpace > hashlen Then ExpandHash
 End Sub
 Friend Sub ReduceHash(newTop As Long, v() As modfun)
-    Dim i As Long
+    Dim i As Long, m As modfun
     If toplim < newTop Then Exit Sub
     For i = toplim To newTop Step -1
        With PriveSpace(i)
@@ -72,14 +72,16 @@ Friend Sub ReduceHash(newTop As Long, v() As modfun)
             .Key = vbNullString
         End If
         If .KeyType = 0 And .ndx >= 0 Then
-            v(.ndx).sb = vbNullString
-            v(.ndx).sbc = 0
-            v(.ndx).sbgroup = vbNullString
-            v(.ndx).goodname = vbNullString
-            v(.ndx).locked = False
-            v(.ndx).tpointer = 0
-            v(.ndx).IamAClass = False
-            Set v(.ndx).subs = Nothing
+                v(.ndx) = m
+            'v(.ndx).sb = vbNullString
+            'v(.ndx).sbc = 0
+            'v(.ndx).sbgroup = vbNullString
+            'v(.ndx).goodname = vbNullString
+            'v(.ndx).locked = False
+            'v(.ndx).tpointer = 0
+            'v(.ndx).IamAClass = False
+            'v(.ndx).IamAClass = False
+            'Set v(.ndx).subs = Nothing
         End If
         .KeyType = 0
         .ndx = -1

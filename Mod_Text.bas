@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 41
+Global Const Revision = 42
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -5411,9 +5411,18 @@ If GetVar(bstack, v$, VR) Then
                 If SG < 0 Then r = -r
             End If
         ElseIf v$ = "Group" Then
-            If var(VR).HasValue And Not IsOperator(a$, "::", 2) Then
-            If Len(var(VR).Patch) > 0 Then
-                s1$ = var(VR).Patch + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
+            Set userGroup = var(VR)
+            If userGroup.IamCleared Then
+            Set userGroup = New Group
+            userGroup.BeginFloat 0
+            userGroup.EndFloat
+            Set bstack.lastobj = userGroup
+            IsNumberNew = True
+            Exit Function
+            End If
+            If userGroup.HasValue And Not IsOperator(a$, "::", 2) Then
+            If Len(userGroup.Patch) > 0 Then
+                s1$ = userGroup.Patch + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
             Else
                 s1$ = n$ + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
                 End If
@@ -5475,14 +5484,14 @@ foundprivate:
                         IsNumberNew = False
                     End If
                 Else
-                    If var(VR).HasStrValue Then
+                    If userGroup.HasStrValue Then
                         r = 0
                         Set bstack.lastobj = CopyGroupObj(var(VR))
                     Else
                         r = 0
                        
                         
-                        s1$ = var(VR).Patch + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
+                        s1$ = userGroup.Patch + "." + ChrW(&H1FFF) + ChrW(&H1FFD) + "()"
                          If Left$(s1$, Len(here$) + 1) = here$ + "." Then
                          s1$ = Mid$(s1$, Len(here$) + 2)
                          End If
@@ -5494,11 +5503,10 @@ foundprivate:
             Else
              
                 r = 0
-                If var(VR).IamApointer Then  ' ???
+                If userGroup.IamApointer Then  ' ???
                 If Mid(a$, 1, 2) = "=>" Then
-                If var(VR).link.IamFloatGroup Then
+                If userGroup.link.IamFloatGroup Then
                 Set pppp = BoxGroupVar(var(VR))
-grouppointer1:
                 
                 Mid$(a$, 1, 2) = "." + Chr(3)
                 IsNumberNew = SpeedGroup(bstack, pppp, "VAL", "", a$, (0)) = 1
@@ -5506,14 +5514,14 @@ grouppointer1:
                 If SG < 0 Then r = -r
                 Else
                 Mid(a$, 1, 2) = Chr$(0) + "."
-                Set bstack.lastpointer = var(VR)
+                Set bstack.lastpointer = userGroup
                 
                 GoTo againpointer
                 End If
                 
                 Else
-                Set bstack.lastpointer = var(VR).link
-                Set bstack.lastobj = var(VR)
+                Set bstack.lastpointer = userGroup.link
+                Set bstack.lastobj = userGroup
                 End If
                 Else
                 CopyGroup2 var(VR), bstack
@@ -24117,6 +24125,7 @@ Dim myobject As Object
 Dim OvarnameLen As Long, OarrnameLen As Long
 Dim F$
 Dim pppp As mArray
+ThisGroup.IamCleared = False
 bstack.CopyStrip stripstack1
 OvarnameLen = varhash.count + 1 ' new way
 If Len(here$) > 0 Then
@@ -27524,6 +27533,9 @@ ThisGroup.HasRemove = .HasRemove
                                     UnFloatGroup bstack, Mid$(s$, 2), v, spare, glob, temp, MakeNew
                                 End If
                                 here$ = ohere$
+                                Set Other = Nothing
+                                
+    
                                 Set spare = Nothing
                             End If
                             ps.DataStr s$ + Str(v)
@@ -27562,6 +27574,9 @@ cont1010:
             here$ = vbNullString
         Else
             here$ = ohere$
+        End If
+        If MyIsObject(vvl) Then
+        Set vvl = Nothing
         End If
         .PeekItem x1, vvl
         If Trim$(vvl) <> "" Then
@@ -27741,6 +27756,7 @@ Set ps = var(i).soros
 Dim subgroup As Object, pppp As mArray
 Dim oldgroupname$, glob As Boolean
 ohere$ = here$  ' get a backup
+
  glob = ThisGroup.IamGlobal
  uni = myobject.IamSuperClass
   If Not myobject.SuperClassList Is Nothing Then
@@ -27913,7 +27929,7 @@ cont1010:
                 If Len(ss$) > 6 Then
                         x1 = IsLabelA1("", s$, ss$)
                         frm$ = vbNullString
-                        If MyFunction(-2 * (&H1FFF = AscW(ss$)), bstack, sss$, 1, True, MakeNew, , bypassnew) Then '' >6 len for function
+                        If MyFunction(-2 * (&H1FFF = AscW(ss$)), bstack, sss$, 1, True, MakeNew, , bypassnew) Then     '' >6 len for function
                         If Asc(s$) <> 32 Then
                             If InStr(s$, " ") = 2 Then
                                 ss$ = ss$ + Left$(s$, 1)
@@ -27978,6 +27994,7 @@ cont1010:
     End If
 End With
 With ThisGroup
+    .IamCleared = False
     .HasValue = myobject.HasValue Or .HasValue
     .HasSet = myobject.HasSet Or .HasSet
     .HasStrValue = myobject.HasStrValue Or .HasStrValue
@@ -28046,7 +28063,27 @@ End If
 Wend
 GetFunctionList = F$
 End Function
+Sub ResetFunctionList(s$)
+Dim c$, k$(), final As Long
+While s$ <> ""
+If ISSTRINGA(s$, c$) Then
+k$() = Split(c$, " ")
+final = val(k$(1))
+With sbf(Abs(final))
+.sb = vbNullString
+.sbc = 0
 
+.sbgroup = vbNullString
+.goodname = vbNullString
+.locked = False
+.tpointer = 0
+.IamAClass = False
+Set .subs = Nothing
+End With
+End If
+Wend
+
+End Sub
 Sub MakeMyTitle(s$, Lang As Long)
      If InStr(s$, "(") > 0 Then
             If shortlang Then
@@ -39227,9 +39264,10 @@ ElseIf y1 < 5 And y1 > 0 Then
        Dim ok As Boolean
        var(i) = CLng(0)
        ElseIf Typename(var(i)) = "Group" Then
-
+        If Not var(i).IamCleared Then
         CallClear bstack, what$, var(i)
 
+        
         
         If var(i).IamApointer Then
         Set var(i) = New Group
@@ -39237,7 +39275,7 @@ ElseIf y1 < 5 And y1 > 0 Then
         Else
        var(i).ResetGroup
        End If
-    
+        End If
        ElseIf Typename(var(i)) = "mHandler" Then
        If var(i).t1 = 1 Then
        If var(i).ReadOnly Then
@@ -49616,8 +49654,16 @@ If var(w1).IamApointer Then
     If var(w1).link.IamFloatGroup Then
     '  var(w1).link
       Set bstack.lastpointer = Nothing
+      If var(w1).link Is NullGroup Then
+      Set aGroup = New Group
+      aGroup.BeginFloat 0
+      aGroup.EndFloat
+      Set mygroup = aGroup
+      
+      Else
      bstack.soros.CopyGroupObj var(w1).link, mygroup
      Set aGroup = mygroup
+     End If
      aGroup.ToDelete = True
      Set bstack.lastobj = mygroup
     Else  ' need to make a copy group using
@@ -49645,7 +49691,14 @@ If Typename(p) = "Group" Then
 If aGroup.IamApointer Then
     If aGroup.link.IamFloatGroup Then
            Set bstack.lastpointer = Nothing
+           If aGroup.link Is NullGroup Then
+      Set aGroup = New Group
+      aGroup.BeginFloat 0
+      aGroup.EndFloat
+      Set mygroup = aGroup
+      Else
            Set mygroup = aGroup.link
+           End If
      bstack.soros.CopyGroupObj mygroup, mygroup2
         Set aGroup = mygroup2
         aGroup.ToDelete = True
@@ -49837,6 +49890,7 @@ checkagain:
                             p.BeginFloat 2
                             NullGroup.GroupName = "NULL"
                             NullGroup.PutIs = "NULL"
+                            NullGroup.PutIs = "лгдемийос"
                             End If
                             MakeGroupPointer bstack, p
                             GetPointer = True
@@ -50440,9 +50494,9 @@ checkobject:
                                 If myobject.IamApointer Then
                                 Set var(v) = myobject
                                 Else
-                                myobject.ToDelete = False
+                                myobject.ToDelete = True
                                  UnFloatGroup bstack, w$, v, myobject, VarStat Or isglobal, , Typename(var(v)) = "Empty"       ' global??
-                                 myobject.ToDelete = True
+                                ' myobject.ToDelete = True
                                  If Len(bstack.UseGroupname) <> 0 Then
                                  var(v).IamRef = True
                                  If Not (VarStat Or isglobal) Then
@@ -50607,6 +50661,7 @@ assigngroup:
                                     UnFloatGroupReWriteVars bstack, var(v).Patch, v, myobject
                                     here = sw$
                                     Else
+                                    
                                     UnFloatGroupReWriteVars bstack, w$, v, myobject
                                     End If
                                     myobject.ToDelete = True

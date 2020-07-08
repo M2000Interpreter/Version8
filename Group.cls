@@ -41,6 +41,7 @@ Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Public PointerPtr As Long
 Public ToDelete As Boolean, HasRemove As Boolean, mytypes As Collection
+Public IamCleared As Boolean
 Friend Property Let PutIs(RHS As String)
 If mytypes Is Nothing Then
     Set mytypes = New Collection
@@ -452,9 +453,13 @@ If Not mTeam Then mTag = vNewValue
 End Property
 
 Public Sub ResetGroup()
+IamCleared = True
 Set SuperClassList = Nothing
-If IamFloatGroup Then EndFloat
+If FloatGroup Then EndFloat
 Set LinkToGroup = Nothing
+'mName = vbNullString
+'mFloatGroupName = vbNullString
+FloatGroup = False
 Set OwnSoros = New mStiva2
 Set mytypes = Nothing
 HasValue = False
@@ -462,9 +467,15 @@ HasSet = False
 HasStrValue = False
 HasParameters = False
 IamSuperClass = False
-FuncRef = vbNullString
+oldFuncRef = vbNullString
+ResetFunctionList FuncRef
 LocalRef = vbNullString
 VarRef = vbNullString
+ToDelete = False
+HasRemove = True
+highpriorityoper = vbNullString
+HasUnary = False
+
 End Sub
 Public Property Get refcount1() As Long
 Dim m As Long
@@ -472,7 +483,6 @@ m = GetRefCount(Me)
 If m > 3 Then refcount1 = m - 3 Else refcount1 = 0
 
 End Property
-
 Private Function GetRefCount(ByRef vvv) As Long
     If Not IsObject(vvv) Then Exit Function
     Dim obj As IUnknown
