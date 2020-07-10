@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 43 active-X
-Final Revision
+Version 9.9 revision 44 active-X
+An optimization only from revision 43
 
 
 George Karras, Kallithea Attikis, Greece.

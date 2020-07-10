@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 43
+Global Const Revision = 44
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -24661,7 +24661,7 @@ classcontclass:
         If prv Then F$ = ChrW(&HFFBF) + F$
 funcoperator:
         If x1 <> 0 Then
-            If Len(ThisGroup.FuncList) = 0 And Not alocal Then ' maybe we have it
+           If Len(ThisGroup.FuncList) > 0 And Not alocal Then ' maybe we have it
                 If InStr(ThisGroup.FuncList, Chr$(2) + F$ + "() ") > 0 Then
                     If FastSymbol(rest$, "(") Then
                         frm$ = BlockParam(rest$)
@@ -24837,7 +24837,7 @@ final = IsLabelSymbolNew(rest$, "текийо", "FINAL", Lang)
 x1 = Abs(IsLabelF(rest$, F$))
     If prv Then F$ = ChrW(&HFFBF) + F$
 If x1 <> 0 Then
-  If ThisGroup.FuncList <> "" Then  ' maybe we have it
+  If ThisGroup.FuncList <> "" And Not alocal Then  ' maybe we have it
   If InStr(ThisGroup.FuncList, Chr$(3) + F$ + " ") > 0 Then
     If FastSymbol(rest$, "(") Then
         frm$ = BlockParam(rest$)
