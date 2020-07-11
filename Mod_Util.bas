@@ -9280,7 +9280,7 @@ Function IsHILOWWORD(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
     Dim p As Variant
     If IsExp(bstack, a$, r, , True) Then
         If FastSymbol(a$, ",") Then
-              If IsExp(bstack, a$, p) Then
+              If IsExp(bstack, a$, p, , True) Then
                     r = SG * (r * &H10000 + p)
                     
                      IsHILOWWORD = FastSymbol(a$, ")", True)
@@ -9340,7 +9340,7 @@ Function IsBinaryOr(bstack As basetask, a$, r As Variant, SG As Variant) As Bool
         Dim p As Variant
      If IsExp(bstack, a$, r, , True) Then
         If FastSymbol(a$, ",") Then
-        If IsExp(bstack, a$, p) Then
+        If IsExp(bstack, a$, p, , True) Then
             r = SG * uintnew1(signlong2(r) Or signlong2(p))
          IsBinaryOr = FastSymbol(a$, ")", True)
            Else
@@ -9407,9 +9407,9 @@ Function IsBinaryAnd(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
 End Function
 Function IsBinaryXor(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
     Dim p As Variant
-        If IsExp(bstack, a$, r, True) Then
+        If IsExp(bstack, a$, r, , True) Then
             If FastSymbol(a$, ",") Then
-                If IsExp(bstack, a$, p) Then
+                If IsExp(bstack, a$, p, , True) Then
                     r = SG * uintnew1(signlong2(r) Xor signlong2(p))
                     
                     IsBinaryXor = FastSymbol(a$, ")", True)
@@ -9432,7 +9432,7 @@ Dim p As Variant
    If IsExp(bstack, a$, r, , True) Then
   
             If FastSymbol(a$, ",") Then
-                    If IsExp(bstack, a$, p) Then
+                    If IsExp(bstack, a$, p, , True) Then
                          If p > 31 Or p < -31 Then
                          
                          MyErMacro a$, "Shift from -31 to 31", "Ïëßóèçóç áðü -31 ùò 31"
@@ -9470,7 +9470,7 @@ Function IsBinaryRotate(bstack As basetask, a$, r As Variant, SG As Variant) As 
 Dim p As Variant
         If IsExp(bstack, a$, r, , True) Then
              If FastSymbol(a$, ",") Then
-                 If IsExp(bstack, a$, p) Then
+                 If IsExp(bstack, a$, p, , True) Then
                         If p > 31 Or p < -31 Then
                             
                               MyErMacro a$, "Rotation from -31 to 31", "ÐåñéóôïöÞ áðü -31 ùò 31"
@@ -9614,7 +9614,7 @@ Function IsFreq(bstack As basetask, a$, r As Variant, SG As Variant) As Boolean
 Dim p As Variant
     If IsExp(bstack, a$, r, , True) Then
            If FastSymbol(a$, ",") Then
-                If IsExp(bstack, a$, p) Then
+                If IsExp(bstack, a$, p, , True) Then
                     r = SG * GetFrequency(CInt(r), CInt(p))
                     
                     IsFreq = FastSymbol(a$, ")", True)
@@ -10420,7 +10420,7 @@ If IsExp(bstack, a$, r) Then
             noImageInBuffer a$
             GetImageX = False
             r = 0#
-    
+            Set bstack.lastobj = Nothing
 Else
 w1 = Abs(IsLabel(bstack, a$, s$))
         If w1 = 3 Then
@@ -10483,7 +10483,7 @@ If IsExp(bstack, a$, r) Then
             noImageInBuffer a$
             GetImageY = False
             r = 0#
-    
+            Set bstack.lastobj = Nothing
 Else
 w1 = Abs(IsLabel(bstack, a$, s$))
         If w1 = 3 Then
@@ -10546,7 +10546,7 @@ If IsExp(bstack, a$, r) Then
             noImageInBuffer a$
             GetImageXpixels = False
             r = 0#
-    
+            Set bstack.lastobj = Nothing
 Else
 w1 = Abs(IsLabel(bstack, a$, s$))
         If w1 = 3 Then
@@ -10609,7 +10609,7 @@ If IsExp(bstack, a$, r) Then
             noImageInBuffer a$
             GetImageYpixels = False
             r = 0#
-    
+            Set bstack.lastobj = Nothing
 Else
 w1 = Abs(IsLabel(bstack, a$, s$))
         If w1 = 3 Then
@@ -11729,16 +11729,16 @@ Case "SORT", "ÔÁÎÉÍÏÌÇÓÇ"
 w2 = 0
 w3 = -1
 w4 = -1
-If IsExp(bstack, a$, p) Then
+If IsExp(bstack, a$, p, , True) Then
 w2 = CLng(p)
 End If
 If FastSymbol(a$, ",") Then
-If IsExp(bstack, a$, p) Then
+If IsExp(bstack, a$, p, , True) Then
 w3 = CLng(p)
 End If
 End If
 If FastSymbol(a$, ",") Then
-If IsExp(bstack, a$, p) Then
+If IsExp(bstack, a$, p, , True) Then
 w4 = CLng(p)
 End If
 End If
@@ -11768,7 +11768,7 @@ If IsExp(bstack, a$, p) Then
     If Not bstack.lastobj Is Nothing Then
         Set anything = bstack.lastobj
         If FastSymbol(a$, ",") Then
-            If IsExp(bstack, a$, p) Then
+            If IsExp(bstack, a$, p, , True) Then
                  res = p
             ElseIf IsStrExp(bstack, a$, Pad$) Then
                 res = Pad$
@@ -11829,7 +11829,7 @@ End If
 res = 0
 If FastSymbol(a$, ",") Then
     If pppp.count = 0 Then
-        If IsExp(bstack, a$, p) Then
+        If IsExp(bstack, a$, p, , True) Then
              res = p: retresonly = True
         ElseIf IsStrExp(bstack, a$, Pad$) Then
             res = Pad$: retresonly = True
@@ -11911,7 +11911,7 @@ Case "POS", "ÈÅÓÇ"
     res = -1
     cur = 0
     Dim st() As String, sn() As Variant
-    If IsExp(bstack, a$, p) Then
+    If IsExp(bstack, a$, p, , True) Then
         p = Int(p)
         If p < 0 Then p = 0
 again1:
@@ -13321,7 +13321,7 @@ Function IsDataVal(bstack As basetask, a$, r As Variant, SG As Variant) As Boole
  Dim s$, p
     If IsStrExp(bstack, a$, s$) Then
     If FastSymbol(a$, ",") Then
-    If Not IsExp(bstack, a$, p) Then
+    If Not IsExp(bstack, a$, p, , True) Then
         p = cLid
     End If
     On Error Resume Next
@@ -15473,7 +15473,7 @@ ExistNum = False
                 ElseIf IsStrExp(bstack, a$, s$) Then
                     Set bstack.lastobj = Nothing
                     If FastSymbol(a$, ",") Then
-                        If IsExp(bstack, a$, X) Then
+                        If IsExp(bstack, a$, X, , True) Then
                             X = Int(X)
                             If X = 0 Then
                                 r = .objref.FindOne(s$, X)

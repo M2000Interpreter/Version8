@@ -1,8 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 44 active-X
-An optimization only from revision 43
-
+Version 9.9 revision 45 active-X
+A fix for enum variables. now a a$=chr$(enumvar) return a string to a$ not an object, which was a fault. 
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

@@ -1465,7 +1465,7 @@ Print DispRev$("")=""
 Print DispRev$("s⃝df̅")="f̅ds⃝", StrRev$("s⃝df")="f̅ds⃝"
 }
 MODULE W1 { Report {
-        This is an evolutionary Algorithm, where is a target string, a fitness functions which return a number of how many charachters are at the right position, but no information returned for which character is in wrong position.
+        This is an evolutionary Algorithm, where is a target string, a fitness function which return a number of how many charachters are at the right position, but no information returned for which character is in wrong position.
         So we use a random solution as the start point
         Then algorithm make small changes and produce a number of solutions, and get the better one using the fitness function
         So the alogrithm produce always a same or better solution in each iteration.
