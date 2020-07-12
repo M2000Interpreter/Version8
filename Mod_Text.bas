@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 45
+Global Const Revision = 46
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -37261,17 +37261,11 @@ checkconstant:
                                         MyRead = False: MissType: Exit Function
                                     End If
                                         If Len(var(i).lasthere) = 0 Then
-                                            If GetVar(bstack, var(i).GroupName, i, True) Then
-                                                If Not var(i).TypeGroup(s$) Then GoTo errgr
-                                            Else
+                                            If Not GetVar(bstack, var(i).GroupName, i, True) Then
                                                 GoTo errgr
                                             End If
-                                        Else
-                                            If GetVar(bstack, var(i).lasthere + "." + var(i).GroupName, i, True) Then
-                                                If Not var(i).TypeGroup(s$) Then GoTo errgr
-                                            Else
+                                        ElseIf Not GetVar(bstack, var(i).lasthere + "." + var(i).GroupName, i, True) Then
                                                 GoTo errgr
-                                            End If
                                         End If
                                     End If
                                     If Not var(i).TypeGroup(s$) Then GoTo errgr
@@ -37898,12 +37892,10 @@ errgr:
                                 Else
                                     If Len(myobject.lasthere) = 0 Then
                                     If GetVar(bstack, myobject.GroupName, it, True) Then
-                                        If Not myobject.TypeGroup(s$) Then GoTo errgr
+                                        If Not var(it).TypeGroup(s$) Then GoTo errgr
                                     End If
-                                    Else
-                                        If GetVar(bstack, myobject.lasthere + "." + myobject.GroupName, it, True) Then
-                                            If Not myobject.TypeGroup(s$) Then GoTo errgr
-                                        End If
+                                    ElseIf GetVar(bstack, myobject.lasthere + "." + myobject.GroupName, it, True) Then
+                                            If Not var(it).TypeGroup(s$) Then GoTo errgr
                                     End If
                                     it = 0
                                 End If
@@ -37913,25 +37905,22 @@ errgr:
                                 If myobject.link.IamFloatGroup Then
                                     If Not myobject.link.TypeGroup(s$) Then GoTo errgr
                                     GoTo oop0
-                                Else
-                                    If Len(myobject.lasthere) = 0 Then
-                                        If GetVar(bstack, myobject.GroupName, i, True) Then
-                                            If Not var(i).TypeGroup(s$) Then GoTo errgr
-                                            CopyGroup2 var(i), bstack
-                                            GoTo oop1
-                                        Else
-                                            GoTo errgr
-                                        End If
+                                ElseIf Len(myobject.lasthere) = 0 Then
+                                    If GetVar(bstack, myobject.GroupName, i, True) Then
+                                        If Not var(i).TypeGroup(s$) Then GoTo errgr
+                                        CopyGroup2 var(i), bstack
+                                        GoTo oop1
                                     Else
-                                        If GetVar(bstack, myobject.lasthere + "." + myobject.GroupName, i, True) Then
-                                            If Not var(i).TypeGroup(s$) Then GoTo errgr
-                                            CopyGroup2 var(i), bstack
-                                            GoTo oop1
-                                        Else
-                                            GoTo errgr
-                                        End If
+                                        GoTo errgr
                                     End If
+                                ElseIf GetVar(bstack, myobject.lasthere + "." + myobject.GroupName, i, True) Then
+                                    If Not var(i).TypeGroup(s$) Then GoTo errgr
+                                    CopyGroup2 var(i), bstack
+                                    GoTo oop1
+                                Else
+                                    GoTo errgr
                                 End If
+                                
                             Else
                                 SyntaxError
                                 MyRead = False

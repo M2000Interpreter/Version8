@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 45 active-X
-A fix for enum variables. now a a$=chr$(enumvar) return a string to a$ not an object, which was a fault. 
+Version 9.9 revision 46 active-X
+A fix for types of pointers to groups in read statement, when a pointer is really a reference to a named group.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
