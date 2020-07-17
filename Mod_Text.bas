@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 46
+Global Const Revision = 47
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -51200,7 +51200,24 @@ checksyntax:
                         End If
                        
                     Case Else
-                    Overflow
+                    
+                    If Err.Number = 8 Then
+                        Overflow
+                        Err.clear
+                    ElseIf Len(ss$) > 0 Then
+                    If GetSub(w$, v) Then
+              
+                    Mid$(b$, 1, Len(ss$)) = ss$
+                    ExecuteVar = 6 ' GoTo autogosub
+                    Exit Function
+                    Else
+                        WrongOperator
+                        Exec1 = 0
+                        End If
+                    Else
+                        SyntaxError
+                    End If
+                    
                     ExecuteVar = 8: Exit Function
 
                 End Select

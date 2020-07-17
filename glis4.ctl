@@ -82,7 +82,7 @@ Private Type Myshape
     Width As Long
     Height As Long
 End Type
-Private mynum$, dragslow As Long, lastshift As Integer
+Private mynum$, dragslow As Long, lastshift As Integer, HandleOverride As Boolean
 Public BypassKey As Boolean
 Public BlinkON As Boolean
 Private mBlinkTime
@@ -1067,11 +1067,12 @@ Else
     If Not enabled Then Exit Sub
 
     If listcount > 0 Or MultiLineEditBox Then
-    If OverrideShow Then
+    If OverrideShow And Not HandleOverride Then
        ShowMe
     Else
       ShowMe2
     End If
+    HandleOverride = False
     Else
     
       ShowMe
@@ -3558,7 +3559,7 @@ If Not state Then
   
 RaiseEvent ScrollMove(topitem)
 Timer1.enabled = True
-
+HandleOverride = True
 LastVScroll = Value
 
 End If
