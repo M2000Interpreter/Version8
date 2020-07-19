@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 48
+Global Const Revision = 49
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -11669,7 +11669,7 @@ IsStr1 = FastSymbol(a$, ")", True)
 Exit Function
 fstr3: ' "STACKTYPE$(", "”Ÿ—œ’‘’–œ”$("
 w3 = 1
-If IsExp(bstackstr, a$, p, , True) Then
+If IsExp(bstackstr, a$, p) Then
 If bstackstr.lastobj Is Nothing Then
     Set anything = bstackstr.soros
     w3 = Abs(CLng(Fix(p)))
@@ -11752,7 +11752,7 @@ End If
 Exit Function
 fstr4: 'STACKITEM$(", "‘…Ã«”Ÿ—œ’$("
 w3 = 1
-If IsExp(bstackstr, a$, p, , True) Then
+If IsExp(bstackstr, a$, p) Then
 If bstackstr.lastobj Is Nothing Then
     Set anything = bstackstr.soros
     w3 = Abs(CLng(Fix(p)))

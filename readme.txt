@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 48 active-X
-Some additions in OOP, a fix in EditBox and new info.gsb and m2000paper.pdf
+Version 9.9 revision 49 active-X
+A bug fixed (introduced in 47 revision, MG example in Info now works fine)
 
 
 George Karras, Kallithea Attikis, Greece.
