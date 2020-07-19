@@ -6035,6 +6035,8 @@ glistN.MarkNext = 0
 End If
 oldenabled = glistN.enabled
 glistN.enabled = False
+glistN.PanPos = 0
+glistN.ScrollToSilent 0
 Set mDoc = New Document
 mDoc.ColorEvent = True
 mDoc.final = mMultiLineComment2

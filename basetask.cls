@@ -576,6 +576,15 @@ Else
     a$ = "THIS." + a$
     End If
   Else
+  If Len(a$) = 4 Then
+  If a$ = "THIS" Then
+    a$ = dotcol(dotnum)
+    GoTo aaa
+  ElseIf a$ = "ауто" Then
+    a$ = dotcol(dotnum)
+    GoTo aaa
+  End If
+  End If
   If Left$(dotcol(dotnum), 1) = "*" And Not clear Then
     a$ = Mid$(dotcol(dotnum), 2) + "." + a$
   Else

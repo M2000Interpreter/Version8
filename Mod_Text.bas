@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 47
+Global Const Revision = 48
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -37658,6 +37658,11 @@ contread123:
                                  ss$ = bstack.GroupName
                                  If Len(s$) > 0 Then what$ = s$
                                  If Len(var(i).GroupName) > Len(what$) Then
+                                    ff = 1
+                                    If Fast2VarNoTrim(rest$, "ыс", 2, "AS", 2, 3, ff) Then
+                                        If FastPureLabel(rest$, s$, , True) <> 1 Then SyntaxError: MyRead = False: Exit Function
+                                        If Not myobject.TypeGroup(s$) Then GoTo errgr
+                                    End If
                                     If var(i).IamRef Then
                                         SwapStrings s$, here$
                                         here$ = vbNullString
@@ -37669,8 +37674,14 @@ contread123:
                                         myobject.ToDelete = True
                                     End If
                                 Else
+                                    If Len(var(i).Patch) > 0 Then what$ = var(i).Patch
                                     bstack.GroupName = Left$(what$, Len(what$) - Len(var(i).GroupName) + 1)
                                     If Len(var(i).GroupName) > 0 Then
+                                        ff = 1
+                                        If Fast2VarNoTrim(rest$, "ыс", 2, "AS", 2, 3, ff) Then
+                                            If FastPureLabel(rest$, s$, , True) <> 1 Then SyntaxError: MyRead = False: Exit Function
+                                            If Not myobject.TypeGroup(s$) Then GoTo errgr
+                                        End If
                                         what$ = Left$(var(i).GroupName, Len(var(i).GroupName) - 1)
                                         SwapStrings s$, here$
                                         here$ = vbNullString
@@ -37680,6 +37691,26 @@ contread123:
                                         SwapStrings here, s$
                                         s$ = vbNullString
                                     ElseIf var(i).IamApointer And myobject.IamApointer Then
+                                    ff = 1
+                                    If Fast2VarNoTrim(rest$, "ыс", 2, "AS", 2, 3, ff) Then
+    
+                                    FastSymbol rest$, "*"
+      
+                                    If FastPureLabel(rest$, s$, , True) <> 1 Then SyntaxError: MyRead = False: Exit Function
+      
+                                    If myobject.link.IamFloatGroup Then
+                                    If Not myobject.link.TypeGroup(s$) Then GoTo errgr
+                                    Else
+                                        If Len(myobject.lasthere) = 0 Then
+                                            If GetVar(bstack, myobject.GroupName, it, True) Then
+                                                If Not var(i).TypeGroup(s$) Then GoTo errgr
+                                            End If
+                                        ElseIf GetVar(bstack, myobject.lasthere + "." + myobject.GroupName, it, True) Then
+                                                If Not var(i).TypeGroup(s$) Then GoTo errgr
+                                        End If
+                                    End If
+                                    
+                                    End If
                                     Set var(i) = myobject
                                     
                                     Else

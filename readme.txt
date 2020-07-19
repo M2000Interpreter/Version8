@@ -1,14 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 47 active-X
-1. Fix the scroll bar action in center mode in EditBox
-2. Added logic to fix this problem by example:
-Module Z (X) {Print "ok", X}
-Z=10  ' now we have a module and a variable with same name
-Z -10  ' THIS NOW EXECUTED AS MODULE CALL TO Z
-before this revision the - operator can't used by variable Z so we got an error
-now before the error raised interprer look if it is a module with same name
-and if find then call it else raise the error.
+Version 9.9 revision 48 active-X
+Some additions in OOP, a fix in EditBox and new info.gsb and m2000paper.pdf
+
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

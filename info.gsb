@@ -5404,7 +5404,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 18 for ver 9.9 rev 33 and newer"
+	Report " A collection of modules for tests version 18 for ver 9.9 rev 48 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -20742,7 +20742,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<35 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<48 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -25649,6 +25649,8 @@ MODULE POLYGONS {module drawPolygon {
       step d
 }
 module clearScreen {
+cls 5
+back {cls 5}
 window 12, 14000,10000;
 cursor 0,0
 gradient 6,1
@@ -25907,5 +25909,81 @@ Sub What(a as Pet)
 	}
 	Report exp$
 End Sub
+}
+MODULE REV48 {\\ In revision 44 Version 9.9
+\\ This object may have dots before.
+Class Alfa {
+	x=10
+	module internal {
+		.x++
+		Print .x
+	}
+}
+Module DoSomething (&z as Alfa){
+	z.x++
+	Print z.x
+	z.internal
+}
+Print "Using Pointers to float groups"
+Dim A(1 to 2)<<Pointer(alfa())
+For A(1), A(2) {
+	DoSomething &.This
+	DoSomething &..This	
+}
+A=Alfa()
+DoSomething &A
+Print A.x, A(1).x, A(2).x
+
+Print "Using float groups"
+Dim A(1 to 2)=alfa()
+For A(1), A(2) {
+	DoSomething &.This
+	DoSomething &..This	
+}
+A=Alfa()
+DoSomething &A
+Print A.x, A(1).x, A(2).x
+
+
+Class Beta as Alfa {
+	X=9999
+	module beta {
+		Class Alfa {
+			x=10
+			module internal {
+				.x++
+				Print .x
+			}
+		}
+		Module DoSomething (&z as Alfa){
+			z.x++
+			Print z.x
+			z.internal
+		}
+		Print "Using Pointers to float groups"
+		Dim A(1 to 2)<<Pointer(alfa())
+		For This, A(1), A(2) {
+			DoSomething &This
+			DoSomething &..This
+			DoSomething &...This	
+		}
+		A=Alfa()
+		DoSomething &A
+		Print A.x, A(1).x, A(2).x
+		
+		Print "Using float groups"
+		Dim A(1 to 2)=alfa()
+		For This, A(1), A(2) {
+			DoSomething &This
+			DoSomething &..This
+			DoSomething &...This	
+		}
+		A=Alfa()
+		DoSomething &A
+		Print A.x, A(1).x, A(2).x
+	}
+}
+Print "Check Beta constructor"
+B=Beta()
 }
 UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}
