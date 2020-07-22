@@ -5404,7 +5404,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 18 for ver 9.9 rev 48 and newer"
+	Report " A collection of modules for tests version 18 for ver 9.9 rev 50 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -20742,7 +20742,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<48 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<50 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user

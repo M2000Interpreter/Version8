@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 49
+Global Const Revision = 50
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -1731,7 +1731,12 @@ contpointer:
                             If bstack.lastpointer.lasthere = vbNullString Then
                                 w$ = "*" + bstack.lastpointer.GroupName
                             Else
-                                w$ = bstack.lastpointer.lasthere + "." + bstack.lastpointer.GroupName
+                            w$ = bstack.lastpointer.lasthere + "." + bstack.lastpointer.GroupName
+                            If GetVar3(bstack, w$, i) Then
+                                If var(i).IamGlobal Then
+                                    w$ = "*" + bstack.lastpointer.GroupName
+                                End If
+                            End If
                             End If
                             Set bstack.lastobj = Nothing
                             Set bstack.lastpointer = Nothing
@@ -27827,11 +27832,13 @@ End If
                             If here$ = vbNullString And Len(bstack.UseGroupname) > 0 Then
                                 If neoGetArrayLinkOnly(bstack, bstack.UseGroupname + s$, j) Then GoTo conthere1111
                             End If
+                            
                             If Not neoGetArrayLinkOnly(bstack, ThisGroup.Patch + "." + s$, j) Then
                                 If bypassnew Then GoTo cont1010
                                 j = -1
                                 Set subgroup = vvl
-                                GlobalArr bstack, ThisGroup.Patch + "." + s$, ss$, 0, j
+                                
+                                GlobalArr bstack, ThisGroup.Patch + "." + s$, ss$, 0, j, True
                                 Set pppp = var(j)
                                 subgroup.CopyArray pppp
                                 Set subgroup = Nothing
@@ -37660,8 +37667,39 @@ contread123:
                                  If Len(var(i).GroupName) > Len(what$) Then
                                     ff = 1
                                     If Fast2VarNoTrim(rest$, "ыс", 2, "AS", 2, 3, ff) Then
+                                   If FastSymbol(rest$, "*") Then
                                         If FastPureLabel(rest$, s$, , True) <> 1 Then SyntaxError: MyRead = False: Exit Function
-                                        If Not myobject.TypeGroup(s$) Then GoTo errgr
+                                            If s$ = "POINTER" Then
+                                                If Not myobject.IamApointer Then GoTo errgr
+                                            ElseIf s$ = "деийтгс" Then
+                                                If Not myobject.IamApointer Then GoTo errgr
+                                            
+                                            ElseIf myobject.IamApointer Then
+                                                If Not myobject.link.TypeGroup(s$) Then
+                                                    GoTo errgr
+                                                End If
+                                            Else
+                                                GoTo errgr
+                                            End If
+                                    Else
+                                        If FastPureLabel(rest$, s$, , True) <> 1 Then SyntaxError: MyRead = False: Exit Function
+                                            If s$ = "POINTER" Then
+                                                If Not myobject.IamApointer Then GoTo errgr
+                                            ElseIf s$ = "деийтгс" Then
+                                                If Not myobject.IamApointer Then GoTo errgr
+                                            ElseIf s$ = "GROUP" Then
+                                                ' get pointer too
+                                            ElseIf s$ = "олада" Then
+                                                ' get pointer too
+                                            ElseIf myobject.IamApointer Then
+                                                If Not myobject.link.TypeGroup(s$) Then
+                                                    GoTo errgr
+                                                End If
+                                            ElseIf Not myobject.TypeGroup(s$) Then
+                                                GoTo errgr
+
+                                            End If
+                                   End If
                                     End If
                                     If var(i).IamRef Then
                                         SwapStrings s$, here$
@@ -37699,7 +37737,14 @@ contread123:
                                     If FastPureLabel(rest$, s$, , True) <> 1 Then SyntaxError: MyRead = False: Exit Function
       
                                     If myobject.link.IamFloatGroup Then
-                                    If Not myobject.link.TypeGroup(s$) Then GoTo errgr
+                                    
+                                    If Not myobject.link.TypeGroup(s$) Then
+                                        If s$ = "POINTER" Then
+                                        ElseIf s$ = "деийтгс" Then
+                                        Else
+                                        GoTo errgr
+                                        End If
+                                    End If
                                     Else
                                         If Len(myobject.lasthere) = 0 Then
                                             If GetVar(bstack, myobject.GroupName, it, True) Then
@@ -38307,7 +38352,14 @@ cont112233:
         If Not lookOne(rest$, ",") Then
         If Fast2VarNoTrim(rest$, "ыс", 2, "AS", 2, 3, ff) Then
             ihavetype = True
+            
             If Not FastPureLabel(rest$, s$, , , True) = 1 Then
+            If FastSymbol(rest$, "*") Then
+            If FastPureLabel(rest$, ss$, , True) = 1 Then
+            ' pointer
+            GoTo cont234356
+            End If
+            End If
             SyntaxError
             Exit Function
             End If
@@ -38357,6 +38409,8 @@ cont112233:
                 p = CCur(p)
                        
             Case Else
+cont234356:
+            
                 If Not flag2 And GetVar3(bstack, what$, i, , , flag, , , isAglobal, True, ok) Then
                     If isAglobal Then
                         GoTo er110
@@ -38375,7 +38429,9 @@ cont112233:
                                     If var(i).IamApointer Then
                                         If Not ss$ = "деийтгс" Then
                                             If Not ss$ = "POINTER" Then
-                                                MyRead = False: MissType: Exit Function
+                                                If Not var(i).link.TypeGroup(ss$) Then
+                                                    MyRead = False: MissType: Exit Function
+                                                End If
                                             End If
                                         End If
                                     Else
@@ -43680,11 +43736,11 @@ If x1 = 1 Then
         
         
         End If
-        If Len(here$) = 0 Then
+    '    If Len(here$) = 0 Then
         'var(y1).Patch = basestack.GroupName & what$
-        Else
+     '   Else
        ' var(y1).Patch = here$ + "." + basestack.GroupName & what$
-        End If
+      '  End If
                 
             Else
             '' CLASS

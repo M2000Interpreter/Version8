@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 49 active-X
-A bug fixed (introduced in 47 revision, MG example in Info now works fine)
+Version 9.9 revision 50 active-X
+A bug fixed in For Object struct
 
 
 George Karras, Kallithea Attikis, Greece.
