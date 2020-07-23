@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 50 active-X
-A bug fixed in For Object struct
+Version 9.9 revision 51 active-X
+A tiny bug fixed. Added a new game Vault in info.gsb
 
 
 George Karras, Kallithea Attikis, Greece.

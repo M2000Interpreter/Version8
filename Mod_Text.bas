@@ -83,11 +83,11 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 50
+Global Const Revision = 51
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
-Public casesensitive As Boolean  ' for files
+Public casesensitive As Boolean  ' for filesf
 Public userfiles As String
 Public TweakLang As Long
 Public notweak As Boolean
@@ -4932,7 +4932,6 @@ num35: ' "REVISION", "амахеыягсг"
 num36: ' "BROWSER", "амакоцио"
         
         r = SG * (Trim(LCase(Form1.view1.LocationURL)) = "about:blank" Or Form1.view1.Visible = False)
-    
     IsNumberNew = True
     Exit Function
 num37: ' "VERSION", "ейдосг"
@@ -5468,7 +5467,8 @@ foundprivate:
                         If userGroup.IamApointer Then
                         Set pppp = BoxGroupVar(CVar(userGroup))
                         w2 = 0
-                        
+                        Set nbstack.lastobj = Nothing
+                        Set nbstack.lastpointer = Nothing
                         Mid$(a$, 1, 2) = "." + Chr(3): GoTo contgroup
                         
                         Else
@@ -10817,6 +10817,8 @@ lit2: '    Case "CONTROL$"
                   r$ = vbNullString
                   Else
                   Select Case Screen.ActiveForm.Name
+                  Case "View1"
+                    r$ = "BROWSER"
                   Case "TweakForm"
                     r$ = "SETTINGS"
                   Case "AVI"
@@ -36261,8 +36263,12 @@ If par Then
                 End If
                 End If
             Else
+
     sX = MyMod(sX + Pi * 2, 2 * Pi)
     sY = MyMod(sY + Pi * 2, 2 * Pi)
+    If Round(sY, 13) = Round(Pi / 2, 13) Then
+    sY = sY - 1 / (Abs(x1) / 8#)
+    End If
                 Scr.Circle (.XGRAPH, .YGRAPH), x1, mycolor(col), -sX, -sY, Y
             End If
     End If
@@ -36307,6 +36313,9 @@ Else
     Else
     sX = MyMod(sX + Pi * 2, 2 * Pi)
     sY = MyMod(sY + Pi * 2, 2 * Pi)
+    If Round(sY, 13) = Round(Pi / 2, 13) Then
+    sY = sY - 1 / (Abs(x1) / 8#)
+    End If
         Scr.Circle (.XGRAPH, .YGRAPH), x1, mycolor(col), sX, sY, Y
     End If
 End If

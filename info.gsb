@@ -5404,7 +5404,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 18 for ver 9.9 rev 50 and newer"
+	Report " A collection of modules for tests version 19 for ver 9.9 rev 51 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -20742,7 +20742,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<50 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<51 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -25985,5 +25985,259 @@ Class Beta as Alfa {
 }
 Print "Check Beta constructor"
 B=Beta()
+}
+MODULE VAULT {\\ Original Idea: George Karras, invetor of M2000 Interpreter.
+Back {Cls 5,0}
+Form 60, 30
+Double
+Report 2, "Unlock The Vault"
+Normal
+Report{
+Instructions:
+
+Attach the moving tool to unlock mechanism. Follow the known code to open it. Get some time, using S. Use mouse buttons, or Z and X. Use space for paise.
+
+For each stage a gift (as a small  circle), flasjng and wait to pick. To pick it just center the tol and press mouse keys or Z or X. You may get time. About 29% you get ultimate gift, you pass the stage at once.
+
+Use Esc to exit any time.
+
+Good Luck
+
+
+Press any key
+}
+Push Key$
+Drop
+Cls
+
+
+Print $(, 6)
+Escape Off
+Mouse.Icon Hide
+Dim CodeBank(), code(), course(128)
+hlp=true
+HiScore=30
+safety=3
+score=0
+N=3
+k=pi -PI/2
+for i=0 to 127
+	course(i)=k
+	k+=pi/64
+next i
+stagetime=50000
+Again:
+esc1=false
+Refresh 5000
+CodeBank()=(Random(2,9), Random(1, 4), Random(5,9), Random(2, 6), Random(4, 7))
+Pen 15
+Cls 3, 0
+Pen 11 {Report 2, "Game: Unlock the Vault"}
+cursor 0,0
+Report 1, format$("Score:{0:4}",str$(score, "0000"))
+cursor 0,0
+Report 3, format$("HiScore:{0:4}",str$(HiScore, "0000"))
+pen 14
+cls 5, 1
+Print "Rotations:",
+for i=0 to N-1
+	Print CodeBank(i),
+next
+Print
+cls , 2
+PI2=PI*2
+k=pi -PI/2
+count=false
+counter=0
+good=false
+M5000=Random(3500, scale.x-3500)
+M8000=Random(7000, scale.y-3500)
+
+flush
+kk=0
+Rem smooth off   ' using gdi32
+smooth on  ' using gdi+
+Z=timecount+stagetime
+bomb=0
+esc$=chr$(27)
+k1=Random(0, 127)
+k11=course(k1)
+k2=Random(0, 127)
+k22=course(k2)
+cl=15
+Cursor 0, 2
+move !
+pY=pos.Y
+gift=false
+giftonce=true
+giftX=Random(3500, scale.x-3500)
+giftY=Random(7000, scale.y-3500)
+giftpulse=10
+SwapKey=2
+pause$=""
+try  {
+	safetyonce=safety>0
+	Do
+		if pause$="" then
+		if kk<>SwapKey then
+			if count then 
+				if stack.size mod 2=1 then
+					k2--: if k2<0 then k2=127
+				else
+					k2++: if k2>127 then k2=0
+				end if
+			else
+				k2++: if k2>127 then k2=0
+				k1+=Random(1, 5): if k1>127 then k1=0
+				k11=course(k1)
+			end if
+			k22=course(k2)
+		end if
+		end if
+		kk=0
+		if count then counter++ else.if counter>0 then data counter : counter=0 : SwapKey=3-SwapKey
+		if stack.size=N then exit
+		(x,y)=(mouse.x, mouse.y)
+		Move 0, pY
+		\\ set path
+		color { polygon 0, scale.x, 0, 0, scale.y-pY, -scale.x, 0, 0, -scale.y+pY};
+		if gift  and giftpulse<5 then
+			move giftX, giftY
+			circle fill 4, 300,1, 4
+		end if
+		move M5000, M8000
+		circle fill 11,  3000, 1, cl, 0+k11, pi/2+k11
+		circle fill 13,  3000, 1, cl, pi+k11, pi+pi/2+k11
+
+		move x, y
+		circle fill 12,  3000, 1, cl, pi/2+k22, pi+k22
+		circle fill 14,  3000, 1, cl, pi+pi/2+k22, pi*2+k22
+
+		refresh 500
+
+		Every 10 {
+			if pause$=" " then
+				Z+=bomb-int(z-timecount)
+				pause$=inkey$
+				if pause$="" then pause$=" " : counter=0: count=0
+			else
+			pause$=inkey$
+			end if
+			bomb=int(z-timecount)
+			esc1=pause$=esc$
+			if bomb<0  or esc1 then exit
+			Cursor 0, 2
+			gradient 1, 5
+			giftpulse--: if giftpulse<0 then giftpulse=10
+			if gift  and giftpulse<5 then
+				move giftX, giftY
+				circle fill 4, 300,1, 4
+			end if
+			Print @(width-8);Str$(Now,"hh:mm:ss")
+			Cursor 0, 2
+			Print "Time Left:"; bomb div 1000;if$(pause$=" "->" paused","")
+			if giftonce then if bomb<Random(10000, 30000) then giftonce=false: gift=true
+			if hlp then Print "Rotated:"; counter
+			br=row
+			Cursor 0, height-1
+			if pause$=" " then
+				Print " Press any key to continue";
+			else
+				Print " Press space for pause";
+			end if
+			if safetyonce then Print @(width-safety-1);string$("S", safety);
+			Cursor 0, br+1
+			(x,y)=(mouse.x, mouse.y)
+			if pause$=" " then exit			
+			count=abs(x-M5000)<twipsx*2 and abs(y-M8000)<twipsy*2 
+			if count and k11<>k22 then
+				if stack.size mod 2=1 then
+					k1--: if k1<0 then k1=127
+				else
+					k1++: if k1>127 then k1=0
+				end if
+				k11=course(k1)
+			end if
+			move M5000, M8000
+			circle fill 11,  3000, 1, cl, 0+k11, pi/2+k11
+			circle fill 13,  3000, 1, cl, pi+k11, pi+pi/2+k11
+			move x, y
+			circle fill 12,  3000, 1, cl, pi/2+k22, pi+k22
+			circle fill 14,  3000, 1, cl, pi+pi/2+k22, pi*2+k22
+			refresh 500
+			kk=mouse
+			if kk=0 then
+				kk=-keypress(90)
+				if kk=0 then kk=-2*keypress(88)
+			end if
+			if safetyonce then if safety then if keypress(83) then safety-- : z+=20000 : safetyonce=false
+			if kk=1 and gift then	
+				if abs(x-giftX)<150 and abs(y-gifty)<150 then
+					gift=false
+					IF Random(5)=1 then
+						flush
+						for i=0 to n-1
+						 	data CodeBank(i)
+						next
+						count=0
+						kk=swapkey				
+					else
+						z+=20000
+					end if
+				end if
+			end if
+			if kk<>0 then exit
+		}
+		if kk<>0 then pause$=""
+		\\ reset path
+		color {};
+		if bomb<0  or esc1 then break
+		if kk=SwapKey and not count then exit
+		if kk=SwapKey then count=0
+		if score>50 then if Random(1, score div 10)>4 then restart	
+		if count then {
+			wait 10
+			if mouse or keypress(80) or keypress(90) then restart
+		}
+	Always
+	if counter>0 then push counter : counter=0
+	code()=Array([])
+	If len(code())<N then 	SwapKey=2 : restart
+	good=true
+	for i=0 to N-1
+		If code(i)<>CodeBank(i) Then good=false: exit for
+	next
+	if good else Loop
+}
+Refresh 50
+\\ using blocks here tu utilize the Goto statement.
+if bomb<0 then {
+	For i=1 to 1000
+		Pen Random(11, 15) {
+			Print @(Random(width div 12)*12,Random( 5, height-5)), "BOOOOOOOOOM"
+		}
+	Next i
+	Score=0
+	hlp=true
+	safety=3
+	stagetime=50000
+	N=3
+	if ask("Play Again", "Unlock the Vault", "*Yes", "No")=1 then Goto Again
+	Cls, 0
+ } Else.if not good then {
+	Scroll Split 0   ' like Cls, 0 without CLS
+} else {
+	score+=10
+	if HiScore<score then HiScore=Score
+	if score>=100 then N=4 : hlp=false : stagetime=70000
+	if score>=300 then N=5: : stagetime=90000: safety+=2
+	Wait 400
+	goto Again
+}
+Mouse.Icon Show
+Escape on
+Print "See you later..."
+wait 500
+keyboard "info"+chr$(13)
 }
 UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}
