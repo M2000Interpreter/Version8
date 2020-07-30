@@ -1467,6 +1467,13 @@ r.Right = 20000
 r.Bottom = 20000
 DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_SINGLELINE Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
 End Sub
+Public Sub CalcRectNoSingle(mHdc As Long, c As String, r As RECT)
+r.top = 0
+r.Left = 0
+r.Right = 20000
+r.Bottom = 20000
+DrawTextEx mHdc, StrPtr(c), -1, r, DT_CALCRECT Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
+End Sub
 
 Public Sub PrintLineControlSingle(mHdc As Long, c As String, r As RECT)
     DrawTextEx mHdc, StrPtr(c), -1, r, DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_EXPANDTABS Or DT_TABSTOP, VarPtr(tParam)
@@ -1542,6 +1549,12 @@ Dim nr As RECT
 CalcRect ddd.hDC, a$, nr
 TextWidth = nr.Right * dv15
 End Function
+Public Function TextWidth2(ddd As Object, a$) As Long
+Dim nr As RECT
+CalcRectNoSingle ddd.hDC, a$, nr
+TextWidth2 = nr.Right * dv15
+
+End Function
 Public Function TextWidthPixels(ddd As Object, a$) As Long
 Dim nr As RECT
 CalcRect ddd.hDC, a$, nr
@@ -1553,7 +1566,12 @@ CalcRect ddd.hDC, a$, nr
 
 TextHeight = nr.Bottom * dv15
 End Function
+Private Function TextHeight2(ddd As Object, a$) As Long
+Dim nr As RECT
+CalcRectNoSingle ddd.hDC, a$, nr
 
+TextHeight2 = nr.Bottom * dv15
+End Function
 Public Sub PrintLine(dd As Object, c As String, r As RECT)
 DrawText dd.hDC, StrPtr(c), -1, r, DT_CENTER
 End Sub
@@ -2122,14 +2140,18 @@ cont1:
 End Sub
 
 
-Public Function nTextY(basestack As basetask, ByVal what As String, ByVal Font As String, ByVal Size As Single, Optional ByVal degree As Double = 0#)
+Public Function nTextY(basestack As basetask, ByVal what As String, ByVal Font As String, ByVal Size As Single, Optional ByVal degree As Double = 0#, Optional ByVal ExtraWidth As Long = 0)
 Dim ddd As Object
 Set ddd = basestack.Owner
 Dim PX As Long, PY As Long, OLDFONT As String, OLDSIZE As String, DE#
-Dim F As LOGFONT, hPrevFont As Long, hFont As Long
+Dim F As LOGFONT, hPrevFont As Long, hFont As Long, fline$
 Dim BFONT As String
 Dim prive As Long
 prive = GetCode(ddd)
+ExtraWidth = ExtraWidth \ dv15
+If ExtraWidth <> 0 Then
+SetTextCharacterExtra ddd.hDC, ExtraWidth
+End If
 On Error Resume Next
 With players(prive)
 BFONT = ddd.Font.Name
@@ -2145,7 +2167,7 @@ Else
 Font = .FontName
 End If
 
-DE# = (degree) * 180# / Pi
+DE# = 0 '(degree) * 180# / Pi
    F.lfItalic = Abs(.italics)
 F.lfWeight = Abs(.bold) * 800
   F.lfEscapement = CLng(10 * DE#)
@@ -2156,29 +2178,52 @@ F.lfWeight = Abs(.bold) * 800
 
   hFont = CreateFontIndirect(F)
   hPrevFont = SelectObject(ddd.hDC, hFont)
-nTextY = Int(TextWidth(ddd, what$) * Sin(degree) + TextHeight(ddd, what$) * Cos(degree))
-
-
-
-
-
+ what$ = Replace$(what, vbCrLf, vbCr) + vbCr
+Dim textmetrics As POINTAPI, max, maxx As Long, sumy As Long
+Do While what$ <> ""
+If Left$(what$, 1) = vbCr Then
+fline$ = vbNullString
+what$ = Mid$(what$, 2)
+Else
+fline$ = GetStrUntil(vbCr, what$)
+End If
+If Len(what$) = 0 And Len(fline$) = 0 Then If sumy > 0 Then Exit Do
+  
+textmetrics.X = 0
+textmetrics.Y = 0
+    If Len(fline$) = 0 Then
+        fline$ = " "
+        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+        textmetrics.X = 0
+    Else
+        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+    End If
+sumy = sumy + textmetrics.Y
+If maxx < textmetrics.X Then maxx = textmetrics.X
+Loop
+nTextY = Int(Abs(maxx * dv15 * Sin(degree)) + Abs(sumy * dv15 * Cos(degree)))
   hFont = SelectObject(ddd.hDC, hPrevFont)
   DeleteObject hFont
-
+If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.hDC, 0
 End With
 PlaceBasket ddd, players(prive)
 
+
 End Function
-Public Function nText(basestack As basetask, ByVal what As String, ByVal Font As String, ByVal Size As Single, Optional ByVal degree As Double = 0#)
+Public Function nText(basestack As basetask, ByVal what As String, ByVal Font As String, ByVal Size As Single, Optional ByVal degree As Double = 0#, Optional ByVal ExtraWidth As Long = 0)
 Dim ddd As Object
 Set ddd = basestack.Owner
 Dim PX As Long, PY As Long, OLDFONT As String, OLDSIZE As String, DE#
-Dim F As LOGFONT, hPrevFont As Long, hFont As Long
+Dim F As LOGFONT, hPrevFont As Long, hFont As Long, fline$
 Dim BFONT As String
 Dim prive As Long
 prive = GetCode(ddd)
 On Error Resume Next
 With players(prive)
+ExtraWidth = ExtraWidth \ dv15
+If ExtraWidth <> 0 Then
+SetTextCharacterExtra ddd.hDC, ExtraWidth
+End If
 BFONT = ddd.Font.Name
 If Font <> "" Then
 If Size = 0 Then Size = ddd.FontSize
@@ -2192,22 +2237,48 @@ Else
 Font = .FontName
 End If
 
-DE# = (degree) * 180# / Pi
+
+DE# = 0 '(degree) * 180# / Pi
    F.lfItalic = Abs(.italics)
 F.lfWeight = Abs(.bold) * 800
-  F.lfEscapement = CLng(10 * DE#)
+    F.lfEscapement = 0
+  'F.lfEscapement = CLng(10 * DE#)
   F.lfFaceName = Left$(Font, 30) + Chr$(0)
   F.lfCharSet = .charset
-  F.lfQuality = 3 ' PROOF_QUALITY
+  F.lfQuality = 3 ' NONANTIALIASED_QUALITY
   F.lfHeight = (Size * -20) / DYP
 
   hFont = CreateFontIndirect(F)
   hPrevFont = SelectObject(ddd.hDC, hFont)
-nText = Int(TextWidth(ddd, what$) * Cos(degree) + TextHeight(ddd, what$) * Sin(degree))
+  what$ = Replace$(what, vbCrLf, vbCr) + vbCr
+Dim textmetrics As POINTAPI, max, maxx As Long, sumy As Long
+Do While what$ <> ""
+If Left$(what$, 1) = vbCr Then
+fline$ = vbNullString
+what$ = Mid$(what$, 2)
+Else
+fline$ = GetStrUntil(vbCr, what$)
+End If
+If Len(what$) = 0 And Len(fline$) = 0 Then If sumy > 0 Then Exit Do
+  
+textmetrics.X = 0
+textmetrics.Y = 0
+    If Len(fline$) = 0 Then
+        fline$ = " "
+        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+        textmetrics.X = 0
+    Else
+        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+    End If
+sumy = sumy + textmetrics.Y
+If maxx < textmetrics.X Then maxx = textmetrics.X
+Loop
 
+nText = Int(Abs(maxx * dv15 * Cos(degree)) + Abs(sumy * dv15 * Sin(degree)))
 
   hFont = SelectObject(ddd.hDC, hPrevFont)
   DeleteObject hFont
+If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.hDC, 0
 
 End With
 PlaceBasket ddd, players(prive)
@@ -2851,8 +2922,9 @@ Public Sub nPlain(basestack As basetask, ByVal what As String, ByVal Font As Str
 Dim ddd As Object
 Set ddd = basestack.Owner
 Dim PX As Long, PY As Long, OLDFONT As String, OLDSIZE As Long, DEGR As Double
-Dim F As LOGFONT, hPrevFont As Long, hFont As Long, fline$, ruler As Long
+Dim F As LOGFONT, hPrevFont As Long, hFont As Long, fline$, tt As Long
 Dim BFONT As String
+
 On Error Resume Next
 BFONT = ddd.Font.Name
 If ExtraWidth <> 0 Then
@@ -2868,19 +2940,19 @@ DEGR = (degree) * 180# / Pi
   F.lfFaceName = Left$(Font, 30) + Chr$(0)
   F.lfCharSet = basestack.myCharSet
   If qual Then
-  F.lfQuality = PROOF_QUALITY 'NONANTIALIASED_QUALITY '
+    F.lfQuality = PROOF_QUALITY 'NONANTIALIASED_QUALITY '
   Else
-  F.lfQuality = NONANTIALIASED_QUALITY
+    F.lfQuality = NONANTIALIASED_QUALITY
   End If
   F.lfHeight = (Size * -20) / DYP
   hFont = CreateFontIndirect(F)
   hPrevFont = SelectObject(ddd.hDC, hFont)
-    icH = TextHeight(ddd, "fq")
+  icH = TextHeight(ddd, "fq")
   hFont = SelectObject(ddd.hDC, hPrevFont)
   DeleteObject hFont
- F.lfItalic = Abs(basestack.myitalic)
+  F.lfItalic = Abs(basestack.myitalic)
   F.lfWeight = Abs(basestack.myBold) * 800
-F.lfEscapement = CLng(10 * DEGR)
+  F.lfEscapement = CLng(10 * DEGR)
   F.lfFaceName = Left$(Font, 30) + Chr$(0)
   F.lfCharSet = basestack.myCharSet
   If qual Then
@@ -2895,8 +2967,7 @@ F.lfEscapement = CLng(10 * DEGR)
     hFont = CreateFontIndirect(F)
   hPrevFont = SelectObject(ddd.hDC, hFont)
 
-
-
+tt = ExtraWidth \ 2
 icy = CLng(Cos(degree) * icH)
 icx = CLng(Sin(degree) * icH)
 
@@ -2919,8 +2990,13 @@ X = .XGRAPH - icx
 
 End If
 End With
+If tt > 0 Then
+X = X + (Cos(degree) * tt * dv15)
+Y = Y - (Sin(degree) * tt * dv15)
+End If
 what$ = Replace$(what, vbCrLf, vbCr) + vbCr
 Dim textmetrics As POINTAPI
+
 Do While what$ <> ""
 If Left$(what$, 1) = vbCr Then
 fline$ = vbNullString
@@ -2931,16 +3007,18 @@ End If
 textmetrics.X = 0
 textmetrics.Y = 0
 GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
-
 X = X + icx
 Y = Y + icy
 If JUSTIFY = 1 Then
     ddd.CurrentX = X - Int((textmetrics.X * Cos(degree) + textmetrics.Y * Sin(degree)) * dv15)
     ddd.CurrentY = Y + Int((textmetrics.X * Sin(degree) - textmetrics.Y * Cos(degree)) * dv15)
 ElseIf JUSTIFY = 2 Then
+'If tt <> 0 Then textmetrics.X = textmetrics.X - tt * 1.5
+
      ddd.CurrentX = X - Int((textmetrics.X * Cos(degree) + textmetrics.Y * Sin(degree)) * dv15) \ 2
     ddd.CurrentY = Y + Int((textmetrics.X * Sin(degree) - textmetrics.Y * Cos(degree)) * dv15) \ 2
 Else
+
     ddd.CurrentX = X
     ddd.CurrentY = Y
 End If

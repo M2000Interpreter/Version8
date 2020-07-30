@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 51 active-X
-A tiny bug fixed. Added a new game Vault in info.gsb
-
+Version 9.9 revision 52 active-X
+Fix size.x() and size.y() for using in rotating multiline aligned text
+Use: help size.x() for example using these functions.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

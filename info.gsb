@@ -22437,7 +22437,7 @@ nl$={
 }
 
 With text1, "ShowAlways", True, "NumberOnly", True, "Value" As Value1
-With text2, "ShowAlways", True, "NumberIntOnly", True, "Value" As Value2
+With text2, "ShowAlways", True, "NumberIntOnly", True, "Value" As Value2, "Text" As Value2$
 With text3, "ShowAlways", True, "UsedAsTextBox", True,"Text" As Value3$
 Value1=93.112
 Value2=1456
@@ -22464,7 +22464,9 @@ Function Form1.Click {
       Layer Form1 {
             Value1=Value1+1  \\  Value1++ not work becaue Value1 is an object (linked property)
             Cls  #606060
-            Print Value1, Value2, " Ctrl+F1"
+rem            Print Part $(0), Value1, Value2 , " Ctrl+F1"
+rem            Print
+            Print format$(" {0:3:} | {1} | Ctrl+F1}", Value1, Value2)
             Print Over $(9), Value3$
             Refresh
             Method text1, "Show"

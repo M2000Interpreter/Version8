@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 51
+Global Const Revision = 52
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -974,47 +974,59 @@ End Sub
 
 
 Function SizeY(bstack As basetask, SG, a$, s$, s1$, r As Variant) As Boolean
-Dim r2 As Variant, r3 As Variant
+Dim r2 As Variant, r3 As Variant, r4 As Variant
+    r3 = 0
+    r4 = 0
     If IsStrExp(bstack, a$, s$) Then
     If Not FastSymbol(a$, ",") Then: MissParam a$: SizeY = False: Exit Function
     If Not IsStrExp(bstack, a$, s1$) Then: MissParam a$: SizeY = False: Exit Function
     If Not FastSymbol(a$, ",") Then: MissParam a$: SizeY = False: Exit Function
     If Not IsExp(bstack, a$, r2, , True) Then: MissParam a$: SizeY = False: Exit Function
-    r3 = 0
     If FastSymbol(a$, ",") Then
-    If Not IsExp(bstack, a$, r3, , True) Then
-         MissParam a$: SizeY = False: Exit Function
-    End If
-
-    End If
+        If Not IsExp(bstack, a$, r3, , True) Then
+             MissParam a$: SizeY = False: Exit Function
+        End If
+            If FastSymbol(a$, ",") Then
+                If Not IsExp(bstack, a$, r4, , True) Then
+                    MissParam a$: SizeY = False: Exit Function
+                End If
+                r4 = Abs(Int(r4))
+            End If
+        End If
     On Error Resume Next
-    r = nTextY(bstack, s$, s1$, CSng(r2), r3)
+    r = nTextY(bstack, s$, s1$, CSng(r2), r3, r4)
     If Err.Number > 0 Then r = 0
     On Error GoTo 0
     If SG < 0 Then r = -r
-    
- 
-    
     SizeY = FastSymbol(a$, ")", True)
     End If
 End Function
 
 Function SizeX(bstack As basetask, SG, a$, s$, s1$, r As Variant) As Boolean
-Dim r2 As Variant, r3 As Variant
+Dim r2 As Variant, r3 As Variant, r4 As Variant
+    r3 = 0
+    r4 = 0
     If IsStrExp(bstack, a$, s$) Then
     If Not FastSymbol(a$, ",") Then SizeX = False: Exit Function
     If Not IsStrExp(bstack, a$, s1$) Then SizeX = False: Exit Function
     If Not FastSymbol(a$, ",") Then SizeX = False: Exit Function
     If Not IsExp(bstack, a$, r2, , True) Then SizeX = False: Exit Function
-    r3 = 0
-    If FastSymbol(a$, ",") Then If Not IsExp(bstack, a$, r3, , True) Then SizeX = False: Exit Function
+    If FastSymbol(a$, ",") Then
+        If Not IsExp(bstack, a$, r3, , True) Then
+           MissParam a$: SizeX = False: Exit Function
+        End If
+            If FastSymbol(a$, ",") Then
+                If Not IsExp(bstack, a$, r4, , True) Then
+                    MissParam a$: SizeX = False: Exit Function
+                End If
+                r4 = Abs(Int(r4))
+            End If
+    End If
     On Error Resume Next
-    r = nText(bstack, s$, s1$, CSng(r2), r3)
+    r = nText(bstack, s$, s1$, CSng(r2), r3, r4)
     If Err.Number > 0 Then r = 0
     On Error GoTo 0
     If SG < 0 Then r = -r
-    
-    
     SizeX = FastSymbol(a$, ")", True)
     End If
 
@@ -34197,9 +34209,9 @@ Else
 End If
 End Sub
 
-Sub SetSizeAndHotSpot(thisbasket As basket, MaxX As Long, MaxY As Long, Optional ByVal HotSpotX = 0, Optional ByVal HotSpotY = 0)
+Sub SetSizeAndHotSpot(thisbasket As basket, maxx As Long, MaxY As Long, Optional ByVal HotSpotX = 0, Optional ByVal HotSpotY = 0)
 With thisbasket
-.MAXXGRAPH = MaxX
+.MAXXGRAPH = maxx
 .MAXYGRAPH = MaxY
 If Not IsMissing(HotSpotX) Then .X = CLng(HotSpotX)  ' this is hotspot
 If Not IsMissing(HotSpotY) Then .Y = CLng(HotSpotY)
