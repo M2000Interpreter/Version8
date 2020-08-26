@@ -83,7 +83,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 9
 Global Const VerMinor = 9
-Global Const Revision = 52
+Global Const Revision = 53
 Private Const doc = "Document"
 Public UserCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -47193,7 +47193,18 @@ check123678:
 checkIterator:
                 If Not pppp.IsEmpty Then
                     If MyIsObject(pppp.item(w1)) Then
-                        Set bstack.lastobj = pppp.item(w1)
+                        Set anything = pppp.item(w1)
+                        If Not anything Is Nothing Then
+                        If TypeOf anything Is Group Then
+                            bstack.soros.CopyGroupObj pppp.item(w1), anything
+                            Set bstack.lastobj = anything
+                        Else
+                            Set bstack.lastobj = anything
+                        End If
+                        
+                        Else
+                            Set bstack.lastobj = Nothing
+                        End If
                         r = 0
                     Else
                         Set bstack.lastobj = Nothing

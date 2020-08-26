@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 52 active-X
-Fix size.x() and size.y() for using in rotating multiline aligned text
-Use: help size.x() for example using these functions.
+Version 9.9 revision 53 active-X
+Fix  Array() function for groups. See REV53 in Info.gsb
+
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

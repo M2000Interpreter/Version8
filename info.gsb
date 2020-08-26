@@ -5404,7 +5404,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 19 for ver 9.9 rev 51 and newer"
+	Report " A collection of modules for tests version 19 for ver 9.9 rev 53 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -20742,7 +20742,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<51 then Error "No proper M2000 revision for version 9.9"
+If Version=9.9 and revision<53 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -21934,6 +21934,50 @@ While z {
 }
 s$="]"
 Report s$
+
+
+
+module Checkit {
+      Stack New {
+            Data "foo://example.com:8042/over/there?name=ferret#nose", "urn:example:animal:ferret:nose"
+            Data "jdbc:mysql://test_user:ouupppssss@localhost:3306/sakila?profileSQL=true", "ftp://ftp.is.co.za/rfc/rfc1808.txt"
+            Data "http://www.ietf.org/rfc/rfc2396.txt#header1", "ldap://[2001:db8::7]/c=GB?objectClass=one&objectClass=two"
+            Data "mailto:John.Doe@example.com", "news:comp.infosystems.www.servers.unix", "tel:+1-816-555-1212"
+            Data "telnet://192.0.2.16:80/", "urn:oasis:names:specification:docbook:dtd:xml:4.1.2", "ssh://alice@example.com"
+            Data "https://bob:pass@example.com/place", "http://example.com/?a=1&b=2+2&c=3&c=4&d=%65%6e%63%6F%64%65%64"
+            a=Array([])
+      }
+      function prechar$(a$, b$) {
+            if a$<>"" then {=quote$(b$+a$)} else ={""}
+      }
+      z=each(a)
+      document s$="["+{
+      }
+      While z {
+            a$=array$(z)
+            s1$={           "uri": }+quote$(a$)+{,
+                  "authority": }+ quote$(string$(a$ as URLAuthority))+{,
+                  "userInfo": }+ quote$(string$(a$ as URLUserInfo))+{,
+                  "scheme": }+quote$(string$(a$ as URLScheme))+{,
+                  "hostname": }+quote$(string$(a$ as UrlHost))+{,
+                  "Port": }+quote$(string$(a$ as UrlPort))+{,
+                  "pathname": }+quote$(string$(a$ as UrlPath))+{,
+                  "search": }+prechar$(string$(a$ as URLpart 6),"?")+{,
+                  "hash": }+prechar$(string$(a$ as UrlFragment),"#")+{
+            }
+            s$="     {"+{
+            }+s1$+"     }"
+            \\ z^ is the iteraror's counter (z is an iterator of a, a touple - array in M2000)
+            if z^<len(a)-1 then s$=" ,"   ' append to document
+            s$={
+            }
+      }
+      s$="]"
+      Print "Press any keyboard key or mouse key to continue scrolling"
+      Report s$   
+      Clipboard s$
+}
+Checkit
 }
 MODULE COMBO1 {\\ module Au is like this with less controls
 
@@ -26241,5 +26285,50 @@ Escape on
 Print "See you later..."
 wait 500
 keyboard "info"+chr$(13)
+}
+MODULE REV53 {\\ Revision 53 Version 9.9
+\\ fix Array() to get a copy from a Group
+Module CheckThis {
+	Class Company {
+		Name$="A Company"
+	}
+	Function At {
+		Class Person {
+			Name$="John Doe"
+			Idempl=0
+			Company=Pointer()
+			Remove {
+				Print "Remove:";.Idempl
+			}
+		Class:
+			Module Person(t as *Company, &n) {
+				.Company<=t
+				n++
+				.Idempl<=n
+			}
+		}
+		\\ []  get s pointer from current stack settinh a new stak as current stack
+		\\ ![] place the current stack as the call stack to Person(), setting current stack for At() a new stack (empty)
+		=Pointer(Person(![]))
+	}
+	Ε1=Company()
+	Idempl=0
+	Dim Empl(1 to 10)<<At(Pointer(Ε1), &Idempl)
+	m=Each(Empl())
+	While m {
+		k=Array(m)
+		For k {
+			Print Format$("{0::-5}|{1:25}|{2:20}", .Idempl, .Name$, .Company=>Name$)
+		}
+	}
+	m=Each(Empl())
+	While m {
+		k=Array(m)
+		For k {
+			Print Format$("{0::-5}|{1:25}|{2:20}", .Idempl, .Name$, .Company=>Name$)
+		}
+	}
+}
+CheckThis
 }
 UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}
