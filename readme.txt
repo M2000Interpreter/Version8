@@ -1,8 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 53 active-X
-Fix  Array() function for groups. See REV53 in Info.gsb
-
+Version 9.9 revision 54 active-X
+Fix color menu item for context popup menu for editbox control
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

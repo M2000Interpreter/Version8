@@ -179,7 +179,11 @@ End If
 .MenuItem 16 - k, True, False, Not that.nowrap, "warp"
 .additemFast "Μεταφορά Κειμένου"
 .MenuItem 17 - k, True, False, that.glistN.DragEnabled, "drag"
+If k = 0 Then
 .additemFast "Χρώμα/Σύμπτυξη Γλώσσας F11"
+Else
+.additemFast "Χρώμα F11"
+End If
 .MenuItem 18 - k, True, False, shortlang, "short"
 .additemFast "Εμφάνιση Παραγράφων F10"
 .MenuItem 19 - k, True, False, that.showparagraph, "para"
@@ -245,7 +249,11 @@ End If
 .MenuItem 16 - k, True, False, Not that.nowrap, "warp"
 .additemFast "Drag Enabled"
 .MenuItem 17 - k, True, False, that.glistN.DragEnabled, "drag"
+If k = 0 Then
 .additemFast "Color/Short Language F11"
+Else
+.additemFast "Color F11"
+End If
 .MenuItem 18 - k, True, False, shortlang, "short"
 .additemFast "Paragraph Mark F10"
 .MenuItem 19 - k, True, False, that.showparagraph, "para"
@@ -721,10 +729,17 @@ End If
 Form1.TEXT1.glistN.enabled = True
 Unload Me
 Case 17 - k
+If k = 0 Then
 With myobject
 shortlang = Not shortlang
 .ManualInform
 End With
+Else
+With myobject
+shortlang = Not shortlang
+.NoColor = shortlang
+End With
+End If
 Case 18 - k
 With myobject
 .showparagraph = Not .showparagraph
