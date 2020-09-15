@@ -17794,7 +17794,7 @@ If Module(Info) Then
     keyboard "INFOBasic"+chr$(13)
 end if
 }
-MODULE ΓΛΩΣΣΑ {\\ `notepad for educational school language ΓΛΩΣΣΑ
+MODULE ΓΛΩΣΣΑ {\\ notepad for educational school language ΓΛΩΣΣΑ
 Greek  ' this make the popup menu of edit boc as 
 Show
 Clear
@@ -17945,7 +17945,7 @@ With Edit1,"MenuStyle", True, "MenuWidth", 4500
 	With Edit1, "GlistN" set Control1
 	With Control1, "UseTab", True, "TabWidthChar", 12
 With Help1,"MenuStyle", True, "MenuWidth", 3000 , "List" as Help.List$()
-With File1, "MenuEnabled" As mEnable()
+With Edit1, "MenuEnabled" As Edit1.Enabled()
 this_line=1
 For This {
       mi$="MenuItem"  \\ is a temporary variable only for For This Block
@@ -17954,7 +17954,7 @@ For This {
       Method File1, mi$,""    \\  only  a line here
       Method File1, mi$,"Κλείσε",True
       Method File1, mi$,"Έξοδος",True
-      
+      With File1, "MenuGroup","This"
       Method Edit1, mi$,"Αποκοπή",True
       Method Edit1, mi$,"Αντιγραφή",True
       Method Edit1, mi$,"Επικόληση",True
@@ -17964,7 +17964,8 @@ For This {
       Method Edit1, mi$,"",True
       Method Edit1, mi$,"Άνοιγμα στη Γλώσσα", exist(filename$)
       
-      With Help1, "Mark", -#7777FF
+      With Edit1, "MenuGroup","This"
+      With Help1, "Mark", -#7777FF,  "MenuGroup","This"
       Method Help1, mi$,"Περί",True
       Method Help1, mi$,"Βοήθεια",True
       Method Help1, mi$,"",True
@@ -18051,6 +18052,14 @@ Function Pad.KeyDown {
                   Call Local MoreI()
             }      
       End If
+}
+Function Edit1.OpenMenu{
+	Local X
+	X=Pad.SelLength>0
+	Edit1.Enabled(0)=X
+	Edit1.Enabled(1)=X
+
+       Edit1.Enabled(7)=exist(filename$)
 }
 Function Edit1.DblClick {
       Read Local Edit1index
@@ -26331,4 +26340,4 @@ Module CheckThis {
 }
 CheckThis
 }
-UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}
+UseThis : InfoBasic :Fkey: Pen 15 {Print "Press F3 now"}
