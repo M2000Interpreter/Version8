@@ -1453,7 +1453,7 @@ With ff
     .bfSize = Len(ff) + Me.packet_bytes
     .bfOffBits = Len(ff) + Me.header_bytes
 End With
-Membl.Costruct 1, Len(ff) + Me.header_bytes + Me.BytesPerScanLine * Me.Height, -1
+Membl.Construct 1, Len(ff) + Me.header_bytes + Me.BytesPerScanLine * Me.Height, -1
 CopyMemory ByVal Membl.GetPtr(0), ff, 2
 CopyMemory ByVal Membl.GetPtr(0) + 2, ff.bfSize, 12  ' vb align issue
 CopyMemory ByVal Membl.GetPtr(0) + Len(ff), m_tBI, Len(m_tBI)
@@ -1480,7 +1480,7 @@ CreateFromDIB VarPtr(fmem(Len(ff)))
 End If
 Exit Sub
 er11:
-Err.clear
+Err.Clear
 On Error Resume Next
 If fh <> 0 Then Close fh
 MyEr "Can't read image", "Δεν μπορώ να διαβάσω το αρχείο"
@@ -2439,7 +2439,7 @@ Dim isbitmap As Boolean, okb As Boolean
                         hDIb = GlobalUnlock(hMem)
                         CloseClipboard
                         If Clipboard.GetFormat(2) Then
-                            CreateFromPicture Clipboard.getData(2)
+                            CreateFromPicture Clipboard.GetData(2)
                             okb = Height
                         End If
                     End If

@@ -5404,7 +5404,7 @@ Pen 0 {
 	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 20 for ver 9.9 rev 53 and newer"
+	Report " A collection of modules for tests version 21 for ver 9.9 rev 55 and newer"
 	
 	Pen 5{
 		cursor 0, row-1
@@ -20904,7 +20904,19 @@ End Sub
 MODULE CHESSGAME {\\ George Karras, 2019
 \\ Chess Example (a big one)
 \\ Example Using sprites
-\\ Rev. 4
+\\ Rev. 5
+\\ to add a chess engine:
+\\ at m2000 console type: win dir$
+\\ paste to that folder the engine.exe
+\\ this engine is an executable file like stockfish_20090216_x64_modern.exe
+\\ from https://stockfishchess.org/
+\\ so get the proper exe file, copy to m2000 user folder (use win dir$ from m2000 console)
+\\ then rename it as engine.exe
+
+enginepath$=dir$+"engine"
+blackComputer=exist(enginepath$+".exe")
+gosub initengine
+
 chessfont$="Arial Unicode MS"
 Font chessfont$
 if not Fontname$="Arial Unicode MS" then
@@ -20980,7 +20992,7 @@ back {
 	Italic 1
 	Def upperlimit
 	Cursor 0,0
-	Pen 15 {Report 2, "Chess Game for two"}
+	Pen 15 {Report 2, "Chess Game "+if$(blackComputer->"UCI Engine", "for two")}
 	Italic OldI
 	Normal
 	Move !      ' Move graphic cursor to character cursor  - Cursor !  the other way
@@ -21179,65 +21191,68 @@ back {
 			Layer {
 				Print Part $(4,5), right$(string$(chrcode$(8199), 3)+str$(Fullmove_number,""),3)+".", $(7,12),condition$,
 			}
-
+			if blackComputer then
+				if not White then 	mymove$=@GetMove$(PastGames$(freeSlot)): keyboard left$(mymove$,4)+chr$(13)
+			end if		
 			White~
 			if empty then
-			Layer {
-				Pen 15 {Input "",move$;}
-			}
-			\\\test !			
-			Thread Sp hold
-			Thread pSp Hold
-			mouse.icon 1
-			getone=false
-			if move$="" then
-				
 				Layer {
-					wait 100
-					Refresh 60
-					profiler
-					Every 1000/60 {
-						if timecount>flashtime then
-							profiler
-							Cls
-							Pen C {Double : Report 2,"End this Game ?" : Normal}
-							C=20-C
-							Cursor width, Height
-							Move !   \\ copy character cursor to graphic cursor
-							Legend "Use Y or Left Mouse Click  to exit | Right Mouse Click or N to continue", FontName$, Mode*.7, 0,1, 1,twipsX
-						end if
-						k$=""
-						if keypress(0x1B) then k$="Y":exit
-						if keypress(0x4E) then exit
-						if keypress(0x59) then  k$="Y":exit
-						if keypress(1) then k$="Y": exit
-						if keypress(2) then exit
-						
-					}
+					Pen 15 {Input "",move$;}
 				}
-				while not inkey$ ="" {Wait 1}  'drop key any
-				If k$="Y" else
-					\\ if stack has something then RedrawBoard mey use it (because read for optional variable)
-					\\ we can be sure we set the optional value using ?
-					White~ :RedrawBoard(?): Layer {Cls}
-					getone=false
-					Thread Sp restart
-					flush ' make empty true (so stack is empty for sure)
-					loop  ' set a flag for restart at end bracket of current block
+				\\\test !			
+				Thread Sp hold
+				Thread pSp Hold
+				mouse.icon 1
+				getone=false
+				if move$="" then
+					
+					Layer {
+						wait 100
+						Refresh 60
+						profiler
+						Every 1000/60 {
+							if timecount>flashtime then
+								profiler
+								Cls
+								Pen C {Double : Report 2,"End this Game ?" : Normal}
+								C=20-C
+								Cursor width, Height
+								Move !   \\ copy character cursor to graphic cursor
+								Legend "Use Y or Left Mouse Click  to exit | Right Mouse Click or N to continue", FontName$, Mode*.7, 0,1, 1,twipsX
+							end if
+							k$=""
+							if keypress(0x1B) then k$="Y":exit
+							if keypress(0x4E) then exit
+							if keypress(0x59) then  k$="Y":exit
+							if keypress(1) then k$="Y": exit
+							if keypress(2) then exit
+							
+						}
+					}
+					while not inkey$ ="" {Wait 1}  'drop key any
+					If k$="Y" else
+						\\ if stack has something then RedrawBoard mey use it (because read for optional variable)
+						\\ we can be sure we set the optional value using ?
+						White~ :RedrawBoard(?): Layer {Cls}
+						getone=false
+						Thread Sp restart
+						flush ' make empty true (so stack is empty for sure)
+						loop  ' set a flag for restart at end bracket of current block
+					end if
+				else
+					move$=lcase$(move$)
+					while len(move$)>0
+						select case left$(move$,1)
+						case "1" to "8"
+							data asc(move$)-48
+						case "a" to "h"
+							data asc(move$)-96
+						end select
+						insert 1,1 move$=""
+					end while
 				end if
-			else
-				move$=lcase$(move$)
-				while len(move$)>0
-					select case left$(move$,1)
-					case "1" to "8"
-						data asc(move$)-48
-					case "a" to "h"
-						data asc(move$)-96
-					end select
-					insert 1,1 move$=""
-				end while
+				isok=false
 			end if
-			isok=false
 			if not empty then
 				if stack.size mod 4 = 0 then
 					try ok {
@@ -21257,6 +21272,7 @@ back {
 					flush : White~ : loop  : Thread Sp restart' loop processed at the end of the block, so only a flag raised here
 				end if
 			end if
+			
 		}
 		Thread Sp Hold
 		Thread pSp Hold
@@ -21304,6 +21320,7 @@ back {
 }
 hide
 threads erase
+declare Engine nothing
 wait 200
 about ""
 if module(info) then keyboard "info"+chr$(13)
@@ -21903,7 +21920,27 @@ for k=max.data(c-2,i) to min.data(c+2, i1)
 	next
 next
 end Sub
-
+\\ new from revision 5
+Function GetMove$(Fen$)
+	local aLine$
+	method Engine, "SendLine" , "position fen "+Fen$
+	method Engine, "SendLine" ,"go movetime"+str$(random(50, 200))
+	every 50 {
+		Method Engine, "ProcessLoop"
+		if not Engine.Active then exit
+		while  Engine.HasLine
+			method Engine, "GetLine" as aLine$
+			if left$(aLine$,8)="bestmove" then exit
+                     End While
+		if left$(aLine$,8)="bestmove" then =piece$(aLine$," ", 2) : exit
+	}		
+End Function
+initengine:
+declare Engine SHELLPIPE
+with Engine, "Active" as Engine.Active, "Hasline" as Engine.HasLine
+Method Engine, "Run",  enginepath$ as OkEngine
+if OkEngine=0 then  Method Engine, "SendLine", "ucinewgame"
+Return
 }
 MODULE URLNEW {Stack New {
       Data "foo://example.com:8042/over/there?name=ferret#nose",  "urn:example:animal:ferret:nose" 
@@ -26360,7 +26397,8 @@ MODULE LED {Module Led_Clock{
 	YY=scale.y-N*22
 	NN=N
 	BackColor=0
-	CLS BackColor,0
+	CLS BackColor, 0
+	Back {CLS BackColor,0}
 	desktop 255, BackColor
 	Forecolor=12
 	C=BackColor-Forecolor
@@ -26424,5 +26462,165 @@ MODULE LED {Module Led_Clock{
 	end sub
 }
 Led_Clock
+}
+MODULE HANDLER {escape off
+Form 100, 60
+Pen 15 {
+	Print "Demo: Using a console program from M2000, using WScript.Shell "
+	Print "Press Esc to exit, or write Exit and press enter"
+}
+cls, 2
+Declare GetForegroundWindow Lib "user32.GetForegroundWindow"
+Declare ShowWindow Lib "user32.ShowWindow" {long hwnd, long nCmdShow}
+cl$=chr$(12)
+al$=">"+chr$(13)
+const SW_MINIMIZE = 6&
+Declare objShell "WScript.Shell"
+Method objShell, "Exec", "%comspec% /d /k"  as  objExecObject
+With objExecObject, "StdOut" set StdOut
+With objExecObject, "Stdin" set StdIn
+With objExecObject, "Status" as Status
+With StdOut, "AtEndOfStream" as AtEndOfStream
+Method StdIn, "WriteLine" , "cd c:\"
+Method StdIn, "WriteLine" , "dir"
+Method StdIn, "WriteLine" ," "
+wait 200
+\\ we have to minimize the window
+t=GetForegroundWindow()
+t1=ShowWindow(t, SW_MINIMIZE)
+a$=""
+p$=""
+Every 10 {
+	Method StdOut, "ReadLine" as strText$
+	p$=filter$(strText$, cl$)
+	if right$(p$,2)="> " or keypress(12) then
+                        	Pen 15 {
+                        	      Print "(Send command)>";
+                        	      Line Input a$
+                        	      print
+                        	}
+                         	Method StdIn, "WriteLine" ,a$
+                         	wait 20
+                  		Method StdIn, "WriteLine" ," "
+	else
+		if right$(p$, len(a$)+1)=">"+a$ else
+			if p$=""   else  print #-2, p$ : refresh
+		end if
+	end if
+	if keypress(27) then exit
+	if status=1 then exit
+} 
+print "End"
+Declare objExecObject nothing
+Declare objShell nothing
+}
+MODULE HANDLER2 {Escape Off
+Form 80, 50
+Pen 15 {
+	Print "Demo: Using a console program from M2000, using ShellPipe internal object"
+	Print "Press Esc to exit, or write Exit and press enter"
+}
+cls, 2
+Declare withevents SP SHELLPIPE
+Rem Print TYPE$(SP)
+with SP, "Active" as IsActive, "Hasline" as Sp.HasLine
+Method SP, "Run","cmd.exe /k" as ok
+Wait 200
+Show
+Rem Print ok
+If ok=0 then
+    Method SP, "SendLine", "Dir"
+    idle=timecount
+    lastcomm$=""
+    comm$=""
+    profiler
+    Function SP_DataArrival {
+    	While  Sp.HasLine
+    		idle=timecount
+    		method Sp, "GetLine" as aLine$
+    		if right$(aline$, len(lastcomm$)+1)<>">"+lastcomm$ then
+    			Print #-2, aLine$
+    	           	Refresh
+    	           end if
+              End While
+    }
+    Every 20 {
+    	Method Sp, "ProcessLoop"
+    	if not IsActive then exit
+    	if keypress(27) then exit
+    	if (timecount-idle)>100 then
+    		Print "(child)>";
+    		Pen 15 {Line Input comm$}
+    		Print
+    		Method SP, "SendLine", comm$
+    		refresh
+    		lastcomm$=comm$
+    	end if
+    }
+end if
+Declare SP nothing
+}
+MODULE ARDUINO {module SerialRead {
+	\\ In com3 there is an Adruino Circuit which send data
+	\\ we have to get them. Data send as UTF8
+	\\ so we have to convert then to unicode UTF16LE
+	\\ newline$ is ansi (8bit) string, A utf8 is the same as Ansi for codes below 128
+	\\ str$(string) convert to ansi based on Locale (Locale 1033 or 1032 etc)
+	\\ chr$(string) do the opposite, ansi to utf16le
+	\\ when we send to arduino we have to place a lf (char 10) (1 byte)
+	const  newline$=str$(chr$(13)+chr$(10)) , send$=str$(chr$(10))
+	escape off
+	declare withevents com3 serialport
+	Print "Try to set port to 3"
+	Print "If we get error then check cable, or change port number"
+	Try ok {
+		method com3, "OpenPort", 3
+	}
+	If ok then
+	\\ we use olddata$ to stack the line characters
+	olddata$=""
+	function com3_DataArrival (new many) {
+		Method com3, "ReadBuffer" as mem
+		\\ we get bytes from buffer mem to a$
+		local a$=eval$(mem)
+		\\ we have to scan a$ as bytes (some characters may have 4 bytes, all of them above 127)
+		\\ so we scan a$ LIKE an ANSI string
+		\\ info: Len(a$) may return integer pluw .5 if we have odd length ansi string
+		\\ Len()) always return charaters of 2 bytes, so 2.5 means 2.5*2 bytes=5 bytes length.
+		local where=instr(a$, newline$ as byte)
+		if  where=0 then
+			olddata$+=a$
+		else
+			olddata$+=Left$(a$, (where-1) as byte)
+			\\ so now the line is ready
+		
+			Print #-2, string$(olddata$ as utf8dec)
+			\\ so olddata$ get a new value
+			\\ after the newline$
+			olddata$=mid$(a$, where+2 as byte)
+		end if
+		refresh
+	}
+	try ok {
+		every 30 {
+			if keypress(65) then method com3, "writestring", string$("hello" as utf8enc)+send$
+			method com3, "processloop", 30
+			if keypress(27) then exit
+			if error then print error$ : exit
+		}
+	}
+	\\ last data here
+	if olddata$<>"" then Print #-2, string$(olddata$ as utf8dec);
+	refresh
+	\\ if we remove the cable we get error
+	\\ but we handle it and just print the error string
+	end if
+	if error or not ok then print : print "ERROR:"+error$
+	\\ also this close the port
+	
+	declare com3 nothing
+	\\ set locale
+}
+SerialRead
 }
 UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}

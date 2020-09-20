@@ -8,7 +8,7 @@ BEGIN
 END
 Attribute VB_Name = "MemBlock"
 Attribute VB_GlobalNameSpace = False
-Attribute VB_Creatable = True
+Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
@@ -39,7 +39,7 @@ Private Width As Long, Height As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
 Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
-Sub Costruct(ByteLen As Long, Optional Times As Long = 1, Optional clearme As Long = 0, Optional executable As Boolean = False, Optional thatbasicitem As Integer)
+Sub Construct(ByteLen As Long, Optional Times As Long = 1, Optional clearme As Long = 0, Optional executable As Boolean = False, Optional thatbasicitem As Integer)
 
 If mItems <> 0 Then ErrorMes = 1: Exit Sub
 If Times < 1 Then ErrorMes = 2: Exit Sub
@@ -266,13 +266,13 @@ Else
 End If
 
 End Function
-Public Function getData(F As Long, addr, lengthInBytes As Long) As Boolean
+Public Function GetData(F As Long, addr, lengthInBytes As Long) As Boolean
 Dim offset, place
 offset = uintnew(addr) - uintnew(mPtr)
 If ErrorMes = 0 And mItems > 0 Then
     If offset < 0 Or offset + lengthInBytes - 1 >= mItems * ItemLen Then
         ErrorMes = 4
-        getData = False
+        GetData = False
     Else
     On Error GoTo there
     Dim a1 As SAFEARRAY1D, a() As Byte
@@ -288,7 +288,7 @@ If ErrorMes = 0 And mItems > 0 Then
         place = 1
         Get #F, , a()
         CopyMemory ByVal VarPtrArray(a), 0&, 4
-        getData = True
+        GetData = True
   End If
     
 Else
@@ -296,7 +296,7 @@ there:
         If place = 1 Then
                 CopyMemory ByVal VarPtrArray(a), 0&, 4
         End If
-        getData = False
+        GetData = False
 End If
         
 End Function
@@ -492,21 +492,21 @@ If mItems > 0 Then
     If r <> 0 Then
         If r >= 0 And r < mItems Then
             If p >= 1 Then
-                aCopy.Costruct ItemLen, CLng(p), , r = 0 And mExecBloc
+                aCopy.Construct ItemLen, CLng(p), , r = 0 And mExecBloc
                 If mItems > p Then
                     p = mItems
                 End If
                 CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(r), ItemLen * p
             Else
-                aCopy.Costruct ItemLen, 1&, , mExecBloc
+                aCopy.Construct ItemLen, 1&, , mExecBloc
                 CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(r), ItemLen
             End If
         Else
-            aCopy.Costruct ItemLen, 1&, , mExecBloc
+            aCopy.Construct ItemLen, 1&, , mExecBloc
             CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(r), ItemLen
         End If
     Else
-    aCopy.Costruct ItemLen, mItems, , mExecBloc
+    aCopy.Construct ItemLen, mItems, , mExecBloc
     CopyMemory ByVal aCopy.GetPtr(0), ByVal mPtr, BLen
     End If
     Set Copy = aCopy

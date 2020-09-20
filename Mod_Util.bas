@@ -1401,7 +1401,7 @@ End With
 End Sub
 Public Function LoadMyPicture(s1$, Optional useback As Boolean = False, Optional bcolor As Variant = 0&, Optional includeico As Boolean = False) As StdPicture
 Dim s As String
-Err.clear
+Err.Clear
    On Error Resume Next
                     If s1$ <> vbNullString Then
                         s$ = UCase(ExtractType(s1$))
@@ -1411,7 +1411,7 @@ Err.clear
                         
                            Set LoadMyPicture = LoadPicture(s1$)
                            If Err.Number > 0 Then
-                           Err.clear
+                           Err.Clear
                            If useback Then
                               Set LoadMyPicture = LoadPictureGDIPlus(s1$, , , bcolor, True)
                            Else
@@ -1419,7 +1419,7 @@ Err.clear
                             End If
                            End If
                            If Err.Number > 0 Then
-                           Err.clear
+                           Err.Clear
                            
                            Set LoadMyPicture = LoadPicture("")
                            End If
@@ -1430,7 +1430,7 @@ Err.clear
                             If includeico And Not useback Then
                             Set LoadMyPicture = LoadPicture(s1$)
                                 If Err.Number > 0 Then
-                                    Err.clear
+                                    Err.Clear
                                     GoTo conthere
                                 End If
                             Else
@@ -1442,7 +1442,7 @@ conthere:
                             End If
                             End If
                             If Err.Number > 0 Then
-                           Err.clear
+                           Err.Clear
                           
                            Set LoadMyPicture = LoadPicture("")
                            End If
@@ -2922,7 +2922,7 @@ Public Sub nPlain(basestack As basetask, ByVal what As String, ByVal Font As Str
 Dim ddd As Object
 Set ddd = basestack.Owner
 Dim PX As Long, PY As Long, OLDFONT As String, OLDSIZE As Long, DEGR As Double
-Dim F As LOGFONT, hPrevFont As Long, hFont As Long, fline$, tt As Long
+Dim F As LOGFONT, hPrevFont As Long, hFont As Long, fline$, TT As Long
 Dim BFONT As String
 
 On Error Resume Next
@@ -2967,7 +2967,7 @@ DEGR = (degree) * 180# / Pi
     hFont = CreateFontIndirect(F)
   hPrevFont = SelectObject(ddd.hDC, hFont)
 
-tt = ExtraWidth \ 2
+TT = ExtraWidth \ 2
 icy = CLng(Cos(degree) * icH)
 icx = CLng(Sin(degree) * icH)
 
@@ -2990,9 +2990,9 @@ X = .XGRAPH - icx
 
 End If
 End With
-If tt > 0 Then
-X = X + (Cos(degree) * tt * dv15)
-Y = Y - (Sin(degree) * tt * dv15)
+If TT > 0 Then
+X = X + (Cos(degree) * TT * dv15)
+Y = Y - (Sin(degree) * TT * dv15)
 End If
 what$ = Replace$(what, vbCrLf, vbCr) + vbCr
 Dim textmetrics As POINTAPI
@@ -4809,7 +4809,7 @@ If bstack.Process Is Nothing Then
 If PP = 0 Then Exit Sub
 Else
 
-Err.clear
+Err.Clear
 p = bstack.Process.Done
 If Err.Number = 0 Then
 e = True
@@ -6093,7 +6093,7 @@ End Sub
 Public Sub Switches(s$, Optional fornow As Boolean = False)
 Dim cc As cRegistry
 Set cc = New cRegistry
-cc.temp = fornow
+cc.Temp = fornow
 cc.ClassKey = HKEY_CURRENT_USER
 cc.SectionKey = basickey
 Dim d$, w$, p As Long, b As Long
@@ -7877,27 +7877,27 @@ Dim i As Long, cursor As Long, ch As String
 cursor = 0
 Dim del As String
 Dim H9F As String
-del = ChrW(127)
-H9F = ChrW(&H9F)
 For i = 1 To Len(RHS)
                 ch = Mid$(RHS, i, 1)
                 cursor = cursor + 1
-                Select Case ch
-                    Case "\":        ch = "\\"
+                Select Case AscW(ch)
+                    Case 92:        ch = "\\"
                    ' Case """":       ch = "\"""
-                    Case """"
+                    Case 34
                     If json Then
                         ch = "\"""
                     Else
                         ch = "\u0022"
                     End If
-                    Case vbLf:       ch = "\n"
-                    Case vbCr:       ch = "\r"
-                    Case vbTab:      ch = "\t"
-                    Case vbBack:     ch = "\b"
-                    Case vbFormFeed: ch = "\f"
-                    Case Is < " ", del To H9F
+                    Case 10:       ch = "\n"
+                    Case 13:       ch = "\r"
+                    Case 9:      ch = "\t"
+                    Case 8:     ch = "\b"
+                    Case 12: ch = "\f"
+                    Case 0 To 31, 127 To &H9F
                         ch = "\u" & Right$("000" & Hex$(AscW(ch)), 4)
+                    Case Is > 255
+                       If json Then ch = "\u" & Right$("000" & Hex$(AscW(ch)), 4)
                 End Select
                 If cursor + Len(ch) > Len(StringToEscapeStr) Then StringToEscapeStr = StringToEscapeStr + space$(500)
                 Mid$(StringToEscapeStr, cursor, Len(ch)) = ch
@@ -8507,6 +8507,7 @@ part2:
         If RoundDouble Then ss$ = ss$ + " +RDB" Else ss$ = ss$ + " -RDB"
         If SecureNames Then ss$ = ss$ + " +SEC" Else ss$ = ss$ + " -SEC"
         If UseTabInForm1Text1 Then ss$ = ss$ + " +TAB" Else ss$ = ss$ + " -TAB"
+        If UseMDBHELP Then ss$ = ss$ + " +MDB" Else ss$ = ss$ + " -MDB"
         If Use13 Then ss$ = ss$ + " +INP" Else ss$ = ss$ + " -INP"
         If Nonbsp Then ss$ = ss$ + " -NBS" Else ss$ = ss$ + " +NBS"
         Return
@@ -9439,11 +9440,11 @@ Function IsBinaryAdd(bstack As basetask, a$, r As Variant, SG As Variant) As Boo
             If FastSymbol(a$, ",") Then
                 If IsExp(bstack, a$, p, , True) Then
                     r = add32(r, p)
-                    If Err.Number Then r = add32(Int(r / 4294967296@), p): Err.clear
+                    If Err.Number Then r = add32(Int(r / 4294967296@), p): Err.Clear
                     While FastSymbol(a$, ",")
                     If Not IsExp(bstack, a$, p, , True) Then MissNumExpr: Exit Function
                     r = add32(r, p)
-                    If Err.Number Then r = add32(r, Int(p / 4294967296@)): Err.clear
+                    If Err.Number Then r = add32(r, Int(p / 4294967296@)): Err.Clear
                     Wend
                     If SG < 0 Then r = -r
                     IsBinaryAdd = FastSymbol(a$, ")", True)
@@ -9888,7 +9889,7 @@ Else
     lr = 1
     Else
     If SG < 0 Then ig$ = "-" & ig$
-    Err.clear
+    Err.Clear
     On Error Resume Next
     n$ = ig$ & DE$ & ex$
     sng = Len(ig$ & DE$ & ex$)
@@ -10129,7 +10130,7 @@ contfinal:
 End If
 er111:
     lr = sng - fr + 1
-    Err.clear
+    Err.Clear
 Exit Function
 
 End Function
@@ -10374,7 +10375,7 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CDec(ig$ & DE$)
                 If Err.Number = 6 Then
-                Err.clear
+                Err.Clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                 r = val(ig$ & DE$)
                 End If
@@ -10383,7 +10384,7 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CCur(ig$ & DE$)
                 If Err.Number = 6 Then
-                Err.clear
+                Err.Clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                 r = val(ig$ & DE$)
                 End If
@@ -10392,14 +10393,14 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CInt(ig$)
                 If Err.Number = 6 Then
-                Err.clear
+                Err.Clear
                 r = val(ig$)
                 End If
            Case 38
                 Mid$(a$, sng, 1) = " "
                 r = CLng(ig$)
                 If Err.Number = 6 Then
-                    Err.clear
+                    Err.Clear
                     r = val(ig$)
                 End If
             Case 126
@@ -10407,7 +10408,7 @@ Else
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = cdecimaldot$
                 r = CSng(ig$ & DE$)
                 If Err.Number = 6 Then
-                Err.clear
+                Err.Clear
                 If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                 r = val(ig$ & DE$)
                 End If
@@ -10424,7 +10425,7 @@ Else
                          If Len(ex$) > 2 Then
                              ex$ = Left$(ex$, Len(ex$) - 1)
                              sng = sng - 1
-                             Err.clear
+                             Err.Clear
                              If DE$ <> vbNullString Then Mid$(DE$, 1, 1) = "."
                              r = val(ig$ & DE$ & ex$)
                              If Err.Number = 6 Then
@@ -11328,7 +11329,7 @@ End Function
 Function Matrix(bstack As basetask, a$, Arr As Variant, res As Variant) As Boolean
 Dim Pad$, cut As Long, pppp As mArray, pppp1 As mArray, st1 As mStiva, anything As Object, w3 As Long, useHandler As mHandler, r As Variant, p As Variant
 Dim cur As Long, w2 As Long, w4 As Long, retresonly As Boolean, s$
-Dim multi As Boolean, original As Long
+Dim multi As Boolean, original As Long, bhas As Integer
 Set anything = Arr
 If Not CheckLastHandlerOrIterator(anything, w3) Then Exit Function
 Pad$ = myUcase(Left$(a$, 20))  ' 20??
@@ -11841,6 +11842,44 @@ Set useHandler = New mHandler
 useHandler.t1 = 3
 Set useHandler.objref = pppp
 Set bstack.lastobj = useHandler
+Case "STR$", "√—¡÷«$"
+If Not IsStrExp(bstack, a$, Pad$) Then Pad$ = " "
+If FastSymbol(a$, ",") Then
+    If Not IsStrExp(bstack, a$, s$) Then
+        s$ = "": If Pad$ = " " Then Pad$ = ","
+    End If
+End If
+res = ""
+If pppp.count > 0 Then
+For w3 = 0 To pppp.count - 2
+If pppp.IsStringItem(w3) Then
+    If Len(s$) > 0 Then
+        res = res + """" + StringToEscapeStr(pppp.item(w3)) + """" + Pad$
+    Else
+    res = res + pppp.item(w3) + Pad$
+    End If
+Else
+    If Len(s$) > 0 Then
+    res = res + Num2Str(pppp.itemnumeric(w3), s$) + Pad$
+    Else
+    res = res + Trim$(Str$(pppp.itemnumeric(w3))) + Pad$
+    End If
+End If
+Next
+If pppp.IsStringItem(w3) Then
+    If Len(s$) > 0 Then
+        res = res + """" + StringToEscapeStr(pppp.item(w3)) + """"
+    Else
+        res = res + pppp.item(w3)
+    End If
+Else
+If Len(s$) > 0 Then
+    res = res + Num2Str(pppp.itemnumeric(w3), s$)
+    Else
+    res = res + Trim$(Str$(pppp.itemnumeric(w3)))
+    End If
+End If
+End If
 Case "FOLD", "–¡ ", "FOLD$", "–¡ $"
 If IsExp(bstack, a$, p) Then
     If Not bstack.lastobj Is Nothing Then
@@ -11985,12 +12024,19 @@ Set useHandler.objref = pppp
 Set bstack.lastobj = useHandler
 End If
 multi = True
+Case "NOTHAVE", "ƒ≈Õ≈◊≈…"
+bhas = 2
+GoTo jpos
+Case "HAVE", "≈◊≈…"
+bhas = 1
+GoTo jpos
 Case "POS", "»≈”«"
+jpos:
     res = -1
     cur = 0
     Dim st() As String, sn() As Variant
-    If IsExp(bstack, a$, p, , True) Then
-        p = Int(p)
+    If IsExp(bstack, a$, r, , True) Then
+        p = Int(r)
         If p < 0 Then p = 0
 again1:
         If FastSymbol(a$, "->", , 2) Then
@@ -12024,7 +12070,7 @@ dothis:
             End If
         Else
             If bstack.lastobj Is Nothing Then
-                r = p
+'                r = p
                 p = 0
                 ReDim sn(0 To 4) As Variant
                 sn(0) = r
@@ -12072,7 +12118,9 @@ inside:
             Else
                 For w3 = p To pppp.count - 1
                     If pppp.MyIsNumeric(pppp.item(w3)) Then
-                        If pppp.item(w3) = r Then res = w3: Exit For
+                        If pppp.item(w3) = r Then
+                        res = w3: Exit For
+                        End If
                     Else
                         If Typename(pppp.item(w3)) = "mHandler" Then
                             Set useHandler = pppp.item(w3)
@@ -12204,6 +12252,13 @@ there:
     Else
         MissParam a$
         Exit Function
+    End If
+    If bhas > 0 Then
+        If bhas = 1 Then
+            res = res <> -1
+        Else
+            res = res = -1
+        End If
     End If
 End Select
 Matrix = FastSymbol(a$, ")")
@@ -12597,7 +12652,7 @@ If CheckIsmArray(anything) Then
     On Error Resume Next
     w = CLng(Fix(p)) + bs
     If Err Then
-        Err.clear
+        Err.Clear
         OutOfLimit
         Exit Function
     End If
@@ -12656,7 +12711,7 @@ If CheckStackObj(bstack, anything) Then
     On Error Resume Next
     w = CLng(Fix(p))
     If Err Then
-        Err.clear
+        Err.Clear
         OutOfLimit
         Exit Function
     End If
@@ -13352,7 +13407,7 @@ Dim PP As Variant, par As Boolean, r2 As Variant, r3 As Variant, r4 As Variant
      If SG < 0 Then r = -r
               If Err.Number > 0 Then
     WrongArgument a$
-    Err.clear
+    Err.Clear
     Exit Function
     End If
     On Error GoTo 0
@@ -13378,7 +13433,7 @@ Dim s$
          If Err.Number > 0 Then
     
     WrongArgument a$
-    Err.clear
+    Err.Clear
     Exit Function
     End If
         On Error GoTo 0
@@ -13408,7 +13463,7 @@ Function IsDataVal(bstack As basetask, a$, r As Variant, SG As Variant) As Boole
      If Err.Number > 0 Then
     
     WrongArgument a$
-    Err.clear
+    Err.Clear
     Exit Function
     End If
     Else
@@ -13422,7 +13477,7 @@ Function IsDataVal(bstack As basetask, a$, r As Variant, SG As Variant) As Boole
      If Err.Number > 0 Then
     
     WrongArgument a$
-    Err.clear
+    Err.Clear
     Exit Function
     End If
     End If
@@ -17119,7 +17174,7 @@ If TypeOf var(h&) Is Constant Then
     s$ = s$ & " = [" & LTrim$(Str(var(h&))) + "]"
     If Err Then
     s$ = s$ & " = [" & var(h&) + "]"
-    Err.clear
+    Err.Clear
     End If
 Else
 
@@ -17139,7 +17194,7 @@ On Error Resume Next
 s$ = s$ & " = " & LTrim$(Str(var(h&)))
 If Err Then
 s$ = s$ & " = " & Chr(34) & var(h&) & Chr(34)
-Err.clear
+Err.Clear
 End If
 Select Case VarType(var(h&))
         Case vbLong
@@ -17427,7 +17482,7 @@ With players(GetCode(Scr))
     End If
     End If
     If .SZ < 4 Then .SZ = 4
-        Err.clear
+        Err.Clear
         Scr.Font.Size = .SZ
         If Err.Number > 0 Then
                 MYFONT = "ARIAL"
@@ -17714,7 +17769,7 @@ End If
 Else
 '.SZ = .SZ * 3
 End If
-Err.clear
+Err.Clear
 Scr.Font.Size = .SZ
 If Err.Number > 0 Then
 
@@ -18035,7 +18090,7 @@ If IsExp(bstack, a$, r, , True) Then
     If SG < 0 Then r = -r
                 If Err.Number > 0 Then
     WrongArgument a$
-    Err.clear
+    Err.Clear
     Exit Function
     End If
     On Error GoTo 0
@@ -18183,6 +18238,12 @@ what$ = Left$(what$, Len(what$) - 1)
         End With
     Case "Socket"
     Set aVar = New Socket
+    Set pppp.item(pppp.count - 1) = aVar
+    Case "SerialPort"
+    Set aVar = New SerialPort
+    Set pppp.item(pppp.count - 1) = aVar
+    Case "ShellPipe"
+    Set aVar = New ShellPipe
     Set pppp.item(pppp.count - 1) = aVar
     Case "cHttpDownload"
     Set aVar = New cHttpDownload
@@ -18448,7 +18509,7 @@ MyDeclare = False
                     
                 If FastSymbol(rest$, ",") Then
                         If IsStrExp(bstack, rest$, w$) Then
-                        Err.clear
+                        Err.Clear
                         On Error Resume Next
                         If w$ = vbNullString Then
                             Licenses.Add s$
@@ -18457,12 +18518,12 @@ MyDeclare = False
                         End If
                         If Err.Number > 0 And Err.Number <> 732 Then
                         MissLicense
-                        Err.clear
+                        Err.Clear
                         Else
-                        Err.clear
+                        Err.Clear
                         CreateitObject var(i), s$, CStr(pa$)
                         If Err.Number > 0 Then
-                        Err.clear
+                        Err.Clear
                         MissLicense
                         End If
                         End If
@@ -18473,11 +18534,11 @@ MyDeclare = False
                         
                         
                 Else
-                      Err.clear
+                      Err.Clear
                         On Error Resume Next
                 CreateitObject var(i), s$, CStr(pa$)
                      If Err.Number > 0 Then
-                        Err.clear
+                        Err.Clear
                         MissLicense
                         End If
                     End If
@@ -18486,7 +18547,7 @@ MyDeclare = False
                 Else
                  If FastSymbol(rest$, ",") Then
                  If IsStrExp(bstack, rest$, pa$) Then
-                    Err.clear
+                    Err.Clear
                         On Error Resume Next
                         If pa$ = vbNullString Then
                         Licenses.Add s$
@@ -18495,12 +18556,12 @@ MyDeclare = False
                  End If
                      If Err.Number > 0 And Err.Number <> 732 Then
                         MissLicense
-                        Err.clear
+                        Err.Clear
                         Else
-                        Err.clear
+                        Err.Clear
                  CreateitObject var(i), s$
                  If Err.Number > 0 Then
-                        Err.clear
+                        Err.Clear
                         MissLicense
                         End If
                         End If
@@ -18518,12 +18579,12 @@ MyDeclare = False
                 
                 
             Else
-               Err.clear
+               Err.Clear
                         On Error Resume Next
                 CreateitObject var(i), s$
                 
                  If Err.Number > 0 Then
-                        Err.clear
+                        Err.Clear
                         MissLicense
                         ElseIf Y3 <> 0 Then
                         
@@ -18563,7 +18624,7 @@ MyDeclare = False
         End If
          
         End If
-           Err.clear
+           Err.Clear
                         On Error Resume Next
             
         If Not MyIsObject(var(i)) Then
@@ -19070,6 +19131,28 @@ ElseIf IsLabelSymbolNew(rest$, "”‘¡»Ãœ”", "SOCKET", Lang) Then
         Set pppp = var(ArrPos)
         For i = 0 To ar - 1
             Set pppp.item(i) = New Socket
+        Next i
+    End If
+    Exit Function
+ElseIf IsLabelSymbolNew(rest$, "¡’Àœ”", "SHELLPIPE", Lang) Then
+    If ar = 0 Then
+        Set var(i) = New ShellPipe
+    Else
+        what$ = Left$(what$, Len(oName$))
+        Set pppp = var(ArrPos)
+        For i = 0 To ar - 1
+            Set pppp.item(i) = New ShellPipe
+        Next i
+    End If
+    Exit Function
+ElseIf IsLabelSymbolNew(rest$, "”≈…—…¡ «", "SERIALPORT", Lang) Then
+    If ar = 0 Then
+        Set var(i) = New SerialPort
+    Else
+        what$ = Left$(what$, Len(oName$))
+        Set pppp = var(ArrPos)
+        For i = 0 To ar - 1
+            Set pppp.item(i) = New SerialPort
         Next i
     End If
     Exit Function
@@ -20021,12 +20104,12 @@ sort3:
 
 End Function
 
-Function getData(bstack As basetask, rest$, obj As Object) As Boolean
+Function GetData(bstack As basetask, rest$, obj As Object) As Boolean
 Dim s$, p As Variant ', vvl As Variant, photo As Object
 Set obj = New mStiva
 Dim soros As mStiva
 Set soros = obj
-getData = True
+GetData = True
 Do
     If FastSymbol(rest$, "!") Then
                 If IsExp(bstack, rest$, p) Then
@@ -20038,7 +20121,7 @@ Do
                         ElseIf TypeOf bstack.lastobj.objref Is mArray Then
                             soros.MergeBottomCopyArray bstack.lastobj.objref
                         Else
-                            getData = False
+                            GetData = False
                             MyEr "Expected Stack Object or Array after !", "–ÂÒﬂÏÂÌ· ·ÌÙÈÍÂﬂÏÂÌÔ ”˘Ò¸ ﬁ ﬂÌ·Í· ÏÂÙ‹ ÙÔ !"
                             Set bstack.lastobj = Nothing
                             Exit Function
@@ -20077,7 +20160,7 @@ Do
                           Set bstack.lastpointer = Nothing
                 End If
         Else
-                getData = LastErNum1 = 0
+                GetData = LastErNum1 = 0
                 Exit Do
         End If
         If Not FastSymbol(rest$, ",") Then Exit Do
@@ -20099,12 +20182,12 @@ If x1 = 1 Or x1 = 3 Then
                       ProcProperty bstack, var(), i, ss$, rest$, Lang
                       If Err.Number > 0 Then
                       MyEr "Property " + ss$ + " problem", "–Ò¸‚ÎÁÏ· ÏÂ È‰È¸ÙÁÙ· " + ss$
-                      Err.clear
+                      Err.Clear
                       MyWith = False
                     Exit Do
                       End If
                       MyWith = Err = 0
-                      Err.clear
+                      Err.Clear
                     ElseIf IsExp(bstack, rest$, Id) Then
                     If Not ss$ = vbNullString Then ss$ = vbNullString
                     ProcProperty bstack, var(), i, ss$, rest$, Lang, , CLng(Id)
@@ -20138,12 +20221,12 @@ ElseIf x1 = 5 Or x1 = 6 Then
                   End If
                   If Err.Number > 0 Then
                       MyEr "Property " + ss$ + " problem", "–Ò¸‚ÎÁÏ· ÏÂ È‰È¸ÙÁÙ· " + ss$
-                      Err.clear
+                      Err.Clear
                       MyWith = False
                     Exit Do
                       End If
                       MyWith = Err = 0
-                      Err.clear
+                      Err.Clear
                    ElseIf IsExp(bstack, rest$, Id) Then
                     If Not ss$ = vbNullString Then ss$ = vbNullString
                      ProcPropertyArray bstack, pppp, i, ss$, rest$, Lang, MyWith
@@ -21226,7 +21309,7 @@ MyShell = ShellExecute(0, 0, StrPtr(EXE$), StrPtr(param), 0, way)
 'If Is64bit Then Wow64EnableWow64FsRedirection True
 If Err.Number > 0 Then
 
-Err.clear
+Err.Clear
 ww$ = PathFromApp(ww$)
 If ww$ <> "" Then
 EXE$ = Trim$(ww$)
@@ -21370,7 +21453,7 @@ basestack.myBold = False
 basestack.myitalic = False
 pa = 0
 
-            Err.clear
+            Err.Clear
             On Error Resume Next
 If IsStrExp(basestack, rest$, s$) Then
             If s$ <> "" And s$ <> "*" Then MYFONT = s$ Else MYFONT = Scr.Font.Name
@@ -21391,7 +21474,7 @@ If IsStrExp(basestack, rest$, s$) Then
                 Scr.FontBold = False
                 Scr.FontItalic = False
             If Err.Number > 0 Then
-                Err.clear
+                Err.Clear
                 Scr.Font.Name = FFONT
                 Scr.Font.charset = basestack.myCharSet
             End If
@@ -21464,7 +21547,7 @@ Form3.CaptionWsilent = ExtractNameOnly(cLine)
 Else
 PlaceCaption ExtractNameOnly(cLine)
 If Err.Number > 0 Then
-Err.clear: Set UseMe = Nothing
+Err.Clear: Set UseMe = Nothing
 Form3.skiptimer = True
 Form3.Visible = True: If Form3.WindowState = 0 Then Form3.Move VirtualScreenWidth() + 2000, VirtualScreenHeight() + 2000
 mywait Basestack1, 100
@@ -21711,7 +21794,7 @@ Else
     For i = 1 To 24
         If FK$(i) <> "" Then
             s$ = s$ + placeme$(" À≈…ƒ…", "FKEY", Lang) + Right$(" " & Str$(i), 3) & " [" & FK$(i) & "]" ' FKEY
-            If i > 12 Then s$ = s$ + " SHIFT + F" & CStr(i Mod 12) Else s$ = s$ + " F" & CStr(i)
+            If i > 12 Then s$ = s$ + " SHIFT + F" & CStr(i - 12) Else s$ = s$ + " F" & CStr(i)
             s$ = s$ + vbCrLf
         End If
     Next i
@@ -22936,7 +23019,7 @@ ProcList = True
 Exit Function
 there:
 MyEr Err.Description, Err.Description
-Err.clear
+Err.Clear
 End Function
 Function ProcLoad(basestack As basetask, rest$, Lang As Long) As Boolean
 Dim x1 As Long, s$, w$, ss$, par As Boolean, vvl As Variant, Key$, par1 As Boolean, NoRun As Boolean
@@ -23090,7 +23173,7 @@ If par Then GoTo skipme
 If (AscW(ss$) > 127 And myUcase(Left$(ss$, 5)) <> " À¡”«" And myUcase(Left$(ss$, 5)) <> "‘Ã«Ã¡" And myUcase(Left$(ss$, 9)) <> "”’Õ¡—‘«”«") Or (((AscW(ss$) And &H4000) = &H4000)) Then
     ss$ = mycoder.must(ss$)
     If NORUN1 Then
-        Clipboard.clear
+        Clipboard.Clear
         SetTextData CF_UNICODETEXT, ss$
         basestack.LoadOnly = True
     End If
@@ -23205,7 +23288,7 @@ Form4.Visible = False
     End If
 End If
 End If
- Form1.List1.clear
+ Form1.List1.Clear
     If lookOne(rest$, "!") Then
             ObjectCatalog.Done = True
             For i = 0 To ObjectCatalog.count - 1
@@ -23883,11 +23966,11 @@ there01:
                 
                 MakeitObjectLong var(i)
                 On Error Resume Next
-                Err.clear
+                Err.Clear
                 CheckVarLong var(i), CLng(Int(p))
                 If Err > 0 Then
                 If Err.Number = 6 Then MyEr "overflowlong Long", "’ÂÒ˜ÂﬂÎÈÛÁ  Ï·ÍÒ˝"
-                Err.clear
+                Err.Clear
                 MyLong = False
                 Exit Function
                 End If
@@ -23902,11 +23985,11 @@ there12:
                     If FastSymbol(rest$, "=") Then
                         If IsExp(basestack, rest$, p, , True) Then
                           On Error Resume Next
-                            Err.clear
+                            Err.Clear
                             CheckVarLong var(i), CLng(Int(p))
                             If Err > 0 Then
                             If Err.Number = 6 Then MyEr "overflowlong Long", "’ÂÒ˜ÂﬂÎÈÛÁ  Ï·ÍÒ˝"
-                            Err.clear
+                            Err.Clear
                             MyLong = False
                             Exit Function
                             End If
@@ -24288,3 +24371,23 @@ Exit Function
 
 End Function
 
+Function Num2Str(p, FTXT As String) As String
+        Dim s$
+        If Not NoUseDec Then
+                If OverideDec Then
+                    s$ = Replace$(Format$(p, FTXT), GetDeflocaleString(LOCALE_SDECIMAL), Chr(2))
+                    s$ = Replace$(s$, GetDeflocaleString(LOCALE_STHOUSAND), Chr(3))
+                    s$ = Replace$(s$, Chr(2), NowDec$)
+                    Num2Str = Replace$(s$, Chr(3), NowThou$)
+                ElseIf InStr(s$, NowDec$) > 0 And InStr(FTXT, ".") > 0 Then
+                    Num2Str = Format$(p, FTXT)
+                ElseIf InStr(s$, NowDec$) > 0 Then
+                    s$ = Replace$(Format$(p, FTXT), NowDec$, Chr(2))
+                    s$ = Replace$(s$, NowThou$, Chr(3))
+                    s$ = Replace$(s$, Chr(2), ".")
+                    Num2Str = Replace$(s$, Chr(3), ",")
+                End If
+        Else
+            Num2Str = Format$(p, FTXT)
+        End If
+End Function
