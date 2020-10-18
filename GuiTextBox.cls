@@ -182,7 +182,7 @@ dimm1 = rgb(100, 200, 160)
 dimm2 = rgb(200, 120, 60)
 Dim ff As New StdFont
 With Callback
-white = .Controls(1).ForeColor
+white = .Controls(1).forecolor
 ff.Name = .CtrlFontName
 ff.charset = Form1.DIS.Font.charset
 ff.Size = .CtrlFontSize
@@ -198,7 +198,7 @@ If .listcount = 0 Then Text = vbNullString
 If Not .CenterText Then .LeftMarginPixels = 8 Else .LeftMarginPixels = 0
 .backcolor = rgb(200, 120, 60)
 Set .Font = ff
-.ForeColor = white
+.forecolor = white
 .dcolor = Callback.Controls(1).dcolor
 .ShowMe
 End With
@@ -228,6 +228,21 @@ End Sub
 
 Private Sub Class_Terminate()
 Set glistN = Nothing
+End Sub
+
+Private Sub glistN_CaretDeal(Deal As Long)
+
+If Deal = 0 Then
+    glistN.Noflashingcaret = True
+    glistN.NoCaretShow = True
+    glistN.ShowMe2
+    Deal = 1
+Else
+   glistN.Noflashingcaret = False
+    glistN.NoCaretShow = False
+    glistN.ShowMe2
+    Deal = 0
+End If
 End Sub
 
 Private Sub glistN_OutPopUp(X As Single, Y As Single, myButton As Integer)
@@ -283,7 +298,7 @@ If thisselstart <= Len(mprompt) Then thisselstart = Len(mprompt) + 1
 'glistN.ShowPan
 With glistN
 .ShowPan
-.ExternalCursor .SelStart, .list(.ListIndex), .ForeColor
+.ExternalCursor .SelStart, .list(.ListIndex), .forecolor
 End With
 End Sub
 
@@ -317,7 +332,7 @@ If glistN.ListIndex < 0 And glistN.listcount > 0 Then glistN.ListindexPrivateUse
 If enabled Then
 glistN.FadeLastLinePart = mPartColor
 If glistN.BackStyle <> 1 Then
-glistN.ForeColor = black
+glistN.forecolor = black
 glistN.backcolor = white
 End If
 glistN.NoCaretShow = False:
@@ -325,11 +340,12 @@ glistN.PanPos = 0
 Else
 glistN.FadeLastLinePart = black
 If glistN.BackStyle <> 1 Then
-glistN.ForeColor = white
+glistN.forecolor = white
 glistN.backcolor = dimm1
 End If
 glistN.NoCaretShow = True
 End If
+Callback.LastActive = ctrlName
 glistN.ShowMe
 End If
 
@@ -338,14 +354,14 @@ Public Sub Retired()
 If mStayOpen Then
 glistN.FadeLastLinePart = mPartColor
 If glistN.BackStyle <> 1 Then
-glistN.ForeColor = black
+glistN.forecolor = black
 glistN.backcolor = white
 End If
 glistN.NoCaretShow = False
 Else
 If glistN.BackStyle <> 1 Then
 glistN.FadeLastLinePart = 0
-glistN.ForeColor = white
+glistN.forecolor = white
 glistN.backcolor = dimm2
 End If
 glistN.NoCaretShow = True
@@ -355,22 +371,20 @@ End Sub
 
 Private Sub glistN_CheckLostFocus()
 If Not locked Then
-Callback.LastActive = ctrlName
-If mStayOpen Then
-glistN.NoCaretShow = True
-
-If glistN.Visible Then glistN.PanPos = 0: glistN.PrepareToShow
-Exit Sub
-End If
-If Not SkipProcAtExitFocus Then
-If glistN.BackStyle <> 1 Then
-glistN.ForeColor = white
-glistN.backcolor = dimm2
-End If
-glistN.NoCaretShow = True: glistN.PanPos = 0: glistN.ShowMe
-Else
-'
-End If
+    Callback.LastActive = ctrlName
+    If mStayOpen Then
+        glistN.NoCaretShow = True
+        glistN.HideTheCaret
+        If glistN.Visible Then glistN.PanPos = 0: glistN.PrepareToShow
+        Exit Sub
+    End If
+    If Not SkipProcAtExitFocus Then
+        If glistN.BackStyle <> 1 Then
+            glistN.forecolor = white
+            glistN.backcolor = dimm2
+        End If
+        glistN.NoCaretShow = True: glistN.PanPos = 0: glistN.ShowMe
+    End If
 End If
 ' RaiseEvent LostFocus
 End Sub
@@ -1199,7 +1213,7 @@ If Err.Number > 0 Then glistN.NoWheel = True
 
 End Sub
 
-Public Sub Move(X, Y, Optional w, Optional h)
+Public Sub move(X, Y, Optional w, Optional h)
 If IsMissing(w) Then
 glistN.MoveTwips CLng(X), CLng(Y), 0, 0
 ElseIf IsMissing(h) Then
@@ -1225,17 +1239,17 @@ aa.bold = ThisBold
 Set glistN.Font = aa
 End If
 End Sub
-Public Property Get index() As Long
-index = mIndex
+Public Property Get Index() As Long
+Index = mIndex
 End Property
 
-Public Property Let index(ByVal RHS As Long)
+Public Property Let Index(ByVal RHS As Long)
 mIndex = RHS
 End Property
 Public Property Let ShowAlways(ByVal vNewValue As Variant)
 mStayOpen = CBool(vNewValue)
 If mStayOpen Then
-glistN.ForeColor = rgb(0, 0, 0)
+glistN.forecolor = rgb(0, 0, 0)
 glistN.backcolor = rgb(255, 255, 255)
 End If
 End Property
@@ -1250,7 +1264,7 @@ End Property
 Sub Transparent()
 Dim X  As Long, Y As Long
 glistN.FadeLastLinePart = mPartColor
-glistN.ForeColor = black
+glistN.forecolor = black
 glistN.BackStyle = 1
 glistN.GetLeftTop X, Y
 glistN.RepaintFromOut Callback.Image, X, Y
@@ -1283,9 +1297,9 @@ If Not IsMissing(dimm21) Then dimm2 = dimm21
 End If
 End If
 If enabled Then
-glistN.ForeColor = white
+glistN.forecolor = white
 Else
-glistN.ForeColor = black
+glistN.forecolor = black
 End If
 
 'Retired

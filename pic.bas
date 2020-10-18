@@ -1,6 +1,6 @@
 Attribute VB_Name = "PicHandler"
 Option Explicit
-Private Declare Function HashData Lib "shlwapi" (ByVal straddr As Long, ByVal bytesize As Long, ByVal res As Long, ByVal ressize As Long) As Long
+Private Declare Function HashData Lib "shlwapi" (ByVal straddr As Long, ByVal ByteSize As Long, ByVal res As Long, ByVal ressize As Long) As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Any)
 Public fonttest As PictureBox
 Private Declare Function GetTextMetrics Lib "gdi32" _
@@ -40,7 +40,10 @@ Private Const SM_CYSCREEN = 1
 Private Const LOGPIXELSX = 88
 Private Const LOGPIXELSY = 90
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
-
+Private Declare Function GetEnhMetaFileBits Lib "gdi32" (ByVal hMf As Long, ByVal nSize As Long, lpvData As Any) As Long
+Private Declare Function CopyEnhMetaFile Lib "gdi32.dll" Alias "CopyEnhMetaFileW" (ByVal hemfSrc As Long, lpszFile As Long) As Long
+Private Declare Function IsClipboardFormatAvailable Lib "user32" (ByVal wFormat As Long) As Long
+Private Declare Function DeleteEnhMetaFile Lib "gdi32" (ByVal hEmf As Long) As Long
 Public MediaPlayer1 As New MovieModule
 Public MediaBack1 As New MovieModule
 Public form5iamloaded As Boolean
@@ -49,10 +52,10 @@ Public sumhDC As Long  ' check it
 Public Rixecode As String
 Public MYSCRnum2stop As Long
 Public octava As Integer, NOTA As Integer, ENTASI As Long
-Private Declare Sub Sleep Lib "KERNEL32" (ByVal dwMilliseconds As Long)
+Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Const Face$ = "C C#D D#E F F#G G#A A#B  "
 Public CLICK_COUNT As Long
-Private Declare Function GetVersionExA Lib "KERNEL32" (lpVersionInformation As OSVERSIONINFO) As Long
+Private Declare Function GetVersionExA Lib "kernel32" (lpVersionInformation As OSVERSIONINFO) As Long
 Private Type OSVERSIONINFO
     dwOSVersionInfoSize As Long
     dwMajorVersion As Long
@@ -104,7 +107,7 @@ Private Type XFORM  ' used for stretching/skewing a region
 End Type
 Public Const RGN_OR = 2
 '**********************************
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Private Const Pi = 3.14159265359
 Private Type SAFEARRAYBOUND
@@ -123,7 +126,7 @@ Private Declare Function VarPtrArray Lib "msvbvm60.dll" Alias "VarPtr" (Ptr() As
 
 Private Declare Function timeGetTime Lib "winmm.dll" () As Long
 
-Type BITMAP
+Type bitmap
         bmType As Long
         bmWidth As Long
         bmHeight As Long
@@ -132,16 +135,16 @@ Type BITMAP
         bmBitsPixel As Integer
         bmBits As Long
 End Type
-Declare Function StretchBlt Lib "gdi32" (ByVal hDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal nSrcWidth As Long, ByVal nSrcHeight As Long, ByVal dwRop As Long) As Long
+Declare Function StretchBlt Lib "gdi32" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal nSrcWidth As Long, ByVal nSrcHeight As Long, ByVal dwRop As Long) As Long
 Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hDC As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
 Declare Function CreateCompatibleDC Lib "gdi32" (ByVal hDC As Long) As Long
 Declare Function SelectObject Lib "gdi32" (ByVal hDC As Long, ByVal hObject As Long) As Long
 Declare Function DeleteDC Lib "gdi32" (ByVal hDC As Long) As Long
 Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
-Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal X As Long, ByVal Y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
 'Declare Function GetObject Lib "gdi32" Alias "GetObjectA" (ByVal hObject As Long, ByVal nCount As Long, lpObject As Any) As Long
-Declare Function GetPixel Lib "gdi32" (ByVal hDC As Long, ByVal X As Long, ByVal Y As Long) As Long
-Declare Function SetPixel Lib "gdi32" (ByVal hDC As Long, ByVal X As Long, ByVal Y As Long, ByVal crColor As Long) As Long
+Declare Function GetPixel Lib "gdi32" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long) As Long
+Declare Function SetPixel Lib "gdi32" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long, ByVal crColor As Long) As Long
 Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As Long, ByVal nIndex As Long) As Long
 Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
 Private Declare Function GetDesktopWindow Lib "user32" () As Long
@@ -166,14 +169,13 @@ Private Declare Function GetClipboardData Lib "user32" _
       ByVal bDaclPresent As Long, _
       ByVal pDacl As Long, _
       ByVal bDaclDefaulted As Long) As Long
- Declare Function GlobalAlloc Lib "KERNEL32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
-Private Declare Function GlobalFree Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalLock Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalReAlloc Lib "KERNEL32" (ByVal hMem As Long, ByVal dwBytes As Long, ByVal wFlags As Long) As Long
-Private Declare Function GlobalSize Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalUnlock Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function IsClipboardFormatAvailable Lib "user32" _
-    (ByVal wFormat As Long) As Long
+ Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalReAlloc Lib "kernel32" (ByVal hMem As Long, ByVal dwBytes As Long, ByVal wFlags As Long) As Long
+Private Declare Function GlobalSize Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
+
 
 Private Const GMEM_DDESHARE = &H2000
 Private Const GMEM_DISCARDABLE = &H100
@@ -209,7 +211,7 @@ Private Type MEMORYSTATUS
     dwTotalVirtual As Long
     dwAvailVirtual As Long
 End Type
-Private Declare Sub GlobalMemoryStatus Lib "KERNEL32" (lpBuffer As MEMORYSTATUS)
+Private Declare Sub GlobalMemoryStatus Lib "kernel32" (lpBuffer As MEMORYSTATUS)
 Public Declare Function joyGetPosEx Lib "winmm.dll" (ByVal uJoyID As Long, pji As JOYINFOEX) As Long
 Public Declare Function joyGetDevCapsA Lib "winmm.dll" (ByVal uJoyID As Long, pjc As JOYCAPS, ByVal cjc As Long) As Long
 
@@ -334,7 +336,7 @@ Else
 If F.Visible Then F.SetFocus
 End If
 End If
-Err.clear
+Err.Clear
 End Sub
 Public Function StartJoypadk(Optional ByVal jn As Long = 0) As Boolean
     If joyGetDevCapsA(jn, MYJOYCAPS, 404) <> 0 Then 'Get Joypadk info
@@ -490,7 +492,7 @@ h = val("&H" & Mid$(a, 9, 4))
 If Len(a) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
 mdib.ClearUp
 
-If mdib.Create(w, h) Then
+If mdib.create(w, h) Then
 If Len(a) * 2 < mdib.BytesPerScanLine * h + 24 Then Exit Function
 CopyMemory ByVal mdib.DIBSectionBitsPtr, ByVal StrPtr(a) + 24, mdib.BytesPerScanLine * h
 cDib = True
@@ -507,22 +509,22 @@ Else
     Set CDib2Pic = emptypic
 End If
 End Function
-Public Function SetDIBPixel(ssdib As Variant, ByVal X As Long, ByVal Y As Long, aColor As Long) As Double
+Public Function SetDIBPixel(ssdib As Variant, ByVal x As Long, ByVal y As Long, aColor As Long) As Double
 Dim w As Long, h As Long, bpl As Long, rgb(2) As Byte
 w = val("&H" & Mid$(ssdib, 5, 4))
 h = val("&H" & Mid$(ssdib, 9, 4))
 If Len(ssdib) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
 If w * h <> 0 Then
 bpl = (LenB(ssdib) - 24) \ h
-w = (w - X - 1) Mod w
-h = (Y Mod h) * bpl + w * 3 + 24
+w = (w - x - 1) Mod w
+h = (y Mod h) * bpl + w * 3 + 24
 CopyMemory rgb(0), ByVal StrPtr(ssdib) + h, 3
 
 SetDIBPixel = -(rgb(2) * 256# * 256# + rgb(1) * 256# + rgb(0))
 CopyMemory ByVal StrPtr(ssdib) + h, aColor, 3
 End If
 End Function
-Public Function GetDIBPixel(ssdib As Variant, ByVal X As Long, ByVal Y As Long) As Double
+Public Function GetDIBPixel(ssdib As Variant, ByVal x As Long, ByVal y As Long) As Double
 Dim w As Long, h As Long, bpl As Long, rgb(2) As Byte
 'a = ssdib$
 w = val("&H" & Mid$(ssdib, 5, 4))
@@ -530,9 +532,9 @@ h = val("&H" & Mid$(ssdib, 9, 4))
 If Len(ssdib) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
 If w * h <> 0 Then
 bpl = (LenB(ssdib) - 24) \ h   ' Len(ssdib$) 2 bytes per char
-w = (w - X - 1) Mod w
+w = (w - x - 1) Mod w
 
-h = (Y Mod h) * bpl + w * 3 + 24
+h = (y Mod h) * bpl + w * 3 + 24
 
 
 CopyMemory rgb(0), ByVal StrPtr(ssdib) + h, 3
@@ -639,7 +641,7 @@ If cDibbuffer0.hDIb = 0 Then Exit Function
 If zoomfactor <= 1 Then zoomfactor = 1
 zoomfactor = zoomfactor / 100#
 Dim myw As Long, myh As Long, piw As Long, pih As Long, pix As Long, piy As Long
-Dim a As Single, b As Single, k As Single, r As Single
+Dim a As Single, b As Single, k As Single, R As Single
 Dim BR As Byte, BG As Byte, bbb As Byte ', ba$
 Dim BR1 As Byte, BG1 As Byte, bbb1 As Byte, ppBa As Long
 BR1 = 255 * ((100 - Alpha) / 100#)
@@ -658,8 +660,8 @@ GetMem1 ppBa + 2, BR
 Dim pw As Long, ph As Long
     piw = cDibbuffer0.Width
     pih = cDibbuffer0.Height
-    r = Atn(CSng(piw) / CSng(pih)) + Pi / 2#
-     k = Fix(Abs((piw / Cos(r) / 2) * zoomfactor) + 0.5)
+    R = Atn(CSng(piw) / CSng(pih)) + Pi / 2#
+     k = Fix(Abs((piw / Cos(R) / 2) * zoomfactor) + 0.5)
 
 Dim cDIBbuffer1 As Object
  Dim olddpix As Long, olddpiy As Long
@@ -671,13 +673,13 @@ myh = 2 * k
     pw = cDibbuffer0.Width
     ph = cDibbuffer0.Height
  cDibbuffer0.ClearUp
-Call cDibbuffer0.Create(myw, myh)
+Call cDibbuffer0.create(myw, myh)
 cDibbuffer0.GetDpi olddpix, olddpiy
 cDibbuffer0.Cls bckColor
 
 there:
 Dim bDib2() As Byte, bDib1() As Byte
-Dim X As Long, Y As Long
+Dim x As Long, y As Long
 Dim lc As Long
 Dim tSA As SAFEARRAY2D
 Dim tSA1 As SAFEARRAY2D
@@ -712,8 +714,8 @@ On Error Resume Next
     ph1 = ph
     pws = pw
     phs = ph
-    r = Atn(CSng(myw) / CSng(myh))
-    k = -myw / (2# * Sin(r))
+    R = Atn(CSng(myw) / CSng(myh))
+    k = -myw / (2# * Sin(R))
     
 
        x_step2 = CLng(Fix(Cos(angle! + Pi / 2) * pw))
@@ -721,8 +723,8 @@ On Error Resume Next
 
     x_step = CLng(Fix(Cos(angle!) * pw))
     y_step = CLng(Fix(Sin(angle!) * ph))
-  image_x = CLng(Fix(pw / 2 - Fix(k * Sin(angle! - r)))) * pw
-   image_y = CLng(Fix(ph / 2 + Fix(k * Cos(angle! - r)))) * ph
+  image_x = CLng(Fix(pw / 2 - Fix(k * Sin(angle! - R)))) * pw
+   image_y = CLng(Fix(ph / 2 + Fix(k * Cos(angle! - R)))) * ph
 Dim pw1out As Long, ph1out As Long, pwOut As Long, phOut As Long, much As Single
 ''Dim cw1 As Long, ch1 As Long, outf As Single, fadex As Long, fadey As Long, outf1 As Single, outf2 As Single
 pw1 = pw1 - 1
@@ -797,7 +799,7 @@ End Function
 
 Public Function Merge3Dib(backdib As cDIBSection, maskdib As cDIBSection, frontdib As cDIBSection, Optional Reverse As Boolean = False)
 
-Dim X As Long, Y As Long
+Dim x As Long, y As Long
 
 Dim xmax As Long, yMax As Long
     yMax = backdib.Height - 1
@@ -843,21 +845,21 @@ Dim tSA2 As SAFEARRAY2D
         '-----------------------------------------------
         If Reverse Then
         
-    For X = 0 To (xmax * 3) Step 3
-        For Y = yMax To 0 Step -1
-            bDib(X, Y) = (CLng(bDib(X, Y)) * bDib1(X, Y) + CLng(bDib2(X, Y)) * (255 - bDib1(X, Y))) \ 256
-            bDib(X + 1, Y) = (CLng(bDib(X + 1, Y)) * bDib1(X + 1, Y) + CLng(bDib2(X + 1, Y)) * (255 - bDib1(X + 1, Y))) \ 256
-            bDib(X + 2, Y) = (CLng(bDib(X + 2, Y)) * bDib1(X + 2, Y) + CLng(bDib2(X + 2, Y)) * (255 - bDib1(X + 2, Y))) \ 256
-        Next Y
-        Next X
+    For x = 0 To (xmax * 3) Step 3
+        For y = yMax To 0 Step -1
+            bDib(x, y) = (CLng(bDib(x, y)) * bDib1(x, y) + CLng(bDib2(x, y)) * (255 - bDib1(x, y))) \ 256
+            bDib(x + 1, y) = (CLng(bDib(x + 1, y)) * bDib1(x + 1, y) + CLng(bDib2(x + 1, y)) * (255 - bDib1(x + 1, y))) \ 256
+            bDib(x + 2, y) = (CLng(bDib(x + 2, y)) * bDib1(x + 2, y) + CLng(bDib2(x + 2, y)) * (255 - bDib1(x + 2, y))) \ 256
+        Next y
+        Next x
         Else
-     For X = 0 To (xmax * 3) Step 3
-        For Y = yMax To 0 Step -1
-            bDib(X, Y) = (CLng(bDib2(X, Y)) * bDib1(X, Y) + CLng(bDib(X, Y)) * (255 - bDib1(X, Y))) \ 256
-            bDib(X + 1, Y) = (CLng(bDib2(X + 1, Y)) * bDib1(X + 1, Y) + CLng(bDib(X + 1, Y)) * (255 - bDib1(X + 1, Y))) \ 256
-            bDib(X + 2, Y) = (CLng(bDib2(X + 2, Y)) * bDib1(X + 2, Y) + CLng(bDib(X + 2, Y)) * (255 - bDib1(X + 2, Y))) \ 256
-        Next Y
-        Next X
+     For x = 0 To (xmax * 3) Step 3
+        For y = yMax To 0 Step -1
+            bDib(x, y) = (CLng(bDib2(x, y)) * bDib1(x, y) + CLng(bDib(x, y)) * (255 - bDib1(x, y))) \ 256
+            bDib(x + 1, y) = (CLng(bDib2(x + 1, y)) * bDib1(x + 1, y) + CLng(bDib(x + 1, y)) * (255 - bDib1(x + 1, y))) \ 256
+            bDib(x + 2, y) = (CLng(bDib2(x + 2, y)) * bDib1(x + 2, y) + CLng(bDib(x + 2, y)) * (255 - bDib1(x + 2, y))) \ 256
+        Next y
+        Next x
         End If
 
    '-----------------------------------------------
@@ -878,7 +880,7 @@ Else
 piw = wcm
 pih = hcm
 End If
-If cDIBbuffer1.Create(piw, pih) Then
+If cDIBbuffer1.create(piw, pih) Then
     cDIBbuffer1.Cls bcolor
     cDIBbuffer1.GetDpiDIB cDibbuffer0
     
@@ -934,7 +936,7 @@ If cDibbuffer0.hDIb = 0 Then Exit Sub
 If zoomfactor <= 0.01! Then zoomfactor = 0.01!
 Dim myw As Long, myh As Long, piw As Long, pih As Long, pix As Long, piy As Long
 
-Dim k As Single, r As Single
+Dim k As Single, R As Single
 Dim BR As Byte, BG As Byte, bbb As Byte, ppBa As Long
 ppBa = VarPtr(bckColor)
 GetMem1 ppBa, bbb
@@ -942,13 +944,13 @@ GetMem1 ppBa + 1, BG
 GetMem1 ppBa + 2, BR
     piw = cDibbuffer0.Width
     pih = cDibbuffer0.Height
-    r = Atn(piw / pih) + Pi / 2!
-    k = Abs((piw / Cos(r) / 2!) * zoomfactor)
+    R = Atn(piw / pih) + Pi / 2!
+    k = Abs((piw / Cos(R) / 2!) * zoomfactor)
  Dim cDIBbuffer1 As Object
  Set cDIBbuffer1 = New cDIBSection
  If piw <= 1 Then piw = 2
  If pih <= 1 Then pih = 2
-Call cDIBbuffer1.Create((piw) * zoomfactor, (pih) * zoomfactor)
+Call cDIBbuffer1.create((piw) * zoomfactor, (pih) * zoomfactor)
 cDIBbuffer1.GetDpiDIB cDibbuffer0
 cDibbuffer0.needHDC
 cDIBbuffer1.LoadPictureStretchBlt cDibbuffer0.HDC1, , , , , pix, piy, piw, pih
@@ -961,7 +963,7 @@ myw = Fix(2 * k)
 myh = Fix(2 * k)
 
 cDibbuffer0.ClearUp
-If cDibbuffer0.Create(CLng(myw), CLng(myh)) Then
+If cDibbuffer0.create(CLng(myw), CLng(myh)) Then
 there:
 Dim bDib() As Byte, bDib1() As Byte
 ''Dim x As Long, y As Long
@@ -1006,8 +1008,8 @@ On Error Resume Next
     pw = cDIBbuffer1.Width
     ph = cDIBbuffer1.Height
 
-    r = Atn(CSng(myw) / CSng(myh))
-    k = -CSng(myw) / (2! * Sin(r))
+    R = Atn(CSng(myw) / CSng(myh))
+    k = -CSng(myw) / (2! * Sin(R))
   
     Dim pw1 As Long, ph1 As Long
     Const pidicv2 = 1.570795!
@@ -1018,8 +1020,8 @@ On Error Resume Next
    
          pws = pw1 * zoomfactor
     phs = ph1 * zoomfactor
-  image_x = ((pws - zoomfactor - b) / 2 - (k * Sin(angle! - r))) * pw
-   image_y = ((phs - zoomfactor - b) / 2 + (k * Cos(angle! - r))) * ph
+  image_x = ((pws - zoomfactor - b) / 2 - (k * Sin(angle! - R))) * pw
+   image_y = ((phs - zoomfactor - b) / 2 + (k * Cos(angle! - R))) * ph
    image_x = image_x - MyMod(image_x, CSng(dv15))
    image_y = image_y - MyMod(image_y, CSng(dv15))
    
@@ -1088,7 +1090,7 @@ myh = Round((Abs(piw * Sin(angle!)) + Abs(pih * Cos(angle!))) * zoomfactor, 0) +
 Dim prive As basket
 prive = players(GetCode(bstack.Owner))
 Dim cDibbuffer0 As New cDIBSection
-If cDibbuffer0.Create(myw, myh) Then
+If cDibbuffer0.create(myw, myh) Then
 On Error GoTo there
         With bstack.Owner
          If bstack.toprinter Then
@@ -1116,7 +1118,7 @@ myh = Round((Abs(piw * Sin(angle!)) + Abs(pih * Cos(angle!))) * zoomfactor, 0) +
 Dim prive As basket
 prive = players(GetCode(bstack.Owner))
 Dim cDibbuffer0 As New cDIBSection
-If cDibbuffer0.Create(myw, myh) Then
+If cDibbuffer0.create(myw, myh) Then
 On Error GoTo there
         With bstack.Owner
          If bstack.toprinter Then
@@ -1130,8 +1132,8 @@ End If
 there:
 End Function
 
-Private Function MyMod(r1 As Single, po As Single) As Single
-MyMod = r1 - Fix(r1 / po) * po
+Private Function MyMod(R1 As Single, po As Single) As Single
+MyMod = R1 - Fix(R1 / po) * po
 End Function
 '
 Public Function RotateDib(bstack As basetask, cDibbuffer0 As cDIBSection, Optional ByVal angle! = 0, Optional ByVal zoomfactor As Single = 100, _
@@ -1180,7 +1182,7 @@ End If
 
 
 Dim myw As Long, myh As Long, piw As Long, pih As Long, pix As Long, piy As Long
-Dim k As Single, r As Single, ppBa As Long
+Dim k As Single, R As Single, ppBa As Long
 Dim BR As Byte, BG As Byte, bbb As Byte, ba$
 Dim BR1 As Byte, BG1 As Byte, bbb1 As Byte
 ppBa = VarPtr(bckColor)
@@ -1197,7 +1199,7 @@ myh = Round((Abs(piw * Sin(angle!)) + Abs(pih * Cos(angle!))) * zoomfactor, 0)
 cDibbuffer0.ClearUp
 Dim prive As basket
 prive = players(GetCode(bstack.Owner))
-If cDibbuffer0.Create(myw, myh) Then
+If cDibbuffer0.create(myw, myh) Then
 On Error GoTo there
 
    
@@ -1254,16 +1256,16 @@ Dim tSA2 As SAFEARRAY2D
      pws = pw * zoomfactor
     phs = ph * zoomfactor
     
-    r = Atn(CSng(myw) / CSng(myh))
-    k = -CSng(myw) / (2! * Sin(r))
+    R = Atn(CSng(myw) / CSng(myh))
+    k = -CSng(myw) / (2! * Sin(R))
     
     x_step = Cos(angle!) * pw
     y_step = Sin(angle!) * ph
 
     x_step2 = Cos(angle! + pidicv2) * pw
     y_step2 = Sin(angle! + pidicv2) * ph
-  image_x = ((pws - b) / 2 - (k * Sin(angle! - r))) * pw
-   image_y = ((phs - b) / 2 + (k * Cos(angle! - r))) * ph
+  image_x = ((pws - b) / 2 - (k * Sin(angle! - R))) * pw
+   image_y = ((phs - b) / 2 + (k * Cos(angle! - R))) * ph
       image_x = image_x - MyMod(image_x, CSng(dv15))
    image_y = image_y - MyMod(image_y, CSng(dv15))
   pws = pws + 1
@@ -1377,7 +1379,7 @@ angle! = -MyMod(angle!, 360!) * 1.745329E-02!
 If zoomfactor <= 1 Then zoomfactor = 1
 zoomfactor = zoomfactor / 100!
 Dim myw As Single, myh As Single, piw As Long, pih As Long, pix As Long, piy As Long
-Dim k As Single, r As Single
+Dim k As Single, R As Single
 Const pidicv2 = 1.570795!
 'If zoomfactor = 1 And angle! = 0 Then Exit Function
     piw = cDibbuffer0.Width
@@ -1385,7 +1387,7 @@ Const pidicv2 = 1.570795!
  Dim cDIBbuffer1 As Object, cDIBbuffer2 As Object
  Set cDIBbuffer1 = New cDIBSection
 
-Call cDIBbuffer1.Create(piw, pih)
+Call cDIBbuffer1.create(piw, pih)
 cDIBbuffer1.GetDpiDIB cDibbuffer0
 cDibbuffer0.needHDC
 cDIBbuffer1.LoadPictureBlt cDibbuffer0.HDC1
@@ -1396,7 +1398,7 @@ myw = Round((Abs(piw * Cos(angle!)) + Abs(pih * Sin(angle!))) * zoomfactor, 0)
 myh = Round((Abs(piw * Sin(angle!)) + Abs(pih * Cos(angle!))) * zoomfactor, 0)
 
 cDibbuffer0.ClearUp
-If cDibbuffer0.Create(myw, myh) Then
+If cDibbuffer0.create(myw, myh) Then
 On Error GoTo there
 If bckColor >= 0 Then
 cDibbuffer0.Cls bckColor
@@ -1449,8 +1451,8 @@ Dim tSA2 As SAFEARRAY2D
     Dim pw As Long, ph As Long
      pw = piw
     ph = pih
-    r = Atn(CSng(myw) / CSng(myh))
-    k = -myw / (2! * Sin(r))
+    R = Atn(CSng(myw) / CSng(myh))
+    k = -myw / (2! * Sin(R))
   
     Dim pw1 As Long, ph1 As Long
     
@@ -1461,8 +1463,8 @@ Dim tSA2 As SAFEARRAY2D
    
          pws = pw1 * zoomfactor
     phs = ph1 * zoomfactor
-  image_x = ((pws - zoomfactor - b) / 2 - (k * Sin(angle! - r))) * pw
-   image_y = ((phs - zoomfactor - b) / 2 + (k * Cos(angle! - r))) * ph
+  image_x = ((pws - zoomfactor - b) / 2 - (k * Sin(angle! - R))) * pw
+   image_y = ((phs - zoomfactor - b) / 2 + (k * Cos(angle! - R))) * ph
    image_x = image_x - MyMod(image_x, CSng(dv15))
    image_y = image_y - MyMod(image_y, CSng(dv15))
    x_step2 = Cos(angle! + pidicv2) * pw
@@ -1528,7 +1530,7 @@ End Function
 Sub Conv24(cDibbuffer0 As Object)
  Dim cDIBbuffer1 As Object
  Set cDIBbuffer1 = New cDIBSection
-Call cDIBbuffer1.Create(cDibbuffer0.Width, cDibbuffer0.Height)
+Call cDIBbuffer1.create(cDibbuffer0.Width, cDibbuffer0.Height)
 cDIBbuffer1.LoadPictureBlt cDibbuffer0.hDC
 Set cDibbuffer0 = cDIBbuffer1
 Set cDIBbuffer1 = Nothing
@@ -1555,12 +1557,12 @@ Call SetWindowRgn(.hWnd, (0), False)
 End With
 End Sub
 Public Function RotateRegion(hRgn As Long, angle As Single, ByVal piw As Long, ByVal pih As Long, ByVal Size As Single) As Long
-Dim k As Single, r As Single, aa As Single
+Dim k As Single, R As Single, aa As Single
 aa = (CLng(angle! * 100) Mod 36000) / 100
 
-angle! = -aa * 1.74532925199433E-02
-   r = Atn(piw / CSng(pih)) + Pi / 2!
-    k = piw / Cos(r)
+angle! = -angle * 1.74532925199433E-02
+   R = Atn(piw / CSng(pih)) + Pi / 2!
+    k = piw / Cos(R)
     Dim myw As Long, myh As Long
  myw = Round((Abs(piw * Cos(angle!)) + Abs(pih * Sin(angle!))) * Size, 0)
 myh = Round((Abs(piw * Sin(angle!)) + Abs(pih * Cos(angle!))) * Size, 0)
@@ -1575,8 +1577,8 @@ hRgn = ScaleRegion(hRgn, Size)
     uXF.eM22 = Cos(angle!)
 k = Abs(k)
 
-uXF.eDx = Round(k * Cos(angle! - r) / 2! + k / 2!, 0)
-uXF.eDy = Round(k * Sin(angle! - r) / 2! + k / 2!, 0)
+uXF.eDx = Round(k * Cos(angle! - R) / 2! + k / 2!, 0)
+uXF.eDy = Round(k * Sin(angle! - R) / 2! + k / 2!, 0)
 
 
     rSize = GetRegionData(hRgn, rSize, ByVal 0&)
@@ -1610,14 +1612,14 @@ Public Function ScaleRegion(hRgn As Long, Size As Single) As Long
     End If
      DeleteObject hRgn
 End Function
-Function GetNewSpriteObj(Priority As Long, s$, tr As Long, rr As Long, Optional ByVal SZ As Single = 1, Optional ByVal ROT As Single = 0, Optional bb$ = vbNullString) As Long
+Function GetNewSpriteObj(Priority As Long, s$, tr As Long, rr As Long, Optional ByVal SZ As Single = 1, Optional ByVal rot As Single = 0, Optional bb$ = vbNullString) As Long
 Dim photo As Object, myRgn As Long, oldobj As Long
 Dim photo2 As Object
  oldobj = FindSpriteByTag(Priority)
  If oldobj Then
 ' this priority...is used
 ' so change only image
-SpriteGetOtherImage oldobj, s$, tr, rr, SZ, ROT, bb$
+SpriteGetOtherImage oldobj, s$, tr, rr, SZ, rot, bb$
 GetNewSpriteObj = oldobj
 
 Exit Function
@@ -1647,11 +1649,11 @@ End If
 myRgn = CreateRectRgn(0, 0, photo.Width, photo.Height)
  End If
  ''''''''''''''''If SZ <> 1 Then myRgn = ScaleRegion(myRgn, SZ)
- myRgn = RotateRegion(myRgn, (ROT), photo.Width * SZ, photo.Height * SZ, SZ)
+ myRgn = RotateRegion(myRgn, (rot), photo.Width * SZ, photo.Height * SZ, SZ)
 
 
 
- RotateDibNew photo, (ROT), 1, tr
+ RotateDibNew photo, (rot), 1, tr
 
 addSprite
 Load Form1.dSprite(PobjNum)
@@ -1660,8 +1662,8 @@ With Form1.dSprite(PobjNum)
 .Width = photo.Width * DXP * SZ
 .Picture = photo.Picture(SZ)
 
-players(PobjNum).X = .Width / 2
-players(PobjNum).Y = .Height / 2
+players(PobjNum).x = .Width / 2
+players(PobjNum).y = .Height / 2
 Call SetWindowRgn(.hWnd, myRgn, 0)
 
 .Tag = Priority
@@ -1682,6 +1684,11 @@ End With
 DeleteObject myRgn
 
 GetNewSpriteObj = PobjNum
+With players(PobjNum)
+.MAXXGRAPH = .x * 2
+.MAXYGRAPH = .y * 2
+End With
+SetText Form1.dSprite(PobjNum)
 End If
 
 End If
@@ -1696,22 +1703,28 @@ Next i
 End Function
 Function CollidePlayers(Priority As Long, Percent As Long) As Long
 Dim i As Long, k As Integer, suma As Long
-Dim x1 As Long, y1 As Long, x2 As Long, y2 As Long
+Dim x1 As Long, y1 As Long, x2 As Long, y2 As Long, it As Long
 k = FindSpriteByTag(Priority)
 If k = 0 Then Exit Function
-x1 = Form1.dSprite(k).Left + Form1.dSprite(k).Width * (100 - Percent) / 200
-y1 = Form1.dSprite(k).top + Form1.dSprite(k).Height * (100 - Percent) / 200
-x2 = x1 + Form1.dSprite(k).Width * (1 - 2 * (100 - Percent) / 200)
-y2 = y1 + Form1.dSprite(k).Height * (1 - 2 * (100 - Percent) / 200)
+With Form1.dSprite(k)
+it = val(.Tag)
+x1 = .Left + .Width * (100 - Percent) / 200 - players(it).HotSpotX
+y1 = .top + .Height * (100 - Percent) / 200 - players(it).HotSpotY
+x2 = .Left + .Width * (1 - (100 - Percent) / 200) - players(it).HotSpotX
+y2 = .top + .Height * (1 - (100 - Percent) / 200) - players(it).HotSpotY
+End With
 For i = Priority - 1 To 1 Step -1
 k = FindSpriteByTag(i)
+With Form1.dSprite(k)
 If k <> 0 Then
-If x2 < Form1.dSprite(k).Left Or x1 >= Form1.dSprite(k).Left + Form1.dSprite(k).Width Or y2 <= Form1.dSprite(k).top Or y1 > Form1.dSprite(k).top + Form1.dSprite(k).Height Then
+If (x2 < .Left + .Width / 4) Or (x1 >= .Left + .Width * 3 / 4) Or (y2 <= .top + .Height / 4) Or (y1 > .top + .Height * 3 / 4) Then
 Else
-suma = suma + 2 ^ (k - 1)
+suma = suma + 2 ^ (i - 1)
 End If
 End If
+End With
 Next i
+
 CollidePlayers = suma
 End Function
 
@@ -1750,7 +1763,7 @@ Function GetNewLayerObj(Priority As Long, ByVal lWidth As Long, ByVal lHeight As
 Dim photo As cDIBSection, myRgn As Long, oldobj As Long
 
 Set photo = New cDIBSection
-If photo.Create(lWidth / DXP, lHeight / DYP) Then
+If photo.create(lWidth / DXP, lHeight / DYP) Then
 photo.WhiteBits
 addSprite
 Load Form1.dSprite(PobjNum)
@@ -1787,13 +1800,13 @@ If k < 1 Or k > PobjNum Then Exit Function
  PosSpriteY = Form1.dSprite(k).top
 End Function
 
-Sub PosSprite(aPrior As Long, ByVal X As Long, ByVal Y As Long) ' ' before take from priority the original sprite
+Sub PosSprite(aPrior As Long, ByVal x As Long, ByVal y As Long) ' ' before take from priority the original sprite
 Dim k As Long
 k = FindSpriteByTag(aPrior)
 If k < 1 Or k > PobjNum Then Exit Sub
  
 
-Form1.dSprite(k).Move X, Y
+Form1.dSprite(k).move x, y
 
 End Sub
 Sub SrpiteHideShow(ByVal aPrior As Long, ByVal wh As Boolean) ' this is a priority
@@ -1809,8 +1822,7 @@ End If
 End If
 End Sub
 Sub SpriteControl(ByVal aPrior As Long, ByVal bPrior As Long) ' these are priorities
-'If aPrior = bPrior Then Exit Sub ' just done...
-Dim k As Long, m As Long, i As Long, LL As Long, kk As Long
+Dim k As Long, m As Long, i As Long
 k = FindSpriteByTag(aPrior)
 
 If k = 0 Then Exit Sub  ' there is no such a player
@@ -1819,20 +1831,79 @@ If k = 0 Then Exit Sub  ' there is no such a player
         If m = 0 Then Exit Sub
         Form1.dSprite(k).Tag = bPrior
         Form1.dSprite(m).Tag = aPrior
-
-    If m < k Then
-    For i = m To 32
+        
+    If aPrior < bPrior Then
+    For i = aPrior To 32
         k = FindSpriteByTag(i)
         If k <> 0 Then Form1.dSprite(k).ZOrder 0
     Next i
     Else
-    For i = k To 32
+    For i = bPrior To 32
         m = FindSpriteByTag(i)
         If m <> 0 Then Form1.dSprite(m).ZOrder 0
     Next i
 End If
 End Sub
-Private Sub SpriteGetOtherImage(s As Long, b$, tran As Long, rrr As Long, SZ As Single, ROT As Single, Optional bb$ = vbNullString) ' before take from priority the original sprite
+Sub SpriteControlOver(ByVal aPrior As Long, ByVal bPrior As Long) ' these are priorities
+Dim k As Long, m As Long, i As Long, LL As Long
+k = FindSpriteByTag(aPrior)
+
+If k = 0 Then Exit Sub  ' there is no such a player
+
+    LL = FindSpriteByTag(bPrior)
+        If LL = 0 Then Exit Sub
+        LL = bPrior + 1
+     For i = aPrior + 1 To bPrior
+        m = FindSpriteByTag(i)
+        If m <> 0 Then
+            Form1.dSprite(m).ZOrder 0
+            bPrior = Form1.dSprite(m).Tag
+            Form1.dSprite(m).Tag = aPrior
+            aPrior = bPrior
+        End If
+    Next i
+    Form1.dSprite(k).ZOrder 0
+    bPrior = Form1.dSprite(k).Tag
+    Form1.dSprite(k).Tag = aPrior
+    For i = LL To 32
+        m = FindSpriteByTag(i)
+        If m <> 0 Then
+            Form1.dSprite(m).ZOrder 0
+        End If
+    Next i
+
+End Sub
+Sub SpriteControlUnder(ByVal aPrior As Long, ByVal bPrior As Long) ' these are priorities
+Dim k As Long, m As Long, i As Long, LL As Long
+k = FindSpriteByTag(aPrior)
+
+If k = 0 Then Exit Sub  ' there is no such a player
+
+    LL = FindSpriteByTag(bPrior)
+        If LL = 0 Then Exit Sub
+    LL = bPrior - 1
+     For i = k - 1 To LL Step -1
+        m = FindSpriteByTag(i)
+        If m <> 0 Then
+            Form1.dSprite(m).ZOrder 1
+            bPrior = Form1.dSprite(m).Tag
+            Form1.dSprite(m).Tag = aPrior
+            aPrior = bPrior
+        End If
+    Next i
+    Form1.dSprite(k).ZOrder 1
+    bPrior = Form1.dSprite(k).Tag
+    Form1.dSprite(k).Tag = aPrior
+    For i = LL To 1 Step -1
+        m = FindSpriteByTag(i)
+        If m <> 0 Then
+            Form1.dSprite(m).ZOrder 1
+        End If
+    Next i
+    
+
+End Sub
+Private Sub SpriteGetOtherImage(s As Long, b$, tran As Long, rrr As Long, SZ As Single, rot As Single, Optional bb$ = vbNullString) ' before take from priority the original sprite
 Dim photo As Object, myRgn As Long
 Dim photo2 As Object
 If s < 1 Or s > PobjNum Then Exit Sub
@@ -1868,9 +1939,9 @@ myRgn = CreateRectRgn(2, 2, photo.Width - 2, photo.Height - 2)
 
 ''If SZ <> 1 Then myRgn = ScaleRegion(myRgn, SZ)
 
-myRgn = RotateRegion(myRgn, (ROT), photo.Width * SZ, photo.Height * SZ, SZ)
+myRgn = RotateRegion(myRgn, (rot), photo.Width * SZ, photo.Height * SZ, SZ)
 
- RotateDibNew photo, (ROT), 1, tran
+ RotateDibNew photo, (rot), 1, tran
  
 
  
@@ -1881,16 +1952,21 @@ With Form1.dSprite(s)
 .Height = photo.Height * DYP * SZ
 .Width = photo.Width * DXP * SZ
 .Picture = photo.Picture(SZ)
-.Left = .Left + players(s).X - .Width / 2
-players(s).X = .Width / 2
-.top = .top + players(s).Y - .Height / 2
-players(s).Y = .Height / 2
+.Left = .Left + players(s).x - .Width / 2
+players(s).x = .Width / 2
+.top = .top + players(s).y - .Height / 2
+players(s).y = .Height / 2
 Call SetWindowRgn(.hWnd, myRgn, True)
 ''''''''''''''''''''''''UpdateWindow .hwnd
  DeleteObject myRgn
 
 End With
+With players(s)
 
+.MAXXGRAPH = .x * 2
+.MAXYGRAPH = .y * 2
+End With
+SetText Form1.dSprite(s)
 End If
 End Sub
 
@@ -1903,7 +1979,7 @@ On Error Resume Next
 Dim i As Long
 If PobjNum > 0 Then
 For i = PobjNum To 1 Step -1
-players(i).X = 0: players(i).Y = 0
+players(i).x = 0: players(i).y = 0
 PobjNum = i
 If Form1.dSprite.count > PobjNum Then Unload Form1.dSprite(PobjNum)
 Next i
@@ -2458,45 +2534,126 @@ If (OpenClipboard(0) <> 0) Then
 End If
 CloseClipboard
 End Function
+Public Function GetImageEmf() As mHandler
+Dim hMem As Long, hEmf As Long, bytes As Long
+Dim hCOPY As Long
+Dim mypic As New cDIBSection
+Dim aPic As MemBlock
+Dim Carrier As New mHandler
+Const CF_DIB = 8
+Const CF_ENHMETAFILE = 14
+Dim okb As Boolean
+If IsClipboardFormatAvailable(CF_ENHMETAFILE) Then
+     If (OpenClipboard(0) <> 0) Then
+         hEmf = GetClipboardData(CF_ENHMETAFILE)
+         If hEmf <> 0 Then
+             ' hCOPY = CopyEnhMetaFile(hemf, ByVal 0)
+              
+               bytes = GetEnhMetaFileBits(hEmf, bytes, ByVal 0)
+                If bytes Then
+                    Set aPic = New MemBlock
+                    aPic.Construct 1, bytes
+                    
+                    Call GetEnhMetaFileBits(hEmf, bytes, ByVal aPic.GetBytePtr(0))
+                    aPic.SubType = 2 ' emf
+                End If
+               ' DeleteEnhMetaFile hCOPY
+        End If
+    End If
+    CloseClipboard
+    End If
+    If aPic Is Nothing Then
+        mypic.ClearUp
+        mypic.create 128, 128
+        mypic.WhiteBits
+        mypic.GetDpi 96, 96
+        mypic.SaveDibToMeMBlock aPic
+        aPic.SubType = 1 ' bitmap
+    End If
+    Set Carrier.objref = aPic
+    Carrier.t1 = 2
+    Set GetImageEmf = Carrier
+
+
+End Function
+Public Function GetImageDIB() As mHandler
+Dim hMem As Long
+Dim hDIb As Long
+Dim mypic As New cDIBSection
+Dim aPic As MemBlock
+Dim Carrier As New mHandler
+Const CF_DIB = 8
+Dim okb As Boolean
+     If (OpenClipboard(0) <> 0) Then
+        
+        hMem = GetClipboardData(CF_DIB)
+        If hMem <> 0 Then
+           hDIb = GlobalLock(hMem)
+           mypic.ClearUp
+           okb = mypic.CreateFromDIB(hDIb)
+           If Not okb Then
+                hDIb = GlobalUnlock(hMem)
+                CloseClipboard
+                If Clipboard.GetFormat(2) Then
+                    mypic.CreateFromPicture Clipboard.GetData(2)
+                    okb = mypic.Height
+                End If
+           End If
+           If okb Then
+                If mypic.dpix = 0 Then mypic.GetDpi 96, 96
+                    If mypic.Height > 0 And mypic.hDIb <> 0 Then
+                         mypic.SaveDibToMeMBlock aPic
+                         aPic.SubType = 1 ' bitmap
+                    End If
+                End If
+        If hMem <> 0 Then Call GlobalUnlock(hMem)
+    End If
+    CloseClipboard
+    If aPic Is Nothing Then
+        mypic.ClearUp
+        mypic.create 128, 128
+        mypic.WhiteBits
+        mypic.GetDpi 96, 96
+        mypic.SaveDibToMeMBlock aPic
+        aPic.SubType = 1 ' bitmap
+    End If
+    Set Carrier.objref = aPic
+    Carrier.t1 = 2
+    Set GetImageDIB = Carrier
+End If
+
+End Function
 Public Function GetImage() As String
 Dim hMem As Long, hDIb As Long
 Dim mypic As New cDIBSection
 Const CF_DIB = 8
-Dim isbitmap As Boolean, okb As Boolean
-
-                     If (OpenClipboard(0) <> 0) Then
-                  hMem = GetClipboardData(CF_DIB)
-                
-                
-                If hMem <> 0 Then
-              
-            hDIb = GlobalLock(hMem)
-           
-                mypic.ClearUp
-       okb = mypic.CreateFromDIB(hDIb)
-       If Not okb Then
-       hDIb = GlobalUnlock(hMem)
-       CloseClipboard
-       If Clipboard.GetFormat(2) Then
-       mypic.CreateFromPicture Clipboard.getData(2)
-       okb = mypic.Height
-       End If
-       End If
-               If okb Then
-               If mypic.bitsPerPixel <> 24 Then Conv24 mypic
-               If mypic.dpix = 0 Then mypic.GetDpi 96, 96
-               If mypic.Height > 0 And mypic.hDIb <> 0 Then
-GetImage = DIBtoSTR(mypic)
-      End If
-      
-
-                             End If
-                           Call GlobalUnlock(hMem)
-                         End If
- 
-CloseClipboard
-
-                    End If
+Dim okb As Boolean
+    
+If (OpenClipboard(0) <> 0) Then
+    hMem = GetClipboardData(CF_DIB)
+    If hMem <> 0 Then
+        hDIb = GlobalLock(hMem)
+        mypic.ClearUp
+        okb = mypic.CreateFromDIB(hDIb)
+        If Not okb Then
+            hDIb = GlobalUnlock(hMem)
+            CloseClipboard
+            If Clipboard.GetFormat(2) Then
+                mypic.CreateFromPicture Clipboard.GetData(2)
+                okb = mypic.Height
+            End If
+        End If
+        If okb Then
+            If mypic.bitsPerPixel <> 24 Then Conv24 mypic
+            If mypic.dpix = 0 Then mypic.GetDpi 96, 96
+            If mypic.Height > 0 And mypic.hDIb <> 0 Then
+                GetImage = DIBtoSTR(mypic)
+            End If
+        End If
+        Call GlobalUnlock(hMem)
+    End If
+    CloseClipboard
+End If
 
 End Function
 
@@ -2781,7 +2938,7 @@ Private Function c_CreatePartialRegion(rgnRects() As RECT, ByVal lIndex As Long,
     End With
     ' call function to create region from our byte (RECT) array
     c_CreatePartialRegion = ExtCreateRegion(ByVal xFrmPtr, (rgnRects(lIndex - 2&).Right + 2&) * 16&, rgnRects(lIndex - 2&))
-    If Err Then Err.clear
+    If Err Then Err.Clear
 
 End Function
 
@@ -2811,9 +2968,9 @@ Function ismine2(ByVal a$) As Boolean  ' CAN START A BLOCK OR DO SOMETHING
 ismine2 = True
 a$ = myUcase(a$, True)
 Select Case a$
-Case "ABOUT", "AFTER", "BACK", "BACKGROUND", "CLASS", "COLOR", "DECLARE", "ELSE", "ENUM", "ENUMERATION", "EVENT", "EVERY", "GLOBAL", "FOR", "FKEY", "FUNCTION", "GROUP", "INVENTORY", "LAYER", "LOCAL", "MAIN.TASK", "MODULE", "OPERATOR", "PATH", "PEN", "PROPERTY", "PRINTER", "PRINTING", "REMOVE", "SET", "STACK", "START", "STRUCTURE", "TASK.MAIN", "THEN", "THREAD", "TRY", "WIDTH", "VALUE", "WHILE"
+Case "ABOUT", "AFTER", "BACK", "BACKGROUND", "CLASS", "COLOR", "DECLARE", "DRAWING", "ELSE", "ENUM", "ENUMERATION", "EVENT", "EVERY", "GLOBAL", "FOR", "FKEY", "FUNCTION", "GROUP", "INVENTORY", "LAYER", "LOCAL", "MAIN.TASK", "MODULE", "OPERATOR", "PATH", "PEN", "PROPERTY", "PRINTER", "PRINTING", "REMOVE", "SET", "STACK", "START", "STRUCTURE", "TASK.MAIN", "THEN", "THREAD", "TRY", "WIDTH", "VALUE", "WHILE"
 Case "аявг", "аккиыс", "аниа", "аниа(", "апая", "апаяихлгсг", "цецомос", "цемийо", "цемийг", "цемийес", "циа", "дес", "диацяажг", "долг", "ейтупытгс", "ейтупысг", "емы", "епипедо", "хесе", "хесе(", "идиотгтес", "ивмос", "идиотгта", "йахе", "йатастасг", "йкасг", "йкеиди", "йуяио.еяцо", "лета", "мгла", "олада", "ояисе", "павос", "пема", "пеяи", "пеяихыяио", "сумаятгсг", "сыяос", "текестгс", "тлгла", "топийа", "топийг", "топийес", "тоте", "вяыла"
-Case "CONST", "стахеяг", "стахеяес", "SUPERCLASS", "упеяйкасг", "DO", "REPEAT", "епамекабе", "епамакабе"
+Case "CONST", "стахеяг", "стахеяес", "сведио", "SUPERCLASS", "упеяйкасг", "DO", "REPEAT", "епамекабе", "епамакабе"
 Case "->"
 Case Else
 ismine2 = False
@@ -2870,13 +3027,13 @@ Case "BACK", "BACKGROUND", "BACKWARD(", "BANK(", "BASE", "BEEP", "BINARY", "BINA
 Case "BINARY.OR(", "BINARY.ROTATE(", "BINARY.SHIFT(", "BINARY.XOR(", "BITMAPS", "BMP$(", "BOLD"
 Case "BOOLEAN", "BORDER", "BREAK", "BROWSER", "BROWSER$", "BUFFER", "BUFFER(", "BYTE", "CALL", "CASE", "CASCADE", "CAT", "CAR("
 Case "CDATE(", "CDR(", "CEIL(", "CENTER", "CHANGE", "CHARSET", "CHOOSE.COLOR", "CHOOSE.FONT", "CHOOSE.OBJECT", "CHOOSE.ORGAN"
-Case "CHR$(", "CHRCODE$(", "CHRCODE(", "CIRCLE", "CLASS", "CLEAR", "CLIPBOARD", "CLIPBOARD$", "CLIPBOARD.IMAGE$"
+Case "CHR$(", "CHRCODE$(", "CHRCODE(", "CIRCLE", "CLASS", "CLEAR", "CLIPBOARD", "CLIPBOARD$", "CLIPBOARD.DRAWING", "CLIPBOARD.IMAGE", "CLIPBOARD.IMAGE$"
 Case "CLOSE", "CLS", "CODE", "CODEPAGE", "COLLIDE(", "COLOR", "COLOR(", "COLORS"
 Case "COLOUR(", "COM", "COMMAND", "COMMAND$", "COMMIT", "COMMON", "COMPARE(", "COMPRESS", "COMPUTER", "COMPUTER$", "CONCURRENT", "CONST", "CONS("
 Case "CONTINUE", "CONTROL$", "COPY", "COS(", "CTIME(", "CURRENCY", "CURSOR", "CURVE"
 Case "DATA", "DATE$(", "DATE(", "DATEFIELD", "DB.PROVIDER", "DB.USER", "DECIMAL", "DECLARE", "DEF", "DELETE"
 Case "DESCENDING", "DESKTOP", "DIM", "DIMENSION(", "DIR", "DIR$", "DIV", "DO"
-Case "DOC.LEN(", "DOC.PAR(", "DOC.UNIQUE.WORDS(", "DOC.WORDS(", "DOCUMENT", "DOS", "DOUBLE", "DOWN", "DRAW"
+Case "DOC.LEN(", "DOC.PAR(", "DOC.UNIQUE.WORDS(", "DOC.WORDS(", "DOCUMENT", "DOS", "DOUBLE", "DOWN", "DRAW", "DRAWING"
 Case "DRAWINGS", "DRIVE$(", "DRIVE.SERIAL(", "DROP", "DRW$(", "DURATION", "EACH("
 Case "EDIT", "EDIT.DOC", "ELSE", "ELSE.IF", "EMPTY", "END", "ENUM", "ENUMERATION", "ENVELOPE$(", "EOF("
 Case "ERASE", "ERROR", "ERROR$", "ESCAPE", "EVAL(", "EVAL$(", "EVENT", "EVENTS", "EVERY", "EXCLUSIVE", "EXECUTE", "EXIST(", "EXIST.DIR("
@@ -2890,13 +3047,13 @@ Case "HILOWWORD(", "HIWORD(", "HOLD", "HSL(", "HTML", "HWND", "ICON", "IF", "IF(
 Case "IMAGE.X.PIXELS(", "IMAGE.Y(", "IMAGE.Y.PIXELS(", "IN", "INFINITY", "INKEY$", "INKEY(", "INLINE", "INPUT", "INPUT$("
 Case "INSERT", "INSTR(", "INT(", "INTEGER", "INTERVAL", "INTERNET", "INTERNET$", "INVENTORY", "IS", "ISLET", "ISNUM", "ISWINE", "ITALIC"
 Case "JOYPAD", "JOYPAD(", "JOYPAD.ANALOG.X(", "JOYPAD.ANALOG.Y(", "JOYPAD.DIRECTION(", "JPG$(", "KEEP", "KEY$", "KEYBOARD"
-Case "KEYPRESS(", "LAMBDA", "LAMBDA(", "LAMBDA$", "LAMBDA$(", "LAN$", "LATIN", "LAYER", "LAZY$(", "LCASE$(", "LEFT$(", "LEFTPART$(", "LEGEND", "LEN"
+Case "KEYPRESS(", "LAMBDA", "LAMBDA(", "LAMBDA$", "LAMBDA$(", "LAN$", "LANDSCAPE", "LATIN", "LAYER", "LAZY$(", "LCASE$(", "LEFT$(", "LEFTPART$(", "LEGEND", "LEN"
 Case "LEN(", "LEN.DISP(", "LET", "LETTER$", "LIB", "LICENSE", "LINE", "LINESPACE", "LINK", "LIST", "LN("
 Case "LOAD", "LOAD.DOC", "LOCAL", "LOCALE", "LOCALE$(", "LOCALE(", "LOG(", "LONG", "LOOP"
 Case "LOWORD(", "LOWWORD(", "LTRIM$(", "MAIN.TASK", "MAP(", "MARK", "MASTER", "MATCH(", "MAX(", "MAX$(", "MAX.DATA$("
 Case "MAX.DATA(", "MDB(", "MEDIA", "MEDIA.COUNTER", "MEMBER$(", "MEMBER.TYPE$(", "MEMO", "MEMORY", "MENU"
 Case "MENU$(", "MENU.VISIBLE", "MENUITEMS", "MERGE.DOC", "METHOD", "MID$(", "MIN(", "MIN$(", "MIN.DATA$(", "MIN.DATA("
-Case "MOD", "MODE", "MODULE", "MODULE$", "MODULE(", "MODULES", "MODULE.NAME$", "MONITOR", "MONITOR.STACK", "MONITOR.STACK.SIZE", "MOTION", "MOTION.W", "MOTION.WX"
+Case "MOD", "MODE", "MODULE", "MODULE$", "MODULE(", "MODULES", "MODULE.NAME$", "MONITOR", "MONITORS", "MONITOR.STACK", "MONITOR.STACK.SIZE", "MOTION", "MOTION.W", "MOTION.WX"
 Case "MOTION.WY", "MOTION.X", "MOTION.XW", "MOTION.Y", "MOTION.YW", "MOUSE", "MOUSE.ICON", "MOUSE.KEY", "MOUSE.X"
 Case "MOUSE.Y", "MOUSEA.X", "MOUSEA.Y", "MOVE", "MOVIE", "MOVIE.COUNTER", "MOVIE.DEVICE$", "MOVIE.ERROR$", "MOVIE.STATUS$"
 Case "MOVIES", "MUSIC", "MUSIC.COUNTER", "NAME", "NEW", "NEXT"
@@ -2904,7 +3061,7 @@ Case "NORMAL", "NOT", "NOTHAVE(", "NOTHING", "NOW", "NUMBER", "NULL", "OFF", "OL
 Case "OPEN", "OPEN.FILE", "OPEN.IMAGE", "OPERATOR", "OPTIMIZATION", "OR", "ORDER", "ORDER(", "OSBIT", "OS$", "OUT", "OUTPUT"
 Case "OVER", "OVERWRITE", "PAGE", "PARAGRAPH$(", "PARAGRAPH(", "PARAGRAPH.INDEX(", "PARAM(", "PARAM$(", "PARAMETERS$", "PART", "PARENT", "PASSWORD"
 Case "PATH", "PATH$(", "PAUSE", "PEN", "PI", "PIECE$(", "PIPE", "PIPENAME$(", "PLATFORM$", "PLAY"
-Case "PLAYER", "PLAYSCORE", "POINT", "POINTER", "POINTER(", "POINT(", "POLYGON", "POS", "POS(", "POS.X", "POS.Y", "PRINT"
+Case "PLAYER", "PLAYSCORE", "POINT", "POINTER", "POINTER(", "POINT(", "POLYGON", "PORTRAIT", "POS", "POS(", "POS.X", "POS.Y", "PRINT"
 Case "PRINTER", "PRINTERNAME$", "PRINTING", "PRIVATE", "PROFILER", "PROPERTY", "PROPERTY(", "PROPERTY$(", "PROPERTIES", "PROPERTIES$", "PROTOTYPE", "PSET", "PUBLIC", "PUSH", "PUT", "QUEUE", "QUOTE$("
 Case "RANDOM", "RANDOM(", "READ", "READY(", "RECORDS(", "RECURSION.LIMIT", "REFER", "REFRESH", "RELEASE", "REM"
 Case "REMOVE", "REPEAT", "REPLACE$(", "REPORT", "REPORTLINES", "RESTART", "RETRIEVE", "RETURN", "REV(", "REVISION"
@@ -2926,21 +3083,21 @@ Case "WAIT", "WCHAR", "WEAK", "WEAK$(", "WHILE", "WIDE", "WIDTH", "WIN", "WINDOW
 Case "WITH", "WITHEVENTS", "WORDS", "WRITABLE(", "WRITE", "WRITER", "X.TWIPS", "XOR", "Y.TWIPS", "адеиас", "апеияо", "апой.ая$(", "апой.де$("
 Case "адеиасе", "ахя(", "ай(", "айеяаио.дуадийо(", "айеяаио", "айеяаиос", "акт", "акгхес", "акгхгс", "аккацг", "аккацг$("
 Case "аккане", "аккиыс", "аккиыс.ам", "ам", "ам(", "амап(", "амап$(", "амт(", "ам$(", "ама", "амафгтгсг", "амахеыягсг", "амайтгсг", "амакоцио"
-Case "амакоцио$", "амакусг.охомгс", "амакусг.у", "амакусг.в", "амакутгс", "амаломг", "амамеысг", "амажояа", "амаье"
+Case "амакоцио$", "амакусг.охомгс", "амакусг.у", "амакусг.ь", "амакусг.в", "амакутгс", "амаломг", "амамеысг", "амажояа", "амаье"
 Case "амехесе", "амоицла.аявеиоу", "амоицла.еийомас", "амоине", "амтецяаье", "амтицяаье", "амы", "аниа", "аниа(", "аниа$", "аниа(", "апая", "апаяихлгсг", "апедысе"
 Case "апко", "апкос", "апо", "апохгйеусг.ыс", "апой$(", "апойопг", "апойкеистийа", "апок(", "аяца", "аяихло", "аяихлос", "аяихлос.паяацяажоу("
 Case "аяис$(", "аяистеяолеяос$(", "аявеиа", "аявеио", "аявеио$(", "аявеиоу.лгйос(", "аявеиоу.сталпа(", "аявг", "аукос"
 Case "аукос$(", "аукоу", "ауноуса", "ауто", "ажаияесг", "ажгсе", "баке", "баке.адеиа$(", "басг"
 Case "басг(", "басг.паяовос", "басг.вягстгс", "баье", "бектистопоигсг", "бгла", "богхеиа", "цецомос", "цецомота", "целисе", "целисла"
 Case "цемийес", "цемийг", "цемийо", "циа", "цомийо", "цяалла", "цяалла$", "цяаллатосеияа", "цяаллатосеияа$", "цяаллесамажояас", "цяаллг"
-Case "цяажг$(", "цяаье", "цягцояа", "цымиа", "дапед(", "деийтг.лояжг", "деийтгс", "деийтгс(", "деийтгс.йол", "деийтгс.у", "деийтгс.в"
-Case "деийтгса.у", "деийтгса.в", "деине", "дей(", "дейаен", "дейаен$(", "дем", "демевеи(", "дениос", "дени$(", "денилеяос$(", "дес", "дглосио"
+Case "цяажг$(", "цяаье", "цягцояа", "цымиа", "дапед(", "деийтг.лояжг", "деийтгс", "деийтгс(", "деийтгс.йол", "деийтгс.ь", "деийтгс.у", "деийтгс.в"
+Case "деийтгса.ь", "деийтгса.у", "деийтгса.в", "деине", "дей(", "дейаен", "дейаен$(", "дем", "демевеи(", "дениос", "дени$(", "денилеяос$(", "дес", "дглосио"
 Case "диа", "диабасе", "диацяажг", "диадийтуо", "диадийтуо$", "диадовийо", "диайопг", "диайоптес", "диалесоу", "диаяхяысг", "диаяхяысг(", "диаяйеиа", "диастасг("
 Case "диастиво", "диажамеиа", "диажамеиа$", "диажамо", "диажуцг", "диайопг", "диейоье", "дийтуо$", "диояхысе"
 Case "дипка", "дипко", "дипкос", "дойилг", "дойилг(", "долг", "дяолеас", "дуадийг.пеяистяожг(", "дуадийо", "дуадийо(", "дуадийо.айеяаио("
 Case "дуадийо.амти(", "дуадийо.амтистяожо(", "дуадийо.апо(", "дуадийо.г(", "дуадийо.йаи(", "дуадийо.окисхгсг(", "дуадийо.ови(", "дуадийо.пяосхесг(", "дуадийо.пяо(", "дуолиса(", "дысе"
 Case "еццяажес(", "еццяажо", "еццяажоу.кенеис(", "еццяажоу.лгйос(", "еццяажоу.ломадийес.кенеис(", "еццяажоу.пая(", "еццяаьило(", "ецйуяо(", "еий$("
-Case "еийома", "еийома(", "еийома.у(", "еийома.у.сглеиа(", "еийома.в(", "еийома.в.сглеиа(", "еийомес", "еийомидио", "еимая", "еимаи", "еимця"
+Case "еийома", "еийома(", "еийома.ь(", "еийома.ь.сглеиа(", "еийома.у(", "еийома.у.сглеиа(", "еийома.в(", "еийома.в.сглеиа(", "еийомес", "еийомидио", "еимая", "еимаи", "еимця"
 Case "еисацыцг", "еисацыцг$(", "еисацыцгс", "ейдосг", "ейтекесг", "ейтупысг", "ейтупысгс", "ейтупытгс", "ейтупытгс$", "ейжя(", "ейжя$("
 Case "ейжяасг(", "ейжяасг$(", "екецвос", "екецвос.сыяоу", "екецвос.лецехос.сыяоу", "еккгмийа", "емаомола$", "емхесг", "емйол$", "емйол(", "емтасг", "емтокг$"
 Case "емы", "емысе", "CONS(", "емысг.сеияас$(", "емысг(", "енацыцг", "енодос", "енытеяийг", "епам$(", "епамакабе", "епамекабе"
@@ -2948,31 +3105,31 @@ Case "епамы", "епекене", "епекене.амтийеилемо", "епекене.цяаллатосеияа", "епекен
 Case "епикене.ояцамо", "епикене.вяыла", "епикоцес", "епикоцес$(", "епикоцес.жамеяес", "епикоцг", "епикоцг$(", "епикоцгс", "епипедо"
 Case "епистяожг", "епижамеиа", "еполемо", "еполема(", "етийета.жоялас", "етоило(", "еуяеиа", "еуяесг", "еуяиа", "ежап(", "ежаялоцг.аявеиоу$(", "ежаялоцг.йат$", "ежаялоцг"
 Case "евеи(", "еыс", "г", "гл(", "глеяа$(", "глеяа(", "глеяолгмиа", "гво$(", "гвоцяажгсг"
-Case "гвои", "гвос", "хесе", "хесе(", "хесг", "хесг(", "хесг.у", "хесг.в", "хесгдениа(", "идиотгта", "идиотгта(", "идиотгта$("
-Case "идиотгтес", "идиотгтес$", "идиытийо", "исвмг", "исвмг$(", "ивмос", "йахаяг", "йахаяо", "йахе", "йахе(", "йаи", "йакесе", "йалпукг"
+Case "гвои", "гвос", "хесе", "хесе(", "хесг", "хесг(", "хесг.ь", "хесг.у", "хесг.в", "хесгдениа(", "идиотгта", "идиотгта(", "идиотгта$("
+Case "идиотгтес", "идиотгтес$", "идиытийо", "исвмг", "исвмг$(", "ивмос", "йахаяг", "йахаяо", "йахе", "йахетг", "йахе(", "йаи", "йакесе", "йалпукг"
 Case "йаме", "йамомийа", "йат", "йат$", "йатакоцои", "йатакоцос", "йатастасг", "йатастасг.таимиас$", "йатавыягсг", "йаты"
 Case "йатылисо(", "йеилемо", "йемг", "йемо", "йемтяо", "йеж$(", "йимгсг", "йимгсг.п", "йимгсг.пу"
-Case "йимгсг.пв", "йимгсг.у", "йимгсг.уп", "йимгсг.в", "йимгсг.вп", "йкасг", "йкеиди", "йкеисе", "йкилан.у"
+Case "йимгсг.пв", "йимгсг.у", "йимгсг.уп", "йимгсг.ь", "йимгсг.ьп", "йимгсг.в", "йимгсг.вп", "йкасг", "йкеиди", "йкеисе", "йкилан.у", "йкилан.ь"
 Case "йкилан.в", "йол$", "йоимос", "йоимои", "йомсока", "йяата", "йяатгсе", "йяужо$(", "йяуье", "йуйкийа", "йуйкос"
-Case "йукисг", "йуяио", "йуяио.еяцо", "йыд(", "йыдийа", "йыдийосекида", "кабг", "кабг(", "кабг.амакоцийо.у("
+Case "йукисг", "йуяио", "йуяио.еяцо", "йыд(", "йыдийа", "йыдийосекида", "кабг", "кабг(", "кабг.амакоцийо.у(", "кабг.амакоцийо.ь("
 Case "кабг.амакоцийо.в(", "кабг.йатеухумсг(", "кахос", "кахос$", "кахос.таимиас$", "калда", "калда(", "калда$", "калда$(", "катимийа", "кенеис", "киста", "коц("
 Case "коцийо", "коцийос", "коцистийо", "коцос", "коцос$(", "кс$", "кж(", "лайяу", "лайяус", "ле", "лец(", "лец$(", "лецако("
 Case "лецако.сеияас$(", "лецако.сеияас(", "лецецомота", "лецехос", "лецехос.сыяоу", "лецехос.у(", "лецехос.в(", "леходос", "лекос$(", "лекоус.тупос$("
 Case "лекыдиа", "леяос", "леяос(", "леяос$(", "лес$(", "лета", "летахесг", "летахесг(", "левяи", "лгдемийос", "лгйос", "лгйос(", "лгйос.елж("
 Case "лий(", "лий$(", "лийяо(", "лийяо.сеияас$(", "лийяо.сеияас(", "лийяос.йатакоцос$(", "лмглг", "ломадиаио", "ломадиаиос", "ломадийо", "лояжг$(", "лоусийг", "лоусийг.летягтгс", "лпип"
 Case "лпяоста(", "маи", "меа", "мео", "меои", "меос", "мгла", "мглата", "мглата$"
-Case "нейима", "одгциа", "одгцос$(", "охомг", "олака", "ойм$(", "олада", "олада(", "олада$(", "олада.сумоко(", "омола", "омола.аявеиоу$("
+Case "нейима", "одгциа", "одгцос$(", "охомг", "охомес", "олака", "ойм$(", "олада", "олада(", "олада$(", "олада.сумоко(", "омола", "омола.аявеиоу$(", "ояифомтиа"
 Case "омола.аявеиоу.ломо$(", "омола.тлглатос$", "омола.вягстг$", "ояио.амадяолгс", "ояисе", "ояож(", "оуяа", "ови", "паифеижымг", "паийтгс", "паине", "пай(", "пай$(", "памта"
 Case "памы", "памылисо(", "паяацяажос$(", "паяацяажос(", "паяал(", "паяал$(", "паяахесг$(", "паяахуяо", "паяалетяои$", "паяе", "паяейаяе$"
 Case "паяелбокг", "патглемо(", "павос", "педиа", "педио", "педио$(", "пеф$(", "пема", "пеяи"
 Case "пеяи$", "пеяихыяио", "пета", "пи", "пимайас", "пимайас$(", "пимайас(", "пимайес", "писы("
 Case "пкациа", "пкаисио", "пкатос", "пкатос.сглеиоу", "пкатжояла$", "пкгйтяокоцио", "покуцымо"
-Case "пяос", "пяосаялоцгс", "пяосхесе.еццяажо", "пяосхгйг", "пяытотупо", "пяыто(", "пяосыяимо$", "пяовеияо", "пяовеияо$", "пяовеияо.еийома$", "яеула", "яифа("
+Case "пяос", "пяосаялоцгс", "пяосхесе.еццяажо", "пяосхгйг", "пяытотупо", "пяыто(", "пяосыяимо$", "пяовеияо", "пяовеияо$", "пяовеияо.еийома", "пяовеияо.еийома$", "пяовеияо.сведио", "яеула", "яифа("
 Case "яоутима", "яоутимас", "яухлисеис", "яыта$(", "яыта(", "саяысе", "сбгсе", "се"
 Case "сеияа", "сеияиайос.дисйоу(", "секида", "семаяио", "сгл", "сгл(", "сглади", "сглеио", "сглеио(", "сглеяа", "сйоупидиа", "стахеяг", "стахеяес", "статийг", "статийес"
 Case "стг", "стгкг", "стгкг(", "стгм", "сто", "стой", "стовои", "стовос", "стяоцц(", "суццяажеас"
 Case "суццяажг", "суцйяиме(", "суцйяоусг(", "суцвымеусе.еццяажо", "сулпиесг", "сулпкгяысг", "сум(", "сумаятгсг", "сумаятгсгс", "сумаятгсг$("
-Case "сумаятгсг(", "сумевисе", "сумхгла", "сус", "сусйеуг.пяобокгс$", "сустгла", "сувмотгта(", "свд$(", "сведиа"
+Case "сумаятгсг(", "сумевисе", "сумхгла", "сус", "сусйеуг", "сусйеуг.пяобокгс$", "сустгла", "сувмотгта(", "свд$(", "сведио", "сведиа"
 Case "сведио.мглатым", "сыяос", "сыяос(", "сыяос$(", "сыяоутупос$(", "сысе", "сысе.еццяажо", "таимиа", "таимиа.летягтгс", "таимиес"
 Case "танг", "танг(", "танимолгсг", "танимолгсг(", "таутисг(", "таутовяомо", "текестг", "текестгс", "текийг", "текийо", "текийос", "текос", "текос(", "тий", "титкос.аявеиоу$(", "тилг"
 Case "тилг(", "тилг$(", "тилгсыяоу$(", "тилгсыяоу(", "типота", "титкос", "титкос$(", "тлгла", "тлгла(", "тлгла$", "тлглата", "томос"
@@ -2983,12 +3140,12 @@ Case "уполмгла", "упыяа(", "уьгкос", "уьос", "уьос.сглеиоу", "жайекос$(", "жамея
 Case "жеяеписы", "жхимоуса", "жиктяо(", "жиктяо$(", "жомто", "жояла", "жояла$", "жоятос", "жоятысе", "жоятысе.еццяажо"
 Case "жяасг", "жымг", "жыто$(", "в.сглеиа", "вая$(", "ваяайтгяес", "ваяане", "ваяйыд$("
 Case "ваяйыд(", "вйж(", "вягсг", "вягстг", "вягстгс", "вягстым", "вяомос$(", "вяомос(", "вяыла", "вяыла(", "вяылата", "вяылатисе"
-Case "выяисла", "ьеудес", "ьеудгс", "ьгжио", "ыс"
+Case "выяисла", "ьеудес", "ьеудгс", "ьгжио", "ь.сглеиа", "ыс"
 Case Else
 ismine = False
 End Select
 End Function
-Private Function IsNumberQuery(a$, fr As Long, r As Variant, lr As Long, skipdecimals As Boolean) As Boolean
+Private Function IsNumberQuery(a$, fr As Long, R As Variant, lr As Long, skipdecimals As Boolean) As Boolean
 Dim SG As Long, sng As Long, n$, ig$, DE$, sg1 As Long, ex$, rr As Double
 ' ti kanei to e$
 If a$ = vbNullString Then IsNumberQuery = False: Exit Function
@@ -3083,7 +3240,7 @@ Else
     lr = 1
     Else
     If SG < 0 Then ig$ = "-" & ig$
-    Err.clear
+    Err.Clear
     On Error Resume Next
     n$ = ig$ & DE$ & ex$
     sng = Len(ig$ & DE$ & ex$)
@@ -3091,7 +3248,7 @@ Else
     If Err.Number > 0 Then
          lr = 0
     Else
-        r = rr
+        R = rr
        lr = sng - fr + 2
        IsNumberQuery = True
     End If
@@ -3103,9 +3260,9 @@ End Function
 
 
 Static Function ValidNum(a$, final As Boolean, Optional cutdecimals As Boolean = False, Optional checktype As Long = 0) As Boolean
-Dim r As Long
-Dim r1 As Long
-r1 = 1
+Dim R As Long
+Dim R1 As Long
+R1 = 1
           If Not NoUseDec Then
                                 If OverideDec Then
                                     a$ = Replace(a$, NowDec$, ".")
@@ -3116,44 +3273,44 @@ r1 = 1
               
 Dim v As Double, b$
 If final Then
-r1 = IsNumberOnly(a$, r1, v, r, cutdecimals)
+R1 = IsNumberOnly(a$, R1, v, R, cutdecimals)
 
-r1 = (r1 And Len(a$) <= r) Or (a$ = vbNullString)
-If r1 Then
+R1 = (R1 And Len(a$) <= R) Or (a$ = vbNullString)
+If R1 Then
 Select Case checktype
 Case vbLong
 On Error Resume Next
     v = CLng(v)
-    If Err.Number > 0 Then Err.clear: r1 = False
+    If Err.Number > 0 Then Err.Clear: R1 = False
 
 Case vbSingle
 On Error Resume Next
      v = CSng(v)
-    If Err.Number > 0 Then Err.clear: r1 = False
+    If Err.Number > 0 Then Err.Clear: R1 = False
 Case vbDecimal
 On Error Resume Next
     v = CDec(v)
-    If Err.Number > 0 Then Err.clear: r1 = False
+    If Err.Number > 0 Then Err.Clear: R1 = False
 Case vbCurrency
 On Error Resume Next
     v = CCur(v)
-    If Err.Number > 0 Then Err.clear: r1 = False
+    If Err.Number > 0 Then Err.Clear: R1 = False
 End Select
 
 
 End If
 Else
 If (a$ = "-") Or a$ = vbNullString Then
-r1 = True
+R1 = True
 Else
- r1 = IsNumberQuery(a$, r1, v, r, cutdecimals)
+ R1 = IsNumberQuery(a$, R1, v, R, cutdecimals)
     If a$ <> "" Then
-         If r < 2 Then
-                r1 = Not (r <= Len(a$))
+         If R < 2 Then
+                R1 = Not (R <= Len(a$))
                 a$ = vbNullString
         Else
-                r1 = r1 And Not r <= Len(a$)
-                a$ = Mid$(a$, 1, r - 1)
+                R1 = R1 And Not R <= Len(a$)
+                a$ = Mid$(a$, 1, R - 1)
         End If
  End If
  End If
@@ -3165,25 +3322,25 @@ Else
                             Else
                                 a$ = Replace(a$, ".", QueryDecString)
                             End If
-ValidNum = r1
+ValidNum = R1
 End Function
-Function ValidNumberOnly(a$, r As Variant, skipdec As Boolean) As Boolean
-r = r - r
-ValidNumberOnly = IsNumberOnly(a$, (1), r, (0), skipdec)
+Function ValidNumberOnly(a$, R As Variant, skipdec As Boolean) As Boolean
+R = R - R
+ValidNumberOnly = IsNumberOnly(a$, (1), R, (0), skipdec)
 End Function
-Function ValidNumberOnlyClean(a$, r As Variant, skipdec As Boolean) As Long
+Function ValidNumberOnlyClean(a$, R As Variant, skipdec As Boolean) As Long
 On Error Resume Next
-r = r - r
+R = R - R
 Dim fr As Long, lr As Long
 fr = 1
-If IsNumberOnly(a$, fr, r, lr, skipdec) Then
+If IsNumberOnly(a$, fr, R, lr, skipdec) Then
 ValidNumberOnlyClean = lr
 Else
 ValidNumberOnlyClean = -1
 End If
 
 End Function
-Private Function IsNumberOnly(a$, fr As Long, r As Variant, lr As Long, skipdecimals As Boolean) As Boolean
+Private Function IsNumberOnly(a$, fr As Long, R As Variant, lr As Long, skipdecimals As Boolean) As Boolean
 Dim SG As Long, sng As Long, n$, ig$, DE$, sg1 As Long, ex$   ', e$
 ' ti kanei to e$
 If a$ = vbNullString Then IsNumberOnly = False: Exit Function
@@ -3278,17 +3435,17 @@ Else
             On Error Resume Next
             If Len(DE$) > 0 Then
                 Mid$(DE$, 1, 1) = cdecimaldot$
-                r = CDec(ig$ & DE$)
+                R = CDec(ig$ & DE$)
             Else
-                r = CDec(ig$)
+                R = CDec(ig$)
             End If
             If Err.Number = 6 Then
-                r = CDbl(ig$ & DE$)
+                R = CDbl(ig$ & DE$)
             End If
          Else
-            r = val(ig$ & DE$ & ex$)
+            R = val(ig$ & DE$ & ex$)
              If Err.Number > 0 Then
-             Err.clear
+             Err.Clear
              IsNumberOnly = False
              End If
 
@@ -3574,11 +3731,11 @@ l = LenB(s): If l = 0 Then Exit Function
   If p2 > p4 Then MyTrimB = vbNullString Else MyTrimB = MidB$(s$, (p2 - p22) + 1, (p4 - p2) + 1)
  
 End Function
-Function IsLabelAnew(where$, a$, r$, Lang As Long) As Long
+Function IsLabelAnew(where$, a$, R$, Lang As Long) As Long
 ' for left side...no &
 
 Dim rr&, one As Boolean, c$, gr As Boolean
-r$ = vbNullString
+R$ = vbNullString
 ' NEW FOR REV 156  - WE WANT TO RUN WITH GREEK COMMANDS IN ANY COMPUTER
 Dim i&, l As Long, p3 As Integer
 Dim p2 As Long, p1 As Integer, p4 As Long
@@ -3633,16 +3790,16 @@ p2 = StrPtr(a$): l = l - 1
   If p1 < 256 Then
   Select Case p1
         Case 64  '"@"
-            If i < p4 And r$ <> "" Then
+            If i < p4 And R$ <> "" Then
                 GetMem2 i + 2, p1
-                where$ = r$
-                r$ = vbNullString
+                where$ = R$
+                R$ = vbNullString
             Else
               IsLabelAnew = 0: a$ = Mid$(a$, (i - p2) \ 2): Exit Function
             End If
         Case 63 '"?"
-        If r$ = vbNullString Then
-            r$ = "?"
+        If R$ = vbNullString Then
+            R$ = "?"
             i = i + 4
         Else
             i = i + 2
@@ -3656,7 +3813,7 @@ p2 = StrPtr(a$): l = l - 1
         Case 46 '"."
             If one Then
                 Exit For
-            ElseIf r$ <> "" And i < p4 Then
+            ElseIf R$ <> "" And i < p4 Then
                 GetMem2 i + 2, p1
                 If ChrW(p1) = "." Or ChrW(p1) = " " Then
                 If ChrW(p1) = "." And i + 2 < p4 Then
@@ -3668,11 +3825,11 @@ p2 = StrPtr(a$): l = l - 1
                 End If
             End If
                 GetMem2 i, p1
-                r$ = r$ & ChrW(p1)
+                R$ = R$ & ChrW(p1)
                 rr& = 1
             End If
       Case 38 ' "&"
-            If r$ = vbNullString Then
+            If R$ = vbNullString Then
             rr& = 2
             'a$ = Mid$(a$, 2)
             End If
@@ -3684,8 +3841,8 @@ p2 = StrPtr(a$): l = l - 1
               If one Then
 
             Exit For
-            ElseIf r$ <> "" Then
-            r$ = r$ & ChrW(p1)
+            ElseIf R$ <> "" Then
+            R$ = R$ & ChrW(p1)
             '' A$ = Mid$(A$, 2)
             rr& = 1 'is an identifier or floating point variable
             Else
@@ -3695,35 +3852,35 @@ p2 = StrPtr(a$): l = l - 1
             If one Then
             Exit For
             Else
-            r$ = r$ & ChrW(p1)
+            R$ = R$ & ChrW(p1)
             rr& = 1 'is an identifier or floating point variable
             End If
         Case 36 ' "$"
             If one Then Exit For
-            If r$ <> "" Then
+            If R$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & ChrW(p1)
+            R$ = R$ & ChrW(p1)
             Else
             Exit For
             End If
         Case 37 ' "%"
             If one Then Exit For
-            If r$ <> "" Then
+            If R$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & ChrW(p1)
+            R$ = R$ & ChrW(p1)
             Else
             Exit For
             End If
             
         Case 40 ' "("
-            If r$ <> "" Then
+            If R$ <> "" Then
             If i + 4 <= p4 Then
                 GetMem2 i + 2, p1
                 GetMem2 i + 2, p3
                 If ChrW(p1) + ChrW(p3) = ")@" Then
-                    r$ = r$ & "()."
+                    R$ = R$ & "()."
                     i = i + 4
                 Else
                     GoTo i1233
@@ -3741,7 +3898,7 @@ i1233:
                                        Exit For
                                        End Select
                      GetMem2 i, p1
-                                        r$ = r$ & ChrW(p1)
+                                        R$ = R$ & ChrW(p1)
                                         i = i + 2
                                       ' A$ = Mid$(A$, 2)
                                    Exit For
@@ -3760,7 +3917,7 @@ i1233:
               Exit For
               Else
               gr = True
-              r$ = r$ & ChrW(p1)
+              R$ = R$ & ChrW(p1)
               rr& = 1 'is an identifier or floating point variable
               End If
     End If
@@ -3768,19 +3925,19 @@ i1233:
 
     Next i
   If i > p4 Then a$ = vbNullString Else If (i + 2 - p2) \ 2 > 1 Then a$ = Mid$(a$, (i + 2 - p2) \ 2)
-       r$ = myUcase(r$, gr)
+       R$ = myUcase(R$, gr)
        Lang = 1 + CLng(gr)
 
     IsLabelAnew = rr&
 
 
 End Function
-Public Function IsLabelDotSub(where$, a$, rrr$, r$, Lang As Long, Optional p1 As Integer = 0) As Long
+Public Function IsLabelDotSub(where$, a$, rrr$, R$, Lang As Long, Optional p1 As Integer = 0) As Long
 ' for left side...no &
 
 Dim rr&, one As Boolean, c$, firstdot$, gr As Boolean
 rrr$ = vbNullString
-r$ = vbNullString
+R$ = vbNullString
 Dim i&, l As Long, p3 As Integer
 Dim p2 As Long, p4 As Long  '', excludesp As Long
   l = Len(a$): If l = 0 Then IsLabelDotSub = 0: Lang = 1: Exit Function
@@ -3845,32 +4002,32 @@ p2 = StrPtr(a$): l = l - 1
                 GetMem2 i + 2, p1
                 Select Case p1
                 Case 61, 40
-                If Len(r$) > 1 Then r$ = Left$(r$, Len(r$) - 1)
+                If Len(R$) > 1 Then R$ = Left$(R$, Len(R$) - 1)
 
                 End Select
                 End If
      Case 64  '"@"
-            If i < p4 And r$ <> "" Then
+            If i < p4 And R$ <> "" Then
             GetMem2 i + 2, p1
             If ChrW(p1) <> "(" Then
-              where$ = myUcase(r$, gr)
-            r$ = vbNullString
+              where$ = myUcase(R$, gr)
+            R$ = vbNullString
             rrr$ = vbNullString
             Else
               IsLabelDotSub = 0: a$ = firstdot$ + Mid$(a$, (i - p2) \ 2): Exit Function
             End If
             Else
-            If LenB(r$) = 0 And i < p4 Then
-            r$ = r$ + "@"
+            If LenB(R$) = 0 And i < p4 Then
+            R$ = R$ + "@"
 
             Else
               IsLabelDotSub = 0: a$ = vbNullString: Exit Function
               End If
             End If
     Case 63 '"?"
-        If r$ = vbNullString And firstdot$ = vbNullString Then
+        If R$ = vbNullString And firstdot$ = vbNullString Then
         rrr$ = "?"
-        r$ = rrr$
+        R$ = rrr$
         i = i + 4
         a$ = Mid$(a$, (i - p2) \ 2)
         IsLabelDotSub = 1
@@ -3883,9 +4040,9 @@ p2 = StrPtr(a$): l = l - 1
         IsLabelDotSub = 1
         Lang = 1 + CLng(gr)
         If Lang = 1 Then
-        rrr$ = UCase(r$)
+        rrr$ = UCase(R$)
         Else
-        rrr$ = myUcase(r$)
+        rrr$ = myUcase(R$)
         End If
     
         a$ = Mid$(a$, (i + 2 - p2) \ 2)
@@ -3898,7 +4055,7 @@ p2 = StrPtr(a$): l = l - 1
     Case 46 '"."
             If one Then
             Exit For
-            ElseIf r$ <> "" And i < p4 Then
+            ElseIf R$ <> "" And i < p4 Then
             GetMem2 i + 2, p1
             If ChrW(p1) = "." Or ChrW(p1) = " " Then
             If ChrW(p1) = "." And i + 2 < p4 Then
@@ -3911,7 +4068,7 @@ p2 = StrPtr(a$): l = l - 1
             End If
             End If
             GetMem2 i, p1
-            r$ = r$ & ChrW(p1)
+            R$ = R$ & ChrW(p1)
             rr& = 1
             Else
             firstdot$ = firstdot$ + "."
@@ -3922,8 +4079,8 @@ p2 = StrPtr(a$): l = l - 1
            If one Then
 
             Exit For
-            ElseIf r$ <> "" Then
-            r$ = r$ & ChrW(p1)
+            ElseIf R$ <> "" Then
+            R$ = R$ & ChrW(p1)
             rr& = 1 'is an identifier or floating point variable
             Else
             Exit For
@@ -3932,34 +4089,34 @@ p2 = StrPtr(a$): l = l - 1
             If one Then
             Exit For
             Else
-            r$ = r$ & ChrW(p1)
+            R$ = R$ & ChrW(p1)
             rr& = 1 'is an identifier or floating point variable
             End If
         Case 36 ' "$"
             If one Then Exit For
-            If r$ <> "" Then
+            If R$ <> "" Then
             one = True
             rr& = 3 ' is string variable
-            r$ = r$ & ChrW(p1)
+            R$ = R$ & ChrW(p1)
             Else
             Exit For
             End If
         Case 37 ' "%"
             If one Then Exit For
-            If r$ <> "" Then
+            If R$ <> "" Then
             one = True
             rr& = 4 ' is long variable
-            r$ = r$ & ChrW(p1)
+            R$ = R$ & ChrW(p1)
             Else
             Exit For
             End If
     Case 40 '"("
-            If r$ <> "" Then
+            If R$ <> "" Then
             If i + 4 <= p4 Then
                 GetMem2 i + 2, p1
                 GetMem2 i + 2, p3
                 If ChrW(p1) + ChrW(p3) = ")@" Then
-                    r$ = r$ & "()."
+                    R$ = R$ & "()."
                     i = i + 4
                 Else
                     GoTo i123
@@ -3978,7 +4135,7 @@ i123:
                                        End Select
                      GetMem2 i, p1
                                         
-                                        r$ = r$ & ChrW(p1)
+                                        R$ = R$ & ChrW(p1)
                                     
                                         i = i + 2
                                    Exit For
@@ -3996,7 +4153,7 @@ i123:
               Exit For
               Else
               gr = True
-              r$ = r$ & ChrW(p1)
+              R$ = R$ & ChrW(p1)
               rr& = 1 'is an identifier or floating point variable
               End If
     End If
@@ -4006,7 +4163,7 @@ i123:
   Else
   If (i + 2 - p2) \ 2 > 1 Then a$ = Mid$(a$, (i + 2 - p2) \ 2)
   End If
-       rrr$ = firstdot$ + myUcase(r$, gr)
+       rrr$ = firstdot$ + myUcase(R$, gr)
        Lang = 1 + CLng(gr)
     IsLabelDotSub = rr&
    'a$ = LTrim$(a$)
@@ -4073,22 +4230,24 @@ Public Function NumberId(aHash As idHash, bHash As idHash, Optional ahashbackup 
 Dim myid(), i As Long
 Dim myfun()
 myid() = Array("THIS", 1, "ауто", 1, "RND", 2, "туваиос", 2, "PEN", 3, "пема", 3, "HWND", 4, "паяахуяо", 4, "LOCALE", 5, "топийо", 5, "CODEPAGE", 6, "йыдийосекида", 6 _
-, "SPEECH", 7, "коцос", 7, "ERROR", 8, "кахос", 8, "SCREEN.Y", 9, "амакусг.у", 9, "SCREEN.X", 10, "амакусг.в", 10, "TWIPSY", 11, "уьос.сглеиоу", 11 _
+, "SPEECH", 7, "коцос", 7, "ERROR", 8, "кахос", 8, "SCREEN.Y", 9, "амакусг.у", 9, "амакусг.ь", 9, "SCREEN.X", 10, "амакусг.в", 10, "TWIPSY", 11, "уьос.сглеиоу", 11 _
 , "TWIPSX", 12, "пкатос.сглеиоу", 12, "REPORTLINES", 13, "цяаллесамажояас", 13, "LINESPACE", 14, "диастиво", 14, "MODE", 15, "тупос", 15 _
 , "MEMORY", 16, "лмглг", 16, "CHARSET", 17, "ваяайтгяес", 17, "ITALIC", 18, "пкациа", 18, "BOLD", 19, "жаядиа", 19, "COLORS", 20, "вяылата", 20 _
 , "ауноуса", 21, "ASCENDING", 21, "жхимоуса", 22, "DESCENDING", 22, "BOOLEAN", 23, "коцийос", 23, "BYTE", 24, "ьгжио", 24 _
 , "INTEGER", 25, "айеяаиос", 25, "LONG", 26, "лайяус", 26, "CURRENCY", 27, "коцистийо", 27, "SINGLE", 28, "апкос", 28, "DOUBLE", 29, "дипкос", 29 _
-, "DATEFIELD", 30, "глеяолгмиа", 30, "BINARY", 31, "дуадийо", 31, "TEXT", 32, "йеилемо", 32, "OLE", 33, "MEMO", 34, "уполмгла", 34, "REVISION", 35, "амахеыягсг", 35, "BROWSER", 36, "амакоцио", 36, "VERSION", 37, "ейдосг", 37, "MOTION.X", 38, "йимгсг.в", 38, "MOTION.Y", 39, "йимгсг.у", 39, "MOTION.XW", 40, "йимгсг.вп", 40, "MOTION.WX", 40, "йимгсг.пв", 40, "MOTION.YW", 41, "йимгсг.уп", 41, "MOTION.WY", 41, "йимгсг.пу", 41 _
+, "DATEFIELD", 30, "глеяолгмиа", 30, "BINARY", 31, "дуадийо", 31, "TEXT", 32, "йеилемо", 32, "OLE", 33, "MEMO", 34, "уполмгла", 34, "REVISION", 35, "амахеыягсг", 35, "BROWSER", 36, "амакоцио", 36, "VERSION", 37, "ейдосг", 37, "MOTION.X", 38, "йимгсг.в", 38, "MOTION.Y", 39, "йимгсг.у", 39, "йимгсг.ь", 39, "MOTION.XW", 40, "йимгсг.вп", 40, "MOTION.WX", 40, "йимгсг.пв", 40, "MOTION.YW", 41, "йимгсг.уп", 41, "йимгсг.ьп", 41, "MOTION.WY", 41, "йимгсг.пу", 41, "йимгсг.пь", 41 _
 , "FIELD", 42, "педио", 42, "MOUSE.KEY", 43, "деийтгс.йол", 43, "MOUSE", 44, "деийтгс", 44, "MOUSE.X", 45, "деийтгс.в", 45 _
-, "MOUSE.Y", 46, "деийтгс.у", 46, "MOUSEA.X", 47, "деийтгса.в", 47, "MOUSEA.Y", 48, "деийтгса.у", 48, "TRUE", 49, "акгхес", 49, "акгхгс", 49 _
+, "MOUSE.Y", 46, "деийтгс.у", 46, "деийтгс.ь", 46, "MOUSEA.X", 47, "деийтгса.в", 47, "MOUSEA.Y", 48, "деийтгса.у", 48, "деийтгса.ь", 48, "TRUE", 49, "акгхес", 49, "акгхгс", 49 _
 , "FALSE", 50, "ьеудес", 50, "ьеудгс", 50, "STACK.SIZE", 51, "лецехос.сыяоу", 51, "ISNUM", 52, "еимая", 52, "PI", 53, "пи", 53 _
-, "NOT", 54, "ови", 54, "дем", 54, "ISLET", 55, "еимця", 55, "WIDTH", 56, "пкатос", 56, "POINT", 57, "сглеио", 57, "POS.X", 58, "хесг.в", 58, "POS.Y", 59, "хесг.у", 59 _
-, "SCALE.X", 60, "йкилан.в", 60, "в.сглеиа", 60, "X.TWIPS", 60, "SCALE.Y", 61, "йкилан.у", 61, "у.сглеиа", 61, "Y.TWIPS", 61, "EMPTY", 62, "йемо", 62 _
+, "NOT", 54, "ови", 54, "дем", 54, "ISLET", 55, "еимця", 55, "WIDTH", 56, "пкатос", 56, "POINT", 57, "сглеио", 57, "POS.X", 58, "хесг.в", 58, "POS.Y", 59, "хесг.ь", 59, "хесг.у", 59 _
+, "SCALE.X", 60, "йкилан.в", 60, "в.сглеиа", 60, "X.TWIPS", 60, "SCALE.Y", 61, "йкилан.ь", 61, "йкилан.у", 61, "ь.сглеиа", 61, "у.сглеиа", 61, "Y.TWIPS", 61, "EMPTY", 62, "йемо", 62 _
 , "MOVIE.COUNTER", 63, "MEDIA.COUNTER", 63, "MUSIC.COUNTER", 63, "таимиа.летягтгс", 63, "лоусийг.летягтгс", 63 _
 , "PLAYSCORE", 64, "паифеижымг", 64, "MOVIE", 65, "MEDIA", 65, "MUSIC", 65, "таимиа", 65, "лоусийг", 65, "DURATION", 66, "диаяйеиа", 66 _
 , "VOLUME", 67, "емтасг", 67, "TAB", 68, "стгкг", 68, "HEIGHT", 69, "уьос", 69, "POS", 70, "хесг", 70, "ROW", 71, "цяаллг", 71, "TIMECOUNT", 72, "жоятос", 72 _
 , "TICK", 73, "тий", 73, "TODAY", 74, "сглеяа", 74, "NOW", 75, "тыяа", 75, "MENU.VISIBLE", 76, "епикоцес.жамеяес", 76, "MENUITEMS", 77, "епикоцес", 77 _
-, "MENU", 78, "епикоцг", 78, "NUMBER", 79, "аяихлос", 79, "тилг", 79, "LAMBDA", 80, "калда", 81, "GROUP", 83, "олада", 83, "ARRAY", 84, "пимайас", 84, "[]", 85, "сыяос", 86, "STACK", 86, "ISWINE", 87, "SHOW", 88, "охомг", 88, "OSBIT", 89, "WINDOW", 90, "паяахуяо", 90, "MONITOR.STACK", 91, "екецвос.сыяоу", 91, "MONITOR.STACK.SIZE", 92, "екецвос.лецехос.сыяоу", 92, "?", 93, "диаяхяысг", 94, "BUFFER", 94, "йатастасг", 95, "INVENTORY", 95, "LIST", 96, "киста", 96, "QUEUE", 97, "оуяа", 97, "INFINITY", 82, "апеияо", 82, "еккгмийа", 98, "GREEK", 98, "INTERNET", 99, "диадийтуо", 99)
+, "MENU", 78, "епикоцг", 78, "NUMBER", 79, "аяихлос", 79, "тилг", 79, "LAMBDA", 80, "калда", 81, "GROUP", 83, "олада", 83, "ARRAY", 84, "пимайас", 84, "[]", 85 _
+, "сыяос", 86, "STACK", 86, "ISWINE", 87, "SHOW", 88, "охомг", 88, "OSBIT", 89, "WINDOW", 90, "сусйеуг", 90, "MONITOR.STACK", 91, "екецвос.сыяоу", 91, "MONITOR.STACK.SIZE", 92, "екецвос.лецехос.сыяоу", 92, "?", 93, "диаяхяысг", 94, "BUFFER", 94, "йатастасг", 95, "INVENTORY", 95, "LIST", 96, "киста", 96, "QUEUE", 97, "оуяа", 97, "INFINITY", 82, "апеияо", 82, "еккгмийа", 98, "GREEK", 98 _
+, "INTERNET", 99, "диадийтуо", 99, "CLIPBOARD.IMAGE", 100, "пяовеияо.еийома", 100, "CLIPBOARD.DRAWING", 101, "пяовеияо.сведио", 101, "MONITORS", 102, "охомес", 102)
 If Not ahashbackup Is Nothing Then
 For i = 0 To UBound(myid()) Step 2
     ahashbackup.ItemCreator CStr(myid(i)), CLng(myid(i + 1))
@@ -4103,8 +4262,8 @@ myfun() = Array("PARAM(", 1, "паяал(", 1, "STACKITEM(", 2, "тилгсыяоу(", 2, "SGN
 , "WRITABLE(", 17, "еццяаьило(", 17, "COLOR(", 18, "COLOUR(", 18, "вяыла(", 18, "DIMENSION(", 19, "диастасг(", 19, "ARRAY(", 20, "пимайас(", 20 _
 , "FUNCTION(", 21, "сумаятгсг(", 21, "DRIVE.SERIAL(", 22, "сеияиайос.дисйоу(", 22, "FILE.STAMP(", 23, "аявеиоу.сталпа(", 23, "EXIST.DIR(", 25, "упаявеи.йатакоцос(", 25 _
 , "EXIST(", 26, "упаявеи(", 26, "JOYPAD(", 27, "кабг(", 27, "JOYPAD.DIRECTION(", 28, "кабг.йатеухумсг(", 28, "JOYPAD.ANALOG.X(", 29, "кабг.амакоцийо.в(", 29 _
-, "JOYPAD.ANALOG.Y(", 30, "кабг.амакоцийо.у(", 30, "IMAGE.X(", 31, "еийома.в(", 31, "IMAGE.Y(", 32, "еийома.у(", 32, "IMAGE.X.PIXELS(", 33, "еийома.в.сглеиа(", 33 _
-, "IMAGE.Y.PIXELS(", 34, "еийома.у.сглеиа(", 34, "VALID(", 35, "ецйуяо(", 35, "EVAL(", 36, "ейжя(", 36, "ейжяасг(", 36, "POINT(", 37, "сглеио(", 37 _
+, "JOYPAD.ANALOG.Y(", 30, "кабг.амакоцийо.у(", 30, "кабг.амакоцийо.ь(", 30, "IMAGE.X(", 31, "еийома.в(", 31, "IMAGE.Y(", 32, "еийома.у(", 32, "еийома.ь(", 32, "IMAGE.X.PIXELS(", 33, "еийома.в.сглеиа(", 33 _
+, "IMAGE.Y.PIXELS(", 34, "еийома.у.сглеиа(", 34, "еийома.ь.сглеиа(", 34, "VALID(", 35, "ецйуяо(", 35, "EVAL(", 36, "ейжя(", 36, "ейжяасг(", 36, "POINT(", 37, "сглеио(", 37 _
 , "CTIME(", 38, "упыяа(", 38, "CDATE(", 39, "уплея(", 39, "TIME(", 40, "вяомос(", 40, "DATE(", 41, "глеяа(", 41, "VAL(", 42, "тилг(", 42, "аниа(", 42, "RINSTR(", 107, "хесгдениа(", 43 _
 , "INSTR(", 106, "хесг(", 44, "RECORDS(", 45, "еццяажес(", 45, "GROUP.COUNT(", 46, "олада.сумоко(", 46, "PARAGRAPH(", 47, "паяацяажос(", 47, "PARAGRAPH.INDEX(", 48, "аяихлос.паяацяажоу(", 48 _
 , "BACKWARD(", 49, "писы(", 49, "FORWARD(", 50, "лпяоста(", 50, "DOC.PAR(", 51, "еццяажоу.пая(", 51, "MAX.DATA(", 52, "лецако.сеияас(", 52, "MIN.DATA(", 53, "лийяо.сеияас(", 53 _
@@ -4131,7 +4290,7 @@ End Function
 Public Function allcommands(aHash As sbHash) As Boolean
 Dim mycommands(), i As Long
 mycommands() = Array("ABOUT", "AFTER", "APPEND", "APPEND.DOC", "BACK", "BACKGROUND", "BASE", "BEEP", "BINARY", "BITMAPS", "BOLD", "BREAK", "BROWSER", "BUFFER", "CALL", "CASE", "CAT", "CHANGE", "CHARSET", "CHOOSE.COLOR", "CHOOSE.FONT", "CHOOSE.OBJECT", "CHOOSE.ORGAN", "CIRCLE", "CLASS", "CLEAR", "CLIPBOARD", "CLOSE", "CLS", "CODEPAGE", "COLOR", "COMMIT", "COMPRESS", "CONST", "CONTINUE", "COPY", "CURSOR", "CURVE", "DATA", "DB.PROVIDER", "DB.USER" _
-, "DECLARE", "DEF", "DELETE", "DESKTOP", "DIM", "DIR", "DIV", "DO", "DOCUMENT", "DOS", "DOUBLE", "DRAW", "DRAWINGS", "DROP", "DURATION", "EDIT", "EDIT.DOC", "ELSE", "ELSE.IF", "EMPTY", "END", "ENUM", "ENUMERATION", "ERASE", "ERROR", "ESCAPE", "EVENT", "EVERY", "EXECUTE", "EXIT", "EXPORT", "FAST", "FIELD", "FILES", "FILL", "FIND", "FKEY", "FLOODFILL", "FLUSH", "FONT", "FOR", "FORM", "FORMLABEL", "FRAME", "FUNCTION", "GET", "GLOBAL" _
+, "DECLARE", "DEF", "DELETE", "DESKTOP", "DIM", "DIR", "DIV", "DO", "DOCUMENT", "DOS", "DOUBLE", "DRAW", "DRAWING", "DRAWINGS", "DROP", "DURATION", "EDIT", "EDIT.DOC", "ELSE", "ELSE.IF", "EMPTY", "END", "ENUM", "ENUMERATION", "ERASE", "ERROR", "ESCAPE", "EVENT", "EVERY", "EXECUTE", "EXIT", "EXPORT", "FAST", "FIELD", "FILES", "FILL", "FIND", "FKEY", "FLOODFILL", "FLUSH", "FONT", "FOR", "FORM", "FORMLABEL", "FRAME", "FUNCTION", "GET", "GLOBAL" _
 , "GOSUB", "GOTO", "GRADIENT", "GREEK", "GROUP", "HALT", "HEIGHT", "HELP", "HEX", "HIDE", "HOLD", "HTML", "ICON", "IF", "IMAGE", "INLINE", "INPUT", "INSERT", "INVENTORY", "ITALIC", "JOYPAD", "KEYBOARD", "LATIN", "LAYER", "LEGEND", "LET", "LINE", "LINESPACE", "LINK", "LIST", "LOAD", "LOAD.DOC", "LOCAL", "LOCALE", "LONG", "LOOP", "MAIN.TASK", "MARK", "MEDIA", "MENU", "MERGE.DOC", "METHOD", "MODE", "MODULE" _
 , "MODULES", "MONITOR", "MOTION", "MOTION.W", "MOUSE.ICON", "MOVE", "MOVIE", "MOVIES", "MUSIC", "NAME", "NEW", "NEXT", "NORMAL", "ON", "OPEN", "OPEN.FILE", "OPEN.IMAGE", "OPTIMIZATION", "ORDER", "OVER", "OVERWRITE", "PAGE", "PART", "PATH", "PEN", "PIPE", "PLAY", "PLAYER", "POLYGON", "PRINT", "PRINTER", "PRINTING", "PROFILER", "PROPERTIES", "PROTOTYPE", "PSET", "PUSH", "PUT", "READ", "RECURSION.LIMIT" _
 , "REFER", "REFRESH", "RELEASE", "REM", "REMOVE", "REPEAT", "REPORT", "RESTART", "RETRIEVE", "RETURN", "SAVE", "SAVE.AS", "SAVE.DOC", "SCAN", "SCORE", "SCREEN.PIXELS", "SCRIPT", "SCROLL", "SEARCH", "SEEK", "SELECT", "SET", "SETTINGS", "SHIFT", "SHIFTBACK", "SHOW", "SLOW", "SMOOTH", "SORT", "SOUND", "SOUNDREC", "SOUNDS", "SPEECH", "SPLIT", "SPRITE", "STACK", "START", "STATIC", "STEP", "STOCK", "STOP", "STRUCTURE" _
@@ -4142,7 +4301,7 @@ mycommands() = Array("ABOUT", "AFTER", "APPEND", "APPEND.DOC", "BACK", "BACKGROU
 , "епипедо", "епистяожг", "епижамеиа", "еполемо", "етийета.жоялас", "еуяесг", "глеяолгмиа", "гвоцяажгсг", "гвои", "гвос", "хесе", "хесг", "идиотгтес", "исвмг", "ивмос", "йахаяг", "йахаяо", "йахе", "йакесе", "йалпукг", "йаме", "йамомийа", "йат", "йатакоцои", "йатакоцос", "йатастасг", "йатавыягсг", "йеилемо", "йемг", "йимгсг", "йимгсг.п", "йкасг", "йкеиди", "йкеисе", "йомсока", "йяата", "йяатгсе", "йяуье" _
 , "йуйкийа", "йуйкос", "йукисг", "йуяио.еяцо", "кабг", "кахос", "катимийа", "кенеис", "киста", "коцос", "лайяус", "ле", "леходос", "лекыдиа", "леяос", "лета", "летахесг", "лоусийг", "лпип", "мео", "мгла", "мглата", "нейима", "охомг", "олада", "олака", "омола", "ояио.амадяолгс", "ояисе", "паийтгс", "паине", "памы", "паяахуяо", "паяе", "паяелбокг", "павос", "педио", "пема", "пеяи" _
 , "пеяихыяио", "пета", "пимайас", "пимайес", "пкациа", "пкаисио", "пкгйтяокоцио", "покуцымо", "пяос", "пяосхесе.еццяажо", "пяосхгйг", "пяытотупо", "пяовеияо", "яоутима", "яухлисеис", "с", "саяысе", "сбгсе", "сеияа", "секида", "семаяио", "сгл", "сглади", "сглеио", "стахеяг", "стахеяес", "статийг", "статийес", "стг", "стгм", "сто", "стой", "стовои", "стовос", "суццяажеас", "суццяажг", "суцвымеусе.еццяажо", "сулпиесг" _
-, "сулпкгяысг", "сумаятгсг", "сумевисе", "сумхгла", "сус", "сустгла", "сведиа", "сведио.мглатым", "сыяос", "сысе", "сысе.еццяажо", "таимиа", "таимиес", "танг", "танимолгсг", "текос", "титкос", "тлгла", "тлглата", "томос", "топийа", "топийес", "топийг", "топийо", "тоте", "тупос", "тупысе", "упеяйкасг", "упойатакоцос", "упокоцистг", "жаядиа", "жеяе", "жеяеписы", "жомто", "жояла", "жоятос", "жоятысе" _
+, "сулпкгяысг", "сумаятгсг", "сумевисе", "сумхгла", "сус", "сустгла", "сведио", "сведиа", "сведио.мглатым", "сыяос", "сысе", "сысе.еццяажо", "таимиа", "таимиес", "танг", "танимолгсг", "текос", "титкос", "тлгла", "тлглата", "томос", "топийа", "топийес", "топийг", "топийо", "тоте", "тупос", "тупысе", "упеяйкасг", "упойатакоцос", "упокоцистг", "жаядиа", "жеяе", "жеяеписы", "жомто", "жояла", "жоятос", "жоятысе" _
 , "жоятысе.еццяажо", "жымг", "ваяайтгяес", "ваяане", "вягсг", "вягстг", "вягстгс", "вяыла", "вяылатисе", "?")
 For i = 0 To UBound(mycommands())
 
@@ -4303,6 +4462,8 @@ Case "SPRITE", "диажамо", "диажамеиа"
     aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoSprite)
 Case "MODULES", "тлглата"
     aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoModules)
+Case "CLIPBOARD", "пяовеияо"
+    aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoClipBoard)
 Case "паине", "PLAY"
     aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoPlayScore)
 Case "SCORE", "жымг"
@@ -4325,6 +4486,8 @@ Case "DROP", "пета"
 aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoDrop)
 Case "апаяихлгсг", "апая", "ENUMERATION", "ENUM"
 aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoEnum)
+Case "DESKTOP", "епижамеиа"
+aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoDesktop)
 Case "вяылатисе", "PSET"
 aHash.ItemCreator CStr(mycommands(i)), ProcPtr(AddressOf NeoPset)
 Case "IF", "ам"
@@ -4400,7 +4563,9 @@ Case "BINARY", "дуадийо"
 Case "HALT", "акт"
     aHash.ItemCreator2 CStr(mycommands(i)), 0, 40
 Case "STOP", "диайопг"
-    aHash.ItemCreator2 CStr(mycommands(i)), 0, 41 ' REMINDER: 41 LAST GOTO, IN EXECUTE()
+    aHash.ItemCreator2 CStr(mycommands(i)), 0, 41
+Case "DRAWING", "сведио"
+    aHash.ItemCreator2 CStr(mycommands(i)), 0, 42 ' REMINDER: 42 LAST GOTO, IN EXECUTE()
 Case Else
     aHash.ItemCreator CStr(mycommands(i)), 0
 End Select
@@ -4411,8 +4576,9 @@ Private Function ProcPtr(ByVal nAddress As Long) As Long
     ProcPtr = nAddress
 End Function
 Public Sub StoreFont(aName$, aSize As Single, ByVal aCharset As Long)
-
+Err.Clear
 On Error Resume Next
+If aSize < 1 Then aSize = 1
 fonttest.Font.Size = aSize
 If Err.Number > 0 Then aSize = 12: fonttest.Font.Size = aSize
     fonttest.FontName = aName$

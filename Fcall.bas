@@ -10,7 +10,7 @@ Private Declare Function lstrlenA Lib "KERNEL32" (ByVal lpString As Long) As Lon
 Private Declare Function lstrlenW Lib "KERNEL32" (ByVal lpString As Long) As Long
 Private Declare Sub RtlMoveMemory Lib "KERNEL32" (Dst As Any, Src As Any, ByVal BLen As Long)
 Private Declare Function SysStringLen Lib "oleaut32" (ByVal bstr As Long) As Long
-
+Declare Function GetLastError Lib "KERNEL32" () As Long
 Private Enum CALLINGCONVENTION_ENUM
   cc_fastcall
   CC_CDECL
@@ -145,10 +145,20 @@ Dim hLib As Long
   GetFuncPtr = GetProcByName(hLib, sFunc)
   If GetFuncPtr = 0 Then MyEr "EntryPoint not found: " & sFunc & " in: " & sLib, "EntryPoint not found: " & sFunc & " στο: " & sLib
 End Function
-Public Sub RemoveDll(sLib As String)
+Public Sub RemoveDll(ByVal sLib As String)
+Dim v As Long, s As String
+s = ExtractPath(sLib)
+If s = "" Then sLib = mcd + sLib
 If LibHdls.Find(sLib) Then
-    FreeLibrary LibHdls.Value
+    If FreeLibrary(LibHdls.Value) <> 0 Then
     LibHdls.RemoveWithNoFind
+    Else
+    v = GetLastError()
+    MyEr "η βιβλιοθήκη δεν μπορεί να αφαιρεθεί, κωδικός λάθους:(" & v & ")", "dll not removes, error code:(" & v & ")"
+    
+    End If
+Else
+MyEr "δεν υπάρχει η βιβλιοθήκη", "dll not found"
 End If
 End Sub
 
@@ -203,7 +213,7 @@ Function IsWine() As Boolean
 Static www As Boolean, wwb As Boolean
 If www Then
 Else
-Err.clear
+Err.Clear
 Dim hLib As Long, ntdll As String
 On Error Resume Next
 ntdll = "ntdll"

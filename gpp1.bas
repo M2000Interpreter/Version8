@@ -259,7 +259,22 @@ Function PrinterCap(Cap As Long) As Long
 PrinterCap = GetDeviceCaps(p_hdc, Cap)
 ret = DeleteDC(p_hdc)
 End Function
-
+Sub ChangeNowOrientationPortrait()
+Dim pDevMode As DEVMODE
+If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) > 1 Then
+    Call CopyMemory(pDevMode, MyDM(1), Len(pDevMode))
+    pDevMode.dmOrientation = 3 - pDevMode.dmOrientation
+    Call CopyMemory(MyDM(1), pDevMode, Len(pDevMode))
+End If
+End Sub
+Sub ChangeNowOrientationLandscape()
+Dim pDevMode As DEVMODE
+If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) < 1 Then
+    Call CopyMemory(pDevMode, MyDM(1), Len(pDevMode))
+    pDevMode.dmOrientation = 3 - pDevMode.dmOrientation
+    Call CopyMemory(MyDM(1), pDevMode, Len(pDevMode))
+End If
+End Sub
 Function ChangeOrientation(F As Object, szPrinterName As String, adevmode() As Byte) As Boolean
       Dim hPrinter As Long, i As Long
       Dim nSize As Long

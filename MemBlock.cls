@@ -35,10 +35,33 @@ Private Type SAFEARRAY1D
     pvData As Long
     onebound(0 To 0) As SAFEARRAYBOUND
 End Type
-Private Width As Long, Height As Long
-Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
+Private Width As Long, Height As Long, mSubtype As Long
+' mSubtype = 0 undefined
+' mSubtype = 1 Bitmap/Png
+' mSubtype = 2 Emf
+' mSubtype = 3 Wmf
 
+Private Declare Function GetEnhMetaFileHeader Lib "gdi32" (ByVal hMf As Long, ByVal cbBuffer As Long, lpemh As Any) As Long
+
+Private Declare Function SetMetaFileBitsEx Lib "gdi32" (ByVal nSize As Long, lpData As Any) As Long
+Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
+ Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function OpenClipboard Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function CloseClipboard Lib "user32" () As Long
+Private Declare Function SetClipboardData Lib "user32" (ByVal wFormat As Long, ByVal hMem As Long) As Long
+Private Declare Function EmptyClipboard Lib "user32" () As Long
+Private Declare Function SetEnhMetaFileBits Lib "gdi32" (ByVal cbBuffer As Long, lpData As Any) As Long
+Private Declare Function GetEnhMetaFileBits Lib "gdi32" (ByVal hMf As Long, ByVal nSize As Long, lpvData As Any) As Long
+Private Declare Function CopyEnhMetaFile Lib "gdi32.dll" Alias "CopyEnhMetaFileW" (ByVal hemfSrc As Long, lpszFile As Long) As Long
+Private Declare Function IsClipboardFormatAvailable Lib "user32" (ByVal wFormat As Long) As Long
+Private Declare Function DeleteEnhMetaFile Lib "gdi32" (ByVal hEmf As Long) As Long
+
+
+Const CF_ENHMETAFILE = 14
 Sub Construct(ByteLen As Long, Optional Times As Long = 1, Optional clearme As Long = 0, Optional executable As Boolean = False, Optional thatbasicitem As Integer)
 
 If mItems <> 0 Then ErrorMes = 1: Exit Sub
@@ -58,6 +81,11 @@ mExecBloc = Not executable
 mPtr = Blockmalloc(ByteLen * Times, clearme, mExecBloc)
 'If mExecBloc Then
 If mPtr <> 0 Then mBytes = ByteLen * Times
+End Sub
+Public Sub RemovePtr(hMem As Long)
+' don't use this sub if you didn't get the number.
+    hMem = mPtr
+    mPtr = 0
 End Sub
 Property Get ItemSize()
 ItemSize = ItemLen
@@ -370,8 +398,7 @@ there:
 End If
         
 End Function
-
-Public Function GetStdPicture(Optional Width As Long = -1, Optional Height As Long = -1, Optional ByVal backcolor As Long = vbWhite, Optional RetainRatio As Boolean = False) As IPicture
+Private Function GetStdPicture1(Optional Width As Long = -1, Optional Height As Long = -1, Optional ByVal backcolor As Long = vbWhite, Optional RetainRatio As Boolean = False, Optional bitmap As Boolean = False) As IPicture
    Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
      With a1
         .cbElements = 1
@@ -380,16 +407,87 @@ Public Function GetStdPicture(Optional Width As Long = -1, Optional Height As Lo
         .onebound(0).cElements = Me.SizeByte
         .pvData = Me.GetPtr(0)
     End With
-    CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
     
-    Set GetStdPicture = LoadImageFromBuffer2(a(), Width, Height, backcolor, RetainRatio)
+    If mSubtype <> 2 Or bitmap Then
+        CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
+        Set GetStdPicture1 = LoadImageFromBuffer3(a(), Width, Height, backcolor)
+         CopyMemory ByVal VarPtrArray(a), 0&, 4
+    Else
+       Dim hEmf As Long
+    On Error Resume Next
+    Dim bb As MemBlock, hMem As Long
+    Set bb = Copy()
+    bb.RemovePtr hMem
+    Set bb = Nothing
+    Set GetStdPicture1 = HandleToPictureFromBits(hMem, Me.SizeByte)
+    If BlockSize(hMem) > 0 Then
+    BlockFree hMem
+    End If
+    End If
+
+   
+ 
+End Function
+Public Function GetStdPicture(Optional Width As Long = -1, Optional Height As Long = -1, Optional ByVal backcolor As Long = vbWhite, Optional FlipOrRotate As Long = 0, Optional bitmap As Boolean = False) As IPicture
+   Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
+     With a1
+        .cbElements = 1
+        .cDims = 1
+        .onebound(0).lLBound = 0
+        .onebound(0).cElements = Me.SizeByte
+        .pvData = Me.GetPtr(0)
+    End With
+    
+    If mSubtype <> 2 Or bitmap Then
+        CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
+        Set GetStdPicture = LoadImageFromBuffer2(a(), Width, Height, backcolor, FlipOrRotate)
+         CopyMemory ByVal VarPtrArray(a), 0&, 4
+    Else
+       Dim hEmf As Long
+    
+    On Error Resume Next
+    
+    hEmf = SetEnhMetaFileBits(SizeByte, ByVal GetBytePtr(0))
+ 
+    Set GetStdPicture = gCreatePicture(hEmf, 4)
+    
+   
+    End If
+
+   
+ 
+End Function
+Public Function DrawEmfToHdc(bstack As basetask, x As Long, y As Long, angle!, Width As Long, Height As Long) As Boolean
+   Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
+   If mSubtype = 0 Then
+        If IsEmf Then
+        mSubtype = 2
+        ElseIf Not IsWmf Then
+        mSubtype = 1
+        End If
+   End If
+     With a1
+        .cbElements = 1
+        .cDims = 1
+        .onebound(0).lLBound = 0
+        .onebound(0).cElements = Me.SizeByte
+        .pvData = Me.GetPtr(0)
+    End With
+    CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
+    DrawEmfToHdc = DrawEmfFromBuffer(bstack, a(), x, y, angle!, Width, Height)
     
     CopyMemory ByVal VarPtrArray(a), 0&, 4
  
 End Function
-
 Public Function DrawSpriteToHdc(bstack As basetask, sprt As Boolean, angle!, zoomfactor!, blend!, Optional backcolor As Long = -1) As Boolean
    Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
+   If mSubtype = 0 Then
+        If IsEmf Then
+        mSubtype = 2
+        ElseIf Not IsWmf Then
+        mSubtype = 1
+        End If
+   End If
      With a1
         .cbElements = 1
         .cDims = 1
@@ -398,12 +496,12 @@ Public Function DrawSpriteToHdc(bstack As basetask, sprt As Boolean, angle!, zoo
         .pvData = Me.GetPtr(0)
     End With
     CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
-    DrawSpriteToHdc = DrawSpriteFromBuffer(bstack, a(), Not sprt, angle!, zoomfactor!, blend!, backcolor)
+    DrawSpriteToHdc = DrawSpriteFromBuffer(bstack, a(), Not sprt, angle!, zoomfactor!, blend!, backcolor, mSubtype = 2)
     
     CopyMemory ByVal VarPtrArray(a), 0&, 4
  
 End Function
-Public Function DrawImageToHdc(where As Object, Optional X As Long = 0&, Optional Y As Long = 0&, Optional Width As Long = -1, Optional Height As Long = -1) As Boolean
+Public Function DrawImageToHdc(where As Object, Optional x As Long = 0&, Optional y As Long = 0&, Optional Width As Long = -1, Optional Height As Long = -1) As Boolean
    Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
      With a1
         .cbElements = 1
@@ -412,10 +510,9 @@ Public Function DrawImageToHdc(where As Object, Optional X As Long = 0&, Optiona
         .onebound(0).cElements = Me.SizeByte
         .pvData = Me.GetPtr(0)
     End With
-    CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
-    DrawImageToHdc = DrawImageFromBuffer(a(), where.hDC, X, Y, Width, Height)
-    
-    CopyMemory ByVal VarPtrArray(a), 0&, 4
+   CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
+   DrawImageToHdc = DrawImageFromBuffer(a(), where.hDC, x, y, (Width), (Height))
+   CopyMemory ByVal VarPtrArray(a), 0&, 4
  
 End Function
 Public Function ReadImageSizeX(SizeX As Variant) As Boolean
@@ -479,9 +576,8 @@ Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
     
     CopyMemory ByVal VarPtrArray(a), 0&, 4
 End Sub
-Function Copy(r, p) As Object
-
-Dim aCopy As New MemBlock, BLen As Long, mItems As Long
+Function Copy(Optional R As Long = 0, Optional p As Long = 0) As Object
+Dim aCopy As New MemBlock, BLen As Long, hMem As Long
 If mItems > 0 Then
     If mExecBloc Then
         BLen = BlockSize(mPtr)
@@ -489,25 +585,30 @@ If mItems > 0 Then
         BLen = mBytes
     End If
     mItems = BLen \ ItemLen
-    If r <> 0 Then
-        If r >= 0 And r < mItems Then
+    If R <> 0 Then
+        If R >= 0 And R < mItems Then
             If p >= 1 Then
-                aCopy.Construct ItemLen, CLng(p), , r = 0 And mExecBloc
+                aCopy.Construct ItemLen, CLng(p), , R = 0 And Not mExecBloc
                 If mItems > p Then
                     p = mItems
                 End If
-                CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(r), ItemLen * p
+                CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(R), ItemLen * p
             Else
-                aCopy.Construct ItemLen, 1&, , mExecBloc
-                CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(r), ItemLen
+           
+                aCopy.Construct ItemLen, 1&, , Not mExecBloc
+                
+                CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(R), ItemLen
             End If
         Else
-            aCopy.Construct ItemLen, 1&, , mExecBloc
-            CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(r), ItemLen
+            aCopy.Construct ItemLen, 1&, , Not mExecBloc
+            CopyMemory ByVal aCopy.GetPtr(0), ByVal Me.GetPtr(R), ItemLen
         End If
     Else
-    aCopy.Construct ItemLen, mItems, , mExecBloc
-    CopyMemory ByVal aCopy.GetPtr(0), ByVal mPtr, BLen
+    aCopy.Construct ItemLen, mItems, , Not mExecBloc
+    hMem = GlobalLock(aCopy.GetPtr(0))
+    
+    CopyMemory ByVal hMem, ByVal mPtr, BLen
+    GlobalUnlock hMem
     End If
     Set Copy = aCopy
 End If
@@ -525,3 +626,113 @@ For i = from To limit
 Next
 Search = i + 1
 End Function
+
+Public Property Get SubType() As Variant
+SubType = mSubtype
+End Property
+
+Public Property Let SubType(ByVal RHS As Variant)
+mSubtype = RHS
+End Property
+Public Sub SentToClipBoard(Optional pWidth As Long = -1, Optional ByVal pHeight As Long = -1, Optional backcolor As Long = vbWhite, Optional lockratio As Boolean = False, Optional toBitmap As Boolean = False)
+    Dim hBitmap As Long
+    Dim mm As StdPicture
+    On Error Resume Next
+    If pWidth <> -1 Then pWidth = pWidth / DXP
+    If pHeight <> -1 Then pHeight = pHeight / DYP
+    If pWidth = -1 Then
+        pWidth = pHeight
+        lockratio = True
+    ElseIf pHeight = -1 Then
+        lockratio = True
+    End If
+
+    Set mm = GetStdPicture1(pWidth, pHeight, backcolor, lockratio, toBitmap)
+
+    If Err.Number > 0 Or (mm Is Nothing) Then
+        MyEr "Not a proper picture to send it to clipboard", "Δεν είναι μια σωστή εικόνα για να τη στείλω στο πρόχειρο"
+        Exit Sub
+    End If
+    If mm.Handle <> 0 Then
+        If (OpenClipboard(0) <> 0) Then
+            EmptyClipboard
+            If mm.Type = 4 Then
+                If SetClipboardData(14, mm.Handle) = 0 Then
+                
+                End If
+            Else
+                If SetClipboardData(2, mm.Handle) = 0 Then
+               
+                End If
+            End If
+            CloseClipboard
+        End If
+
+    End If
+
+End Sub
+Public Function IsWmf() As Boolean
+    Dim hEmf As Long
+        hEmf = SetMetaFileBitsEx(SizeByte, ByVal GetBytePtr(0))
+        If hEmf <> 0 Then
+            IsWmf = True
+            mSubtype = 3
+            DeleteEnhMetaFile hEmf
+        End If
+    
+End Function
+
+Public Function IsEmf() As Boolean
+    Dim hEmf As Long
+        hEmf = SetEnhMetaFileBits(SizeByte, ByVal GetBytePtr(0))
+        If hEmf <> 0 Then
+            IsEmf = True
+            mSubtype = 2
+            DeleteEnhMetaFile hEmf
+        End If
+    
+End Function
+Public Sub SentEmfToClipBoard()
+    Dim hEmf As Long
+    
+    On Error Resume Next
+    hEmf = SetEnhMetaFileBits(SizeByte, ByVal GetBytePtr(0))
+  
+    
+    If Err.Number > 0 Then
+        MyEr "Not a proper picture to send it to clipboard", "Δεν είναι μια σωστή εικόνα για να τη στείλω στο πρόχειρο"
+        Exit Sub
+    End If
+    If hEmf <> 0 Then
+        If (OpenClipboard(0) <> 0) Then
+            EmptyClipboard
+                If SetClipboardData(CF_ENHMETAFILE, hEmf) = 0 Then
+                DeleteEnhMetaFile hEmf
+                End If
+            CloseClipboard
+        End If
+    End If
+
+End Sub
+Friend Function CreateFromPicture(backcolor As Long, w1 As Long, w2 As Long, rot As Long) As mHandler
+Dim aa As New cDIBSection
+If w1 <> -1 Then w1 = w1 / dv15
+If w2 <> -1 Then w2 = w2 / dv15
+    aa.CreateFromPicture GetStdPicture(w1, w2, mycolor(backcolor), rot)
+    Dim k As Object
+    Set k = New MemBlock
+    aa.SaveDibToMeMBlock k
+    If rot <> 0 Then
+        aa.ClearUp
+        aa.CreateFromPicture k.GetStdPicture(-1, -1, , rot)
+        Set k = New MemBlock
+        aa.SaveDibToMeMBlock k
+        
+    End If
+    Dim handler As New mHandler
+    handler.t1 = 2
+    Set handler.objref = k
+    Set CreateFromPicture = handler
+    
+End Function
+

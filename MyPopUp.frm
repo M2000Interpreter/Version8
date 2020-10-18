@@ -68,19 +68,19 @@ If IsMissing(X) Then
 X = CSng(MOUSEX())
 Y = CSng(MOUSEY())
 Else
-X = X + Form1.Left
+X = X + Form1.left
 Y = Y + Form1.top
 End If
 If X + Width > VirtualScreenWidth() Then
 If Y + Height > VirtualScreenHeight() Then
-Move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
+move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
 Else
-Move VirtualScreenWidth() - Width, Y
+move VirtualScreenWidth() - Width, Y
 End If
 ElseIf Y + Height > VirtualScreenHeight() Then
-Move X, VirtualScreenHeight() - Height
+move X, VirtualScreenHeight() - Height
 Else
-Move X, Y
+move X, Y
 End If
 Show
 MyDoEvents
@@ -94,20 +94,20 @@ Else
 gList1.HeadLine = vbNullString
 gList1.HeadlineHeight = 0
 End If
-X = X + that.Left
+X = X + that.left
 Y = Y + that.top
 
 
 If X + Width > VirtualScreenWidth() Then
 If Y + Height > VirtualScreenHeight() Then
-Move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
+move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
 Else
-Move VirtualScreenWidth() - Width, Y
+move VirtualScreenWidth() - Width, Y
 End If
 ElseIf Y + Height > VirtualScreenHeight() Then
-Move X, VirtualScreenHeight() - Height
+move X, VirtualScreenHeight() - Height
 Else
-Move X, Y
+move X, Y
 End If
 If thistilte$ <> "" Then
 
@@ -673,10 +673,10 @@ If MyTrim(neo$) = vbNullString Then neo$ = "Resource"
 End If
 If Right$(neo$, 1) = "$" Then
     s$ = "$"
-    neo$ = Left$(neo$, Len(neo$) - 1)
+    neo$ = left$(neo$, Len(neo$) - 1)
 ElseIf Right$(neo$, 1) = ")" Then
     s$ = ")"
-    neo$ = Left$(neo$, Len(neo$) - 1)
+    neo$ = left$(neo$, Len(neo$) - 1)
 Else
     s$ = vbNullString
 End If
@@ -709,7 +709,11 @@ End If
         Form1.TEXT1.PasteText "ƒı·‰ÈÍ¸ {"
         Form1.TEXT1.PasteText FileToEncode64(fname$, 6)
         If s$ = ")" Then
-        Form1.TEXT1.PasteText "} ŸÚ " + neo$ + "0" + s$
+            If Right$(neo$, 1) <> "(" Then
+                Form1.TEXT1.PasteText "} ŸÚ " + neo$ + s$
+            Else
+                Form1.TEXT1.PasteText "} ŸÚ " + neo$ + "0" + s$
+            End If
         Else
         Form1.TEXT1.PasteText "} ŸÚ " + neo$ + s$
         End If
@@ -717,7 +721,11 @@ End If
         Form1.TEXT1.PasteText "Binary {"
         Form1.TEXT1.PasteText FileToEncode64(fname$, 6)
         If s$ = ")" Then
-        Form1.TEXT1.PasteText "} As " + neo$ + "0" + s$
+            If Right$(neo$, 1) <> "(" Then
+                Form1.TEXT1.PasteText "} As " + neo$ + s$
+            Else
+                Form1.TEXT1.PasteText "} As " + neo$ + "0" + s$
+            End If
         Else
         Form1.TEXT1.PasteText "} As " + neo$ + s$
         End If
@@ -780,11 +788,11 @@ allheight = height1 * factor
 itemWidth = allwidth - 2 * borderleft
 ''MyForm Me, Left, top, allwidth, allheight, True, factor
 
-Move Left, top, allwidth, allheight
+move left, top, allwidth, allheight
   
 gList1.addpixels = 4 * factor
 
-gList1.Move borderleft, bordertop, itemWidth, allheight - bordertop * 2
+gList1.move borderleft, bordertop, itemWidth, allheight - bordertop * 2
 
 gList1.CalcAndShowBar
 gList1.ShowBar = False

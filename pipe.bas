@@ -615,7 +615,7 @@ On Error GoTo inc1
 Dim what As Long
 Dim st&, pa&, po&
 st& = 1
-Dim word$(), it As Long, max As Long, line$, ok As Boolean, Min As Long
+Dim word$(), it As Long, max As Long, Line$, ok As Boolean, Min As Long
 simple$ = simple$ + "|"
 word$() = Split(simple$, "|")
 
@@ -655,9 +655,9 @@ again:
     
      If max > 0 Then
      po& = po& + Len(word$(0))
-     line$ = a.TextParagraph(a.ParagraphFromOrder(pa&))
+     Line$ = a.TextParagraph(a.ParagraphFromOrder(pa&))
      For it = 1 To max
-     ok = InStr(po&, line$, word$(it), vbTextCompare) > 0
+     ok = InStr(po&, Line$, word$(it), vbTextCompare) > 0
      If Not ok Then Exit For
      Next it
      st& = st& + Len(word$(0))

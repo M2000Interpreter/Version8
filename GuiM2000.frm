@@ -459,7 +459,11 @@ If DefaultName <> "" Then
 Dim aa As gList
 
 Set aa = Controls(DefaultName)
+If IamPopUp Then
 aa.SetFocus
+Else
+LastActive = DefaultName
+End If
 DefaultName = vbNullString
 End If
 If IamPopUp Then Exit Sub
@@ -571,7 +575,7 @@ If Button > 0 And Targets Then
                 Set bstack = New basetask
                 Set bstack.Owner = Me
                 Set bstack.Sorosref = New mStiva
-                If Execute(bstack, (q(sel&).Comm), False) = 0 Then Beep
+                If Execute(bstack, (q(sel&).Comm), False) = 0 Then BEEP
                 SwapStrings here$, oldhere$
                 
             Case Else
@@ -660,7 +664,7 @@ End Sub
 Private Sub Form_Resize()
 If Me.WindowState <> 0 Then WindowState = 0: Exit Sub
 gList2.MoveTwips 0, 0, Me.Width, gList2.HeightTwips
-ResizeMark.Move Width - ResizeMark.Width, Height - ResizeMark.Height
+ResizeMark.move Width - ResizeMark.Width, Height - ResizeMark.Height
 End Sub
 
 
@@ -804,7 +808,7 @@ If mSizable And mShowMaximize Then
             On Error Resume Next
             With ScrInfo(FindMonitorFromMouse)
             If IsWine And .Left = 0 And .top = 0 And .Width - 1 = Width And .Height - 1 = Height And (.Left <> Left Or .top <> top) Then
-                Me.Move .Left, .top
+                Me.move .Left, .top
                 If LastActive <> "" Then
                     If Controls(LastActive).enabled Then
                     If Controls(LastActive).Visible Then Controls(LastActive).SetFocus
@@ -812,7 +816,7 @@ If mSizable And mShowMaximize Then
                 End If
                 Exit Sub
             ElseIf .Width = Width And .Height = Height And (.Left <> Left Or .top <> top) Then
-                Me.Move .Left, .top
+                Me.move .Left, .top
                 If LastActive <> "" Then
                     If Controls(LastActive).enabled Then
                     If Controls(LastActive).Visible Then Controls(LastActive).SetFocus
@@ -824,9 +828,9 @@ If mSizable And mShowMaximize Then
                 If IsWine And .Left = 0 And .top = 0 Then
                     Width = MeWidth
                     Height = MeHeight
-                    Me.Move MeLeft, MeTop
+                    Me.move MeLeft, MeTop
                 Else
-                    Me.Move MeLeft, MeTop, MeWidth, MeHeight
+                    Me.move MeLeft, MeTop, MeWidth, MeHeight
                 End If
             End If
 
@@ -843,9 +847,9 @@ If mSizable And mShowMaximize Then
                 If IsWine And .Left = 0 And .top = 0 Then
                     Width = .Width - 1
                     Height = .Height - 1
-                    Move .Left, .top
+                    move .Left, .top
                 Else
-                Move .Left, .top, .Width, .Height
+                move .Left, .top, .Width, .Height
                 End If
             End With
         End If
@@ -910,19 +914,19 @@ If mSizable And mShowMaximize Then
             On Error Resume Next
             With ScrInfo(FindMonitorFromMouse)
             If IsWine And .Left = 0 And .top = 0 And .Width - 1 = Width And .Height - 1 = Height And (.Left <> Left Or .top <> top) Then
-                Me.Move .Left, .top
+                Me.move .Left, .top
                 Exit Sub
             ElseIf .Width = Width And .Height = Height And (.Left <> Left Or .top <> top) Then
-                Me.Move .Left, .top
+                Me.move .Left, .top
                 Exit Sub
             Else
                 IhaveLastPos = False
                 If IsWine And .Left = 0 And .top = 0 Then
                     Width = MeWidth
                     Height = MeHeight
-                    Me.Move MeLeft, MeTop
+                    Me.move MeLeft, MeTop
                 Else
-                    Me.Move MeLeft, MeTop, MeWidth, MeHeight
+                    Me.move MeLeft, MeTop, MeWidth, MeHeight
                 End If
             End If
 
@@ -939,9 +943,9 @@ If mSizable And mShowMaximize Then
                 If IsWine And .Left = 0 And .top = 0 Then
                     Width = .Width - 1
                     Height = .Height - 1
-                    Move .Left, .top
+                    move .Left, .top
                 Else
-                Move .Left, .top, .Width, .Height
+                move .Left, .top, .Width, .Height
                 End If
             End With
             
@@ -1051,9 +1055,9 @@ Dim mm As Long
 mm = Forms.count
 With ScrInfo(Console)
     If (.Left + .Width / 16 + mm * dv15 * 10) > .Width * 7 / 8 Or (.top + .Height / 16 + mm * dv15 * 10) > .Height * 7 / 8 Then
-    Move .Left, .top
+    move .Left, .top
     Else
-    Move .Left + .Width / 16 + mm * dv15 * 10, .top + .Height / 16 + mm * dv15 * 10
+    move .Left + .Width / 16 + mm * dv15 * 10, .top + .Height / 16 + mm * dv15 * 10
     End If
 End With
 End Sub
@@ -1256,7 +1260,7 @@ Public Sub ShowTaskBar()
     MyForm3.Visible = True
     MyForm3.Refresh
     If Err Then
-    Err.clear
+    Err.Clear
     Sleep 10
     MyForm3.Visible = True
     
@@ -1297,7 +1301,7 @@ If vNewValue <> vbNullString Then
     MyForm3.Visible = True
     MyForm3.Refresh
     If Err Then
-    Err.clear
+    Err.Clear
     Sleep 10
     MyForm3.Visible = True
     End If
@@ -1348,7 +1352,7 @@ Public Sub Hold()
 If Not Sizable Then
 If MY_BACK Is Nothing Then Set MY_BACK = New cDIBSection
 MY_BACK.ClearUp
-If MY_BACK.Create(Width / DXP, Height / DYP) Then
+If MY_BACK.create(Width / DXP, Height / DYP) Then
 MY_BACK.LoadPictureBlt hDC
 If MY_BACK.bitsPerPixel <> 24 Then Conv24 MY_BACK
 End If
@@ -1521,14 +1525,14 @@ If Not that.enabled Then Exit Sub
 End If
 If X + that.Width > ScrInfo(hmonitor).Width + ScrInfo(hmonitor).Left Then
 If Y + that.Height > ScrInfo(hmonitor).Height + ScrInfo(hmonitor).top Then
-that.Move ScrInfo(hmonitor).Width - that.Width + ScrInfo(hmonitor).Left, ScrInfo(hmonitor).Height - that.Height + ScrInfo(hmonitor).top
+that.move ScrInfo(hmonitor).Width - that.Width + ScrInfo(hmonitor).Left, ScrInfo(hmonitor).Height - that.Height + ScrInfo(hmonitor).top
 Else
-that.Move ScrInfo(hmonitor).Width - that.Width + ScrInfo(hmonitor).Left, Y + ScrInfo(hmonitor).top
+that.move ScrInfo(hmonitor).Width - that.Width + ScrInfo(hmonitor).Left, Y + ScrInfo(hmonitor).top
 End If
 ElseIf Y + that.Height > ScrInfo(hmonitor).Height + ScrInfo(hmonitor).top Then
-that.Move X, ScrInfo(hmonitor).Height - Height + ScrInfo(hmonitor).top
+that.move X, ScrInfo(hmonitor).Height - Height + ScrInfo(hmonitor).top
 Else
-that.Move X, Y
+that.move X, Y
 End If
 var1(1) = 1
 Set var1(0) = Me
@@ -1552,14 +1556,14 @@ If Not that.enabled Then Exit Sub
 End If
 If X + that.Width > ScrInfo(hmonitor).Width + ScrInfo(hmonitor).Left Then
 If Y + that.Height > ScrInfo(hmonitor).Height + ScrInfo(hmonitor).top Then
-that.Move ScrInfo(hmonitor).Width + ScrInfo(hmonitor).Left - that.Width, Y - that.Height - y1 + ScrInfo(hmonitor).top
+that.move ScrInfo(hmonitor).Width + ScrInfo(hmonitor).Left - that.Width, Y - that.Height - y1 + ScrInfo(hmonitor).top
 Else
-that.Move ScrInfo(hmonitor).Width + ScrInfo(hmonitor).Left - that.Width, Y + ScrInfo(hmonitor).top
+that.move ScrInfo(hmonitor).Width + ScrInfo(hmonitor).Left - that.Width, Y + ScrInfo(hmonitor).top
 End If
 ElseIf Y + that.Height > ScrInfo(hmonitor).Height + ScrInfo(hmonitor).top Then
-that.Move X, Y - that.Height - y1 + ScrInfo(hmonitor).top
+that.move X, Y - that.Height - y1 + ScrInfo(hmonitor).top
 Else
-that.Move X, Y
+that.move X, Y
 End If
 that.ShowmeALL
 PopupOn = True
@@ -1646,7 +1650,7 @@ If Not Relax Then
              If Height + addy >= 1800 And Height + addy < VirtualScreenHeight() Then
                 Lx = X
                 ly = Y
-                Move Left, top, Width + addX, Height + addy
+                move Left, top, Width + addX, Height + addy
                 IhaveLastPos = False
                 If mIndex > -1 Then
                     Callback mMyName$ + ".Resize(" + CStr(Index) + ")"
@@ -1696,7 +1700,7 @@ If vNewValue \ dv15 > 1 Then
     With ResizeMark
     .Width = MarkSize * dv15
     .Height = MarkSize * dv15
-    .Move Width - .Width, Height - .Height
+    .move Width - .Width, Height - .Height
     End With
 End If
 End Property
@@ -2035,7 +2039,7 @@ Sub MakeInfo(ByVal RHS As Long)
  On Error Resume Next
  Set glistN = Pad.Controls(1)
 If EnableStandardInfo Then
-    glistN.clear
+    glistN.Clear
    
     EnableStandardInfo = False
 End If
@@ -2045,7 +2049,7 @@ With glistN
     .FontSize = Me.CtrlFontSize
     .FontBold = True
     .backcolor = rgb(255, 255, 255)
-    .ForeColor = 0
+    .forecolor = 0
     .enabled = True
     .FreeMouse = True
     .NoPanLeft = True
@@ -2099,19 +2103,19 @@ If IhaveLastPos And Not what Then
            
             With ScrInfo(FindMonitorFromMouse)
             If IsWine And .Left = 0 And .top = 0 And .Width - 1 = Width And .Height - 1 = Height And (.Left <> Left Or .top <> top) Then
-                Me.Move .Left, .top
+                Me.move .Left, .top
                 Exit Function
             ElseIf .Width = Width And .Height = Height And (.Left <> Left Or .top <> top) Then
-                Me.Move .Left, .top
+                Me.move .Left, .top
                 Exit Function
             Else
                 IhaveLastPos = False
                 If IsWine And .Left = 0 And .top = 0 Then
                     Width = MeWidth
                     Height = MeHeight
-                    Me.Move MeLeft, MeTop
+                    Me.move MeLeft, MeTop
                 Else
-                    Me.Move MeLeft, MeTop, MeWidth, MeHeight
+                    Me.move MeLeft, MeTop, MeWidth, MeHeight
                 End If
             End If
 
@@ -2128,9 +2132,9 @@ ElseIf what And Not IhaveLastPos Then
                 If IsWine And .Left = 0 And .top = 0 Then
                     Width = .Width - 1
                     Height = .Height - 1
-                    Move .Left, .top
+                    move .Left, .top
                 Else
-                Move .Left, .top, .Width, .Height
+                move .Left, .top, .Width, .Height
                 End If
     End With
     Maximize = True
@@ -2283,4 +2287,16 @@ End If
 glistN.menuEnabled(CLng(item - 1)) = enabledthis
 End If
 End Sub
-
+Property Get NoFocus() As Boolean
+NoFocus = AppNoFocus
+End Property
+Property Get LastControl() As String
+If Not LastGlist Is Nothing Then
+LastControl = LastActive + " True"
+Else
+LastControl = LastActive
+End If
+End Property
+Property Get HookStatus() As Long
+HookStatus = HOOKTEST
+End Property

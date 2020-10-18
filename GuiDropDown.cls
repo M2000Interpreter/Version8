@@ -100,7 +100,7 @@ End With
  mesCtrlName = Name$
 End Sub
 
-Public Sub Move(X, Y, Optional w, Optional h)
+Public Sub move(X, Y, Optional w, Optional h)
 With Textbox
 If IsMissing(w) Then
 .glistN.MoveTwips CLng(X), CLng(Y), 0, 0
@@ -109,7 +109,7 @@ ElseIf IsMissing(h) Then
 Else
 .glistN.MoveTwips CLng(X), CLng(Y), CLng(w), CLng(h)
 End If
-Pad.Move Pad.Left, Pad.top, .glistN.widthtwips, .glistN.HeightTwips * 5
+Pad.move Pad.Left, Pad.top, .glistN.widthtwips, .glistN.HeightTwips * 5
 End With
 glistN.restrictLines = 5
 glistN.MoveTwips 0, 0, Pad.Width, Pad.Height
@@ -134,8 +134,8 @@ aa.bold = ThisBold
 Set Textbox.glistN.Font = aa
 End If
 End Sub
-Public Property Get index() As Long
-index = mIndex
+Public Property Get Index() As Long
+Index = mIndex
 End Property
 
 Public Property Set Container(glistNN As gList)
@@ -218,7 +218,7 @@ glistN.FreeMouse = True
 If Textbox.glistN.TabStopSoft Then Callback.LastActive = ctrlName
 
 Textbox.glistN.NoCaretShow = True
-glistN.ForeColor = rgb(0, 0, 0)
+glistN.forecolor = rgb(0, 0, 0)
 glistN.backcolor = rgb(255, 255, 255)
 glistN.NoCaretShow = False:
 glistN.PanPos = 0
@@ -229,7 +229,7 @@ If Textbox.SkipProcAtExitFocus Then
 Textbox.Retired   'wrong...
 If Not Iam Then glistN.ListindexPrivateUse = -1
 Textbox.SkipProcAtExitFocus = False
-Callback.LastActive = vbNullString
+Callback.LastActive = ctrlName 'vbNullString
 Else
 Pad.Visible = False
 End If
@@ -310,13 +310,13 @@ Private Sub glistN_ScrollSelected(item As Long, Y As Long)
 End Sub
 
 
-Public Property Get list(index) As Variant
+Public Property Get list(Index) As Variant
 On Error Resume Next
-list = glistN.list(CLng(index))
+list = glistN.list(CLng(Index))
 End Property
-Public Property Let list(index, RHS As Variant)
+Public Property Let list(Index, RHS As Variant)
 On Error Resume Next
-glistN.list(CLng(index)) = CStr(RHS)
+glistN.list(CLng(Index)) = CStr(RHS)
 End Property
 
 Private Sub glistN_Selected(item As Long)
@@ -876,7 +876,7 @@ With glistN
 .MoveTwips 0, 0, Pad.Width, Pad.Height
 
 Set .Font = ff
-.ForeColor = Callback.Controls(1).ForeColor
+.forecolor = Callback.Controls(1).forecolor
 
 .dcolor = rgb(127, 127, 127)
 .NoCaretShow = False
@@ -1000,11 +1000,11 @@ End Property
 Public Property Let MenuWidth(ByVal vNewValue As Variant)
 mMenuWidth = vNewValue
 End Property
-Public Sub clear()
+Public Sub Clear()
 On Error Resume Next
 Iam = False
 Pad.Visible = False
-glistN.clear
+glistN.Clear
 
 Textbox.SetFocus
 End Sub

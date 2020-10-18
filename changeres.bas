@@ -64,13 +64,14 @@ dwReserved1 As Long
 cFileName(MAX_PATH * 2 - 1) As Byte
 cAlternate(14 * 2 - 1) As Byte
 End Type
-Private Declare Function FindFirstFile Lib "KERNEL32" Alias "FindFirstFileW" (ByVal lpFileName As Long, lpFindFileData As WIN32_FIND_DATA) As Long
+Private Declare Function FindFirstFile Lib "kernel32" Alias "FindFirstFileW" (ByVal lpFileName As Long, lpFindFileData As WIN32_FIND_DATA) As Long
 Private Declare Function FindClose Lib "kernel32.dll" (ByVal hFindFile As Long) As Long
 
 Private Declare Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
 Private Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare Function CallWindowProc Lib "user32" Alias "CallWindowProcA" (ByVal lpPrevWndFunc As Long, ByVal hWnd As Long, ByVal Msg As Long, ByVal wParam As Long, ByVal lParam As Long) As Long
 '
+Private Const WM_ACTIVATEAPP = &H1C
 Private Const GWL_WNDPROC = (-4)
 Private Const WM_MOUSEWHEEL = &H20A
 'Private Const WM_MOUSELAST = &H20A
@@ -81,6 +82,7 @@ Public defWndProc3 As Long
 Public LastGlist3 As gList
 
 Public HOOKTEST As Long
+Public AppNoFocus As Boolean
 
 
 Public Sub Hook3(hWnd As Long, a As gList)
@@ -136,7 +138,6 @@ End Sub
 
 Public Sub Hook(hWnd As Long, a As gList, Optional NoEvents As Boolean = False)
 ' work in IDE but for development and a fear...of a crash...
-
 If HOOKTEST <> 0 Then
 Set LastGlist = Nothing
 'Debug.Print "unhook now"
@@ -280,6 +281,13 @@ Public Function WindowProc(ByVal hWnd As Long, _
                            ByVal lParam As Long) As Long
 
    Select Case uMsg
+        Case WM_ACTIVATEAPP
+        AppNoFocus = wParam = 0
+        If AppNoFocus Then
+              If Not LastGlist Is Nothing Then LastGlist.HideTheCaret
+              Else
+              If Not LastGlist Is Nothing Then LastGlist.ShowTheCaret
+         End If
          Case WM_MOUSEWHEEL
         Select Case Sgn(wParam)
         Case 1:
@@ -331,7 +339,7 @@ If ExistFileT Then FindClose fhandle: timestamp = uintnew(wfd.ftLastAccessTime.d
 Exit Function
 there2:
 End Function
-Public Sub ChangeScreenRes(X As Long, Y As Long)
+Public Sub ChangeScreenRes(x As Long, y As Long)
 ' this is a modified version that i found in internet
 Static once As Boolean
 
@@ -348,8 +356,8 @@ nDc = CreateDC("DISPLAY", vbNullString, vbNullString, ByVal 0&)
 BITS = GetDeviceCaps(nDc, BITSPIXEL)
 erg = EnumDisplaySettings(0&, 0&, DevM)
 DevM.dmFields = DM_PELSWIDTH Or DM_PELSHEIGHT Or DM_BITSPERPEL
-DevM.dmPelsWidth = X
-DevM.dmPelsHeight = Y
+DevM.dmPelsWidth = x
+DevM.dmPelsHeight = y
 DevM.dmBitsPerPel = BITS
 erg = ChangeDisplaySettings(DevM, CDS_TEST)
 DeleteDC nDc

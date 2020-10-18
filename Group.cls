@@ -37,7 +37,7 @@ Public IamApointer As Boolean, lasthere$
 Public original As Long
 Public isref As Boolean ' One time use
 Public LastOpen As String
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Public PointerPtr As Long
 Public ToDelete As Boolean, HasRemove As Boolean, mytypes As Collection
@@ -55,13 +55,13 @@ Function TypeGroup(RHS) As Boolean
 If Not mytypes Is Nothing Then
     On Error Resume Next
     TypeGroup = Len(mytypes(RHS))
-    Err.clear
+    Err.Clear
 End If
 End Function
 Private Function TypeGroupNow(RHS) As Boolean
     On Error Resume Next
     TypeGroupNow = Len(mytypes(RHS))
-    Err.clear
+    Err.Clear
 End Function
 Sub mergeTypes(RHS As Collection)
 Dim extypes As Collection, k
@@ -75,7 +75,7 @@ For Each k In extypes
 Next
 End Sub
 Function MatchTypes(RHS As Collection) As Boolean
-Dim extypes As Collection, k, counter As Long
+Dim extypes As Collection, k
 Set extypes = RHS
 If extypes Is Nothing Then Exit Function
 If mytypes Is Nothing Then Exit Function
@@ -83,12 +83,12 @@ If mytypes Is RHS Then
     MatchTypes = True
     Exit Function
 End If
-If mytypes.count <> extypes.count Then Exit Function
+'If mytypes.count <> extypes.count Then Exit Function
+If mytypes.count * extypes.count = 0 Then Exit Function
 For Each k In extypes
-    If Not TypeGroupNow(k) Then Exit Function
-    counter = counter + 1
+    If TypeGroupNow(k) Then MatchTypes = True: Exit Function
 Next
-MatchTypes = mytypes.count = counter
+
 End Function
 Public Property Get Events() As Object
 Set Events = eventlist

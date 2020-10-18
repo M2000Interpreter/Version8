@@ -296,7 +296,7 @@ conthere:
                     End If
                     Form3.WindowState = 0
                     Do While Modalid <> 0 And (pobjTarget.Visible Or pobjTarget.VisibleOldState)
-                        mywait basestack1, 1, True
+                        mywait Basestack1, 1, True
                         Sleep 1
                         If pobjTarget.Visible Then
                             If Not Screen.ActiveForm Is Nothing Then
@@ -308,7 +308,11 @@ conthere:
                                     ElseIf GetForegroundWindow <> Screen.ActiveForm.hWnd Then
                                         handlepopup = False
                                         If Screen.ActiveForm.PopUpMenuVal Or Screen.ActiveForm.IamPopUp Then
+                                        If Screen.ActiveForm.Visible Then
                                             Screen.ActiveForm.Visible = False
+                                            AppNoFocus = True
+                                            End If
+                                            
                                         End If
                                     End If
                                 End If
@@ -430,12 +434,12 @@ End If
 VarRet = CLng(0)
 End If
 there:
-Err.clear
+Err.Clear
 CallByNameFixParamArray = VarRet
 Exit Function
 exithere:
     If Err.Number <> 0 Then CallByNameFixParamArray = VarRet
-Err.clear
+Err.Clear
     If items > 0 Then
                 ' Fill parameters arrays. The array must be
                 ' filled in reverse order.
@@ -486,7 +490,7 @@ Public Function ReadOneParameter(pobjTarget As Object, dispid As Long, ERrR$, Va
         End If
 
         ' Invoke method/property
-        Err.clear
+        Err.Clear
        On Error Resume Next
         lngRet = IDsp.Invoke(dispid, riid, 0, CallType, params, VarRet, Excep, lngArgErr)
 If Err > 0 Then
@@ -513,7 +517,7 @@ Else
     'End If
 ReadOneParameter = Err = 0
   ''  If Err.Number <> 0 Then ReadOneParameter = varRet
-Err.clear
+Err.Clear
 End Function
 Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR$, ThisIndex As Variant, Optional useset As Boolean = False) As Variant
     
@@ -560,7 +564,7 @@ Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR
   
 
   
-        Err.clear
+        Err.Clear
         On Error Resume Next
         lngRet = IDsp.Invoke(dispid, riid, 0, CallType, params, VarRet, Excep, lngArgErr)
 If Err > 0 Then
@@ -587,7 +591,7 @@ Else
     End If
 
   ''  If Err.Number <> 0 Then ReadOneParameter = varRet
-Err.clear
+Err.Clear
 End Function
 Public Sub ChangeOneParameter(pobjTarget As Object, dispid As Long, val1, ERrR$)
     

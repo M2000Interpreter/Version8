@@ -11,6 +11,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
+Option Explicit
 Private Type DCB
   DCBlength As Long
   BaudRate As Long
@@ -116,38 +117,40 @@ Const FILE_FLAG_OVERLAPPED = &H40000000
 Const ERROR_FILE_NOT_FOUND = 2
 Const ERROR_ACCESS_DENIED = 5
 Const ERROR_INVALID_HANDLE = 6
-Private Declare Function CreateFile Lib "KERNEL32" Alias "CreateFileW" (ByVal lpFileName As Long, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
+Private Declare Function CreateFile Lib "kernel32" Alias "CreateFileW" (ByVal lpFileName As Long, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
+' added by George from https://github.com/grricks/vb6SerialAPI/blob/master/clsVB6serialAPI.cls
+Private Declare Function EscapeCommFunction Lib "kernel32" _
+    (ByVal nCid As Long, ByVal nFunc As Long) As Long
+Private Declare Function PurgeComm Lib "kernel32" _
+    (ByVal hFile As Long, ByVal dwFlags As Long) As Long
+Private Declare Function GetCommModemStatus Lib "kernel32" _
+    (ByVal hFile As Long, lpModemStat As Long) As Long
+' end addition
 
+Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
+Private Declare Function SetCommState Lib "kernel32" (ByVal hFile As Long, lpDCB As DCB) As Long
+Private Declare Function GetCommState Lib "kernel32" (ByVal hFile As Long, lpDCB As DCB) As Long
 
-'Private Declare Function CreateFile Lib "KERNEL32" Alias "CreateFileA" (ByVal lpFileName As String, _
-        ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, ByVal lpSecurityAttributes As Long, _
-        ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, _
-        ByVal hTemplateFile As Long) As Long
-
-Private Declare Function CloseHandle Lib "KERNEL32" (ByVal hObject As Long) As Long
-Private Declare Function SetCommState Lib "KERNEL32" (ByVal hFile As Long, lpDCB As DCB) As Long
-Private Declare Function GetCommState Lib "KERNEL32" (ByVal hFile As Long, lpDCB As DCB) As Long
-
-Private Declare Function SetCommTimeouts Lib "KERNEL32" (ByVal hFile As Long, _
+Private Declare Function SetCommTimeouts Lib "kernel32" (ByVal hFile As Long, _
         lpCommTimeouts As COMMTIMEOUTS) As Long
 
-Private Declare Function GetCommTimeouts Lib "KERNEL32" (ByVal hFile As Long, _
+Private Declare Function GetCommTimeouts Lib "kernel32" (ByVal hFile As Long, _
         lpCommTimeouts As COMMTIMEOUTS) As Long
 
-Private Declare Function ReadFile Lib "KERNEL32" (ByVal hFile As Long, lpBuffer As Any, _
+Private Declare Function ReadFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, _
          ByVal nNumberOfBytesToRead As Long, lpNumberOfBytesRead As Long, ByVal lpOverlapped As Long) _
          As Long
 
-Private Declare Function WriteFile Lib "KERNEL32" (ByVal hFile As Long, lpBuffer As Any, _
+Private Declare Function WriteFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, _
          ByVal nNumberOfBytesToWrite As Long, lpNumberOfBytesWritten As Long, _
          ByVal lpOverlapped As Long) As Long
-Private h As Long, port$, BaudRate
+Private h As Long, port$, BaudRate, mportnumber As Long
 Private openserial As Boolean
 Private timeouts As COMMTIMEOUTS
 Dim BufferOut As MemBlock, bOutOffset As Long
 Dim BufferIn As MemBlock, bInOffset As Long, bInBase As Long
 Dim mlock As Boolean
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 Public Event DataArrival(ByVal CharsTotal As Long)
 Public Event ReadyToSend()
 Public Event Finished()
@@ -192,12 +195,11 @@ Public Sub OpenPort(ByVal portnumber As Long, Optional ByVal rate As Long = 9600
     d.parity = NOPARITY
     rc = SetCommState(h, d)
     If rc = 0 Then
-      rc = Err.LastDllError
-      MsgBox "SetCommState failed, the error code is " & Str(rc)
+      Err1 Err.LastDllError, "SetCommState"
       GoTo close_and_exit
     End If
     SetReadTimeOuts
-    
+    mportnumber = portnumber
      'Because we don't want communication timeouts to hang the VB code,
     Exit Sub
 close_and_exit:
@@ -211,20 +213,16 @@ Sub SetReadTimeOuts(Optional ByVal IntervalTimeout As Long = 3, Optional ByVal T
         timeouts.ReadTotalTimeoutConstant = TotalTimeoutConstant 'The max. time the ReadFile() function will wait for data.
         timeouts.ReadTotalTimeoutMultiplier = TotalTimeoutMultiplier
         rc = SetCommTimeouts(h, timeouts)
-        If rc = 0 Then
-          rc = Err.LastDllError
-          MyEr "SetCommTimeOuts failed, the error code is " & Str(rc), "η SetCommTimeOuts απέτυχε με κωδικό λάθους: " & Str(rc)
-          GoTo close_and_exit
-        End If
+        If rc = 0 Then Err1 Err.LastDllError, "SetCommTimeOuts": GoTo close_and_exit
     End If
     Exit Sub
 close_and_exit:
     CloseSerial
 End Sub
 Sub ProcessLoop(Optional chunklen As Long = 10)
-    Dim rd As Long
+    Dim rd As Long, rc As Long, wr As Long
     Dim bRead(1 To 10) As Byte, s$
-    If mlock Then Err.Raise "Locked buffers in serial port " & portnumber
+    If mlock Then Err.Raise "Locked buffers in serial port " & mportnumber
     mlock = True
     If openserial Then
         If bOutOffset + chunklen >= BufferOut.SizeByte Then
@@ -233,8 +231,7 @@ Sub ProcessLoop(Optional chunklen As Long = 10)
       '  GoTo 1000
         rc = ReadFile(h, ByVal BufferOut.GetBytePtr(bOutOffset), chunklen, rd, 0)    'rd indicates how many bytes received from the port.
         If rc = 0 Then
-          rc = Err.LastDllError
-          MyEr "ReadFile failed, the error code is " & Str(rc), "η ReadFile απέτυχε με κωδικό λάθους: " & Str(rc)
+          Err1 Err.LastDllError, "ReadFile"
           GoTo close_and_exit
         End If
         If rd > 0 Then
@@ -243,10 +240,6 @@ Sub ProcessLoop(Optional chunklen As Long = 10)
             RaiseEvent DataArrival(bOutOffset)
             mlock = True
         End If
-'1000     rc = ReadFile(h, bRead(1), 10, rd, 0) 'rd indicates how many bytes received from the port.
- '           Debug.Print StrConv(bRead(), vbUnicode)
-        
-        
         If Not (bInOffset > 0 And bInOffset - bInBase > 0) Then
             mlock = False
             RaiseEvent ReadyToSend
@@ -255,8 +248,7 @@ Sub ProcessLoop(Optional chunklen As Long = 10)
         If bInOffset > 0 And bInOffset - bInBase > 0 Then
             rc = WriteFile(h, ByVal BufferIn.GetBytePtr(bInBase), bInOffset - bInBase, wr, 0)      'wr indicates how many bytes went to the port.
             If rc = 0 Then
-                rc = Err.LastDllError
-                MyEr "WriteFile failed, the error code is " & Str(rc), "η ReadFile απέτυχε με κωδικό λάθους: " & Str(rc)
+                Err1 Err.LastDllError, "WriteFile"
                 GoTo close_and_exit
             Else
                 bInBase = bInBase + wr
@@ -285,7 +277,7 @@ Dim a As MemBlock, aOffset As Long, aHandler As mHandler
 If Typename(RHS) <> "mHandler" Then GoTo 100
 Set aHandler = RHS
 If aHandler.t1 <> 2 Then GoTo 100
-If mlock Then Err.Raise "Locked input buffer in serial port " & portnumber
+If mlock Then Err.Raise "Locked input buffer in serial port " & mportnumber
 mlock = True
 Set a = aHandler.objref
 If bInOffset - bInBase = 0 Then
@@ -307,7 +299,7 @@ Else
 End If
 mlock = False
 Exit Sub
-100 Err.Raise "Wrong input buffer in serial port " & portnumber
+100 Err.Raise "Wrong input buffer in serial port " & mportnumber
 End Sub
 Sub WriteString(RHS As String)
     Dim a As New MemBlock, b As mHandler, c As Object
@@ -320,9 +312,9 @@ Sub WriteString(RHS As String)
     WriteBuffer c
 End Sub
 Function ReadBuffer() As Object
-    If mlock Then Err.Raise "Locked buffer in serial port " & portnumber
+    If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
     If BufferOut.SizeByte = 0 Then
-        Err.Raise "Empty buffer in serial port " & portnumber
+        Err.Raise "Empty buffer in serial port " & mportnumber
     Else
         Dim a As MemBlock
         Set a = BufferOut
@@ -336,6 +328,140 @@ Function ReadBuffer() As Object
         Set ReadBuffer = buf
     End If
 End Function
+Sub PortNotOpened()
+    MyEr "Serial port is closed", "Η Σειριακή είναι κλειστή"
+End Sub
+Sub LINE_BREAK(b As Boolean)
+    Dim rc As Long
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+        Const SETBREAK = 8&
+        Const CLRBREAK = 9&
+        If b Then
+            rc = EscapeCommFunction(h, SETBREAK)
+        Else
+            rc = EscapeCommFunction(h, CLRBREAK)
+        End If
+        If rc = 0 Then Err2 Err.LastDllError
+    Else
+        PortNotOpened
+    End If
+End Sub
+Sub LINE_DTR(b As Boolean)
+    Dim rc As Long
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+        Const SETDTR = 5&
+        Const CLRDTR = 6&
+        If b Then
+            rc = EscapeCommFunction(h, SETDTR)
+        Else
+            rc = EscapeCommFunction(h, CLRDTR)
+        End If
+        If rc = 0 Then Err2 Err.LastDllError
+    Else
+        PortNotOpened
+    End If
+End Sub
+Sub LINE_RTS(b As Boolean)
+    Dim rc As Long
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+        Const SETRTS = 3&
+        Const CLRRTS = 4&
+        If b Then
+            rc = EscapeCommFunction(h, SETRTS)
+        Else
+            rc = EscapeCommFunction(h, CLRRTS)
+        End If
+        If rc = 0 Then Err2 Err.LastDllError
+    Else
+        PortNotOpened
+    End If
+End Sub
+Function Inputs() As Long
+    Dim rc As Long, R As Long
+    rc = GetCommModemStatus(h, R)
+    If rc = 0 Then Err1 Err.LastDllError, "GetCommModemStatus": R = -1
+    Inputs = R
+End Function
+Function CD(Optional ByVal R As Long = -1) As Variant
+    Dim rc As Long
+    Const LINE_CD = &H80&
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+        If R = -1 Then rc = GetCommModemStatus(h, R): If rc = 0 Then Err1 Err.LastDllError, "GetCommModemStatus": R = -1
+        CD = (R And LINE_CD) <> 0
+    Else
+        PortNotOpened
+    End If
+End Function
+Function CTS(Optional ByVal R As Long = -1) As Variant
+    Dim rc As Long
+    Const LINE_CTS = &H10&
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+           If R = -1 Then rc = GetCommModemStatus(h, R): If rc = 0 Then Err1 Err.LastDllError, "GetCommModemStatus": R = -1
+        CTS = (R And LINE_CTS) <> 0
+    Else
+        PortNotOpened
+    End If
+End Function
+Function DSR(Optional ByVal R As Long = -1) As Variant
+    Dim rc As Long
+    Const LINE_DSR = &H20&
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+        If R = -1 Then rc = GetCommModemStatus(h, R): If rc = 0 Then Err1 Err.LastDllError, "GetCommModemStatus": R = -1
+        DSR = (R And LINE_DSR) <> 0
+    Else
+        PortNotOpened
+    End If
+End Function
+Function RING(Optional ByVal R As Long = -1) As Variant
+    Dim rc As Long
+    Const LINE_RING = &H40&
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+        If R = -1 Then rc = GetCommModemStatus(h, R): If rc = 0 Then Err1 Err.LastDllError, "GetCommModemStatus": R = -1
+        RING = (R And LINE_RING) <> 0
+    Else
+        PortNotOpened
+    End If
+End Function
+Function RLSD(Optional ByVal R As Long = -1) As Variant
+    Dim rc As Long
+    Const LINE_RLSD = &H80&
+    If openserial Then
+        If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+        If R = -1 Then rc = GetCommModemStatus(h, R): If rc = 0 Then Err1 Err.LastDllError, "GetCommModemStatus": R = -1
+        RLSD = (R And LINE_RLSD) <> 0
+    Else
+        PortNotOpened
+    End If
+End Function
+Sub FlushPort()
+    Dim rd As Long
+    If mlock Then Err.Raise "Locked buffer in serial port " & mportnumber
+    mlock = True
+    If Not openserial Then
+        rd = 1
+    Else
+        rd = PurgeComm(h, &HF)
+    End If
+    If rd = 0 Then
+        MyEr "Can't flush the port's buffers", "Δεν μπορώ να καθαρίσω τις μνήμες της πόρτας)"
+    Else
+        Set BufferOut = New MemBlock
+        Set BufferIn = New MemBlock
+        BufferOut.Construct 1, 2048
+        BufferIn.Construct 1, 2048
+        bInOffset = 0
+        bInBase = 0
+        bOutOffset = 0
+    End If
+    mlock = False
+End Sub
 Private Sub Class_Initialize()
 Set BufferOut = New MemBlock
 Set BufferIn = New MemBlock
@@ -346,3 +472,10 @@ End Sub
 Private Sub Class_Terminate()
 CloseSerial
 End Sub
+Private Sub Err2(ByVal rc As Long)
+    Err1 rc, "EscapeCommFunction"
+End Sub
+Private Sub Err1(ByVal rc As Long, mess As String)
+    MyEr mess & " failed, the error code is " & Str(rc), "η " & mess & " απέτυχε με κωδικό λάθους: " & Str(rc)
+End Sub
+

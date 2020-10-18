@@ -682,7 +682,7 @@ End If
 
                         If Not handlepopup Then
                             If Screen.ActiveForm.PopUpMenuVal Then
-                            lastpopup = Screen.ActiveForm.hDC
+                            lastpopup = Screen.ActiveForm.hdc
                             handlepopup = True
                             End If
                        ElseIf GetForegroundWindow <> Screen.ActiveForm.hWnd Then
@@ -706,7 +706,7 @@ Sub SetVisibleByHDC(whatHDC As Long, setit As Long)
 Dim k As Form
 On Error Resume Next
 For Each k In Forms
-    If k.hDC = whatHDC Then k.Visible = setit
+    If k.hdc = whatHDC Then k.Visible = setit
 Next k
 
 End Sub

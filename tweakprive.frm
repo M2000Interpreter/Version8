@@ -496,40 +496,40 @@ DIS.TabStop = False
 gList2.TabStop = False
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If Button = 1 Then
     
     If lastfactor = 0 Then lastfactor = 1
 
     If bordertop < 150 Then
-    If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
+    If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     
     Else
-    If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
+    If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     End If
 
 End If
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False: drmove = False
 If bordertop < 150 Then
-If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
  Else
- If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+ If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
 End If
 If dr Then
 
@@ -537,12 +537,12 @@ If dr Then
 
 If bordertop < 150 Then
 
-        If Y < (Height - 150) Or Y > Height Then addy = (Y - ly)
-     If X < (Width - 150) Or X > Width Then addX = (X - Lx)
+        If y < (Height - 150) Or y > Height Then addy = (y - ly)
+     If x < (Width - 150) Or x > Width Then addX = (x - Lx)
      
 Else
-    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
-        If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
+    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
+        If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
     End If
     
 
@@ -569,10 +569,10 @@ Else
 
         If addX = 0 Then
         If lastfactor <> factor Then ScaleDialog lastfactor, Width
-        Lx = X
+        Lx = x
         
         Else
-        Lx = X * lastfactor / factor
+        Lx = x * lastfactor / factor
          ScaleDialog lastfactor, (Width + addX) * lastfactor / factor
          End If
 
@@ -582,20 +582,20 @@ Else
         LastWidth = Width
       gList2.HeadlineHeight = gList2.HeightPixels
         gList2.PrepareToShow
-      glist3.PrepareToShow
+      gList3.PrepareToShow
       gList5.PrepareToShow
       DIS.PrepareToShow
         ly = ly * lastfactor / factor
         End If
         Else
-        Lx = X
-        ly = Y
+        Lx = x
+        ly = y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If dr Then Me.mousepointer = 0
 dr = False
@@ -613,42 +613,42 @@ allheight = height1 * factor
 itemWidth = allwidth - 2 * borderleft
 itemwidth3 = (itemWidth - 2 * borderleft) / 3
 itemwidth2 = (itemWidth - borderleft) / 2
-Move Left, top, allwidth, allheight
+move Left, top, allwidth, allheight
 FontTransparent = False  ' clear background  or false to write over
-gList2.Move borderleft, bordertop, itemWidth, bordertop * 3
+gList2.move borderleft, bordertop, itemWidth, bordertop * 3
 gList2.FloatLimitTop = VirtualScreenHeight() - bordertop - bordertop * 3
 gList2.FloatLimitLeft = VirtualScreenWidth() - borderleft * 3
-gList1.Move borderleft, bordertop * 6, itemWidth, bordertop * 3
-glist3.Move borderleft + itemWidth * 2 / 5, bordertop * 9, itemWidth * 3 / 5, bordertop * 18
-gList9.Move borderleft, bordertop * 10, itemWidth * 2 / 5 - borderleft, bordertop * 3
-gList10.Move borderleft + itemWidth * 2 / 5, bordertop * 10, itemWidth * 3 / 5, bordertop * 3
+gList1.move borderleft, bordertop * 6, itemWidth, bordertop * 3
+gList3.move borderleft + itemWidth * 2 / 5, bordertop * 9, itemWidth * 3 / 5, bordertop * 18
+gList9.move borderleft, bordertop * 10, itemWidth * 2 / 5 - borderleft, bordertop * 3
+gList10.move borderleft + itemWidth * 2 / 5, bordertop * 10, itemWidth * 3 / 5, bordertop * 3
 'gList4.Move borderleft, bordertop * 14, itemwidth2, bordertop * 3
-gList4.Move borderleft, bordertop * 14, itemWidth * 2 / 5 - borderleft * 2, bordertop * 3
+gList4.move borderleft, bordertop * 14, itemWidth * 2 / 5 - borderleft * 2, bordertop * 3
 
 ' FOR NEW COMBO3
-gList13.Move itemWidth * 4 / 10, bordertop * 14, itemWidth * 3 / 10 + borderleft, bordertop * 3
+gList13.move itemWidth * 4 / 10, bordertop * 14, itemWidth * 3 / 10 + borderleft, bordertop * 3
 ''gList12.Move borderleft * 2 + itemwidth2, bordertop * 14, itemwidth2, bordertop * 3
-gList12.Move borderleft * 3 + itemWidth * 7 / 10 - borderleft, bordertop * 14, itemWidth * 3 / 10 - borderleft, bordertop * 3
+gList12.move borderleft * 3 + itemWidth * 7 / 10 - borderleft, bordertop * 14, itemWidth * 3 / 10 - borderleft, bordertop * 3
 gList12.ShowBar = True
-gList5.Move borderleft + itemWidth / 6, bordertop * 17, itemWidth / 5, bordertop * 6
+gList5.move borderleft + itemWidth / 6, bordertop * 17, itemWidth / 5, bordertop * 6
 ' FOR NEW COMBO3
-gList14.Move borderleft + itemWidth / 2, bordertop * 17, itemWidth / 5, bordertop * 6
-gList6.Move borderleft, bordertop * 18, itemwidth3, bordertop * 3
+gList14.move borderleft + itemWidth / 2, bordertop * 17, itemWidth / 5, bordertop * 6
+gList6.move borderleft, bordertop * 18, itemwidth3, bordertop * 3
 gList6.ShowBar = True
-gList7.Move borderleft * 2 + itemwidth3, bordertop * 18, itemwidth3, bordertop * 3
+gList7.move borderleft * 2 + itemwidth3, bordertop * 18, itemwidth3, bordertop * 3
 gList7.ShowBar = True
-gList8.Move borderleft * 3 + itemwidth3 * 2, bordertop * 18, itemwidth3, bordertop * 3
+gList8.move borderleft * 3 + itemwidth3 * 2, bordertop * 18, itemwidth3, bordertop * 3
 gList8.ShowBar = True
 
-DIS.Move borderleft, bordertop * 22, itemwidth2, bordertop * 16
+DIS.move borderleft, bordertop * 22, itemwidth2, bordertop * 16
 DIS.ScrollTo 0
 DIS.ShowBar = False
-gList11.Move borderleft + itemwidth2 + borderleft, bordertop * 22, itemwidth2, bordertop * 16
+gList11.move borderleft + itemwidth2 + borderleft, bordertop * 22, itemwidth2, bordertop * 16
 
-command1(1).Move borderleft, bordertop * 39, itemwidth3, bordertop * 3
-command1(2).Move borderleft + itemwidth3 + borderleft, bordertop * 39, itemwidth3, bordertop * 3
-command1(0).Move borderleft + itemwidth3 * 2 + borderleft * 2, bordertop * 39, itemwidth3, bordertop * 3
-Gradient Me, rgb(100, 100, 100), rgb(100, 0, 0), 0, 0, ScaleWidth, ScaleHeight, False, True
+command1(1).move borderleft, bordertop * 39, itemwidth3, bordertop * 3
+command1(2).move borderleft + itemwidth3 + borderleft, bordertop * 39, itemwidth3, bordertop * 3
+command1(0).move borderleft + itemwidth3 * 2 + borderleft * 2, bordertop * 39, itemwidth3, bordertop * 3
+TwoColorsGradient Me, 0, rgb(100, 100, 100), rgb(100, 0, 0)
 Set Me.Picture = Me.Image
 gList11.ShowMe2
 End Sub
@@ -657,7 +657,7 @@ gList2.FontSize = 14.25 * factor * dv15 / 15
 factor = gList2.FontSize / 14.25 / dv15 * 15
 gList1.FontSize = 11.25 * factor * dv15 / 15
 factor = gList1.FontSize / 11.25 / dv15 * 15
-glist3.FontSize = gList1.FontSize
+gList3.FontSize = gList1.FontSize
 gList4.FontSize = gList1.FontSize
 gList5.FontSize = gList1.FontSize
 gList6.FontSize = gList1.FontSize
@@ -730,13 +730,13 @@ cc.ClassKey = HKEY_CURRENT_USER
         If cc.Value = vbNullString Then
         cc.Value = "Verdana"
         End If
-        MYFONT = cc.Value
+        MyFont = cc.Value
     combo1.Text = cc.Value
-Err.clear
-DIS.Font.Name = MYFONT
+Err.Clear
+DIS.Font.Name = MyFont
 If Err.Number > 0 Then
-Err.clear
-MYFONT = "Verdana"
+Err.Clear
+MyFont = "Verdana"
 
 End If
 If DIS.Font.charset <> 161 Then
@@ -776,7 +776,7 @@ End If
         tbPen = CStr(pen)
         tbPen.Value = CStr(pen)
 tbPen.enabled = True
-      DIS.ForeColor = QBColor(tbPen)
+      DIS.forecolor = QBColor(tbPen)
     cc.ValueKey = "PAPER"
         cc.ValueType = REG_DWORD
         tbPaper = CStr(cc.Value)
@@ -861,7 +861,7 @@ checkbox2.Shutdown
 Unload Me
 End Sub
 Private Sub Form_Load1()
-Dim cd As String, dummy As Long, q$
+Dim CD As String, dummy As Long, q$
 
 
 Dim i, a$
@@ -869,7 +869,7 @@ DIS.NoCaretShow = True
 DIS.LeftMarginPixels = 10
   
 ' Combobox1 SetUp
-glist3.restrictLines = 6
+gList3.restrictLines = 6
 Set textbox2 = New myTextBox
 Set textbox2.Container = gList1
 
@@ -878,7 +878,7 @@ combo1.UseOnlyTheList = True
 
 
 Set combo1.Textbox = textbox2
-Set combo1.Container = glist3
+Set combo1.Container = gList3
 combo1.locked = False
 combo1.AutoComplete = True
 combo1.Textbox.ShowAlways = True
@@ -940,7 +940,7 @@ Dim aa As New Document, bb As New FastCollection
        If ex Then Exit For
     Next i
     aa.SortDoc 1, 1, aa.DocLines
-glist3.Text = aa.textDoc
+gList3.Text = aa.textDoc
  gList11.enabled = True
 gList11.BackStyle = 1
 gList11.FontSize = 10.25
@@ -1137,8 +1137,8 @@ Private Sub gList1_ChangeListItem(item As Long, content As String)
 If combo1.ListText <> "" Then DIS.Font.Name = combo1.ListText: playall
 End Sub
 
-Private Sub gList11_SpecialColor(rgbcolor As Long)
-rgbcolor = rgb(255, 200, 100)
+Private Sub gList11_SpecialColor(RGBcolor As Long)
+RGBcolor = rgb(255, 200, 100)
 End Sub
 
 
@@ -1151,8 +1151,8 @@ skip = True
 End If
 End Sub
 
-Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
-If gList2.DoubleClickCheck(Button, item, X, Y, 10 * lastfactor, 10 * lastfactor, 8 * lastfactor, -1) Then
+Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+If gList2.DoubleClickCheck(Button, item, x, y, 10 * lastfactor, 10 * lastfactor, 8 * lastfactor, -1) Then
                       ShutMe
 End If
 End Sub
@@ -1164,7 +1164,7 @@ Private Sub glist3_LostFocus()
 playall
 End Sub
 
-Private Sub glist3_ScrollSelected(item As Long, Y As Long)
+Private Sub glist3_ScrollSelected(item As Long, y As Long)
 playall
 End Sub
 
@@ -1319,7 +1319,7 @@ End If
 tbPen.Value = a
 a = tbPen.Value  ' cut max or min
 tbPen.Value = a
-DIS.ForeColor = mycolor(a)
+DIS.forecolor = mycolor(a)
 DIS.ShowMe2
 'tbpen.Info = "This is info box" + vbCrLf + "X = " + CStr(a)
 ThatString = CStr(a)

@@ -24,15 +24,15 @@ Public Const DFC_POPUPMENU = 5            'Only Win98/2000 !!
 Public Const DFCS_BUTTON3STATE = &H10
 
 Public Const DC_GRADIENT = &H20          'Only Win98/2000 !!
-Public Declare Function FillRect Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
+Public Declare Function FillRect Lib "user32" (ByVal hdc As Long, lpRect As RECT, ByVal hBrush As Long) As Long
 Public Declare Function CreateSolidBrush Lib "gdi32" (ByVal crColor As Long) As Long
 Public Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
-Public Declare Function SetTextColor Lib "gdi32" (ByVal hDC As Long, ByVal crColor As Long) As Long
+Public Declare Function SetTextColor Lib "gdi32" (ByVal hdc As Long, ByVal crColor As Long) As Long
 Public Const OPAQUE = 2
-Public Declare Function SetBkMode Lib "gdi32" (ByVal hDC As Long, ByVal nBkMode As Long) As Long
-Public Declare Function DrawFrameControl Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
-Public Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
-Public Declare Function SetRect Lib "user32" (lpRect As RECT, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
+Public Declare Function SetBkMode Lib "gdi32" (ByVal hdc As Long, ByVal nBkMode As Long) As Long
+Public Declare Function DrawFrameControl Lib "user32" (ByVal hdc As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
+Public Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hdc As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
+Public Declare Function SetRect Lib "user32" (lpRect As RECT, ByVal X1 As Long, ByVal Y1 As Long, ByVal X2 As Long, ByVal Y2 As Long) As Long
 Public Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal X As Long, ByVal Y As Long) As Long
 
 Public Const DT_BOTTOM As Long = &H8&
@@ -113,7 +113,7 @@ Function NumberofDrives() As Integer
     NumberofDrives = DriveCount
 End Function
 
-Function DriveName(index As Integer) As String
+Function DriveName(Index As Integer) As String
     
     Dim Buffer As String * 255
     Dim BuffLen As Long
@@ -128,7 +128,7 @@ Function DriveName(index As Integer) As String
           TheDrive = TheDrive & Mid$(Buffer, i, 1)
         If AscW(Mid$(Buffer, i, 1)) = 0 Then 'null separates drives
             DriveCount = DriveCount + 1
-            If DriveCount = index Then
+            If DriveCount = Index Then
                 DriveName = UCase(Left(TheDrive, 1))
                 Exit Function
             End If
@@ -213,7 +213,7 @@ End If
 End Function
 Public Sub showmodules()
 If Not Form1.EditTextWord Then
-fHelp basestack1, "", DialogLang = 1
+fHelp Basestack1, "", DialogLang = 1
 Else
 Beep
 End If

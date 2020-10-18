@@ -32,21 +32,13 @@ Begin VB.Form Form4
       TabIndex        =   0
       Top             =   300
       Width           =   6015
-      _ExtentX        =   10610
-      _ExtentY        =   6747
-      Max             =   1
-      Vertical        =   -1  'True
-      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
-         Name            =   "Arial"
-         Size            =   12
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      ShowBar         =   0   'False
-      Backcolor       =   -2147483624
+      _extentx        =   10610
+      _extenty        =   6747
+      max             =   1
+      vertical        =   -1
+      font            =   "help.frx":000C
+      showbar         =   0
+      backcolor       =   -2147483624
    End
 End
 Attribute VB_Name = "Form4"
@@ -73,7 +65,6 @@ Dim allheight As Long, allwidth As Long, itemWidth As Long
 Dim UAddPixelsTop As Long, flagmarkout As Boolean
 
 Private Sub Form_Deactivate()
-
 jump = False
 End Sub
 
@@ -289,19 +280,19 @@ End Sub
 Private Sub ffhelp(a$)
 If a$ = "цемийа" Then a$ = "ока"
 If a$ = "GENERAL" Then a$ = "ALL"
-If Left$(a$, 1) = "#" Then
+If left$(a$, 1) = "#" Then
 If Mid$(a$, 2) < "а" Then
-fHelp basestack1, a$, True
+fHelp Basestack1, a$, True
 Else
-fHelp basestack1, a$
+fHelp Basestack1, a$
 End If
 
 Else
 
-If Left$(a$, 1) < "а" Then
-fHelp basestack1, a$, True
+If left$(a$, 1) < "а" Then
+fHelp Basestack1, a$, True
 Else
-fHelp basestack1, a$
+fHelp Basestack1, a$
 End If
 End If
 End Sub
@@ -415,7 +406,7 @@ b = setupxy / 3
 
 CopyFromLParamToRect a, thatRect
 a.Right = a.Right - b
-a.Left = a.Right - setupxy - b
+a.left = a.Right - setupxy - b
 a.top = b
 a.Bottom = b + setupxy / 5
 FillThere thathDC, VarPtr(a), thatbgcolor
@@ -431,13 +422,13 @@ Public Sub FillThereMyVersion(thathDC As Long, thatRect As Long, thatbgcolor As 
 Dim a As RECT, b As Long
 b = 2
 CopyFromLParamToRect a, thatRect
-a.Left = a.Right - b
+a.left = a.Right - b
 a.Right = a.Right - setupxy + b
 a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), gList1.dcolor
 b = 5
-a.Left = a.Left - 3
+a.left = a.left - 3
 a.Right = a.Right + 3
 a.top = b
 a.Bottom = setupxy - b
@@ -482,11 +473,11 @@ End If
 allwidth = NewWidth  ''vH_x * factor
 allheight = vH_y * factor
 itemWidth = allwidth - 2 * borderleft
-myform Me, Left, top, allwidth, allheight, True, factor
+myform Me, left, top, allwidth, allheight, True, factor
 
   
 gList1.addpixels = 4 * factor
-label1.Move borderleft, bordertop, itemWidth, allheight - bordertop * 2
+label1.move borderleft, bordertop, itemWidth, allheight - bordertop * 2
 
 label1.NewTitle vH_title$, (4 + UAddPixelsTop) * factor
 label1.Render

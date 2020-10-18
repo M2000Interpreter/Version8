@@ -237,7 +237,7 @@ Attribute HTML.VB_VarHelpID = -1
 Private DisStack As basetask
 Private MeStack As basetask
 Dim lookfirst As Boolean, look1 As Boolean
-Private Declare Function GetLocaleInfo Lib "KERNEL32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
+Private Declare Function GetLocaleInfo Lib "kernel32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
 Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not NT?
 Private Const DWL_ANYTHREAD& = 0
 Const LOCALE_ILANGUAGE = 1
@@ -245,8 +245,8 @@ Private Declare Function PeekMessageW Lib "user32" (lpMsg As Msg, ByVal hWnd As 
 Const WM_KEYFIRST = &H100
  Const WM_KEYLAST = &H108
  Private Type POINTAPI
-    X As Long
-    Y As Long
+    x As Long
+    y As Long
 End Type
  Private Type Msg
     hWnd As Long
@@ -258,12 +258,12 @@ End Type
 End Type
 Public Point2Me As Object
 Public TabControl As Long
-Private Declare Function GetCommandLineW Lib "KERNEL32" () As Long
+Private Declare Function GetCommandLineW Lib "kernel32" () As Long
 
 Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal Ptr As Long, ByVal Value As Long)
 Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal Ptr As Long, ByVal Length As Long) As Long
-Private Declare Function GetModuleHandleW Lib "KERNEL32" (ByVal lpModuleName As Long) As Long
-Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
+Private Declare Function GetModuleHandleW Lib "kernel32" (ByVal lpModuleName As Long) As Long
+Private Declare Function GetProcAddress Lib "kernel32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
 Private Declare Function GetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long) As Long
 Private Declare Function SetWindowLongA Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare Function SetWindowLongW Lib "user32" (ByVal hWnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
@@ -327,7 +327,7 @@ DestroyCaret
 End If
 End Sub
 
-Private Sub DIS_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
+Private Sub DIS_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, x As Single, y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -337,19 +337,19 @@ End If
         End If
 End Sub
 
-Private Sub dSprite_GotFocus(index As Integer)
+Private Sub dSprite_GotFocus(Index As Integer)
 If lockme Then TEXT1.SetFocus: Exit Sub
 
 End Sub
 
-Private Sub dSprite_LostFocus(index As Integer)
+Private Sub dSprite_LostFocus(Index As Integer)
 If iamactive Then
 iamactive = False
 DestroyCaret
 End If
 End Sub
 
-Private Sub dSprite_OLEDragOver(index As Integer, Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
+Private Sub dSprite_OLEDragOver(Index As Integer, Data As DataObject, Effect As Long, Button As Integer, shift As Integer, x As Single, y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -433,7 +433,7 @@ DestroyCaret
 End If
 End Sub
 
-Private Sub Form_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, X As Single, Y As Single, state As Integer)
+Private Sub Form_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, shift As Integer, x As Single, y As Single, state As Integer)
 On Error Resume Next
 If Not TaskMaster Is Nothing Then
   If TaskMaster.QueueCount > 0 Then
@@ -540,7 +540,7 @@ If KeyAscii = 9 Then KeyAscii = 0: Exit Sub
 If KeyAscii = 13 Then KeyAscii = 0: Exit Sub
 End Sub
 
-Private Sub gList1_OutPopUp(X As Single, Y As Single, myButton As Integer)
+Private Sub gList1_OutPopUp(x As Single, y As Single, myButton As Integer)
 Dim i As Long
 
 If Not gList1.enabled Then Exit Sub
@@ -557,7 +557,7 @@ i = .SelLength
 End With
 UNhookMe
 MyPopUp.feedlabels TEXT1, EditTextWord
-MyPopUp.Up X + gList1.Left, Y + gList1.top
+MyPopUp.Up x + gList1.Left, y + gList1.top
 myButton = 0
 End Sub
 
@@ -581,9 +581,9 @@ End Sub
 
 Private Sub ffhelp(a$)
 If Left$(a$, 1) < "Α" Then
-fHelp basestack1, a$, True
+fHelp Basestack1, a$, True
 Else
-fHelp basestack1, a$
+fHelp Basestack1, a$
 End If
 End Sub
 
@@ -598,7 +598,7 @@ If List1.Tag <> "" Then
 If QRY Or GFQRY Then
 Else
 
-dummy = interpret(basestack1, List1.Tag)
+dummy = interpret(Basestack1, List1.Tag)
 'Me.KeyPreview = True
 End If
 End If
@@ -644,7 +644,7 @@ End If
 End Select
 End Sub
 
-Private Sub List1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+Private Sub List1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 If item = -1 Then
 
 Else
@@ -675,7 +675,7 @@ If List1.Tag <> "" Then
 If QRY Or GFQRY Then
 Else
 
-dummy = interpret(basestack1, List1.Tag)
+dummy = interpret(Basestack1, List1.Tag)
 'Me.KeyPreview = True
 End If
 Else
@@ -692,7 +692,7 @@ If List1.Tag <> "" Then
 If QRY Or GFQRY Then
 Else
 
-dummy = interpret(basestack1, List1.Tag)
+dummy = interpret(Basestack1, List1.Tag)
 'Me.KeyPreview = True
 End If
 Else
@@ -861,7 +861,7 @@ w = 1
 l = 0
 safety = safety + 1
 End If
-If prof1.MARKTWO > 1000 Then ProcTask2 basestack1: prof1.MARKONE
+If prof1.MARKTWO > 1000 Then ProcTask2 Basestack1: prof1.MARKONE
 Loop Until safety = 2 Or KeyPressed(16)
 TEXT1.glistN.dropkey = False
 
@@ -910,7 +910,7 @@ w = 1
 l = 0
 safety = safety + 1
 End If
-If prof1.MARKTWO > 1000 Then ProcTask2 basestack1: prof1.MARKONE
+If prof1.MARKTWO > 1000 Then ProcTask2 Basestack1: prof1.MARKONE
 Loop Until safety = 2 Or KeyPressed(16)
 TEXT1.glistN.dropkey = False
 End If
@@ -1018,7 +1018,7 @@ End If
 
 End Sub
 
-Private Sub DIS_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub DIS_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 If Not NoAction Then
 NoAction = True
 
@@ -1026,7 +1026,7 @@ If Button > 0 And Targets Then
 
 If Button = 1 Then
 Dim sel&
-    sel& = ScanTarget(q(), CLng(X), CLng(Y), 0)
+    sel& = ScanTarget(q(), CLng(x), CLng(y), 0)
     If sel& >= 0 Then
         Select Case q(sel&).Id Mod 100
         Case Is < 10
@@ -1060,24 +1060,24 @@ End Sub
 
 
 
-Private Sub dSprite_MouseDown(index As Integer, Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub dSprite_MouseDown(Index As Integer, Button As Integer, shift As Integer, x As Single, y As Single)
 Dim p As Long, u2 As Long
 If lockme Then Exit Sub
 If Not NoAction Then
 NoAction = True
 Dim sel&
-p = val("0" & dSprite(index).Tag)
+p = val("0" & dSprite(Index).Tag)
 With players(p)
     u2 = .uMineLineSpace * 2
 
         If Button > 0 And Targets Then
 
-        sel& = ScanTarget(q(), CLng(X), CLng(Y), index)
+        sel& = ScanTarget(q(), CLng(x), CLng(y), Index)
             If sel& >= 0 Then
                 If Button = 1 Then
                 Select Case q(sel&).Id Mod 100
                 Case Is < 10
-                If Not interpret(DisStack, "LAYER " & dSprite(index).Tag + " {" + vbCrLf + q(sel&).Comm + vbCrLf & "}") Then Beep
+                If Not interpret(DisStack, "LAYER " & dSprite(Index).Tag + " {" + vbCrLf + q(sel&).Comm + vbCrLf & "}") Then Beep
                 Case Else
                 INK$ = q(sel&).Comm
                 End Select
@@ -1407,7 +1407,7 @@ STq = False
 STEXIT = False
 STbyST = True
 Form2.Show , Form1
- PrepareLabel basestack1
+ PrepareLabel Basestack1
  
 Form2.label1(1) = "..."
 Form2.label1(2) = "..."
@@ -1415,8 +1415,8 @@ Form2.label1(2) = "..."
     TestShowCode = False
      TestShowSub = vbNullString
  TestShowStart = 0
-     Set Form2.Process = basestack1
-   stackshow basestack1
+     Set Form2.Process = Basestack1
+   stackshow Basestack1
 Form1.Show , Form5
 trace = True
 End If
@@ -1546,33 +1546,33 @@ ThereIsAPrinter = IsPrinter
 If ThereIsAPrinter Then
 
 pname = Printer.DeviceName
-Port = Printer.Port
+port = Printer.port
 
 End If
 
 dset
 
-MYFONT = "Verdana"
-defFontname = MYFONT
+MyFont = "Verdana"
+defFontname = MyFont
 myBold = False
 
 myCharSet = 0
 With Form1
-.Font.Name = MYFONT
+.Font.Name = MyFont
 .Font.Strikethrough = False
 .Font.Underline = False
 .Font.bold = myBold
-MYFONT = .Font.Name
+MyFont = .Font.Name
     .Font.charset = myCharSet
     .DIS.Font.charset = myCharSet
-    .DIS.Font.Name = MYFONT
+    .DIS.Font.Name = MyFont
     .DIS.Font.bold = myBold
     .TEXT1.Font.charset = myCharSet
-    .TEXT1.Font.Name = MYFONT
+    .TEXT1.Font.Name = MyFont
     .TEXT1.Font.bold = myBold
     
     .List1.charset = myCharSet
-    .List1.Font.Name = MYFONT
+    .List1.Font.Name = MyFont
     .List1.FontBold = myBold
      
 End With
@@ -1617,13 +1617,13 @@ End Sub
 
 
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 If NoAction Then Exit Sub
 NoAction = True
 Dim sel&
 
 If Button > 0 And Targets Then
-sel& = ScanTarget(q(), CLng(X), CLng(Y), -1)
+sel& = ScanTarget(q(), CLng(x), CLng(y), -1)
 
 If sel& >= 0 Then
 
@@ -1677,17 +1677,17 @@ Cancel = NoAction
 End Sub
 
 Private Sub iForm_Resize()
-DIS.Move 0, 0, ScaleWidth, ScaleHeight
+DIS.move 0, 0, Scalewidth, Scaleheight
 End Sub
 Public Sub Up()
 UpdateWindow hWnd
 End Sub
 
 Sub something()
-Set basestack1.Owner = DIS
+Set Basestack1.Owner = DIS
 Set DisStack.Owner = DIS
 NOEXECUTION = False
-basestack1.toprinter = False
+Basestack1.toprinter = False
 MOUT = False
 On Error Resume Next
 Const HWND_BROADCAST = &HFFFF&
@@ -1715,25 +1715,25 @@ Console = FindFormSScreen(Me)
 Me.WindowState = 0
 If Me.WindowState = 0 Then
 With ScrInfo(Console)
-Me.Move .Left, ScrY(), .Width, .Height
+Me.move .Left, ScrY(), .Width, .Height
 End With
 End If
 
-basestack1.myCharSet = 0
-    Font.charset = basestack1.myCharSet
-    basestack1.Owner.Font.charset = basestack1.myCharSet
-    TEXT1.Font.charset = basestack1.myCharSet
-    List1.Font.charset = basestack1.myCharSet
+Basestack1.myCharSet = 0
+    Font.charset = Basestack1.myCharSet
+    Basestack1.Owner.Font.charset = Basestack1.myCharSet
+    TEXT1.Font.charset = Basestack1.myCharSet
+    List1.Font.charset = Basestack1.myCharSet
 
-basestack1.Owner.Move 0, 0, ScaleWidth, ScaleHeight
+Basestack1.Owner.move 0, 0, Scalewidth, Scaleheight
 
 If NoAction Then Exit Sub
 Dim dummy As Boolean, i
 NOEXECUTION = False
 '
-myBreak basestack1
-MyNew basestack1, "", 0
-MyClear basestack1, ""
+myBreak Basestack1
+MyNew Basestack1, "", 0
+MyClear Basestack1, ""
 
 Dim mybasket As basket
 mybasket = players(DisForm)
@@ -1749,10 +1749,10 @@ Public Sub MyPrompt(LoadFileAndSwitches$, Prompt$, Optional thisbs As basetask)
 Static forwine As Long
 Dim oldbs As basetask
 If Not thisbs Is Nothing Then
-Set oldbs = basestack1
-Set basestack1 = New basetask
-thisbs.CopyStrip2 basestack1
-Set basestack1.Owner = basestack1.Owner
+Set oldbs = Basestack1
+Set Basestack1 = New basetask
+thisbs.CopyStrip2 Basestack1
+Set Basestack1.Owner = Basestack1.Owner
 
 End If
 onetime = onetime + 1
@@ -1780,15 +1780,15 @@ MyDoEvents
  If cLine = vbNullString Then
 
    If trace Then
-   PrepareLabel basestack1
+   PrepareLabel Basestack1
     Form2.label1(1) = "..."
     Form2.label1(2) = "..."
     Form2.gList3(2).backcolor = &H3B3B3B
     TestShowCode = False
     TestShowSub = vbNullString
     TestShowStart = 0
-    Set Form2.Process = basestack1
-    stackshow basestack1
+    Set Form2.Process = Basestack1
+    stackshow Basestack1
     Form2.ComputeNow
 
    
@@ -1824,7 +1824,7 @@ If onetime = 1 Then
     If IsWine Then
     If forwine = 0 Then
     forwine = 1
-    newStart basestack1, ""
+    newStart Basestack1, ""
     MOUT = True
     ElseIf Form1.Visible = False Then
     Else
@@ -1852,7 +1852,7 @@ NOEXECUTION = False
 MOUT = True
 End If
 
-    QUERY basestack1, Prompt$, qq$, (mybasket.mx * 4), True
+    QUERY Basestack1, Prompt$, qq$, (mybasket.mx * 4), True
     If NOEXECUTION And MOUT Then
     If MKEY$ = "@Start" + Chr$(13) Then qq$ = "@start"
         NOEXECUTION = False
@@ -1864,8 +1864,8 @@ conthere:
     If ExTarget = True Then GoTo nExit
       mybasket = players(DisForm)
 
-      If basestack1.Owner Is Nothing Then GoTo nExit
-If basestack1.Owner.Visible = True Then basestack1.Owner.Refresh Else basestack1.Owner.Visible = True
+      If Basestack1.Owner Is Nothing Then GoTo nExit
+If Basestack1.Owner.Visible = True Then Basestack1.Owner.Refresh Else Basestack1.Owner.Visible = True
     Fkey = 0
     If pagio$ = "GREEK" Then
     FK$(13) = "ΣΥΓΓΡΑΦΕΑΣ"
@@ -1879,13 +1879,13 @@ If basestack1.Owner.Visible = True Then basestack1.Owner.Refresh Else basestack1
 If LoadFileAndSwitches$ = vbNullString And qq$ = vbNullString Then helpcnt = helpcnt + 1
 
         If helpcnt > 4 Then
-    If basestack1.Owner.Font.charset <> 161 Then
+    If Basestack1.Owner.Font.charset <> 161 Then
     qq$ = " HELP": helpcnt = -100000
     Else
     qq$ = " ΒΟΗΘΕΙΑ": helpcnt = -100000
     End If
     End If
- crNew basestack1, mybasket
+ crNew Basestack1, mybasket
 If NOEXECUTION Then GoTo breakit
  
 Else
@@ -1902,10 +1902,10 @@ End If
 If Not MOUT Then
 NOEXECUTION = False
 ResetBreak
-MOUT = interpret(basestack1, "START")
+MOUT = interpret(Basestack1, "START")
 qq$ = vbNullString
 
-MOUT = interpret(basestack1, "cls")
+MOUT = interpret(Basestack1, "cls")
 
 mybasket = players(DisForm)
 End If
@@ -1918,13 +1918,13 @@ ResetBreak
 players(DisForm) = mybasket
 NoAction = True
 NOEXECUTION = False
-basestack1.toprinter = False
+Basestack1.toprinter = False
 MOUT = False
 ClearLabels
 Dim kolpo As Boolean
 If Not thisbs Is Nothing Then
 kolpo = False
-If executeblock((1), basestack1, qq$, False, kolpo, , , True) Then
+If executeblock((1), Basestack1, qq$, False, kolpo, , , True) Then
 GoTo cont123
 Else
 If kolpo Then GoTo nExit
@@ -1932,14 +1932,14 @@ If kolpo Then GoTo nExit
 GoTo cont567
 End If
 End If
-If Not interpret(basestack1, qq$) Then
+If Not interpret(Basestack1, qq$) Then
 ' clear inuse flag
 
 cont123:
 mybasket = players(DisForm)
 '' ClearLoadedForms  not needed any more
 If NERR Then Exit Do
-    basestack1.toprinter = False
+    Basestack1.toprinter = False
     If MOUT Then
             NOEXECUTION = False
             ResetBreak
@@ -1959,24 +1959,24 @@ If NERR Then Exit Do
         ' look last error
                 If Left$(LastErName & " ", 1) <> "?" Then
                         closeAll
-                        crNew basestack1, mybasket
-                        If basestack1.Owner.Font.charset <> 161 Then
+                        crNew Basestack1, mybasket
+                        If Basestack1.Owner.Font.charset <> 161 Then
                         
-                        wwPlain2 basestack1, mybasket, " ? " & LastErName, basestack1.Owner.Width, 1000, True
-                        If Left$(FK$(13), 4) = "EDIT" Then crNew basestack1, mybasket: wwPlain2 basestack1, mybasket, "Use SHIFT F1, edit, ESC to return", basestack1.Owner.Width, 1000, True
+                        wwPlain2 Basestack1, mybasket, " ? " & LastErName, Basestack1.Owner.Width, 1000, True
+                        If Left$(FK$(13), 4) = "EDIT" Then crNew Basestack1, mybasket: wwPlain2 Basestack1, mybasket, "Use SHIFT F1, edit, ESC to return", Basestack1.Owner.Width, 1000, True
                         Else
-                        wwPlain2 basestack1, mybasket, " ? " & LastErNameGR, basestack1.Owner.Width, 1000, True
-                        If Left$(FK$(13), 4) = "EDIT" Then crNew basestack1, mybasket: wwPlain2 basestack1, mybasket, "Με το SHIFT F1 διορθώνεις, ESC επιστρέφεις", basestack1.Owner.Width, 1000, True
+                        wwPlain2 Basestack1, mybasket, " ? " & LastErNameGR, Basestack1.Owner.Width, 1000, True
+                        If Left$(FK$(13), 4) = "EDIT" Then crNew Basestack1, mybasket: wwPlain2 Basestack1, mybasket, "Με το SHIFT F1 διορθώνεις, ESC επιστρέφεις", Basestack1.Owner.Width, 1000, True
                         End If
                             
                             LastErName = "?" & LastErName
                             LastErNameGR = "?" & LastErNameGR
                 Else
                         mybasket = players(DisForm)
-                        wwPlain2 basestack1, mybasket, " ? " & qq$, basestack1.Owner.Width, 1000, True
+                        wwPlain2 Basestack1, mybasket, " ? " & qq$, Basestack1.Owner.Width, 1000, True
                 End If
         End If
-        crNew basestack1, mybasket
+        crNew Basestack1, mybasket
         LastErNum = 0: LastErNum1 = 0
         LastErName = vbNullString
         LastErNameGR = vbNullString
@@ -1991,7 +1991,7 @@ cont567:
         
         LCTbasketCur DIS, mybasket
          If mybasket.curpos > 0 Then
-          crNew basestack1, mybasket
+          crNew Basestack1, mybasket
         
         
           
@@ -2015,7 +2015,7 @@ ExTarget = True
 elevatestatus = 0
 nExit:
 If Not thisbs Is Nothing Then
-    Set basestack1 = oldbs
+    Set Basestack1 = oldbs
 End If
 
 End Sub
@@ -2056,7 +2056,7 @@ If QRY Or GFQRY Then
 
 Else
 
-dummy = interpret(basestack1, List1.Tag)
+dummy = interpret(Basestack1, List1.Tag)
 'Me.KeyPreview = True
 End If
 End If
@@ -2070,7 +2070,7 @@ If List1.Tag <> "" Then
 If QRY Or GFQRY Then
 Else
 
-dummy = interpret(basestack1, List1.Tag)
+dummy = interpret(Basestack1, List1.Tag)
 'Me.KeyPreview = True
 End If
 End If
@@ -2124,7 +2124,7 @@ If Form4Loaded Then If Form4.Visible Then Form4.Visible = False
                 Unload NeoMsgBox: ASKINUSE = False: noentrance = False: Exit Sub
                 End If
             BreakMe = True
-            If ask(basestack1, BreakMes) = 1 Then
+            If ask(Basestack1, BreakMes) = 1 Then
             
             If AVIRUN Then
             AVI.GETLOST
@@ -2347,7 +2347,8 @@ Else
 showmodules
 End If
 KeyCode = 0
-
+Case vbKeyPageUp
+Case vbKeyPageDown
 Case vbKeyTab
 nochange = True
 If Len(TEXT1.CurrentParagraph) + 1 < TEXT1.Charpos Then
@@ -2665,11 +2666,11 @@ look1 = False
 If IESizeX = 0 Or IESizeY < 100 Then
 IEX = 0
 IEY = 0
-IESizeX = Me.ScaleWidth
-IESizeY = Me.ScaleHeight
+IESizeX = Me.Scalewidth
+IESizeY = Me.Scaleheight
 End If
-If (IESizeX - IEX) > Me.ScaleWidth Then IESizeX = Me.ScaleWidth - IEX
-If (IESizeY - IEY) > Me.ScaleHeight Then IESizeY = Me.ScaleHeight - IEY
+If (IESizeX - IEX) > Me.Scalewidth Then IESizeX = Me.Scalewidth - IEX
+If (IESizeY - IEY) > Me.Scaleheight Then IESizeY = Me.Scaleheight - IEY
 If IsWine Then
 With view1
 On Error Resume Next
@@ -2683,12 +2684,12 @@ On Error Resume Next
 
 End With
 Else
-view1.Move IEX, IEY, IESizeX, IESizeY
+view1.move IEX, IEY, IESizeX, IESizeY
 If IsWine Then
 Sleep 1
-view1.Move IEX, IEY
+view1.move IEX, IEY
 Sleep 1
-view1.Move IEX, IEY, IESizeX - 1, IESizeY - 1
+view1.move IEX, IEY, IESizeX - 1, IESizeY - 1
 End If
 End If
 
@@ -2806,25 +2807,25 @@ cc.ClassKey = HKEY_CURRENT_USER
         cc.ValueType = REG_SZ
 If Not cc.KeyExists Then
 myBold = True
-MYFONT = defFontname
+MyFont = defFontname
             mNoUseDec = True
-            If Not Form1.FontName = MYFONT Then
-            MYFONT = "Arial"
-            Form1.FontName = MYFONT
+            If Not Form1.FontName = MyFont Then
+            MyFont = "Arial"
+            Form1.FontName = MyFont
             Form1.Font.Italic = False
-            Form1.FontName = MYFONT
+            Form1.FontName = MyFont
             
             End If
-            MYFONT = Form1.FontName
+            MyFont = Form1.FontName
             
-            FFONT = MYFONT
-            Err.clear
-            DIS.FontName = MYFONT
+            FFONT = MyFont
+            Err.Clear
+            DIS.FontName = MyFont
             DIS.Font.Italic = False
-            DIS.FontName = MYFONT
+            DIS.FontName = MyFont
             If Err.Number > 0 Then
-            Err.clear
-            MYFONT = defFontname
+            Err.Clear
+            MyFont = defFontname
             End If
             If TEXT1.Font.charset <> 161 Then
             
@@ -2850,7 +2851,7 @@ MYFONT = defFontname
                     SzOne = 14
              PenOne = 14
              PaperOne = 5
-             DIS.ForeColor = mycolor(PenOne)
+             DIS.forecolor = mycolor(PenOne)
              On Error Resume Next
              cc.Value = Form1.FontName
              cc.ValueKey = "NEWSECURENAMES"
@@ -2923,28 +2924,28 @@ Else
 ' *****************************
         If cc.Value = vbNullString Then
         cc.Value = defFontname
-        MYFONT = defFontname
+        MyFont = defFontname
         
         Else
-        MYFONT = cc.Value
+        MyFont = cc.Value
         On Error Resume Next
         
-        Me.Font.Name = MYFONT
+        Me.Font.Name = MyFont
         Me.Font.Italic = False
-        Me.Font.Name = MYFONT
-        If Me.Font.Name <> MYFONT Then
-        MYFONT = defFontname
+        Me.Font.Name = MyFont
+        If Me.Font.Name <> MyFont Then
+        MyFont = defFontname
         End If
        
         End If
-FFONT = MYFONT
-Err.clear
-DIS.FontName = MYFONT
+FFONT = MyFont
+Err.Clear
+DIS.FontName = MyFont
 DIS.Font.Italic = False
-DIS.FontName = MYFONT
+DIS.FontName = MyFont
 If Err.Number > 0 Then
-Err.clear
-MYFONT = defFontname
+Err.Clear
+MyFont = defFontname
 End If
     cc.ValueKey = "BOLD"
         cc.ValueType = REG_DWORD
@@ -2988,7 +2989,7 @@ End If
       
     If cc.Value = PenOne Then cc.Value = 15 - PenOne
    
-        DIS.ForeColor = mycolor(PenOne)
+        DIS.forecolor = mycolor(PenOne)
     cc.ValueKey = "PAPER"
         cc.ValueType = REG_DWORD
         PaperOne = cc.Value
@@ -3044,7 +3045,7 @@ End If
         Set cc = Nothing
         End If
            
-       DIS.ForeColor = mycolor(PenOne) ' NOW PEN IS RGB VALUE
+       DIS.forecolor = mycolor(PenOne) ' NOW PEN IS RGB VALUE
             Font.charset = basestack.myCharSet
     Font.bold = basestack.myBold
     DIS.Font.charset = basestack.myCharSet
@@ -3056,9 +3057,9 @@ End If
   
         Select Case pagio$
         Case "GREEK"
-         GREEK basestack1
+         GREEK Basestack1
         Case Else   '"LATIN"
-            LATIN basestack1
+            LATIN Basestack1
         
          End Select
 If OperatingSystem > System_Windows_7 Then
@@ -3121,10 +3122,10 @@ End Sub
 Function GetKeY(ascii As Integer) As String
     Dim Buffer As String, ret As Long
     Buffer = String$(514, 0)
-    Dim r&, k&
-      r = GetKeyboardLayout(DWL_ANYTHREAD) And &HFFFF
-      r = CLng(val("&H" & Right(Hex(r), 4)))
-    ret = GetLocaleInfo(r, LOCALE_ILANGUAGE, StrPtr(Buffer), Len(Buffer))
+    Dim R&, k&
+      R = GetKeyboardLayout(DWL_ANYTHREAD) And &HFFFF
+      R = CLng(val("&H" & Right(Hex(R), 4)))
+    ret = GetLocaleInfo(R, LOCALE_ILANGUAGE, StrPtr(Buffer), Len(Buffer))
     If ret > 0 Then
         GetKeY = ChrW$(AscW(StrConv(ChrW$(ascii Mod 256), 64, CLng(val("&h" + Left$(Buffer, ret - 1))))))
     Else
@@ -3132,11 +3133,11 @@ Function GetKeY(ascii As Integer) As String
     End If
 End Function
 Public Function GetLCIDFromKeyboard() As Long
-    Dim Buffer As String, ret&, r&
+    Dim Buffer As String, ret&, R&
     Buffer = String$(514, 0)
-      r = GetKeyboardLayout(DWL_ANYTHREAD) And &HFFFF
-      r = val("&H" & Right(Hex(r), 4))
-        ret = GetLocaleInfo(r, LOCALE_ILANGUAGE, StrPtr(Buffer), Len(Buffer))
+      R = GetKeyboardLayout(DWL_ANYTHREAD) And &HFFFF
+      R = val("&H" & Right(Hex(R), 4))
+        ret = GetLocaleInfo(R, LOCALE_ILANGUAGE, StrPtr(Buffer), Len(Buffer))
     GetLCIDFromKeyboard = CLng(val("&h" + Left$(Buffer, ret - 1)))
 End Function
 Sub MarkSoftButton(para As Long, pospara As Long)
@@ -3383,20 +3384,20 @@ End If
     MyDoEvents
     End If
    
-    Dim mycode As Double, oldcodeid As Double, X As Form
+    Dim mycode As Double, oldcodeid As Double, x As Form
 mycode = Rnd * 12312314
 oldcodeid = Modalid
 
- For Each X In Forms
-                            If X.Visible And X.Name = "GuiM2000" Then
+ For Each x In Forms
+                            If x.Visible And x.Name = "GuiM2000" Then
                      
-                           If X.Enablecontrol Then
-                               X.Modal = mycode
-                                X.Enablecontrol = False
+                           If x.Enablecontrol Then
+                               x.Modal = mycode
+                                x.Enablecontrol = False
                             End If
                             End If
-                    Next X
-                     Set X = Nothing
+                    Next x
+                     Set x = Nothing
 If INFOONLY Then
 NeoMsgBox.command1(0).SetFocus
 End If
@@ -3434,13 +3435,13 @@ AskTitle$ = vbNullString
 Dim z As Form
  Set z = Nothing
 
-           For Each X In Forms
-            If X.Visible And X.Name = "GuiM2000" Then
-            If Not X.Enablecontrol Then X.TestModal mycode
-          If X.Enablecontrol Then Set z = X
+           For Each x In Forms
+            If x.Visible And x.Name = "GuiM2000" Then
+            If Not x.Enablecontrol Then x.TestModal mycode
+          If x.Enablecontrol Then Set z = x
             End If
-            Next X
-             Set X = Nothing
+            Next x
+             Set x = Nothing
           If Not zz Is Nothing Then Set z = zz
           
           If Typename(z) = "GuiM2000" Then
@@ -3495,7 +3496,7 @@ If bstack.Process Is Nothing Then
 If PP = 0 Then Exit Sub
 Else
 
-Err.clear
+Err.Clear
 p = bstack.Process.Done
 If Err.Number = 0 Then
 e = True

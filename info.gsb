@@ -679,13 +679,14 @@ MODULE DD8GRNEW {\\ Like DD8 but better
 \\ For Y we make a first value according to the lower
 \\ also we can make narrow the graph changing the ΖουμΧ value (2 for half the width of console screen)
 Τμήμα Ζεύγη_Τιμών {
-      \\ χρήση Gdi+ ομαλοποίησης γραμμών (δεν δουλεύει σε Wine σε Linux, αλλά δεν γυρίζει λάθος)
-      Ομαλά ναί
+      Ομαλά όχι
       Σταθερές κέντρο=2, δεξιά=3, αριστερά=1, μπλε=1, γωνία=0, γραμμή_με_τελίτσες=3
-      Σταθερές μέγεθος_9pt=9, μέγεθος_11pt=11
+      Σταθερές μέγεθος_12pt=12, μέγεθος_11pt=11, ΑπόσταστηΑριθμών=10
       Οθόνη ,0
-      Δρομέας 0,3
+      Δρομέας 0,1
+      Διπλά
       Αναφορά κέντρο, "Γράφημα: Ζεύγη Τιμών"
+      Κανονικά
       Άδειασε
       χ=(0,1,2,3,4,5,6,7,8,9)
 Σημ    χ=(1,2,3,4,5,6,9,10, 15,19)
@@ -751,24 +752,28 @@ MODULE DD8GRNEW {\\ Like DD8 but better
       δτ=κλΧ
       αν δτ=0 τότε δτ=1
 
-      
-      Για ι=ΒάσηΧ έως ΒάσηΧ+δχ*μέρη Ανά δχ
-            Θέση ι, ΒάσηΥ
-            Βήμα 0, Ύψος.Σημείου*10
-            Επιγραφή μορφή$("{0}",τ), "courier", μέγεθος_9pt, γωνία, κέντρο
-            Αν ι>ΒάσηΧ Τότε Πάχος 1, γραμμή_με_τελίτσες { Χάραξε 0, -βαθμόςΥ-Ύψος.Σημείου*10,7}
-            κ++ : τ+=δτ
-      Επόμενο
+      Πενα 15 {
+            Για ι=ΒάσηΧ έως ΒάσηΧ+δχ*μέρη Ανά δχ
+                  Θέση ι, ΒάσηΥ
+                  Βήμα 0, Ύψος.Σημείου*(10+ΑπόσταστηΑριθμών)
+                  Επιγραφή μορφή$("{0}",τ), "courier new", μέγεθος_12pt, γωνία, κέντρο
+                  Βήμα 0, -Ύψος.Σημείου*ΑπόσταστηΑριθμών
+                  Αν ι>ΒάσηΧ Τότε Πάχος 1, γραμμή_με_τελίτσες { Χάραξε 0, -βαθμόςΥ-Ύψος.Σημείου*10,7}
+                  κ++ : τ+=δτ
+            Επόμενο
+      }
       \\ φτιάχνουμε κάθετες γραμμές ανά δψ
-      ΜισόΎψοςΚειμένου=Μέγεθος.Υ("1","courier", μέγεθος_9pt)/2
+      ΜισόΎψοςΚειμένου=Μέγεθος.Υ("1","courier new", μέγεθος_12pt)/2
       ΣτόχοςΥ=ΒάσηΥ-δψ*10
-      Για ι=ΒάσηΥ έως ΣτόχοςΥ Ανά δψ
-            Θέση ΒάσηΧ, ι
-            Βήμα -Πλάτος.σημείου*10
-            Αν ι<ΒάσηΥ Τότε Πάχος 1, γραμμή_με_τελίτσες { Χάραξε χ.σημεία/ΖουμΧ+Πλάτος.σημείου*10,,7}
-            Θέση ΒάσηΧ-Πλάτος.Σημείου*6, ι+ΜισόΎψοςΚειμένου
-            Επιγραφή μορφή$("{0}",(ι-ΒάσηΥ)/κλΨ+ελάχιστο), "courier", μέγεθος_9pt, γωνία, αριστερά
-      Επόμενο
+      Πένα 15 {
+            Για ι=ΒάσηΥ έως ΣτόχοςΥ Ανά δψ
+                  Θέση ΒάσηΧ, ι
+                  Βήμα -Πλάτος.σημείου*10
+                  Αν ι<ΒάσηΥ Τότε Πάχος 1, γραμμή_με_τελίτσες { Χάραξε χ.σημεία/ΖουμΧ+Πλάτος.σημείου*10,,7}
+                  Θέση ΒάσηΧ-Πλάτος.Σημείου*(4+ΑπόσταστηΑριθμών), ι+ΜισόΎψοςΚειμένου
+                  Επιγραφή μορφή$("{0}",(ι-ΒάσηΥ)/κλΨ+ελάχιστο), "courier new", μέγεθος_12pt, γωνία, αριστερά
+            Επόμενο
+      }
       
       \\ Τώρα χαράζουμε μια γραμμή που θα περάσει από όλα τα σημεία
       \\ με την Χάραξε Έως δίνουμε απόλυτες συντεταγμένες (χωρίς το Έως δίνουμε σχετικές)
@@ -799,16 +804,17 @@ MODULE DD8GRNEW {\\ Like DD8 but better
                   Επιγραφή μορφή$("{0}|{1}", Α(ι,0), Α(ι,1) ), "courier bold", μέγεθος_11pt, γωνία, δεξιά
             }
       Επόμενο
-      \\ Αντιγραφή οθόνης στο πρόχειρο
-      ΑντίγραφοΟθόνης$=""
-      Θέση 0,0
-      Αντίγραψε χ.σημεία, υ.σημεία στο ΑντίγραφοΟθόνης$
-      Πρόχειρο ΑντίγραφοΟθόνης$
-      \\ αναμονή πατήματος πλήκτρου
-      Βάλε Κομ$ : Πέτα
-      Ομαλά όχι    ' επαναφορά
+      Ομαλά Όχι
 }
-Ζεύγη_Τιμών
+'Ζεύγη_Τιμών
+'εξοδος
+Σχέδιο Κλίμαξ.Χ, Κλίμαξ.Υ {
+	Ζεύγη_Τιμών
+} ως Α
+Οθόνη,0
+Θέση 0,0
+Εικόνα Α
+Πρόχειρο Α
 }
 MODULE DD9 {Report {Execute a Clear statement to erase static variables from console. Static variables reduce a bit the speed of interpreter. Except for static varibales in threads, they erased when a thread erased}
 
@@ -4535,16 +4541,16 @@ If Not Mess Then {
 }
 Print Timecount
 }
-MODULE P {\\ this is not a game is an example for how we make a game using threads and sprites. Images are simple for this example.
+MODULE P {// this is not a game is an example for how we make a game using threads and sprites. Images are simple for this example.
 
 SET FAST !
 PEN #fff9aa
-\\ BLOCK ESCAPE KEY
+// BLOCK ESCAPE KEY
 ESCAPE OFF
-\\thread.plan sequential \\WE CAN USE THREAD plan sequential also.
+//thread.plan sequential //WE CAN USE THREAD plan sequential also.
 THREAD.PLAN CONCURRENT
-ox=scale.x*1.2
-oy=scale.y*1.2
+ox=scale.x*1.4
+oy=scale.y*1.4
 REFRESH  500 
 Layer 1 {
 	Window Mode, ox, oy
@@ -4555,7 +4561,7 @@ Layer 1 {
 	PRINT "This is second line"   'BECAUSE WE SET A HIGH REFRESH RATE
 	PRINT "This is third line"
 	PRINT "This is forth line"
-	PRINT $(1)  \\ NOT allowed  a PRINT of an item to exceed a column (1,2,3,5,6,7,8,9)
+	PRINT $(1)  // NOT allowed  a PRINT of an item to exceed a column (1,2,3,5,6,7,8,9)
 	MOVE 0,0
 	A$=""
 	COPY 3000,2000 TO A$
@@ -4566,9 +4572,9 @@ Layer 1 {
 	      CIRCLE FILL 14, RANDOM(3)*TWIPSX
 	}
 	}
-	\\COPY 6000,6000 TOP A$, 10, 200
-	\\COPY 6000,6000 TOP A$, 45
-	\\COPY 2000,2000 USE A$, 45
+	//COPY 6000,6000 TOP A$, 10, 200
+	//COPY 6000,6000 TOP A$, 45
+	//COPY 2000,2000 USE A$, 45
 	h$="	"
 	Move 0,0
 	copy scale.x, scale.y to h$
@@ -4611,10 +4617,10 @@ enemy4=FALSE
 pp=.02
 X=MOUSE.X
 Y=MOUSE.Y
-\\ simple routine name is case sensitive
+// simple routine name is case sensitive
 GOSUB basicpart
-\\MOVE x,y
-\\GOSUB ship
+//MOVE x,y
+//GOSUB ship
 SHOW
 
 TASK.MAIN 20 { 
@@ -4625,10 +4631,10 @@ TASK.MAIN 20 {
       ' COMMENT THE LINE BELOW AND PUT REFRESH TO 10 IN THE FIRST LINE
       {
             Move -(scale.x/2-x)/scale.x*300,-(scale.y/2-y)/scale.y*300 : Image h$
-            \\ PART USE $(4) (PROPORTIONAL TEXT), AND WRITE ONLY IN ONE LINE WITH NO WRAP
+            // PART USE $(4) (PROPORTIONAL TEXT), AND WRITE ONLY IN ONE LINE WITH NO WRAP
             PRINT PART $(0),@(0,0),"SPACE BAR TO FIRE OR KEY 1 TO QUIT"
 
-            PRINT PART @(0,1),STR$(NOW,"HH:MM:SS"), e1z   \\, $(0),format$("({0},{1})", sX, sY)
+            PRINT PART @(0,1),STR$(NOW,"HH:MM:SS"), e1z   //, $(0),format$("({0},{1})", sX, sY)
             
             GOSUB basicpart
             IF enemy1 THEN {
@@ -4675,7 +4681,7 @@ TASK.MAIN 20 {
             Y=MOUSE.Y
       }     
 }
-\\ UNBLOCK ESCAPE KEY
+// UNBLOCK ESCAPE KEY
 ESCAPE ON
 REFRESH 30
 THREADS ERASE
@@ -5386,14 +5392,15 @@ MODULE INFOBASIC {Set Edit !4   ' 4 chars fpr tabs in edit
 \\
 \\
 refresh 10000
-if scale.Y<8000 then window 8, window
+hide
+\\ window show again
+window 8, window 
 Form 80, 66
-BackGround {height.pixels=ceil(scale.y / twipsY) : width.pixels=ceil(scale.x / twipsX)}
-Print height.pixels
+BackGround {cls 11 :height.pixels=scale.y  div twipsY : width.pixels=scale.x div twipsX }
 if height.pixels=1024 or height.pixels/width.pixels>0.70 then
       Form  80,66
 else
-     Form   120,80
+     Form !  120,80    // we use ! to add more space for TV-MONITORS - Remove it then press Esc and then F1 to save it
   end if
 backcolor=5   'point
 oldpen=14  ' pen
@@ -5401,11 +5408,12 @@ Pen 0 {
 	cls 7
 	ico 1   ' draw icon (a png image, loaded as text as BASE64 encoded)
 	Double
-	Print Part  "  M2000 Interpreter"+str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
+	Print part "   ";~(1);" M2000 Interpreter";~(#2222bb);str$(version)+if$(revision>0->" ("+str$(revision,0)+")","")
 	Print
 	Normal
-	Report " A collection of modules for tests version 21 for ver 9.9 rev 55 and newer"
-	
+	italic
+	Report " A collection of modules for tests version 22 for M2000 Interpreter version 10 and newer revisions/versions"
+	italic
 	Pen 5{
 		cursor 0, row-1
 		Report 1, "George Karras 2020"
@@ -6309,7 +6317,7 @@ While k {
 }
 }
 MODULE DEMO1 {set Fast !
-smooth on
+Smooth on
 Rem :
  Thread.plan sequential : ComputeInterval=20: Rate=60
 \\ we can set Thread.plan before any thread created
@@ -6392,17 +6400,11 @@ Declare Alfa Form
 With Alfa, "Title", "Demo1", "UseIcon", True, "UseReverse", True  ' icon now is in the left side
 Method Alfa,"MakeStandardInfo", 1   ' 1 for English
 Def  info$, AskRet
+OpenInfo=False
 Function Alfa.InfoClick {
 	Read New X
 	If X=0 then
-	after 100 {
-			Info$={
-				This is an example
-				of  using MATH object
-				(included in M2000 Interpreter)
-				}
-			AskRet=Ask(info$,"About Demo1","","")	
-	}
+		OpenInfo=True
 	end if
 }
 \\ a string to hold static background
@@ -6541,7 +6543,7 @@ Method Alfa, "Show"
 \\ Task.Main is a Thread
 \\ ExitNow needed If we have Every in place of Task.Main
 Task.Main 50 {
-\\      If counter1>1000 Then Threads Erase : Exit
+      if OpenInfo then showinfo()
       If ExitNow Then Exit
 }
 Threads Erase
@@ -6552,8 +6554,19 @@ Declare Alfa Nothing
 Declare Math Nothing
 Print counter1, counter2
 Title "Demo Complete"
-smooth off
+Smooth off
 Set Fast   ' return to normal
+sub showinfo()
+      OpenInfo=false
+      after 100 {
+		Info$={
+			This is an example
+			of  using MATH object
+			(included in M2000 Interpreter)
+			}
+		AskRet=Ask(info$,"About Demo1","","")	
+	}
+end sub
 }
 MODULE UPDATE {beep
 Title "Info"
@@ -9276,6 +9289,7 @@ MODULE ICONS {function dummy {
 	if isWine then sp=10 : r=30 else sp=40 : r=60
 	Escape off
 	Def a,b,c
+	\\ ico is another module : write edit ico to open it
 	call ico, 2
 	read ico
 	\\gradient 5,0
@@ -9412,8 +9426,8 @@ MODULE COMPILER {Module CompilerExample {
 		Ahead=lambda Scanner (a$, offset)->{
 			=false
 			Try {
-				\\ second parameter is the offset in buffer units
-				\\ third parameter is length in bytes
+				// second parameter is the offset in buffer units
+				// third parameter is length in bytes
 				=Eval$(Scanner, offset,2*len(a$))=a$
 			}
 		}
@@ -9843,9 +9857,9 @@ MODULE COMPILER {Module CompilerExample {
 			gif, gwhile, gAssign, gSeq, gstring, gidentifier, gint, gnone
 		}
  
-		\\ Inventories are lists with keys, or keys/data (key must be unique)
-		\\ there is one type more the Invetory Queue which get same keys.
-		\\ But here not used.
+		// Inventories are lists with keys, or keys/data (key must be unique)
+		// there is one type more the Invetory Queue which get same keys.
+		// But here not used.
 		Inventory symb="Multiply":=gmul, "Divide":=gdiv, "Mod":=gmod, "Add":=gadd
 		Append  symb, "Negate":=gneg, "Not":=gnot,"Less":=glt,"Subtract":=gsub
 		Append  symb, "LessEqual":=gle, "Greater":=ggt, "GreaterEqual":=gge, "Sequence":=gSeq
@@ -9854,59 +9868,59 @@ MODULE COMPILER {Module CompilerExample {
 		Append  symb, "String":=gstring, "Identifier":=gidentifier, "Integer":=gint, ";", gnone
  
 		Inventory DataSet
-		\\ We set string as key. key maybe an empty string, a string or a number.
-		\\ so we want eash string to saved one time only.
+		// We set string as key. key maybe an empty string, a string or a number.
+		// so we want eash string to saved one time only.
 		Inventory Strings
  
 		Const nl$=chr$(13)+chr$(10), Ansi=3
 		Def z$, lim, line$, newvar_ok, i=0
 		Document message$=nl$
-		Global pc     \\ functions have own scope, so we make it global, for this module, and childs.
+		Global pc     // functions have own scope, so we make it global, for this module, and childs.
  
 		Dim lines$()
-		s$=filter$(s$,chr$(9))   \\ exclude tabs
-		Lines$()=piece$(s$,nl$) \\ break to lines
+		s$=filter$(s$,chr$(9))   // exclude tabs
+		Lines$()=piece$(s$,nl$) // break to lines
 		lim=len(Lines$())
 		Flush ' empty stack (there is a current stack of values which we use here)
  
 		Load_Ast()
 		If not stack.size=1 Then Flush : Error "Ast not loaded"
-		AST=array   \\ pop the array from stack
+		AST=array   // pop the array from stack
 		Document Assembly$, Header$
  
-		\\ all lines of assembly goes to stack. Maybe not in right order.
-		\\ Push statement push to top, Data statement push to bottom of stack
+		// all lines of assembly goes to stack. Maybe not in right order.
+		// Push statement push to top, Data statement push to bottom of stack
  
 		CodeGenerator(Ast)
 		Data  code$("halt") ' append to end of stack
-		\\ So now we get all data (letters) from stack
+		// So now we get all data (letters) from stack
 		While not empty
 			Assembly$=letter$+nl$
 		end while
-		\\ So now we have to place them in order
+		// So now we have to place them in order
 		Sort Assembly$
  
-		\\ Let's make the header
+		// Let's make the header
 		Header$=format$("Datasize: {0} Strings: {1}", Len(Dataset),Len(strings))
-		\\ we use an iterator object, str^ is the counter, readonly, but Eval$() use it from object.
+		// we use an iterator object, str^ is the counter, readonly, but Eval$() use it from object.
 		str=each(strings)    
 		While str
 			Header$=nl$+Eval$(str)
 		End while
 		Assembly$=nl$
-		\\ insert to line 1 the Header
+		// insert to line 1 the Header
 		Insert 1 Assembly$=Header$
-		\\ Also we check for warnings
+		// Also we check for warnings
 		If len(message$)>2 then Assembly$="Warnings: "+nl$+message$
-		\\ So now we get a report
-		\\ (at each 3/4 of window's lines, the printing stop and wait for user response, any key)
+		// So now we get a report
+		// (at each 3/4 of window's lines, the printing stop and wait for user response, any key)
 		Push Assembly$
 		Exit
 		Report Assembly$
 		Clipboard Assembly$
 		Save.Doc Assembly$, "code.t", Ansi
 		End
-		\\ subs have 10000 limit for recursion but can be extended to 1000000 or more.
+		// subs have 10000 limit for recursion but can be extended to 1000000 or more.
 		Sub CodeGenerator(t)
  
 			If len(t)=3 then
@@ -10017,19 +10031,19 @@ MODULE COMPILER {Module CompilerExample {
 		End Sub
 	}
 	Module Virtual_Machine_Interpreter (a$){
-		\\ function to extract string, replacing escape codes.
+		// function to extract string, replacing escape codes.
 		Function GetString$(a$) {
 			s=instr(a$, chr$(34))
 			m=rinstr(a$,chr$(34))-s
 			if m>1 then
-				\\ process escape codes
+				// process escape codes
 				=format$(mid$(a$, s+1, m-1))
 			else
 				=""
 			end if
 		}
  		const nl$=chr$(13)+chr$(10)
-		\\ we can set starting value to any number  n where 0<=n<=232
+		// we can set starting value to any number  n where 0<=n<=232
 		enum op {	halt_=232, add_, sub_, mul_, div_, mod_, not_, neg_, and_, or_, lt_,
 			    	gt_, le_, ge_, ne_, eq_, prts_, prti_, prtc_, store_, fetch_, push_,
 				jmp_, jz_
@@ -10058,25 +10072,25 @@ MODULE COMPILER {Module CompilerExample {
 		Append  func, ge_:=lambda->{Return stack_, sp+1:=uint(if(sint(eval(stack_, sp+1))>=sint(eval(stack_, sp))->-1, 0)):sp++}
 		Append  func, ne_:=lambda->{Return stack_, sp+1:=uint(if(eval(stack_, sp+1)<>eval(stack_, sp)->-1, 0)):sp++}
 		Append  func, eq_:=lambda->{Return stack_, sp+1:=uint(if(eval(stack_, sp+1)=eval(stack_, sp)->-1, 0)):sp++}
-		Append  func, prts_:=lambda->{Print #-2, string$(eval(stack_,sp));: Refresh:sp++}
+		Append  func, prts_:=lambda->{Print #-2, strings$(eval(stack_,sp));: Refresh:sp++}
 		Append  func, prti_:=lambda->{Print #-2, str$(sint(eval(stack_,sp)),0);: Refresh:sp++}
 		Append  func, prtc_:=lambda->{Print #-2, chrcode$(eval(stack_,sp));: Refresh:sp++}
 		Rem : Form 120, 60 ' change console width X height to run Ascii Mandlebrot example
-		\\ change Report with Print #-2,   (report stop when scrolling 3/4 of height of console, waiting key or mouse key to continue)
+		// change Report with Print #-2,   (report stop when scrolling 3/4 of height of console, waiting key or mouse key to continue)
 		Print #-2,  "Virtual Assembly Code:"+{
 		}+a$
 		Print "Prepare Byte Code"
  
-		\\ get datasize
+		// get datasize
 		a$=rightpart$(a$, "Datasize:")
 		m=0
 		data_size=val(a$, "int", m)
 		a$=mid$(a$, m)
-		\\ make stack
+		// make stack
 		if data_size>0 then Buffer Clear stack_ as long*data_size
-		\\ dim or redim buffer append 1000 long as is.
+		// dim or redim buffer append 1000 long as is.
 		Buffer stack_ as long*(1000+data_size)
-		\\ get strings
+		// get strings
 		a$=rightpart$(a$, "Strings:")
 		m=0
 		strings=val(a$, "int", m)
@@ -10114,7 +10128,7 @@ MODULE COMPILER {Module CompilerExample {
 			end if
 		Always
 		Print "Press any key" : Push key$ : Drop
-		\\ Prepare VM
+		// Prepare VM
 		let pc=0, sp=len(stack_) div 4
 		do
 			b=func(eval(code_, pc))
@@ -10625,53 +10639,53 @@ Dim A(10)
 A(3)=zz()
 A(3).bb
 }
-MODULE OOP1 {\\ events without using Event objects
-\\ We use weak reference to register events in eventhandler
-\\ if A is a variable a &A is a string contain the actuall name of A, and this is a weak reference
-\\ Normally when we do a Read &B the read instruction get the string as a name for  a variable  and check if exist as variable
-\\ so Read make references from weak references
-\\ M2000 has also the pointer. A pointer is different from the reference, because has nothing to do with name of entities
-\\ For example  a=(1,2,3,4) set a as a pointer to array. Passing by value a we pass the object by a pointer.
-\\ We can pass &a so if we change the array inside a module or funcion, then we get the change back
-\\ A weak reference can be stored as string, and maybe later be invalid, if the storage, an array, passed back as return value,
-\\ or pushed to stack of values, and the module where we defined the refered entitites, terminate, and clear all own variables.
+MODULE OOP1 {// events without using Event objects
+// We use weak reference to register events in eventhandler
+// if A is a variable a &A is a string contain the actuall name of A, and this is a weak reference
+// Normally when we do a Read &B the read instruction get the string as a name for  a variable  and check if exist as variable
+// so Read make references from weak references
+// M2000 has also the pointer. A pointer is different from the reference, because has nothing to do with name of entities
+// For example  a=(1,2,3,4) set a as a pointer to array. Passing by value a we pass the object by a pointer.
+// We can pass &a so if we change the array inside a module or funcion, then we get the change back
+// A weak reference can be stored as string, and maybe later be invalid, if the storage, an array, passed back as return value,
+// or pushed to stack of values, and the module where we defined the refered entitites, terminate, and clear all own variables.
 
-\\for this example we make "static" groups (as named the user objects in M2000).
-\\The word static used for static variables which stay in every call of a module or function, from the same execution object.
-\\ (perhaps a thread which is a separate execution object call a module with specific for the thread static variables)
-\\ Here we don't use threads. We have one loop, which call one function of the EventHandler, the observe()
-\\ if this functions return true then the loop exit, and the program terminate
+//for this example we make "static" groups (as named the user objects in M2000).
+//The word static used for static variables which stay in every call of a module or function, from the same execution object.
+// (perhaps a thread which is a separate execution object call a module with specific for the thread static variables)
+// Here we don't use threads. We have one loop, which call one function of the EventHandler, the observe()
+// if this functions return true then the loop exit, and the program terminate
 
 
-\\we have three classes (they are global functions, which construct groups)
-\\ The mouseListene and the keylistener, and the EventHandler
-\\ Inside EventListener we have one more class (this isn't global)
-\\ The Widdget class
-\\ This class has the state for an event, and used from button function, a member of EventHandler
-\\ So with this EventHandler we can make buttons, with a name. The function button() return a Group
-\\ So for the example we make three buttons to three named groups, B1, B2 and B3
-\\ Each widget has a weak reference to EventHandler and a name, when constructed,
-\\ but has no listeners.
-\\ Also the listeners have to link to EventHandler, and this is the work of EventList() function
-\\ The Eventlist() is a member of EventHandler and get a listener class, and return a handler
-\\ To register an event we have to use register method passing the handler and the weak reference and a  button (widget)
-\\ So buttons and handlers are entities from EventHandler
-\\ The actual events are not part of the EventHandler. They are inside the listeners classes.
-\\ Each listener has a contruction member (same name as the class name),
-\\ a register member to add more widgets to same listener,
-\\ and the  CheckEvent(), which return true if event happen.
+//we have three classes (they are global functions, which construct groups)
+// The mouseListene and the keylistener, and the EventHandler
+// Inside EventListener we have one more class (this isn't global)
+// The Widdget class
+// This class has the state for an event, and used from button function, a member of EventHandler
+// So with this EventHandler we can make buttons, with a name. The function button() return a Group
+// So for the example we make three buttons to three named groups, B1, B2 and B3
+// Each widget has a weak reference to EventHandler and a name, when constructed,
+// but has no listeners.
+// Also the listeners have to link to EventHandler, and this is the work of EventList() function
+// The Eventlist() is a member of EventHandler and get a listener class, and return a handler
+// To register an event we have to use register method passing the handler and the weak reference and a  button (widget)
+// So buttons and handlers are entities from EventHandler
+// The actual events are not part of the EventHandler. They are inside the listeners classes.
+// Each listener has a contruction member (same name as the class name),
+// a register member to add more widgets to same listener,
+// and the  CheckEvent(), which return true if event happen.
 
-\\The EventHandler pass &this  as own weak reference to each new wigdet.
-\\The Listeners added to an array inside the EventHandler with a list of weak references to widgets.
-\\The observe() function cehck all stored listeners, calling the CheckEcent() on listener.
-\\ if an event happen then all subscribers (all widgets) get a call in callback()  function with the name of the event
-\\ each widget then using the weak refrence to EventHandler do a query passig an id, an iinfo string (what$) and a reference of it
-\\ The query method (module in M2000) use id and what$ to display information, and use reference to read the caption of widget
-\\ perhaps the caption may change, so we can't stored this in listener's list in EventHandler.
+//The EventHandler pass &this  as own weak reference to each new wigdet.
+//The Listeners added to an array inside the EventHandler with a list of weak references to widgets.
+//The observe() function cehck all stored listeners, calling the CheckEcent() on listener.
+// if an event happen then all subscribers (all widgets) get a call in callback()  function with the name of the event
+// each widget then using the weak refrence to EventHandler do a query passig an id, an iinfo string (what$) and a reference of it
+// The query method (module in M2000) use id and what$ to display information, and use reference to read the caption of widget
+// perhaps the caption may change, so we can't stored this in listener's list in EventHandler.
 
-\\ So from observe(), pressing 1 or 2 keys or mouse key, we can call  one or more  widget's callback(),
-\\ which all  call back the query method, which the later read the widget caption.
-\\ B1 listen 1 and 2 keys, B2 listen 1 key, B3 listen a mouse key (right key)
+// So from observe(), pressing 1 or 2 keys or mouse key, we can call  one or more  widget's callback(),
+// which all  call back the query method, which the later read the widget caption.
+// B1 listen 1 and 2 keys, B2 listen 1 key, B3 listen a mouse key (right key)
 
 
 
@@ -10692,7 +10706,7 @@ Module OOP {
 	      module register {
 	            .auto++
 	            dim .ref$(.auto)
-	            read .ref$(.auto-1)   \\ weak reference
+	            read .ref$(.auto-1)   // weak reference
 	      }
 	      function CheckEvent {
 	            =Mouse=.yourkey
@@ -10708,7 +10722,7 @@ Module OOP {
 	      module register {
 	            .auto++
 	            dim .ref$(.auto)
-	            read .ref$(.auto-1)   \\ weak reference
+	            read .ref$(.auto-1)   // weak reference
 	      }
 	      function CheckEvent {
 	            =keypress(.yourkey)
@@ -10718,34 +10732,34 @@ Module OOP {
 	      auto, autoevents, EnableEvents
 	      Dim Events()
 	      class widget {
-	            \\ in classes we can define variables without value
-	            ref$  \\ weak reference
+	            // in classes we can define variables without value
+	            ref$  // weak reference
 	            id, caption$, Enabled=True
 	            module linkme {
 	                  read .ref$
 	            }
-	            module widget {  \\ this is used as construction function, but is a module
+	            module widget {  // this is used as construction function, but is a module
 	                  read .id
 	                  read .caption$
 	            }
 	            function Callback {
 	                  read some$
-	                  push .ref$ : read &ref  \\ this is the link
+	                  push .ref$ : read &ref  // this is the link
 	                  =ref.query(.id, some$, &this)
 	            }
 	      }
-	      function button {    \\ this is the button construction
+	      function button {    // this is the button construction
 	         .auto++
 	         read txt$
 	         makeme =.widget(.auto,txt$)  
 	         makeme.linkme &this
-	         =makeme   \\ we make a group a floating group to export
+	         =makeme   // we make a group a floating group to export
 	      }
 	      function EventList {
-	            handle=.autoevents  \\ we execute some commands..
+	            handle=.autoevents  // we execute some commands..
 	            .autoevents++
 	            dim .Events(.autoevents)
-	            read .Events(handle)   \\ .. and then we can read function parameter
+	            read .Events(handle)   // .. and then we can read function parameter
 	            =handle
 	      }
 	      module register {
@@ -10759,9 +10773,9 @@ Module OOP {
 	                 for .Events(i) {
 	                        if  .checkevent() then {
 	                              for j=0 to .auto-1 {
-	                                    for this {     \\ we use a for this {} to make temporary variables
-	                                                           \\ because we can't relink a link.  so we make a fresh here
-	\\              the link statement to this:    push  .ref$(j) : read &Link
+	                                    for this {     // we use a for this {} to make temporary variables
+	                                                           // because we can't relink a link.  so we make a fresh here
+	//              the link statement to this:    push  .ref$(j) : read &Link
 	                                          link weak .ref$(j) to &link
 	                                          call link.callback(.name$)
 	                                     }
@@ -10785,14 +10799,14 @@ Module OOP {
 	            }
 	      }
 	}
-	EventHandler=EventHandler()  \\ create handler
-	B1=EventHandler.button("Button1")  \\ create subjects
+	EventHandler=EventHandler()  // create handler
+	B1=EventHandler.button("Button1")  // create subjects
 	B2=EventHandler.button("Button2") 
 	B3=EventHandler.button("Button3") 
 	
 	for EventHandler {
 	      PressKeyOne=.Eventlist(keylistener(49))
-	      .Register  PressKeyOne, &B1  \\register event to subject
+	      .Register  PressKeyOne, &B1  //register event to subject
 	      .Register  PressKeyOne, &B2 
 	      .Register .Eventlist(keylistener(50)) , &B1 
 	      .Register .Eventlist(Mouselistener(1)) , &B3 
@@ -11711,7 +11725,7 @@ again:
       }
        ShowMaze()
       Cursor 0,Height-1
-      Print Part $(6,width), ~(15,0,0),"Press a key o rmouse button after any drawing of the maze to exit  - "+format$("{0:3}",tc)
+      Print Part $(6,width), ~(15,0,0),"Press a key or mouse button after any drawing of the maze to exit  - "+format$("{0:3}",tc)
       Refresh
       counter=10
       every 200 {
@@ -12245,7 +12259,7 @@ MODULE CALENDAR (YEAR, LOCALEID) {
             PRINT
             FOR I=1 TO 6 {
                   MONTH=I+J*6
-                  PRINT  PART @((I-1)*22), $(2,21), UCASE$(LOCALE$(55+MONTH))
+                  PRINT  PART @((I-1)*22+1), $(2,21), UCASE$(LOCALE$(55+MONTH))
             }
             PRINT
             DIM SKIP(1 TO 6), COUNT(1 TO 6), D(1 TO 6)=1
@@ -13001,7 +13015,7 @@ MODULE UTF8 {Module checkit {
             	We have to read more than one byte to make it one character. But maybe we have less, so we have to stop reading, if that happen. So when we need more we try to get more, and maybe we get error. We use a Try block to get the error in the code, and do something for it.
             	We use buffers as memory area to get the data at a predefined length. So when we use:
             	Get #file_Handler, two
-            	intrerpreter check that two is a buffer, get the length and try to get the same length of bytes to that buffer. Each buffer have a base structure and maybe a count value, of how many of them can be stored. The folowwing statement say that the base structure is a byte and we have two of them
+            	intrerpreter check that two is a buffer, get the length and try to get the same length of bytes to that buffer. Each buffer have a base structure and maybe a count value, of how many of them can be stored. The following statement say that the base structure is a byte and we have two of them
             	Buffer Two as byte*2
             	The variable Two is a reference to an object. Two(0) is the real address of offset 0, of buffer two.
             	Here we don't use address, only offsets. We can read using Eval() the byte at any offset, included in the buffer, unless we get an error. So Eval(two, 0) return the byte as an assign value (0 to 255). Also we can use the string reading, Eval$(two,0,2) which return a string with 2 bytes, from offset 0, from buffer referred by two.
@@ -14019,9 +14033,9 @@ BASE 0
 }
 Puzzle15
 }
-MODULE CRYPTO {\\ https://en.wikipedia.org/wiki/RIPEMD
-\\ The original RIPEMD function was designed in the framework of the EU project RIPE (RACE Integrity Primitives Evaluation) in 1992
-\\ RIPEMD-160 is 160bit cryptographic hash function.
+MODULE CRYPTO {// https://en.wikipedia.org/wiki/RIPEMD
+// The original RIPEMD function was designed in the framework of the EU project RIPE (RACE Integrity Primitives Evaluation) in 1992
+// RIPEMD-160 is 160bit cryptographic hash function.
 
 Module Checkit {
 	Function Prepare_RiPeMd_160 {
@@ -14063,22 +14077,22 @@ Module Checkit {
 		T(3)=lambda (B,C,D)->binary.or(binary.and(B,D), binary.and(C,binary.not(D)))
 		T(4)=lambda ->binary.xor(number, binary.or(number, binary.not(number)))
 		
-		\\ no need for variables we read form stack with number
+		// no need for variables we read form stack with number
 		TT(0)=lambda ->binary.xor(number, binary.or(number, binary.not(number)))
 		TT(1)=lambda (BB,CC,DD)->binary.or(binary.and(BB,DD), binary.and(CC,binary.not(DD)))	
 		TT(2)=lambda ->binary.xor(binary.or(number, binary.not(number)), number)
 		TT(3)=lambda (BB,CC,DD)->binary.or(binary.and(BB,CC), binary.and(binary.not(BB),DD))	
 		TT(4)=lambda ->binary.xor(binary.xor(number,number),number)
 		
-		\\ return of this function is a lambda function
-		\\ all arrays are closures to this lambda
+		// return of this function is a lambda function
+		// all arrays are closures to this lambda
 		=lambda K(),K1(),TT(), T(),r(),r1(), s(), s1() (&message$, ansi as boolean=true, ansiid=1033)-> {
 			set fast!
 			def h0 = 0x67452301, h1 = 0xEFCDAB89, h2 = 0x98BADCFE
 			def h3 = 0x10325476, h4 = 0xC3D2E1F0
 			def i, j, l, padding, l1, blocks, acc, f64 as boolean=true, oldid
 			if ansi then oldid=locale : locale ansiid
-			\\ we use a buffer of 64 bytes
+			// we use a buffer of 64 bytes
 			buffer clear message as byte*64
 			l=len(message$)*if(ansi->1,2 )
 			if binary.and(l,63)>55 then  padding=64 
@@ -14090,7 +14104,7 @@ Module Checkit {
 			blocks=l1 div 64
 rem
 			Print "blocks:";blocks
-			\\ now prepare the buffer
+			// now prepare the buffer
 			PrepareBuffer()
 			def decimal  A, B, C, D, E, AA, BB, CC, DD, EE, T, TT
 			do
@@ -14118,7 +14132,7 @@ rem
 rem
 			print
 			buffer ans as byte*20
-			\\ we put ulong (long ar ulong in buffers)
+			// we put ulong (long ar ulong in buffers)
 			Return ans, 0:=h0 as long, 4:=h1 as long,8:=h2 as long, 12:=h3 as long, 16:=h4 as long
 			=ans
 			if ansi then locale oldid
@@ -14142,8 +14156,8 @@ rem
 				end if
 			End Sub
 			sub LoadPart(many)
-				\\ str$() convert to ansi, one byte per character
-				\\ using 1033 as Ansi language
+				// str$() convert to ansi, one byte per character
+				// using 1033 as Ansi language
 				if ansi then
 					Return message, 0:=str$(mid$(message$,1+acc, many))
 				else
@@ -14155,7 +14169,7 @@ rem
 	}
 	Module TestHash (RIPEMD){
 		Flush
-		\\ push data to stack of values, as fifo (each entry append to end of stack)
+		// push data to stack of values, as fifo (each entry append to end of stack)
 		Data "b3be159860842cebaa7174c8fff0aa9e50a5199f","Rosetta Code"
 		Data "9c1185a5c5e9fc54612808977ee8f548b2258d31",""
 		Data "0bdc9d2d256b3ee9daae347be6f4dc835a467ffe","a"
@@ -14170,7 +14184,7 @@ rem		Data "52783243c1697bdbe16d37f97f68f08325dc1528", String$("a",1000000)
 		While not empty
 			Read check$, text$
 			Print "RIPEMD160 for ";quote$(Left$(if$(len(text$)>30->left$(text$,27)+"...",  text$),30))
-			\\ pass text$ by reference
+			// pass text$ by reference
 			Display(RIPEMD(&text$))
 		End While
 		
@@ -14691,15 +14705,18 @@ MODULE PYTH {MODULE Pythagoras_tree {
 Pythagoras_tree
 }
 MODULE PYTH1 {MODULE Pythagoras_Example{
-	CLS 5, 0  ' MAGENTA, split line = 0  
-	PEN 14  ' YELLOW
-	\\ Linux smoothing not work (we can use the statement but without effect)
+	CLS 5, 0  	' MAGENTA, split line = 0  
+	PEN 14		' YELLOW
+	// Linux smoothing not work (we can use the statement but without effect)
 	IF ISWINE ELSE SMOOTH ON
 	\\ PYTHAGORAS TREE
-	\\ by definition all variables ar type of a double
-	GLOBAL p=7, p4=PI/4, p2=PI/2, s2=SQRT(2)/2
+	// by definition all variables ar type of a double
+	GLOBAL CONST p4=PI/4, p2=PI/2, s2=SQRT(2)/2
+	CONST right=1
 	MODULE center_p (r, t){
+		CONST p4
 		MODULE pythagoras_tree (r, dx, depth) {
+			CONST p4, p2,s2
 			r2=r-p2
 			DRAW ANGLE r, dx
 			DRAW ANGLE r2, dx
@@ -14722,18 +14739,35 @@ MODULE PYTH1 {MODULE Pythagoras_Example{
 	}
 	r=PI/3
 	pixels=MIN.DATA(SCALE.X, SCALE.Y)/TWIPSX/8
-	Refresh 1000/25
-	center_p r, pixels*TWIPSX
-	center_p r+PI, pixels*TWIPSX
-	Refresh 50
-	CopyImageToClipboard()
- 
-	Sub CopyImageToClipboard()
-		LOCAL Scr$=""
+	REFRESH 1000/25
+	// FIRST TREE
+	CALL center_p r, pixels*TWIPSX
+	\\ SECOND TREE
+	CALL center_p r+PI, pixels*TWIPSX
+	REFRESH 50
+	CopyDrawingToClipboard()
+	REM CopyImageToClipboard()
+	END
+	
+	SUB CopyImageToClipboard()
+		LOCAL scr$=""
 		MOVE 0,0
-		COPY SCALE.X, SCALE.Y TO Scr$
-		CLIPBOARD Scr$
+		COPY SCALE.X, SCALE.Y TO scr$
+		CLIPBOARD scr$
 	END SUB
+	SUB CopyDrawingToClipboard()
+		LOCAL scr
+		DRAWING {
+			PEN 0 {
+				CALL center_p r, pixels*TWIPSX
+				CALL center_p r+PI, pixels*TWIPSX
+			}
+		} AS scr
+		CLIPBOARD scr
+		REM LIST
+		REPORT right,"A COPY  AS DRAWING TO CLIPBOARD DONE"
+	END SUB
+	
 }
 Pythagoras_Example
 }
@@ -14951,11 +14985,11 @@ Module BankerAlgo {
 BankerAlgo
 keyboard "Info"+chr$(13)
 }
-MODULE MATMUL {\\ http://www.rosettacode.org/wiki/Matrix_multiplication#M2000_Interpreter
+MODULE MATMUL {// http://www.rosettacode.org/wiki/Matrix_multiplication#M2000_Interpreter
 Module CheckMatMult2 {
-	\\ Matrix Multiplication
-	\\ pass arrays by reference
-	\\ if we change a passed array here, to a new array then this change also the reference array.
+	// Matrix Multiplication
+	// pass arrays by reference
+	// if we change a passed array here, to a new array then this change also the reference array.
 	Function MatMul(&a(),&b()) {
 		if dimension(a())<>2 or dimension(b())<>2 then Error "Need two 2D arrays "
 		let a2=dimension(a(),2), b1=dimension(b(),1)
@@ -14967,14 +15001,14 @@ Module CheckMatMult2 {
 		for i=1 to a1 : let ia=i+abase : for j=1 to b2 : let jb=j+bBase1 : for k=1 to a2
 		c(i,j)+=a(ia,k+aBase1)*b(k+bBase,jb)
 		next k : next j : next i
-		\\ redim to base 0
+		// redim to base 0
 		dim base 0, c(a1, b2)
 		=c()
 	}
-	\\ define arrays with different base per dimension
-	\\ res() defined as empty array
+	// define arrays with different base per dimension
+	// res() defined as empty array
 	dim a(10 to 13, 4), b(4, 2 to 5), res()
-	\\ numbers from ADA task
+	// numbers from ADA task
 	a(10,0)= 1, 1, 1, 1, 2, 4, 8, 16, 3, 9, 27, 81, 4, 16, 64, 256
 	b(0,2)= 4, -3, 4/3, -1/4, -13/3, 19/4, -7/3, 11/24, 3/2, -2, 7/6, -1/4, -1/6, 1/4, -1/6, 1/24
 	res()=MatMul(&a(), &b())
@@ -16363,22 +16397,22 @@ MODULE WUMPUS {Module WumpusGame {
 cls,0
 WumpusGame
 }
-MODULE FORTH {\\ https://rosettacode.org/wiki/Fixed_length_records#Forth_Blocks
-\\ A Forth block is 1024 bytes. Source code is stored as 16 lines of 64 characters each (no newline character or sequence to mark the end of a line).
+MODULE FORTH {// https://rosettacode.org/wiki/Fixed_length_records#Forth_Blocks
+// A Forth block is 1024 bytes. Source code is stored as 16 lines of 64 characters each (no newline character or sequence to mark the end of a line).
 
 Form 80,50
 Print "Forth's Blocks"
-\\ Forth Blocks
+// Forth Blocks
 Structure Line16 {
       a`Line as byte*64
 }
 NewBlock=lambda Line16 -> {
       Buffer a`Block as Line16*16
-      \\ fill spaces
+      // fill spaces
       Return a`Block, 0:=str$(string$(" ",1024))
       =a`Block
 }
-\\ Events are value types, but for closures and groups are reference types
+// Events are value types, but for closures and groups are reference types
 Event Doit {
       Read something$
 }
@@ -16390,7 +16424,7 @@ DisplayBlock= Lambda NewBlock, Line16, Doit, Header (Blocks`File$,Block`Number, 
             Get #f,Page1
       Close #f
       Document NewDoc$
-      \\ need to convert from Ansi
+      // need to convert from Ansi
       Call Event Header, "Block:"+Str$(Block`Number)
       oldlocale=locale
       locale UseLocale
@@ -16408,27 +16442,27 @@ Document ForthCode$={( Large letter F)
       : BAR     MARGIN 5 STARS ;
       : F       BAR BLIP BAR BLIP BLIP CR ;
       }
-\\ Make Document bigger than 16 lines
-\\ doc.par(ForthCode$)  return paragraphs (here we have no wrap)
-\\ actuall lines per layer can be found from Report (the renderer)
-\\ using Reportlines. layer can be the printer page.
+// Make Document bigger than 16 lines
+// doc.par(ForthCode$)  return paragraphs (here we have no wrap)
+// actuall lines per layer can be found from Report (the renderer)
+// using Reportlines. layer can be the printer page.
 ForthCode$=string$(ForthCode$,5)
 Print "Make Block"
 Page1=NewBlock()
 Locale 1033
 Blocks`File$="Forth Blocks"
 Block`Number=1
-\\ Apppend three times same blocks
+// Apppend three times same blocks
 For Pass=1 to 3
       If Doc.Len(ForthCode$)>0 then
             For i=1 to Doc.par(ForthCode$)-1
-            \\ we give order number but Paragraph$ use unique number for paragraphs
-            \\ if we didn't delete or insert lines, then these two are the same
+            // we give order number but Paragraph$ use unique number for paragraphs
+            // if we didn't delete or insert lines, then these two are the same
                   Print Paragraph$(ForthCode$, Paragraph(ForthCode$,i))
-                  \\ convert to Ansi using Locale
-                  \\ offset from 0, so minus 1
-                  \\ offset 1 is at len(Line16)
-                  \\ Page1(0) is the real address, but here doesn't matter
+                  // convert to Ansi using Locale
+                  // offset from 0, so minus 1
+                  // offset 1 is at len(Line16)
+                  // Page1(0) is the real address, but here doesn't matter
                   Return Page1, (i-1) mod 16:=Str$(Paragraph$(ForthCode$, Paragraph(ForthCode$,i)))
                   if i mod 16=0 then Gosub SaveBlock
             Next i
@@ -16436,11 +16470,11 @@ For Pass=1 to 3
             if Not i mod 16=0 then  Gosub SaveBlock
       End if
 Next Pass
-\\ now we read from disk
+// now we read from disk
 Class DocumentKeeper {
       Document Text$
       Function AppendLine(aline$) {
-            \\ right trim$
+            // right trim$
             .Text$<=Mid$(Trim$("*"+aline$),2)+{
             }
       }
@@ -16468,7 +16502,7 @@ End
 SaveBlock:
       Print "Save as Number ";Block`Number
       If Exist(Blocks`File$) then 
-            \\ check if there is space for this block
+            // check if there is space for this block
             If Not filelen(Blocks`File$) div 1024>=Block`Number-1 Then
                   Error "Wrong Block Number"
             End if
@@ -16477,7 +16511,7 @@ SaveBlock:
             Open Blocks`File$ for output as #f
             Close #f
             Wait 100
-            \\ or Error "Empty File" if we wish only read
+            // or Error "Empty File" if we wish only read
             If Block`Number<>1 then Error "Wrong Block Number"
       End if
       Open Blocks`File$ for append as #f
@@ -16742,7 +16776,7 @@ MODULE CLOCK {Αν Έγκυρο(ok) Αλλιως Πληκτρολόγιο "Clock
 Ανανέωση 5000
 Φόρμα
 ομαλά ναί
-Παράθυρο 16, Παράθυρο
+Παράθυρο 16, Συσκευή
 Οθόνη 5,0
 Πενα 14
 Περιθώριο {Πένα 14}
@@ -17280,8 +17314,8 @@ Print a$, $(0)   ' return to normal text
 if random(1,2)=1 then Print else Print Under
 Report a$
 }
-MODULE CS {Clear \\ Clear all variables/objects
-Flush \\ Empty the stack
+MODULE CS {Clear // Clear all variables/objects
+Flush // Empty the stack
 first$={using System;
             using System.Drawing;
             using System.Windows.Forms;
@@ -17377,11 +17411,11 @@ With Run1,"MenuStyle", True, "MenuWidth", 3000,"menuEnabled" as Comp.Enabled()
 With Help1,"MenuStyle", True, "MenuWidth", 3000 
 With File1, "MenuEnabled" As mEnable()
 For This {
-      mi$="MenuItem"  \\ is a temporary variable only for For This Block
+      mi$="MenuItem"  // is a temporary variable only for For This Block
       With File1, "MenuGroup","This"
       Method File1, mi$,"Open",True
       Method File1, mi$,"Save",True
-      Method File1, mi$,""    \\  only  a line here
+      Method File1, mi$,""    //  only  a line here
       Method File1,"MenuRadio","txt files",True,False
       Method File1,"MenuRadio","cs files",True,True
       
@@ -17523,7 +17557,7 @@ Function Run1Status() {
       end if
 }
 Function File1.MenuChecked {
-Read New RadioIndex \\ 3 or 4
+Read New RadioIndex // 3 or 4
 If RadioIndex =3 Then {
       After 30 { Static a$="."+File.type$(Filename$), b$=File.name$(Filename$)
       Filename$=File.path$(Filename$)+Left$(b$,Len(b$)-Len(a$))+".txt"
@@ -17546,17 +17580,17 @@ If RadioIndex =3 Then {
 
 }
 Function File1.DblClick {
-\\ we use functions As subs here
-\\ each function and each module have a name (define a namespace)
-\\ but here real module name is the File1.DblClick() host module
-\\ this is done because is a Gui Event Service Function
-\\ and is Call With Local tag (Call Local)
+// we use functions As subs here
+// each function and each module have a name (define a namespace)
+// but here real module name is the File1.DblClick() host module
+// this is done because is a Gui Event Service Function
+// and is Call With Local tag (Call Local)
       Read New File1index
       Local cont, cont2, f$, NL$={
       }
       File1index++
-      \\ Because we want some jumps..we use  On Goto
-      \\ on Goto need here a block
+      // Because we want some jumps..we use  On Goto
+      // on Goto need here a block
       {
       On File1index Goto Open1, Save1, ExitNow, ExitNow, ExitNow, ExitNow, Save2, ExitNow,  Unload
 Exitnow:
@@ -17580,7 +17614,7 @@ Open1:
            
            Caption$=TitleStr$(File.Name$(Filename$)) +" - C# Editor"
            lookpath$=file.path$(Filename$)
-           \\ silent means here without refresh
+           // silent means here without refresh
            With Pad, "SelStartSilent", 0, "SellengthSilent",0 
            Pad.text$=BackUp$
            } Else Pad.text$="": Clear BackUp$
@@ -17756,7 +17790,7 @@ Function Run1.DblClick {
       end select
 }
 Function Help1.DblClick {
-     rem  Read New Help1index  \\ we get the number without variable
+     rem  Read New Help1index  // we get the number without variable
       select case Number
       case 0
       {
@@ -17782,7 +17816,7 @@ Function Notepad.InfoClick {
     If X=0 Then Call Local Help1.DblClick(0)  ' 0 for first menu item
 }
 Call Local Notepad.Resize()
-\\ open As modal
+// open As modal
 Title "", 0
 Call local cs_choose()
 Call Local Bright()
@@ -20750,8 +20784,8 @@ Font "Verdana"
 Bold 1
 PEN 14
 CLS,0
-If Version<9.9 then Error "No proper M2000 version (must be >=9.9)"
-If Version=9.9 and revision<53 then Error "No proper M2000 revision for version 9.9"
+If Version<10 then Error "No proper M2000 version (must be >=9.9)"
+// If Version=9.9 and revision<53 then Error "No proper M2000 revision for version 9.9"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -20901,10 +20935,10 @@ Sub Mes()
 	Wait 100
 End Sub
 }
-MODULE CHESSGAME {\\ George Karras, 2019
+MODULE CHESSGAME {\\ George Karras, 2020
 \\ Chess Example (a big one)
 \\ Example Using sprites
-\\ Rev. 5
+\\ Rev. 6
 \\ to add a chess engine:
 \\ at m2000 console type: win dir$
 \\ paste to that folder the engine.exe
@@ -21327,7 +21361,7 @@ if module(info) then keyboard "info"+chr$(13)
 Flush
 set switches "-inp"
 escape off
-Window 12,0
+Window 12, window
 form
 form ;
 About ! ""
@@ -21931,15 +21965,15 @@ Function GetMove$(Fen$)
 		while  Engine.HasLine
 			method Engine, "GetLine" as aLine$
 			if left$(aLine$,8)="bestmove" then exit
-                     End While
-		if left$(aLine$,8)="bestmove" then =piece$(aLine$," ", 2) : exit
-	}		
+		End While
+		if left$(aLine$,8)="bestmove" then =piece$(aLine$," ", 2)
+	}
 End Function
 initengine:
-declare Engine SHELLPIPE
-with Engine, "Active" as Engine.Active, "Hasline" as Engine.HasLine
-Method Engine, "Run",  enginepath$ as OkEngine
-if OkEngine=0 then  Method Engine, "SendLine", "ucinewgame"
+	declare Engine SHELLPIPE
+	with Engine, "Active" as Engine.Active, "Hasline" as Engine.HasLine
+	Method Engine, "Run",  enginepath$ as OkEngine
+	if OkEngine=0 then  Method Engine, "SendLine", "ucinewgame"
 Return
 }
 MODULE URLNEW {Stack New {
@@ -22369,59 +22403,62 @@ Method Form1, "Show", 1
 Threads Erase
 Declare Form1 Nothing
 }
-MODULE PRMASTER {      let col=8, flip=True, oldbold=Bold
-      Bold 0
-      Refresh 1000
-      Form ! (100 div col)*col,32
-      Cls 5
-      Pen 14
-      For i=0 To Width-1 Step col {
-            If flip Then {
-                  Print @(i,0,i+col,Height,#222222,3),
-            } Else Print @(i,0,i+col,Height,5,3),
-            flip~
-      }
-
-      For i=2 To Height-2
-            Cursor 0, i
-            Pen 2 { Print Under }
-      Next i
-      Print @(0,2),   \\ same as Cursor 0,2
-      For i=0 To 9 {
-            Print $(i, col),145355,34.23432,34.222, ~(10,2, 2-12*(i=8)), "aaa",~(14),"bb"
-            Print 145355,"A So Real Big String",34.222, "Small", 10, i
-            Print $(0),  ' For να το επαναφέρουμε
-      }
-      Print $(";True;False;"), 0,-1, True, False, "A">" ", "*"
-      Print $(""), True, "*Ok"
-      Print Part @(Tab*2), $(6,col*2),~(10,2),"Double Column",$(4,col), ~(14), 1000
-      Pen 2 { Print Under }
-      Print Part @(Tab*2), $(6,col*3),~(10,2),"Triple Column",$(4,col),~(14), "ok"
-      For i=0 To 1 {
-            Cursor 0,i : Print Over ~(14,7,7),
-      }
-      Cursor 0,0
-      Double : Bold 1
-      Pen 15 { Report 2, "Example with Print & Report Statements"}
-      Pen 2 { Print Under }
-      Normal : Bold
-      Print @(Tab(8),15, Tab(11),30,#222222, 2),
-      Print @(Tab(8),4, Tab(11),14,#222222, 2),
-      Document$={   Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-   Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
-   Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
+MODULE PRMASTER {let col=8, flip=True, oldbold=Bold
+Bold 0
+Refresh 1000
+Form ! (100 div col)*col,32
+Cls 5
+Pen 14
+For i=0 To Width-1 Step col {
+      If flip Then {
+            Print @(i,0,i+col,Height,#222222,3),
+      } Else Print @(i,0,i+col,Height,5,3),
+      flip~
 }
-      Pen 7 {
-            Report Document$, Tab*3, 10
-            Cursor Tab(8), 16
-            Report Document$, Tab*3, 14 Line 12
-      }
-      Pen 13 {
-            Cursor Tab(8), 15
-            Report Document$, Tab*3, 1 Line 11
-           }
-      Cursor 0,Height-2
-      Bold OldBold
+  
+For i=2 To Height-2
+      Cursor 0, i
+      Pen 2 { Print Under }
+Next i
+Print @(0,2),   \\ same as Cursor 0,2
+For i=0 To 9 {
+      Print $(i, col),145355,34.23432,34.222, ~(10,2, 2-12*(i=8)), "aaa",~(14),"bb"
+      Print 145355,"A So Real Big String",34.222, "Small", 10, i
+      Print $(0), 
+}
+Print $(";True;False;"), 0,-1, True, False, "A">" ", "*"
+Print $(""), True, "*Ok"
+Print Part @(Tab*2), $(6,col*2),~(10,2),"Double Column",$(4,col), ~(14), 1000
+Pen 2 { Print Under }
+Print Part @(Tab*2), $(6,col*3),~(10,2),"Triple Column",$(4,col),~(14), "ok"
+For i=0 To 1 {
+      Cursor 0,i : Print Over ~(14,7,7),
+}
+Cursor 0,0
+Double : Bold 1
+Pen 15 { Report 2, "Example with Print & Report Statements"}
+Pen 2 { Print Under }
+Normal : Bold
+Print @(Tab(8),15, Tab(11),26,#222222, 2),
+Print @(Tab(8),4, Tab(11),14,#222222, 2),
+Document$={	Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+	Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
+	Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?
+	Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?
+  }
+Pen 7 {
+      Report Document$, Tab*3, 10
+      Cursor Tab(8), 16
+      Report Document$, Tab*3, 14 Line 12
+}
+Pen 13 {
+      Cursor Tab(8), 15
+      Report Document$, Tab*3, 1 Line 11
+     }
+Cursor 0,Height-2
+Bold OldBold
+  k$=key$
+  
 }
 MODULE BREAKPOINT {Test "start", test("ok"), A
 For A=1 to 100 {
@@ -22847,7 +22884,7 @@ End
 }
 MODULE CRAWL {Escape Off
 Hide
-Window 12,1
+Window 12, window
 Back {
 Ybig=scale.Y
 Window 18,0, 2000;
@@ -22934,7 +22971,8 @@ if menu then
       Pen 15 {Print time$()}
 End If
 }
-MODULE WIND4 {\\ An old example, new revision.
+MODULE WIND4 {Clear
+\\ An old example, new revision.
 Thread.plan sequential
 Global Caption$="M2000 THREAD-INPUT-HANDLE WINDOW"
 Title caption$
@@ -24594,11 +24632,11 @@ Z()=(1,2)
 (M, N)=Z()
 Print M, N
 }
-MODULE CLASS1 {\\ update with types
+MODULE CLASS1 {// update with types
 Form 80,50
-\\ counters supposed we provide them from a file
+// counters supposed we provide them from a file
 global LastCustomerId=100, ReportId=80
-\\
+//
 class person {
 Private:
 	name$, address$, phone$, id
@@ -24615,7 +24653,7 @@ class customer as person {
 	Private:
 		day$, time$, id
 	Public:
-		\\ read only property (is a group inside group)
+		// read only property (is a group inside group)
 		Property euro {value}
 		Function Key$ {
 			=.day$+"/"+.time$+"#"+str$(.id,"")
@@ -24657,10 +24695,10 @@ Class:
 Inventory Customers
 Pen 15 {Print "Adding to Customers"}
 For This {
-	\\ this is a block for temporary definitions
+	// this is a block for temporary definitions
 	K=Customer(Customers, person("George","Athens","0912399"))
 	K.CustomerData
-	\\ after that group K deleted
+	// after that group K deleted
 }
 Pen 15 {Print "Using key to customers to add bills"}
 For Customers(LastCustomerId) {
@@ -24672,8 +24710,8 @@ For Customers(LastCustomerId) {
 Pen 15 {Print "Using Iterator 1 - working at original data"}
 M=each(Customers)
 While M {
-	\\ we extract key using eval$(M!)
-	\\ so we can work from original data
+	// we extract key using eval$(M!)
+	// so we can work from original data
 	For Customers(eval$(M!)) {
 		.CustomerData
 	}
@@ -24681,7 +24719,7 @@ While M {
 Pen 15 {Print "Using Iterator 2  - working at a copy of data"}
 M=each(Customers)
 While M {
-	\\ or using a copy of data
+	// or using a copy of data
 	K=Eval(M)
 	For K  {
 		.CustomerData
@@ -25039,7 +25077,7 @@ Print A3.Two$(A1, A2)
 
 
 }
-MODULE GROUPTYPES {\\ from revision 33 version 9.9 we have group types
+MODULE GROUPTYPES {// from revision 33 version 9.9 we have group types
 Report {First Example
 Theory:
 	Static groups may have a type or not.
@@ -25052,7 +25090,7 @@ Practice:
 	
 }
 Group alfa {
-\\ we can place any number of types
+// we can place any number of types
 type: mytype1, mytype2
 private:
 		x=10, y=50
@@ -25113,7 +25151,7 @@ Print delta is type delta
 Print delta.One=delta.Two
 Print delta.one=delta
 
-\\third example using pointers and types for group pointers too
+//third example using pointers and types for group pointers too
 Report {
 
 Third Example
@@ -25147,9 +25185,9 @@ class epsilon as prive {
 public:
 	operator final "=" {
 			def boolean false
-			\\ convert other to group if not,  for sure
+			// convert other to group if not,  for sure
 			read other as group
-			if other is type epsilon then
+			if other is type prive then
 				push .x=other.x and .y=other.y
 			else
 				push false
@@ -25157,25 +25195,25 @@ public:
 	}
 	
 	function final add5(other as *epsilon) {
-		\\ we get a pointer from a copy of this
-		\\ because m is in a same type object
-		\\ we have access to private variables
+		// we get a pointer from a copy of this
+		// because m is in a same type object
+		// we have access to private variables
 		m->(this)
-		\\ I add some spaces for clarity
+		// I add some spaces for clarity
 		m=>x <= other=>x + 5
 		m=>y <= other=>y + 5
 		=m
 	}
 	
 	function final sub5(other as *epsilon) {
-		\\ we get a copy of this
+		// we get a copy of this
 		m=this
-		\\ I add some spaces for clarity
+		// I add some spaces for clarity
 		m.x <= other=>x - 5
 		m.y <= other=>y - 5
-		\\ now we make a pointer from a copy of m
+		// now we make a pointer from a copy of m
 		->(m)
-		\\ this way we make two copies
+		// this way we make two copies
 		Print "call the remove member for a named group, only using Clear"
 		clear m
 	}
@@ -25188,7 +25226,7 @@ class:
 		print "epsilon created"
 	}
 }
-\\ used as mixin  - we need it as Group, with no type
+// used as mixin  - we need it as Group, with no type
 Group ReplaceTostring {
 	function ToString$ {
 		=format$("private data: x={0}, y={1} from replaced function", .x, .y)
@@ -25205,6 +25243,47 @@ M4=M3=>add5(M3)  ' 4 created, the 4th without constructor.
 Print M4=>tostring$()
 M5=M4=>sub5(M3)  
 Print M5=>tostring$()
+Report {
+	Additional Example (to third one)
+	
+	A class Theta is a prive one, and can get values from any prive class (or subclass of prive). We make the  Set member to read a prive only class and from Version 10 when a class has any type common with the method's class then open the private members. We get me.X (where X is private) and place it to this.x, the same for me.Y.
+	Also see that we use  constructor, no in  a class segment,  to be used as method to replace values. 
+	
+	Class Theta as prive {
+		Set {
+			Read me as prive
+			.X<=me.X
+			.Y<=me.Y
+		}
+		function final toString$ {
+			=format$("Theta class: x={0} y={1}", .x, .y)
+		}
+		Module Theta (.X, .Y) {
+		}
+	}	
+	
+}
+
+Class Theta as prive {
+	Set {
+		Read me as prive
+		.X<=me.X
+		.Y<=me.Y
+	}
+	function final toString$ {
+		=format$("Theta class: x={0} y={1}", .x, .y)
+	}
+	Module Theta (.X, .Y) {
+	}
+}
+M6->Theta(25, 35)
+Print M6=>tostring$()
+Print M4=M6
+M6=>=M4
+Print M6 is M4
+Print M4=>tostring$()
+Print M6=>tostring$()
+Print M4=M6
 }
 MODULE TRAVERSAL2 {Report {
           Tree traversal
@@ -25594,17 +25673,17 @@ With Text1, "Prompt", "Name: ", "MaxCharLength", 30+6
 
 Declare Spinner TextBox Form Form1
 Def Alone as boolean
-\\\ spinner values: ShowBar, MinValue , MaxValue , LargeValue.
-\\Range include MinValue and MaxValue
-\\ So we have integers (sign long) but we can display it like a float
+//\ spinner values: ShowBar, MinValue , MaxValue , LargeValue.
+//Range include MinValue and MaxValue
+// So we have integers (sign long) but we can display it like a float
 
 Method Spinner "Spinner", True, 0,2000,30
 Method Spinner "Move", 3000, 3000, 8000, 900
 With Spinner, "Prompt", "A_Value: ",  "Value" as Spi, "VarText" as  Feed$, "ThisKind"," units"
-\\ Spinner is a textbox with some advanced performance
-\\ We use ValidString to check every new value
-\\ we use SpinnerValue to format the value
-\\ Inside ValidString we use "Value" as Spi, to cut off higher or lower values.
+// Spinner is a textbox with some advanced performance
+// We use ValidString to check every new value
+// we use SpinnerValue to format the value
+// Inside ValidString we use "Value" as Spi, to cut off higher or lower values.
 
 Function Spinner.SpinnerValue {
             Read val
@@ -25612,11 +25691,11 @@ Function Spinner.SpinnerValue {
             }
 
 Function Spinner.ValidString {
-            \\ this function called direct from textbox
+            // this function called direct from textbox
             Read  New &this$, &thispos
             Local Alfa
             Try {     
-                  \\ Spi is an alias for Value property      
+                  // Spi is an alias for Value property      
                 Alfa=val(this$)*1000 : Spi= Alfa :  Alfa=Spi
             }
             if valid(Alfa) then {
@@ -25639,7 +25718,7 @@ With Button1,"Caption", "Reset CheckButton"
 
 Function Button1.Click {
       CheckPut= Not CheckGet
-      \\ No Event Fired, so we make here the change
+      // No Event Fired, so we make here the change
       If CheckGet Then {
             With Button1,"Caption", "Reset CheckButton"
       } Else {
@@ -25665,16 +25744,16 @@ With Form1, "Title", "First Window", "visible" as visible
 Method Form1,"Show"
 Layer Form1 {
       Cls 1,0
-      Scroll Split 2  \\ scroll from 3rd line - same as Cls ,2
+      Scroll Split 2  // scroll from 3rd line - same as Cls ,2
       Cursor 0, Height/2-1  
       Report 2, "Hello World"
 }
 
 With Text1, "VarText" as VarText$
 Thread {
-      Static work  \\ we use it for trash bin
+      Static work  // we use it for trash bin
       if alone then continue
-           if not empty then work=ask(letter$,"Four Controls in M2000") : Flush \\ stack is empty now
+           if not empty then work=ask(letter$,"Four Controls in M2000") : Flush // stack is empty now
 
 } as worker interval 100
 Function Text1.Click {
@@ -25687,10 +25766,10 @@ Function Spinner.Enter {
       Layer Form1 {Pen 15 {Print Val(Feed$)}}
 }
 Function Form1.Click {
-      \\ we can push values to Thread Stack for Values
-      \\ Data push at bottom, Push push at top
-      \\ always we pop from top we Read Variables or
-      \\ immediate with Number/Letter$
+      // we can push values to Thread Stack for Values
+      // Data push at bottom, Push push at top
+      // always we pop from top we Read Variables or
+      // immediate with Number/Letter$
       Document Doc$={Hello There 
       }
       Doc$="This is your name "+VarText$+{
@@ -25703,7 +25782,7 @@ Function Form1.Click {
       Clear Doc$
 }
 
-\\ some nice background tasks
+// some nice background tasks
 kk=0
 Thread {      
       kk++
@@ -25718,7 +25797,7 @@ Thread {
       }
 } As Print2Form Interval 50
 
-\\  main loop
+//  main loop
 Main.Task 50 {
        if not visible then exit
 }
@@ -25790,37 +25869,51 @@ copy "this.bmp"    'export to bmp
 A$=KEY$ ' Wait for a keypress
 if module(info) then info
 }
-MODULE GRAPHGR {οθόνη 1,0   \\ μπλε χρώμα, χωρίς χωριστή οθόνη
-κ=0
-ανανέωση 50
-\\ κάνουμε την αυτόματη ανανέωση πιο αργή, ανά 5 δευτερόλεπτα
-πάχος 1, 3 {  \\ αξονική γραμμή - μόνο για πάχος 1
-      θέση  χ.σημεία, υ.σημεία/2
-      χάραξε -χ.σημεία
-      θέση  χ.σημεία/2, υ.σημεία
-      χάραξε , -υ.σημεία
-      }
-για ν=3 έως 63 {
-      α=ν/2/πι
-      β=χ.σημεία/3/ν+ν*10
-      \\ απόλυτη θέση
-      θέση  χ.σημεία/2, υ.σημεία/2
-      κ+=πι/10
-      λ=1
-      για ι=1 έως ν {
-           πάχος λ {
-                 \\ πολικές συντεταγμένες: απόλυτη γωνία σε ακτίνια, σχετική απόσταση
-                 \\ η χάραξε  έχει τρεις μορφές
-                 \\ χάραξε γωνία  απόλυτη_γωνία,  απόσταση  [, χρώμα]
-                 \\ χάραξε απόσταση_κατά_χ [, απόσταση_κατά_ψ [, χρώμα]]
-                 \\ χάραξε έως απόλυτη_θέση_χ, απόλυτη_θέση_ψ [, χρώμα]
-                  χάραξε γωνία ι/α+Κ, β, χρώμα(255*ν/24, 255*ι/ν, 255-255*ι/ν)
-            }
-            λ=3-λ
-      }
+MODULE GRAPHGR {Module GraphGraph1 {
+	οθόνη 1,0   \\ μπλε χρώμα, χωρίς χωριστή οθόνη
+	κ=0
+	ανανέωση 50
+	\\ κάνουμε την αυτόματη ανανέωση πιο αργή, ανά 5 δευτερόλεπτα
+	πάχος 1, 3 {  \\ αξονική γραμμή - μόνο για πάχος 1
+	      θέση  χ.σημεία, υ.σημεία/2
+	      χάραξε -χ.σημεία
+	      θέση  χ.σημεία/2, υ.σημεία
+	      χάραξε , -υ.σημεία
+	      }
+	για ν=3 έως 63 {
+	      α=ν/2/πι
+	      β=χ.σημεία/3/ν+ν*10
+	      \\ απόλυτη θέση
+	      θέση  χ.σημεία/2, υ.σημεία/2
+	      κ+=πι/10
+	      λ=1
+	      για ι=1 έως ν {
+	           πάχος λ {
+	                 \\ πολικές συντεταγμένες: απόλυτη γωνία σε ακτίνια, σχετική απόσταση
+	                 \\ η χάραξε  έχει τρεις μορφές
+	                 \\ χάραξε γωνία  απόλυτη_γωνία,  απόσταση  [, χρώμα]
+	                 \\ χάραξε απόσταση_κατά_χ [, απόσταση_κατά_ψ [, χρώμα]]
+	                 \\ χάραξε έως απόλυτη_θέση_χ, απόλυτη_θέση_ψ [, χρώμα]
+	                  χάραξε γωνία ι/α+Κ, β, χρώμα(255*ν/24, 255*ι/ν, 255-255*ι/ν)
+	            }
+	            λ=3-λ
+	      }
+	}
+	\\ τώρα επαναφέρουμε την αυτόματη ανανέωση ανά 0.025 δευτερόλεπτα
+	ανανέωση 25
 }
-\\ τώρα επαναφέρουμε την αυτόματη ανανέωση ανά 0.025 δευτερόλεπτα
-ανανέωση 25
+
+function dummy {
+	ro=row
+	GraphGraph1
+	Wait 500
+	cls 5, row-1
+	Pen 14
+}
+
+Inline Code LibFade
+FadeScreen Lazy$(&Dummy()), 30
+Set Fast
 }
 MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
 Ομαλά Ναι
@@ -25830,8 +25923,8 @@ MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
 ζ1=ζβ1*16
 \\ στο μέσον!
 κχ=χ.σημεια/2
-κυ=υ.σημεια/2
-μκ=Μικρό.Σειράς(χ.σημεια, υ.σημεια)*.3
+κυ=ψ.σημεια/2
+μκ=Μικρό.Σειράς(χ.σημεια, ψ.σημεια)*.3
 ανανεωση 2000 \\ για να μην εμφανίσει αλλαγές της οθόνης, εκτός αν θέλουμε!
 διπλα
 φοντο 1,5
@@ -25842,15 +25935,24 @@ MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
 μκ2=μκ δια 2
 Άδειασε  ' αδειάζει το σωρό
 κκ=ψευδες
+Σχέδιο {
+	πάχος 3 { \\ βάζουμε πάχος στις γραμμές μας
+		δ(μκ2,0,0,0)
+	}
+} Ως Εσωτερική
+ Rad2Deg =Lambda pidivby180=pi/180 (RadAngle)->RadAngle / pidivby180
+
+
 κρατησε   \\ σώνουμε προσωρινά την εικόνα
 πάχος 3 { \\ βάζουμε πάχος στις γραμμές μας
-      καθε 60 {
+      καθε 10 {
             αφησε  \\ αντί να σβήσουμε βάζουμε ότι έχουμε σταθερό
             θεση κχ, κυ
             βήμα γωνια (πι/2+πι/4)+ζ,μκ2 \\ η θέση του εσωτερικού κύκλου
             κ(μκ2,θέση.χ, θέση.υ, -ζ1, &κκ) \\ την πρώτη φορά απλά παίρνει τα σημεία
             \\ η κ κάθε άλλη φορά θα σώνει την οθόνη χωρίς τον εσωτερικό κύκλο
-            δ(μκ2,θέση.χ,θέση.υ,-ζ1, 1) \\ τυπώνει το κύκλο
+'            δ(μκ2,θέση.χ,θέση.υ,-ζ1) \\ τυπώνει το κύκλο
+            Εικόνα Εσωτερική,,,Rad2Deg(-ζ)
             \\ με την ανανέωση εμφανίζουμε τις αλλαγές 
             ανανεωση 2000
             αν πατημένο(1)  τοτε εξοδος
@@ -25861,21 +25963,21 @@ MODULE ΓΡΑΦΙΚΟ {θεσε γρηγορα !
 }
 Αδειασε
 Θέσε Γρήγορα
-Ρουτίνα δ(α, Χ, Ψ, ζ, τρικ)
-      παχος 2,3 {
+Ρουτίνα δ(α, Χ, Ψ, ζ)
+      παχος 2 {
             \\ άξονες  -- ενώ απ' έξω έχουμε αλλάξει το πάχος σε 2
             βημα γωνια ζ+πι/4, -α
             κυκλος α/16
             βημα γωνια ζ+πι/4, -α 
             κυκλος α/16
-            χαραξε γωνια ζ+πι/4 , α*3
+            Πάχος 2, 3 {χαραξε γωνια ζ+πι/4 , α*3}
             κυκλος α/16 
-            χαραξε γωνια ζ+πι/4 , α
-            κυκλος α/16 
+            Πάχος 2, 3 {χαραξε γωνια ζ+πι/4 , α}
+            κυκλος α/16
             θεση Χ, Ψ
             βημα γωνια ζ-πι/4,-α*2
-            κυκλος α/16
-            χαραξε γωνια ζ-πι/4,α*4
+            κυκλος  α/16
+            Πάχος 2, 3 {χαραξε γωνια ζ-πι/4,α*4}
             κυκλος α/16
       }
       θεση Χ, Ψ
@@ -26377,7 +26479,11 @@ Module CheckThis {
 }
 CheckThis
 }
-MODULE LED {Module Led_Clock{
+MODULE LED {\\ if you have two monitors:
+\\ Window mode, 1     \\ mode is a read only variable return the size of current font
+// Window mode, 2    // selecet monitor 2
+
+Module Led_Clock{
 	Escape Off
 	Smooth off
 	Dim D(-1 to 9)
@@ -26568,15 +26674,45 @@ MODULE ARDUINO {module SerialRead {
 	\\ str$(string) convert to ansi based on Locale (Locale 1033 or 1032 etc)
 	\\ chr$(string) do the opposite, ansi to utf16le
 	\\ when we send to arduino we have to place a lf (char 10) (1 byte)
+
+	Arduino$={
+		  int incomingByte = 0;
+                void setup() {
+                  Serial.begin(9600);
+                }
+                
+                void loop() {
+                  if (Serial.available() > 0) {
+                    incomingByte = Serial.read();
+                    Serial.print("I received: ");
+                    Serial.println(incomingByte, DEC);
+                  }
+                }
+	}
+	Pen 15 {
+			Report {You have to place this sketch -code- to Arduino Nano from Arduino IDE:
+				
+			}
+		}
+	Report Arduino$
+	clipboard Arduino$
+	Print "code copied to clipboard"
 	const  newline$=str$(chr$(13)+chr$(10)) , send$=str$(chr$(10))
 	escape off
 	declare withevents com3 serialport
-	Print "Try to set port to 3"
+	Print "Try to set port to 3:";
+	Menu
+	for i=1 to 7
+		Menu + "COM"+str$(i,"")
+	next
+	Menu Show "3"
+	if menu=0 then port=3 else port=val(mid$(menu$(menu),4)) : Print menu$(menu)
 	Print "If we get error then check cable, or change port number"
 	Try ok {
-		method com3, "OpenPort", 3
+		method com3, "OpenPort", port
 	}
 	If ok then
+	PRINT "ok press A or Esc"
 	\\ we use olddata$ to stack the line characters
 	olddata$=""
 	function com3_DataArrival (new many) {
@@ -26622,5 +26758,420 @@ MODULE ARDUINO {module SerialRead {
 	\\ set locale
 }
 SerialRead
+}
+MODULE GCC {Document Export$={
+Module Global A {\\ empty the stack
+\\ clear values
+If not valid(mypath$) then Keyboard "All"+chr$(13) :exit
+Escape off
+Refresh 30
+Flush : Clear
+Fkey 1, {Save command$, {All:End}}
+Fkey 2, {End}
+Fkey 8, {Edit TestMe}
+Fkey 9, {Edit c()}
+Fkey 10, {Edit a}
+Fkey 4, {Flush : TestMe 10000}
+\\Fkey 5, {Save Command$ : Push Command$: New : Cls,0 : Load Letter$ : A}
+Fkey 5, {A}
+Fkey 14, {List}
+\\************** need the proper path for gcc  **************//
+\\																    \\
+gcc$="C:\msys64\mingw32\bin\gcc"							     '>
+//																     //
+//**************************************************\\
+If not exist(gcc$+".exe") then
+Report {Error: gcc not found in proper path
+	Find a path similar to C:\msys64\mingw32\bin\
+	We need the 32 bit version of gcc
+Get the Msys64
+	from https://www.msys2.org/wiki/MSYS2-installation/
+	and place it to C:\
+Run mingw32.exe and run this command:
+	pacman -S mingw-w64-i686-toolchain
+}
+Show
+Print "Press any key..." : Push Key$: Drop
+keyboard "Continue"+chr$(13)
+break
+End If
+dir user
+dd$=dir$
+\\ Not need an exe elevation for c:\M2000test\
+\\ but need for c:\ and the elevation grant from powershell call
+If rnd>.5 then {
+	Title "Compile Dll", 1
+	NoElevation=True
+	d$="c:\M2000test\"
+} else {
+	Title "Compile Dll", 1   \\ put 0 instead 1
+	NoElevation=False
+	d$="c:\"
+}
+If not exist.dir(d$) then
+	batch$="mkdir "+d$+{
+	}
+	ExportBatch(batch$,,true)
+End If
+Pen #A7CC99
+Cursor 0,0
+Gradient #738493,#434453
+Double
+Mark : Print $(4),"  Make a dll, using gcc, load it, use it, and unload it"
+Normal
+      Data "F4","Run 10000","F5","Compile Again", "F1","Save as "+file.name$(command$), "F2","Exit"
+      Data "F8","Edit Test M2000 code","F9","Edit C code - Press Esc then F5","F10","Edit Main code", "Shift F2","List"
+      c=9
+      For i=1 to 4 { Keys(c,0,"-  ") : c++}
+      Cursor 0,row-4
+      For i=1 to 3 { Keys(c, width/2, "-  ") : c++}
+      Keys(#FF8866, width/2, "-  ")
+      there=row
+Cls #636473, there
+\\ Scroll Split there+3
+Cls #434453, there+3
+\\ we have to open console If this script executed as an argument of the m2000.exe
+Show
+\\ a  c program is written in C()
+A$= &C()
+A$=mid$(A$,2,len(A$)-2)
+F=1
+If exist(d$+"adll3.dll") then
+	batch$= "del  "+d$+"adll*.*"+{
+	}+"del  "+d$+"*.a"+{
+	}+"del "+temporary$+"mydir"+{
+	exit
+	}
+	ExportBatch(batch$,,NoElevation)
+	\\ alt "+" "2" "7" "1" "3" we get ✓
+	\\ M2000 has unicode internal custom editor
+	If Not @WaitNoFileOrEsc(d$+"adll3.dll") Then break
+	keys(14, 0,"", "✓","Old files Deleted")
+End If
+open dd$+"adll3.c" for output as F
+Print #F, A$
+close #F
+keys(14, 0,"", "✓","Export adll3.c")
+keys(14, 0,"", "gcc path:", file.path$(gcc$))
+batch$={move }+quote$(dd$+"adll3.c")+" "+quote$(d$+"adll3.c")+{
+}+"cd "+d$+" && "+gcc$+" -c -DBUILD_DLL "+d$+"\adll3.c"+{
+exit
+}
+ExportBatch(batch$,,NoElevation)
+
+If @WaitFileOrEsc(d$+"adll3.o") then {
+      keys(14, 0,"" ,"✓","Object file complete adll3.o")
+      batch$="cd "+d$+" && "+gcc$+" -shared -o "+d$+"adll3.dll  "+d$+"adll3.o -Wl,--out-implib,libadll3.a"+{
+      exit
+      }
+	ExportBatch(batch$,,NoElevation)      
+} else Print"Error" :exit
+If not @WaitFileOrEsc(d$+"adll3.dll") then Error "No dll error"
+keys(14, 0,"" ,"✓","Linked with gcc adll3.dll")
+Push row
+Cursor 0,there
+\\ Results
+dir d$
+Pen 15 {
+      keys(14, 0,"" ,"Directory", Dir$)
+      menu \\ clear internal menu list
+      \\ ! sort by name, + not display just feed menu list
+      files ! + "adll3.*"
+      files ! + "libmessage.*"      
+      If menuitems=0 then break 
+      For i=1 to menuitems
+      cursor 0,row+(i mod 2 =0)
+      keys(14, 0-(width/2)*(i mod 2 =0),"" ,str$(i),menu$(i))
+      Next i
+      If (i mod 2) then print
+}
+\\ set default directory
+If NoElevation then wait 2000
+MyPath$<=d$
+Dir User 
+Cursor 0,Number 'pop row
+Title "Done"
+Show
+Print "Perform Test (Y/N):";
+Refresh
+Clear Yes, No
+Repeat {
+      Yes=keypress(89)
+      No=Keypress(78)
+      wait 10
+} Until Yes or No
+Flush
+If Yes then {TestMe} else print "N"
+Pen 14
+Escape on
+Sub Keys(c, x,pre$)
+local t=tab
+            Pen c  { \\ change Pen only for here, ~(15) change again to white
+                  \\ use right justify
+                  Print @(x),$(7,6),letter$,
+                  italic 1
+                        \\ use normal left justify and restore column width
+                        Print @(x+6),$(4,t),~(15), pre$+letter$
+                  italic 0
+            }
+            If c>13 then Refresh
+End Sub
+Sub ExportBatch(script$, uselocale=false, bypass=false)
+	declare local osinfo information
+	local Elevated, userdir$
+	document script$  ' upgrade to document
+	push dir$ : dir user : userdir$=dir$ : dir letter$
+	save.doc script$, userdir$+"my.bat", if(uselocale->locale, 3)
+	wait 200
+	With osinfo, "isWindowsVistaOrGreater" as VistaUp
+	method osinfo,"IsProcessElevated"  as Elevated
+	If bypass or not VistaUp then
+		dos dir$+"my.bat", 1000;
+	else.if not Elevated then
+		local cmd$="powershell -WindowStyle Hidden -NoProfile -Command "
+		cmd$+=quote$("Start-Process CMD -WindowStyle Hidden -ArgumentList '/k "+dir$+"my.bat' -Verb RunAs")
+		dos cmd$, 3000;
+	else
+		dos dir$+"my.bat", 1000;
+	End If
+End sub
+Function WaitFileOrEsc(file$)
+Every 10 {
+	If keypress(27) then break
+	If exist(file$) then =true : break
+}
+End Function
+Function WaitNoFileOrEsc(file$)
+Every 10 {
+	If keypress(27) then break
+	If Not exist(file$) then =true : break
+}
+End Function
+}
+Function Global C {/* C Code for DLL 
+*  from an example in M2000
+*  Using gcc from http://www.mingw.org/
+*  gcc -c -DBUILD_DLL adll3.c
+*  gcc -shared -o adll3.dll adll3.o -Wl,--out-implib,libadll3.a
+*/
+long add2(long a[], long b)
+{
+      long i, m;
+      m=a[0]+2;
+      for (i=0;i<b;i++)
+                  a[i]=i+m ;
+         return 0;
+}
+
+long mult(long num1, long num2)
+{
+   long product;
+   product = num1 * num2;
+   return product;
+}
+
+}
+Module Global TESTME {dir user
+If not valid(mypath$) then Keyboard "All"+chr$(13) :exit
+Print
+Pen 14
+Print "	Path:";mypath$
+Pen #A7CC99
+max%=200
+Read ? max%
+If not exist(mypath$+"adll3.dll") then error "dll not exist"
+\\ we make a buffer
+If max%<20 or max%>1000000 then exit
+Print Over $(6),"Test for an array of"+str$(max%)+" numbers of type long"
+Refresh
+Buffer clear alfa as long*max%
+
+\\ Feed unsign 100 to alfa[0]
+Return alfa, 0:=100
+
+\\ Now we load lib (lib loaded once)
+Declare add2 lib c mypath$+"adll3.add2" {long c, long d}
+Declare mult lib c mypath$+"adll3.mult" {long c, long d}
+
+\\ We pass alfa(0) as the first long in buffer
+Print mult(12,4)
+
+\\ read from memory alfa(0)
+\\ and populate array with values
+\\ now we get values in buffer (we use as a Peek() this: Eval(<buffer>, index as long))
+clear m, m1
+Profiler
+If add2(alfa(0), Max%) else {
+      m=Timecount
+      Print eval(alfa,Max%-1), m
+}
+
+Dim a(Max%)
+Profiler
+b=100+2
+For i=0 to Max%-1 {
+      a(i)=i+b
+}
+m1=TimeCount
+
+Print a(Max%-1), m1
+If m<2 then m=1
+Print format$("C is by far the fastest language {0}% from M2000", m1/m*100)
+
+Print Over $(6), "Test 20 Random Items"
+Print Under
+Equ$=string$("0",log(max%)+1)
+Document doc$
+Inventory pack
+\\ choose one of two methods
+If max%<100 then {
+\\ use  a populated pack, remove used
+
+for i=0 to max%-1: Append pack, i:=i: next i
+            L=Lambda pack -> {
+                  If len(pack)=0 then error "empty"
+
+                  k=random(1, len(pack))-1
+                  \\ return value (key as value, when no value exist) using k as index
+                   =pack(k!)
+                                     try {
+                    Delete pack, eval$(pack, k)
+                    } 
+                    If error then {
+                    cls
+                    For i=0 to len(pack)-1
+                    print i, pack(i!)
+                    next i
+                    test
+                    a$=key$
+                    }
+                 
+            }
+} else {
+\\ use an empty pack, store used
+      L=Lambda pack, max% -> {
+       repeat {
+              k=random(0, max%-1)
+        } until not exist(pack, k)
+        \\ so now k exist, for the next time
+        append pack, k
+        =k
+}
+}
+For i=1 to 20 {
+      k=L()
+      doc$= format$("{0}) {1}={2} ({3})",str$(k+1, equ$), eval(alfa, k), a(k), str$(eval(alfa, k)=a(k),{"Not Equal";"Equal";"Not Equal"}))
+      If i<20 then {
+                  \\ just a new line
+                  doc$={
+                  }
+      }
+}
+for i=1 to 5 { print}
+X=row-5
+
+\\ sorting
+Sort Doc$
+refresh 1000
+For i=1 to 4
+      Print @(width*((i-1)/4),X),
+      Report 2, doc$, Width/4, 5 Line 5*i-4
+Next i
+Print
+Refresh 30
+Pen 14
+Remove mypath$+"adll3"
+}
+Module Global ALL {Set mypath$="c:\"
+a
+Print "Enter to Halt State - Exit using End or Continue"
+halt
+Print "done"
+}
+ALL : End ' statement to execute when script loaded
+}
+Save.Doc Export$, "dlltst.gsb"
+If Exist("dlltst.gsb") then
+	If ask("File saved, press run to execute it","Use gcc to make and import a dll", "*Run", "Not Now")=1 then
+	Use "dlltst.gsb"
+	End If
+End If
+}
+MODULE VER10 {Escape off
+Input End  // empty the input buffer
+keyboard " "
+prmaster
+wait 1000
+function dummy {
+	ro=row
+	ok=false
+	try {
+		keyboard " "
+		drawing { prmaster } as A
+		refresh
+		move 0,0
+		image A, scale.x/2, scale.y/2
+		wait 300 : refresh
+		move  scale.x/2,0
+		image A, scale.x/2, scale.y/2
+		wait 300 : refresh
+		move 0,scale.y/2
+		image A, scale.x/2, scale.y/2
+		wait 300 : refresh
+		move  scale.x/2,scale.y/2
+		image A, scale.x/2, scale.y/2
+		wait 300 : refresh
+		cursor 0, 3
+		Pen 11 {
+			Double
+			Path 11 {
+				Print Over 
+			}
+			italic 1
+				Print Part $(, width),~(4), "M2000 Version 10 - direct output to a Vector type drawing, inside a buffer object"
+			italic 0
+			normal
+		}
+		hold
+              Again()
+		release
+		drawing {dd8grnew} as A
+              Again()
+		release
+		ok=true
+		100
+	}
+	if ok else while keypress(27) : wait 10 : end while
+	cls 5, row-1
+	Pen 14
+	Sub WaitKey(wastetime)
+	Refresh
+	Profiler
+	While wastetime>timecount
+		if keypress(32) then exit
+	End While
+	End Sub
+	Sub Again()
+		WaitKey(3000)
+		for i=0 to 179
+			if keypress(27) then 100
+			release
+			sprite A,, i,15+i*3,50,1
+			refresh 1000
+		next
+		for i=179 to 0
+			if keypress(27) then 100
+			release
+			sprite A,, i,15+i*3,50,1
+			refresh 1000
+		next
+		WaitKey(3000)
+	End Sub
+}
+Inline Code LibFade
+FadeScreen &Dummy(), 30
+Set Fast
+escape on
+
 }
 UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}

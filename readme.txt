@@ -1,11 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 9.9 revision 55 active-X
-1. Fix Mid$() for Ansi (8bit)
-2. Fix Fkey statement (now display Shift F12 as expected)
-3. Tuple: New #functions: #Have(), #NotHave(),  #Str$() (see Help)
-4. A ShellPipe object for handling child processes (look Handler2 and ChessGame, in info.gsb)
-5. A SerialPort onject for handling Serial ports (look Arduino in info.gsb)
+Version 10 active-X
+A new version.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

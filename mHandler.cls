@@ -67,3 +67,10 @@ If IsObject(index_cursor) Then Set objref = index_cursor: index_cursor = vbEmpty
     index_End = 0
 End If
 End Sub
+Friend Function CreateFromPicture(b As Long, w1 As Long, w2 As Long, w3 As Long) As Object
+If t1 = 2 Then
+Dim mm As MemBlock
+Set mm = objref
+Set CreateFromPicture = mm.CreateFromPicture(b, w1, w2, w3)
+End If
+End Function

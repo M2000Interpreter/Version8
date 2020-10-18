@@ -2129,10 +2129,10 @@ Dim w As Long, a() As Byte, F$, i As Long, bb As Byte, yesswap As Boolean, lf$
 Const Utf8CodePage As Long = 65001
 On Error GoTo t12345
 '' 0 vbcrlf, 1 vblf, 2 vbcr
-lf$ = choose(ListLoadedType \ 10 + 1, vbCrLf, vbLf, vbCr)
+lf$ = choose(Abs(ListLoadedType \ 10) + 1, vbCrLf, vbLf, vbCr)
 If Abs(mode2save \ 10) > 0 Then
 ' overide loaded status
-lf$ = choose((mode2save \ 10) Mod 3 + 1, vbCrLf, vbLf, vbCr)
+lf$ = choose(Abs(mode2save \ 10) Mod 3 + 1, vbCrLf, vbLf, vbCr)
 End If
 mode2save = mode2save Mod 10
 If Not Append Then
@@ -2428,17 +2428,17 @@ utf8cont:
        NewSeek FNr, 1
        
        mLof = LOF(FNr)
-       Dim Buf() As Byte
+       Dim buf() As Byte
        If mLof > 1000 Then
-       ReDim Buf(1000)
+       ReDim buf(1000)
        Else
-       ReDim Buf(mLof)
+       ReDim buf(mLof)
        End If
-       Get FNr, 1, Buf()
+       Get FNr, 1, buf()
        NewSeek FNr, 1
-      If ContainsUTF8(Buf()) Then nobom = -1: GoTo utf8cont
+      If ContainsUTF8(buf()) Then nobom = -1: GoTo utf8cont
 ' check if it is utf-16
-    Select Case ContainsUTF16(Buf())
+    Select Case ContainsUTF16(buf())
     Case 1
         nobom = -1
         BOM = &HFEFF
@@ -2452,7 +2452,7 @@ utf8cont:
     End Select
     Dim cc$
     cc$ = space$(30)
-    LSet cc$ = Buf()
+    LSet cc$ = buf()
 lbt = 0
 If mlcid < 4 Then mlcid = Module1.cLid
 
