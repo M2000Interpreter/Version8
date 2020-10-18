@@ -20935,17 +20935,17 @@ Sub Mes()
 	Wait 100
 End Sub
 }
-MODULE CHESSGAME {\\ George Karras, 2020
+MODULE CHESSGAME {\\ George Karras, 2019
 \\ Chess Example (a big one)
 \\ Example Using sprites
-\\ Rev. 6
+\\ Rev. 5
 \\ to add a chess engine:
 \\ at m2000 console type: win dir$
 \\ paste to that folder the engine.exe
-\\ this engine is an executable file like stockfish_20090216_x64_modern.exe
-\\ from https://stockfishchess.org/
-\\ so get the proper exe file, copy to m2000 user folder (use win dir$ from m2000 console)
-\\ then rename it as engine.exe
+\\ this engine is a executable file like stockfish_20090216_x64_modern.exe
+\\from https://stockfishchess.org/
+
+\\ also change blackComputer=False to blackComputer=true
 
 enginepath$=dir$+"engine"
 blackComputer=exist(enginepath$+".exe")
@@ -21361,7 +21361,7 @@ if module(info) then keyboard "info"+chr$(13)
 Flush
 set switches "-inp"
 escape off
-Window 12, window
+Window 12,0
 form
 form ;
 About ! ""
@@ -21965,16 +21965,18 @@ Function GetMove$(Fen$)
 		while  Engine.HasLine
 			method Engine, "GetLine" as aLine$
 			if left$(aLine$,8)="bestmove" then exit
-		End While
-		if left$(aLine$,8)="bestmove" then =piece$(aLine$," ", 2)
-	}
+                     End While
+		if left$(aLine$,8)="bestmove" then =piece$(aLine$," ", 2) : exit
+	}		
 End Function
 initengine:
-	declare Engine SHELLPIPE
-	with Engine, "Active" as Engine.Active, "Hasline" as Engine.HasLine
-	Method Engine, "Run",  enginepath$ as OkEngine
-	if OkEngine=0 then  Method Engine, "SendLine", "ucinewgame"
+declare Engine SHELLPIPE
+with Engine, "Active" as Engine.Active, "Hasline" as Engine.HasLine
+Method Engine, "Run",  enginepath$ as OkEngine
+if OkEngine=0 then  Method Engine, "SendLine", "ucinewgame"
 Return
+
+
 }
 MODULE URLNEW {Stack New {
       Data "foo://example.com:8042/over/there?name=ferret#nose",  "urn:example:animal:ferret:nose" 
