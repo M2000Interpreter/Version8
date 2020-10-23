@@ -27,6 +27,11 @@ Option Explicit
 'and it skips the video just don't use the getPositionInFrames
 'function
 
+Private Declare Function midiOutSetVolume Lib "winmm" (ByVal uDeviceID As Long, ByVal dwVolume As Long) As Long
+Private Declare Function waveOutSetVolume Lib "winmm.dll" (ByVal uDeviceID As Long, ByVal dwVolume As Long) As Long
+Private Declare Function waveOutGetVolume Lib "winmm.dll" (ByVal uDeviceID As Long, dwVolume As Long) As Long
+
+Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 
 
 Private myid As Long
@@ -34,7 +39,7 @@ Private opencounter As Long
 Private Declare Function mciGetErrorString Lib "winmm.dll" Alias "mciGetErrorStringA" (ByVal dwError As Long, ByVal lpstrBuffer As String, ByVal uLength As Long) As Long 'Get the error message of the mcidevice if any
 Private Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal lpstrReturnString As String, ByVal uReturnLength As Long, ByVal hwndCallback As Long) As Long 'Send command strings to the mci device
 Private Data As String * 128 ' Used to store our return data
-Public error As Long ' Used to store our error message
+Public Error As Long ' Used to store our error message
 Public Height As Long
 Public Width As Long
 Public Length As Long
@@ -122,26 +127,26 @@ Public Length As Long
                      pmxcd As MIXERCONTROLDETAILS, _
                      ByVal fdwDetails As Long) As Long
 
-    Private Declare Sub CopyStructFromPtr Lib "KERNEL32" _
+    Private Declare Sub CopyStructFromPtr Lib "kernel32" _
                      Alias "RtlMoveMemory" _
                      (struct As Any, _
                      ByVal Ptr As Long, _
                      ByVal cb As Long)
 
-    Private Declare Sub CopyPtrFromStruct Lib "KERNEL32" _
+    Private Declare Sub CopyPtrFromStruct Lib "kernel32" _
                      Alias "RtlMoveMemory" _
                      (ByVal Ptr As Long, _
                      struct As Any, _
                      ByVal cb As Long)
 
-    Private Declare Function GlobalAlloc Lib "KERNEL32" _
+    Private Declare Function GlobalAlloc Lib "kernel32" _
                      (ByVal wFlags As Long, _
                      ByVal dwBytes As Long) As Long
 
-    Private Declare Function GlobalLock Lib "KERNEL32" _
+    Private Declare Function GlobalLock Lib "kernel32" _
                      (ByVal hMem As Long) As Long
 
-    Private Declare Function GlobalFree Lib "KERNEL32" _
+    Private Declare Function GlobalFree Lib "kernel32" _
                      (ByVal hMem As Long) As Long
 
       Private Type MIXERCAPS
@@ -321,12 +326,12 @@ Public Function stepFrames(Value As Long)
     'Ex. If the m"+cstr(myID)+" was on frame 20. And if you stepped
     '10 frames the m"+cstr(myID)+" would skip ahead 10 frames and
     'would be on frame 30.
-    error = mciSendString("step m" & CStr(myid) & " by " & Value, 0, 0, 0)
+    Error = mciSendString("step m" & CStr(myid) & " by " & Value, 0, 0, 0)
 End Function
 Public Function restoreSizeDefault()
     'This function will restore the m"+cstr(myID)+" to its original
     'size. Not if you use a child window
-    error = mciSendString("put m" & CStr(myid) & " window", 0, 0, 0)
+    Error = mciSendString("put m" & CStr(myid) & " window", 0, 0, 0)
 End Function
 Public Function openMovie()
 
@@ -340,19 +345,19 @@ Public Function openMovie()
     'Specify the mpegvideo driver to play the movies
     'type mpegvideo alias
      If pt$ = "MID" Then
-    error = mciSendString("open " & LASTF & " type sequencer alias m" & CStr(myid) & " ", 0, 0, 0)
+    Error = mciSendString("open " & LASTF & " type sequencer alias m" & CStr(myid) & " ", 0, 0, 0)
     ElseIf pt$ = "WAV" Then
-    error = mciSendString("open " & LASTF & " type waveaudio alias m" & CStr(myid) & " ", 0, 0, 0)
+    Error = mciSendString("open " & LASTF & " type waveaudio alias m" & CStr(myid) & " ", 0, 0, 0)
       ElseIf Left$(pt$, 2) = "MP" Then
-    error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " ", 0, 0, 0)
+    Error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " ", 0, 0, 0)
     Else
-    error = mciSendString("open " & LASTF & " alias m" & CStr(myid) & " ", 0, 0, 0)
-       If error <> 0 Then
-     error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " ", 0, 0, 0)
+    Error = mciSendString("open " & LASTF & " alias m" & CStr(myid) & " ", 0, 0, 0)
+       If Error <> 0 Then
+     Error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " ", 0, 0, 0)
 
     End If
     End If
-    If error <> 0 Then opencounter = 0 Else opencounter = 1
+    If Error <> 0 Then opencounter = 0 Else opencounter = 1
     'Let the mci device decide which driver to use
     'Error = mciSendString("open " & Filename & " alias m"+cstr(myID)+"", 0, 0, 0)
 End Function
@@ -371,45 +376,45 @@ Public Function openMovieWindow(hWnd As Long, WindowStyle As String)
    ' error = mciSendString("open " & LASTF & " type mpegvideo alias m"+cstr(myID)+" parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
     
     'Let the mci device decide which driver to use
-      error = mciSendString("open " & LASTF & " alias m" & CStr(myid) & " parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
+      Error = mciSendString("open " & LASTF & " alias m" & CStr(myid) & " parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
  
-    If error <> 0 Then
-    error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
+    If Error <> 0 Then
+    Error = mciSendString("open " & LASTF & " type mpegvideo alias m" & CStr(myid) & " parent " & hWnd & " style " & WindowStyle & " ", 0, 0, 0)
     
     
     End If
-    If error <> 0 Then opencounter = 0 Else opencounter = 1
+    If Error <> 0 Then opencounter = 0 Else opencounter = 1
     End Function
 Public Function minimizeMovie()
     'Minimize the m"+cstr(myID)+" window
-    error = mciSendString("window m" & CStr(myid) & " state minimized", 0, 0, 0)
+    Error = mciSendString("window m" & CStr(myid) & " state minimized", 0, 0, 0)
 End Function
 Public Function playMovie()
 
 
     'Play the m"+cstr(myID)+" after you open it
-    error = mciSendString("play m" & CStr(myid) & "", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & "", 0, 0, 0)
 
 End Function
 
 
 Public Function hideMovie()
     'Hides the m"+cstr(myID)+" window
-    error = mciSendString("window m" & CStr(myid) & " state hide", 0, 0, 0)
+    Error = mciSendString("window m" & CStr(myid) & " state hide", 0, 0, 0)
 End Function
 Public Function showMovie()
     'Will show the window if it was hidden with the
     'hideMovie function
-    error = mciSendString("window m" & CStr(myid) & " state show", 0, 0, 0)
+    Error = mciSendString("window m" & CStr(myid) & " state show", 0, 0, 0)
 End Function
 Public Function restoreMovie()
     'Will restore the window to its original state
-    error = mciSendString("window m" & CStr(myid) & " state restore", 0, 0, 0)
+    Error = mciSendString("window m" & CStr(myid) & " state restore", 0, 0, 0)
 End Function
 Public Function stopMovie()
     'Stops the playing of the m"+cstr(myID)+"
 
-    error = mciSendString("stop m" & CStr(myid) & "", 0, 0, 0)
+    Error = mciSendString("stop m" & CStr(myid) & "", 0, 0, 0)
     
 End Function
 Public Function extractCurrentMovieSize(wLeft As Long, wTop As Long, wWidth As Long, wHeight As Long)
@@ -464,29 +469,29 @@ Public Function getBitsPerPixel()
     'Will get the m"+cstr(myID)+" bitsperpixel
     'Works with avi movies only
     On Error Resume Next
-    error = mciSendString("status m" & CStr(myid) & " bitsperpel", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " bitsperpel", Data, 128, 0)
     getBitsPerPixel = val(Data)
 End Function
 Public Function getMovieInput() As String
     'Returns the current input source
-    error = mciSendString("status m" & CStr(myid) & " monitor input", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " monitor input", Data, 128, 0)
     getMovieInput = StrPart(Data)
 End Function
 Public Function getMovieOutput() As String
     'Returns the current output source
-    error = mciSendString("status m" & CStr(myid) & " monitor output", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " monitor output", Data, 128, 0)
     getMovieOutput = StrPart(Data)
 End Function
 Public Function getAudioStatus() As String
     'Check to see if the audio is on or off
-    error = mciSendString("status m" & CStr(myid) & " audio", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " audio", Data, 128, 0)
     getAudioStatus = StrPart(Data)
 End Function
 Public Function sizeLocateMovie(Left As Long, top As Long, Width As Long, Height As Long)
     'Change the size of the m"+cstr(myID)+" and the location of
     'the m"+cstr(myID)+" in Pixels
 ' 120 120 200 200 frame 0 0 200 200 source 0 0 200 200
-    error = mciSendString("put m" & CStr(myid) & " window at " & Left & " " & top & " " & Width & " " & Height, 0, 0, 0)
+    Error = mciSendString("put m" & CStr(myid) & " window at " & Left & " " & top & " " & Width & " " & Height, 0, 0, 0)
 
 'error = mciSendString("put m"+cstr(myID)+" video 120 120 200 200 frame 0 0 200 200 source 0 0 200 200 ", 0, 0, 0)
 
@@ -497,7 +502,7 @@ Public Function isMoviePlaying() As Boolean
     
     Dim isPlaying As String
 
-    error = mciSendString("status m" & CStr(myid) & " mode", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " mode", Data, 128, 0)
    MyDoEvents
      isPlaying = Left(StrPart(Data), 7)
     If isPlaying = "playing" And Not NOEXECUTION Then
@@ -511,33 +516,33 @@ Public Function checkError() As String
     'A very useful function for getting any errors
     'associated with the mci device
     checkError = space$(255)
-    mciGetErrorString error, checkError, Len(checkError)
+    mciGetErrorString Error, checkError, Len(checkError)
 End Function
 Public Function getDeviceName() As String
     'Returns the current device name in use
-    error = mciSendString("info m" & CStr(myid) & " product", Data, 128, 0)
+    Error = mciSendString("info m" & CStr(myid) & " product", Data, 128, 0)
     getDeviceName = StrPart(Data)
 End Function
 Public Function getDeviceVersion() As String
     'Returns the current version of the mci device in use
-    error = mciSendString("info m" & CStr(myid) & " version", Data, 128, 0)
+    Error = mciSendString("info m" & CStr(myid) & " version", Data, 128, 0)
     getDeviceVersion = StrPart(Data)
 End Function
 Public Function getNominalFrameRate() As Long
     'Returns the nominal frame rate of the m"+cstr(myID)+" file
-    error = mciSendString("status m" & CStr(myid) & " nominal frame rate ", Data, 128, 0) ' wait
+    Error = mciSendString("status m" & CStr(myid) & " nominal frame rate ", Data, 128, 0) ' wait
     getNominalFrameRate = val(StrPart(Data))
 End Function
 Public Function getFramePerSecRate() As Long
     'Returns the Frames Per Second of the m"+cstr(myID)+" file
     'avi and mpeg movies
-    error = mciSendString("status m" & CStr(myid) & " frame rate", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " frame rate", Data, 128, 0)
     getFramePerSecRate = val(StrPart(Data)) \ 1000
 End Function
 Public Function getCurrentSize() As String
     'Returns the current width, height of the m"+cstr(myID)+"
-    error = mciSendString("where m" & CStr(myid) & " destination max", Data, 128, 0)
-    If error > 0 Then
+    Error = mciSendString("where m" & CStr(myid) & " destination max", Data, 128, 0)
+    If Error > 0 Then
     getCurrentSize = "0 0 0 0"
     Else
     getCurrentSize = StrPart(Data)
@@ -546,9 +551,9 @@ End Function
 Public Function getDefaultSize() As String
     'Returns the default width, height the m"+cstr(myID)+"
   
-    error = mciSendString("where m" & CStr(myid) & " source", Data, 128, 0)
+    Error = mciSendString("where m" & CStr(myid) & " source", Data, 128, 0)
  
-        If error > 0 Then
+        If Error > 0 Then
     getDefaultSize = "0 0"
     Else
     getDefaultSize = StrPart(Data)
@@ -557,19 +562,19 @@ End Function
 Public Function getLengthInFrames() As Long
     'Get the length of the m"+cstr(myID)+" in frames
 
-    error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0)
-    error = mciSendString("status m" & CStr(myid) & " length", Data, 128, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0)
+    Error = mciSendString("status m" & CStr(myid) & " length", Data, 128, 0)
     getLengthInFrames = val(StrPart(Data))
 End Function
 Public Function getLengthInMS() As Long
     'Get the length of the m"+cstr(myID)+" in milliseconds
-    error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
-    error = mciSendString("status m" & CStr(myid) & " length", Data, 128, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
+    Error = mciSendString("status m" & CStr(myid) & " length", Data, 128, 0)
     getLengthInMS = val(StrPart(Data))
 End Function
 Public Function playFullScreen()
     'Play the m"+cstr(myID)+" in full screen mode
-    error = mciSendString("play m" & CStr(myid) & " fullscreen", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & " fullscreen", 0, 0, 0)
 End Function
 Public Function getLengthInSec() As Long
     'Get the length of the m"+cstr(myID)+" in seconds
@@ -577,11 +582,11 @@ Public Function getLengthInSec() As Long
 End Function
 Public Function setVideoOff()
     'Set the video device off
-    error = mciSendString("set all video off", 0, 0, 0)
+    Error = mciSendString("set all video off", 0, 0, 0)
 End Function
 Public Function setVideoOn()
     'Set the video device on
-    error = mciSendString("set all video on", 0, 0, 0)
+    Error = mciSendString("set all video on", 0, 0, 0)
 End Function
 Public Function pauseMovie()
     'Pause the m"+cstr(myID)+"
@@ -589,43 +594,43 @@ Public Function pauseMovie()
     AVI.Timer1.enabled = False
     If (Me.getLengthInMS - Me.getPositionInMS) > 0 Then
     
-    AVI.Timer1.Interval = Me.getLengthInMS - Me.getPositionInMS
+    AVI.Interval = Me.getLengthInMS - Me.getPositionInMS
     Else
-     AVI.Timer1.Interval = 10000
+     AVI.Interval = 10000
     End If
     End If
-    error = mciSendString("pause m" & CStr(myid) & "", 0, 0, 0)
+    Error = mciSendString("pause m" & CStr(myid) & "", 0, 0, 0)
 End Function
 Public Function resumeMovie()
     'Resumes the m"+cstr(myID)+"
-    error = mciSendString("resume m" & CStr(myid) & "", 0, 0, 0)
+    Error = mciSendString("resume m" & CStr(myid) & "", 0, 0, 0)
 End Function
 Public Function getPositionInMS() As Long
     'Get the position of the m"+cstr(myID)+" in milliseconds
-    error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
-    error = mciSendString("status m" & CStr(myid) & " position", Data, 128, 0) 'wait
+    Error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
+    Error = mciSendString("status m" & CStr(myid) & " position", Data, 128, 0) 'wait
     getPositionInMS = val(StrPart(Data))
 End Function
 Public Function getRate() As Long
     'Get the current speed of the m"+cstr(myID)+"
-    error = mciSendString("status m" & CStr(myid) & " speed", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " speed", Data, 128, 0)
     getRate = val(StrPart(Data))
 End Function
 Public Function getPositionInFrames() As Long
     'Get the position of the m"+cstr(myID)+" in frames
-    error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0) 'wait
-    error = mciSendString("status m" & CStr(myid) & " position", Data, 128, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0) 'wait
+    Error = mciSendString("status m" & CStr(myid) & " position", Data, 128, 0)
     getPositionInFrames = val(StrPart(Data))
 End Function
 Public Function getStatus() As String
     'Get the current mode of the m"+cstr(myID)+"
     'Playing, Stopped, Paused, Not Ready
-    error = mciSendString("status m" & CStr(myid) & " mode", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " mode", Data, 128, 0)
     getStatus = StrConv(StrPart(Data), vbProperCase)
 End Function
 Public Function closeMovie()
     'Close the mci device
-   If opencounter > 0 Then error = mciSendString("close m" & CStr(myid) & "", 0, 0, 0): opencounter = opencounter - 1
+   If opencounter > 0 Then Error = mciSendString("close m" & CStr(myid) & "", 0, 0, 0): opencounter = opencounter - 1
 End Function
 Public Function getFormatPosition() As String
     'Get the position in a userfriendly time format
@@ -676,22 +681,22 @@ TrapIt:     MyEr Err.Description, Err.Description
 End Function
 Public Function getVolume() As Long
     'Get the current volume level
-    error = mciSendString("status m" & CStr(myid) & " volume", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " volume", Data, 128, 0)
     getVolume = val(StrPart(Data))
 End Function
 Public Function getVideoStatus() As String
     'Get the status of the video. Returns on or off
-    error = mciSendString("status m" & CStr(myid) & " video", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " video", Data, 128, 0)
     getVideoStatus = StrPart(Data)
 End Function
 Public Function getTimeFormat() As String
     'Returns the current time format. Frames or Millisecond
-    error = mciSendString("status m" & CStr(myid) & " time format", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " time format", Data, 128, 0)
     getTimeFormat = StrPart(Data)
 End Function
 Public Function getLeftVolume() As Long
     'Returns the volume value of the left channel
-    error = mciSendString("status m" & CStr(myid) & " left volume", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " left volume", Data, 128, 0)
     getLeftVolume = val(StrPart(Data))
 End Function
 Public Function getPositionInSec() As Double
@@ -700,47 +705,48 @@ Public Function getPositionInSec() As Double
 End Function
 Public Function getRightVolume() As Long
     'Get the volume value of the right channel
-    error = mciSendString("status m" & CStr(myid) & " right volume", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " right volume", Data, 128, 0)
     getRightVolume = val(StrPart(Data))
 End Function
 Public Function setAudioOff()
     'Turns of the audio device
-    error = mciSendString("set m" & CStr(myid) & " audio all off", 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " audio all off", 0, 0, 0)
 End Function
 Public Function setAudioOn()
     'turns on the audio device
-    error = mciSendString("set m" & CStr(myid) & " audio all on", 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " audio all on", 0, 0, 0)
 End Function
 Public Function setLeftOff()
     'Turns of the left channel
-    error = mciSendString("set m" & CStr(myid) & " audio left off", 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " audio left off", 0, 0, 0)
 End Function
 Public Function setRightOff()
     'Turns of the right channel
-    error = mciSendString("set m" & CStr(myid) & " audio right off", 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " audio right off", 0, 0, 0)
 End Function
 Public Function setLeftOn()
     'Turns on the left channel
-    error = mciSendString("set m" & CStr(myid) & " audio left on", 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " audio left on", 0, 0, 0)
 End Function
 Public Function setRightOn()
     'Truns on the right channel
-    error = mciSendString("set m" & CStr(myid) & " audio right on", 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " audio right on", 0, 0, 0)
 End Function
 Public Function setDoorOpen()
     'Open the cdrom door
-    error = mciSendString("set cdaudio door open", 0, 0, 0)
+    Error = mciSendString("set cdaudio door open", 0, 0, 0)
 End Function
 Public Function setDoorClosed()
     'Close the cdrom door
-    error = mciSendString("set cdaudio door closed", 0, 0, 0)
+    Error = mciSendString("set cdaudio door closed", 0, 0, 0)
 End Function
 Public Function setVolume(Value As Long)
      'Raise or lower the volume for both channels
     '1000 max - 0 min
 
-'     error = mciSendString("setaudio sequencer volume to " & Value, 0, 0, 0)
- error = mciSendString("setaudio m" & CStr(myid) & " volume to " & CStr(Value), 0, 0, 0)
+    ' Error = mciSendString("setaudio volume to " & Value, 0, 0, 0)
+ Error = mciSendString("setaudio m" & CStr(myid) & " volume to " & CStr(Value), 0, 0, 0)
+ 
 End Function
 Public Function setPositionTo(Second As Double)
     'Sets the position of the m"+cstr(myID)+" to play at
@@ -757,9 +763,9 @@ Public Function setPositionTo(Second As Double)
     
      If (Me.getLengthInMS - Me.getPositionInMS) > 0 Then
     
-    AVI.Timer1.Interval = Me.getLengthInMS - Me.getPositionInMS
+    AVI.Interval = Me.getLengthInMS - Me.getPositionInMS
     Else
-     AVI.Timer1.Interval = 10000
+     AVI.Interval = 10000
     End If
     End If
     On Error GoTo 0
@@ -767,7 +773,7 @@ Public Function setPositionTo(Second As Double)
 Public Function restartMovie()
     'Sets the m"+cstr(myID)+" to the beginning and call the playMovie
     'function to start playing from the beginning
-    error = mciSendString("seek m" & CStr(myid) & " to start", 0, 0, 0)
+    Error = mciSendString("seek m" & CStr(myid) & " to start", 0, 0, 0)
      If AVIRUN Then
     AVI.Timer1.enabled = False
     AVI.Timer1.enabled = Me.getLengthInMS
@@ -777,74 +783,108 @@ Public Function restartMovie()
 End Function
 Public Function rewindByMS(numMS As Long)
     'Rewind the m"+cstr(myID)+" a specified number of milliseconds
-    error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
-    error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS - numMS, 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS - numMS, 0, 0, 0)
 End Function
 Public Function rewindByFrames(numFrames As Long)
     'Rewind the m"+cstr(myID)+" by a specified number of frames
-    error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0)
-    error = mciSendString("play m" & CStr(myid) & " from " & getPositionInFrames - numFrames, 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & " from " & getPositionInFrames - numFrames, 0, 0, 0)
 End Function
 Public Function rewindBySeconds(numSec As Long)
     'Rewind the m"+cstr(myID)+" by a specified number of seconds
-    error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
-    error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS - 1000 * numSec, 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS - 1000 * numSec, 0, 0, 0)
 End Function
 Public Function forwardByFrames(numFrames As Long)
     'Forward the m"+cstr(myID)+" a specified number of frames
-    error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0)
-    error = mciSendString("play m" & CStr(myid) & " from " & getPositionInFrames + numFrames, 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format frames", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & " from " & getPositionInFrames + numFrames, 0, 0, 0)
 End Function
 Public Function forwardByMS(numMS As Long)
     'Forward the m"+cstr(myID)+" a specified number of milliseconds
-    error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
-    error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS + numMS, 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS + numMS, 0, 0, 0)
 End Function
 Public Function forwardBySeconds(numSec As Long)
     'Forward the m"+cstr(myID)+" a specified number of seconds
-    error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
-    error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS + 1000 * numSec, 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " time format ms", 0, 0, 0)
+    Error = mciSendString("play m" & CStr(myid) & " from " & getPositionInMS + 1000 * numSec, 0, 0, 0)
 End Function
 Public Function checkDeviceReady() As String
     'Returns true or false depending if the mci device
     'is ready or not
-    error = mciSendString("status m" & CStr(myid) & " ready", Data, 128, 0)
+    Error = mciSendString("status m" & CStr(myid) & " ready", Data, 128, 0)
     checkDeviceReady = StrPart(Data)
 End Function
 Public Function setSpeed(Value As Long)
     'Set the current playing spped of the m"+cstr(myID)+"
     '0 = as fast as possible without losing frames
     'Values 1 - 2000 - 2000 being fastest
-    error = mciSendString("set m" & CStr(myid) & " speed " & Value, 0, 0, 0)
+    Error = mciSendString("set m" & CStr(myid) & " speed " & Value, 0, 0, 0)
 End Function
 Public Function setLeftVolume(Value As Long)
     'Set the value of the left volume
-    error = mciSendString("setaudio m" & CStr(myid) & " left volume to " & Value, 0, 0, 0)
+    Error = mciSendString("setaudio m" & CStr(myid) & " left volume to " & Value, 0, 0, 0)
 End Function
 Public Function setRightVolume(Value As Long)
-    error = mciSendString("setaudio m" & CStr(myid) & " right volume to " & Value, 0, 0, 0)
+    Error = mciSendString("setaudio m" & CStr(myid) & " right volume to " & Value, 0, 0, 0)
 End Function
 Sub Timeout(duration)
     'Pauses for a specified amount of milliseconds
     Dim StartTime As Long
-    Dim X As Long
+    Dim x As Long
     StartTime = Timer
     Do While Timer - StartTime < duration
-        X = DoEvents()
+        x = DoEvents()
     Loop
     Exit Sub
 End Sub
 
 Private Sub Class_Initialize()
 myid = CLng(Timer * 1000 Mod 1000)
-
-
 End Sub
 
 Private Sub Class_Terminate()
 closeMovie
 End Sub
-Public Sub SetMasterVolume(MVol As Long)
+Public Sub SetMasterVolume(MVol As Long, Optional mix As Long = 50)
+Dim thisvol As Long, al As Double, ar As Double
+If MVol > 100 Then MVol = 100
+If MVol < 0 Then MVol = 0
+If mix > 100 Then mix = 100
+If mix < 0 Then mix = 0
+ar = MVol * 655.36 - 1
+al = ar
+If ar < 0 Then ar = 0
+If al < 0 Then al = 0
+If mix < 50 Then
+al = al * mix / 50
+
+ElseIf mix > 50 Then
+ar = ar * (100 - mix) / 50
+End If
+
+thisvol = signlong2((ar) * &H10000 + al)
+Error = midiOutSetVolume(0, thisvol)
+Error = waveOutSetVolume(0, thisvol)
+
+End Sub
+Sub GetMasterVolume(vol As Long)
+Dim thisvol As Long, part1 As Integer
+Error = waveOutGetVolume(0, thisvol)
+If Error = 0 Then
+    GetMem2 VarPtr(thisvol), part1
+    vol = part1
+    GetMem2 VarPtr(thisvol) + 2, part1
+    If UINT(vol) < UINT(part1) Then vol = part1
+    Dim a As Double
+    a = UINT(vol) \ 655.36
+    vol = CLng(a)
+    
+End If
+End Sub
+Public Sub SetMasterVolume1(MVol As Long)
     Dim hmixer As Long          ' mixer handle
       Dim volCtrl As MIXERCONTROL ' waveout volume control
       Dim micCtrl As MIXERCONTROL ' microphone volume control
@@ -859,6 +899,8 @@ Public Sub SetMasterVolume(MVol As Long)
                               If ok Then
       ovol = CLng(MVol * ((volCtrl.lMaximum - volCtrl.lMinimum) / 100#)) + volCtrl.lMinimum
 SetVolumeControl hmixer, volCtrl, ovol
+Else
+setVolume MVol
 End If
 End Sub
 

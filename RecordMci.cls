@@ -12,16 +12,43 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
+Private Type WAVEINCAPS
+    wMid                As Integer
+    wPid                As Integer
+    vDriverVersion      As Long
+    szPname(31)         As Integer
+    dwFormats           As Long
+    wChannels           As Integer
+    wReserved1          As Integer
+End Type
 Private Declare Function mciGetErrorString Lib "winmm.dll" Alias "mciGetErrorStringA" (ByVal dwError As Long, ByVal lpstrBuffer As String, ByVal uLength As Long) As Long 'Get the error message of the mcidevice if any
 Private Declare Function mciSendString Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal lpstrReturnString As String, ByVal uReturnLength As Long, ByVal hwndCallback As Long) As Long 'Send command strings to the mci device
+Private Declare Function mciSendString2 Lib "winmm.dll" Alias "mciSendStringA" (ByVal lpstrCommand As String, ByVal Id As Long, ByVal something1 As Long, ByVal hwndCallback As Long) As Long
+
+Private Declare Function waveInGetNumDevs Lib "winmm.dll" () As Long
+Private Declare Function waveInGetID Lib "winmm.dll" ( _
+                         ByVal hWaveIn As Long, _
+                         ByRef lpuDeviceID As Long) As Long
+Private Declare Function waveInGetDevCaps Lib "winmm.dll" _
+                         Alias "waveInGetDevCapsW" ( _
+                         ByVal uDeviceID As Long, _
+                         ByRef lpCaps As WAVEINCAPS, _
+                         ByVal uSize As Long) As Long
+Private Declare Function lstrcpyn Lib "kernel32" _
+                         Alias "lstrcpynW" ( _
+                         ByRef lpString1 As Any, _
+                         ByRef lpString2 As Any, _
+                         ByVal iMaxLength As Long) As Long
+
 Private Data As String * 128 ' Used to store our return data
-Public error As Long ' Used to store our error message
+Public Error As Long ' Used to store our error message
 Public Height As Long
 Public Width As Long
 Public Length As Long
 Private bt As Long
 Private ch As Long
-Private Terminate As String
+Private Terminate0 As String
+Private Terminate1 As String
  Private mFilename  As String ' Used to store our file
  Public Property Let FileName(n As String)
 mFilename = n
@@ -30,19 +57,21 @@ Public Property Get FileName() As String
 FileName = mFilename
 End Property
 Public Sub Rec_Initialize()
-If Terminate <> "" Then
-error = mciSendString(Terminate, 0, 0, 0)
+If Terminate0 <> "" Then
+Error = mciSendString2(Terminate0, 0, 0, 0)
+If Terminate1 <> "" Then Error = mciSendString2(Terminate1, 0, 0, 0)
 End If
-error = mciSendString("open new type waveaudio alias capture", 0&, 0, 0)
-error = mciSendString("set capture time format ms", 0, 0, 0)
-If error <= 0 Then Terminate = "close capture"
+Error = mciSendString2("open new type waveaudio alias mycapture", 0, 0, 0)
+Error = mciSendString2("open new type waveaudio alias waveLevel", 0, 0, 0)
+Error = mciSendString2("set mycapture time format ms", 0, 0, 0)
+If Error <= 0 Then Terminate0 = "close mycapture": Terminate1 = "close wavelevel"
 End Sub
 Public Sub GeneralMCI(OpenString As String, CloseString As String)
-error = mciSendString(OpenString, 0&, 0, 0)
-If error = 0 Then Terminate = CloseString
+Error = mciSendString2(OpenString, 0&, 0, 0)
+If Error = 0 Then Terminate0 = CloseString
 End Sub
 Public Sub oneMCI(NowString As String)
-error = mciSendString(NowString, 0&, 0, 0)
+Error = mciSendString2(NowString, 0&, 0, 0)
 End Sub
 Private Function NeedByteFactor() As Long
 If bt = 0 Then Bit8
@@ -55,28 +84,28 @@ End Function
 
 Public Sub Bit8()
 
- error = mciSendString("set capture bitspersample 8", 0&, 0, 0)
- If error <= 0 Then bt = 1
+ Error = mciSendString2("set mycapture bitspersample 8", 0&, 0, 0)
+ If Error <= 0 Then bt = 1
 End Sub
 Public Sub Bit16()
- error = mciSendString("set capture bitspersample 16", 0&, 0, 0)
-  If error <= 0 Then bt = 2
+ Error = mciSendString2("set mycapture bitspersample 16", 0&, 0, 0)
+  If Error <= 0 Then bt = 2
 End Sub
 Public Sub QualityRadio()
 
-  error = mciSendString("set capture samplespersec 11025 BYTESPERSEC " & CStr(11025 * NeedByteFactor), 0&, 0, 0)
+  Error = mciSendString2("set mycapture samplespersec 11025 BYTESPERSEC " & CStr(11025 * NeedByteFactor), 0&, 0, 0)
   
 End Sub
 Public Sub QualityAny(qrec As Double)
- error = mciSendString("set capture samplespersec " & CStr(CLng(qrec)) & " BYTESPERSEC " & CStr(CLng(qrec) * NeedByteFactor), 0&, 0, 0)
+ Error = mciSendString2("set mycapture samplespersec " & CStr(CLng(qrec)) & " BYTESPERSEC " & CStr(CLng(qrec) * NeedByteFactor), 0&, 0, 0)
 End Sub
 Public Sub Mono()
-error = mciSendString("set capture channels 1", 0&, 0, 0)
- If error <= 0 Then ch = 1
+Error = mciSendString2("set mycapture channels 1", 0&, 0, 0)
+ If Error <= 0 Then ch = 1
 End Sub
 Public Sub Stereo()
-error = mciSendString("set capture channels 2", 0&, 0, 0)
-If error <= 0 Then ch = 2
+Error = mciSendString2("set mycapture channels 2", 0&, 0, 0)
+If Error <= 0 Then ch = 2
 End Sub
 Public Sub RecFast()
 Bit8
@@ -89,48 +118,60 @@ Capture
 End Sub
 Public Sub Capture(Optional ByVal ins As Boolean = False)
 If ins Then
-error = mciSendString("record capture insert", 0&, 0, 0)
+Error = mciSendString2("record mycapture insert", 0, 0, 0)
 Else
-error = mciSendString("record capture", 0&, 0, 0)
+Error = mciSendString2("record mycapture", 0, 0, 0)
 End If
 End Sub
 Public Sub ReCapture()
-error = mciSendString("record capture overwrite", 0&, 0, 0)
+Error = mciSendString2("record mycapture overwrite", 0, 0, 0)
 End Sub
 Sub CutRecordMs(recStart As Double, recEnd As Double)
-error = mciSendString("set capture time format ms", 0, 0, 0)
-error = mciSendString("delete capture from " & CStr(recStart) & " to " & CStr(recEnd), 0&, 0, 0)
+Error = mciSendString2("set mycapture time format ms", 0, 0, 0)
+Error = mciSendString2("delete mycapture from " & CStr(recStart) & " to " & CStr(recEnd), 0&, 0, 0)
 
 End Sub
 Public Function getPositionInMS() As Long
     'Get the position of the movie in milliseconds
-    error = mciSendString("set capture time format ms", 0, 0, 0)
-    error = mciSendString("status capture position", Data, 128, 0)
+    Error = mciSendString2("set mycapture time format ms", 0, 0, 0)
+    Error = mciSendString("status mycapture position", Data, 128, 0)
     getPositionInMS = val(StrPart(Data))
+End Function
+Public Function getLevels() As Long
+If Terminate1 <> "" Then
+Error = mciSendString("status waveLevel level", Data, 128, 0)
+getLevels = val(StrPart(Data))
+End If
 End Function
 Public Function getLengthInMS() As Long
     'Get the position of the movie in milliseconds
-    error = mciSendString("set capture time format ms", 0, 0, 0)
-    error = mciSendString("status capture length", Data, 128, 0)
+    Error = mciSendString2("set mycapture time format ms", 0, 0, 0)
+    Error = mciSendString("status mycapture length", Data, 128, 0)
     getLengthInMS = val(StrPart(Data))
 End Function
 Sub recStop()
-error = mciSendString("stop capture", 0, 0, 0)
+Error = mciSendString2("stop mycapture", 0, 0, 0)
 End Sub
 Sub recPlay()
-error = mciSendString("play capture", 0, 0, 0)
+Dim again As Boolean
+If Terminate1 <> "" Then Error = mciSendString2(Terminate1, 0, 0, 0): again = True
+Error = mciSendString2("set mycapture time format ms", 0, 0, 0)
+Error = mciSendString2("play mycapture from 0", 0, 0, 0)
+If again Then Error = mciSendString2("open new type waveaudio alias waveLevel", 0, 0, 0)
+
 End Sub
 Sub recPlayFromMs(recPos As Double)
 recPos = CLng(recPos)
-error = mciSendString("set capture time format ms", 0, 0, 0)
-error = mciSendString("play capture from " & CStr(recPos), 0, 0, 0)
+Error = mciSendString2("set mycapture time format ms", 0, 0, 0)
+Error = mciSendString2("play mycapture from " & CStr(recPos), 0, 0, 0)
 End Sub
 Public Function setVolume(Value As Long)
- error = mciSendString("setaudio capture volume to " & CStr(Value), 0, 0, 0)
+ Error = mciSendString2("setaudio mycapture volume to " & CStr(Value), 0, 0, 0)
+
 End Function
 Public Function isRecPlaying() As Boolean
     Dim isPlaying As String
-    error = mciSendString("status capture mode", Data, 128, 0)
+    Error = mciSendString("status mycapture mode", Data, 128, 0)
     MyDoEvents
     isPlaying = Left(StrPart(Data), 7)
     If isPlaying = "playing" And Not NOEXECUTION Then
@@ -141,36 +182,39 @@ Public Function isRecPlaying() As Boolean
 End Function
 Sub Save()
 If mFilename <> "" Then
-error = mciSendString("save capture " & """" + mFilename + """", 0&, 0, 0)
+Error = mciSendString2("save mycapture " & """" + mFilename + """", 0&, 0, 0)
 End If
 End Sub
 Sub AnyMci(CommandString As String)
-error = mciSendString(CommandString, 0&, 0, 0)
+Error = mciSendString2(CommandString, 0&, 0, 0)
 
 End Sub
 Function AnyMciValue(CommandString As String)
- error = mciSendString(CommandString, Data, 128, 0)
+ Error = mciSendString(CommandString, Data, 128, 0)
     AnyMciValue = val(StrPart(Data))
 End Function
 Public Function checkError() As String
     'A very useful function for getting any errors
     'associated with the mci device
     checkError = space$(255)
-    mciGetErrorString error, checkError, Len(checkError)
+    mciGetErrorString Error, checkError, Len(checkError)
 End Function
 Sub SaveAs(fnm As String)
 
-error = mciSendString("save capture " & """" + fnm + """", 0&, 0, 0)
-If error <= 0 Then
+Error = mciSendString2("save mycapture " & """" + fnm + """", 0&, 0, 0)
+If Error <= 0 Then
 mFilename = fnm
 End If
 
 End Sub
+Public Property Get HaveMic() As Boolean
+HaveMic = waveInGetNumDevs()
+End Property
 
 Private Sub Class_Terminate()
-If Terminate <> "" Then
-error = mciSendString(Terminate, 0, 0, 0)
-
+If Terminate0 <> "" Then
+Error = mciSendString2(Terminate0, 0, 0, 0)
+If Terminate1 <> "" Then Error = mciSendString2(Terminate1, 0, 0, 0)
 End If
 End Sub
 Private Function StrPart(sBuffer As String)

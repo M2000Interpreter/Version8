@@ -37,29 +37,29 @@ Private Const EM_GETFIRSTVISIBLELINE = &HCE
 Private Const EM_LINESCROLL = &HB6
 Private Const EM_GETLINECOUNT = 186
 Public Const INVALID_HANDLE_VALUE = -1
-Declare Function CreateNamedPipe Lib "KERNEL32" Alias "CreateNamedPipeW" (ByVal lpName As Long, ByVal dwOpenMode As Long, ByVal dwPipeMode As Long, ByVal nMaxInstances As Long, ByVal nOutBufferSize As Long, ByVal nInBufferSize As Long, ByVal nDefaultTimeOut As Long, lpSecurityAttributes As Any) As Long
-Declare Function ConnectNamedPipe Lib "KERNEL32" (ByVal hNamedPipe As Long, lpOverlapped As Long) As Long
-Declare Function DisconnectNamedPipe Lib "KERNEL32" (ByVal hNamedPipe As Long) As Long
-Declare Function WriteFile Lib "KERNEL32" (ByVal hFile As Long, lpBuffer As Any, ByVal nNumberOfBytesToWrite As Long, lpNumberOfBytesWritten As Long, lpOverlapped As Long) As Long
- Declare Function ReadFile Lib "KERNEL32" (ByVal hFile As Long, lpBuffer As Any, _
+Declare Function CreateNamedPipe Lib "kernel32" Alias "CreateNamedPipeW" (ByVal lpName As Long, ByVal dwOpenMode As Long, ByVal dwPipeMode As Long, ByVal nMaxInstances As Long, ByVal nOutBufferSize As Long, ByVal nInBufferSize As Long, ByVal nDefaultTimeOut As Long, lpSecurityAttributes As Any) As Long
+Declare Function ConnectNamedPipe Lib "kernel32" (ByVal hNamedPipe As Long, lpOverlapped As Long) As Long
+Declare Function DisconnectNamedPipe Lib "kernel32" (ByVal hNamedPipe As Long) As Long
+Declare Function WriteFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, ByVal nNumberOfBytesToWrite As Long, lpNumberOfBytesWritten As Long, lpOverlapped As Long) As Long
+ Declare Function ReadFile Lib "kernel32" (ByVal hFile As Long, lpBuffer As Any, _
       ByVal nNumberOfBytesToRead As Long, _
       lpNumberOfBytesRead As Long, _
       lpOverlapped As Any) As Long
-Declare Function WaitNamedPipe Lib "KERNEL32" Alias "WaitNamedPipeW" (ByVal lpNamedPipeName As Long, ByVal nTimeOut As Long) As Long
+Declare Function WaitNamedPipe Lib "kernel32" Alias "WaitNamedPipeW" (ByVal lpNamedPipeName As Long, ByVal nTimeOut As Long) As Long
       
 'Declare Function CallNamedPipe Lib "KERNEL32" Alias "CallNamedPipeW" (ByVal lpNamedPipeName As Long, lpInBuffer As Any, ByVal nInBufferSize As Long, lpOutBuffer As Any, ByVal nOutBufferSize As Long, lpBytesRead As Long, ByVal nTimeOut As Long) As Long
-Declare Function GetLastError Lib "KERNEL32" () As Long
-Declare Function CopyFile Lib "KERNEL32" Alias "CopyFileW" (ByVal lpExistingFileName As Long, ByVal lpNewFileName As Long, ByVal bFailIfExists As Long) As Long
+Declare Function GetLastError Lib "kernel32" () As Long
+Declare Function CopyFile Lib "kernel32" Alias "CopyFileW" (ByVal lpExistingFileName As Long, ByVal lpNewFileName As Long, ByVal bFailIfExists As Long) As Long
 '' MoveFile
-Declare Function MoveFile Lib "KERNEL32" Alias "MoveFileW" (ByVal lpExistingFileName As Long, ByVal lpNewFileName As Long) As Long
-Declare Function FlushFileBuffers Lib "KERNEL32" (ByVal hFile As Long) As Long
-Declare Function CloseHandle Lib "KERNEL32" (ByVal hObject As Long) As Long
-Declare Function CreateFile Lib "KERNEL32" Alias "CreateFileW" (ByVal lpFileName As Long, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
+Declare Function MoveFile Lib "kernel32" Alias "MoveFileW" (ByVal lpExistingFileName As Long, ByVal lpNewFileName As Long) As Long
+Declare Function FlushFileBuffers Lib "kernel32" (ByVal hFile As Long) As Long
+Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
+Declare Function CreateFile Lib "kernel32" Alias "CreateFileW" (ByVal lpFileName As Long, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
 Public Const GENERIC_READ = &H80000000
 Public Const GENERIC_WRITE = &H40000000
 Public Const OPEN_EXISTING = 3
 Public Const CREATE_NEW = 1
-Private Declare Sub CopyMemoryStr Lib "KERNEL32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemoryStr Lib "kernel32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, ByVal lpvSource As String, ByVal cbCopy As Long)
     
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -125,7 +125,7 @@ Private Const SND_PURGE = &H40 ' purge non-static events for task
 Private Const SND_RESOURCE = &H40004 ' name is a resource name or atom
 Private Const SND_SYNC = &H0 ' play synchronously (default)
 Private Declare Function PlaySound Lib "winmm.dll" Alias "PlaySoundW" (ByVal lpszName As Long, ByVal hModule As Long, ByVal dwFlags As Long) As Long
-Declare Function GetShortPathName Lib "KERNEL32" Alias _
+Declare Function GetShortPathName Lib "kernel32" Alias _
 "GetShortPathNameW" (ByVal lpszLongPath As Long, _
 ByVal lpszShortPath As Long, ByVal cchBuffer As Long) As Long
 
@@ -195,7 +195,7 @@ Private Type TIME_ZONE_INFORMATION
    DaylightDate As SYSTEMTIME
    DaylightBias As Long
 End Type
-Private Declare Function getTimeFormat Lib "KERNEL32" Alias "GetTimeFormatW" ( _
+Private Declare Function getTimeFormat Lib "kernel32" Alias "GetTimeFormatW" ( _
     ByVal Locale As Long, _
     ByVal dwFlags As Long, _
     ByRef lpTime As SYSTEMTIME, _
@@ -203,7 +203,7 @@ Private Declare Function getTimeFormat Lib "KERNEL32" Alias "GetTimeFormatW" ( _
     ByVal lpTimeStr As Long, _
     ByVal cchTime As Long _
 ) As Long
-Private Declare Function GetDateFormat Lib "KERNEL32" Alias "GetDateFormatW" ( _
+Private Declare Function GetDateFormat Lib "kernel32" Alias "GetDateFormatW" ( _
     ByVal Locale As Long, _
     ByVal dwFlags As Long, _
     ByRef lpDate As SYSTEMTIME, _
@@ -228,8 +228,8 @@ Private Declare Function VariantTimeToSystemTime Lib "OleAut32.dll" ( _
 ) As Long
 Private Declare Function GetTimeZoneInformation Lib "kernel32.dll" (lpTimeZoneInformation As TIME_ZONE_INFORMATION) As Long
   
-Private Declare Function CreateDirectory Lib "KERNEL32" Alias "CreateDirectoryW" (ByVal lpszPath As Long, ByVal lpSA As Long) As Long
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
+Private Declare Function CreateDirectory Lib "kernel32" Alias "CreateDirectoryW" (ByVal lpszPath As Long, ByVal lpSA As Long) As Long
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Private EncbTrans(63) As Byte, EnclPowers8(255) As Long, EnclPowers16(255) As Long
 Dim lPowers18(63) As Long, bTrans(255) As Byte, lPowers6(63) As Long, lPowers12(63) As Long
@@ -420,10 +420,10 @@ Dim F$, fd$
 If Not CanKillFile(sSourceFile) Then Exit Function
 If ExtractType(sSourceFile) = vbNullString Then sSourceFile = sSourceFile + ".gsb"
 If ExtractType(sDesFile) = vbNullString Then
-If ExtractNameOnly(sDesFile) = ExtractNameOnly(sSourceFile) Then
-sDesFile = ExtractNameOnly(sDesFile) + ".bck"
+If ExtractNameOnly(sDesFile, True) = ExtractNameOnly(sSourceFile, True) Then
+sDesFile = ExtractNameOnly(sDesFile, True) + ".bck"
 Else
-sDesFile = ExtractNameOnly(sDesFile) + ".gsb"
+sDesFile = ExtractNameOnly(sDesFile, True) + ".gsb"
 End If
 End If
 sSourceFile = CFname(sSourceFile)
@@ -431,7 +431,7 @@ If sSourceFile = vbNullString Or CFname(sDesFile) <> "" Then
 BadFilename
 Exit Function
 Else
-sDesFile = ExtractPath(sSourceFile) + ExtractName(sDesFile)
+sDesFile = ExtractPath(sSourceFile) + ExtractName(sDesFile, True)
 End If
 If Left$(sSourceFile, 2) <> "\\" Then
 F$ = "\\?\" + sSourceFile
@@ -449,7 +449,7 @@ End Function
 
 Public Function RenameFile2(ByVal sSourceFile As String, ByVal sDesFile As String) As Boolean
 Dim F$, fd$
-sDesFile = ExtractPath(sSourceFile) + ExtractName(sDesFile)
+sDesFile = ExtractPath(sSourceFile) + ExtractName(sDesFile, True)
 If Left$(sSourceFile, 2) <> "\\" Then
 F$ = "\\?\" + sSourceFile
 Else
@@ -556,8 +556,10 @@ If ExtractType(F) = vbNullString Then F = F & ".WAV"
 F = CFname(F)
 PlaySound StrPtr(F), ByVal 0&, SND_FILENAME Or SND_ASYNC
 End If
+End Sub  ' SND_MEMORY
+Sub PlaySoundNew2(F As Long)
+PlaySound (F), ByVal 0&, SND_MEMORY Or SND_ASYNC
 End Sub
-
 
        
 Public Sub SetTrans(oForm As Form, Optional bytAlpha As Byte = 255, Optional lColor As Long = 0, Optional TRMODE As Boolean = False)
@@ -631,7 +633,7 @@ Next
 End If
 st& = 1
 If Len(simple$) <= 1 Then
-Included = ExtractName(afile$)
+Included = ExtractName(afile$, True)
 Else
     Sleep 1
     Set a = New Document
@@ -642,7 +644,7 @@ Else
     If InStr(simple$, vbCr) > 0 Then
     'work with any char but using computer locale
     If InStr(1, a.textDoc, word$(0), vbTextCompare) > 0 Then
-                Included = ExtractName(afile$)
+                Included = ExtractName(afile$, True)
     End If
     Else
     ' work in paragraphs..
@@ -661,10 +663,10 @@ again:
      If Not ok Then Exit For
      Next it
      st& = st& + Len(word$(0))
-    If ok Then Included = ExtractName(afile$) Else GoTo again
+    If ok Then Included = ExtractName(afile$, True) Else GoTo again
     
      Else
-            Included = ExtractName(afile$)
+            Included = ExtractName(afile$, True)
            End If
     End If
     End If

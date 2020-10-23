@@ -42,11 +42,11 @@ dwReserved1 As Long
 cFileName(MAX_PATH * 2 - 1) As Byte
 cAlternate(14 * 2 - 1) As Byte
 End Type
-Private Declare Function CompareString Lib "KERNEL32" Alias "CompareStringW" (ByVal Locale As Long, ByVal dwCmpFlags As Long, ByVal lpString1 As Long, ByVal cchCount1 As Long, ByVal lpString2 As Long, ByVal cchCount2 As Long) As Long
+Private Declare Function CompareString Lib "kernel32" Alias "CompareStringW" (ByVal Locale As Long, ByVal dwCmpFlags As Long, ByVal lpString1 As Long, ByVal cchCount1 As Long, ByVal lpString2 As Long, ByVal cchCount2 As Long) As Long
 
-Private Declare Function FindFirstFile Lib "KERNEL32" Alias "FindFirstFileW" (ByVal lpFileName As Long, lpFindFileData As WIN32_FIND_DATA) As Long
+Private Declare Function FindFirstFile Lib "kernel32" Alias "FindFirstFileW" (ByVal lpFileName As Long, lpFindFileData As WIN32_FIND_DATA) As Long
 
-Private Declare Function FindNextFile Lib "KERNEL32" Alias "FindNextFileW" (ByVal hFindFile As Long, lpFindFileData As WIN32_FIND_DATA) As Long
+Private Declare Function FindNextFile Lib "kernel32" Alias "FindNextFileW" (ByVal hFindFile As Long, lpFindFileData As WIN32_FIND_DATA) As Long
 Private Declare Function FindClose Lib "kernel32.dll" (ByVal hFindFile As Long) As Long
 
 Dim myfile$(), myLevel() As Integer
@@ -63,24 +63,24 @@ Private mTopFolder As String
 Dim InUseItems As Long
 Public LevelStop As Long
 
-Private Declare Function GetDiskFreeSpace Lib "KERNEL32" _
+Private Declare Function GetDiskFreeSpace Lib "kernel32" _
  Alias "GetDiskFreeSpaceA" (ByVal lpRootPathName As String, _
  lpSectorsPerCluster As Long, lpBytesPerSector As Long, _
  lpNumberOfFreeClusters As Long, lpTtoalNumberOfClusters As Long) _
  As Long
-Private Declare Function GetLogicalDriveStrings Lib "KERNEL32" _
+Private Declare Function GetLogicalDriveStrings Lib "kernel32" _
   Alias "GetLogicalDriveStringsW" _
   (ByVal nBufferLength As Long, ByVal lpBuffer As Long) As Long
 
-Private Declare Function GetLongPathName Lib "KERNEL32" _
+Private Declare Function GetLongPathName Lib "kernel32" _
    Alias "GetLongPathNameW" _
   (ByVal lpszShortPath As Long, _
    ByVal lpszLongPath As Long, _
    ByVal cchBuffer As Long) As Long
 Public lastTimeStamp As Date
 Public lastTimeStamp2 As Date
-Private Declare Function FileTimeToSystemTime Lib "KERNEL32" (lpFileTime As FILETIME, lpSystemTime As SYSTEMTIME) As Long
-Private Declare Function FileTimeToLocalFileTime Lib "KERNEL32" (lpFileTime As FILETIME, lpLocalFileTime As FILETIME) As Long
+Private Declare Function FileTimeToSystemTime Lib "kernel32" (lpFileTime As FILETIME, lpSystemTime As SYSTEMTIME) As Long
+Private Declare Function FileTimeToLocalFileTime Lib "kernel32" (lpFileTime As FILETIME, lpLocalFileTime As FILETIME) As Long
 Public UseUTC As Boolean
 Private Function FileTimeToDate(File_Time As FILETIME) As Date
 Dim System_Time As SYSTEMTIME
@@ -130,7 +130,7 @@ End Function
   Function TotalDiskSpace(DriveLetter As String) As Double
 ' Returns the total storage capacity for a drive
 On Error GoTo 100
-Dim Dletter As String, X As Long
+Dim Dletter As String, x As Long
 
     Dim SectorsPerCluster As Long
     Dim BytesPerSector As Long
@@ -138,10 +138,10 @@ Dim Dletter As String, X As Long
     Dim TotalClusters As Long
 
     Dletter = Left(DriveLetter, 1) & ":\"
-    X = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
+    x = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
       BytesPerSector, NumberofFreeClusters, TotalClusters)
     
-    If X = 0 Then 'Error occurred
+    If x = 0 Then 'Error occurred
         TotalDiskSpace = -99 'Assign an arbitrary error value
         Exit Function
     End If
@@ -172,7 +172,7 @@ Function NumberofDrives() As Integer
     Exit Function
 End Function
 
-Function DriveName(index As Integer) As String
+Function DriveName(Index As Integer) As String
     Dim i As Integer
     Dim Buffer As String
     Buffer = String$(260, 0)
@@ -188,7 +188,7 @@ Function DriveName(index As Integer) As String
           TheDrive = TheDrive & Mid$(Buffer, i, 1)
         If Asc(Mid$(Buffer, i, 1)) = 0 Then 'null separates drives
             DriveCount = DriveCount + 1
-            If DriveCount = index Then
+            If DriveCount = Index Then
                 DriveName = UCase(Left(TheDrive, 1))
                 Exit Function
             End If
@@ -201,17 +201,17 @@ End Function
 Function FreeDiskSpace(DriveLetter As String) As Double
 ' Returns the number of free bytes for a drive
 On Error GoTo 400
-Dim Dletter As String, X As Double
+Dim Dletter As String, x As Double
     Dim SectorsPerCluster As Long
     Dim BytesPerSector As Long
     Dim NumberofFreeClusters As Long
     Dim TotalClusters As Long
 
     Dletter = Left(DriveLetter, 1) & ":\"
-    X = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
+    x = GetDiskFreeSpace(Dletter, SectorsPerCluster, _
       BytesPerSector, NumberofFreeClusters, TotalClusters)
     
-    If X = 0 Then 'Error occurred
+    If x = 0 Then 'Error occurred
         FreeDiskSpace = -99 'Assign an arbitrary error value
         Exit Function
     End If
@@ -291,16 +291,16 @@ ReDim myfile$(100)
 ReDim myLevel(100) As Integer
 InUseItems = 0
 End Sub
-Public Property Get list(index As Long) As String
-If index < 0 Then
+Public Property Get list(Index As Long) As String
+If Index < 0 Then
 list = vbNullString
 Else
 If Not onetime Then onetime = True: once
-list = myfile$(index)
+list = myfile$(Index)
 End If
 End Property
-Public Property Let list(index As Long, RHS As String)
-myfile$(index) = RHS
+Public Property Let list(Index As Long, RHS As String)
+myfile$(Index) = RHS
 End Property
 
 Private Function CheckFile(ByVal expan$) As Boolean
@@ -481,7 +481,7 @@ End If
 If fhandle > 0 Then
 lookpath = StripNulls(wfd.cFileName)
 End If
-If Level = 3 Then mywait basestack1, 5
+If Level = 3 Then mywait Basestack1, 5
 
 While lookpath <> ""
 If Pattern <> "" Then
@@ -493,7 +493,7 @@ If Not LCase(lookpath) Like LCase(Pattern) Then
 End If
 End If
 
-If fff Mod 30 = 29 Then mywait basestack1, 1
+If fff Mod 30 = 29 Then mywait Basestack1, 1
     If isdirP(wfd) Or lookpath = ".." Then
          If lookpath = "." Or lookpath = ".." Then
         Else
@@ -829,12 +829,13 @@ End Function
 Public Function ExtractName(F$) As String
 Dim i As Long, j As Long, k$
 If F$ = vbNullString Then Exit Function
-j = PointPos(F$)
-If Mid$(F$, j, 1) = "." Then
-k$ = ExtractType(F$, j)
-Else
+'j = PointPos(F$)
+
+'If Mid$(F$, j, 1) = "." Then
+'k$ = ExtractType(F$, j)
+'Else
 j = Len(F$)
-End If
+'End If
 For i = j To 1 Step -1
 Select Case Mid$(F$, i, 1)
 Case Is < " ", "\", "/", ":"
@@ -856,7 +857,7 @@ End Function
 Public Function isReadOnly(ByVal F$) As Boolean
 Dim v&
 
-Err.clear
+Err.Clear
 On Error Resume Next
 If Right$(F$, 1) = "\" Then F$ = Mid$(F$, 1, Len(F$) - 1)
 If F$ <> "" Then
@@ -872,7 +873,7 @@ isdirP = (wfd.dwFileAttributes And 16) > 0
 End Function
 Public Function isdir(F$) As Boolean
 Dim v&
-Err.clear
+Err.Clear
 If F$ = vbNullString Then Exit Function
 On Error Resume Next
 If FileAttr(F$, v&) Then
@@ -930,14 +931,14 @@ Else
 mTopFolder = RHS
 End If
 End Property
-Function CleanName(ByVal name$) As String
-name$ = Replace(name$, """", "-")
-name$ = Replace(name$, "\", "-")
-name$ = Replace(name$, "<", "-")
-name$ = Replace(name$, ">", "-")
-name$ = Replace(name$, ":", "-")
-name$ = Replace(name$, "/", "-")
-CleanName = Replace(name$, "|", "-")
+Function CleanName(ByVal Name$) As String
+Name$ = Replace(Name$, """", "-")
+Name$ = Replace(Name$, "\", "-")
+Name$ = Replace(Name$, "<", "-")
+Name$ = Replace(Name$, ">", "-")
+Name$ = Replace(Name$, ":", "-")
+Name$ = Replace(Name$, "/", "-")
+CleanName = Replace(Name$, "|", "-")
 End Function
 
 Private Sub Class_Terminate()
@@ -1169,7 +1170,7 @@ Else
 IsNumberInFilename = False
 End If
 End Function
-Private Function IsNumberOnly(a$, fr As Long, r As Double, lr As Long) As Boolean
+Private Function IsNumberOnly(a$, fr As Long, R As Double, lr As Long) As Boolean
 Dim SG As Long, i As Long, ig$
 If a$ = vbNullString Then IsNumberOnly = False: Exit Function
 i = fr
@@ -1195,7 +1196,7 @@ Else
     IsNumberOnly = False
     lr = 1
     Else
-    r = val(ig$)
+    R = val(ig$)
     lr = i - fr + 1
     IsNumberOnly = True
 End If

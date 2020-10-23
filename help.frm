@@ -32,13 +32,21 @@ Begin VB.Form Form4
       TabIndex        =   0
       Top             =   300
       Width           =   6015
-      _extentx        =   10610
-      _extenty        =   6747
-      max             =   1
-      vertical        =   -1
-      font            =   "help.frx":000C
-      showbar         =   0
-      backcolor       =   -2147483624
+      _ExtentX        =   10610
+      _ExtentY        =   6747
+      Max             =   1
+      Vertical        =   -1  'True
+      BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
+         Name            =   "Arial"
+         Size            =   12
+         Charset         =   0
+         Weight          =   700
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      ShowBar         =   0   'False
+      Backcolor       =   -2147483624
    End
 End
 Attribute VB_Name = "Form4"
@@ -162,40 +170,40 @@ End If
 End If
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If Button = 1 Then
     
     If Helplastfactor = 0 Then Helplastfactor = 1
 
     If bordertop < 150 Then
-    If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
+    If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     
     Else
-    If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
+    If (x > Width - borderleft And x < Width) Or (y > Height - bordertop) Then  ' (y > Height - bordertop And y < Height) And
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     End If
 
 End If
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False: drmove = False
 If bordertop < 150 Then
-If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
  Else
- If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+ If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
 End If
 If dr Then
 
@@ -203,12 +211,12 @@ If dr Then
 
 If bordertop < 150 Then
 
-        If Y < (Height - 150) Or Y > Height Then addy = (Y - ly)
-     If X < (Width - 150) Or X > Width Then addX = (X - Lx)
+        If y < (Height - 150) Or y > Height Then addy = (y - ly)
+     If x < (Width - 150) Or x > Width Then addX = (x - Lx)
      
 Else
-    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
-        If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
+    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
+        If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
     End If
     
 
@@ -237,10 +245,10 @@ Else
         
         If Helplastfactor <> factor Then ScaleDialog Helplastfactor, Width
 
-        Lx = X
+        Lx = x
         
         Else
-        Lx = X * Helplastfactor / factor
+        Lx = x * Helplastfactor / factor
              ScaleDialog Helplastfactor, (Width + addX) * Helplastfactor / factor
          
    
@@ -254,14 +262,14 @@ Else
         ly = ly * Helplastfactor / factor
         End If
         Else
-        Lx = X
-        ly = Y
+        Lx = x
+        ly = y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If dr Then Me.mousepointer = 0
 dr = False
@@ -280,7 +288,7 @@ End Sub
 Private Sub ffhelp(a$)
 If a$ = "цемийа" Then a$ = "ока"
 If a$ = "GENERAL" Then a$ = "ALL"
-If left$(a$, 1) = "#" Then
+If Left$(a$, 1) = "#" Then
 If Mid$(a$, 2) < "а" Then
 fHelp Basestack1, a$, True
 Else
@@ -289,7 +297,7 @@ End If
 
 Else
 
-If left$(a$, 1) < "а" Then
+If Left$(a$, 1) < "а" Then
 fHelp Basestack1, a$, True
 Else
 fHelp Basestack1, a$
@@ -306,9 +314,9 @@ helpSizeDialog = 1
 Form4Loaded = False
 End Sub
 
-Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 If item = -1 Then
-If gList1.DoubleClickCheck(Button, item, X, Y, gList1.WidthPixels - 10 * Helplastfactor, 10 * Helplastfactor, 8 * Helplastfactor, -1) Then
+If gList1.DoubleClickCheck(Button, item, x, y, gList1.WidthPixels - 10 * Helplastfactor, 10 * Helplastfactor, 8 * Helplastfactor, -1) Then
 HelpLastWidth = -1
             Unload Me
 End If
@@ -354,7 +362,7 @@ flagmarkout = False: Exit Sub
 End If
 End Sub
 
-Private Sub gList1_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub gList1_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 flagmarkout = True
 If mHelp Then
 shift = 0
@@ -406,7 +414,7 @@ b = setupxy / 3
 
 CopyFromLParamToRect a, thatRect
 a.Right = a.Right - b
-a.left = a.Right - setupxy - b
+a.Left = a.Right - setupxy - b
 a.top = b
 a.Bottom = b + setupxy / 5
 FillThere thathDC, VarPtr(a), thatbgcolor
@@ -422,13 +430,13 @@ Public Sub FillThereMyVersion(thathDC As Long, thatRect As Long, thatbgcolor As 
 Dim a As RECT, b As Long
 b = 2
 CopyFromLParamToRect a, thatRect
-a.left = a.Right - b
+a.Left = a.Right - b
 a.Right = a.Right - setupxy + b
 a.top = b
 a.Bottom = setupxy - b
 FillThere thathDC, VarPtr(a), gList1.dcolor
 b = 5
-a.left = a.left - 3
+a.Left = a.Left - 3
 a.Right = a.Right + 3
 a.top = b
 a.Bottom = setupxy - b
@@ -470,10 +478,19 @@ borderleft = bordertop
 If (NewWidth < 0) Or NewWidth <= vH_x * factor Then
 NewWidth = vH_x * factor
 End If
+
+
+
 allwidth = NewWidth  ''vH_x * factor
 allheight = vH_y * factor
 itemWidth = allwidth - 2 * borderleft
-myform Me, left, top, allwidth, allheight, True, factor
+Dim kk As Long
+If Left < 0 Or top < 0 Then
+kk = 0
+Else
+kk = 1
+End If
+myform Me, Left * kk, top * kk, allwidth, allheight, True, factor
 
   
 gList1.addpixels = 4 * factor

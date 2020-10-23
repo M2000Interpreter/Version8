@@ -97,7 +97,7 @@ If Not Screen.ActiveForm Is ColorDialog Then
 ColorDialog.Show , Screen.ActiveForm
 End If
 End If
-MoveFormToOtherMonitorOnly ColorDialog, bstack.Owner.name = "GuiM2000"
+MoveFormToOtherMonitorOnly ColorDialog, bstack.Owner.Name = "GuiM2000"
 CancelDialog = False
 If Not ColorDialog.Visible Then
     ColorDialog.Visible = True
@@ -128,7 +128,7 @@ If Not Screen.ActiveForm Is FontDialog Then
 FontDialog.Show , Screen.ActiveForm
 End If
 End If
-MoveFormToOtherMonitorOnly FontDialog, bstack.Owner.name = "GuiM2000"
+MoveFormToOtherMonitorOnly FontDialog, bstack.Owner.Name = "GuiM2000"
 CancelDialog = False
 If Not FontDialog.Visible Then
     FontDialog.Visible = True
@@ -186,7 +186,7 @@ If Not Screen.ActiveForm Is LoadFile Then
 LoadFile.Show , Screen.ActiveForm
 End If
 End If
-MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.name = "GuiM2000"
+MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.Name = "GuiM2000"
 CancelDialog = False
 If Not LoadFile.Visible Then
     LoadFile.Visible = True
@@ -259,7 +259,7 @@ If Not Screen.ActiveForm Is LoadFile Then
 LoadFile.Show , Screen.ActiveForm
 End If
 End If
-MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.name = "GuiM2000"
+MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.Name = "GuiM2000"
 CancelDialog = False
 If Not LoadFile.Visible Then
     LoadFile.Visible = True
@@ -325,7 +325,7 @@ If Not Screen.ActiveForm Is LoadFile Then
 LoadFile.Show , Screen.ActiveForm
 End If
 End If
-MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.name = "GuiM2000"
+MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.Name = "GuiM2000"
  CancelDialog = False
  If Not LoadFile.Visible Then
     LoadFile.Visible = True
@@ -398,7 +398,7 @@ If Not Screen.ActiveForm Is LoadFile Then
 LoadFile.Show , Screen.ActiveForm
 End If
 End If
-MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.name = "GuiM2000"
+MoveFormToOtherMonitorOnly LoadFile, bstack.Owner.Name = "GuiM2000"
 CancelDialog = False
 If Not LoadFile.Visible Then
     LoadFile.Visible = True

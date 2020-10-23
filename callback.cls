@@ -18,7 +18,7 @@ Private mineHere$
 Private setstacklimit As Boolean
 Private par1$, par2$
 Public Event ErrorAtt(ByRef recover As Variant)
-Public finished As Boolean
+Public Finished As Boolean
 Private hTimer As Long, hTimer2
 Dim locked As Boolean
 Dim ExtForm As Object
@@ -163,7 +163,7 @@ MyDoEvents
     End If
 'If form5iamloaded Then Unload Form5
 Set ExtForm = Nothing
-finished = True
+Finished = True
 End Sub
 Public Sub AsyncCli(LoadFileAndSwitches$, Optional Prompt$ = ">")
 par1$ = LoadFileAndSwitches$
@@ -186,7 +186,7 @@ If findstack - 100000 > 0 Then
     stacksize = findstack - 100000
 End If
 If elevatestatus Then Exit Sub
-If basestack1.Owner Is Nothing Then Exit Sub
+If Basestack1.Owner Is Nothing Then Exit Sub
 elevatestatus = 1
 ohere$ = here$
 here$ = mineHere$
@@ -222,7 +222,7 @@ End If
 
 
 Switches para$, True
-If Trim$(para$) <> "" And Not Left$(para$, 1) Like "[+-]" Then interpret basestack1, para$
+If Trim$(para$) <> "" And Not Left$(para$, 1) Like "[+-]" Then interpret Basestack1, para$
 If Not INK$ = Chr(27) Then
 Form1.MyPrompt cLine, Prompt$
 End If
@@ -237,14 +237,14 @@ On Error Resume Next
 If Not ExtForm Is Nothing Then ExtForm.Shutdown
 Dim i As Long
 For i = UBound(var()) To 0 Step -1: var(i) = 0&: Next i
-finished = True
+Finished = True
 End Sub
 Property Let ShowGui(RHS As Boolean)
 If Forms.count = 0 Then Exit Property
 If RHS Then
 Form1.Visible = True
 Form1.WindowState = 0
-If Form1.top >= VirtualScreenHeight Then Form1.Move ScrInfo(Console).Left, ScrInfo(Console).top
+If Form1.top >= VirtualScreenHeight Then Form1.move ScrInfo(Console).Left, ScrInfo(Console).top
 Else
 If Form1.WindowState = 0 Then
 If Not (Forms.count > 5) Then Form1.Visible = False
@@ -312,7 +312,7 @@ Public Function Run(ByVal code$, Optional clean As Boolean = True) As Boolean
 Dim ohere$, stay As Variant
 If elevatestatus Then Exit Function
 byPassCallback = False
- If basestack1.Owner Is Nothing Then Exit Function
+ If Basestack1.Owner Is Nothing Then Exit Function
 elevatestatus = 1
 If clean Then PushStage objref, 0
 ohere$ = here$
@@ -495,7 +495,7 @@ If vNewValue = 1 Then
     End If
 Else
         
-        Form1.Visible = Form1.Visible Or Form1.TrueVisible 'Or Forms.count < 5
+       Form1.Visible = Form1.Visible Or Form1.TrueVisible 'Or Forms.count < 5
         If Form1.Visible Then
         If Not trace Then reopen2 = False
         If vH_title$ = vbNullString Then reopen4 = False
@@ -516,3 +516,24 @@ End Property
 Public Property Get MayQuit() As Boolean
 MayQuit = Not Check2Save
 End Property
+Public Sub GetMess(a$)
+    If Not ExtForm Is Nothing Then
+        ExtForm.GetMessNow a$
+    End If
+End Sub
+Public Sub GetMessOneChar(a$)
+    If Not ExtForm Is Nothing Then
+        ExtForm.GetMessNow a$
+    End If
+End Sub
+Public Sub SendMess(a$)
+    If Not ExtForm Is Nothing Then
+    On Error Resume Next
+        ExtForm.SendMessNow a$
+        If Err Then
+        Me.Shutdown True
+        
+        End If
+        
+    End If
+End Sub

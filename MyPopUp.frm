@@ -63,29 +63,29 @@ Private myobject As Object
 Public LASTActiveForm As Form
 Dim ttl$(1 To 2)
 
-Public Sub Up(Optional X As Variant, Optional Y As Variant)
-If IsMissing(X) Then
-X = CSng(MOUSEX())
-Y = CSng(MOUSEY())
+Public Sub Up(Optional x As Variant, Optional y As Variant)
+If IsMissing(x) Then
+x = CSng(MOUSEX())
+y = CSng(MOUSEY())
 Else
-X = X + Form1.left
-Y = Y + Form1.top
+x = x + Form1.Left
+y = y + Form1.top
 End If
-If X + Width > VirtualScreenWidth() Then
-If Y + Height > VirtualScreenHeight() Then
+If x + Width > VirtualScreenWidth() Then
+If y + Height > VirtualScreenHeight() Then
 move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
 Else
-move VirtualScreenWidth() - Width, Y
+move VirtualScreenWidth() - Width, y
 End If
-ElseIf Y + Height > VirtualScreenHeight() Then
-move X, VirtualScreenHeight() - Height
+ElseIf y + Height > VirtualScreenHeight() Then
+move x, VirtualScreenHeight() - Height
 Else
-move X, Y
+move x, y
 End If
 Show
 MyDoEvents
 End Sub
-Public Sub UpGui(that As Object, X As Variant, Y As Variant, thistitle$)
+Public Sub UpGui(that As Object, x As Variant, y As Variant, thistitle$)
 If thistitle$ <> "" Then
 gList1.HeadLine = vbNullString
 gList1.HeadLine = thistitle$
@@ -94,20 +94,20 @@ Else
 gList1.HeadLine = vbNullString
 gList1.HeadlineHeight = 0
 End If
-X = X + that.left
-Y = Y + that.top
+x = x + that.Left
+y = y + that.top
 
 
-If X + Width > VirtualScreenWidth() Then
-If Y + Height > VirtualScreenHeight() Then
+If x + Width > VirtualScreenWidth() Then
+If y + Height > VirtualScreenHeight() Then
 move VirtualScreenWidth() - Width, VirtualScreenHeight() - Height
 Else
-move VirtualScreenWidth() - Width, Y
+move VirtualScreenWidth() - Width, y
 End If
-ElseIf Y + Height > VirtualScreenHeight() Then
-move X, VirtualScreenHeight() - Height
+ElseIf y + Height > VirtualScreenHeight() Then
+move x, VirtualScreenHeight() - Height
 Else
-move X, Y
+move x, y
 End If
 If thistilte$ <> "" Then
 
@@ -307,39 +307,39 @@ Private Sub Form_Load()
 Set LASTActiveForm = Screen.ActiveForm
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If Button = 1 Then
     
     If Pouplastfactor = 0 Then Pouplastfactor = 1
 
     If bordertop < 150 Then
-    If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
+    If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     
     Else
-    If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
+    If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
     dr = True
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     End If
 
 End If
 End Sub
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False: drmove = False
 If bordertop < 150 Then
-If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
  Else
- If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+ If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
 End If
 If dr Then
 
@@ -347,12 +347,12 @@ If dr Then
 
 If bordertop < 150 Then
 
-        If Y < (Height - 150) Or Y > Height Then addy = (Y - ly)
-     If X < (Width - 150) Or X > Width Then addX = (X - Lx)
+        If y < (Height - 150) Or y > Height Then addy = (y - ly)
+     If x < (Width - 150) Or x > Width Then addX = (x - Lx)
      
 Else
-    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
-        If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
+    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
+        If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
     End If
     
 
@@ -381,10 +381,10 @@ Else
         
         If Pouplastfactor <> factor Then ScaleDialog Pouplastfactor, Width
 
-        Lx = X
+        Lx = x
         
         Else
-        Lx = X * Pouplastfactor / factor
+        Lx = x * Pouplastfactor / factor
              ScaleDialog Pouplastfactor, (Width + addX) * Pouplastfactor / factor
          
    
@@ -398,14 +398,14 @@ Else
         ly = ly * Pouplastfactor / factor
         End If
         Else
-        Lx = X
-        ly = Y
+        Lx = x
+        ly = y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If dr Then Me.mousepointer = 0
 dr = False
@@ -440,7 +440,7 @@ End Sub
 
 
 
-Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 ''If X * dv15 > Width / 2 Then
 
 If item = -1 Then
@@ -497,7 +497,7 @@ Private Sub gList1_LostFocus()
 Unload Me
 End Sub
 
-Private Sub gList1_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub gList1_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 
 gokeyboard = False
 gList1.PromptLineIdent = 0
@@ -509,7 +509,7 @@ Private Sub glist1_RegisterGlist(this As gList)
 this.NoWheel = True '
 End Sub
 
-Private Sub gList1_ScrollSelected(item As Long, Y As Long)
+Private Sub gList1_ScrollSelected(item As Long, y As Long)
 If gokeyboard Then Exit Sub
 
 gList1.EditFlag = False
@@ -650,6 +650,7 @@ End If
 Form1.TEXT1.Render
 End If
 Form1.TEXT1.glistN.enabled = True
+Form1.TEXT1.ManualInform
 Unload Me
 Case 26 - 1
     Set b = New basetask
@@ -663,20 +664,26 @@ If fname$ <> "" Then
 If pagio$ = "GREEK" Then
 s$ = "Πόρος"
 neo$ = Trim$(InputBoxN("Όνομα Μεταβλητής (αριθμητική ή αλφαριθμητική)", "Συγγραφή Κειμένου", s$, noinp))
-If noinp <> 1 Then Exit Sub
+If noinp <> 1 Then
+Form1.TEXT1.glistN.enabled = True
+Exit Sub
+End If
 If MyTrim(neo$) = vbNullString Then neo$ = "Πόρος"
 Else
 s$ = "Resource"
 neo$ = Trim$(InputBoxN("Variable Name (numeric or string)", "Text Editor", s$, noinp))
-If noinp <> 1 Then Exit Sub
+If noinp <> 1 Then
+Form1.TEXT1.glistN.enabled = True
+Exit Sub
+End If
 If MyTrim(neo$) = vbNullString Then neo$ = "Resource"
 End If
 If Right$(neo$, 1) = "$" Then
     s$ = "$"
-    neo$ = left$(neo$, Len(neo$) - 1)
+    neo$ = Left$(neo$, Len(neo$) - 1)
 ElseIf Right$(neo$, 1) = ")" Then
     s$ = ")"
-    neo$ = left$(neo$, Len(neo$) - 1)
+    neo$ = Left$(neo$, Len(neo$) - 1)
 Else
     s$ = vbNullString
 End If
@@ -733,8 +740,11 @@ End If
 
     End If
 Form1.TEXT1.Render
+
 End If
 Form1.TEXT1.glistN.enabled = True
+Form1.TEXT1.ManualInform
+
 Unload Me
 Case 17 - k
 If k = 0 Then
@@ -788,7 +798,7 @@ allheight = height1 * factor
 itemWidth = allwidth - 2 * borderleft
 ''MyForm Me, Left, top, allwidth, allheight, True, factor
 
-move left, top, allwidth, allheight
+move Left, top, allwidth, allheight
   
 gList1.addpixels = 4 * factor
 
@@ -804,8 +814,8 @@ End Sub
 Public Sub hookme(this As gList)
 '' do nothing
 End Sub
-Private Sub gList1_SpecialColor(rgbcolor As Long)
-rgbcolor = rgb(100, 132, 254)
+Private Sub gList1_SpecialColor(RGBcolor As Long)
+RGBcolor = rgb(100, 132, 254)
 End Sub
 Private Sub gList1_RefreshDesktop()
 If Form1.Visible Then Form1.Refresh: If Form1.DIS.Visible Then Form1.DIS.Refresh

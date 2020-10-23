@@ -9,6 +9,7 @@ End Type
 Private Type ITEMIDLIST
     mkid As SHITEMID
 End Type
+Public doslast As Double
 Dim FontList As FastCollection
 Public Trush() As VarItem
 Public TrushCount As Long, TrushWait As Boolean
@@ -25,7 +26,7 @@ Private Declare Function SHGetSpecialFolderLocation Lib "shell32.dll" (ByVal hWn
 Private Declare Function SHGetPathFromIDList Lib "shell32.dll" Alias "SHGetPathFromIDListA" (ByVal pidl As Long, ByVal pszPath As String) As Long
 Private Declare Function FindExecutable Lib "shell32.dll" Alias "FindExecutableW" (ByVal lpFile As Long, ByVal lpDirectory As Long, ByVal lpResult As Long) As Long
 Private Declare Function GetForegroundWindow Lib "user32" () As Long
-Private Declare Function SelectClipRgn Lib "gdi32" (ByVal hDC As Long, ByVal hRgn As Long) As Long
+Private Declare Function SelectClipRgn Lib "gdi32" (ByVal Hdc As Long, ByVal hRgn As Long) As Long
 Private Declare Function MessageBeep Lib "user32" (ByVal wType As Long) As Long
 Public Declare Function GetLocaleInfoW Lib "kernel32" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
 Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not NT?
@@ -119,14 +120,14 @@ Private Const LOCALE_USER_DEFAULT As Long = &H800
 Private Const C3_DIACRITIC As Long = &H2
 Private Const CT_CTYPE3 As Byte = &H4
 Private Declare Function GetStringTypeExW Lib "kernel32.dll" (ByVal Locale As Long, ByVal dwInfoType As Long, ByVal lpSrcStr As Long, ByVal cchSrc As Long, ByRef lpCharType As Integer) As Long
-Private Declare Function SetTextCharacterExtra Lib "gdi32" (ByVal hDC As Long, ByVal nCharExtra As Long) As Long
+Private Declare Function SetTextCharacterExtra Lib "gdi32" (ByVal Hdc As Long, ByVal nCharExtra As Long) As Long
 Private Declare Function WideCharToMultiByte Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long, ByVal lpMultiByteStr As Long, ByVal cchMultiByte As Long, ByVal lpDefaultChar As Long, ByVal lpUsedDefaultChar As Long) As Long
 Private Declare Function GdiFlush Lib "gdi32" () As Long
 Public iamactive As Boolean
 Declare Function MultiByteToWideChar& Lib "kernel32" (ByVal CodePage&, ByVal dwFlags&, MultiBytes As Any, ByVal cBytes&, ByVal pWideChars&, ByVal cWideChars&)
-Private Declare Function FillRect Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal hBrush As Long) As Long
+Private Declare Function FillRect Lib "user32" (ByVal Hdc As Long, lpRect As RECT, ByVal hBrush As Long) As Long
 Private Declare Function CreateSolidBrush Lib "gdi32" (ByVal crColor As Long) As Long
-Private Declare Function GetClipRgn Lib "gdi32" (ByVal hDC As Long, _
+Private Declare Function GetClipRgn Lib "gdi32" (ByVal Hdc As Long, _
          hRgn As Long) As Long
 Declare Function CreateRectRgn Lib "gdi32" (ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
@@ -191,11 +192,11 @@ Public vH_y As Long
 Public ttl As Boolean
 Public Const SRCCOPY = &HCC0020
 Public Release As Boolean
-Private Declare Function SetBkMode Lib "gdi32" (ByVal hDC As Long, ByVal nBkMode As Long) As Long
+Private Declare Function SetBkMode Lib "gdi32" (ByVal Hdc As Long, ByVal nBkMode As Long) As Long
 Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
-Declare Function RoundRect Lib "gdi32" (ByVal hDC As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal Y3 As Long) As Long
+Declare Function RoundRect Lib "gdi32" (ByVal Hdc As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal Y3 As Long) As Long
 Declare Function UpdateWindow Lib "user32" (ByVal hWnd As Long) As Long
-Declare Function ScrollDC Lib "user32" (ByVal hDC As Long, ByVal dX As Long, ByVal dY As Long, lprcScroll As RECT, lprcClip As RECT, ByVal hrgnUpdate As Long, lprcUpdate As RECT) As Long
+Declare Function ScrollDC Lib "user32" (ByVal Hdc As Long, ByVal dX As Long, ByVal dY As Long, lprcScroll As RECT, lprcClip As RECT, ByVal hrgnUpdate As Long, lprcUpdate As RECT) As Long
 Public LastErName As String
 Public LastErNameGR As String
 Public LastErNum As Long
@@ -206,11 +207,11 @@ Type POINTAPI
         x As Long
         y As Long
 End Type
-Private Declare Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal hDC As Long, ByVal lpsz As Long, ByVal cbString As Long, lpSize As POINTAPI) As Long
+Private Declare Function GetTextExtentPoint32 Lib "gdi32" Alias "GetTextExtentPoint32W" (ByVal Hdc As Long, ByVal lpsz As Long, ByVal cbString As Long, lpSize As POINTAPI) As Long
 
 Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
-Declare Function PaintDesktop Lib "user32" (ByVal hDC As Long) As Long
-Declare Function SelectClipPath Lib "gdi32" (ByVal hDC As Long, ByVal iMode As Long) As Long
+Declare Function PaintDesktop Lib "user32" (ByVal Hdc As Long) As Long
+Declare Function SelectClipPath Lib "gdi32" (ByVal Hdc As Long, ByVal iMode As Long) As Long
   Public Const RGN_AND = 1
     Public Const RGN_COPY = 5
     Public Const RGN_DIFF = 4
@@ -218,14 +219,14 @@ Declare Function SelectClipPath Lib "gdi32" (ByVal hDC As Long, ByVal iMode As L
     Public Const RGN_MIN = RGN_AND
     Public Const RGN_OR = 2
     Public Const RGN_XOR = 3
-Declare Function StrokePath Lib "gdi32" (ByVal hDC As Long) As Long
-Declare Function Polygon Lib "gdi32" (ByVal hDC As Long, lpPoint As POINTAPI, ByVal nCount As Long) As Long
-Declare Function PolyBezier Lib "gdi32.dll" (ByVal hDC As Long, lppt As POINTAPI, ByVal cPoints As Long) As Long
-Declare Function PolyBezierTo Lib "gdi32.dll" (ByVal hDC As Long, lppt As POINTAPI, ByVal cCount As Long) As Long
-Declare Function BeginPath Lib "gdi32" (ByVal hDC As Long) As Long
-Declare Function EndPath Lib "gdi32" (ByVal hDC As Long) As Long
-Declare Function FillPath Lib "gdi32" (ByVal hDC As Long) As Long
-Declare Function StrokeAndFillPath Lib "gdi32" (ByVal hDC As Long) As Long
+Declare Function StrokePath Lib "gdi32" (ByVal Hdc As Long) As Long
+Declare Function Polygon Lib "gdi32" (ByVal Hdc As Long, lpPoint As POINTAPI, ByVal nCount As Long) As Long
+Declare Function PolyBezier Lib "gdi32.dll" (ByVal Hdc As Long, lppt As POINTAPI, ByVal cPoints As Long) As Long
+Declare Function PolyBezierTo Lib "gdi32.dll" (ByVal Hdc As Long, lppt As POINTAPI, ByVal cCount As Long) As Long
+Declare Function BeginPath Lib "gdi32" (ByVal Hdc As Long) As Long
+Declare Function EndPath Lib "gdi32" (ByVal Hdc As Long) As Long
+Declare Function FillPath Lib "gdi32" (ByVal Hdc As Long) As Long
+Declare Function StrokeAndFillPath Lib "gdi32" (ByVal Hdc As Long) As Long
 
 Public PLG() As POINTAPI
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
@@ -250,7 +251,7 @@ Global Const HWND_NOTOPMOST = -2
 Global Const SWP_NOACTIVATE = &H10
 Global Const SWP_SHOWWINDOW = &H40
 Declare Sub SetWindowPos Lib "user32" (ByVal hWnd As Long, ByVal hWndInsertAfter As Long, ByVal x As Long, ByVal y As Long, ByVal cX As Long, ByVal cY As Long, ByVal wFlags As Long)
-Declare Function ExtFloodFill Lib "gdi32" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long, ByVal crColor As Long, ByVal wFillType As Long) As Long
+Declare Function ExtFloodFill Lib "gdi32" (ByVal Hdc As Long, ByVal x As Long, ByVal y As Long, ByVal crColor As Long, ByVal wFillType As Long) As Long
 Public Const FLOODFILLSURFACE = 1
 Public Const FLOODFILLBORDER = 0
 
@@ -330,10 +331,10 @@ Private Type LOGFONT
 End Type
 Private Declare Function CreateRoundRectRgn Lib "gdi32" (ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long, ByVal X3 As Long, ByVal Y3 As Long) As Long
 
-Private Declare Function PathToRegion Lib "gdi32" (ByVal hDC As Long) As Long
+Private Declare Function PathToRegion Lib "gdi32" (ByVal Hdc As Long) As Long
 Private Declare Function SetWindowRgn Lib "user32" (ByVal hWnd As Long, ByVal hRgn As Long, ByVal bRedraw As Boolean) As Long
 Private Declare Function CreateFontIndirect Lib "gdi32" Alias "CreateFontIndirectA" (lpLogFont As LOGFONT) As Long
-Private Declare Function SelectObject Lib "gdi32" (ByVal hDC As Long, ByVal hObject As Long) As Long
+Private Declare Function SelectObject Lib "gdi32" (ByVal Hdc As Long, ByVal hObject As Long) As Long
 
 ' OCTOBER 2000
 Public dstyle As Long
@@ -354,12 +355,12 @@ Const DFC_POPUPMENU = 5            'Only Win98/2000 !!
 Const DFCS_BUTTON3STATE = &H10
 Const DC_GRADIENT = &H20          'Only Win98/2000 !!
 
-Private Declare Function DrawCaption Lib "user32" (ByVal hWnd As Long, ByVal hDC As Long, pcRect As RECT, ByVal un As Long) As Long
-Private Declare Function DrawEdge Lib "user32" (ByVal hDC As Long, qrc As RECT, ByVal edge As Long, ByVal grfFlags As Long) As Long
-Private Declare Function DrawFocusRect Lib "user32" (ByVal hDC As Long, lpRect As RECT) As Long
-Private Declare Function DrawFrameControl Lib "user32" (ByVal hDC As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
-Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal hDC As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
-Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal hDC As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
+Private Declare Function DrawCaption Lib "user32" (ByVal hWnd As Long, ByVal Hdc As Long, pcRect As RECT, ByVal un As Long) As Long
+Private Declare Function DrawEdge Lib "user32" (ByVal Hdc As Long, qrc As RECT, ByVal edge As Long, ByVal grfFlags As Long) As Long
+Private Declare Function DrawFocusRect Lib "user32" (ByVal Hdc As Long, lpRect As RECT) As Long
+Private Declare Function DrawFrameControl Lib "user32" (ByVal Hdc As Long, lpRect As RECT, ByVal un1 As Long, ByVal un2 As Long) As Long
+Private Declare Function DrawText Lib "user32" Alias "DrawTextW" (ByVal Hdc As Long, ByVal lpStr As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long) As Long
+Private Declare Function DrawTextEx Lib "user32" Alias "DrawTextExW" (ByVal Hdc As Long, ByVal lpsz As Long, ByVal nCount As Long, lpRect As RECT, ByVal wFormat As Long, ByVal lpDrawTextParams As Long) As Long
 Private Declare Function SetRect Lib "user32" (lpRect As RECT, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
 Private Declare Function OffsetRect Lib "user32" (lpRect As RECT, ByVal x As Long, ByVal y As Long) As Long
 ''API declarations
@@ -385,11 +386,11 @@ Public Const TA_LEFT = 0
 Public Const TA_RIGHT = 2
 Public Const TA_CENTER = 6
 Public Const TA_RTLREADING = &H100&
-Public Declare Function SetTextJustification Lib "gdi32" (ByVal hDC As Long, ByVal nBreakExtra As Long, ByVal nBreakCount As Long) As Long
-Public Declare Function SetTextAlign Lib "gdi32" (ByVal hDC As Long, ByVal wFlags As Long) As Long
-Public Declare Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Long, ByVal nTabOrigin As Long) As Long
-Public Declare Function TextOut Lib "gdi32" Alias "TextOutW" (ByVal hDC As Long, ByVal x As Long, ByVal y As Long, ByVal lpString As Long, ByVal nCount As Long) As Long
-Public Declare Function GetTabbedTextExtent Lib "user32" Alias "GetTabbedTextExtentW" (ByVal hDC As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, lpnTabStopPositions As Long) As Long
+Public Declare Function SetTextJustification Lib "gdi32" (ByVal Hdc As Long, ByVal nBreakExtra As Long, ByVal nBreakCount As Long) As Long
+Public Declare Function SetTextAlign Lib "gdi32" (ByVal Hdc As Long, ByVal wFlags As Long) As Long
+Public Declare Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal Hdc As Long, ByVal x As Long, ByVal y As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Long, ByVal nTabOrigin As Long) As Long
+Public Declare Function TextOut Lib "gdi32" Alias "TextOutW" (ByVal Hdc As Long, ByVal x As Long, ByVal y As Long, ByVal lpString As Long, ByVal nCount As Long) As Long
+Public Declare Function GetTabbedTextExtent Lib "user32" Alias "GetTabbedTextExtentW" (ByVal Hdc As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, lpnTabStopPositions As Long) As Long
 
 Function CheckItemType(bstackstr As basetask, v As Variant, a$, R$, Optional ByVal wasarr As Boolean = False, Optional UseCase As Boolean) As Boolean
 Dim useHandler As mHandler, fastcol As FastCollection, pppp As mArray, w1 As Long, p As Variant, s$
@@ -891,20 +892,20 @@ If y1 >= .My Then y1 = m.ScaleY(m.Scaleheight, 1, 3) Else y1 = m.ScaleY(y1 * .Yt
 SetRect R, x + zoom, y + zoom, x1 - zoom, y1 - zoom
 Select Case way
 Case 0
-DrawEdge m.hDC, R, CLng(par) Mod 256, CLng(par) \ 256
+DrawEdge m.Hdc, R, CLng(par) Mod 256, CLng(par) \ 256
 Case 1
-DrawCaption m.hWnd, m.hDC, R, CLng(par)
+DrawCaption m.hWnd, m.Hdc, R, CLng(par)
 Case 2
-DrawEdge m.hDC, R, CLng(par), BF_RECT
+DrawEdge m.Hdc, R, CLng(par), BF_RECT
 Case 3
-DrawFocusRect m.hDC, R
+DrawFocusRect m.Hdc, R
 Case 4
-DrawFrameControl m.hDC, R, DFC_BUTTON, DFCS_BUTTON3STATE
+DrawFrameControl m.Hdc, R, DFC_BUTTON, DFCS_BUTTON3STATE
 Case 5
 b$ = Replace(CStr(par), ChrW(&HFFFFF8FB), ChrW(&H2007))
-DrawText m.hDC, StrPtr(b$), Len(CStr(par)), R, DT_CENTER + DT_NOCLIP
+DrawText m.Hdc, StrPtr(b$), Len(CStr(par)), R, DT_CENTER + DT_NOCLIP
 Case 6
-DrawFrameControl m.hDC, R, CLng(par) Mod 256, CLng(par) \ 256
+DrawFrameControl m.Hdc, R, CLng(par) Mod 256, CLng(par) \ 256
 Case Else
 k1 = 0
 MyDoEvents1 Form1
@@ -926,20 +927,20 @@ y = m.ScaleY(.YGRAPH, 1, 3)
 SetRect R, x + zoom, y + zoom, x1 - zoom, y1 - zoom
 Select Case way
 Case 0
-DrawEdge m.hDC, R, CLng(par) Mod 256, CLng(par) \ 256
+DrawEdge m.Hdc, R, CLng(par) Mod 256, CLng(par) \ 256
 Case 1
-DrawCaption m.hWnd, m.hDC, R, CLng(par)
+DrawCaption m.hWnd, m.Hdc, R, CLng(par)
 Case 2
-DrawEdge m.hDC, R, CLng(par), BF_RECT
+DrawEdge m.Hdc, R, CLng(par), BF_RECT
 Case 3
-DrawFocusRect m.hDC, R
+DrawFocusRect m.Hdc, R
 Case 4
-DrawFrameControl m.hDC, R, DFC_BUTTON, DFCS_BUTTON3STATE
+DrawFrameControl m.Hdc, R, DFC_BUTTON, DFCS_BUTTON3STATE
 Case 5
 b$ = Replace(CStr(par), ChrW(&HFFFFF8FB), ChrW(&H2007))
-DrawText m.hDC, StrPtr(b$), Len(CStr(par)), R, DT_CENTER + DT_NOCLIP
+DrawText m.Hdc, StrPtr(b$), Len(CStr(par)), R, DT_CENTER + DT_NOCLIP
 Case 6
-DrawFrameControl m.hDC, R, CLng(par) Mod 256, CLng(par) \ 256
+DrawFrameControl m.Hdc, R, CLng(par) Mod 256, CLng(par) \ 256
 Case Else
 k1 = 0
 MyDoEvents1 Form1
@@ -1121,9 +1122,9 @@ End If
 dqq.fillcolor = mycolor(c)
 dqq.fillstyle = vbFSSolid
 If v Then
-ExtFloodFill dqq.hDC, dqq.ScaleX(x1, 1, 3), dqq.ScaleY(y1, 1, 3), dqq.point(dqq.ScaleX(x1, 1, 3), dqq.ScaleY(y1, 1, 3)), FLOODFILLSURFACE
+ExtFloodFill dqq.Hdc, dqq.ScaleX(x1, 1, 3), dqq.ScaleY(y1, 1, 3), dqq.point(dqq.ScaleX(x1, 1, 3), dqq.ScaleY(y1, 1, 3)), FLOODFILLSURFACE
 Else
-ExtFloodFill dqq.hDC, dqq.ScaleX(x1, 1, 3), dqq.ScaleY(y1, 1, 3), mycolor(.mypen), FLOODFILLBORDER
+ExtFloodFill dqq.Hdc, dqq.ScaleX(x1, 1, 3), dqq.ScaleY(y1, 1, 3), mycolor(.mypen), FLOODFILLBORDER
 End If
 If Not .IamEmf Then
 dqq.ScaleMode = osm
@@ -1294,7 +1295,7 @@ Else
         Pcw = raster.Width \ 2
         Pch = raster.Height \ 2
         With players(GetCode(d1))
-        raster.PaintPicture d1.hDC, Int(d1.ScaleX(.XGRAPH, 1, 3) - Pcw), Int(d1.ScaleX(.YGRAPH, 1, 3) - Pch)
+        raster.PaintPicture d1.Hdc, Int(d1.ScaleX(.XGRAPH, 1, 3) - Pcw), Int(d1.ScaleX(.YGRAPH, 1, 3) - Pch)
         End With
     GoTo cont1
 End If
@@ -1304,7 +1305,7 @@ RotateDib bstack, raster, rot, sp, i, NoUseBack, (blend), amask$
 Pcw = raster.Width \ 2
 Pch = raster.Height \ 2
 With players(GetCode(d1))
-raster.PaintPicture d1.hDC, Int(d1.ScaleX(.XGRAPH, 1, 3) - Pcw), Int(d1.ScaleX(.YGRAPH, 1, 3) - Pch)
+raster.PaintPicture d1.Hdc, Int(d1.ScaleX(.XGRAPH, 1, 3) - Pcw), Int(d1.ScaleX(.YGRAPH, 1, 3) - Pch)
 End With
 cont1:
 If Not bstack.toprinter Then
@@ -1398,11 +1399,11 @@ If Left$(F, 4) = "cDIB" And Len(F) > 12 Then
 Dim ph As New cDIBSection
 If cDib(F, ph) Then
 If x1 = 0 Then
-ph.PaintPicture d1.hDC, CLng(d1.ScaleX(.XGRAPH, 1, 3)), CLng(d1.ScaleX(.YGRAPH, 1, 3))
+ph.PaintPicture d1.Hdc, CLng(d1.ScaleX(.XGRAPH, 1, 3)), CLng(d1.ScaleX(.YGRAPH, 1, 3))
 Exit Sub
 Else
 If y1 = 0 Then y1 = Abs(ph.Height * x1 / ph.Width)
-ph.StretchPictureH d1.hDC, CLng(d1.ScaleX(.XGRAPH, 1, 3)), CLng(d1.ScaleX(.YGRAPH, 1, 3)), CLng(d1.ScaleX(x1, 1, 3)), CLng(d1.ScaleX(y1, 1, 3))
+ph.StretchPictureH d1.Hdc, CLng(d1.ScaleX(.XGRAPH, 1, 3)), CLng(d1.ScaleX(.YGRAPH, 1, 3)), CLng(d1.ScaleX(x1, 1, 3)), CLng(d1.ScaleX(y1, 1, 3))
 Exit Sub
 End If
 End If
@@ -1493,7 +1494,7 @@ End Function
 
 Public Function MyTextWidth(d As Object, a$) As Long
 Dim nr As RECT
-CalcRect d.hDC, a$, nr
+CalcRect d.Hdc, a$, nr
 'MyTextWidth = nr.Right * d.ScaleX(1, 3, 1)
 MyTextWidth = nr.Right * DXP
 End Function
@@ -1522,7 +1523,7 @@ Dim nr As RECT, nl As Long, mytop As Long
 mytop = ddd.currentY
 If s$ = vbNullString Then
 nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
-CalcRect ddd.hDC, " ", nr
+CalcRect ddd.Hdc, " ", nr
 nr.Left = ddd.currentX / dv15
 nr.Right = nr.Right + nr.Left
 nr.top = ddd.currentY / dv15
@@ -1536,14 +1537,14 @@ ddd.currentX = nr.Right * dv15
 End If
 Else
 nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
-CalcRect ddd.hDC, s$, nr
+CalcRect ddd.Hdc, s$, nr
 nr.Left = ddd.currentX / dv15
 nr.Right = nr.Right + nr.Left
 nr.top = ddd.currentY / dv15
 nr.Bottom = nr.top + nr.Bottom
 nl = (nr.Bottom + 1) * dv15
 If Not fake Then
-If nr.Left * dv15 < ddd.Width Then PrintLineControlSingle ddd.hDC, s$, nr
+If nr.Left * dv15 < ddd.Width Then PrintLineControlSingle ddd.Hdc, s$, nr
 End If
 If cr Then
 ddd.currentY = nl + UAddTwipsTop ''* 2
@@ -1559,7 +1560,7 @@ Public Sub MyPrint(ddd As Object, s$)
 Dim nr As RECT, nl As Long
 If s$ = vbNullString Then
     nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
-    CalcRect ddd.hDC, " ", nr
+    CalcRect ddd.Hdc, " ", nr
     nr.Left = ddd.currentX / dv15
     nr.Right = nr.Right + nr.Left
     nr.top = ddd.currentY / dv15
@@ -1569,13 +1570,13 @@ If s$ = vbNullString Then
     ddd.currentX = 0
 Else
 nr.Left = 0: nr.Right = 0: nr.top = 0: nr.Bottom = 0
-CalcRect ddd.hDC, s$, nr
+CalcRect ddd.Hdc, s$, nr
 nr.Left = ddd.currentX / dv15
 nr.Right = nr.Right + nr.Left
 nr.top = ddd.currentY / dv15
 nr.Bottom = nr.top + nr.Bottom
 nl = (nr.Bottom + 1) * dv15
-If nr.Left * dv15 <= ddd.Width Then PrintLineControlSingle ddd.hDC, s$, nr
+If nr.Left * dv15 <= ddd.Width Then PrintLineControlSingle ddd.Hdc, s$, nr
 ddd.currentY = nl
 ddd.currentX = 0
 End If
@@ -1583,34 +1584,35 @@ End Sub
 
 Public Function TextWidth(ddd As Object, a$) As Long
 Dim nr As RECT
-CalcRect ddd.hDC, a$, nr
+CalcRect ddd.Hdc, a$, nr
 TextWidth = nr.Right * dv15
 End Function
 Public Function TextWidth2(ddd As Object, a$) As Long
 Dim nr As RECT
-CalcRectNoSingle ddd.hDC, a$, nr
+CalcRectNoSingle ddd.Hdc, a$, nr
 TextWidth2 = nr.Right * dv15
 
 End Function
 Public Function TextWidthPixels(ddd As Object, a$) As Long
 Dim nr As RECT
-CalcRect ddd.hDC, a$, nr
+CalcRect ddd.Hdc, a$, nr
 TextWidthPixels = nr.Right
 End Function
 Private Function TextHeight(ddd As Object, a$) As Long
 Dim nr As RECT
-CalcRect ddd.hDC, a$, nr
+CalcRect ddd.Hdc, a$, nr
 
 TextHeight = nr.Bottom * dv15
 End Function
 Private Function TextHeight2(ddd As Object, a$) As Long
 Dim nr As RECT
-CalcRectNoSingle ddd.hDC, a$, nr
+CalcRectNoSingle ddd.Hdc, a$, nr
 
 TextHeight2 = nr.Bottom * dv15
 End Function
 
 Public Sub PlainBaSket(ddd As Object, mybasket As basket, ByVal what As String, Optional ONELINE As Boolean = False, Optional nocr As Boolean = False, Optional plusone As Long = 2, Optional clearline As Boolean = False, Optional processcr As Boolean = False, Optional semicolon As Boolean = False)
+
 Dim PX As Long, PY As Long, R As Long, p$, c$, LEAVEME As Boolean, nr As RECT, nr2 As RECT, w As Integer
 Dim p2 As Long, mUAddPixelsTop As Long
 Dim pixX As Long, pixY As Long
@@ -1675,7 +1677,7 @@ With mybasket
             .top = rTop
             .Bottom = rBottom
         End With
-         FillBack ddd.hDC, nr2, .Paper
+         FillBack ddd.Hdc, nr2, .Paper
          End If
         ddd.currentX = PX * .Xt
         ddd.currentY = PY * .Yt + .uMineLineSpace
@@ -1723,7 +1725,7 @@ With mybasket
                 R = R + Len(c$): If ii > mark1 Then R = R - 1
                 mark1 = nr.Right
                 nr.Right = (PX + Len(what$)) * pixX + 1
-                DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX + DT_NOCLIP
+                DrawText ddd.Hdc, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX + DT_NOCLIP
                 mark1 = TextWidth(ddd, c$)
                 mark1 = mark1 \ .Xt - (mark1 Mod .Xt > 0)
                 nr.Right = nr.Left + mark1 * pixX + 1
@@ -1746,7 +1748,7 @@ checkcombine:
                          Loop Until (a1(R + 1) And 7) = 0
                      End If
                  End If
-                 DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX + DT_NOCLIP
+                 DrawText ddd.Hdc, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX + DT_NOCLIP
             Else
                 If c$ = Chr$(7) Then
                     If Not ddd Is Form1.PrinterDocument1 Then Beep
@@ -1894,7 +1896,7 @@ skipthis:
             .top = rTop
             .Bottom = rBottom
         End With
-        FillBack ddd.hDC, nr2, mybasket.Paper
+        FillBack ddd.Hdc, nr2, mybasket.Paper
     End If
     realR& = 0
     If Len(what$) > R Then
@@ -1924,7 +1926,7 @@ skipthis:
                 If ii > mark1 Then R = R - 1
                 mark1 = TextWidth(ddd, c$) \ DXP
                 nr.Right = nr.Left + mark1 + 1
-                DrawTextEx ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX + DT_NOCLIP, 0
+                DrawTextEx ddd.Hdc, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_NOPREFIX + DT_NOCLIP, 0
                 .curpos = nr.Right \ pixX
                 realR& = realR + mark1 \ pixX - (mark1 Mod pixX > 0) * 1
                 ddd.currentX = .curpos * .Xt
@@ -2030,7 +2032,7 @@ CHECK1:
                     End If
                 End If
             End If
-            DrawText ddd.hDC, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX + DT_NOCLIP
+            DrawText ddd.Hdc, StrPtr(c$), -1, nr, DT_SINGLELINE Or DT_CENTER Or DT_NOPREFIX + DT_NOCLIP
             realR& = realR + 1
 contNew:
             With nr
@@ -2080,7 +2082,7 @@ Dim prive As Long
 prive = GetCode(ddd)
 ExtraWidth = ExtraWidth \ dv15
 If ExtraWidth <> 0 Then
-SetTextCharacterExtra ddd.hDC, ExtraWidth
+SetTextCharacterExtra ddd.Hdc, ExtraWidth
 End If
 On Error Resume Next
 With players(prive)
@@ -2107,7 +2109,7 @@ F.lfWeight = Abs(.bold) * 800
   F.lfHeight = (Size * -20) / DYP
 
   hFont = CreateFontIndirect(F)
-  hPrevFont = SelectObject(ddd.hDC, hFont)
+  hPrevFont = SelectObject(ddd.Hdc, hFont)
  what$ = Replace$(what, vbCrLf, vbCr) + vbCr
 Dim textmetrics As POINTAPI, max, maxx As Long, sumy As Long
 Do While what$ <> ""
@@ -2123,18 +2125,18 @@ textmetrics.x = 0
 textmetrics.y = 0
     If Len(fline$) = 0 Then
         fline$ = " "
-        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+        GetTextExtentPoint32 ddd.Hdc, StrPtr(fline$), Len(fline$), textmetrics
         textmetrics.x = 0
     Else
-        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+        GetTextExtentPoint32 ddd.Hdc, StrPtr(fline$), Len(fline$), textmetrics
     End If
 sumy = sumy + textmetrics.y
 If maxx < textmetrics.x Then maxx = textmetrics.x
 Loop
 nTextY = Int(Abs(maxx * dv15 * Sin(degree)) + Abs(sumy * dv15 * Cos(degree)))
-  hFont = SelectObject(ddd.hDC, hPrevFont)
+  hFont = SelectObject(ddd.Hdc, hPrevFont)
   DeleteObject hFont
-If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.hDC, 0
+If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.Hdc, 0
 End With
 PlaceBasket ddd, players(prive)
 
@@ -2152,7 +2154,7 @@ On Error Resume Next
 With players(prive)
 ExtraWidth = ExtraWidth \ dv15
 If ExtraWidth <> 0 Then
-SetTextCharacterExtra ddd.hDC, ExtraWidth
+SetTextCharacterExtra ddd.Hdc, ExtraWidth
 End If
 BFONT = ddd.Font.Name
 If Font <> "" Then
@@ -2179,7 +2181,7 @@ F.lfWeight = Abs(.bold) * 800
   F.lfHeight = (Size * -20) / DYP
 
   hFont = CreateFontIndirect(F)
-  hPrevFont = SelectObject(ddd.hDC, hFont)
+  hPrevFont = SelectObject(ddd.Hdc, hFont)
   what$ = Replace$(what, vbCrLf, vbCr) + vbCr
 Dim textmetrics As POINTAPI, max, maxx As Long, sumy As Long
 Do While what$ <> ""
@@ -2195,10 +2197,10 @@ textmetrics.x = 0
 textmetrics.y = 0
     If Len(fline$) = 0 Then
         fline$ = " "
-        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+        GetTextExtentPoint32 ddd.Hdc, StrPtr(fline$), Len(fline$), textmetrics
         textmetrics.x = 0
     Else
-        GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+        GetTextExtentPoint32 ddd.Hdc, StrPtr(fline$), Len(fline$), textmetrics
     End If
 sumy = sumy + textmetrics.y
 If maxx < textmetrics.x Then maxx = textmetrics.x
@@ -2206,9 +2208,9 @@ Loop
 
 nText = Int(Abs(maxx * dv15 * Cos(degree)) + Abs(sumy * dv15 * Sin(degree)))
 
-  hFont = SelectObject(ddd.hDC, hPrevFont)
+  hFont = SelectObject(ddd.Hdc, hPrevFont)
   DeleteObject hFont
-If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.hDC, 0
+If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.Hdc, 0
 
 End With
 PlaceBasket ddd, players(prive)
@@ -2267,6 +2269,7 @@ Else
             
                If whNoSpace$ <> "" Then
                whl = Len(whNoSpace$) * magicratio + whl
+
                     MyPrintNew dd, mb.uMineLineSpace, whNoSpace$, , fake
                 whNoSpace$ = vbNullString
                 End If
@@ -2286,8 +2289,7 @@ Else
 
           whl = Len(whNoSpace$) * magicratio + whl
       dd.currentX = dd.currentX + CLng(whl) * st
-      
-                   MyPrintNew dd, mb.uMineLineSpace, whNoSpace$, , fake
+          MyPrintNew dd, mb.uMineLineSpace, whNoSpace$, , fake
     Else
 
             MyPrintNew dd, mb.uMineLineSpace, wh$, Not nocr, fake
@@ -2330,12 +2332,12 @@ If whr = 2 Then
     dd.currentX = dd.currentX + wi \ 2 - (TextWidth(dd, wh$) + (Len(wh$) - Len(Replace$(wh$, " ", ""))) * (MinDispl - TextWidth(dd, " "))) / 2
 ElseIf whr = 1 Then
     dd.currentX = dd.currentX + wi - TextWidth(dd, wh$) - (Len(wh$) - Len(Replace$(wh$, " ", ""))) * (MinDispl - TextWidth(dd, " "))
-
 Else
 
 INTD = (wi - TextWidth(dd, whNoSpace)) * 0.2 + dd.currentX
 
 End If
+
 If whNoSpace$ = wh$ Then
  MyPrintNew dd, mb.uMineLineSpace, wh$, Not nocr, fake
 Else
@@ -2356,8 +2358,8 @@ Else
         For i = 1 To Len(wh$)
             If Mid$(wh$, i, 1) = " " Then
             whSpace$ = Mid$(whSpace$, 2)
-            
                If whNoSpace$ <> "" Then
+               
                  MyPrintNew dd, mb.uMineLineSpace, whNoSpace$, , fake
                 whNoSpace$ = vbNullString
                 
@@ -2367,7 +2369,6 @@ Else
             ElseIf Mid$(wh$, i, 1) = Chr$(9) Then
            
              whSpace$ = Mid$(whSpace$, 2)
-
                  MyPrintNew dd, mb.uMineLineSpace, whNoSpace$ + Chr$(9), , fake
                 dd.currentX = TextWidth(dd, Left$(wh$, i)) + stdisp
                 whNoSpace$ = vbNullString
@@ -2376,11 +2377,10 @@ Else
                 whNoSpace$ = whNoSpace$ & Mid$(wh$, i, 1)
             End If
         Next i
-        If whNoSpace$ <> "" Then
 
-        End If
           MyPrintNew dd, mb.uMineLineSpace, whNoSpace$, Not nocr, fake
     Else
+    
     MyPrintNew dd, mb.uMineLineSpace, wh$, Not nocr, fake
     
     End If
@@ -2451,7 +2451,7 @@ Dim BFONT As String
 On Error Resume Next
 BFONT = ddd.Font.Name
 If ExtraWidth <> 0 Then
-SetTextCharacterExtra ddd.hDC, ExtraWidth
+SetTextCharacterExtra ddd.Hdc, ExtraWidth
 End If
 Dim icx As Long, icy As Long, x As Long, y As Long, icH As Long
 
@@ -2469,9 +2469,9 @@ DEGR = (degree) * 180# / Pi
   End If
   F.lfHeight = (Size * -20) / DYP
   hFont = CreateFontIndirect(F)
-  hPrevFont = SelectObject(ddd.hDC, hFont)
+  hPrevFont = SelectObject(ddd.Hdc, hFont)
   icH = TextHeight(ddd, "fq")
-  hFont = SelectObject(ddd.hDC, hPrevFont)
+  hFont = SelectObject(ddd.Hdc, hPrevFont)
   DeleteObject hFont
   F.lfItalic = Abs(basestack.myitalic)
   F.lfWeight = Abs(basestack.myBold) * 800
@@ -2488,7 +2488,7 @@ DEGR = (degree) * 180# / Pi
 
   
     hFont = CreateFontIndirect(F)
-  hPrevFont = SelectObject(ddd.hDC, hFont)
+  hPrevFont = SelectObject(ddd.Hdc, hFont)
 
 TT = ExtraWidth \ 2
 icy = CLng(Cos(degree) * icH)
@@ -2529,7 +2529,7 @@ fline$ = GetStrUntil(vbCr, what$)
 End If
 textmetrics.x = 0
 textmetrics.y = 0
-GetTextExtentPoint32 ddd.hDC, StrPtr(fline$), Len(fline$), textmetrics
+GetTextExtentPoint32 ddd.Hdc, StrPtr(fline$), Len(fline$), textmetrics
 x = x + icx
 y = y + icy
 If JUSTIFY = 1 Then
@@ -2547,9 +2547,9 @@ Else
 End If
 MyPrint ddd, fline$
 Loop
-  hFont = SelectObject(ddd.hDC, hPrevFont)
+  hFont = SelectObject(ddd.Hdc, hPrevFont)
   DeleteObject hFont
-If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.hDC, 0
+If ExtraWidth <> 0 Then SetTextCharacterExtra ddd.Hdc, 0
 End Sub
 
 Public Sub nForm(bstack As basetask, TheSize As Single, nW As Long, nH As Long, myLineSpace As Long)
@@ -2559,6 +2559,7 @@ Public Sub nForm(bstack As basetask, TheSize As Single, nW As Long, nH As Long, 
     nW = fonttest.TextWidth("W") + dv15
 End Sub
 Sub crNew(bstack As basetask, mb As basket)
+
 Dim d As Object
 Set d = bstack.Owner
 With mb
@@ -2632,11 +2633,11 @@ ar.Bottom = d.Height / dv15
 ar.Right = d.Width / dv15
 ar.top = .mysplit * .Yt / dv15
 p = .Yt / dv15
-R = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.top), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.top + p), SRCCOPY)
+R = BitBlt(d.Hdc, CLng(ar.Left), CLng(ar.top), CLng(ar.Right), CLng(ar.Bottom - p), d.Hdc, CLng(ar.Left), CLng(ar.top + p), SRCCOPY)
 
  
   ar.top = ar.Bottom - p
-FillBack d.hDC, ar, .Paper
+FillBack d.Hdc, ar, .Paper
 .curpos = 0
 .currow = .My - 1
 End With
@@ -2652,7 +2653,7 @@ ar.Bottom = d.ScaleY(d.Height, 1, 3)
 ar.Right = d.ScaleX(d.Width, 1, 3)
 ar.top = d.ScaleY(.mysplit * .Yt, 1, 3)
 p = d.ScaleY(.Yt, 1, 3)
-R = BitBlt(d.hDC, CLng(ar.Left), CLng(ar.top + p), CLng(ar.Right), CLng(ar.Bottom - p), d.hDC, CLng(ar.Left), CLng(ar.top), SRCCOPY)
+R = BitBlt(d.Hdc, CLng(ar.Left), CLng(ar.top + p), CLng(ar.Right), CLng(ar.Bottom - p), d.Hdc, CLng(ar.Left), CLng(ar.top), SRCCOPY)
 d.Line (0, .mysplit * .Yt)-(d.Scalewidth, .mysplit * .Yt + .Yt), .Paper, BF
 .currow = .mysplit
 .curpos = 0
@@ -5056,7 +5057,7 @@ Loop
  
 If Not QRY Then s$ = vbNullString
 dq.FontTransparent = True
-SetBkMode dq.hDC, 1
+SetBkMode dq.Hdc, 1
 QRY = False
 
 Call mouse
@@ -5276,7 +5277,7 @@ End Function
 Sub ICOPY(d1 As Object, x1 As Long, y1 As Long, w As Long, h As Long)
 Dim sV As Long
 With players(GetCode(d1))
-sV = BitBlt(d1.hDC, CLng(d1.ScaleX(x1, 1, 3)), CLng(d1.ScaleY(y1, 1, 3)), CLng(d1.ScaleX(w, 1, 3)), CLng(d1.ScaleY(h, 1, 3)), d1.hDC, CLng(d1.ScaleX(.XGRAPH, 1, 3)), CLng(d1.ScaleY(.YGRAPH, 1, 3)), SRCCOPY)
+sV = BitBlt(d1.Hdc, CLng(d1.ScaleX(x1, 1, 3)), CLng(d1.ScaleY(y1, 1, 3)), CLng(d1.ScaleX(w, 1, 3)), CLng(d1.ScaleY(h, 1, 3)), d1.Hdc, CLng(d1.ScaleX(.XGRAPH, 1, 3)), CLng(d1.ScaleY(.YGRAPH, 1, 3)), SRCCOPY)
 'sv = UpdateWindow(d1.hwnd)
 End With
 End Sub
@@ -5307,6 +5308,19 @@ End If
 If Not Form4.Visible Then Form4.Show , Form1: bypassshow = True
 
 If bypassshow Then
+
+
+If (ScrInfo(monitor).Height - vH_y * Helplastfactor + ScrInfo(monitor).top) < 0 Then
+Helplastfactor = (ScrInfo(monitor).Height + ScrInfo(monitor).top) / vH_y
+End If
+
+If (ScrInfo(monitor).Width - vH_x * Helplastfactor + ScrInfo(monitor).Left) < 0 Then
+ Helplastfactor = (ScrInfo(monitor).Left + ScrInfo(monitor).Width) / vH_x
+End If
+If VirtualScreenWidth * 0.8 < vH_x * Helplastfactor Then
+Helplastfactor = VirtualScreenWidth * 0.8 / vH_x
+End If
+
 myform Form4, ScrInfo(monitor).Width - vH_x * Helplastfactor + ScrInfo(monitor).Left, ScrInfo(monitor).Height - vH_y * Helplastfactor + ScrInfo(monitor).top, vH_x * Helplastfactor, vH_y * Helplastfactor, True, Helplastfactor
 Else
 If Screen.Width <= Form4.Left - ScrInfo(monitor).Left Then
@@ -5316,7 +5330,6 @@ myform Form4, Form4.Left, Form4.top, vH_x * Helplastfactor, vH_y * Helplastfacto
 End If
 End If
 Form4.moveMe
-
 If Form1.Visible Then
 If Form1.DIS.Visible Then
   ''  If Abs(Val(hueconvSpecial(mycolor(uintnew(&H80000018)))) - Val(hueconvSpecial(-Paper))) > Abs(Val(hueconvSpecial(mycolor(uintnew(&H80000003)))) - Val(hueconvSpecial(-Paper))) Then
@@ -5630,7 +5643,7 @@ MesTitle$ = "M2000"
 ' IDE
 Else
 If LASTPROG$ <> "" Then
-MesTitle$ = ExtractNameOnly(LASTPROG$)
+MesTitle$ = ExtractNameOnly(LASTPROG$, True)
 Else
 MesTitle$ = "M2000"
 End If
@@ -5650,10 +5663,10 @@ If Not UseMe Is Nothing Then
 If UseMe.AppTitle <> vbNullString Then
 MesTitle$ = UseMe.AppTitle & " " & here$
 Else
-MesTitle$ = ExtractNameOnly(LASTPROG$) & " " & here$
+MesTitle$ = ExtractNameOnly(LASTPROG$, True) & " " & here$
 End If
 Else
-MesTitle$ = ExtractNameOnly(LASTPROG$) & " " & here$
+MesTitle$ = ExtractNameOnly(LASTPROG$, True) & " " & here$
 End If
 End If
 End If
@@ -6943,6 +6956,9 @@ End Sub
 Public Sub unknownid(b$, w$)
 MyErMacro b$, "unknown identifier " & w$, "’γνωστο αναγνωριστικό " & w$
 End Sub
+Public Sub NoRename()
+    MyEr "Nothing renamed", "Δεν έγινε μετονομασία"
+End Sub
 Public Sub MissCdib()
   MyEr "Missing IMAGE", "Λείπει εικόνα"
 End Sub
@@ -6976,6 +6992,9 @@ Public Sub MissStackItem()
 End Sub
 Public Sub MissStackNumber()
  MyEr "Missing number value from stack", "Λείπει αριθμός από το σωρό"
+End Sub
+Public Sub MissMic()
+MyEr "No mic found", "Δεν βρήκα είσοδο ηχογράφησης"
 End Sub
 Public Sub missNumber()
 MyEr "Only number allowed", "Μόνο αριθμός επιτρέπεται"
@@ -7773,16 +7792,16 @@ Wend
 PointPos = j
 End If
 End Function
-Public Function ExtractType(F$, Optional JJ As Long = 0) As String
+Public Function ExtractType(F$, Optional JJ As Long = 0, Optional simple As Boolean = True) As String
 Dim i As Long, j As Long, d$
 If FastSymbol(F$, Chr(34)) Then F$ = GetStrUntil(Chr(34), F$)
 If F$ = vbNullString Then ExtractType = vbNullString: Exit Function
-If JJ > 0 Then
-j = JJ
+If simple Then
+    j = SimplePointPos(F$)
+ElseIf JJ > 0 Then
+    j = JJ
 Else
-
-
-j = PointPos(F$)
+    j = PointPos(F$)
 End If
 d$ = F$ & " "
 If j < Len(d$) Then
@@ -7859,7 +7878,7 @@ If Right(F$, 1) = "\" Or Right(F$, 1) = "/" Then F$ = F$ & " a"
 j = PointPos(F$)
 If Mid$(F$, j, 1) = "." Then j = j - 1
 If Len(F$) < j Then
-If ExtractType(Mid$(F$, j) & "\.10") = "10" Then j = j - 1 Else Exit Function
+If ExtractType(Mid$(F$, j) & "\.10", , False) = "10" Then j = j - 1 Else Exit Function
 Else
 
 End If
@@ -7907,12 +7926,30 @@ ExtractPath = c$ & ccc(i)
 End If
 End If
 End Function
-Public Function ExtractName(F$) As String
+Function SimplePointPos(s$)
+Dim a As Long, b As Long, c As Long, d As Long
+a = rinstr(s$, ".")
+b = rinstr(s$, "\")
+c = rinstr(s$, "/")
+d = rinstr(s$, ":")
+If b < a And c < a And d < a Then
+    SimplePointPos = a
+Else
+    SimplePointPos = Len(s$)
+End If
+
+End Function
+Public Function ExtractName(F$, Optional simple As Boolean = False) As String
 Dim i As Long, j As Long, k$
 If F$ = vbNullString Then Exit Function
+If simple Then
+j = SimplePointPos(F$)
+Else
 j = PointPos(F$)
+If j > Len(F$) Then j = Len(F$)
+End If
 If Mid$(F$, j, 1) = "." Then
-k$ = ExtractType(F$, j)
+k$ = ExtractType(F$, j, simple)
 Else
 j = Len(F$)
 End If
@@ -7936,11 +7973,15 @@ End If
 'ExtractName = mylcasefILE(Trim$(Mid$(f$, I + 1, j - I)))
 
 End Function
-Public Function ExtractNameOnly(ByVal F$) As String
+Public Function ExtractNameOnly(ByVal F$, Optional simple As Boolean = False) As String
 Dim i As Long, j As Long
 If F$ = vbNullString Then Exit Function
+If simple Then
+j = SimplePointPos(F$)
+Else
 j = PointPos(F$)
 If j > Len(F$) Then j = Len(F$)
+End If
 For i = j To 1 Step -1
 Select Case Mid$(F$, i, 1)
 Case Is < " ", "\", "/", ":"
@@ -13378,7 +13419,7 @@ Dim pppp As mArray, i1 As Long, Lang As Long
 Dim R1 As Long, r2 As Long
 ' uink$ = VbNullString
 di.FontTransparent = True
-SetBkMode di.hDC, 1
+SetBkMode di.Hdc, 1
 ohere$ = here$
 If Not ByPass Then here$ = vbNullString
 bstack.LoadOnly = ByPass
@@ -16462,7 +16503,7 @@ End If
 End Function
 Sub stackshow(b As basetask)
 Static OldPagio$
-Dim p As Variant, R$, AL$, s$, dl$, dl2$
+Dim p As Variant, R$, al$, s$, dl$, dl2$
 Static once As Boolean, ok As Boolean
 If once Then Exit Sub
 once = True
@@ -16528,25 +16569,25 @@ stackshowonly = True
 If FastSymbol(dl$, ")") Then
 ok = True
 ElseIf IsExp(b, dl$, p) Then
-    If AL$ = vbNullString Then
+    If al$ = vbNullString Then
         If pagio$ = "GREEK" Then
-        AL$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
+        al$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
         Else
-        AL$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
+        al$ = "? " & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
         End If
             
     Else
-        AL$ = AL$ & "," & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
+        al$ = al$ & "," & Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & MyCStr(p)
     End If
     ok = True
     ElseIf IsStrExp(b, dl$, s$) Then
     If Len(dl2$) - Len(dl$) >= 0 Then
     
     
-    If AL$ = vbNullString Then
-        AL$ = Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
+    If al$ = vbNullString Then
+        al$ = Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
     Else
-        AL$ = AL$ + "," + Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
+        al$ = al$ + "," + Left$(dl2$, Len(dl2$) - Len(dl$)) & "=" & Chr(34) + s$ & Chr(34)
     End If
     ok = True
     End If
@@ -16556,10 +16597,10 @@ ElseIf IsExp(b, dl$, p) Then
      s$ = "<"
 If ISSTRINGA(dl$, R$) Then If pagio$ <> "GREEK" Then s$ = s$ & R$
 If ISSTRINGA(dl$, R$) Then If pagio$ = "GREEK" Then s$ = s$ & R$
-AL$ = s$ & ">" & AL$
+al$ = s$ & ">" & al$
 ok = True
 Else
-AL$ = AL$ & " " & GetStrUntil(",", dl$)
+al$ = al$ & " " & GetStrUntil(",", dl$)
     
      dl$ = vbNullString
   
@@ -16572,10 +16613,10 @@ End If
      s$ = "<"
 If ISSTRINGA(dl$, R$) Then If pagio$ <> "GREEK" Then s$ = s$ & R$
 If ISSTRINGA(dl$, R$) Then If pagio$ = "GREEK" Then s$ = s$ & R$
-AL$ = s$ & ">" & AL$
+al$ = s$ & ">" & al$
 ok = True
 Else
-     AL$ = AL$ & " " & dl$
+     al$ = al$ & " " & dl$
      dl$ = vbNullString
   
 End If
@@ -16587,23 +16628,23 @@ DropLeft ",", dl$
 Loop Until Not ok
 End If
 stackshowonly = False
-If AL$ <> "" Then AL$ = AL$ & vbCrLf
+If al$ <> "" Then al$ = al$ & vbCrLf
     If pagio$ = "GREEK" Then
-    AL$ = AL$ & "Σωρός "
+    al$ = al$ & "Σωρός "
     Else
-    AL$ = AL$ & "Stack "
+    al$ = al$ & "Stack "
     End If
 If stack.Total = 0 Then
     If pagio$ = "GREEK" Then
-    AL$ = AL$ & "Αδειος"
+    al$ = al$ & "Αδειος"
     Else
-    AL$ = AL$ & "Empty"
+    al$ = al$ & "Empty"
     End If
 Else
     If pagio$ = "GREEK" Then
-    AL$ = AL$ & "Κορυφή "
+    al$ = al$ & "Κορυφή "
     Else
-    AL$ = AL$ & "Top "
+    al$ = al$ & "Top "
     End If
 
 End If
@@ -16611,28 +16652,28 @@ Dim i As Long
 
 Do
 i = i + 1
-If stack.Total < i Or Len(AL$) > 400 Then Exit Do
+If stack.Total < i Or Len(al$) > 400 Then Exit Do
 
 If stack.StackItemType(i) = "N" Or stack.StackItemType(i) = "L" Then
-AL$ = AL$ & MyCStr(stack.StackItem(i)) & " "
+al$ = al$ & MyCStr(stack.StackItem(i)) & " "
 ElseIf stack.StackItemType(i) = "S" Then
 R$ = stack.StackItem(i)
     If Len(R$) > 78 Then
-    AL$ = AL$ & Chr(34) + Left$(R$, 75) & "..." & Chr(34)
+    al$ = al$ & Chr(34) + Left$(R$, 75) & "..." & Chr(34)
     Else
-    AL$ = AL$ & Chr(34) + R$ & Chr(34)
+    al$ = al$ & Chr(34) + R$ & Chr(34)
     End If
  ElseIf stack.StackItemType(i) = ">" Then
    If pagio$ = "LATIN" Then
-    AL$ = AL$ & "[Optional] "
+    al$ = al$ & "[Optional] "
     Else
-    AL$ = AL$ & "[Προαιρετικό] "
+    al$ = al$ & "[Προαιρετικό] "
     End If
 ElseIf stack.StackItemType(i) = "*" Then
 
-AL$ = AL$ & stack.StackItemTypeObjectType(i) & " "
+al$ = al$ & stack.StackItemTypeObjectType(i) & " "
 Else  '??
-AL$ = AL$ & stack.StackItemTypeObjectType(i) & " "
+al$ = al$ & stack.StackItemTypeObjectType(i) & " "
 End If
 
 Loop
@@ -16641,7 +16682,7 @@ With Form2
         .label1(2) = .label1(2)
     
         .testpad.enabled = True
-        .testpad.Text = AL$
+        .testpad.Text = al$
         .testpad.SetRowColumn 1, 1
         .testpad.enabled = False
 End With
@@ -17097,7 +17138,7 @@ bsfile = mylcasefILE(sFile)
    i = FindExecutable(StrPtr(sFile), StrPtr(MYNULL$), StrPtr(s2))
    If i > 32 Then
    rfile = mylcasefILE(Left$(s2, InStr(s2, Chr$(0)) - 1))
-   If ExtractName(bsfile) = ExtractName(rfile) Then
+   If ExtractName(bsfile, True) = ExtractName(rfile, True) Then
    ' it is an executable
    PCall = mylcasefILE(bsfile)
    Else
@@ -17273,9 +17314,9 @@ If x1 <> 0 Then
             Exit Function
         End If
 
-        If ExtractType(pa$) = "gsb" Then pa$ = ExtractPath(pa$) + ExtractNameOnly(pa$)
-        If ExtractPath(pa$) <> "" Then
-                If InStr(ExtractPath(pa$), mcd) <> 1 Then pa$ = pa$ & ".gsb" Else pa$ = pa$ & ".gsb"
+        If ExtractType(pa$) = "gsb" Then pa$ = ExtractPath(pa$) + ExtractNameOnly(pa$, True)
+        If ExtractPath(pa$, True) <> "" Then
+                If InStr(ExtractPath(pa$, True), mcd) <> 1 Then pa$ = pa$ & ".gsb" Else pa$ = pa$ & ".gsb"
         Else
                 pa$ = mcd + pa$ & ".gsb"
         End If
@@ -17389,11 +17430,11 @@ If x1 <> 0 Then
         If Not SaveUnicode(pa$ + "1", prg$, 2) Then BadFilename: Exit Function
         End If
         ProcTask2 Basestack1
-        If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".gsb") <> "" Then
-            If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1") <> "" Then
-                KillFile ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
+        If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".gsb") <> "" Then
+            If CFname(ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck1") <> "" Then
+                KillFile ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck1"
             End If
-            RenameFile2 pa$, ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
+            RenameFile2 pa$, ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck1"
             askme = True
         End If
      ProcTask2 Basestack1
@@ -17401,12 +17442,12 @@ If x1 <> 0 Then
         If askme Then
                 
                 If Lang = 1 Then
-                        If MsgBoxN("Replace " + ExtractNameOnly(pa$), vbOKCancel, MesTitle$) <> vbOK Then
+                        If MsgBoxN("Replace " + ExtractNameOnly(pa$, True), vbOKCancel, MesTitle$) <> vbOK Then
 nogood:
                         If CFname(pa$ + "1") <> "" Then
                             KillFile pa$ + "1"
                         End If
-                        RenameFile2 ExtractPath(pa$) & ExtractNameOnly(pa$) + ".bck1", ExtractPath(pa$) & ExtractNameOnly(pa$) + ".gsb"
+                        RenameFile2 ExtractPath(pa$) & ExtractNameOnly(pa$, True) + ".bck1", ExtractPath(pa$) & ExtractNameOnly(pa$, True) + ".gsb"
                         MyEr "File not saved -1005", "Δεν σώθηκε το αρχείο -1005"
                         ProcSave = True
                         Exit Function
@@ -17414,7 +17455,7 @@ nogood:
                         Check2SaveModules = False
                         End If
                 Else
-                        If MsgBoxN("Αλλαγή " + ExtractNameOnly(pa$), vbOKCancel, MesTitle$) <> vbOK Then
+                        If MsgBoxN("Αλλαγή " + ExtractNameOnly(pa$, True), vbOKCancel, MesTitle$) <> vbOK Then
                         GoTo nogood
                         Else
                         Check2SaveModules = False
@@ -17424,15 +17465,15 @@ nogood:
         End If
         If par Then
                 If s$ = "*" Then
-                        MakeACopy ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1", ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
-                        KillFile ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
+                        MakeACopy ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck1", ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck"
+                        KillFile ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck1"
                 End If
                 RenameFile2 pa$ + "1", pa$
                 Check2SaveModules = False
         Else
                 If s$ <> "" Then
-                        MakeACopy ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1", ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck"
-                        KillFile ExtractPath(pa$) & ExtractNameOnly(pa$) & ".bck1"
+                        MakeACopy ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck1", ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck"
+                        KillFile ExtractPath(pa$) & ExtractNameOnly(pa$, True) & ".bck1"
                 End If
                 RenameFile2 pa$ + "1", pa$
                 If here$ = vbNullString Then LASTPROG$ = pa$
@@ -19546,12 +19587,12 @@ If mGDILines Then
         PLG(x1 + 2) = PLG(0)
         PLG(x1 + 3) = PLG(0)
         PLG(x1 + 4) = PLG(0)
-        DrawBezierGdi Scr.hDC, pencol, Col, .pathfillstyle, Scr.DrawWidth, Scr.DrawStyle, PLG(), CLng(x1 + 4)
+        DrawBezierGdi Scr.Hdc, pencol, Col, .pathfillstyle, Scr.DrawWidth, Scr.DrawStyle, PLG(), CLng(x1 + 4)
     Else
-        DrawBezierGdi Scr.hDC, pencol, 0, 1, Scr.DrawWidth, Scr.DrawStyle, PLG(), CLng(x1 + 1)
+        DrawBezierGdi Scr.Hdc, pencol, 0, 1, Scr.DrawWidth, Scr.DrawStyle, PLG(), CLng(x1 + 1)
     End If
 Else
-If PolyBezier(Scr.hDC, PLG(0), x1 + 1) = 0 Then
+If PolyBezier(Scr.Hdc, PLG(0), x1 + 1) = 0 Then
 BadGraphic
  Exit Function
 End If
@@ -20511,14 +20552,14 @@ mDir.IncludedFolders = False
 mDir.Nofiles = False
 mDir.TopFolder = mcd
 mDir.SortType = Abs(FastSymbol(rest$, "!"))
-frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "WAV", False))
+frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "WAV", False), True)
 s$ = vbNullString
 ss$ = vbNullString
 Do While frm$ <> ""
 s$ = frm$
 If ss$ <> "" Then ss$ = ss$ & ", " & s$ Else ss$ = s$
 s$ = mDir.Dir2
-If s$ <> "" Then frm$ = ExtractNameOnly(s$) Else frm$ = vbNullString
+If s$ <> "" Then frm$ = ExtractNameOnly(s$, True) Else frm$ = vbNullString
 Loop
 If Lang Then
 ss$ = "Sounds: " & ss$
@@ -20671,11 +20712,11 @@ If Right$(" " & aDir.Pattern, 1) <> "*" And InStr(" " & aDir.Pattern, "|") = 0 T
             If LastErNum1 <> 0 Then Exit Function
             If s$ <> "" Then s$ = mcd + s$
         Else
-            s$ = ExtractName(Included(mcd + frm$, stac1))
+            s$ = ExtractName(Included(mcd + frm$, stac1), True)
             If LastErNum1 <> 0 Then Exit Function
         End If
     Else
-        s$ = ExtractNameOnly(Included(mcd + frm$, stac1))
+        s$ = ExtractNameOnly(Included(mcd + frm$, stac1), True)
     If LastErNum1 <> 0 Then Exit Function
     End If
 Else
@@ -20817,7 +20858,7 @@ mDir.IncludedFolders = False
 mDir.Nofiles = False
 mDir.TopFolder = mcd
 mDir.SortType = Abs(FastSymbol(rest$, "!"))
-frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "GSB|GSB1", False))
+frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "GSB|GSB1", False), True)
 
 If frm$ <> "" Then
 If pa$ <> "" Then pa$ = pa$ & vbCrLf
@@ -20832,7 +20873,7 @@ Do While frm$ <> ""
 s$ = frm$
 If ss$ <> "" Then ss$ = ss$ & ", " & s$ Else ss$ = s$
 s$ = mDir.Dir2
-If s$ <> "" Then frm$ = ExtractNameOnly(s$) Else frm$ = vbNullString
+If s$ <> "" Then frm$ = ExtractNameOnly(s$, True) Else frm$ = vbNullString
 
 Loop
 Set mDir = Nothing
@@ -21490,14 +21531,14 @@ mDir.IncludedFolders = False
 mDir.Nofiles = False
 mDir.TopFolder = mcd
 mDir.SortType = Abs(FastSymbol(rest$, "!"))
-frm$ = ExtractName(mDir.Dir2$(mcd, "WMF|EMF", False))
+frm$ = ExtractName(mDir.Dir2$(mcd, "WMF|EMF", False), True)
 s$ = vbNullString
 ss$ = vbNullString
 Do While frm$ <> ""
 s$ = frm$
 If ss$ <> "" Then ss$ = ss$ & ", " & s$ Else ss$ = s$
 s$ = mDir.Dir2
-If s$ <> "" Then frm$ = ExtractName(s$) Else frm$ = vbNullString
+If s$ <> "" Then frm$ = ExtractName(s$, True) Else frm$ = vbNullString
 Loop
 
 If Lang Then
@@ -21516,14 +21557,14 @@ mDir.IncludedFolders = False
 mDir.Nofiles = False
 mDir.TopFolder = mcd
 mDir.SortType = Abs(FastSymbol(rest$, "!"))
-frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "AVI", False))
+frm$ = ExtractNameOnly(mDir.Dir2$(mcd, "AVI", False), True)
 s$ = vbNullString
 ss$ = vbNullString
 Do While frm$ <> ""
 s$ = frm$
 If ss$ <> "" Then ss$ = ss$ & ", " & s$ Else ss$ = s$
 s$ = mDir.Dir2
-If s$ <> "" Then frm$ = ExtractNameOnly(s$) Else frm$ = vbNullString
+If s$ <> "" Then frm$ = ExtractNameOnly(s$, True) Else frm$ = vbNullString
 Loop
 Set mDir = Nothing
 If Lang Then
@@ -21541,14 +21582,14 @@ mDir.IncludedFolders = False
 mDir.Nofiles = False
 mDir.TopFolder = mcd
 mDir.SortType = Abs(FastSymbol(rest$, "!"))
-frm$ = ExtractName(mDir.Dir2$(mcd, "BMP|JPG|GIF|DIB|ICO|CUR|PNG|TIF", False))
+frm$ = ExtractName(mDir.Dir2$(mcd, "BMP|JPG|GIF|DIB|ICO|CUR|PNG|TIF", False), True)
 s$ = vbNullString
 ss$ = vbNullString
 Do While frm$ <> ""
 s$ = frm$
 If ss$ <> "" Then ss$ = ss$ & ", " & s$ Else ss$ = s$
 s$ = mDir.Dir2
-If s$ <> "" Then frm$ = ExtractName(s$) Else frm$ = vbNullString
+If s$ <> "" Then frm$ = ExtractName(s$, True) Else frm$ = vbNullString
 Loop
 If Lang Then
 ss$ = "Bitmaps: " & ss$
@@ -21722,7 +21763,7 @@ End If
 If basestack.toprinter Then
 If oprinter.Height > 0 Then
 oprinter.Cls CLng(mycolor(.Paper))
-oprinter.PaintPicture Form1.PrinterDocument1.hDC
+oprinter.PaintPicture Form1.PrinterDocument1.Hdc
 .curpos = 0
 .currow = .mysplit
 .lastprint = False
@@ -21864,7 +21905,7 @@ If IsExp(bstack, rest$, p, , True) Then
                 players(prive).pathcolor = mycolor(Col)
                 players(prive).pathfillstyle = Int(x) Mod 8
                 
-                BeginPath bstack.Owner.hDC
+                BeginPath bstack.Owner.Hdc
               '  If (par Or F) And GDILines Then OldGDILines = True: players(prive).NoGDI = True
                 If (par Or region) Then players(prive).NoGDI = True: If GDILines Then OldGDILines = True
                 Call executeblock(it, bstack, ss$, False, once, , True)
@@ -21879,7 +21920,7 @@ If IsExp(bstack, rest$, p, , True) Then
                 End If
                         
                 ' what for 2 and 3 values
-                EndPath bstack.Owner.hDC
+                EndPath bstack.Owner.Hdc
         
                 bstack.Owner.fillstyle = Int(x) Mod 8
                 bstack.Owner.fillcolor = mycolor(Col)
@@ -21887,12 +21928,12 @@ If IsExp(bstack, rest$, p, , True) Then
                 If par Then bstack.Owner.DrawMode = 7
                 If F Then  ' from 8 rev 83
                       If bstack.Owner.fillstyle = 1 Then
-                           StrokeAndFillPath bstack.Owner.hDC
+                           StrokeAndFillPath bstack.Owner.Hdc
                         Else
-                            FillPath bstack.Owner.hDC
+                            FillPath bstack.Owner.Hdc
                           End If
                 Else
-                     StrokeAndFillPath bstack.Owner.hDC         ' stroke and fill path
+                     StrokeAndFillPath bstack.Owner.Hdc         ' stroke and fill path
                 End If
                 If par Then bstack.Owner.DrawMode = 13
                 bstack.Owner.fillstyle = vbFSTransparent
@@ -21931,7 +21972,7 @@ If IsExp(bstack, rest$, p, , True) Then
 contthere:
               If FastSymbol(rest$, ";") Then
  
-                  SelectClipRgn bstack.Owner.hDC, 0&
+                  SelectClipRgn bstack.Owner.Hdc, 0&
               End If
               bstack.addlen = nd&
               Exit Function
@@ -21946,12 +21987,12 @@ contthere2:
                 
                 players(prive).pathcolor = mycolor(Col)
                 players(prive).pathfillstyle = Int(x) Mod 8
-                BeginPath bstack.Owner.hDC
+                BeginPath bstack.Owner.Hdc
                 'If (par Or region) And GDILines Then OldGDILines = True: players(prive).NoGDI = True
                 If (par Or region) Then players(prive).NoGDI = True: If GDILines Then OldGDILines = True
                 Call executeblock(it, bstack, ss$, False, once, , , True)
                 
-                EndPath bstack.Owner.hDC
+                EndPath bstack.Owner.Hdc
                 players(prive).pathgdi = players(prive).pathgdi - 1
                 If players(prive).pathgdi > 0 Then
                     players(prive).pathcolor = oldpathcolor
@@ -21963,15 +22004,15 @@ contthere2:
                 If region Then            ' path { block of commands };
                     
                     If F Then
-                        SelectClipPath bstack.Owner.hDC, 2
+                        SelectClipPath bstack.Owner.Hdc, 2
                     Else
-                        SelectClipPath bstack.Owner.hDC, RGN_COPY  ' make a clip path
+                        SelectClipPath bstack.Owner.Hdc, RGN_COPY  ' make a clip path
                     End If
                 
                     
                 Else
                     If par Then bstack.Owner.DrawMode = 7
-                    StrokePath bstack.Owner.hDC               ' stroke path
+                    StrokePath bstack.Owner.Hdc               ' stroke path
                     If par Then bstack.Owner.DrawMode = 13
                 End If
                  bstack.Owner.fillstyle = vbFSTransparent
@@ -22554,7 +22595,7 @@ If entrypoint = 1 Then dum = True
     Exit Function
     End If
     ' check valid name
-    If ExtractNameOnly(ss$) = vbNullString Then BadFilename:  Exit Function
+    If ExtractNameOnly(ss$, True) = vbNullString Then BadFilename: Exit Function
     If ExtractPath(ss$) = vbNullString Then
     ss$ = mylcasefILE(mcd + ss$)
     End If
@@ -22711,12 +22752,12 @@ End If
         If x1 Then
         
                     If FastSymbol(rest$, ";") Then
-                                Shell "CMD /C " & s$, vbMinimizedNoFocus
+                                doslast = Shell("CMD /C " & s$, vbMinimizedNoFocus)
                     Else
-                                Shell "CMD /K " & s$, vbNormalFocus
+                                doslast = Shell("CMD /K " & s$, vbNormalFocus)
                     End If
         Else
-                    Shell "CMD", vbNormalFocus
+                    doslast = Shell("CMD", vbNormalFocus)
         End If
 
            MyDoEvents
@@ -22933,14 +22974,14 @@ End If
 If x1 <> 0 Then
    
     If par1 Then
-        If loadcatalog.ExistKey(mcd + ExtractNameOnly(s$) & ".gsb") Then
-            w$ = mcd + ExtractNameOnly(s$) & ".gsb"
+        If loadcatalog.ExistKey(mcd + ExtractNameOnly(s$, True) & ".gsb") Then
+            w$ = mcd + ExtractNameOnly(s$, True) & ".gsb"
             ss$ = loadcatalog.Value
             If loadcatalog.ExistKey(w$ + Chr(1)) Then Switches loadcatalog.Value
             par1 = False
             GoTo JUMPHERE
-        ElseIf loadcatalog.ExistKey(mcd + ExtractNameOnly(w$) & ".gsb") Then
-            w$ = mcd + ExtractNameOnly(w$) & ".gsb"
+        ElseIf loadcatalog.ExistKey(mcd + ExtractNameOnly(w$, True) & ".gsb") Then
+            w$ = mcd + ExtractNameOnly(w$, True) & ".gsb"
             ss$ = loadcatalog.Value
             If loadcatalog.ExistKey(w$ + Chr(1)) Then Switches loadcatalog.Value
             par1 = False
@@ -22949,27 +22990,27 @@ If x1 <> 0 Then
     End If
     par1 = True
     If ExtractType(s$) <> "gsb" Then
-        Key$ = mcd + ExtractNameOnly(s$) & ".gsb"
-        s$ = CFname(mcd + ExtractNameOnly(s$) & ".gsb")
+        Key$ = mcd + ExtractNameOnly(s$, True) & ".gsb"
+        s$ = CFname(mcd + ExtractNameOnly(s$, True) & ".gsb")
         If s$ = vbNullString Then
-        Key$ = mcd + ExtractNameOnly(w$) & ".gsb"
-        s$ = CFname(mcd + ExtractNameOnly(w$) & ".gsb")
+        Key$ = mcd + ExtractNameOnly(w$, True) & ".gsb"
+        s$ = CFname(mcd + ExtractNameOnly(w$, True) & ".gsb")
         End If
         If s$ = vbNullString Then
-        Key$ = mcd + ExtractNameOnly(w$) & ".gsb1"
-        s$ = CFname(mcd + ExtractNameOnly(w$) & ".gsb1")
-        If RenameFile2(s$, mcd + ExtractNameOnly(s$) + ".gsb") Then
-         s$ = CFname(mcd + ExtractNameOnly(w$) & ".gsb")
+        Key$ = mcd + ExtractNameOnly(w$, True) & ".gsb1"
+        s$ = CFname(mcd + ExtractNameOnly(w$, True) & ".gsb1")
+        If RenameFile2(s$, mcd + ExtractNameOnly(s$, True) + ".gsb") Then
+         s$ = CFname(mcd + ExtractNameOnly(w$, True) & ".gsb")
         End If
         End If
      Else
         ss$ = s$
         If ExtractPath$(s$) = vbNullString Then
-            s$ = ExtractName(s$)
+            s$ = ExtractName(s$, True)
             ss$ = Trim$(Mid$(ss$, Len(s$) + 1))
             s$ = mcd + s$
         Else
-            s$ = ExtractPath(s$) + ExtractName(s$)
+            s$ = ExtractPath(s$) + ExtractName(s$, True)
             ss$ = Trim$(Mid$(ss$, Len(s$) + 1))
         
         End If
@@ -22977,11 +23018,11 @@ If x1 <> 0 Then
         s$ = w$
         ss$ = s$
         If ExtractPath$(s$) = vbNullString Then
-            s$ = ExtractName(s$)
+            s$ = ExtractName(s$, True)
             ss$ = Trim$(Mid$(ss$, Len(s$) + 1))
             s$ = mcd + s$
         Else
-            s$ = ExtractPath(s$) + ExtractName(s$)
+            s$ = ExtractPath(s$) + ExtractName(s$, True)
             ss$ = Trim$(Mid$(ss$, Len(s$) + 1))
         
         End If
@@ -23000,7 +23041,7 @@ If x1 <> 0 Then
         End If
         Switches ss$
     End If
-    If ExtractNameOnly(s$) = vbNullString Or LenB(CFname(s$)) = 0 Then
+    If ExtractNameOnly(s$, True) = vbNullString Or LenB(CFname(s$)) = 0 Then
         nosuchfile
         ProcLoad = False
         Exit Function
@@ -23214,7 +23255,7 @@ End If
                                             ss$ = cr.Value
                                             
 '
-                                             ss$ = ExtractPath(ss$, , True) + ExtractName(ss$)
+                                             ss$ = ExtractPath(ss$, , True) + ExtractName(ss$, True)
                                              If mmdir.ExistFile(ss$) Then
                                              
                                                 ObjectCatalog.AddKey first$ + " (" + sVersions(iVer) + ")", ss$
@@ -23589,7 +23630,7 @@ If Not FastSymbol(rest$, ",") Then
 If useold Then
 TwoColorsGradient bstack.Owner, GRADIENT_FILL_RECT_V, GDIP_ARGB1(trans, x), GDIP_ARGB1(trans, y)
 Else
-GdiPlusGradient bstack.Owner.hDC, 0, 0, bstack.Owner.Scalewidth / dv15, bstack.Owner.Scaleheight / dv15, GDIP_ARGB1(trans, x), GDIP_ARGB1(trans, y), 1
+GdiPlusGradient bstack.Owner.Hdc, 0, 0, bstack.Owner.Scalewidth / dv15, bstack.Owner.Scaleheight / dv15, GDIP_ARGB1(trans, x), GDIP_ARGB1(trans, y), 1
 End If
 
 
@@ -23602,9 +23643,9 @@ If useold Then
 TwoColorsGradient bstack.Owner, -CLng(p <> 0), GDIP_ARGB1(trans, x), GDIP_ARGB1(trans, y)
 Else
 If p = 0 Then
-GdiPlusGradient bstack.Owner.hDC, 0, 0, bstack.Owner.Scalewidth / dv15, bstack.Owner.Scaleheight / dv15, GDIP_ARGB1(trans, y), GDIP_ARGB1(trans, x), 0&
+GdiPlusGradient bstack.Owner.Hdc, 0, 0, bstack.Owner.Scalewidth / dv15, bstack.Owner.Scaleheight / dv15, GDIP_ARGB1(trans, y), GDIP_ARGB1(trans, x), 0&
 Else
-GdiPlusGradient bstack.Owner.hDC, 0, 0, bstack.Owner.Scalewidth / dv15, bstack.Owner.Scaleheight / dv15, GDIP_ARGB1(trans, x), GDIP_ARGB1(trans, y), 1&
+GdiPlusGradient bstack.Owner.Hdc, 0, 0, bstack.Owner.Scalewidth / dv15, bstack.Owner.Scaleheight / dv15, GDIP_ARGB1(trans, x), GDIP_ARGB1(trans, y), 1&
 End If
 End If
 
@@ -23908,37 +23949,45 @@ End Function
 Function ProcSoundRec(basestack As basetask, rest$, Lang As Long) As Boolean
 ' not tested yet...
 Dim s$, p As Variant, ss$, x As Double, y As Double
-    If IsLabelSymbolNew(rest$, "ΝΕΑ", "NEW", Lang) Then
-    Set sRec = New RecordMci
-    sRec.Rec_Initialize
-    If IsStrExp(basestack, rest$, s$) Then
+Dim LRec As RecordMci
     
-    sRec.FileName = s$
-    End If
-    If FastSymbol(rest$, ",") Then
-    If IsExp(basestack, rest$, p, , True) Then
-    ' hz
-        If IsLabelSymbolLatin(rest$, "STEREO") Then
-        sRec.Stereo
-        Else
-        sRec.Mono
+    
+    If IsLabelSymbolNew(rest$, "ΝΕΑ", "NEW", Lang) Then
+        Set sRec = New RecordMci
+        Set LRec = sRec
+        If Not LRec.HaveMic Then GoTo noMic
+        LRec.Rec_Initialize
+        If IsStrExp(basestack, rest$, s$) Then LRec.FileName = s$
+        If FastSymbol(rest$, ",") Then
+            If IsExp(basestack, rest$, p, , True) Then
+                If IsLabelSymbolLatin(rest$, "STEREO") Then
+                    LRec.Stereo
+                Else
+                    LRec.Mono
+                End If
+                If IsLabelSymbolLatin(rest$, "HIFI") Then
+                    LRec.Bit16
+                Else
+                    LRec.Bit8
+                End If
+                LRec.QualityAny CDbl(p)
         End If
-        If IsLabelSymbolLatin(rest$, "HIFI") Then
-        sRec.Bit16
-        Else
-        sRec.Bit8
-        End If
-        sRec.QualityAny p
-    End If
     Else
-        sRec.RecFast
+        If sRec Is Nothing Then
+         Set sRec = New RecordMci
+         If Not LRec.HaveMic Then GoTo noMic
+        End If
+        Set LRec = sRec
+        LRec.RecFast
     End If
     ElseIf Not (sRec Is Nothing) Then
+        Set LRec = sRec
     ss$ = vbNullString
+    
     If IsLabelSymbolNewExp(rest$, "ΕΙΣΑΓΩΓΗ", "INSERT", Lang, ss$) Then
-        sRec.Capture True
+        LRec.Capture True
     ElseIf IsLabelSymbolNewExp(rest$, "ΑΛΛΑΓΗ", "OVERWRITE", Lang, ss$) Then
-        sRec.ReCapture
+        LRec.ReCapture
     ElseIf IsLabelSymbolNewExp(rest$, "ΑΠΟΚΟΠΗ", "DELETE", Lang, ss$) Then
             If IsExp(basestack, rest$, x, , True) Then
             Else
@@ -23946,45 +23995,58 @@ Dim s$, p As Variant, ss$, x As Double, y As Double
             End If
             If IsLabelSymbolNew(rest$, "ΕΩΣ", "TO", Lang) Then
                 If Not IsExp(basestack, rest$, y, , True) Then
-                    y = sRec.getLengthInMS
+                    y = LRec.getLengthInMS
                 End If
             Else
-                y = sRec.getLengthInMS
+                y = LRec.getLengthInMS
             End If
-            sRec.CutRecordMs x, y
-    ElseIf IsLabelSymbolNewExp(rest$, "STOP", "ΔΙΑΚΟΠΗ", Lang, ss$) Then
-        sRec.recStop
+            LRec.CutRecordMs CDbl(x), CDbl(y)
+    ElseIf IsLabelSymbolNewExp(rest$, "ΕΝΤΑΣΗ", "VOLUME", Lang, ss$) Then
+                If IsExp(basestack, rest$, x, , True) Then
+                    If x < 0 Then x = 0
+                    If x > 100 Then x = 100
+                    LRec.setVolume CLng(x)
+                Else
+                    LRec.setVolume 50&
+                End If
+    ElseIf IsLabelSymbolNewExp(rest$, "ΔΙΑΚΟΠΗ", "STOP", Lang, ss$) Then
+        LRec.recStop
     ElseIf IsLabelSymbolNewExp(rest$, "ΔΟΚΙΜΗ", "TEST", Lang, ss$) Then
-        sRec.recPlay
+        LRec.recPlay
     ElseIf IsLabelSymbolNewExp(rest$, "ΘΕΣΗ", "POS", Lang, ss$) Then
-        If sRec.isRecPlaying Then
+        If LRec.isRecPlaying Then
             If IsExp(basestack, rest$, x, , True) Then
-            sRec.recPlayFromMs x
+            LRec.recPlayFromMs x
             Else
-            sRec.recPlay
+            LRec.recPlay
             End If
         Else
         ' SEEK
             If IsExp(basestack, rest$, x, , True) Then
-            sRec.oneMCI "seek capture to " & CStr(CLng(x))
+            LRec.oneMCI "seek capture to " & CStr(CLng(x))
             Else
-            sRec.oneMCI "seek capture to 0"
+            LRec.oneMCI "seek capture to 0"
             End If
         End If
     ElseIf IsLabelSymbolNewExp(rest$, "ΣΩΣΕ", "SAVE", Lang, ss$) Then
         If IsStrExp(basestack, rest$, s$) Then
-            sRec.SaveAs s$
+            LRec.SaveAs s$
         Else
-            sRec.Save
+            LRec.Save
         End If
     ElseIf IsLabelSymbolNewExp(rest$, "ΚΛΕΙΣΕ", "END", Lang, ss$) Then
         Set sRec = Nothing
+        Set LRec = Nothing
     End If
     Else
         
         MyEr "You don't have new recording", "Δεν έχεις ετοιμάσει νέα ηχογράφηση"
     End If
   ProcSoundRec = True
+  Exit Function
+noMic:
+MissMic
+  
 End Function
 
 Public Function ScanTarget(j() As target, ByVal x As Long, ByVal y As Long, ByVal myl As Long) As Long
@@ -24032,18 +24094,20 @@ If IsLabelSymbolNew(rest$, "ΦΟΡΤΩΣΕ", "LOAD", Lang) Then
                 End If
                 avifile = s$
                 Load AVI
-                
+                If Not OsInfo.IsWindows8Point1OrGreater Then
                 MediaPlayer1.playMovie
                 MediaPlayer1.pauseMovie
-                
                 MediaPlayer1.setPositionTo 0
+                End If
+                
                 Sleep 2
                 MyDoEvents
                 AVIRUN = False
                     If Form1.Visible Then Form1.SetFocus
-                    MediaPlayer1.setLeftVolume vol * 10
-                    MediaPlayer1.setRightVolume vol * 10
+                    'MediaPlayer1.setLeftVolume vol * 10
+                    'MediaPlayer1.setRightVolume vol * 10
                     
+                MediaPlayer1.sizeLocateMovie AVI.Left \ dv15, AVI.top \ dv15, AVI.Width \ dv15, AVI.Height \ dv15
                 
             End If
             Set Scr = Nothing
@@ -24054,9 +24118,14 @@ If IsLabelSymbolNew(rest$, "ΦΟΡΤΩΣΕ", "LOAD", Lang) Then
     ss$ = vbNullString
         If IsLabelSymbolNewExp(rest$, "ΔΕΙΞΕ", "SHOW", Lang, ss$) Then
             'If Not AVIRUN Then MediaPlayer1.playMovie: MediaPlayer1.pauseMovie
+            
+            
             If Scr.Name = "GuiM2000" Then
             If Scr.Visible Then
+                
                 AVI.Show , Scr
+                'MediaPlayer1.sizeLocateMovie 0, 0, AVI.Width \ dv15, AVI.Height \ dv15 + 1
+                MediaPlayer1.showMovie
       End If
                 Set Scr = Nothing
                 ProcMedia = True
@@ -24069,7 +24138,8 @@ If IsLabelSymbolNew(rest$, "ΦΟΡΤΩΣΕ", "LOAD", Lang) Then
                 Else
                 AVI.Show , Form5
                 End If
-               
+               'MediaPlayer1.sizeLocateMovie 0, 0, AVI.Width \ dv15, AVI.Height \ dv15 + 1
+               MediaPlayer1.showMovie
                 AVI.ZOrder 0
              AVI.SetFocus
                 MyDoEvents
@@ -24090,7 +24160,7 @@ If IsLabelSymbolNew(rest$, "ΦΟΡΤΩΣΕ", "LOAD", Lang) Then
         ElseIf IsLabelSymbolNewExp(rest$, "ΠΑΙΞΕ", "PLAY", Lang, ss$) Then
         
                 If Not AVIRUN Then
-                AVI.Timer1.Interval = MediaPlayer1.getLengthInMS - MediaPlayer1.getPositionInMS
+                AVI.Interval = MediaPlayer1.getLengthInMS - MediaPlayer1.getPositionInMS
                 AVI.Avi2Up
                 End If
         
@@ -24121,6 +24191,8 @@ If IsLabelSymbolNew(rest$, "ΦΟΡΤΩΣΕ", "LOAD", Lang) Then
                     Exit Function
 
         End If
+    ElseIf IsLabelSymbolNewExp(rest$, "ΚΡΥΨΕ", "HIDE", Lang, ss$) Then
+    
     End If
     ss$ = vbNullString
 ' do nothing until here
@@ -24171,14 +24243,15 @@ If IsExp(basestack, rest$, x) Then
                    If AVIUP Then
                    If UseAviXY And UseAviSize Then
                    AVI.move aviX, aviY, AviSizeX, AviSizeY
-                   MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
+                   MediaPlayer1.sizeLocateMovie 0, 0, AviSizeX \ dv15, AviSizeY \ dv15 + 1
                    ElseIf UseAviXY Then
                    AVI.move aviX, aviY
-                    MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
+                    MediaPlayer1.sizeLocateMovie 0, 0, AVI.Width \ dv15, AVI.Height \ dv15 + 1
                     ElseIf UseAviSize Then
                      AVI.move AVI.Left, AVI.top, AviSizeX, AviSizeY
-                   MediaPlayer1.sizeLocateMovie 0, 0, Form1.ScaleX(AviSizeX, vbTwips, vbPixels), Form1.ScaleY(AviSizeY, vbTwips, vbPixels) + 1
+                   MediaPlayer1.sizeLocateMovie 0, 0, AviSizeX \ dv15, AviSizeY \ dv15 + 1
                     End If
+                    If AVI.Visible Then AVI.Refresh
            Else
                    If AVIRUN Or AVIUP Then
                 AVI.GETLOST
@@ -24231,11 +24304,14 @@ End If
 avifile = s$
 Load AVI
 AVI.Avi2Up
-AVI.Show
+
+
+
+ AVI.Show
 Sleep 5
 
 If AVIRUN Then
-If Form1.Visible Then Form1.SetFocus
+If AVI.Height > 0 Then If Form1.Visible Then Form1.SetFocus
 MediaPlayer1.setLeftVolume vol * 10
 MediaPlayer1.setRightVolume vol * 10
 
@@ -24527,13 +24603,13 @@ cont4:
                             x1 = (Abs(p) - 1) Mod 100 + 1
                             s$ = vbNullString
                             If FastSymbol(rest$, ",") Then If Not IsStrExp(bstack, rest$, s$) Then MissStringExpr: ProcImage = False: Exit Function
-                            SaveJPG photo, ExtractPath(w$) + ExtractNameOnly(w$) & ".jpg", x1, s$
+                            SaveJPG photo, ExtractPath(w$) + ExtractNameOnly(w$, True) & ".jpg", x1, s$
                         Else
                             Set photo = Nothing
                             ProcImage = False: MissNumExpr: Exit Function
                         End If
                     Else
-                        photo.SaveDib ExtractPath(w$) + ExtractNameOnly(w$) & ".bmp"
+                        photo.SaveDib ExtractPath(w$) + ExtractNameOnly(w$, True) & ".bmp"
                     End If
                 Else
                  MyEr "No Proper Image in String", "Δεν βρήκα κατάλληλη εικόνα σε αλφαριθμητικό"

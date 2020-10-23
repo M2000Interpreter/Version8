@@ -4,10 +4,10 @@ Option Explicit
 ' We have to give some stack space
 Public Declare Function CoAllowSetForegroundWindow Lib "ole32.dll" (ByVal pUnk As Object, ByVal lpvReserved As Long) As Long
 
-Private Declare Function GetProcByName Lib "KERNEL32" Alias "GetProcAddress" (ByVal hModule As Long, ByVal lpProcName As String) As Long
-Private Declare Function GetProcByOrdinal Lib "KERNEL32" Alias "GetProcAddress" (ByVal hModule As Long, ByVal nOrdinal As Long) As Long
-Private Declare Function LoadLibrary Lib "KERNEL32" Alias "LoadLibraryW" (ByVal lpLibFileName As Long) As Long
-Private Declare Function FreeLibrary Lib "KERNEL32" (ByVal hLibModule As Long) As Long
+Private Declare Function GetProcByName Lib "kernel32" Alias "GetProcAddress" (ByVal hModule As Long, ByVal lpProcName As String) As Long
+Private Declare Function GetProcByOrdinal Lib "kernel32" Alias "GetProcAddress" (ByVal hModule As Long, ByVal nOrdinal As Long) As Long
+Private Declare Function LoadLibrary Lib "kernel32" Alias "LoadLibraryW" (ByVal lpLibFileName As Long) As Long
+Private Declare Function FreeLibrary Lib "kernel32" (ByVal hLibModule As Long) As Long
 
 Private Declare Sub DisableProcessWindowsGhosting Lib "user32" ()
 Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As Long, ByVal nIndex As Long) As Long
@@ -20,16 +20,16 @@ Private Const SM_CXVIRTUALSCREEN = 78
 Private Const SM_CYVIRTUALSCREEN = 79
 Private Declare Function GetSystemMetrics Lib "user32" ( _
    ByVal nIndex As Long) As Long
-Private Declare Function GetCommandLineW Lib "KERNEL32" () As Long
+Private Declare Function GetCommandLineW Lib "kernel32" () As Long
 Private Declare Function lstrlenW Lib "kernel32.dll" (ByVal psString As Long) As Long
 Private Const SEM_NOGPFAULTERRORBOX = &H2&
 Public m_bInIDE As Boolean
 Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal Ptr As Long, ByVal Value As Long)
 Private Declare Function SysAllocStringLen Lib "oleaut32" (ByVal Ptr As Long, ByVal Length As Long) As Long
-Private Declare Function SetErrorMode Lib "KERNEL32" ( _
+Private Declare Function SetErrorMode Lib "kernel32" ( _
    ByVal wMode As Long) As Long
 Public UnloadForm1 As Boolean, a$
-Public Declare Sub Sleep Lib "KERNEL32" (ByVal dwMilliseconds As Long)
+Public Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Public dv15 As Long
 Public ExitNow As Boolean
 

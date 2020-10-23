@@ -42,7 +42,7 @@ Private Width As Long, Height As Long, mSubtype As Long
 ' mSubtype = 3 Wmf
 
 Private Declare Function GetEnhMetaFileHeader Lib "gdi32" (ByVal hMf As Long, ByVal cbBuffer As Long, lpemh As Any) As Long
-
+Private Declare Function VarPtrArray Lib "msvbvm60.dll" Alias "VarPtr" (Ptr() As Any) As Long
 Private Declare Function SetMetaFileBitsEx Lib "gdi32" (ByVal nSize As Long, lpData As Any) As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
@@ -511,7 +511,7 @@ Public Function DrawImageToHdc(where As Object, Optional x As Long = 0&, Optiona
         .pvData = Me.GetPtr(0)
     End With
    CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
-   DrawImageToHdc = DrawImageFromBuffer(a(), where.hDC, x, y, (Width), (Height))
+   DrawImageToHdc = DrawImageFromBuffer(a(), where.Hdc, x, y, (Width), (Height))
    CopyMemory ByVal VarPtrArray(a), 0&, 4
  
 End Function

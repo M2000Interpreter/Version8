@@ -326,7 +326,7 @@ If ReturnFile <> "" Then
 UserFileName = .Mydir.ExtractName(ReturnFile)
 .selectedFile = .Mydir.ExtractName(ReturnFile)
 gList3.ShowMe
-.FilePath = ExtractPath(ReturnFile)
+.FilePath = ExtractPath(ReturnFile, True)
 If .TEXT1 <> .Mydir.ExtractName(ReturnFile) Then .TEXT1 = .Mydir.ExtractName(ReturnFile)
 ReturnFile = vbNullString
 Else
@@ -346,7 +346,7 @@ gList2.HeadlineHeight = gList2.HeightPixels
 gList2.SoftEnterFocus
 If selectorLastX = -1 And selectorLastY = -1 Then
 Else
-Move selectorLastX, selectorLastY
+move selectorLastX, selectorLastY
 End If
 'If TEXT1 <> "" Then
 TEXT1.locked = False
@@ -369,43 +369,43 @@ UnHook hWnd
 End If
 End Sub
 
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 If Button = 1 Then
 
 If lastfactor = 0 Then lastfactor = 1
 
 If bordertop < 150 Then
-If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
+If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
 dr = True
 mousepointer = vbSizeNWSE
-Lx = X
-ly = Y
+Lx = x
+ly = y
 End If
 
 Else
-If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
+If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
 dr = True
 mousepointer = vbSizeNWSE
-Lx = X
-ly = Y
+Lx = x
+ly = y
 End If
 
 End If
 End If
 End Sub
 
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False
 If bordertop < 150 Then
-If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
+If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
  Else
- If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
+ If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else mousepointer = 0
 End If
 If dr Then
-    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
-    If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
+    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
+    If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
     
    If Not ExpandWidth Then addX = 0
         If lastfactor = 0 Then lastfactor = 1
@@ -436,10 +436,10 @@ If dr Then
 
         If addX = 0 Then
         If lastfactor <> factor Then ScaleDialog lastfactor, DialogPreview, Width
-        Lx = X
+        Lx = x
         
         Else
-        Lx = X * lastfactor / factor
+        Lx = x * lastfactor / factor
          ScaleDialog lastfactor, DialogPreview, (Width + addX) * lastfactor / factor
          End If
 
@@ -458,14 +458,14 @@ If dr Then
         'End If
         End If
         Else
-        Lx = X
-        ly = Y
+        Lx = x
+        ly = y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
 If dr Then Me.mousepointer = 0
 dr = False
 End Sub
@@ -527,13 +527,13 @@ Private Sub gList1_CtrlPlusF1()
 FlipList
 End Sub
 
-Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+Private Sub glist1_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 
 Static doubleclick As Long
 
 If mySelector.IamBusy Then Exit Sub
 If item = -1 Then
-    If Button = 1 And X > gList1.WidthPixels - setupxy And Y < setupxy Then
+    If Button = 1 And x > gList1.WidthPixels - setupxy And y < setupxy Then
     doubleclick = doubleclick + 1
       If doubleclick > 1 Then
       doubleclick = 0
@@ -609,7 +609,7 @@ End Sub
 
 
 
-Private Sub gList1_ScrollSelected(item As Long, Y As Long)
+Private Sub gList1_ScrollSelected(item As Long, y As Long)
 ShearchList = vbNullString
 End Sub
 
@@ -684,8 +684,8 @@ Set LastGlist = Nothing
 If Err.Number > 0 Then gList1.NoWheel = True
 End Sub
 
-Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
-If gList2.DoubleClickCheck(Button, item, X, Y, CLng(setupxy) / 2, CLng(setupxy) / 2, CLng(setupxy) / 2, -1) Then
+Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+If gList2.DoubleClickCheck(Button, item, x, y, CLng(setupxy) / 2, CLng(setupxy) / 2, CLng(setupxy) / 2, -1) Then
                       mySelector.AbordAll
                       Unload Me
 End If
@@ -710,7 +710,7 @@ End Sub
 
 
 
-Private Sub gList2_MouseUp(X As Single, Y As Single)
+Private Sub gList2_MouseUp(x As Single, y As Single)
             If mySelector.myDir2 Is Nothing Then Exit Sub
             If Not LastActive Is Nothing Then
             If LastActive.enabled Then
@@ -738,7 +738,7 @@ Set LastActive = gList3
 End Sub
 
 
-Private Sub glist3_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+Private Sub glist3_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 If gList3.EditFlag Then Exit Sub
     If gList3.list(0) = vbNullString Then
     gList3.backcolor = &H808080
@@ -773,7 +773,7 @@ If NewFolder Then
 If Not (gList1.ListIndex = -1) Then
 gList1.ListIndex = -1
 gList1.ShowMe2
-gList3.clear
+gList3.Clear
 gList3.SelStart = 1
 TEXT1 = "NewFolder"
 End If
@@ -783,12 +783,12 @@ End If
 gList3.EditFlag = True
 gList3.NoCaretShow = False
 gList3.backcolor = &H0
-gList3.ForeColor = &HFFFFFF
+gList3.forecolor = &HFFFFFF
 ElseIf Not FileExist Then
 If Not (gList1.ListIndex = -1) Then
 gList1.ListIndex = -1
 gList1.ShowMe2
-gList3.clear
+gList3.Clear
 gList3.SelStart = 1
 If UserFileName <> "" Then
 TEXT1 = UserFileName
@@ -802,7 +802,7 @@ End If
 gList3.EditFlag = True
 gList3.NoCaretShow = False
 gList3.backcolor = &H0
-gList3.ForeColor = &HFFFFFF
+gList3.forecolor = &HFFFFFF
 Else
 If KeyCode = vbKeyReturn Then
 GoTo here
@@ -891,7 +891,7 @@ End If
 
 gList3.LeftMarginPixels = 8
 gList3.backcolor = &H808080
-gList3.ForeColor = &HE0E0E0
+gList3.forecolor = &HE0E0E0
 gList3.EditFlag = False
 gList3.NoCaretShow = True
 
@@ -909,7 +909,7 @@ End If
 gList3.EditFlag = True
 gList3.NoCaretShow = False
 gList3.backcolor = &H0
-gList3.ForeColor = &HFFFFFF
+gList3.forecolor = &HFFFFFF
 ElseIf Not FileExist Then
 If Not (gList1.ListIndex = -1) Then
 gList1.ListIndex = -1
@@ -926,7 +926,7 @@ End If
 gList3.EditFlag = True
 gList3.NoCaretShow = False
 gList3.backcolor = &H0
-gList3.ForeColor = &HFFFFFF
+gList3.forecolor = &HFFFFFF
 End If
 End If
 gList3.ShowMe2
@@ -944,7 +944,7 @@ Private Sub mySelector_NewHeadline(newpath As String)
 If firstpath = 0 Then
 Else
 If Not SaveDialog Then TEXT1 = vbNullString
- Line (0, 0)-(ScaleWidth - dv15, ScaleHeight - dv15), Me.backcolor, BF
+ Line (0, 0)-(Scalewidth - dv15, Scaleheight - dv15), Me.backcolor, BF
 
 Set LoadApicture = LoadPicture("")
 End If
@@ -981,11 +981,11 @@ Static ihave As Boolean
 If ihave Then Exit Sub
 mySelector.glistN.enabled = False
 ' read ratio
- Line (0, 0)-(ScaleWidth - dv15, ScaleHeight - dv15), Me.backcolor, BF
+ Line (0, 0)-(Scalewidth - dv15, Scaleheight - dv15), Me.backcolor, BF
 
 Set LoadApicture = LoadPicture("")
 On Error Resume Next
-Err.clear
+Err.Clear
 'If FileLen(file) > 1500000 Then Image1.refresh
     s$ = CFname(file)
     Set aPic = LoadMyPicture(GetDosPath(s$), True, gList2.backcolor)
@@ -994,7 +994,7 @@ Err.clear
         Set aImage = aPic
         If file = vbNullString Or Err.Number > 0 Then Exit Sub
         ihave = True
-        Line (0, 0)-(ScaleWidth - dv15, ScaleHeight - dv15), Me.backcolor, BF
+        Line (0, 0)-(Scalewidth - dv15, Scaleheight - dv15), Me.backcolor, BF
 
         Set LoadApicture = aPic
 Refresh
@@ -1004,7 +1004,7 @@ mySelector.glistN.enabled = True
 ihave = False
 End If
 End If
-Err.clear
+Err.Clear
 End Sub
 
 
@@ -1187,10 +1187,10 @@ allheight = bordertop + heightTop + bordertop + heightSelector + bordertop + Hei
 
 End If
 
-Move Left, top, allwidth, allheight
-gList2.Move borderleft, bordertop, itemWidth, heightTop
-gList1.Move borderleft, 2 * bordertop + heightTop, itemWidth, heightSelector
-gList3.Move borderleft, allheight - HeightBottom - bordertop, itemWidth, HeightBottom
+move Left, top, allwidth, allheight
+gList2.move borderleft, bordertop, itemWidth, heightTop
+gList1.move borderleft, 2 * bordertop + heightTop, itemWidth, heightSelector
+gList3.move borderleft, allheight - HeightBottom - bordertop, itemWidth, HeightBottom
 
 If iwidth = 0 Then iwidth = itemWidth
 If iheight = 0 Then iheight = HeightPreview
@@ -1206,7 +1206,7 @@ iLeft = borderleft
 iTop = 3 * bordertop + heightTop + heightSelector
 iwidth = itemWidth
 iheight = HeightPreview
- Line (0, 0)-(ScaleWidth - dv15, ScaleHeight - dv15), Me.backcolor, BF
+ Line (0, 0)-(Scalewidth - dv15, Scaleheight - dv15), Me.backcolor, BF
 If (curIwidth / iwidth) < (curIheight / iheight) Then
 sc = curIheight / iheight
 ImageMove Image1, iLeft + (iwidth - curIwidth / sc) / 2, iTop, curIwidth / sc, iheight

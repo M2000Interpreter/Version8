@@ -36,7 +36,7 @@ End If
 test = m.WindowState
 If Err Then
 Debug.Assert (InIDECheck = True)
-m.Run "start"
+m.run "start"
 m.StackMax -12345
 a$ = commandW
 If Trim$(a$) = "-h" Or Trim$(a$) = "/?" Then frmAbout.Show 1: ExitNow = True: Exit Sub
@@ -50,9 +50,10 @@ Exit Sub
 Else
 m.getform f
 Debug.Assert (InIDECheck = True)
-m.Run "start"
+m.run "start"
 m.StackMax -12345
 a$ = commandW
+
 If Trim$(a$) = "-h" Or Trim$(a$) = "/?" Then frmAbout.Show 1: ExitNow = True: Exit Sub
 If m.Status = 0 Then
 Set f.mm = Me

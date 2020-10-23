@@ -9,15 +9,15 @@ Private Declare Sub PutMem2 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As 
           lpszOutput As String
       End Type
             Private Declare Function StartDoc Lib "gdi32" Alias "StartDocA" _
-          (ByVal hDC As Long, lpdi As DOCINFO) As Long
+          (ByVal Hdc As Long, lpdi As DOCINFO) As Long
 
-      Private Declare Function StartPage Lib "gdi32" (ByVal hDC As Long) _
+      Private Declare Function StartPage Lib "gdi32" (ByVal Hdc As Long) _
           As Long
 
-      Private Declare Function EndDoc Lib "gdi32" (ByVal hDC As Long) _
+      Private Declare Function EndDoc Lib "gdi32" (ByVal Hdc As Long) _
           As Long
 
-      Private Declare Function EndPage Lib "gdi32" (ByVal hDC As Long) _
+      Private Declare Function EndPage Lib "gdi32" (ByVal Hdc As Long) _
           As Long
 Private mp_hdc As Long
 Public MyDM() As Byte
@@ -30,10 +30,10 @@ Private Const PHYSICALWIDTH As Long = 110
 Private Const LOGPIXELSX = 88
 Private Const LOGPIXELSY = 90
 
-Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal hDC As Long, ByVal iCapabilitiy As Long) As Long
+Private Declare Function GetDeviceCaps Lib "gdi32" (ByVal Hdc As Long, ByVal iCapabilitiy As Long) As Long
 
       Private Declare Function ResetDC Lib "gdi32" Alias "ResetDCA" _
-          (ByVal hDC As Long, lpInitData As Any) As Long
+          (ByVal Hdc As Long, lpInitData As Any) As Long
 Private Declare Function CreateIC Lib "gdi32" Alias "CreateICA" _
           (ByVal lpDriverName As String, ByVal lpDeviceName As String, _
           ByVal lpOutput As String, lpInitData As Any) As Long
@@ -44,7 +44,7 @@ Private Declare Function CreateIC Lib "gdi32" Alias "CreateICA" _
       Private Declare Function CreateDC Lib "gdi32" Alias "CreateDCA" _
           (ByVal lpDriverName As String, ByVal lpDeviceName As String, _
           ByVal lpOutput As Long, lpInitData As Any) As Long
-      Private Declare Function DeleteDC Lib "gdi32" (ByVal hDC As Long) _
+      Private Declare Function DeleteDC Lib "gdi32" (ByVal Hdc As Long) _
           As Long
       Private Const NULLPTR = 0&
       ' Constants for DEVMODE
@@ -137,12 +137,12 @@ End Type
       Private Declare Function ClosePrinter Lib "winspool.drv" _
       (ByVal hPrinter As Long) As Long
 
-      Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" _
+      Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
-      Private Declare Function GlobalLock Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalUnlock Lib "KERNEL32" (ByVal hMem As Long) As Long
-Private Declare Function GlobalAlloc Lib "KERNEL32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
-Private Declare Function GlobalFree Lib "KERNEL32" (ByVal hMem As Long) As Long
+      Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalUnlock Lib "kernel32" (ByVal hMem As Long) As Long
+Private Declare Function GlobalAlloc Lib "kernel32" (ByVal wFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function GlobalFree Lib "kernel32" (ByVal hMem As Long) As Long
 Const GMEM_MOVEABLE = &H2
 Const GMEM_ZEROINIT = &H40
 
@@ -351,7 +351,7 @@ Dim b As Object
 Set b = CreateObject("wscript.shell")
 EXT = "." & Replace(UCase(EXT), ".", "")
 If FileName = vbNullString Then Exit Sub
-b.regwrite "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\" & ExtractNameOnly(FileName), FileName
+b.regwrite "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\" & ExtractNameOnly(FileName, True), FileName
 b.regwrite "HKCR\" & EXT & "\", FileType
 b.regwrite "HKCR\" & FileType & "\", EXT & " M2000 file"  'EXT & "_auto_file"
 b.regwrite "HKCR\" & FileType & "\DefaultIcon\", FileName & ",0"
@@ -374,7 +374,7 @@ Dim b As Object
 Set b = CreateObject("wscript.shell")
 EXT = "." & Replace$(EXT, ".", "")
 If FileName = vbNullString Then Exit Sub
-b.regdelete "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\" & ExtractNameOnly(FileName)
+b.regdelete "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\" & ExtractNameOnly(FileName, True)
 b.regdelete "HKCR\" & EXT & "\" ', FileType
 b.regdelete "HKCR\" & FileType & "\shell\open\command\" ', Filename & " ""&l"" "
 b.regdelete "HKCR\" & FileType & "\DefaultIcon\" ', Filename & ",0"

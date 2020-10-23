@@ -57,19 +57,19 @@ Private Const QS_ALLINPUT& = (QS_SENDMESSAGE _
                             Or QS_HOTKEY _
                             Or QS_KEY)
 
-Private Declare Function CreateWaitableTimer Lib "KERNEL32" _
+Private Declare Function CreateWaitableTimer Lib "kernel32" _
     Alias "CreateWaitableTimerA" ( _
     ByVal lpSemaphoreAttributes As Long, _
     ByVal bManualReset As Long, _
     ByVal lpName As String) As Long
     
-Private Declare Function OpenWaitableTimer Lib "KERNEL32" _
+Private Declare Function OpenWaitableTimer Lib "kernel32" _
     Alias "OpenWaitableTimerA" ( _
     ByVal dwDesiredAccess As Long, _
     ByVal bInheritHandle As Long, _
     ByVal lpName As String) As Long
     
-Private Declare Function SetWaitableTimer Lib "KERNEL32" ( _
+Private Declare Function SetWaitableTimer Lib "kernel32" ( _
     ByVal hTimer As Long, _
     lpDueTime As FILETIME, _
     ByVal lPeriod As Long, _
@@ -77,13 +77,13 @@ Private Declare Function SetWaitableTimer Lib "KERNEL32" ( _
     ByVal lpArgToCompletionRoutine As Long, _
     ByVal fResume As Long) As Long
     
-Private Declare Function CancelWaitableTimer Lib "KERNEL32" ( _
+Private Declare Function CancelWaitableTimer Lib "kernel32" ( _
     ByVal hTimer As Long)
     
-Private Declare Function CloseHandle Lib "KERNEL32" ( _
+Private Declare Function CloseHandle Lib "kernel32" ( _
     ByVal hObject As Long) As Long
     
-Private Declare Function WaitForSingleObject Lib "KERNEL32" ( _
+Private Declare Function WaitForSingleObject Lib "kernel32" ( _
     ByVal hHandle As Long, _
     ByVal dwMilliseconds As Long) As Long
     
@@ -94,22 +94,22 @@ Private Declare Function MsgWaitForMultipleObjects Lib "user32" ( _
     ByVal dwMilliseconds As Long, _
     ByVal dwWakeMask As Long) As Long
 ''DoEvents alternative function.
-Private Declare Function FlushInstructionCache Lib "KERNEL32" (ByVal hProcess As Long, lpBaseAddress As Any, ByVal dwSize As Long) As Long
-Private Declare Function HeapAlloc Lib "KERNEL32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal dwBytes As Long) As Long
+Private Declare Function FlushInstructionCache Lib "kernel32" (ByVal hProcess As Long, lpBaseAddress As Any, ByVal dwSize As Long) As Long
+Private Declare Function HeapAlloc Lib "kernel32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal dwBytes As Long) As Long
 Private Declare Function HeapReAlloc Lib "kernel32.dll" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long, ByVal dwBytes As Long) As Long
 Private Declare Function HeapSize Lib "kernel32.dll" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long) As Long
-Private Declare Function HeapFree Lib "KERNEL32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long) As Long
-Private Declare Function GetProcessHeap Lib "KERNEL32" () As Long
-Private Declare Function VirtualAlloc Lib "KERNEL32" (ByVal lpAddress As Long, ByVal dwSize As Long, ByVal flAllocationType As Long, ByVal flProtect As Long) As Long
-Private Declare Function VirtualFree Lib "KERNEL32" (ByVal lpAddress As Long, ByVal dwSize As Long, ByVal dwFreeType As Long) As Long
-Private Declare Function VirtualLock Lib "KERNEL32" (ByVal lpAddress As Long, ByVal dwSize As Long) As Long
-Private Declare Function VirtualUnlock Lib "KERNEL32" (ByVal lpAddress As Long, ByVal dwSize As Long) As Long
-Private Declare Function VirtualProtect Lib "KERNEL32" (ByVal lpAddress As Long, ByVal dwSize As Long, ByVal flNewProtect As Long, lpflOldProtect As Long) As Long
+Private Declare Function HeapFree Lib "kernel32" (ByVal hHeap As Long, ByVal dwFlags As Long, ByVal lpMem As Long) As Long
+Private Declare Function GetProcessHeap Lib "kernel32" () As Long
+Private Declare Function VirtualAlloc Lib "kernel32" (ByVal lpAddress As Long, ByVal dwSize As Long, ByVal flAllocationType As Long, ByVal flProtect As Long) As Long
+Private Declare Function VirtualFree Lib "kernel32" (ByVal lpAddress As Long, ByVal dwSize As Long, ByVal dwFreeType As Long) As Long
+Private Declare Function VirtualLock Lib "kernel32" (ByVal lpAddress As Long, ByVal dwSize As Long) As Long
+Private Declare Function VirtualUnlock Lib "kernel32" (ByVal lpAddress As Long, ByVal dwSize As Long) As Long
+Private Declare Function VirtualProtect Lib "kernel32" (ByVal lpAddress As Long, ByVal dwSize As Long, ByVal flNewProtect As Long, lpflOldProtect As Long) As Long
 Public Declare Function Wow64EnableWow64FsRedirection Lib "kernel32.dll" (ByVal Enable As Boolean) As Boolean
-Private Declare Function GetProcAddress Lib "KERNEL32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
-Private Declare Function GetModuleHandle Lib "KERNEL32" Alias "GetModuleHandleA" (ByVal lpModuleName As String) As Long
-Private Declare Function GetCurrentProcess Lib "KERNEL32" () As Long
-Private Declare Function IsWow64Process Lib "KERNEL32" (ByVal hProc As Long, bWow64Process As Boolean) As Long
+Private Declare Function GetProcAddress Lib "kernel32" (ByVal hModule As Long, ByVal lpProcName As String) As Long
+Private Declare Function GetModuleHandle Lib "kernel32" Alias "GetModuleHandleA" (ByVal lpModuleName As String) As Long
+Private Declare Function GetCurrentProcess Lib "kernel32" () As Long
+Private Declare Function IsWow64Process Lib "kernel32" (ByVal hProc As Long, bWow64Process As Boolean) As Long
 Private Declare Function GetForegroundWindow Lib "user32" () As Long
     
 
@@ -160,8 +160,8 @@ Public Function BlockSize(ByVal Ptr As Long) As Long
 End Function
 Public Sub BlockFree(ByVal Ptr As Long)
 
-    HeapFree GetProcessHeap(), 0, Ptr
-
+  '  Debug.Print HeapFree(GetProcessHeap(), 0, Ptr)
+        HeapFree GetProcessHeap(), 0, Ptr
 End Sub
 Public Sub SetUpForExecution(ByVal Ptr As Long, ByVal nBytes As Long)
         FlushInstructionCache GetCurrentProcess, Ptr, nBytes
@@ -682,7 +682,7 @@ End If
 
                         If Not handlepopup Then
                             If Screen.ActiveForm.PopUpMenuVal Then
-                            lastpopup = Screen.ActiveForm.hdc
+                            lastpopup = Screen.ActiveForm.Hdc
                             handlepopup = True
                             End If
                        ElseIf GetForegroundWindow <> Screen.ActiveForm.hWnd Then
@@ -706,7 +706,7 @@ Sub SetVisibleByHDC(whatHDC As Long, setit As Long)
 Dim k As Form
 On Error Resume Next
 For Each k In Forms
-    If k.hdc = whatHDC Then k.Visible = setit
+    If k.Hdc = whatHDC Then k.Visible = setit
 Next k
 
 End Sub

@@ -1,5 +1,5 @@
 Type=Exe
-Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\Windows\system32\stdole2.tlb#OLE Automation
+Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\Windows\SysWOW64\stdole2.tlb#OLE Automation
 Module=Module1; mexe.bas
 Form=frmAbout.frm
 Class=cFIE; clsFIE.cls
@@ -10,7 +10,7 @@ Startup="Sub Main"
 HelpFile=""
 Title="mexe"
 ExeName32="m2000.exe"
-Command32=""
+Command32="/c"
 Name="m2000exe"
 HelpContextID="0"
 CompatibleMode="0"

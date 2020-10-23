@@ -103,6 +103,14 @@ Private Type TOKEN_PRIVILEGES
     LuidHighPart    As Long
     Attributes      As Long
 End Type
+Private Declare Function OpenProcess Lib "kernel32" _
+  (ByVal dwDesiredAccess As Long, _
+   ByVal bInheritHandle As Long, _
+   ByVal dwProcessId As Long) As Long
+   
+Private Declare Function WaitForSingleObject Lib "kernel32" _
+  (ByVal hHandle As Long, _
+   ByVal dwMilliseconds As Long) As Long
 
 Private Declare Function GetLocaleInfo Lib "kernel32.dll" Alias "GetLocaleInfoW" (ByVal lcid As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
 Private Declare Function GetUserDefaultUILanguage Lib "kernel32.dll" () As Long
@@ -761,12 +769,12 @@ ErrorHandler:
     If psidGuest Then FreeSid psidGuest
 End Function
 
-Function GetCurrentProcessSID() As String
+Function GetCurrentProcessSID(Optional hProcess As Long = 0) As String
     On Error GoTo ErrorHandler
 
     Const TokenUser As Long = 1&
         
-    Dim hProcess As Long, hProcessToken As Long, tkUser As SID_AND_ATTRIBUTES, dwSize As Long, sSID As String, psSID As Long
+    Dim hProcessToken As Long, tkUser As SID_AND_ATTRIBUTES, dwSize As Long, sSID As String, psSID As Long
 
     If hProcess = 0 Then hProcess = GetCurrentProcess()
     If 0 = OpenProcessToken(hProcess, TOKEN_QUERY, hProcessToken) Then Exit Function
@@ -1622,3 +1630,9 @@ Friend Function ErrorMsg(ByVal ErrObj As ErrObject, ParamArray CodeModule())
     Debug.Print " - " & Now() & " # " & ErrObj.Number & " (" & Err.Description & "), (" & Err.LastDllError & "), " & Other
 End Function
 
+Function IsRunning(hProcess As Long) As Long
+Dim hProc As Long
+hProc = OpenProcess(&H800, True, hProcess)
+IsRunning = hProc <> 0
+If hProc Then CloseHandle hProc
+End Function

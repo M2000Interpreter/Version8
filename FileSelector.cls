@@ -24,7 +24,7 @@ Attribute mDoc1.VB_VarHelpID = -1
 Public TEXT1 As myTextBox
 Attribute TEXT1.VB_VarHelpID = -1
 Public Mydir As recDir
-Private path$
+Private Path$
 Event TraceFile(file$)
 Event doubleclick(file$)
 Event controlmenu(check As Boolean)
@@ -42,8 +42,8 @@ Private mNostateDir As Boolean
 Private mselectedFile As String
 Dim filetypes As String
 Dim ReturnFile As String
-Private Declare Function GetDriveType Lib "KERNEL32" Alias "GetDriveTypeA" (ByVal nDrive As String) As Long
-Private Declare Function GetVolumeInformation Lib "KERNEL32" Alias "GetVolumeInformationA" (ByVal lpRootPathName As String, ByVal lpVolumeNameBuffer As String, ByVal nVolumeNameSize As Long, lpVolumeSerialNumber As Long, lpMaximumComponentLength As Long, lpFileSystemFlags As Long, ByVal lpFileSystemNameBuffer As String, ByVal nFileSystemNameSize As Long) As Long
+Private Declare Function GetDriveType Lib "kernel32" Alias "GetDriveTypeA" (ByVal nDrive As String) As Long
+Private Declare Function GetVolumeInformation Lib "kernel32" Alias "GetVolumeInformationA" (ByVal lpRootPathName As String, ByVal lpVolumeNameBuffer As String, ByVal nVolumeNameSize As Long, lpVolumeSerialNumber As Long, lpMaximumComponentLength As Long, lpFileSystemFlags As Long, ByVal lpFileSystemNameBuffer As String, ByVal nFileSystemNameSize As Long) As Long
 Private Declare Function CopyFromLParamToRect Lib "user32" Alias "CopyRect" (lpDestRect As RECT, ByVal lpSourceRect As Long) As Long
 Private Text1Dir As String
 Private topoffsetpixel As Long
@@ -51,7 +51,7 @@ Private topoffsetpixel As Long
 Property Let SortType(ByVal RHS As Long)
 If Not Mydir.SortType = RHS Then
 Mydir.SortType = RHS
-If path$ <> "" Then reload
+If Path$ <> "" Then reload
 End If
 End Property
 
@@ -61,8 +61,8 @@ End Property
 Property Let FilePath(RHS As String)
 Dim first As String
 glistN.enabled = False
-If RHS = vbNullString Or Not (path$ = RHS) Then
-path$ = RHS
+If RHS = vbNullString Or Not (Path$ = RHS) Then
+Path$ = RHS
 mDoc1.textDoc = RHS
 ''glistN.AddPixels = 10
 If Not NoHeadLine Then
@@ -85,7 +85,7 @@ End If
 
 End Property
 Property Get FilePath() As String
-FilePath = path$
+FilePath = Path$
 End Property
 Private Sub Class_Initialize()
 Set Mydir = New recDir
@@ -95,7 +95,7 @@ End Sub
 
 Private Sub glistN_BlockCaret(item As Long, blockme As Boolean, skipme As Boolean)
 If Not NostateDir Then
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 If item >= 0 Then
 If (Mydir.ReadLevel(item) - 1) > 0 Then
 blockme = True
@@ -191,7 +191,7 @@ End If
 ElseIf Not glistN.ListSep(item - 1) Then
 If Left$(Mydir.list(item - 1), 1) = Chr$(2) Then
 'Caption = Mid$(Mydir.List(item - 1), 2)
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 If netdisplay And item > LastItemCount Then
 If Mid$(Mydir.list(item - 1), 2, 1) = "(" Then
 TEXT1 = FindNetworkFolderPath(Mid$(Mydir.list(item - 1), 2))
@@ -219,7 +219,7 @@ Else
     If recnowchecked Then
   RaiseEvent TraceFile(Mydir.FindFolder(item - 1) + Mydir.list(item - 1))
     Else
-    RaiseEvent TraceFile(Mydir.path + Mydir.list(item - 1))
+    RaiseEvent TraceFile(Mydir.Path + Mydir.list(item - 1))
     End If
 End If
 End If
@@ -242,7 +242,7 @@ End If
 Else
 If Left$(Mydir.list(item - 1), 1) = Chr$(2) Then
 'Caption = Mid$(Mydir.List(item - 1), 2)
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 If netdisplay And item > LastItemCount Then
 
 If Mid$(Mydir.list(item - 1), 2, 1) = "(" Then
@@ -272,8 +272,8 @@ Else
   RaiseEvent TraceFile(Mydir.FindFolder(item - 1) + Mydir.list(item - 1))
   ' Text1 = Mydir.List(item - 1)
     Else
-    Text1Dir = Mydir.path + Mydir.list(item - 1)
-    RaiseEvent TraceFile(Mydir.path + Mydir.list(item - 1))
+    Text1Dir = Mydir.Path + Mydir.list(item - 1)
+    RaiseEvent TraceFile(Mydir.Path + Mydir.list(item - 1))
     ' Text1 = Mydir.List(item - 1)
     End If
 End If
@@ -327,17 +327,17 @@ If recnow3checked Then myDir2.LevelStop = 3
 If Mydir.list(item) = "..." Then
 
 If GetPath <> "" Then
-If Len(Mydir.path) < 4 Or (ExtractPath(ExtractPath(Mydir.path, False), , True) = vbNullString) Then
-path$ = vbNullString
+If Len(Mydir.Path) < 4 Or (ExtractPath(ExtractPath(Mydir.Path, False), , True) = vbNullString) Then
+Path$ = vbNullString
 Else
             If Right$(GetPath, 1) = "\" Then
-            path$ = Mydir.ExtractPath(Left$(GetPath, Len(GetPath) - 1))
+            Path$ = Mydir.ExtractPath(Left$(GetPath, Len(GetPath) - 1))
             Else
-            path$ = Mydir.ExtractPath(GetPath)
+            Path$ = Mydir.ExtractPath(GetPath)
             
             End If
 End If
-anystr = myDir2.Dir2(path$, filetypes, recnowchecked)
+anystr = myDir2.Dir2(Path$, filetypes, recnowchecked)
 End If
 ElseIf Left$(Mydir.list(item), 1) = Chr$(2) Then
 myDir2.IncludedFolders = True
@@ -349,19 +349,19 @@ End If
 Else
 
 If recnowchecked Then
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 TEXT1 = Mid$(Mydir.list(item), 2)
 Else
 TEXT1 = Mydir.FindFolder(item) + Mydir.list(item)
 End If
   RaiseEvent doubleclick(Mydir.FindFolder(item) + Mydir.list(item))
 Else
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 TEXT1 = Mid$(Mydir.list(item), 2)
 Else
 TEXT1 = Mydir.list(item)
 End If
- RaiseEvent doubleclick(Mydir.path + Mydir.list(item))
+ RaiseEvent doubleclick(Mydir.Path + Mydir.list(item))
 End If
 
 skipselected2 = False
@@ -371,8 +371,8 @@ If skipselected2 Then glistN.ShowMe2
 End If
 End Sub
 
- Private Sub PrintItem(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_NOPREFIX Or DT_NOCLIP)
-    DrawText mHdc, StrPtr(c), -1, r, way
+ Private Sub PrintItem(mHdc As Long, c As String, R As RECT, Optional way As Long = DT_NOPREFIX Or DT_NOCLIP)
+    DrawText mHdc, StrPtr(c), -1, R, way
     End Sub
 Public Property Get HeadLinesNum() As Long
 HeadLinesNum = mDoc1.DocLines
@@ -418,7 +418,7 @@ ElseIf Left$(Mydir.list(item), 1) = Chr$(2) Then
             FillBack thisHDC, b, &H999999
             SetTextColor thisHDC, &HDDDDDD 'glistN.ForeColor
         End If
-        If Mydir.path = vbNullString Then
+        If Mydir.Path = vbNullString Then
             a.Left = a.Left + 1
         If (Mydir.ReadLevel(item) - 1) > 0 Then SetTextColor thisHDC, &H666666 ' &H999999
             PrintItem thisHDC, Mid$(Mydir.list(item), 2), a
@@ -454,7 +454,7 @@ Else
             If Mydir.ReadMark(item) And multifileselection Then
                 FillBack thisHDC, b, &HAA
             End If
-            SetTextColor thisHDC, glistN.ForeColor
+            SetTextColor thisHDC, glistN.forecolor
             b.top = b.Bottom - 1
             FillBack thisHDC, b, 0
     End If
@@ -465,8 +465,8 @@ End If
 skip = True
 End If
 End Sub
-Private Sub gListN_SpecialColor(rgbcolor As Long)
-rgbcolor = &HF0F0FF
+Private Sub gListN_SpecialColor(RGBcolor As Long)
+RGBcolor = &HF0F0FF
 End Sub
 
 
@@ -487,7 +487,7 @@ Else
     If recnowchecked Then
   RaiseEvent TraceFile(Mydir.FindFolder(item - 1) + Mydir.list(item - 1))
     Else
-    RaiseEvent TraceFile(Mydir.path + Mydir.list(item - 1))
+    RaiseEvent TraceFile(Mydir.Path + Mydir.list(item - 1))
     End If
 End If
 End If
@@ -516,11 +516,11 @@ End If
 End If
 End Sub
 
-Private Sub mDoc1_BreakLine(data As String, datanext As String)
+Private Sub mDoc1_BreakLine(Data As String, datanext As String)
 If PreserveNpixelsHeaderRight > 0 Then
-glistN.BreakLine data, datanext, glistN.Pixels2Twips(PreserveNpixelsHeaderRight)
+glistN.BreakLine Data, datanext, glistN.Pixels2Twips(PreserveNpixelsHeaderRight)
 Else
-glistN.BreakLine data, datanext
+glistN.BreakLine Data, datanext
 End If
 End Sub
 Sub disablemenu(Optional DIS As Boolean = False)
@@ -541,7 +541,7 @@ myDir2.SortType = Mydir.SortType
 myDir2.TopFolder = Mydir.TopFolder
 If recnow3checked Then myDir2.LevelStop = 3 Else myDir2.LevelStop = 0
 
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 anystr = myDir2.Dir2("", filetypes, recnowchecked)
 Else
 anystr = myDir2.Dir2(GetPath, filetypes, recnowchecked)
@@ -584,7 +584,7 @@ fakeitemcount = Mydir.listcount
 LastItemCount = fakeitemcount
 glistN.ShowMe
 netdisplay = False
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 SetPath "My Computer"
 If Not IsWine Then
 netdisplay = True
@@ -595,16 +595,16 @@ fakeitemcount = fakeitemcount + 1
 Wend
 End If
 Else
-SetPath Mydir.path
+SetPath Mydir.Path
 End If
 'If NoHeadLine Then  change mind...is better to inform for the change
-RaiseEvent NewHeadline(Mydir.path)
+RaiseEvent NewHeadline(Mydir.Path)
 
 glistN.CalcAndShowBar
 glistN.enabled = True
 glistN.ShowMe2
 If Mydir.Nofiles Then
-If Mydir.path = vbNullString Then
+If Mydir.Path = vbNullString Then
 TEXT1 = vbNullString
 Else
 TEXT1 = SelectFolderButton
@@ -641,8 +641,8 @@ disablemenu True
 
 glistN.ShowMe
 End Sub
-Function DriveType(path$) As String
-    Select Case GetDriveType(Left(path$, 1))
+Function DriveType(Path$) As String
+    Select Case GetDriveType(Left(Path$, 1))
         Case 0
             DriveType = "Non-Recognized Drive"
         Case 1
@@ -661,20 +661,20 @@ Function DriveType(path$) As String
             DriveType = "Non-Recognized Drive"
     End Select
 End Function
-Function DriveSerial(ByVal path$) As Long
+Function DriveSerial(ByVal Path$) As Long
 ' need trailing slash
-    Dim Serial As Long, VName As String, FSName As String
-    VName = String$(255, Chr$(0))
+    Dim Serial As Long, Vname As String, FSName As String
+    Vname = String$(255, Chr$(0))
     FSName = String$(255, Chr$(0))
-    GetVolumeInformation path$, VName, 255, Serial, 0, 0, FSName, 255
+    GetVolumeInformation Path$, Vname, 255, Serial, 0, 0, FSName, 255
     DriveSerial = Serial
 End Function
-Function WeCanWrite(ByVal path$) As Boolean
+Function WeCanWrite(ByVal Path$) As Boolean
 ' need trailing slash
-    Dim Serial As Long, VName As String, FSName As String, SystemFlags As Long
-    VName = String$(255, Chr$(0))
+    Dim Serial As Long, Vname As String, FSName As String, SystemFlags As Long
+    Vname = String$(255, Chr$(0))
     FSName = String$(255, Chr$(0))
-    GetVolumeInformation path$, VName, 255, 0, 0, SystemFlags, FSName, 255
+    GetVolumeInformation Path$, Vname, 255, 0, 0, SystemFlags, FSName, 255
     WeCanWrite = (SystemFlags And &H80000) = 0
 End Function
 
@@ -695,7 +695,7 @@ End Sub
 
 Public Property Get selectedFile() As String
 If Text1Dir <> "" Then ReturnFile = Text1Dir  ' this is with path
-If ReturnFile = vbNullString Then ReturnFile = Mydir.path + mselectedFile ' this is without path
+If ReturnFile = vbNullString Then ReturnFile = Mydir.Path + mselectedFile ' this is without path
 selectedFile = ReturnFile
 
 End Property
