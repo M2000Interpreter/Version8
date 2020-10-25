@@ -22,7 +22,27 @@ Public UseStruct As Boolean
 Private mExecBloc As Boolean
 Private Strings As LongHash
 Private BasicItem As Integer
+Private Type METAFILEPICT
+    mm As Long
+    xExt As Long
+    yExt As Long
+    hmf As Long
+End Type
+Private Type PWMFRect16
+    Left   As Integer
+    top    As Integer
+    Right  As Integer
+    Bottom As Integer
+End Type
 
+Private Type wmfPlaceableFileHeader
+    Key         As Long
+    hmf         As Integer
+    BoundingBox As PWMFRect16
+    Inch        As Integer
+    reserved    As Long
+    CheckSum    As Integer
+End Type
 Private Type SAFEARRAYBOUND
     cElements As Long
     lLBound As Long
@@ -40,10 +60,13 @@ Private Width As Long, Height As Long, mSubtype As Long
 ' mSubtype = 1 Bitmap/Png
 ' mSubtype = 2 Emf
 ' mSubtype = 3 Wmf
+Private Declare Function SetWinMetaFileBits Lib "gdi32" (ByVal cbBuffer As Long, lpbBuffer As Byte, ByVal hDCRef As Long, lpmfp As Any) As Long
+Private Declare Function GetMetaFileBitsEx Lib "gdi32" (ByVal hmf As Long, ByVal nSize As Long, lpvData As Any) As Long
+Private Declare Function SetMetaFileBitsEx Lib "gdi32" (ByVal nSize As Long, lpData As Byte) As Long
 
-Private Declare Function GetEnhMetaFileHeader Lib "gdi32" (ByVal hMf As Long, ByVal cbBuffer As Long, lpemh As Any) As Long
+Private Declare Function GetEnhMetaFileHeader Lib "gdi32" (ByVal hmf As Long, ByVal cbBuffer As Long, lpemh As Any) As Long
 Private Declare Function VarPtrArray Lib "msvbvm60.dll" Alias "VarPtr" (Ptr() As Any) As Long
-Private Declare Function SetMetaFileBitsEx Lib "gdi32" (ByVal nSize As Long, lpData As Any) As Long
+
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
  Private Declare Function GlobalLock Lib "kernel32" (ByVal hMem As Long) As Long
@@ -55,7 +78,7 @@ Private Declare Function CloseClipboard Lib "user32" () As Long
 Private Declare Function SetClipboardData Lib "user32" (ByVal wFormat As Long, ByVal hMem As Long) As Long
 Private Declare Function EmptyClipboard Lib "user32" () As Long
 Private Declare Function SetEnhMetaFileBits Lib "gdi32" (ByVal cbBuffer As Long, lpData As Any) As Long
-Private Declare Function GetEnhMetaFileBits Lib "gdi32" (ByVal hMf As Long, ByVal nSize As Long, lpvData As Any) As Long
+Private Declare Function GetEnhMetaFileBits Lib "gdi32" (ByVal hmf As Long, ByVal nSize As Long, lpvData As Any) As Long
 Private Declare Function CopyEnhMetaFile Lib "gdi32.dll" Alias "CopyEnhMetaFileW" (ByVal hemfSrc As Long, lpszFile As Long) As Long
 Private Declare Function IsClipboardFormatAvailable Lib "user32" (ByVal wFormat As Long) As Long
 Private Declare Function DeleteEnhMetaFile Lib "gdi32" (ByVal hEmf As Long) As Long
@@ -398,7 +421,7 @@ there:
 End If
         
 End Function
-Private Function GetStdPicture1(Optional Width As Long = -1, Optional Height As Long = -1, Optional ByVal backcolor As Long = vbWhite, Optional RetainRatio As Boolean = False, Optional bitmap As Boolean = False) As IPicture
+Friend Function GetStdPicture1(Optional Width As Long = -1, Optional Height As Long = -1, Optional ByVal backcolor As Long = vbWhite, Optional RetainRatio As Boolean = False, Optional bitmap As Boolean = False, Optional magia1 As Boolean = False) As IPicture
    Dim a1 As SAFEARRAY1D, a() As Byte, Token As Long
      With a1
         .cbElements = 1
@@ -407,10 +430,16 @@ Private Function GetStdPicture1(Optional Width As Long = -1, Optional Height As 
         .onebound(0).cElements = Me.SizeByte
         .pvData = Me.GetPtr(0)
     End With
-    
+If mSubtype = 0 Then
+If IsWmf Then
+mSubtype = 2
+ElseIf IsEmf Then
+SubType = 2
+End If
+End If
     If mSubtype <> 2 Or bitmap Then
         CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
-        Set GetStdPicture1 = LoadImageFromBuffer3(a(), Width, Height, backcolor)
+        Set GetStdPicture1 = LoadImageFromBuffer3(a(), Width, Height, backcolor, magia1)
          CopyMemory ByVal VarPtrArray(a), 0&, 4
     Else
        Dim hEmf As Long
@@ -437,7 +466,13 @@ Public Function GetStdPicture(Optional Width As Long = -1, Optional Height As Lo
         .onebound(0).cElements = Me.SizeByte
         .pvData = Me.GetPtr(0)
     End With
-    
+    If mSubtype = 0 Then
+    If IsWmf Then
+    SubType = 2
+    ElseIf IsEmf Then
+    SubType = 2
+    End If
+    End If
     If mSubtype <> 2 Or bitmap Then
         CopyMemory ByVal VarPtrArray(a()), VarPtr(a1), 4
         Set GetStdPicture = LoadImageFromBuffer2(a(), Width, Height, backcolor, FlipOrRotate)
@@ -448,9 +483,11 @@ Public Function GetStdPicture(Optional Width As Long = -1, Optional Height As Lo
     On Error Resume Next
     
     hEmf = SetEnhMetaFileBits(SizeByte, ByVal GetBytePtr(0))
- 
+    If hEmf = 0 Then
+    Set GetStdPicture = Me.GetStdPicture1()
+    Else
     Set GetStdPicture = gCreatePicture(hEmf, 4)
-    
+    End If
    
     End If
 
@@ -614,13 +651,13 @@ If mItems > 0 Then
 End If
 End Function
 Public Function Search(from As Long, what) As Long
-Dim limit As Long, b As Byte, i As Long, w As Byte
+Dim limit As Long, b As Byte, i As Long, W As Byte
 b = Abs(what) And &HFF
 limit = SizeByte - 1
 
 For i = from To limit
-    GetMem1 GetBytePtr(i), w
-    If b = w Then
+    GetMem1 GetBytePtr(i), W
+    If b = W Then
     Search = i + 1: Exit Function
     End If
 Next
@@ -636,7 +673,7 @@ mSubtype = RHS
 End Property
 Public Sub SentToClipBoard(Optional pWidth As Long = -1, Optional ByVal pHeight As Long = -1, Optional backcolor As Long = vbWhite, Optional lockratio As Boolean = False, Optional toBitmap As Boolean = False)
     Dim hBitmap As Long
-    Dim mm As StdPicture
+    Dim mm As StdPicture, hEmf As Long
     On Error Resume Next
     If pWidth <> -1 Then pWidth = pWidth / DXP
     If pHeight <> -1 Then pHeight = pHeight / DYP
@@ -656,7 +693,12 @@ Public Sub SentToClipBoard(Optional pWidth As Long = -1, Optional ByVal pHeight 
     If mm.Handle <> 0 Then
         If (OpenClipboard(0) <> 0) Then
             EmptyClipboard
-            If mm.Type = 4 Then
+          If mm.Type = 2 Then
+                hEmf = getEmf(mm)
+             If SetClipboardData(14, hEmf) = 0 Then
+                Debug.Print "its zero"
+                End If
+            ElseIf mm.Type = 4 Then
                 If SetClipboardData(14, mm.Handle) = 0 Then
                 
                 End If
@@ -673,21 +715,24 @@ Public Sub SentToClipBoard(Optional pWidth As Long = -1, Optional ByVal pHeight 
 End Sub
 Public Function IsWmf() As Boolean
     Dim hEmf As Long
-        hEmf = SetMetaFileBitsEx(SizeByte, ByVal GetBytePtr(0))
-        If hEmf <> 0 Then
+       CopyMemory hEmf, ByVal GetBytePtr(0), 4
+        If hEmf = &H9AC6CDD7 Then
+            mSubtype = 2
             IsWmf = True
-            mSubtype = 3
-            DeleteEnhMetaFile hEmf
         End If
-    
 End Function
 
 Public Function IsEmf() As Boolean
     Dim hEmf As Long
+
+ CopyMemory hEmf, ByVal GetBytePtr(0), 4
+    If hEmf = 1 Then IsEmf = True: Exit Function
+    Exit Function
         hEmf = SetEnhMetaFileBits(SizeByte, ByVal GetBytePtr(0))
+
         If hEmf <> 0 Then
             IsEmf = True
-            mSubtype = 2
+            
             DeleteEnhMetaFile hEmf
         End If
     
@@ -699,7 +744,47 @@ Public Sub SentEmfToClipBoard()
     hEmf = SetEnhMetaFileBits(SizeByte, ByVal GetBytePtr(0))
   
     
-    If Err.Number > 0 Then
+    If Err.Number > 0 Or hEmf = 0 Then
+        MyEr "Not a proper picture to send it to clipboard", "Δεν είναι μια σωστή εικόνα για να τη στείλω στο πρόχειρο"
+        Exit Sub
+    End If
+    If hEmf <> 0 Then
+        If (OpenClipboard(0) <> 0) Then
+            EmptyClipboard
+                If SetClipboardData(CF_ENHMETAFILE, hEmf) = 0 Then
+                DeleteEnhMetaFile hEmf
+                End If
+            CloseClipboard
+        End If
+    End If
+
+End Sub
+Private Function getEmf(Wmf As StdPicture) As Long
+ Dim zz As METAFILEPICT
+ Dim bb As wmfPlaceableFileHeader
+ CopyMemory bb, ByVal GetBytePtr(0), LenB(bb)
+ zz.xExt = bb.BoundingBox.Right - bb.BoundingBox.Left
+ zz.yExt = bb.BoundingBox.Bottom - bb.BoundingBox.Bottom
+ 
+ Dim bytes As Long
+Dim Buffer() As Byte
+   bytes = GetMetaFileBitsEx(Wmf.Handle, bytes, ByVal 0&)
+ If bytes Then
+ReDim Buffer(1 To bytes) As Byte
+Call GetMetaFileBitsEx(Wmf.Handle, bytes, Buffer(1))
+Else
+
+Exit Function
+End If
+    On Error Resume Next
+    zz.mm = 1
+    getEmf = SetWinMetaFileBits(bytes, Buffer(1), Form1.Hdc, zz)
+End Function
+
+Public Sub SentWmfToClipBoard()
+ Dim hEmf As Long
+    hEmf = getEmf(GetStdPicture1())
+    If Err.Number > 0 Or hEmf = 0 Then
         MyEr "Not a proper picture to send it to clipboard", "Δεν είναι μια σωστή εικόνα για να τη στείλω στο πρόχειρο"
         Exit Sub
     End If

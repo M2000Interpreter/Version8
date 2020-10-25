@@ -2777,6 +2777,12 @@ keyboard "Info"+chr$(13)
 }
 MODULE LOGO {smooth off  ' can't use xor with GDI+, so we work with GDI32 (by default)
 Form 80, 50
+BackGround {cls 11 :height.pixels=scale.y  div twipsY : width.pixels=scale.x div twipsX }
+if height.pixels=1024 or height.pixels/width.pixels>0.70 then
+      Form  80,50
+else
+     Form !  120,60    // we use ! to add more space for TV-MONITORS - Remove it then press Esc and then F1 to save it
+  end if
 Refresh 10000
 Cls 5,0
 Pen 14
@@ -5412,7 +5418,7 @@ Pen 0 {
 	Print
 	Normal
 	italic
-	Report " A collection of modules for tests version 23 for M2000 Interpreter version 10 and newer revisions/versions"
+	Report " A collection of modules for tests version 24 for M2000 Interpreter version 10 and newer revisions/versions"
 	italic
 	Pen 5{
 		cursor 0, row-1
@@ -6568,7 +6574,12 @@ sub showinfo()
 	}
 end sub
 }
-MODULE UPDATE {beep
+MODULE UPDATE {// if you can't run update, means that you get an error and the name of the module erased from the list where the we place a statement replacer
+// the update clause is a statement for M2000, so when we load inform the update clause replace by this module
+// we can call this module using @update  if we can't call by name update
+// don't use this module, use the saveme module Press F1 in the  m2000 console.
+
+beep
 Title "Info"
 dir appdir$
 save info, {UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}}
@@ -31767,7 +31778,7 @@ Hide
 
 Back 12 {
 Cls 5,0
-Refresh 5000
+// Refresh 5000
 //Player 0
 Pen 14,255
 Gradient 1,5
@@ -31916,7 +31927,7 @@ Pen ,255
 finale=True
 ShowAllicon()
 Show
-back {cls 11,0}
+back {cls 11,0 : refresh 50}
 wait 200
 if IsHide then ShowAllicon()
 Player 1 hide
@@ -31972,5 +31983,621 @@ Sub  RotateValues(&a(), N)
 	Stock a(N+1) keep Z-N, a(N)
 	a(Z)=V
 End Sub
+}
+MODULE CODEPAGES {Charset 0
+FONT "Tahoma"
+m$=fontname$
+Form ! 80, 40
+page=-1
+Print "Font:";fontname$
+old=locale
+for i=1023 to 1170
+	try ok {
+	 	locale i
+		// uncomment the next line
+	 //	charset 0
+	 }
+	If ok then gosub 100
+next i
+Locale Old
+Print Part "Done - Press a Key"
+Gosub 200
+wait 100
+While  (inkey(10)=-1 and mouse=0) {wait 10}
+cls
+end
+100 Bold 0
+	m=tab
+	x=0
+	y=row
+	Pen 11 {
+		Print Part $(6, m*2),locale$(4),$(0, m), @(tab(3)), locale$(3), Locale, codepage,charset,
+		Pen 15+2*(m$=fontname$) {Print "-->";fontname$}
+	}
+	gosub 200
+	Y++
+	for i=33 to 255
+		if x=width then x=0 : page-- : if y>height-2 then gosub 200 else y++
+		print part @(x, y), chr$(i)
+		x++
+	next
+	gosub 200
+	gosub 200
+	Bold 1
+Return
+200	Refresh
+	page--
+	if y=height-1 then
+		if page<=0 then
+			While (keypress(1) or keypress(32)) {wait 10}
+			While not (keypress(1) or keypress(32)) {wait 10}
+			// This is the page control, so each next stop for key happen after
+			// printing 3/4 of rows (height is the number of text rows)
+			// page here is a variable
+			page=height*3/4
+		End if
+		scroll up
+	Else
+		Print
+	End if
+Return
+}
+MODULE LIBEPIG {Τμήμα ΦέρεΑπόΔεξιά(Α, Β,  βήμα_ολίσθησης=60, ΣκίασηΦόντου=0,  Συνεχόμενη=0, φ1=1, φ2=5, μεγ=1) {
+	Αν βήμα_ολίσθησης<15 Τότε Έξοδος
+	πολλ=1
+	ΜεΣκιά=Ψευδές
+	ι=Κλίμαξ.χ*1.5 
+	Όριο=Κλίμαξ.χ/2
+	υ=κλίμαξ.ψ/2
+	ΜεΣκιά=Τύπος$(Β)="Buffer"
+	Αν ΣκίασηΦόντου>0 Τότε Πένα, ΣκίασηΦόντου : Φοντο φ1, φ2
+	Ν=0
+	Πένα , 255
+	Κράτησε
+	Ανανέωση 5000
+	Επανάλαβε
+		ι-=βήμα_ολίσθησης*πολλ
+		αν ι<=Όριο τότε έξοδος
+		Άφησε
+		Αν Συνεχόμενη Τότε
+			Αν ΣκίασηΦόντου>0  και Ν=0 και ΣκίασηΦόντου<255  Τότε
+				Πένα, ΣκίασηΦόντου : φόντο φ1, φ2
+				Αν Συνεχόμενη Τότε
+					Κράτησε
+					ΣκίασηΦόντου*=1.04
+					Αν ΣκίασηΦόντου>255 Τότε ΣκίασηΦόντου=255
+				Τέλος Αν
+				Ν=Συνεχόμενη
+			Τέλος Αν
+			Ν--
+		Τέλος Αν
+		Αν ΜεΣκιά Τότε Θέση ι+πλάτος.σημείου*2, υ+ύψος.σημείου*3: Εικόνα Β, κλίμαξ.χ,,0
+		Θέση ι, υ
+		Εικόνα Α, κλίμαξ.χ*μεγ,,0
+		Ανανέωση 5000
+		Αναμονή 20
+		Αν πατημένο(32) τότε πολλ*=1.08:Συνεχόμενη/=2
+		Αν πατημένο(27) τότε Έξοδος
+	Πάντα
+	Άφησε
+	Πένα , 255	
+	Αν ΣκίασηΦόντου>0 Τότε φόντο φ1, φ2
+	Αν ΜεΣκιά Τότε Θέση Κλίμαξ.χ/2+πλάτος.σημείου*2, υ+ύψος.σημείου*3: Εικόνα Β, κλίμαξ.χ,,0
+	Θέση Κλίμαξ.χ/2, υ
+	Εικόνα Α, κλίμαξ.χ*μεγ,,0
+	Ανανέωση 50
+}
+Τμήμα ΦέρεΑπόΚάτω(Α, Β, βήμα_ολίσθησης=60, ΣκίασηΦόντου=0, Συνεχόμενη=0, φ1=1, φ2=5, μεγ=1) {
+	Αν βήμα_ολίσθησης<15 Τότε Έξοδος
+	πολλ=1
+	ΜεΣκιά=Ψευδές
+	ι=Κλίμαξ.ψ*1.5 
+	Όριο=Κλίμαξ.ψ/2
+	π=κλίμαξ.χ/2
+	ΜεΣκιά=Τύπος$(Β)="Buffer"
+	Αν ΣκίασηΦόντου>0 Τότε Πένα, ΣκίασηΦόντου : Φοντο φ1, φ2
+	Ν=0
+	Πένα , 255
+	Κράτησε
+	Ανανέωση 5000
+	Επανάλαβε
+		ι-=βήμα_ολίσθησης*πολλ
+		αν ι<=Όριο τότε έξοδος
+		Άφησε
+		Αν Συνεχόμενη Τότε
+			Αν ΣκίασηΦόντου>0  και Ν=0 και ΣκίασηΦόντου<255  Τότε
+				Πένα, ΣκίασηΦόντου : φόντο φ1, φ2
+				Αν Συνεχόμενη Τότε
+					Κράτησε
+					ΣκίασηΦόντου*=1.04
+					Αν ΣκίασηΦόντου>255 Τότε ΣκίασηΦόντου=255
+				Τέλος Αν
+				Ν=Συνεχόμενη
+			Τέλος Αν
+			Ν--
+		Τέλος Αν
+		Αν ΜεΣκιά Τότε Θέση π+πλάτος.σημείου*2, ι+ύψος.σημείου*3: Εικόνα Β, κλίμαξ.χ,,0
+		Θέση π, ι
+		Εικόνα Α, κλίμαξ.χ*μεγ,,0
+		Ανανέωση 5000
+		Αναμονή 20
+		Αν πατημένο(32) τότε πολλ*=1.08: Συνεχόμενη/=2
+		Αν πατημένο(27) τότε Έξοδος
+	Πάντα
+	Άφησε
+	Πένα , 255
+	Αν ΣκίασηΦόντου>0 Τότε φόντο φ1, φ2
+	Αν ΜεΣκιά Τότε Θέση π+πλάτος.σημείου*2, Κλίμαξ.ψ/2+ύψος.σημείου*3: Εικόνα Β, κλίμαξ.χ,,0
+	Θέση π, Κλίμαξ.ψ/2
+	Εικόνα Α, κλίμαξ.χ*μεγ,,0
+	Ανανέωση 50
+}
+Τμήμα ΠερίμενεΚουμπί(ΧαμένοςΧρόνος) {
+	Ανανέωση
+	Αναλυτής
+	Ενώ ΧαμένοςΧρόνος>Φόρτος
+		Αν πατημένο(32) Τότε Έξοδος
+		Αναμονή 1
+	Τέλος Ενώ
+	Ενώ πατημένο(32)
+		Αναμονή 1
+	Τέλος Ενώ
+}
+Συνάρτηση Επιγραφή(Χρώμα_Επιγραφής) {
+	Τοπική Α
+	Σχέδιο 8000, 2000 {
+		Πένα Χρώμα_Επιγραφής, 255
+		Αναφορά 2, "https://georgekarras.blogspot.com"
+		Δρομέας 0, 3
+		Αναφορά 2, "https://github.com/M2000Interpreter"
+	} ως Α
+	=Α
+}
+Συνάρτηση Επιγραφή1(Χρώμα_Επιγραφής) {
+	Τοπική Α
+	Σχέδιο {
+		Πένα Χρώμα_Επιγραφής, 255
+		Φορμα 40, 22
+		Διάστιχο 240
+		Διπλά
+		Πλάγια
+		Αναφορά 2, "Προγραμματιστικά Υποδείγματα"
+		Πλάγια
+		Κανονικά
+		Δρομέας 0, γραμμή-1
+		Τύπωσε Υπό
+		Τύπωσε "○  ";
+		Αναφορά 3, {Μη Δομημένος Προγραμματισμός (GOTO ή ΠΡΟΣ και αριθμούς γραμμών)}
+		Τύπωσε @(0), "○  ";
+		Αναφορά 3, {Δομημένος (Structural) Προγραμματισμός (Δομές Επανάληψης και Επιλογής)}
+		Τύπωσε @(0), "○  ";
+		Αναφορά 3, {Διαδικαστικός (Procedural) Προγραμματισμός (Στατικές Ρουτίνες και Συναρτήσεις)}
+		Τύπωσε @(0), "○  ";
+		Αναφορά 3, {Τμηματικός (Modular) Προγραμματισμός (Τμήματα και Συναρτήσεις ως ανεξάρτητες μονάδες, που δύναται να περιέχουν ή να φορτώνουν άλλες μονάδες ως εξωτερικές βιβλιοθήκες)}
+		Τύπωσε @(0), "○  ";
+		Αναφορά 3, {Συναρτησιακός (Functional) Προγραμματισμός. (Λάμδα συναρτήσεις ως πολίτες πρώτης τάξης)}
+		Τύπωσε @(0), "○  ";
+		Αναφορά 3, {Αντικειμενοστραφής Προγραμματισμός. (Κλάσεις και Αντικείμενα)}
+		Τύπωσε @(0), "○  ";
+		Αναφορά 3, {Προγραμματισμός με Γεγονότα (Event-driven). (Συνδυάζεται με Αντικείμενα, όπως με φόρμες χρήστη και στοιχεία ελέγχου γραφικής διεπαφής)}
+		Τύπωσε @(0), "○  ";
+		Αναφορά 3, {Παράλληλος (Concurrent) Προγραμματισμός. (Νήματα σε έναν επεξεργαστή)}
+	} ως Α1
+	Σχέδιο 14000, 14000{
+		Θέση 7000,7000
+		Εικόνα Α1, 12000,,0
+	} ως Α
+		
+	=Α
+}
+Συνάρτηση Επιγραφή2(Χρώμα_Επιγραφής) {
+	Τοπική Α
+	Σχέδιο {
+		Πένα Χρώμα_Επιγραφής, 255
+		Διάστιχο 120
+		Φόρμα 40, 40
+		Διπλά
+		Αναφορά 2, {
+		Το Προγραμματιστικό Περιβάλλον Μ2000 στη Πρωτοβάθμια και Δευτεροβάθμια Εκπαίδευση
+		
+		}
+		Αναφορά 2, {Γιώργος Καρράς
+		}
+		Κανονικά
+		Αναφορά 2, {
+		Δημιουργός της Μ2000, Πτ. Τεχνολόγος Πετρελαίων ΤΕΙ Καβάλας
+		
+		}
+		Κανονικά
+		Πένα Αν(Χρώμα_Επιγραφής=0->0, 7) {
+			Αναφορά 2, {georgekarras@freemail.gr}
+		}
+		Πλάγια
+		Αναφορά 2, {
+		Η παρουσίαση γίνεται μέσα από το περιβάλλον της Μ2000!
+		}
+		
+	} ως Α1
+	Σχέδιο 6000, 4000{
+		θέση 3000,2000
+		Εικόνα Α1, 5800,,0
+	} ως Α
+	=Α
+}
+}
+MODULE DEMOEPIG {Αναφορά {Οδηγίες
+	Για να δοκιμάσεις την παρουσίαση (μέρος της από τη πραγμαιτκή που έγινε 18-10-2020 στο συνέδριο 12o CIE 2020), μπορείς να κάνεις τα εξής:
+		Με το διάστημα επιταχύνουμε την ολίσθηση, με το Esc την τερματίζουμε
+		Στην εφαρμογή sprites, υπάρχουν οδηγίες, με Esc την τερματίζουμε
+		Επάνω δεξιά φαίνεται και το ρολόι λεπτών για να συτονίζει κανείς το χρόνο της παρουσίασης.
+		Το ρολόι δουλεύει σε δικό του νήμα και χρησιμοποιεί δικό του sprite, το 32 το οποίο είναι πάντα πάνω από όλα τα άλλα!
+}
+// Τα πραγματικά νούμερα των παικτών (sprites) δεν γίνονται ποτέ φανερά, αυτά που χειριζόμαστε είναι οι προτεραιότητές τους, έτσι πάντα το 32 θα είναι πάνω από τα άλλα, όσα και αν υπάρχουν, γιατί στην αρχή δεν υπάρχουν φορτωμένοι παίκτης. Μπορεί να αλλάξει νούμερο ένας παίκτης με έναν άλλο, αλλάζοντας προτεραιότητες (θα μπει ο μπροστινός παίκτης πίσω από τον άλλο, και όσοι είναι ενδιάμεσα θα παραμείνουν ως έχει), έτσι αν έχουμε δυο μεταβλητές με τις προτεραιότητες απλά τις αλλάζουμε μεταξύ τους τιμές. Η μπορεί να αλλάξει ένας παίκτης προτεραιόττηα κατά απόλυτη τιμή  αλλάζοντας τις προτεραιότητες των αλλων. Στη τελευταία περίπτωση πρέπει να κρατάμε λογαριασμό σε ένα πίνακα, δείτε στο τμήμα sprites, τη ρουτίνα RotateValues() που περιστρέφει τις τιμές σε ένα πίνακα (με γρήγορη εντολή).
+// Οι προτεραιότητες χρησιμεύουν και για τον έλεγχο σύγκρουσης, ο οποίος γίνεται για νούμερα κάτω από το νούμερο προτεραιότητας του παίκτη. Συνήθως μας ενδιαφέρει ένας παίκτης να ελέγχεται για σύγκρουση με άλλους παίκτες.
+Βάλε Κομ$: Πέτα
+
+Κάνε UseTimer
+Ένθεση Κώδικα LibTimer
+Οθόνη 5, 0
+Γραμματοσειρά "Verdana"
+Φόρμα ! 60, 32
+Αδειασε
+Ένθεση Κώδικα LibEpig
+Πένα 14, 255
+Διαφυγή Όχι
+Δρομέας 0,0
+Φόντο 1, 5
+// οι επιγραφές είναι στη βιβλιοθήκη (στο τμήμα LibEpig)
+ΦέρεΑπόΚάτω Επιγραφή2(15),0, 60, 16, 2
+ΠερίμενεΚουμπί 100000
+ΦέρεΑπόΔεξιά Επιγραφή2(15),Επιγραφή2(0), 60, 16, 2
+ΠερίμενεΚουμπί 100000
+ΦέρεΑπόΚάτω Επιγραφή1(15),Επιγραφή1(#003366), 60, 8, 2
+ΠερίμενεΚουμπί 100000
+ΦέρεΑπόΔεξιά Επιγραφή1(15),Επιγραφή1(0), 60, 8, 2
+ΠερίμενεΚουμπί 100000
+Ανανέωση 5000
+Περιθώριο {Ανανέωση 5000}
+σβησε
+Πένα , 220
+Φόντο 1, 5
+sprites
+Πένα , 255
+ΦέρεΑπόΔεξιά Επιγραφή(11),Επιγραφή(0), 90
+ΠερίμενεΚουμπί 10000
+Πένα Πένα, 255
+Αν Έγκυρο(UseTimer) Τότε Παίκτης 32 Κρύψε
+Ρουτίνα Τίτλος(Α$, Β$="", Πένα1=0, Πένα2=0)
+	Δρομέας 0, 3
+	Διπλά
+	Πένα Πένα1 {Αναφορά 2,α$}
+	Κανονικά
+	Αν Β$<>"" Τότε Πένα Πένα2 {Αναφορά 2, Β$}
+Τέλος Ρουτίνας
+}
+MODULE LIBTIMER {if Valid(UseTimer) Then
+	UseTimer=Int(UseTimer)
+	If UseTimer<1 then UseTimer=1
+	timer_spr$=""
+	timer_counter=1
+	Drawing 1000,1000 {
+		move 500,500
+		circle Fill 2, 450,,2
+		Pen 15
+		legend str$(timer_counter,"00"), "Impact", 24,0,2
+	} as timer_image
+	image  timer_image  to timer_spr$ (5), 100
+	Back {
+		Cls 0, 0
+		Player 32,  SCALE.X-1000, 1000 use timer_spr$, 5, 10,0   size 1
+		PLAYER 32 SHOW
+		Layer 32 {Refresh}
+		Thread {
+		{	timer_counter++
+			if timer_counter=100 then Player 32 hide : Exit
+			if  timer_counter>=100 Then Exit
+			Drawing 1000,1000 {
+			move 500,500
+			circle Fill 2, 450,,2
+			Pen 15
+			legend str$(timer_counter,"00"), "Impact", 24,0,2
+		} as timer_image
+		image  timer_image  to timer_spr$ (5), 100
+		Player 32,  SCALE.X-1000, 1000 use timer_spr$, 5, 10,0   size 1}
+	} as  timer_id interval if(UseTimer-> 60000, 30000, 1000)
+	}
+Else
+	Report  {LibTimer Version 2, George Karras
+	To use this library:
+		Def UseTimer
+		Inline code LibTimer
+	You can use:
+		default value for UseTimer:
+		 0 or 1, for 60 seconds per counting
+		2, for 30 seconds per counting
+		3, for 1 second per counting
+	By default the timer hide when rich 100 coutings
+		using timer_counter we can read or write new value
+		the thread has to execute, so to add one to this value, to show this
+	Stop The Timer: 
+		1. By setting timer_counter to 100  (expecting a lag time, max the thread  interval)
+		2. Holding the thread:
+			Thread timer_id Hold
+			to restart we have to execute Thread timer_id Restart
+	Hide the timer:
+		Player 32 hide
+	Hide the timer:
+		Player 32 hide
+	}
+End If
+}
+MODULE TSTTIMER {// Erase all threads
+Threads Erase
+// Erase all players
+Player 0
+Def UseTimer=3
+Inline code LibTimer
+Print "Timer start"
+Profiler
+Every 1000/50 {
+	Print Over $(0,10), Timecount div 1000 + 1, timer_counter
+	if keypress(32) or timer_counter>99 then exit
+}
+Thread  timer_id hold
+Print
+Print "Start Again in 15 seconds"
+wait 15000
+Thread  timer_id Restart
+Every 1000/50 {
+	Print Over $(0,10), Timecount div 1000 + 1, timer_counter
+	if keypress(32) or timer_counter>99 then exit
+}
+Print
+Print "Finished"
+Player 0
+}
+MODULE LIBSTOPTIMER {if Valid(UseStopTimer) Then
+	UseStopTimer=Int(UseStopTimer)
+	If UseStopTimer<1 then UseStopTimer=1
+	stimer_spr$=""
+	if Valid(UseStopTimer_Start_Value) Then
+		stimer_counter=UseStopTimer_Start_Value
+	else
+		stimer_counter=99
+	end if
+	Drawing 1000,1000 {
+		move 500,500
+		circle Fill 12, 450,,12
+		Pen 15
+		legend str$(stimer_counter,""), "Arial Black", 24,0,2
+	} as stimer_image
+	image  stimer_image  to stimer_spr$ (5), 200
+	Back {
+		Cls 0, 0
+		Player 32,  2000, 2000 use stimer_spr$, 5, 10,0   size 1
+		PLAYER 32 SHOW
+		Layer 32 {Refresh}
+		Thread {
+		{	stimer_counter--
+			if stimer_counter=-1 then
+				Player 32 hide
+				if valid(Use_Ring) then ring
+			End if
+			if  stimer_counter<0 Then Exit
+			Drawing 1000,1000 {
+			move 500,500
+			circle Fill 12, 450,,12
+			Pen 15
+			legend str$(stimer_counter,""), "Arial Black", 24,0,2
+		} as stimer_image
+		image  stimer_image  to stimer_spr$ (5), 200
+		Player 32,  2000, 2000 use stimer_spr$, 5, 10,0   size 1}
+	} as  stop_timer_id interval if(UseStopTimer-> 60000, 30000, 1000)
+	}
+	Thread {
+			// if stimer_counter<10 then thread this hold : exit
+			player 32 hide
+			after 50 {
+				player 32 show
+				after 50 {
+					player 32 hide
+					after 50 {
+						player 32 show
+					}
+				}
+			}
+	} as stimer_pulse interval 500
+	thread stimer_pulse hold
+Else
+	Report  {LibStopTimer Version 1, George Karras
+	Need the ring module to play the ring tone
+	To use this library:
+		Def UseStopTimer, UseStopTimer_Start_Value=30
+		Inline code LibStopTimer
+	Optional: add the Use_Ring in the def statement to play the ring tone
+	You can use:
+		default value for UseStopTimer:
+		 0 or 1, for 60 seconds per counting
+		2, for 30 seconds per counting
+		3, for 1 second per counting
+	By default the timer hide when rich ZERO
+		using stimer_counter we can read or write new value
+		the thread has to execute, so to add one to this value, to show this
+	Stop The Timer: 
+		1. By setting stimer_counter to 100  (expecting a lag time, max the thread  interval)
+		2. Holding the thread:
+			Thread stop_timer_id Hold
+			to restart we have to execute Thread stop_timer_id Restart
+	Use the stimer_pulse thread
+	Make the spriter flash
+		Thread stimer_pulse restart
+	Hold the flashing
+		Thread stimer_pulse hold
+	Hide the timer view:
+		Player 32 hide
+	Hide the timer view:
+		Player 32 hide
+	}
+End If
+}
+MODULE TSTSTOPTIMER {// Erase all threads
+Threads Erase
+// Erase all players
+Player 0
+Def UseStopTimer=3, UseStopTimer_Start_Value=20, use_ring
+Inline code LibStopTimer
+Print "Stop Timer start"
+Profiler
+task()
+if stimer_counter>0 then
+	Thread  stop_timer_id hold
+	Print
+	Print "Start Again in 15 seconds"
+	wait 15000
+	Thread  stop_timer_id Restart
+	task()
+end if
+Print
+Print "Finished"
+Player 0
+sub task()
+Every 1000/50 {
+	if keypress(32) or stimer_counter<0 then exit
+		if (3, 10)#have(stimer_counter) then
+			Thread stimer_pulse restart
+		Else.if (2, 9)#have(stimer_counter) then
+			thread stimer_pulse Hold
+		End if
+	Print Over $(0,10), Timecount div 1000 + 1, stimer_counter
+}
+end sub
+}
+MODULE FINALE {διαφυγή Όχι
+Συνάρτηση Γενική Όλα {
+	Πένα 14, 255
+	Ωρα$=""
+	Σχέδιο{
+	Διάστιχο 15
+	Φαρδιά 0
+	Γραμματοσειρά "courier new"
+	Τύπος 8
+	Πένα 15, 255
+	Εγγραφο β$=&Όλα()
+	Αναφορά β$,9000, Εγγράφου.Παρ(β$)-2 Γραμμή 2
+	} Ως Τρία
+	cls,0
+	Σχέδιο {
+		Βάψε 8000, 6000, 1, 2,0
+		Τύπος 23
+		Πένα 15
+		Τύπωσε "Μ2000"
+	} Ως β
+	Σχέδιο {
+		Δρομέας 0,0
+		Τύπωσε Πάνω $(6), "Επίδειξη χρήσης σχεδίων"
+	} Ως Επικεφαλίδα
+	Φόντο 1, 5
+	Κράτησε
+	γωνία_όλου=0
+	μεγ=1
+	ολίσθηση=υ.σημεία*1.5
+	Ν=2.3
+	Για ι=0 Έως 270*3-90 ανά Ν
+		Άφησε
+		Σχέδιο {
+			Θέση 4000, 4000
+			Εικόνα  β,4000,,ι,-2000, 1500
+			Κύκλος 600
+			Κύκλος Γέμισμα 2, 45, 1, 2
+			Θέση 12000, 4000
+			Εικόνα  β,4000,,ι,2000, 1500
+			Κύκλος 600
+			Κύκλος Γέμισμα 2, 45, 1, 2
+			Θέση 12000, 10000
+			Εικόνα  β,4000,,ι,2000, -1500
+			Κύκλος 600
+			Κύκλος Γέμισμα 2, 45, 1, 2
+			Θέση 4000, 10000
+			Εικόνα  β,4000,,ι,-2000, -1500
+			Κύκλος 600
+			Κύκλος Γέμισμα 2, 45, 1, 2
+			Θέση 8000, 7000
+			Εικόνα  β,4000,,ι
+			Κύκλος 600
+			Κύκλος Γέμισμα 2, 45, 1, 2
+		} Ως Όλα0
+		Θέση 3000+ι*25*Ν, ολίσθηση
+		Εικόνα Τρία, 10000,,0
+		Θέση ι*25*Ν-7000, ολίσθηση+6000
+		Εικόνα Τρία, 10000,,0
+		Θέση 0,0
+		Εικόνα Επικεφαλίδα
+		ν=0.8
+		χ=Εικόνα.Χ(Όλα0)*ν
+		ψ=Εικόνα.Υ(Όλα0)*ν
+		Αν Ωρα$<>Γραφή$(Τώρα,"hh:nn:ss") τοτε
+		Ωρα$=Γραφή$(Τώρα, "hh:nn:ss")
+		Σχέδιο {
+			Χρώμα ! {Επιγραφή Ωρα$, "Courier New", 64,0, 2};
+			Θέση -4000, -2000
+			Βάψε 8000, 4000, 14, 10, 1
+			Βήμα -8000, -2600
+			Βάψε 8000, 600, 13, 15, 1
+			Χρώμα {};
+		} ως Ώρα
+		τέλος αν
+		Σχέδιο χ*1.2,ψ*1.2{
+			Θέση χ.σημεία/2, υ.σημεία/2
+			Εικόνα Όλα0,χ*ν,,0
+			Βήμα 0, 2000
+			Εικόνα Ώρα,3000,,0
+			Βήμα 0, -4000
+			Εικόνα Ώρα,3000,,180
+		} Ως Όλα
+		Θέση χ.σημεία/2, υ.σημεία/2
+		Εικόνα Όλα,,, γωνία_όλου, 3000/μεγ
+		Θεση χ.σημεία-6000-ι*πλάτος.σημείου, Εικόνα.ψ(Επικεφαλίδα)
+		Εικόνα Ώρα, 6000, 1200
+		γωνία_όλου+=2.5*Ν
+		μεγ+=.1245*Ν
+		ολίσθηση-=45*Ν*3
+		Ανανέωση 5000
+		Αν Πατημένο(27) τότε Έξοδος Για
+
+	Επόμενο ι
+	
+	Πένα , 5
+	Σχέδιο {
+		Πενα 15
+		Επιγραφή "Τέλος Παρουσίασης", "Arial Black", 22
+	} Ως Μήνυμα
+	Πλάτος_Μηνύματος=χ.σημεία*.8/2
+	θέση_μηνύματος=χ.σημεία
+	Κράτησε
+	Για ι=1 Έως 40
+		αναμονή 20
+		Θέση χ.σημεία/2, υ.σημεία/2
+		Πένα , 90+ι*4
+		Αφησε
+		Φόντο 1,5
+		Βήμα (150-300*Τυχαίος)/2, (150-300*Τυχαίος)/2
+		Εικόνα Μήνυμα,Πλάτος_Μηνύματος*ι/20,,0
+		θέση_μηνύματος/=4
+		Ανανέωση 2000
+	Επόμενο ι
+	Αναμονή 400
+	Ανανέωση 5000
+	Πένα , 140
+	ιι=ι-1
+	Για ι=1 Έως 20
+		αναμονή 50
+		Φόντο 1, 5
+		ανανεωση 100
+	Επόμενο ι
+	Πένα 15, 255
+}
+Κάλεσε Όλα()
+Διαφυγή Ναι
+Δείκτη.Μορφή Δείξε
 }
 UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}

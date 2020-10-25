@@ -18,14 +18,14 @@ Public Event Lastline()
 Public Event ColorDataEvent(thispara As Long, Data$, feedback As Long)
 Private lastlinelastchar As Long
 Private lastcolordatacur As Long
-Private Declare Function GetShortPathName Lib "KERNEL32" Alias _
+Private Declare Function GetShortPathName Lib "kernel32" Alias _
 "GetShortPathNameW" (ByVal lpszLongPath As Long, _
 ByVal lpszShortPath As Long, ByVal cchBuffer As Long) As Long
 Private Declare Sub CopyMemory Lib "kernel32.dll" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
-Private Declare Function WideCharToMultiByte Lib "KERNEL32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long, ByVal lpMultiByteStr As Long, ByVal cchMultiByte As Long, ByVal lpDefaultChar As Long, ByVal lpUsedDefaultChar As Long) As Long
-Private Declare Function MultiByteToWideChar& Lib "KERNEL32" (ByVal CodePage&, ByVal dwFlags&, MultiBytes As Any, ByVal cBytes&, ByVal pWideChars&, ByVal cWideChars&)
-Private Declare Function CloseHandle Lib "KERNEL32" (ByVal hObject As Long) As Long
-Private Declare Function CreateFile Lib "KERNEL32" Alias "CreateFileW" (ByVal lpFileName As Long, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
+Private Declare Function WideCharToMultiByte Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long, ByVal lpMultiByteStr As Long, ByVal cchMultiByte As Long, ByVal lpDefaultChar As Long, ByVal lpUsedDefaultChar As Long) As Long
+Private Declare Function MultiByteToWideChar& Lib "kernel32" (ByVal CodePage&, ByVal dwFlags&, MultiBytes As Any, ByVal cBytes&, ByVal pWideChars&, ByVal cWideChars&)
+Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
+Private Declare Function CreateFile Lib "kernel32" Alias "CreateFileW" (ByVal lpFileName As Long, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, lpSecurityAttributes As Any, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
 Public final$
 'Dim mPosId As Long
 'Dim mCurrentParagraph As Long
@@ -46,7 +46,7 @@ Dim mKeystart As String
 Public BackMove As Boolean
 Public LastSelStart As Long
 Public ListLoadedType As Long
-Private Declare Function CompareString Lib "KERNEL32" Alias "CompareStringW" (ByVal Locale As Long, ByVal dwCmpFlags As Long, ByVal lpString1 As Long, ByVal cchCount1 As Long, ByVal lpString2 As Long, ByVal cchCount2 As Long) As Long
+Private Declare Function CompareString Lib "kernel32" Alias "CompareStringW" (ByVal Locale As Long, ByVal dwCmpFlags As Long, ByVal lpString1 As Long, ByVal cchCount1 As Long, ByVal lpString2 As Long, ByVal cchCount2 As Long) As Long
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Private Declare Sub PutMem2 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As Integer)
 Private words$, unique As Long
@@ -1324,8 +1324,8 @@ End Property
 Property Get startfrom(ParaNum As Long) As Long
 startfrom = para(ParaNum).startfrom
 End Property
-Property Let Paracolordata(ParaNum As Long, col() As Long)
-If ParaNum <> 0 Then para(ParaNum).colordata() = col()
+Property Let Paracolordata(ParaNum As Long, Col() As Long)
+If ParaNum <> 0 Then para(ParaNum).colordata() = Col()
 End Property
 
 Property Get Paracolordata(ParaNum As Long) As Long()
@@ -1834,7 +1834,7 @@ ReDim Buffer(1 To 1) As Byte
 bufOffset = 0
 bufsize = 0
 SeekBuf = 1
-mlcid = Module1.cLid
+mlcid = Module1.clid
 final$ = "}"
 End Sub
 
@@ -1916,9 +1916,15 @@ Public Sub SetLocaleCompare(Optional RHS As Variant)
 If IsMissing(RHS) Then
 sortmlcid = mlcid
 Else
-sortmlcid = CLng(RHS)
+    If CLng(RHS) = 0 Then
+        sortmlcid = OsInfo.LangNonUnicodeCode
+    ElseIf GetCodePage(CLng(RHS)) <> 0 Then
+        sortmlcid = CLng(RHS)
+    Else
+        NoValidLocale
+    End If
 End If
-If sortmlcid = 0 Then sortmlcid = &H800
+If sortmlcid = 0 Then sortmlcid = OsInfo.LangNonUnicodeCode
 mSortstyle = vbBinaryCompare
 End Sub
 
@@ -2188,7 +2194,7 @@ If mode2save > 0 And Not Append Then
 ElseIf Abs(mode2save) = 3 Then ' ascii
             iPos = DocParaNext(0)
             maxmw = 327680
-If mlcid < 4 Then mlcid = Module1.cLid
+If mlcid < 4 Then mlcid = Module1.clid
             While iPos <> 0
             
                 Put #w, , Convert2Ansi(textString(lf$, iPos, maxmw), mlcid)
@@ -2454,7 +2460,7 @@ utf8cont:
     cc$ = space$(30)
     LSet cc$ = buf()
 lbt = 0
-If mlcid < 4 Then mlcid = Module1.cLid
+If mlcid < 4 Then mlcid = Module1.clid
 
         While Not (mLof < SeekBuf)
          If insert2index Then
@@ -2986,7 +2992,13 @@ lcid = mlcid
 End Property
 
 Public Property Let lcid(ByVal RHS As Long)
-mlcid = RHS
+If CLng(RHS) = 0 Then
+    mlcid = OsInfo.LangNonUnicodeCode
+ElseIf GetCodePage(CLng(RHS)) <> 0 Then
+    mlcid = RHS
+Else
+    NoValidLocale
+End If
 End Property
 
 Function RangeUnsignInteger(mValue As Integer, ByVal mFrom As Long, ByVal mTo As Long) As Boolean
@@ -3140,7 +3152,7 @@ Select Case what
 Case 1 To 2
 CompareStr2 = StrComp(a$, b$, what)
 Case Else
-If sortmlcid = 0 Then
+If sortmlcid = 0 Or UserCodePage = DefCodePage Then
 CompareStr2 = StrComp(a$, b$)
 Else
 CompareStr2 = -2 + CompareString(sortmlcid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$))

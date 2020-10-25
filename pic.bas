@@ -40,7 +40,7 @@ Private Const SM_CYSCREEN = 1
 Private Const LOGPIXELSX = 88
 Private Const LOGPIXELSY = 90
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
-Private Declare Function GetEnhMetaFileBits Lib "gdi32" (ByVal hMf As Long, ByVal nSize As Long, lpvData As Any) As Long
+Private Declare Function GetEnhMetaFileBits Lib "gdi32" (ByVal hmf As Long, ByVal nSize As Long, lpvData As Any) As Long
 Private Declare Function CopyEnhMetaFile Lib "gdi32.dll" Alias "CopyEnhMetaFileW" (ByVal hemfSrc As Long, lpszFile As Long) As Long
 Private Declare Function IsClipboardFormatAvailable Lib "user32" (ByVal wFormat As Long) As Long
 Private Declare Function DeleteEnhMetaFile Lib "gdi32" (ByVal hEmf As Long) As Long
@@ -199,7 +199,7 @@ Private Const GMEM_LOWER = GMEM_NOT_BANKED
 
 Public frame As Boolean
 Public PhotoBmp As Long
-Public w As Long
+Public W As Long
 Public BACKSPRITE As String
 Private Type MEMORYSTATUS
     dwLength As Long
@@ -486,15 +486,15 @@ cDib = False
 If Len(a) >= 12 Then
 ' read magicNo, witdh, height
 If Left$(a, 4) = "cDIB" Then
-Dim w As Long, h As Long
-w = val("&H" & Mid$(a, 5, 4))
-h = val("&H" & Mid$(a, 9, 4))
-If Len(a) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
+Dim W As Long, H As Long
+W = val("&H" & Mid$(a, 5, 4))
+H = val("&H" & Mid$(a, 9, 4))
+If Len(a) * 2 < ((W * 3 + 3) \ 4) * 4 * H - 24 Then Exit Function
 mdib.ClearUp
 
-If mdib.create(w, h) Then
-If Len(a) * 2 < mdib.BytesPerScanLine * h + 24 Then Exit Function
-CopyMemory ByVal mdib.DIBSectionBitsPtr, ByVal StrPtr(a) + 24, mdib.BytesPerScanLine * h
+If mdib.create(W, H) Then
+If Len(a) * 2 < mdib.BytesPerScanLine * H + 24 Then Exit Function
+CopyMemory ByVal mdib.DIBSectionBitsPtr, ByVal StrPtr(a) + 24, mdib.BytesPerScanLine * H
 cDib = True
 End If
 End If
@@ -510,76 +510,76 @@ Else
 End If
 End Function
 Public Function SetDIBPixel(ssdib As Variant, ByVal x As Long, ByVal y As Long, aColor As Long) As Double
-Dim w As Long, h As Long, bpl As Long, rgb(2) As Byte
-w = val("&H" & Mid$(ssdib, 5, 4))
-h = val("&H" & Mid$(ssdib, 9, 4))
-If Len(ssdib) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
-If w * h <> 0 Then
-bpl = (LenB(ssdib) - 24) \ h
-w = (w - x - 1) Mod w
-h = (y Mod h) * bpl + w * 3 + 24
-CopyMemory rgb(0), ByVal StrPtr(ssdib) + h, 3
+Dim W As Long, H As Long, bpl As Long, rgb(2) As Byte
+W = val("&H" & Mid$(ssdib, 5, 4))
+H = val("&H" & Mid$(ssdib, 9, 4))
+If Len(ssdib) * 2 < ((W * 3 + 3) \ 4) * 4 * H - 24 Then Exit Function
+If W * H <> 0 Then
+bpl = (LenB(ssdib) - 24) \ H
+W = (W - x - 1) Mod W
+H = (y Mod H) * bpl + W * 3 + 24
+CopyMemory rgb(0), ByVal StrPtr(ssdib) + H, 3
 
 SetDIBPixel = -(rgb(2) * 256# * 256# + rgb(1) * 256# + rgb(0))
-CopyMemory ByVal StrPtr(ssdib) + h, aColor, 3
+CopyMemory ByVal StrPtr(ssdib) + H, aColor, 3
 End If
 End Function
 Public Function GetDIBPixel(ssdib As Variant, ByVal x As Long, ByVal y As Long) As Double
-Dim w As Long, h As Long, bpl As Long, rgb(2) As Byte
+Dim W As Long, H As Long, bpl As Long, rgb(2) As Byte
 'a = ssdib$
-w = val("&H" & Mid$(ssdib, 5, 4))
-h = val("&H" & Mid$(ssdib, 9, 4))
-If Len(ssdib) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
-If w * h <> 0 Then
-bpl = (LenB(ssdib) - 24) \ h   ' Len(ssdib$) 2 bytes per char
-w = (w - x - 1) Mod w
+W = val("&H" & Mid$(ssdib, 5, 4))
+H = val("&H" & Mid$(ssdib, 9, 4))
+If Len(ssdib) * 2 < ((W * 3 + 3) \ 4) * 4 * H - 24 Then Exit Function
+If W * H <> 0 Then
+bpl = (LenB(ssdib) - 24) \ H   ' Len(ssdib$) 2 bytes per char
+W = (W - x - 1) Mod W
 
-h = (y Mod h) * bpl + w * 3 + 24
+H = (y Mod H) * bpl + W * 3 + 24
 
 
-CopyMemory rgb(0), ByVal StrPtr(ssdib) + h, 3
+CopyMemory rgb(0), ByVal StrPtr(ssdib) + H, 3
 
 GetDIBPixel = -(rgb(2) * 256# * 256# + rgb(1) * 256# + rgb(0))
 End If
 End Function
 Public Function cDIBwidth1(a) As Long
-Dim w As Long, h As Long
+Dim W As Long, H As Long
 cDIBwidth1 = -1
 
-w = val("&H" & Mid$(a, 5, 4))
-h = val("&H" & Mid$(a, 9, 4))
-If Len(a) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
-cDIBwidth1 = w
+W = val("&H" & Mid$(a, 5, 4))
+H = val("&H" & Mid$(a, 9, 4))
+If Len(a) * 2 < ((W * 3 + 3) \ 4) * 4 * H - 24 Then Exit Function
+cDIBwidth1 = W
 End Function
 Public Function cDIBwidth(a) As Long
-Dim w As Long, h As Long
+Dim W As Long, H As Long
 cDIBwidth = -1
 If Len(a) >= 12 Then
 If Left$(a, 4) = "cDIB" Then
-w = val("&H" & Mid$(a, 5, 4))
-h = val("&H" & Mid$(a, 9, 4))
-If Len(a) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
-cDIBwidth = w
+W = val("&H" & Mid$(a, 5, 4))
+H = val("&H" & Mid$(a, 9, 4))
+If Len(a) * 2 < ((W * 3 + 3) \ 4) * 4 * H - 24 Then Exit Function
+cDIBwidth = W
 End If
 End If
 End Function
 Public Function cDIBheight1(a) As Long
-Dim w As Long, h As Long
+Dim W As Long, H As Long
 cDIBheight1 = -1
-w = val("&H" & Mid$(a, 5, 4))
-h = val("&H" & Mid$(a, 9, 4))
-If Len(a) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
-cDIBheight1 = h
+W = val("&H" & Mid$(a, 5, 4))
+H = val("&H" & Mid$(a, 9, 4))
+If Len(a) * 2 < ((W * 3 + 3) \ 4) * 4 * H - 24 Then Exit Function
+cDIBheight1 = H
 End Function
 Public Function cDIBheight(a) As Long
-Dim w As Long, h As Long
+Dim W As Long, H As Long
 cDIBheight = -1
 If Len(a) >= 12 Then
 If Left$(a, 4) = "cDIB" Then
-w = val("&H" & Mid$(a, 5, 4))
-h = val("&H" & Mid$(a, 9, 4))
-If Len(a) * 2 < ((w * 3 + 3) \ 4) * 4 * h - 24 Then Exit Function
-cDIBheight = h
+W = val("&H" & Mid$(a, 5, 4))
+H = val("&H" & Mid$(a, 9, 4))
+If Len(a) * 2 < ((W * 3 + 3) \ 4) * 4 * H - 24 Then Exit Function
+cDIBheight = H
 End If
 End If
 End Function
@@ -1715,19 +1715,23 @@ y2 = .top + .Height * (1 - (100 - Percent) / 200) - players(it).HotSpotY
 End With
 For i = Priority - 1 To 1 Step -1
 k = FindSpriteByTag(i)
-With Form1.dSprite(k)
 If k <> 0 Then
-If (x2 < .Left + .Width / 4) Or (x1 >= .Left + .Width * 3 / 4) Or (y2 <= .top + .Height / 4) Or (y1 > .top + .Height * 3 / 4) Then
-Else
-suma = suma + 2 ^ (i - 1)
+    With Form1.dSprite(k)
+        If (x2 < .Left + .Width / 4) Or (x1 >= .Left + .Width * 3 / 4) Or (y2 <= .top + .Height / 4) Or (y1 > .top + .Height * 3 / 4) Then
+        Else
+        suma = suma + 2 ^ (i - 1)
+        End If
+    End With
 End If
-End If
-End With
 Next i
-
 CollidePlayers = suma
 End Function
-
+Function SpriteVisible(Priority As Long) As Boolean
+Dim k As Long
+    k = FindSpriteByTag(Priority)
+    If k = 0 Then Exit Function
+    SpriteVisible = Form1.dSprite(k).Visible
+End Function
 Function CollideArea(Priority As Long, Percent As Long, basestack As basetask, rest$) As Boolean
 ' nx2 isn't width but absolute line at nx2
 ' means not inside
@@ -2791,7 +2795,7 @@ End Function
 Function Convert3(a$, localeid As Long) As String  ' to feed textboxes
 Dim b$, i&
 If a$ <> "" Then
-If localeid = 0 Then localeid = cLid
+If localeid = 0 Then localeid = clid
 For i& = 1 To Len(a$)
 b$ = b$ + Left$(StrConv(ChrW$(AscW(Left$(StrConv(Mid$(a$, i, 1) + Chr$(0), 128, 1033), 1))), 64, localeid), 1)
 
@@ -2947,8 +2951,8 @@ If Convert3(Convert2(a$, 1032), 1032) = a$ Then
     FoundLocaleId = 1032
 ElseIf Convert3(Convert2(a$, 1033), 1033) = a$ Then
     FoundLocaleId = 1033
-ElseIf Convert3(Convert2(a$, cLid), cLid) = a$ Then
- FoundLocaleId = cLid
+ElseIf Convert3(Convert2(a$, clid), clid) = a$ Then
+ FoundLocaleId = clid
 End If
 End Function
 Function FoundSpecificLocaleId(a$, this As Long) As Long
@@ -3119,7 +3123,7 @@ Case "лекыдиа", "леяос", "леяос(", "леяос$(", "лес$(", "лета", "летахесг", "лета
 Case "лий(", "лий$(", "лийяо(", "лийяо.сеияас$(", "лийяо.сеияас(", "лийяос.йатакоцос$(", "лмглг", "ломадиаио", "ломадиаиос", "ломадийо", "лояжг$(", "лоусийг", "лоусийг.летягтгс", "лпип"
 Case "лпяоста(", "маи", "меа", "мео", "меои", "меос", "мгла", "мглата", "мглата$"
 Case "нейима", "одгциа", "одгцос$(", "охомг", "охомес", "олака", "ойм$(", "олада", "олада(", "олада$(", "олада.сумоко(", "омола", "омола.аявеиоу$(", "ояифомтиа"
-Case "омола.аявеиоу.ломо$(", "омола.тлглатос$", "омола.вягстг$", "ояио.амадяолгс", "ояисе", "ояож(", "оуяа", "ови", "паифеижымг", "паийтгс", "паине", "пай(", "пай$(", "памта"
+Case "омола.аявеиоу.ломо$(", "омола.тлглатос$", "омола.вягстг$", "ояио.амадяолгс", "ояисе", "ояож(", "оуяа", "ови", "паифеижымг", "паийтгс", "паийтгс(", "паине", "пай(", "пай$(", "памта"
 Case "памы", "памылисо(", "паяацяажос$(", "паяацяажос(", "паяал(", "паяал$(", "паяахесг$(", "паяахуяо", "паяалетяои$", "паяе", "паяейаяе$"
 Case "паяелбокг", "патглемо(", "павос", "педиа", "педио", "педио$(", "пеф$(", "пема", "пеяи"
 Case "пеяи$", "пеяихыяио", "пета", "пи", "пимайас", "пимайас$(", "пимайас(", "пимайес", "писы("
@@ -4275,7 +4279,7 @@ myfun() = Array("PARAM(", 1, "паяал(", 1, "STACKITEM(", 2, "тилгсыяоу(", 2, "SGN
 , "BINARY.ROTATE(", 81, "дуадийг.пеяистяожг(", 81, "SINT(", 82, "айеяаио.дуадийо(", 82, "USGN(", 83, "дуадийо(", 83, "UINT(", 84, "дуадийо.айеяаио(", 84, "ROUND(", 85, "стяоцц(", 85 _
 , "INT(", 86, "ай(", 86, "SEEK(", 87, "летахесг(", 87, "EOF(", 88, "текос(", 88, "RANDOM(", 89, "туваиос(", 89, "CHRCODE(", 90, "ваяйыд(", 90, "ASC(", 91, "йыд(", 91 _
 , "GROUP(", 92, "олада(", 92, "TEST(", 93, "дойилг(", 93, "CONS(", 94, "емысг(", 94, "CAR(", 95, "пяыто(", 95, "CDR(", 96, "еполема(", 96, "сыяос(", 24, "STACK(", 24, "READY(", 97, "етоило(", 97, "PROPERTY(", 98, "идиотгта(", 98, "IF(", 99, "ам(", 99, "ORDER(", 100, "танг(", 100, "BANK(", 101, "тяап(", 101, "CEIL(", 102, "ояож(", 102, "FLOOR(", 86, "дапед(", 86, "еийома(", _
-103, "IMAGE(", 103, "BUFFER(", 104, "диаяхяысг(", 104, "BINARY.NOT(", 105, "дуадийо.ови(", 105, "POINTER(", 108, "деийтгс(", 108, "BINARY.ADD(", 109, "дуадийо.пяосхесг(", 109, "дуадийо.пяо(", 109, "HSL(", 110, "вйж(", 110)
+103, "IMAGE(", 103, "BUFFER(", 104, "диаяхяысг(", 104, "BINARY.NOT(", 105, "дуадийо.ови(", 105, "POINTER(", 108, "деийтгс(", 108, "BINARY.ADD(", 109, "дуадийо.пяосхесг(", 109, "дуадийо.пяо(", 109, "HSL(", 110, "вйж(", 110, "PLAYER(", 111, "пайтгс(", 111)
 If Not bhashbackup Is Nothing Then
 For i = 0 To UBound(myfun()) Step 2
     bhashbackup.ItemCreator CStr(myfun(i)), CLng(myfun(i + 1))
@@ -4292,7 +4296,7 @@ Dim mycommands(), i As Long
 mycommands() = Array("ABOUT", "AFTER", "APPEND", "APPEND.DOC", "BACK", "BACKGROUND", "BASE", "BEEP", "BINARY", "BITMAPS", "BOLD", "BREAK", "BROWSER", "BUFFER", "CALL", "CASE", "CAT", "CHANGE", "CHARSET", "CHOOSE.COLOR", "CHOOSE.FONT", "CHOOSE.OBJECT", "CHOOSE.ORGAN", "CIRCLE", "CLASS", "CLEAR", "CLIPBOARD", "CLOSE", "CLS", "CODEPAGE", "COLOR", "COMMIT", "COMPRESS", "CONST", "CONTINUE", "COPY", "CURSOR", "CURVE", "DATA", "DB.PROVIDER", "DB.USER" _
 , "DECLARE", "DEF", "DELETE", "DESKTOP", "DIM", "DIR", "DIV", "DO", "DOCUMENT", "DOS", "DOUBLE", "DRAW", "DRAWING", "DRAWINGS", "DROP", "DURATION", "EDIT", "EDIT.DOC", "ELSE", "ELSE.IF", "EMPTY", "END", "ENUM", "ENUMERATION", "ERASE", "ERROR", "ESCAPE", "EVENT", "EVERY", "EXECUTE", "EXIT", "EXPORT", "FAST", "FIELD", "FILES", "FILL", "FIND", "FKEY", "FLOODFILL", "FLUSH", "FONT", "FOR", "FORM", "FORMLABEL", "FRAME", "FUNCTION", "GET", "GLOBAL" _
 , "GOSUB", "GOTO", "GRADIENT", "GREEK", "GROUP", "HALT", "HEIGHT", "HELP", "HEX", "HIDE", "HOLD", "HTML", "ICON", "IF", "IMAGE", "INLINE", "INPUT", "INSERT", "INVENTORY", "ITALIC", "JOYPAD", "KEYBOARD", "LATIN", "LAYER", "LEGEND", "LET", "LINE", "LINESPACE", "LINK", "LIST", "LOAD", "LOAD.DOC", "LOCAL", "LOCALE", "LONG", "LOOP", "MAIN.TASK", "MARK", "MEDIA", "MENU", "MERGE.DOC", "METHOD", "MODE", "MODULE" _
-, "MODULES", "MONITOR", "MOTION", "MOTION.W", "MOUSE.ICON", "MOVE", "MOVIE", "MOVIES", "MUSIC", "NAME", "NEW", "NEXT", "NORMAL", "ON", "OPEN", "OPEN.FILE", "OPEN.IMAGE", "OPTIMIZATION", "ORDER", "OVER", "OVERWRITE", "PAGE", "PART", "PATH", "PEN", "PIPE", "PLAY", "PLAYER", "POLYGON", "PRINT", "PRINTER", "PRINTING", "PROFILER", "PROPERTIES", "PROTOTYPE", "PSET", "PUSH", "PUT", "READ", "RECURSION.LIMIT" _
+, "MODULES", "MONITOR", "MOTION", "MOTION.W", "MOUSE.ICON", "MOVE", "MOVIE", "MOVIES", "MUSIC", "NAME", "NEW", "NEXT", "NORMAL", "ON", "OPEN", "OPEN.FILE", "OPEN.IMAGE", "OPTIMIZATION", "ORDER", "OVER", "OVERWRITE", "PAGE", "PART", "PATH", "PEN", "PIPE", "PLAY", "PLAYER", "PLAYER(", "POLYGON", "PRINT", "PRINTER", "PRINTING", "PROFILER", "PROPERTIES", "PROTOTYPE", "PSET", "PUSH", "PUT", "READ", "RECURSION.LIMIT" _
 , "REFER", "REFRESH", "RELEASE", "REM", "REMOVE", "REPEAT", "REPORT", "RESTART", "RETRIEVE", "RETURN", "SAVE", "SAVE.AS", "SAVE.DOC", "SCAN", "SCORE", "SCREEN.PIXELS", "SCRIPT", "SCROLL", "SEARCH", "SEEK", "SELECT", "SET", "SETTINGS", "SHIFT", "SHIFTBACK", "SHOW", "SLOW", "SMOOTH", "SORT", "SOUND", "SOUNDREC", "SOUNDS", "SPEECH", "SPLIT", "SPRITE", "STACK", "START", "STATIC", "STEP", "STOCK", "STOP", "STRUCTURE" _
 , "SUB", "SUBDIR", "SUPERCLASS", "SWAP", "SWEEP", "SWITCHES", "TAB", "TABLE", "TARGET", "TARGETS", "TASK.MAIN", "TEST", "TEXT", "THEN", "THREAD", "THREAD.PLAN", "THREADS", "TITLE", "TONE", "TRY", "TUNE", "UPDATE", "USE", "USER", "VERSION", "VIEW", "VOLUME", "WAIT", "WHILE", "WIDTH", "WIN", "WINDOW", "WITH", "WORDS", "WRITE", "WRITER", "адеиасе", "акт", "аккацг", "аккане", "аккиыс", "аккиыс.ам", "ам", "амафгтгсг" _
 , "амахеыягсг", "амайтгсг", "амакоцио", "амакусг.охомгс", "амакутгс", "амаломг", "амамеысг", "амажояа", "амаье", "амехесе", "амоицла.аявеиоу", "амоицла.еийомас", "амоине", "амтецяаье", "амтицяаье", "апая", "апаяихлгсг", "апедысе", "апо", "апохгйеусг.ыс", "апойопг", "аяца", "аявеиа", "аявеио", "аявг", "аукос", "ауноуса", "ажаияесг", "ажгсе", "баке", "басг", "басг.паяовос", "басг.вягстгс", "баье", "бектистопоигсг" _

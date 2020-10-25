@@ -1705,6 +1705,7 @@ ttl = True
 Form3.Visible = False
 escok = False
 Sleep 10
+ProcSalata 3, Basestack1, "locale"
 If pagio$ = "GREEK" Then
 FK$(13) = "”’√√—¡÷≈¡”"
 Else
