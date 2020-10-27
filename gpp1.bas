@@ -175,8 +175,7 @@ End Sub
       Function ShowProperties(F As Object, szPrinterName As String, adevmode() As Byte) As Boolean
       Dim hPrinter As Long, i As Long
       Dim nSize As Long
-     '' Dim pDevMode As DEVMODE
-     ' Dim adevmode() As Byte
+
       Dim TempStr As String, oldfields As Long
       Dim pd As PRINTER_DEFAULTS
       pd.DesiredAccess = PRINTER_ACCESS_USE
@@ -198,18 +197,14 @@ End Sub
             Exit Function
           End If
    
-      ''Call CopyMemory(pDevMode, adevmode(1), Len(pDevMode))
-''  if you need to check fileds for any bit use these copies to do the check.
-        
-      '' Call CopyMemory(adevmode(1), pDevMode, Len(pDevMode))
-   End If
+  End If
          If Not F Is Nothing Then
           nSize = DocumentProperties(F.hWnd, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_PROMPT Or DM_IN_BUFFER Or DM_OUT_BUFFER)  '
          Else
          nSize = DocumentProperties(0, hPrinter, szPrinterName, adevmode(1), adevmode(1), DM_IN_BUFFER Or DM_OUT_BUFFER)
         End If
 
-       ''  Call CopyMemory(pDevMode, adevmode(1), Len(pDevMode))
+
           
  On Error Resume Next
 
@@ -499,16 +494,16 @@ Function LowWord(a As Long) As Long
 LowWord = a
 PutMem2 VarPtr(LowWord) + 2, 0
 End Function
-Function HighLow(h As Long, l As Long) As Long
+Function HighLow(H As Long, l As Long) As Long
 Dim a As Integer
 HighLow = l
-GetMem2 VarPtr(h), a
+GetMem2 VarPtr(H), a
 PutMem2 VarPtr(HighLow) + 2, a
 End Function
 Function HighWord(a As Long) As Long
-Dim h As Integer
-GetMem2 VarPtr(a) + 2, h
-PutMem2 VarPtr(HighWord), h
+Dim H As Integer
+GetMem2 VarPtr(a) + 2, H
+PutMem2 VarPtr(HighWord), H
 End Function
 Function cUlng2(a As Double) As Long ' for packlng, get a double as unsigned 32bit and return sign 32bit
 a = Int(a)

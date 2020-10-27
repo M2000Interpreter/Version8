@@ -1075,13 +1075,6 @@ Public Sub SetNormal(dq As Object)
 SetTextSZ dq, players(GetCode(dq)).SZ, 1
 End Sub
 
-
-Sub BOXbasket(dqq As Object, mybasket As basket, b$, c As Long)
-With mybasket
-    dqq.Line (.x * .Xt - DXP, .y * .Yt - DYP)-((.x + Len(b$)) * .Xt, .y * .Yt + .Yt), mycolor(c), B
-End With
-End Sub
-
 Sub BoxBigNew(dqq As Object, mb As basket, x1&, y1&, c As Long)
 With mb
  If TypeOf dqq Is MetaDc Then
@@ -21473,13 +21466,14 @@ mydpi = 600 '288
 again:
 On Error Resume Next
 ' DC FROM PRINTER
+oprinter.EndPrint
 oprinter.ClearUp
 If oprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
+Form1.PrinterDocument1.backcolor = QBColor(15)
 oprinter.WhiteBits
 oprinter.GetDpi mydpi, mydpi
 Form1.PrinterDocument1.Cls
 oprinter.needHDC
-
 Set Form1.PrinterDocument1 = hDCToPicture(oprinter.HDC1, 0, 0, oprinter.Width, oprinter.Height)
 oprinter.FreeHDC
 If Err > 0 And try1 < 2 Then
@@ -21489,6 +21483,8 @@ mydpi = mydpi / 2
 GoTo again
 End If
 szFactor = mydpi * dv15 / 1440#
+On Error Resume Next
+Form1.PrinterDocument1.Refresh
 Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
 pnum = 0
 End If
@@ -21511,11 +21507,15 @@ With Form1.PrinterDocument1
 .currentX = 0
 .currentY = 0
 End With
-'Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
-
 oprinter.CopyPicturePrinter Form1.PrinterDocument1
+oprinter.GetDpi mydpi, mydpi
 oprinter.ThumbnailPaintPrinter 1, 100 * prFactor, False, True, True, , , , , , Form3.CaptionW '& " " & Str$(pnum)
-Form1.PrinterDocument1.Cls
+oprinter.ClearBits Form1.PrinterDocument1.backcolor
+oprinter.needHDC
+Set Form1.PrinterDocument1 = hDCToPicture(oprinter.HDC1, 0, 0, oprinter.Width, oprinter.Height)
+oprinter.FreeHDC
+
+Form1.PrinterDocument1.Refresh
 Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
 
 
@@ -21525,9 +21525,13 @@ Sub getenddoc()
 pnum = pnum + 1
 If prFactor = 0 Then prFactor = 1
 oprinter.CopyPicturePrinter Form1.PrinterDocument1
-oprinter.ThumbnailPaintPrinter 1, 100 * prFactor, False, True, True, , , , , , Form3.CaptionW '& " " & Str$(pnum)
-oprinter.ClearUp
 Form1.PrinterDocument1.Picture = LoadPicture("")
+oprinter.ThumbnailPaintPrinter 1, 100 * prFactor, False, True, True, , , , , , Form3.CaptionW '& " " & Str$(pnum)
+oprinter.EndPrint
+
+oprinter.ClearUp
+
+Set oprinter = New cDIBSection
 End Sub
 Function MyDrawings(bstack As basetask, rest$, Lang As Long) As Boolean
 MyDrawings = True
@@ -22109,7 +22113,7 @@ End If
 If Not bstack.toprinter Then Exit Sub
 'oprinter.ClearUp
 If oprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
-oprinter.WhiteBits
+oprinter.ClearBits Form1.PrinterDocument1.backcolor
 oprinter.GetDpi mydpi, mydpi
 oprinter.needHDC
 Set Form1.PrinterDocument1 = hDCToPicture(oprinter.HDC1, 0, 0, oprinter.Width, oprinter.Height)
@@ -22121,6 +22125,8 @@ mydpi = mydpi / 2
 GoTo again
 End If
 szFactor = mydpi * dv15 / 1440#
+On Error Resume Next
+Form1.Refresh
 Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
 
 End If
@@ -22160,7 +22166,7 @@ End If
 If Not bstack.toprinter Then Exit Sub
 'oprinter.ClearUp
 If oprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
-oprinter.WhiteBits
+oprinter.ClearBits Form1.PrinterDocument1.backcolor
 oprinter.GetDpi mydpi, mydpi
 oprinter.needHDC
 On Error Resume Next
@@ -22174,6 +22180,8 @@ mydpi = mydpi / 2
 GoTo again
 End If
 szFactor = mydpi * dv15 / 1440#
+On Error Resume Next
+Form1.Refresh
 Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * (mydpi) + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
 End If
 If bstack.toprinter Then
@@ -24937,4 +24945,33 @@ End If
 ProcPlayer = True
 Exit Function
 End Function
+
+
+Sub ClearState()
+Basestack1.IamAnEvent = False
+abt = False
+Set comhash = New sbHash
+allcommands comhash
+Set numid = New idHash
+Set funid = New idHash
+Set strid = New idHash
+Set strfunid = New idHash
+NumberId numid, funid
+StringId strid, strfunid
+NoOptimum = False
+NERR = False
+TaskMaster.Dispose
+CloseAllConnections
+CleanupLibHandles
+If Not NOEDIT Then
+NOEDIT = True
+Else
+If QRY Then QRY = False
+End If
+' restore DB.Provider for User
+JetPrefixUser = JetPrefixHelp
+JetPostfixUser = JetPostfixHelp
+' SET ARRAY BASE TO ZERO
+ArrBase = 0
+End Sub
 

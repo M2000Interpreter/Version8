@@ -1,10 +1,10 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 2 active-X
-1. Now an invalid Locale id return an error (before there was a return as a vb6 error).
-2. Added in Info more examples.
-3. Wmf supported (old metafiles) by the Drawing structure (we can embbed those metafiles converted internally to enhached metfiles)
-4. Player() function to return if a sprite is visible. 
+Version 10 revision 3 active-X
+These are serious fixes
+1. Fix a leak in GDI objects
+2. Fix the printing system
+
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

@@ -318,7 +318,7 @@ Private PaintType As Boolean
 Private Declare Function SetBkMode Lib "gdi32" (ByVal Hdc As Long, ByVal nBkMode As Long) As Long
 Private Declare Function DeleteEnhMetaFile Lib "gdi32" (ByVal hEmf As Long) As Long
 Private Declare Function PlayEnhMetaFile Lib "gdi32" (ByVal Hdc As Long, ByVal hEmf As Long, lpRect As Any) As Long
-Private Declare Function GetMetaFileBitsEx Lib "gdi32" (ByVal hMF As Long, ByVal nSize As Long, lpvData As Any) As Long
+Private Declare Function GetMetaFileBitsEx Lib "gdi32" (ByVal hmf As Long, ByVal nSize As Long, lpvData As Any) As Long
 Private Declare Function SetMetaFileBitsEx Lib "gdi32" (ByVal nSize As Long, lpData As Byte) As Long
 Private Declare Function SetWinMetaFileBits Lib "gdi32" (ByVal cbBuffer As Long, lpbBuffer As Byte, ByVal hDCRef As Long, lpmfp As Any) As Long
 Private mType As Long
@@ -506,38 +506,16 @@ Dim hDibCopy As Long
                 SentToClipBoard
                 CloseClipboard
               End If
-               'MsgBox "I don't know how to put a DIB on the clipboard! Copy as bitmap instead!!!"
-                ' Create a duplicate DIBSection and copy
-                ' to the clipboard:
-                'LSet tBI = m_tBI
-                'hDibCopy = CreateDIBSection( _
-                '        lhDC, _
-                '        m_tBI, _
-                '        DIB_RGB_COLORS, _
-                '        lPtr, _
-                '        0, 0)
-                'If (hDibCopy <> 0) Then
-                '    lhBmpOld = SelectObject(lhDC, hObj)
-                '    BitBlt lhDC, 0, 0, Width, Height, m_hDC, 0, 0, vbSrcCopy
-                '    SelectObject lhDC, lhBmpOld
-                '    lFmt = CF_DIB
-                '
-                '     '....
-                                    
-                'Else
-                '    hObj = 0
-                'End If
+               
             Else
-                ' Create a compatible bitmap and copy to
-                ' the clipboard:
+
                 hObj = CreateCompatibleBitmap(lhDCDesktop, Width, Height)
                 If (hObj <> 0) Then
                     lhBmpOld = SelectObject(lHDC, hObj)
                     PaintPicture lHDC
                     SelectObject lHDC, lhBmpOld
                     lFmt = CF_BITMAP
-                    ' Now set the clipboard to the bitmap:
-                    If (OpenClipboard(0) <> 0) Then
+                     If (OpenClipboard(0) <> 0) Then
                         EmptyClipboard
                         If (SetClipboardData(lFmt, hObj) <> 0) Then
                             CopyToClipboard = True
@@ -965,11 +943,19 @@ FreeHDC
 DeleteObject my_brush
 End Sub
 Public Sub ClearUp()
-EndPrint
 If m_hDIb <> 0 Then
- If m_lPtr > 0 Then GlobalFree m_lPtr
+ If m_hDIb <> 0 And m_hDC <> 0 Then
+ m_hBmpOld = SelectObject(m_hDC, m_hDIb)
+ End If
+
+' If m_lPtr > 0 Then
+' GlobalFree m_lPtr
+ '    m_lPtr = 0
+     
+ 'End If
+ GdiFlush
  If DeleteObject(m_hDIb) <> 1 Then MyEr "Problem with GDI objects", "Πρόβλημα με το σύστημα γραφικών"
-GdiFlush
+       
         m_tBI.bmiHeader.biHeight = 0
          ' end new
     m_hDC = 0: m_hDIb = 0: m_hBmpOld = 0: m_lPtr = 0
@@ -1481,7 +1467,10 @@ PaintType = False
 End Sub
 
 Private Sub Class_Terminate()
-     EndPrint
+     'EndPrint
+     If m_lPtr Then
+     GlobalFree m_lPtr
+     End If
     ClearUp
 
 End Sub
@@ -1809,19 +1798,19 @@ End Sub
 Public Sub needPrinterHDC(dest As Object)
 ' return hdc
 If UBound(MyDM) > 1 And p_hdc <> 0 Then
+If m_hDC <> 0 Then
   m_hDC = CreateCompatibleDC(p_hdc)
-
-Else
-  m_hDC = 0
   End If
+ End If
 If m_hDIb <> 0 And m_hDC <> 0 Then m_hBmpOld = SelectObject(m_hDC, m_hDIb)
 End Sub
 
 Public Sub FreeHDC()
 GdiFlush
 If m_hDC <> 0 Then
-If m_hDIb <> 0 And m_hBmpOld <> 0 Then SelectObject m_hDC, m_hBmpOld
+If m_hDIb <> 0 And m_hBmpOld <> 0 Then SelectObject m_hDC, m_hBmpOld: m_hBmpOld = 0
 sumhDC = sumhDC - 1
+If p_hdc <> 0 Then Exit Sub
 DeleteDC m_hDC
 m_hDC = 0
 End If
@@ -2140,10 +2129,20 @@ End If
  End Sub
  Public Sub FreePrinterHdc()
  Dim ret As Long
-          
+   If m_hDIb <> 0 And m_hDC <> 0 Then
+   If m_hBmpOld <> 0 Then
+   SelectObject m_hDC, m_hBmpOld
+   m_hBmpOld = 0
+   End If
+   
+   End If
           ret = EndDoc(p_hdc)
+           ret = DeleteDC(m_hDC)
           ret = DeleteDC(p_hdc)
+          m_hDC = 0
           p_hdc = 0
+          
+          
 End Sub
 Sub PageView(where As Object, Optional How As Long = -1, Optional vso As Object = Nothing, Optional hso As Object = Nothing, Optional Percent As Single = 1, Optional gid As Long = 0)
 ' object need gonia 375x375 frame if we use vso and hso.
@@ -2500,14 +2499,14 @@ tp1:
     ' gdiflush
 End Sub
 
-Function ConvertWmftoEmF(hMF As Long) As Long
+Function ConvertWmftoEmF(hmf As Long) As Long
 Dim hEmf As Long
 Dim bytes As Long
 Dim Buffer() As Byte
-bytes = GetMetaFileBitsEx(hMF, bytes, ByVal 0&)
+bytes = GetMetaFileBitsEx(hmf, bytes, ByVal 0&)
 If bytes Then
 ReDim Buffer(1 To bytes) As Byte
-Call GetMetaFileBitsEx(hMF, bytes, Buffer(1))
+Call GetMetaFileBitsEx(hmf, bytes, Buffer(1))
 Else
 
 Exit Function

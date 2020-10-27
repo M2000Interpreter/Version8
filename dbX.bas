@@ -1525,7 +1525,7 @@ End If
 
 End Function
 Public Sub getrow(bstackstr As basetask, R$, Optional ERL As Boolean = True, Optional Search$ = " = ", Optional Lang As Long = 0, Optional IamHelpFile As Boolean = False)
-
+Dim stat As Long
 Dim base As String, table$, from As Long, first$, Second$, ok As Boolean, fr As Double, stac1$, p, i&
 Dim mb As Mk2Base, tables As FastCollection, pppp As mArray, Temp As mArray, fieldlist As FastCollection, ii As Long, pppp1 As mArray
 Dim vv, IndexList As FastCollection, many As Long, topi As Long, temp2 As mArray, ret As Boolean
@@ -1910,16 +1910,29 @@ If from >= 0 Then
 End If
 
     For i& = rec.fields.count - 1 To 0 Step -1
-
+    On Error Resume Next
+    Err.Clear
+    stat = rec.fields(i&).Status
+    If Err Then
+        Err.Clear
+         
+    ElseIf stat > 1 Then
+        bstackstr.soros.PushUndefine
+        GoTo contnext
+    End If
    Select Case rec.fields(i&).Type
 Case 1, 2, 3, 4, 5, 6
 
- If IsNull(rec.fields(i&)) Then
-        bstackstr.soros.PushUndefine          '.PushStr "0"
+    If IsNull(rec.fields(i&)) Then
+        bstackstr.soros.PushUndefine
+    Else
+    stat = rec.fields(i&).Status
+    If stat = 2 Then
+    bstackstr.soros.PushUndefine
     Else
         bstackstr.soros.PushVal CDbl(rec.fields(i&))
-    
-End If
+        End If
+    End If
 Case 7
 If IsNull(rec.fields(i&)) Then
     
@@ -1943,6 +1956,7 @@ Case 11, 12 ' this is the binary field so we can save unicode there
 '
    bstackstr.soros.PushStr "?"
  End Select
+contnext:
    Next i&
    End If
    

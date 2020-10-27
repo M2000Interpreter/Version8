@@ -348,7 +348,6 @@ Private Sub Class_Terminate()
     If m_Status Then
         If m_hDC <> 0 Then
              CleanUp
-             SelectObject m_hDC, m_hFntOld
              DeleteDC m_hDC
         End If
     End If
@@ -567,7 +566,7 @@ FillRect m_hDC, rp, linepen
 DeleteObject linepen
 If DrawBlock Then GoTo cont123
 ElseIf DrawBlock Then
-linepen = CreateSolidBrush(RGBcolor)
+'linepen = CreateSolidBrush(RGBcolor)
 rp.Left = x1 \ dv15
 rp.top = y1 \ dv15
 rp.Right = Int(x2 / dv15 + 0.5)

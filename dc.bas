@@ -113,7 +113,7 @@ Public Function GetLongName(strTest As String) As String
    Dim cbbuff As Long
    Dim Result As Long
  
-   buff = space$(MAX_PATH_UNICODE)
+   buff = Space$(MAX_PATH_UNICODE)
    cbbuff = Len(buff)
  
    Result = GetLongPathName(StrPtr(strTest), StrPtr(buff), cbbuff)
@@ -151,7 +151,7 @@ Sub Pprop()
         
     Dim x As Printer
 For Each x In Printers
-If x.DeviceName = pname And x.port = port Then Exit For
+If x.DeviceName = pname And x.Port = Port Then Exit For
 Next x
 Dim gp As Long, td As PRINTER_DEFAULTS
 Call OpenPrinter(x.DeviceName, gp, td)
@@ -321,10 +321,10 @@ End Function
 Public Function VoiceName(ByVal d As Double) As String
 On Error Resume Next
 Dim o As Object
-If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
-If Typename(sapi) = "Nothing" Then VoiceName = vbNullString: Exit Function
+If TypeName(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
+If TypeName(sapi) = "Nothing" Then VoiceName = vbNullString: Exit Function
 d = Int(d)
-If sapi.getvoices().count >= d And d > 0 Then
+If sapi.getvoices().Count >= d And d > 0 Then
 For Each o In sapi.getvoices
 d = d - 1
 If d = 0 Then VoiceName = o.GetDescription: Exit For
@@ -333,10 +333,10 @@ End If
 End Function
 Public Function NumVoices() As Long
 On Error Resume Next
-If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
-If Typename(sapi) = "Nothing" Then NumVoices = -1: Exit Function
-If sapi.getvoices().count > 0 Then
-NumVoices = sapi.getvoices().count
+If TypeName(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
+If TypeName(sapi) = "Nothing" Then NumVoices = -1: Exit Function
+If sapi.getvoices().Count > 0 Then
+NumVoices = sapi.getvoices().Count
 End If
 End Function
 Public Sub SPEeCH(ByVal a$, Optional BOY As Boolean = False, Optional ByVal vNumber As Long = -1)
@@ -344,22 +344,22 @@ Static lastvoice As Long
 If vNumber = -1 Then vNumber = lastvoice
 On Error Resume Next
 If vNumber = 0 Then vNumber = 1
-If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
-If Typename(sapi) = "Nothing" Then Beep: Exit Sub
-If sapi.getvoices().count > 0 Then
-If sapi.getvoices().count < vNumber Or sapi.getvoices().count < 1 Then vNumber = 1
+If TypeName(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
+If TypeName(sapi) = "Nothing" Then Beep: Exit Sub
+If sapi.getvoices().Count > 0 Then
+If sapi.getvoices().Count < vNumber Or sapi.getvoices().Count < 1 Then vNumber = 1
  With sapi
-         Set .Voice = .getvoices.item(vNumber - 1)
+         Set .Voice = .getvoices.Item(vNumber - 1)
        If BOY Then
          .volume = IIf(vol = 0, 0, 50 + vol \ 2)
         
-         .rate = 2
+         .Rate = 2
        ' boy
          .Speak "<pitch absmiddle='25'>" & a$
          Else
          
          'man
-       .rate = 1
+       .Rate = 1
        .volume = IIf(vol = 0, 0, 50 + vol \ 2)
          .Speak "<pitch absmiddle='-5'>" & a$
          End If
@@ -412,13 +412,13 @@ With mybasket
 
     If Not nopr Then
         If Not nosettext Then
-        If PY = .My And .double Then
+        If PY = .My And .Double Then
             crNew bstack, mybasket
             PY = .currow
         End If
              LCTbasket ddd, mybasket, PY, PX
         End If
-        ddd.currentX = ddd.currentX + dv2x15
+        ddd.CurrentX = ddd.CurrentX + dv2x15
         If Not scrollme Then
             If Hi >= 0 Then If (.My - PY) * .Yt < Hi Then Hi = (.My - PY) * .Yt
         Else
@@ -507,11 +507,11 @@ last:
     
             MyPrintNew ddd, mybasket.uMineLineSpace, buf$, , nowait     ';   '************************************************************************************
     
-            res = ddd.currentX
+            res = ddd.CurrentX
                     If Trim$(buf$) = vbNullString Then
-                    ddd.currentX = ((ddd.currentX + .Xt \ 2) \ .Xt) * .Xt
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 2) \ .Xt) * .Xt
                     Else
-                    ddd.currentX = ((ddd.currentX + .Xt \ 1.2) \ .Xt) * .Xt
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 1.2) \ .Xt) * .Xt
                     End If
             End If
           If Not (isAcolumn Or nosettext) Then If Not nonewline Then GoTo JUMPHERE
@@ -580,7 +580,7 @@ JUMPHERE:
               
         End If
       End If
-If Not nopr Then LCTbasket ddd, mybasket, npy, PX: ddd.currentX = ddd.currentX + dv2x15
+If Not nopr Then LCTbasket ddd, mybasket, npy, PX: ddd.CurrentX = ddd.CurrentX + dv2x15
 If skip < 0 Then Hi = Hi - 1
 If Hi < 0 Then Exit For
 continue:
@@ -592,7 +592,7 @@ If scrollme Then
 HoldReset lCount, mybasket
 End If
 res = nohi - Hi
-wi = ddd.currentX
+wi = ddd.CurrentX
 If collectit Then bstack.soros.PushStr mDoc.textDoc
 End Sub
 Public Sub wwPlain(bstack As basetask, mybasket As basket, ByVal what As String, ByVal wi As Long, ByVal Hi As Long, Optional scrollme As Boolean = False, Optional nosettext As Boolean = False, Optional frmt As Long = 0, Optional ByVal skip As Long = 0, Optional res As Long, Optional isAcolumn As Boolean = False, Optional collectit As Boolean = False, Optional nonewline As Boolean)
@@ -644,13 +644,13 @@ With mybasket
 
     If Not nopr Then
         If Not nosettext Then
-        If PY = .My And .double Then
+        If PY = .My And .Double Then
             crNew bstack, mybasket
             PY = .currow
         End If
              LCTbasket ddd, mybasket, PY, PX
         End If
-        ddd.currentX = ddd.currentX + dv2x15
+        ddd.CurrentX = ddd.CurrentX + dv2x15
         If Not scrollme Then
             If Hi >= 0 Then If (.My - PY) * .Yt < Hi Then Hi = (.My - PY) * .Yt
         Else
@@ -728,17 +728,17 @@ nextline:
 
                  Select Case frmt
                  Case 0
-                 INTD = TextWidth(ddd, space$(MyTrimL3Len(buf$)))
+                 INTD = TextWidth(ddd, Space$(MyTrimL3Len(buf$)))
                             If INTD > 0 Then
                  buf$ = Mid$(buf$, MyTrimL3Len(buf$) + 1)
-                 ddd.currentX = ddd.currentX + INTD
+                 ddd.CurrentX = ddd.CurrentX + INTD
                  End If
                  buf$ = RTrim(buf$)
                  lasttab = rinstr(buf$, vbTab)
                  If lasttab > 0 Then
-                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.currentX \ DXP, ddd.currentY \ DXP, StrPtr(buf$), lasttab, 1, tabw, ddd.currentX \ DXP))
+                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(buf$), lasttab, 1, tabw, ddd.CurrentX \ DXP))
                  buf$ = Mid$(buf$, lasttab + 1)
-                 ddd.currentX = ddd.currentX + Extra * DXP
+                 ddd.CurrentX = ddd.CurrentX + Extra * DXP
                               
                  End If
                  olda = SetTextAlign(ddd.Hdc, 0) 'TA_RTLREADING)
@@ -749,7 +749,7 @@ nextline:
                  SetTextJustification ddd.Hdc, Extra, cuts
                  
                 '
-                 TextOut ddd.Hdc, ddd.currentX \ DXP, ddd.currentY \ DXP, StrPtr(buf$), Len(buf$)
+                 TextOut ddd.Hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(buf$), Len(buf$)
                  
                  SetTextJustification ddd.Hdc, 0, 0
                  olda = SetTextAlign(ddd.Hdc, olda)
@@ -757,15 +757,15 @@ nextline:
                  buf$ = RTrim(buf$)
                  Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.Hdc, StrPtr(buf$), Len(buf$), 1, tabw))
                  
-                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.currentX \ DXP + Extra, ddd.currentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.currentX \ DXP + Extra))
+                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
                  Case 2
                  buf$ = Trim(buf$)
                  Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.Hdc, StrPtr(buf$), Len(buf$), 1, tabw))) \ 2
                  
-                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.currentX \ DXP + Extra, ddd.currentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.currentX \ DXP + Extra))
+                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
                  
                  Case Else
-                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.currentX \ DXP, ddd.currentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.currentX \ DXP))
+                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.CurrentX \ DXP))
                  
                  End Select
 
@@ -788,11 +788,11 @@ last:
     
             MyPrintNew ddd, mybasket.uMineLineSpace, buf$, , nowait     ';   '************************************************************************************
     
-            res = ddd.currentX
+            res = ddd.CurrentX
                     If Trim$(buf$) = vbNullString Then
-                    ddd.currentX = ((ddd.currentX + .Xt \ 2) \ .Xt) * .Xt
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 2) \ .Xt) * .Xt
                     Else
-                    ddd.currentX = ((ddd.currentX + .Xt \ 1.2) \ .Xt) * .Xt
+                    ddd.CurrentX = ((ddd.CurrentX + .Xt \ 1.2) \ .Xt) * .Xt
                     End If
             End If
             If Not (isAcolumn Or nosettext) Then If Not nonewline Then GoTo JUMPHERE
@@ -815,23 +815,23 @@ last:
                 buf$ = RTrim(buf$)
                  Extra = wi \ DXP - LowWord(GetTabbedTextExtent(ddd.Hdc, StrPtr(buf$), Len(buf$), 1, tabw))
                  
-                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.currentX \ DXP + Extra, ddd.currentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.currentX \ DXP + Extra))
+                 Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
                 
                 Case 2
                 buf$ = Trim(buf$)
                 Extra = (wi \ DXP - LowWord(GetTabbedTextExtent(ddd.Hdc, StrPtr(buf$), Len(buf$), 1, tabw))) \ 2
                  
-                Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.currentX \ DXP + Extra, ddd.currentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.currentX \ DXP + Extra))
+                Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.CurrentX \ DXP + Extra, ddd.CurrentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.CurrentX \ DXP + Extra))
 
                 Case 3, 0
-                INTD = TextWidth(ddd, space$(MyTrimL3Len(buf$)))
+                INTD = TextWidth(ddd, Space$(MyTrimL3Len(buf$)))
                 If INTD > 0 Then
                     buf$ = Mid$(buf$, MyTrimL3Len(buf$) + 1)
-                    ddd.currentX = ddd.currentX + INTD
+                    ddd.CurrentX = ddd.CurrentX + INTD
                 End If
                 buf$ = RTrim(buf$)
                 
-                Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.currentX \ DXP, ddd.currentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.currentX \ DXP))
+                Extra = LowWord(TabbedTextOut(ddd.Hdc, ddd.CurrentX \ DXP, ddd.CurrentY \ DXP, StrPtr(buf$), Len(buf$), 1, tabw, ddd.CurrentX \ DXP))
                 
                 End Select
                 End If
@@ -883,7 +883,7 @@ JUMPHERE:
                 End If
                 End If
             End If
-If Not nopr Then LCTbasket ddd, mybasket, npy, PX: ddd.currentX = ddd.currentX + dv2x15
+If Not nopr Then LCTbasket ddd, mybasket, npy, PX: ddd.CurrentX = ddd.CurrentX + dv2x15
 If skip < 0 Then Hi = Hi - 1
 If Hi < 0 Then Exit For
 continue:
@@ -895,7 +895,7 @@ If scrollme Then
 HoldReset lCount, mybasket
 End If
 res = nohi - Hi
-wi = ddd.currentX
+wi = ddd.CurrentX
 If collectit Then bstack.soros.PushStr mDoc.textDoc
 End Sub
 Public Sub EnableMidi()
@@ -923,5 +923,7 @@ Public Sub DisableMidi()
   hmidi = 0
   End If
 End Sub
+
+
 
 
