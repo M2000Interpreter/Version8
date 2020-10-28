@@ -21466,7 +21466,7 @@ mydpi = 600 '288
 again:
 On Error Resume Next
 ' DC FROM PRINTER
-oprinter.EndPrint
+'oprinter.EndPrint
 oprinter.ClearUp
 If oprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
 Form1.PrinterDocument1.backcolor = QBColor(15)
@@ -21524,14 +21524,16 @@ End Sub
 Sub getenddoc()
 pnum = pnum + 1
 If prFactor = 0 Then prFactor = 1
+Form1.Refresh
 oprinter.CopyPicturePrinter Form1.PrinterDocument1
 Form1.PrinterDocument1.Picture = LoadPicture("")
 oprinter.ThumbnailPaintPrinter 1, 100 * prFactor, False, True, True, , , , , , Form3.CaptionW '& " " & Str$(pnum)
+oprinter.ClearUp
 oprinter.EndPrint
 
-oprinter.ClearUp
 
-Set oprinter = New cDIBSection
+
+'Set oprinter = New cDIBSection
 End Sub
 Function MyDrawings(bstack As basetask, rest$, Lang As Long) As Boolean
 MyDrawings = True
@@ -22097,39 +22099,54 @@ End If
 prFactor = mydpi / 600#
 mydpi = 600
 szFactor = mydpi * dv15 / 1440#
-again:
+
 If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) > 1 Then
     If oprinter.PrinterOn Then
         ChangeNowOrientationPortrait
         oprinter.ResetPageDM
-        Exit Sub
+        SwapPrinterDim pw, ph, psw, psh, pwox, phoy
+        GoTo contnow
     Else
-        ChangeOrientation dummy, Printer.DeviceName, MyDM():
+        ChangeOrientation dummy, Printer.DeviceName, MyDM()
+        SwapPrinterDim pw, ph, psw, psh, pwox, phoy
+        Exit Sub
     End If
-    PrinterDim pw, ph, psw, psh, pwox, phoy
+    
 Else
-If oprinter.PrinterOn Then Exit Sub
+    Form1.PrinterDocument1.Cls
+    Form1.Refresh
+    Exit Sub
 End If
-If Not bstack.toprinter Then Exit Sub
-'oprinter.ClearUp
-If oprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
-oprinter.ClearBits Form1.PrinterDocument1.backcolor
-oprinter.GetDpi mydpi, mydpi
-oprinter.needHDC
-Set Form1.PrinterDocument1 = hDCToPicture(oprinter.HDC1, 0, 0, oprinter.Width, oprinter.Height)
-oprinter.FreeHDC
-If Err > 0 And try1 < 2 Then
-try1 = try1 + 1
-prFactor = prFactor * 2
-mydpi = mydpi / 2
-GoTo again
-End If
-szFactor = mydpi * dv15 / 1440#
-On Error Resume Next
-Form1.Refresh
-Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
+contnow:
+Dim thisprinter As New cDIBSection
 
+If thisprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
+    thisprinter.ClearBits Form1.PrinterDocument1.backcolor
+    
+    thisprinter.GetDpi mydpi, mydpi
+    Form1.PrinterDocument1.Cls
+    thisprinter.needHDC
+    Set Form1.PrinterDocument1 = hDCToPicture(thisprinter.HDC1, 0, 0, thisprinter.Width, thisprinter.Height)
+    thisprinter.FreeHDC
+    If Err > 0 And try1 < 2 Then
+        try1 = try1 + 1
+        prFactor = prFactor * 2
+        mydpi = mydpi / 2
+        GoTo contnow
+    End If
+    szFactor = mydpi * dv15 / 1440#
+    On Error Resume Next
+    Form1.Refresh
+    Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * mydpi + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
+    thisprinter.CopyPrinter oprinter.PrinterHdc
+    Set oprinter = thisprinter
+ElseIf try1 < 2 Then
+        try1 = try1 + 1
+        prFactor = prFactor * 2
+        mydpi = mydpi / 2
+        GoTo contnow
 End If
+
 If bstack.toprinter Then
     SetText Form1.PrinterDocument1
     Else
@@ -22149,41 +22166,54 @@ mydpi = phoy
 End If
 prFactor = mydpi / 600#
 mydpi = 600
-again:
-
 
 If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) < 1 Then
     If oprinter.PrinterOn Then
         ChangeNowOrientationLandscape
         oprinter.ResetPageDM
-        Exit Sub
+        SwapPrinterDim pw, ph, psw, psh, pwox, phoy
+        GoTo contnow
     Else
         ChangeOrientation dummy, Printer.DeviceName, MyDM()
-        
+        SwapPrinterDim pw, ph, psw, psh, pwox, phoy
+        Exit Sub
     End If
-    PrinterDim pw, ph, psw, psh, pwox, phoy
+Else
+    Form1.PrinterDocument1.Cls
+    Form1.Refresh
+    Exit Sub
 End If
-If Not bstack.toprinter Then Exit Sub
-'oprinter.ClearUp
-If oprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
-oprinter.ClearBits Form1.PrinterDocument1.backcolor
-oprinter.GetDpi mydpi, mydpi
-oprinter.needHDC
-On Error Resume Next
-Set Form1.PrinterDocument1 = hDCToPicture(oprinter.HDC1, 0, 0, oprinter.Width, oprinter.Height)
-oprinter.FreeHDC
-If Err > 0 And try1 < 2 Then
-oprinter.ClearUp
-try1 = try1 + 1
-prFactor = prFactor * 2
-mydpi = mydpi / 2
-GoTo again
+
+contnow:
+Dim thisprinter As New cDIBSection
+
+If thisprinter.create(Int(psw / pwox * mydpi + 0.5), Int(psh / phoy * mydpi + 0.5)) Then
+    thisprinter.ClearBits Form1.PrinterDocument1.backcolor
+    thisprinter.GetDpi mydpi, mydpi
+    thisprinter.needHDC
+    On Error Resume Next
+    Set Form1.PrinterDocument1 = hDCToPicture(thisprinter.HDC1, 0, 0, thisprinter.Width, thisprinter.Height)
+    thisprinter.FreeHDC
+    If Err > 0 And try1 < 2 Then
+        thisprinter.ClearUp
+        try1 = try1 + 1
+        prFactor = prFactor * 2
+        mydpi = mydpi / 2
+        GoTo contnow
+    End If
+    szFactor = mydpi * dv15 / 1440#
+    On Error Resume Next
+    Form1.Refresh
+    Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * (mydpi) + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
+    thisprinter.CopyPrinter oprinter.PrinterHdc
+    Set oprinter = thisprinter
+ElseIf try1 < 2 Then
+        try1 = try1 + 1
+        prFactor = prFactor * 2
+        mydpi = mydpi / 2
+        GoTo contnow
 End If
-szFactor = mydpi * dv15 / 1440#
-On Error Resume Next
-Form1.Refresh
-Form1.PrinterDocument1.Scale (0, 0)-(Form1.ScaleX(Int(psw / pwox * (mydpi) + 0.5), 3, 1), Form1.ScaleY(Int(psh / phoy * mydpi + 0.5), 3, 1))
-End If
+
 If bstack.toprinter Then
     SetText Form1.PrinterDocument1
     Else

@@ -377,7 +377,7 @@ End If
             If isLong Then
                 On Error Resume Next
                 .Value = CLng(MyRound(.Value, 0))
-                If Err.Number = 6 Then .Value = CDbl(MyRound(.Value, 0)): Err.clear
+                If Err.Number = 6 Then .Value = CDbl(MyRound(.Value, 0)): Err.Clear
             ElseIf inttype Then
                 .Value = MyRound(.Value, 0)
             Else
@@ -468,7 +468,7 @@ End If
         End Select
     End If
 there:
-Err.clear
+Err.Clear
 MyRound = a
 If i < 0 Or i > 28 Then MyEr "Round Place exit range 0 to 28", "Η θέση στρογγυλοποίησης εκτός περιοχής από 0 έως 28"
 End Function
@@ -533,7 +533,7 @@ Else
     MyEr "Max count for dot names", "Μέγιστος αριθμός τελείας"
 End If
 End Sub
-Public Function GetDotNew(a$, dotnum&, Optional clear As Boolean = False) As Boolean
+Public Function GetDotNew(a$, dotnum&, Optional Clear As Boolean = False) As Boolean
 If Look2Parent Then GetDotNew = Parent.GetDotNew(a$, dotnum&): Exit Function
 
 If curdotcol = 0 Then
@@ -585,7 +585,7 @@ Else
     GoTo aaa
   End If
   End If
-  If Left$(dotcol(dotnum), 1) = "*" And Not clear Then
+  If Left$(dotcol(dotnum), 1) = "*" And Not Clear Then
     a$ = Mid$(dotcol(dotnum), 2) + "." + a$
   Else
 
@@ -737,7 +737,7 @@ Set Owner = myOwner
 End If
 
 On Error Resume Next
-Err.clear
+Err.Clear
 If Not Owner Is Nothing Then
 mitalic = Owner.Font.Italic
 mBold = Owner.Font.bold
@@ -746,7 +746,7 @@ myRun = True
 Else
 myRun = False
 End If
-Err.clear
+Err.Clear
 End Property
 Public Property Get IamThread() As Boolean
 IamThread = mprocessOk
@@ -809,7 +809,7 @@ If threadsnames Is Nothing Then Exit Function
 ' this is mandatory
 If TaskMaster Is Nothing Then Exit Function
 If TaskMaster.ThrowOne(Threadid) Then ThrowOne = True
-If Err.Number > 0 Then Err.clear: Exit Function
+If Err.Number > 0 Then Err.Clear: Exit Function
 ' maybe the task isn't on our list - because we send message from other thread!
 If threadsnames.Find(Threadid) Then
     Set aa = threadsnames.ValueObj
@@ -820,7 +820,7 @@ If threadsnames.Find(Threadid) Then
     ThrowOne = True
     Set aa.thread = Nothing
 Else
-    Err.clear
+    Err.Clear
     ThrowOne = Me.Parent.ThrowOne(Threadid)
 End If
 Set aa = Nothing
@@ -930,24 +930,24 @@ ElseIf parentSoros.count = 0 Then
   IsOptional = True
 End If
 End Function
-Public Function IsNumber(r As Variant) As Boolean
+Public Function IsNumber(R As Variant) As Boolean
 If parentSoros.LookNull Then
-r = parentSoros.PopVal
+R = parentSoros.PopVal
 IsNumber = True
 ElseIf parentSoros.PopType = "N" Then
-r = parentSoros.PopVal
+R = parentSoros.PopVal
 IsNumber = True
 ElseIf parentSoros.PopType = "L" Then
-r = parentSoros.PopValLong
+R = parentSoros.PopValLong
 IsNumber = True
 End If
 End Function
-Public Function IsVariant(r As Variant) As Boolean
+Public Function IsVariant(R As Variant) As Boolean
 If parentSoros.LookNull Then
-r = parentSoros.PopVal
+R = parentSoros.PopVal
 IsVariant = True
 ElseIf parentSoros.PopType = "D" Then
-r = parentSoros.PopVariant
+R = parentSoros.PopVariant
 IsVariant = True
 End If
 End Function
@@ -958,49 +958,49 @@ If parentSoros.PopType = ">" Then Parent.soros.drop 1 Else Exit Do
 Loop
 End Sub
 
-Public Function IsObjectRef(r As Object) As Boolean
+Public Function IsObjectRef(R As Object) As Boolean
 If parentSoros.LookNull Then
-Set r = Nothing
+Set R = Nothing
 IsObjectRef = True
 ElseIf parentSoros.PopType = "*" Then
-Set r = parentSoros.PopObj
+Set R = parentSoros.PopObj
 IsObjectRef = True
 End If
 End Function
-Public Function IsString(r As String) As Boolean
+Public Function IsString(R As String) As Boolean
 If parentSoros.LookNull Then
-parentSoros.PopStr2 r
+parentSoros.PopStr2 R
 IsString = True
 ElseIf parentSoros.PopType = "S" Then
-parentSoros.PopStr2 r
+parentSoros.PopStr2 R
 IsString = True
 End If
 End Function
-Public Function IsInStackObject(r As Object) As Boolean  ' not used yet
+Public Function IsInStackObject(R As Object) As Boolean  ' not used yet
 If soros.LookNull Then
-Set r = Nothing
+Set R = Nothing
 IsInStackObject = True
 ElseIf soros.PopType = "*" Then
-Set r = parentSoros.PopObj
+Set R = parentSoros.PopObj
 IsInStackObject = True
 End If
 End Function
-Public Function IsInRetStackNumber(r As Variant) As Boolean
+Public Function IsInRetStackNumber(R As Variant) As Boolean
 If RetSoros Is Nothing Then Exit Function
 Dim v As Variant
 v = RetSoros.LookTopVal
 If MyIsNumeric(v) Then
 IsInRetStackNumber = True
-SwapVariant r, v
+SwapVariant R, v
 RetSoros.drop 1
 End If
 End Function
-Public Function IsInRetStackString(r As String) As Boolean
+Public Function IsInRetStackString(R As String) As Boolean
 If RetSoros Is Nothing Then Exit Function
 Dim v As Variant
 v = RetSoros.LookTopVal
 If Not MyIsNumeric(v) Then
-r = v
+R = v
 IsInRetStackString = True
 RetSoros.drop 1
 End If
@@ -1013,21 +1013,21 @@ If soros.PopType = "L" Then
     IsInStackLong = True
 End If
 End Function
-Public Function IsInStackNumber(r As Variant) As Boolean
+Public Function IsInStackNumber(R As Variant) As Boolean
 If soros.LookNull Then
-r = soros.PopVal
+R = soros.PopVal
 IsInStackNumber = True
 ElseIf soros.PopType = "N" Then
-r = soros.PopVal
+R = soros.PopVal
 IsInStackNumber = True
 End If
 End Function
-Public Function IsInStackString(r As String) As Boolean
+Public Function IsInStackString(R As String) As Boolean
 If soros.LookNull Then
-r = soros.PopStr
+R = soros.PopStr
 IsInStackString = True
 ElseIf soros.PopType = "S" Then
-r = soros.PopStr
+R = soros.PopStr
 IsInStackString = True
 End If
 End Function

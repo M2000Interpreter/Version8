@@ -215,7 +215,12 @@ End Sub
          ShowProperties = False
       End If
       End Function
-
+Sub SwapPrinterDim(pw As Long, ph As Long, psw As Long, psh As Long, lpx As Long, lpy As Long)
+Dim a As Long
+a = pw: pw = ph: ph = a
+a = psw: psw = psh: psh = a
+a = lpx: lpx = lpy: lpy = a
+End Sub
 Sub PrinterDim(pw As Long, ph As Long, psw As Long, psh As Long, lpx As Long, lpy As Long)
           Dim ret As Long
           Dim LastError As Long
@@ -284,8 +289,8 @@ Function ChangeOrientation(F As Object, szPrinterName As String, adevmode() As B
             ChangeOrientation = False
             Exit Function
           End If
-          If UBound(adevmode) <> nSize Then
-         ReDim adevmode(1 To nSize) As Byte
+          If UBound(adevmode) <> nSize + 100 Then
+         ReDim adevmode(1 To nSize + 100) As Byte
          
            nSize = DocumentProperties(NULLPTR, hPrinter, szPrinterName, adevmode(1), ByVal NULLPTR, DM_OUT_BUFFER)
           

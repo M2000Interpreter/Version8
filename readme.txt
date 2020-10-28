@@ -1,9 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 3 active-X
+Version 10 revision 4 active-X
 These are serious fixes
-1. Fix a leak in GDI objects
-2. Fix the printing system
+1. Fix the printing system
 
 
 George Karras, Kallithea Attikis, Greece.

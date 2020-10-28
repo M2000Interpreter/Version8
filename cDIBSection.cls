@@ -219,6 +219,7 @@ Private m_backcolor As Long
 Private m_hDIb As Long
 ' Handle to the old bitmap in the DC, for clear up:
 Private m_hBmpOld As Long
+Private m_PrinterhBmpOld As Long
 ' Handle to the Device context holding the DIBSection:
 Private m_hDC As Long
 Private p_hdc As Long
@@ -334,6 +335,17 @@ Private Const DSS_MONO = &H80
 Private Const DSS_RIGHT = &H8000
 Private Declare Function DrawIconEx Lib "user32" (ByVal Hdc As Long, ByVal xLeft As Long, ByVal yTop As Long, ByVal hIcon As Long, ByVal cxWidth As Long, ByVal cyWidth As Long, ByVal istepIfAniCur As Long, ByVal hbrFlickerFreeDraw As Long, ByVal diFlags As Long) As Long
 Private OpenPrinter As Boolean
+Public Property Get PrinterHdc() As Long
+PrinterHdc = p_hdc
+p_hdc = 0
+OpenPrinter = False
+End Property
+
+Public Sub CopyPrinter(a As Long)
+p_hdc = a
+OpenPrinter = True
+End Sub
+
 Public Property Get BitmapType() As Long
 BitmapType = mType
 End Property
@@ -341,6 +353,7 @@ Public Sub ResetBitmapTypeToBITMAP()
 Set wmfemf = Nothing
 mType = 4
 End Sub
+
 Public Sub Cls(Optional ByVal clearcolor = &HFFFFFF)
 square 0, 0, Width - 1, Height - 1, clearcolor
 End Sub
@@ -666,6 +679,7 @@ Public Function create( _
     needHDC
       create = CreateDIB(m_hDC, lWidth, lHeight, m_hDIb)
     FreeHDC
+
         'GdiFlush
 End Function
 Friend Function create32( _
@@ -943,19 +957,11 @@ FreeHDC
 DeleteObject my_brush
 End Sub
 Public Sub ClearUp()
+GdiFlush
 If m_hDIb <> 0 Then
- If m_hDIb <> 0 And m_hDC <> 0 Then
- m_hBmpOld = SelectObject(m_hDC, m_hDIb)
- End If
-
-' If m_lPtr > 0 Then
-' GlobalFree m_lPtr
- '    m_lPtr = 0
-     
- 'End If
- GdiFlush
+ If m_lPtr > 0 Then GlobalFree m_lPtr
  If DeleteObject(m_hDIb) <> 1 Then MyEr "Problem with GDI objects", "Πρόβλημα με το σύστημα γραφικών"
-       
+
         m_tBI.bmiHeader.biHeight = 0
          ' end new
     m_hDC = 0: m_hDIb = 0: m_hBmpOld = 0: m_lPtr = 0
@@ -963,7 +969,42 @@ If m_hDIb <> 0 Then
 End If
 Set wmfemf = Nothing
 End Sub
+Public Sub needHDC()
+' return hdc
+If m_hDC <> 0 Then Exit Sub
+Dim lhDCDesktop As Long
+   lhDCDesktop = CreateDC(SD, 0, 0, ByVal 0)
+  m_hDC = CreateCompatibleDC(lhDCDesktop)
+If m_hDIb <> 0 And m_hDC <> 0 Then m_hBmpOld = SelectObject(m_hDC, m_hDIb)
 
+    DeleteDC lhDCDesktop
+    sumhDC = sumhDC + 1
+End Sub
+Public Sub FreeHDC()
+GdiFlush
+If m_hDC <> 0 Then
+If m_hDIb <> 0 And m_hBmpOld <> 0 Then SelectObject m_hDC, m_hBmpOld
+sumhDC = sumhDC - 1
+DeleteDC m_hDC
+m_hDC = 0
+End If
+End Sub
+
+Private Sub MakePrinterhDC(dest As Object, PAGENAME$)
+Dim di As DOCINFO
+        
+          Dim ret As Long
+          Dim LastError As Long
+          Dim dummy3 As Object
+            If UBound(MyDM) = 1 Then
+            ShowProperties dummy3, dest.DeviceName, MyDM
+            End If
+          p_hdc = CreateDC(dest.DriverName, dest.DeviceName, 0, MyDM(1))
+          di.cbSize = Len(di)   ' 20
+          di.lpszDocName = PAGENAME$
+          ret = StartDoc(p_hdc, di)
+          
+ End Sub
 
 
 Public Function Resample( _
@@ -1099,7 +1140,14 @@ If zf <= 0 Then
 End Sub
 Public Sub EndPrint()
        If OpenPrinter Then
-        FreePrinterHdc
+            Dim ret As Long
+            GdiFlush
+           ' MsgBox "end print " & m_lPtr
+            ret = EndDoc(p_hdc)
+           ' MsgBox "end enddoc " & ret
+            ret = DeleteDC(p_hdc)
+            'MsgBox "end deletedc " & ret
+            p_hdc = 0
         OpenPrinter = False
     End If
 End Sub
@@ -1123,10 +1171,16 @@ Public Sub ThumbnailPaintPrinter(copiesNUM As Long, Optional ByVal zf As Single 
 If Not OpenPrinter Then
    CopiesCount copiesNUM, MyDM()
    MakePrinterhDC Printer, pname
-   OpenPrinter = True
+   OpenPrinter = p_hdc <> 0
 End If
-   needPrinterHDC Printer
-   If p_hdc <> 0 Then StartPage p_hdc
+
+   If p_hdc <> 0 Then
+   m_PrinterhBmpOld = SelectObject(p_hdc, m_hDIb)
+   StartPage p_hdc
+   Else
+    Beep
+    Exit Sub
+   End If
 
    If over Then
    swProbe = GetDeviceCaps(p_hdc, PHYSICALWIDTH) 'DestPic.ScaleX(DestPic.width, 1, 3)
@@ -1218,10 +1272,15 @@ sh = sh * m_logy
         End If
     End If
     FreeHDC
-    If p_hdc <> 0 Then EndPage p_hdc
+    If p_hdc <> 0 Then
+    EndPage p_hdc
+    SelectObject p_hdc, m_PrinterhBmpOld
+    End If
+    m_PrinterhBmpOld = 0
     CopiesCount (1), MyDM()
     last_zf = zf
     m_logx = 1: m_logy = 1
+    
 End Sub
 
 Public Sub ThumbnailPaintDummy(DestPic As Object, Optional ByVal zf As Single = -1, Optional ByVal FitToPic As Boolean = True, Optional CROP As Boolean = False, Optional over As Boolean = False, Optional ByVal fr As Long = 0, Optional ByVal offsetx As Long = 0, Optional ByVal offsety As Long, Optional ByVal border As Long = 0, Optional ByVal rtxy As Double = 1#)
@@ -1467,11 +1526,7 @@ PaintType = False
 End Sub
 
 Private Sub Class_Terminate()
-     'EndPrint
-     If m_lPtr Then
-     GlobalFree m_lPtr
-     End If
-    ClearUp
+ ClearUp
 
 End Sub
 
@@ -1784,37 +1839,6 @@ FreeHDC
 DeleteObject my_brush
 End Sub
 
-Public Sub needHDC()
-' return hdc
-If m_hDC <> 0 Then Exit Sub
-Dim lhDCDesktop As Long
-   lhDCDesktop = CreateDC(SD, 0, 0, ByVal 0)
-  m_hDC = CreateCompatibleDC(lhDCDesktop)
-If m_hDIb <> 0 And m_hDC <> 0 Then m_hBmpOld = SelectObject(m_hDC, m_hDIb)
-
-    DeleteDC lhDCDesktop
-    sumhDC = sumhDC + 1
-End Sub
-Public Sub needPrinterHDC(dest As Object)
-' return hdc
-If UBound(MyDM) > 1 And p_hdc <> 0 Then
-If m_hDC <> 0 Then
-  m_hDC = CreateCompatibleDC(p_hdc)
-  End If
- End If
-If m_hDIb <> 0 And m_hDC <> 0 Then m_hBmpOld = SelectObject(m_hDC, m_hDIb)
-End Sub
-
-Public Sub FreeHDC()
-GdiFlush
-If m_hDC <> 0 Then
-If m_hDIb <> 0 And m_hBmpOld <> 0 Then SelectObject m_hDC, m_hBmpOld: m_hBmpOld = 0
-sumhDC = sumhDC - 1
-If p_hdc <> 0 Then Exit Sub
-DeleteDC m_hDC
-m_hDC = 0
-End If
-End Sub
 
 Public Property Get HDC1() As Long
  ' ************here********************
@@ -2108,42 +2132,7 @@ canmake:
  Text "big....size " & CStr(3 * Int(picthis.Width / autosize) * Int(picthis.Height / autosize) / 1024# / 1024#) & " Mbyte", 0, 0
 
 End Function
-Public Sub MakePrinterhDC(dest As Object, PAGENAME$)
-Dim di As DOCINFO
-        
-          Dim ret As Long
-          Dim LastError As Long
-          Dim dummy3 As Object
-If UBound(MyDM) = 1 Then
-ShowProperties dummy3, dest.DeviceName, MyDM
-End If
 
-'ImOrient MyDM
-          p_hdc = CreateDC(dest.DriverName, dest.DeviceName, 0, MyDM(1))
-          di.cbSize = Len(di)   ' 20
-          di.lpszDocName = PAGENAME$
-
-         ' Ret = ResetDC(p_hdc, MyDM(1))
-          ret = StartDoc(p_hdc, di)
-          
- End Sub
- Public Sub FreePrinterHdc()
- Dim ret As Long
-   If m_hDIb <> 0 And m_hDC <> 0 Then
-   If m_hBmpOld <> 0 Then
-   SelectObject m_hDC, m_hBmpOld
-   m_hBmpOld = 0
-   End If
-   
-   End If
-          ret = EndDoc(p_hdc)
-           ret = DeleteDC(m_hDC)
-          ret = DeleteDC(p_hdc)
-          m_hDC = 0
-          p_hdc = 0
-          
-          
-End Sub
 Sub PageView(where As Object, Optional How As Long = -1, Optional vso As Object = Nothing, Optional hso As Object = Nothing, Optional Percent As Single = 1, Optional gid As Long = 0)
 ' object need gonia 375x375 frame if we use vso and hso.
 ' from vs and hs remove tabstop
