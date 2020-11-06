@@ -127,26 +127,26 @@ Public Length As Long
                      pmxcd As MIXERCONTROLDETAILS, _
                      ByVal fdwDetails As Long) As Long
 
-    Private Declare Sub CopyStructFromPtr Lib "kernel32" _
+    Private Declare Sub CopyStructFromPtr Lib "KERNEL32" _
                      Alias "RtlMoveMemory" _
                      (struct As Any, _
                      ByVal Ptr As Long, _
                      ByVal cb As Long)
 
-    Private Declare Sub CopyPtrFromStruct Lib "kernel32" _
+    Private Declare Sub CopyPtrFromStruct Lib "KERNEL32" _
                      Alias "RtlMoveMemory" _
                      (ByVal Ptr As Long, _
                      struct As Any, _
                      ByVal cb As Long)
 
-    Private Declare Function GlobalAlloc Lib "kernel32" _
+    Private Declare Function GlobalAlloc Lib "KERNEL32" _
                      (ByVal wFlags As Long, _
                      ByVal dwBytes As Long) As Long
 
-    Private Declare Function GlobalLock Lib "kernel32" _
+    Private Declare Function GlobalLock Lib "KERNEL32" _
                      (ByVal hMem As Long) As Long
 
-    Private Declare Function GlobalFree Lib "kernel32" _
+    Private Declare Function GlobalFree Lib "KERNEL32" _
                      (ByVal hMem As Long) As Long
 
       Private Type MIXERCAPS
@@ -515,8 +515,12 @@ End Function
 Public Function checkError() As String
     'A very useful function for getting any errors
     'associated with the mci device
+    
+    If Error = 0 Then
+    Else
     checkError = space$(255)
     mciGetErrorString Error, checkError, Len(checkError)
+    End If
 End Function
 Public Function getDeviceName() As String
     'Returns the current device name in use
@@ -865,7 +869,7 @@ ElseIf mix > 50 Then
 ar = ar * (100 - mix) / 50
 End If
 
-thisvol = signlong2((ar) * &H10000 + al)
+thisvol = cUlng(Int(ar) * 65536# + Int(al))
 Error = midiOutSetVolume(0, thisvol)
 Error = waveOutSetVolume(0, thisvol)
 

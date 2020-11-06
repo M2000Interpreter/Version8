@@ -19,7 +19,7 @@ Public UseIndex As Boolean
 Dim Init As Boolean
 Dim IamMethod  As Boolean
 Dim hardlink As Object, useobj As Boolean
-Dim lastobj As Object
+Private mLastObj As Object
 Public Arr As Boolean
 Dim oEnum As IUnknown
 
@@ -45,21 +45,25 @@ useobj = True
 'ObjectRef = ref
 vtref = vtrefnumber
 End Sub
+Public Property Get lastobj() As Object
+Set lastobj = mLastObj
+Set mLastObj = Nothing
+End Property
 
-Private Function Bind2Handler() As Object
-Dim m As mHandler
-Set m.objref = lastobj
-m.ReadOnly = True
-m.UseIterator = True
-End Function
 Public Property Get Value() As Variant
+
 Dim RETVAR As Variant
+Dim check As Boolean
+Set mLastObj = Nothing
 If Init Then
 If UseIndex Then
 If useobj Then
  Value = ReadPropIndexObj(hardlink, vtref, mIndex)
 Else
- Value = ReadPropIndex(ObjectRef, vtref, mIndex)
+  Value = ReadPropIndex(ObjectRef, vtref, mIndex, check, RETVAR)
+ If check Then
+ Set mLastObj = RETVAR
+ End If
  End If
 
 Else
@@ -109,10 +113,10 @@ End If
 End If
 
 End Property
-Public Property Let ValueStr(S As String)
+Public Property Let ValueStr(s As String)
 Dim vNewValue
 vNewValue = vbNullString
-SwapString2Variant S, vNewValue
+SwapString2Variant s, vNewValue
 If Init Then
 If Not UseIndex Then
 If useobj Then
@@ -141,11 +145,11 @@ End Property
 Private Sub Class_Terminate()
 Set hardlink = Nothing
 End Sub
-Public Property Get index() As Variant
-index = mIndex
+Public Property Get Index() As Variant
+Index = mIndex
 End Property
 
-Public Property Let index(ByVal RHS As Variant)
+Public Property Let Index(ByVal RHS As Variant)
 mIndex = RHS
 End Property
 

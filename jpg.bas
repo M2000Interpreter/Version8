@@ -2,7 +2,7 @@ Attribute VB_Name = "Module5"
 Option Explicit
 Private Declare Function CopyBytes Lib "msvbvm60.dll" Alias "__vbaCopyBytes" (ByVal ByteLen As Long, ByVal Destination As Long, ByVal Source As Long) As Long
 
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Private Const Pi = 3.14159265359
 Private Type SAFEARRAYBOUND
@@ -36,16 +36,16 @@ Public Function Decode64toMemBloc(ByVal a$, ok As Boolean, Optional forcode As B
     End If
     
 End Function
-Public Function File2newMemblock(FileName As String, r, p) As Object
+Public Function File2newMemblock(FileName As String, R, P) As Object
     Dim mem As New MemBlock, BLen As Long, i As Long
-    r = -1#
+    R = -1#
     FileName = CFname(FileName)
     If FileName <> "" Then
      
      
     BLen = FileLen(GetDosPath(FileName))
     If BLen Then
-    mem.Construct 1, BLen, , CBool(p)
+    mem.Construct 1, BLen, , CBool(P)
     i = FreeFile
     On Error Resume Next
 
@@ -53,7 +53,7 @@ Public Function File2newMemblock(FileName As String, r, p) As Object
 
     If Err.Number > 0 Then MyEr Err.Description, Err.Description: Close i: Exit Function
     If mem.GetData(i, mem.GetPtr(0), BLen) Then
-    r = 0#
+    R = 0#
     Set File2newMemblock = mem
     End If
     Close i
@@ -61,15 +61,15 @@ Public Function File2newMemblock(FileName As String, r, p) As Object
     End If
 End Function
 
-Public Function SaveStr2MemBlock(a, r) As Object
+Public Function SaveStr2MemBlock(a, R) As Object
 Dim aa As New cDIBSection
-r = -1#
+R = -1#
 If cDib(a, aa) Then
     aa.GetDpi 96, 96
     If Not aa.SaveDibToMeMBlock(SaveStr2MemBlock) Then
     MyEr "Can't save to buffer", "Δεν μπορώ να σώσω στη διάρθρωση"
     Else
-    r = 0#
+    R = 0#
     End If
 End If
 End Function
@@ -119,11 +119,11 @@ If cDibbuffer0.hDIb = 0 Then Exit Function
       If piw = 0 Then Exit Function
 
  Dim cDIBbuffer1 As New cDIBSection
-If cDIBbuffer1.Create(pih, piw) Then
+If cDIBbuffer1.create(pih, piw) Then
 
 cDIBbuffer1.GetDpiDIB cDibbuffer0
 Dim bDib() As Byte, bDib1() As Byte
-Dim X As Long, Y As Long
+Dim x As Long, y As Long
 Dim tSA As SAFEARRAY2D
 Dim tSA1 As SAFEARRAY2D
 On Error Resume Next
@@ -155,29 +155,29 @@ ttt = 1 + 100000 / piw
 
 myx = 0
 If MEDOEV Then
-  For Y = pih - 1 To 0 Step -1
+  For y = pih - 1 To 0 Step -1
     oldx = 0
     TTC = TTC - 1
     If TTC = 0 Then DoEvents: TTC = ttt
-        For X = 0 To piw - 1
-                        bDib1(myx, X) = bDib(oldx, Y)
-                        bDib1(myx + 1, X) = bDib(oldx + 1, Y)
-                        bDib1(myx + 2, X) = bDib(oldx + 2, Y)
+        For x = 0 To piw - 1
+                        bDib1(myx, x) = bDib(oldx, y)
+                        bDib1(myx + 1, x) = bDib(oldx + 1, y)
+                        bDib1(myx + 2, x) = bDib(oldx + 2, y)
                         oldx = oldx + 3
-       Next X
+       Next x
        myx = myx + 3
-    Next Y
+    Next y
 Else
-  For Y = pih - 1 To 0 Step -1
+  For y = pih - 1 To 0 Step -1
     oldx = 0
-        For X = 0 To piw - 1
-                        bDib1(myx, X) = bDib(oldx, Y)
-                        bDib1(myx + 1, X) = bDib(oldx + 1, Y)
-                        bDib1(myx + 2, X) = bDib(oldx + 2, Y)
+        For x = 0 To piw - 1
+                        bDib1(myx, x) = bDib(oldx, y)
+                        bDib1(myx + 1, x) = bDib(oldx + 1, y)
+                        bDib1(myx + 2, x) = bDib(oldx + 2, y)
                         oldx = oldx + 3
-       Next X
+       Next x
        myx = myx + 3
-    Next Y
+    Next y
     End If
 
     CopyMemory ByVal VarPtrArray(bDib), 0&, 4
@@ -196,12 +196,12 @@ Dim piw As Long, pih As Long
     If piw = 0 Then Exit Function
 ' Dim cDIBbuffer1 As Object
  Dim cDIBbuffer1 As New cDIBSection
-If cDIBbuffer1.Create(pih, piw) Then
+If cDIBbuffer1.create(pih, piw) Then
 'cDIBbuffer1.WhiteBits
 cDIBbuffer1.GetDpiDIB cDibbuffer0
 cDIBbuffer1.Cls
 Dim bDib() As Byte, bDib1() As Byte
-Dim X As Long, Y As Long
+Dim x As Long, y As Long
 Dim tSA As SAFEARRAY2D
 Dim tSA1 As SAFEARRAY2D
 On Error Resume Next
@@ -232,29 +232,29 @@ Dim ttt As Long, TTC As Long
 
 ttt = 1 + 100000 / piw
 If MEDOEV Then
-    For Y = pih - 1 To 0 Step -1
+    For y = pih - 1 To 0 Step -1
     oldx = piw * 3 - 3
       TTC = TTC - 1
     If TTC = 0 Then DoEvents: TTC = ttt
-        For X = 0 To piw - 1
-                        bDib1(myx, X) = bDib(oldx, Y)
-                        bDib1(myx + 1, X) = bDib(oldx + 1, Y)
-                        bDib1(myx + 2, X) = bDib(oldx + 2, Y)
+        For x = 0 To piw - 1
+                        bDib1(myx, x) = bDib(oldx, y)
+                        bDib1(myx + 1, x) = bDib(oldx + 1, y)
+                        bDib1(myx + 2, x) = bDib(oldx + 2, y)
                         oldx = oldx - 3
-       Next X
+       Next x
        myx = myx - 3
-    Next Y
+    Next y
        Else
-        For Y = pih - 1 To 0 Step -1
+        For y = pih - 1 To 0 Step -1
     oldx = piw * 3 - 3
-        For X = 0 To piw - 1
-                        bDib1(myx, X) = bDib(oldx, Y)
-                        bDib1(myx + 1, X) = bDib(oldx + 1, Y)
-                        bDib1(myx + 2, X) = bDib(oldx + 2, Y)
+        For x = 0 To piw - 1
+                        bDib1(myx, x) = bDib(oldx, y)
+                        bDib1(myx + 1, x) = bDib(oldx + 1, y)
+                        bDib1(myx + 2, x) = bDib(oldx + 2, y)
                         oldx = oldx - 3
-       Next X
+       Next x
        myx = myx - 3
-    Next Y
+    Next y
     End If
     CopyMemory ByVal VarPtrArray(bDib), 0&, 4
     CopyMemory ByVal VarPtrArray(bDib1), 0&, 4
@@ -274,11 +274,11 @@ If cDibbuffer0.hDIb = 0 Then Exit Function
    pih = cDibbuffer0.Height
       If piw = 0 Then Exit Function
  Dim cDIBbuffer1 As New cDIBSection
- If cDIBbuffer1.Create(piw, pih) Then
+ If cDIBbuffer1.create(piw, pih) Then
  cDIBbuffer1.GetDpiDIB cDibbuffer0
 
 Dim bDib() As Byte, bDib1() As Byte
-Dim X As Long, Y As Long
+Dim x As Long, y As Long
 Dim tSA As SAFEARRAY2D
 Dim tSA1 As SAFEARRAY2D
 On Error Resume Next
@@ -310,35 +310,35 @@ Dim ttt As Long, TTC As Long
 
 ttt = 1 + 100000 / piw
 If MEDOEV Then
-    For Y = 0 To pih - 1
+    For y = 0 To pih - 1
   myx = oldx - 3
   oldx = 0
       TTC = TTC - 1
     If TTC = 0 Then DoEvents: TTC = ttt
-        For X = 0 To piw - 1
-                        bDib1(myx, oldy) = bDib(oldx, Y)
-                        bDib1(myx + 1, oldy) = bDib(oldx + 1, Y)
-                        bDib1(myx + 2, oldy) = bDib(oldx + 2, Y)
+        For x = 0 To piw - 1
+                        bDib1(myx, oldy) = bDib(oldx, y)
+                        bDib1(myx + 1, oldy) = bDib(oldx + 1, y)
+                        bDib1(myx + 2, oldy) = bDib(oldx + 2, y)
                         myx = myx - 3
                         oldx = oldx + 3
-       Next X
+       Next x
        oldy = oldy - 1
        myx = myx + 3
-    Next Y
+    Next y
 Else
-    For Y = 0 To pih - 1
+    For y = 0 To pih - 1
   myx = oldx - 3
   oldx = 0
-        For X = 0 To piw - 1
-                        bDib1(myx, oldy) = bDib(oldx, Y)
-                        bDib1(myx + 1, oldy) = bDib(oldx + 1, Y)
-                        bDib1(myx + 2, oldy) = bDib(oldx + 2, Y)
+        For x = 0 To piw - 1
+                        bDib1(myx, oldy) = bDib(oldx, y)
+                        bDib1(myx + 1, oldy) = bDib(oldx + 1, y)
+                        bDib1(myx + 2, oldy) = bDib(oldx + 2, y)
                         myx = myx - 3
                         oldx = oldx + 3
-       Next X
+       Next x
        oldy = oldy - 1
        myx = myx + 3
-    Next Y
+    Next y
     End If
     CopyMemory ByVal VarPtrArray(bDib), 0&, 4
     CopyMemory ByVal VarPtrArray(bDib1), 0&, 4

@@ -50,7 +50,7 @@ Public Function FindDISPID(pobjTarget As Object, ByVal pstrProcName As Variant) 
     
  Set IDsp = pobjTarget
  If Not getone(Typename(pobjTarget) & "." & pstrProcName, dispid) Then
-      lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, cLid, arrdispid(0))
+      lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, clid, arrdispid(0))
      
       If lngRet = 0 Then dispid = arrdispid(0): PushOne Typename(pobjTarget) & "." & pstrProcName, dispid
       
@@ -60,16 +60,16 @@ End If
 If lngRet = 0 Then FindDISPID = dispid
 End Function
 Public Sub ShutEnabledGuiM2000(Optional all As Boolean = False)
-Dim X As Form, bb As Boolean
+Dim x As Form, bb As Boolean
 
 Do
-For Each X In Forms
+For Each x In Forms
 bb = True
-If TypeOf X Is GuiM2000 Then
-    If X.enabled Then bb = False: X.CloseNow: bb = False: Exit For
+If TypeOf x Is GuiM2000 Then
+    If x.enabled Then bb = False: x.CloseNow: bb = False: Exit For
     
 End If
-Next X
+Next x
 
 Loop Until bb Or Not all
 
@@ -116,7 +116,7 @@ Dim mmm As mArray
 If Not getone(Typename$(pobjTarget) & "." & pstrProcName, dispid) Then
             ReDim myptr(0 To 0)
             myptr(0) = StrPtr(pstrProcName)
-            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, cLid, varDISPID(0))
+            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, clid, varDISPID(0))
             
             If lngRet = 0 Then dispid = varDISPID(0): PushOne Typename$(pobjTarget) & "." & pstrProcName, dispid
             Else
@@ -129,7 +129,7 @@ Else
             myptr(lngLoop) = StrPtr(pargs2(lngLoop))
             Next lngLoop
                 ReDim varDISPID(0 To fixnamearg)
-            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), fixnamearg + 1, cLid, varDISPID(0))
+            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), fixnamearg + 1, clid, varDISPID(0))
  dispid = varDISPID(0)
 End If
     If lngRet = 0 Then
@@ -252,22 +252,22 @@ conthere:
                    oldmoldid = Modalid
                    mycodeid = Rnd * 1000000
                    pobjTarget.Modal = mycodeid
-                   Dim X As Form, z As Form, zz As Form
+                   Dim x As Form, z As Form, zz As Form
                    Set zz = Screen.ActiveForm
                    If zz.Name = "Form3" Then
                    Set zz = zz.lastform
                    End If
                    If Not pobjTarget.IamPopUp Then
-                        For Each X In Forms
-                            If X.Visible And X.Name = "GuiM2000" Then
-                                If Not X Is pobjTarget Then
-                                    If X.Enablecontrol Then
-                                        X.Modal = mycodeid
-                                        X.Enablecontrol = False
+                        For Each x In Forms
+                            If x.Visible And x.Name = "GuiM2000" Then
+                                If Not x Is pobjTarget Then
+                                    If x.Enablecontrol Then
+                                        x.Modal = mycodeid
+                                        x.Enablecontrol = False
                                     End If
                                 End If
                             End If
-                        Next X
+                        Next x
                     End If
                     If pobjTarget.NeverShow Then
                     Modalid = mycodeid
@@ -325,12 +325,12 @@ conthere:
                     Modalid = mycodeid
                 End If
                 Set z = Nothing
-                For Each X In Forms
-                    If X.Visible And X.Name = "GuiM2000" Then
-                        X.TestModal mycodeid
-                        If X.Enablecontrol Then Set z = X
+                For Each x In Forms
+                    If x.Visible And x.Name = "GuiM2000" Then
+                        x.TestModal mycodeid
+                        If x.Enablecontrol Then Set z = x
                     End If
-                Next X
+                Next x
                 If Not zz Is Nothing Then Set z = zz
                 If Typename(z) = "GuiM2000" Then
                 If z.Modal = Modalid Then
@@ -519,7 +519,7 @@ ReadOneParameter = Err = 0
   ''  If Err.Number <> 0 Then ReadOneParameter = varRet
 Err.Clear
 End Function
-Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR$, ThisIndex As Variant, Optional useset As Boolean = False) As Variant
+Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR$, ThisIndex As Variant, Optional useset As Boolean = False, Optional bypass As Boolean) As Variant
     
     Dim CallType As cbnCallTypes
     
@@ -584,8 +584,14 @@ Else
 
     Set IDsp = Nothing
     If IsObject(VarRet) Then
+        If bypass Then
+            Set pobjTarget = VarRet
+            ReadOneIndexParameter = 0
+            bypass = False
+        Else
+            Set ReadOneIndexParameter = VarRet
 
-    Set ReadOneIndexParameter = VarRet
+        End If
     Else
     ReadOneIndexParameter = VarRet
     End If

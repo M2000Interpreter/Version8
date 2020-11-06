@@ -88,7 +88,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 4
+Global Const Revision = 5
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -159,7 +159,7 @@ Public varhash As New Hash
 Public comhash As New sbHash, numid As New idHash, numidbackup As New idHash, funid As New idHash, funidbackup As New idHash
 Public zones As New FastCollection
 Public strid  As New idHash, stridbackup As New idHash, strfunid As New idHash, strfunidbackup As New idHash
-Public clid As Long 'current id for app id
+Public Clid As Long 'current id for app id
 Public lastAboutHTitle As String, LastAboutText As String
 ''
 Public Basestack1 As New basetask ' this is the global stack
@@ -253,7 +253,7 @@ Private Declare Function SysReAllocStringLen Lib "OleAut32.dll" (ByVal pBSTR As 
 Public Modalid As Double
 
 Function ChangeValuesMem(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim aa As mHandler, ah As String, p As Variant, s$, addr As Long, PP As Variant, what$, R As Double
+Dim aa As mHandler, ah As String, p As Variant, s$, addr As Long, pp As Variant, what$, R As Double
 Dim bb1 As MemBlock, w2 As Variant, rs As Single, itissingle As Boolean
 Set aa = bstack.lastobj
 Set bstack.lastobj = Nothing
@@ -262,7 +262,7 @@ Set bb1 = aa.objref
     Do While FastSymbol(rest$, ",")
     
         ChangeValuesMem = False
-        PP = bb1.ItemSize
+        pp = bb1.ItemSize
         ah = aheadstatus(rest$, False) + " "
         If InStr(ah, "l") Then
                 MyEr "Found logical expression", "Βρήκα λογική έκφραση"
@@ -276,13 +276,13 @@ Set bb1 = aa.objref
                     If FastPureLabel(rest$, what$) Then
                         If bb1.UseStruct Then
                                 If bb1.structref.Find(myUcase(what$, True)) Then
-                                    PP = bb1.structref.sValue
+                                    pp = bb1.structref.sValue
                                     itissingle = bb1.structref.KeyTypeValue = vbSingle
                                     If FastSymbol(rest$, "!") Then
                                         If Not IsExp(bstack, rest$, R, , True) Then
                                                  GoTo there
                                         ElseIf R >= 0 Then
-                                                 p = bb1.GetPtr(p) + bb1.structref.Value + Int(R) * Abs(PP)
+                                                 p = bb1.GetPtr(p) + bb1.structref.Value + Int(R) * Abs(pp)
                                         Else
                                                  MyEr "negative index", "αρνητικός δείκτη"
                                                 GoTo there
@@ -353,16 +353,16 @@ Set bb1 = aa.objref
                                 ' here is the part where we copy a string to memblock
                                 If IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang, , , , False) Then
                                     If IsLabelSymbolNew(rest$, "ΨΗΦΙΟ", "BYTE", Lang, , , , False) Then
-                                        PP = 1
+                                        pp = 1
                                     ElseIf IsLabelSymbolNew(rest$, "ΑΚΕΡΑΙΟΣ", "INTEGER", Lang, , , , False) Then
-                                    PP = 2
+                                    pp = 2
                                     ElseIf IsLabelSymbolNew(rest$, "ΜΑΚΡΥΣ", "LONG", Lang, , , , False) Then
-                                    PP = 4
+                                    pp = 4
                                     ElseIf IsLabelSymbolNew(rest$, "ΑΠΛΟΣ", "SINGLE", Lang, , , , False) Then
-                                        PP = 4
+                                        pp = 4
                                         itissingle = True
                                     ElseIf IsLabelSymbolNew(rest$, "ΔΙΠΛΟΣ", "DOUBLE", Lang, , , , False) Then
-                                        PP = 8
+                                        pp = 8
                                     Else
                                         SyntaxError
                                         GoTo there
@@ -370,7 +370,7 @@ Set bb1 = aa.objref
                                End If
                                 Err.Clear
                                 On Error Resume Next
-                                Select Case PP
+                                Select Case pp
                                 Case 1
                                     ChangeValuesMem = True
                                     PutMem1 addr, CByte(LowWord(signlong(p)) And &HFF)
@@ -416,7 +416,7 @@ Set bb1 = aa.objref
                         End If
                         If IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang, , , , False) Then
                                 If IsLabelSymbolNew(rest$, "ΓΡΑΜΜΑ", "STRING", Lang, , , , False) Then
-                                    PP = -4
+                                    pp = -4
                                 Else
                                     SyntaxError
                  
@@ -438,7 +438,7 @@ Set bb1 = aa.objref
                             ' here is the part where we copy a string to memblock
                             Err.Clear
                             On Error Resume Next
-                          If PP < 0 Or bb1.WhatIsBasicItem = vbString Then
+                          If pp < 0 Or bb1.WhatIsBasicItem = vbString Then
                           If bb1.ValidArea(addr, 4) Then
                           ChangeValuesMem = True
                             PutMem4 addr, CLng(bb1.PutStringAtOffset(addr, s$))
@@ -498,7 +498,7 @@ Dim nSize As Long
     Const LCMAP_UPPERCASE = &H200&
 Dim mLid As Long
 If p = 0 Then
-mLid = clid
+mLid = Clid
 Else
 mLid = p
 End If
@@ -558,7 +558,7 @@ Dim nSize As Long
     Const LCMAP_UPPERCASE = &H200&
 Dim mLid As Long
 If p = 0 Then
-mLid = clid
+mLid = Clid
 Else
 mLid = p
 End If
@@ -614,7 +614,7 @@ Dim nSize As Long
 
 Dim mLid As Long
 If p = 0 Then
-mLid = clid
+mLid = Clid
 Else
 mLid = p
 End If
@@ -2423,8 +2423,8 @@ DefCodePage = GetCodePage(OsInfo.LangNonUnicodeCode)
 UserCodePage = DefCodePage
 UseTabInForm1Text1 = True
 ShowBooleanAsString = True
-clid = LCID_DEF
-If clid = 1032 Then
+Clid = LCID_DEF
+If Clid = 1032 Then
     DefBooleanString = ";Αληθές;Ψευδές"
 Else
     DefBooleanString = ";\T\r\u\e;\F\a\l\s\e"
@@ -4609,7 +4609,7 @@ End Function
 '
 Function IsNumberNew(bstack As basetask, a$, R As Variant, SG As Variant, flatobject) As Boolean
 Dim VR As Long, v$, v1&, w1 As Long, w2 As Long, p As Variant, s1$, dd As Long, dn As Long, w3 As Long
-Dim PP As Variant, pppp As mArray, nbstack As basetask, useHandler As mHandler, usebackup As Boolean
+Dim pp As Variant, pppp As mArray, nbstack As basetask, useHandler As mHandler, usebackup As Boolean
 Dim anything As Object, n$, useFast As FastCollection, userGroup As Group, useProp As PropReference, gr As Boolean
 R = 0#
 If a$ = vbNullString Then IsNumberNew = False: Exit Function
@@ -4818,7 +4818,7 @@ R = SG * myHwnd(bstack)
 IsNumberNew = True
 Exit Function
 num5: ' Case "LOCALE", "ΤΟΠΙΚΟ"
-R = SG * clid
+R = SG * Clid
     
     IsNumberNew = True
     Exit Function
@@ -5863,7 +5863,7 @@ IsNumberNew = False
         If w1 = 3 Then
             If GetVar(bstack, s$, w1) Then
                 If Typename(var(w1)) = doc Then
-                    R = SG * Not var(w1).busy
+                    R = SG * Not var(w1).Busy
                 Else
                     R = SG * True
                 End If
@@ -5878,7 +5878,7 @@ IsNumberNew = False
                 If neoGetArray(bstack, s$, pppp) Then
                  If Not NeoGetArrayItem(pppp, bstack, s$, w2, a$) Then Exit Function
                     If Typename(pppp.item(w2)) = doc Then
-                      R = SG * Not pppp.item(w2).busy
+                      R = SG * Not pppp.item(w2).Busy
                       Else
                       R = SG * True
                       End If
@@ -6346,15 +6346,15 @@ Exit Function
 fun23: ' "FILE.STAMP(", "ΑΡΧΕΙΟΥ.ΣΤΑΜΠΑ("
 IsNumberNew = False
     If IsStrExp(bstack, a$, s$) Then
-    PP = 1
+    pp = 1
     If IsSymbol(a$, ",") Then
-        If Not IsExp(bstack, a$, PP) Then
+        If Not IsExp(bstack, a$, pp) Then
         
          MissNumExpr
         Exit Function
         End If
     End If
-    If CFname(s$, p, PP) <> vbNullString Then
+    If CFname(s$, p, pp) <> vbNullString Then
     If p = 0 Then
     CantReadFileTimeStap a$
     Else
@@ -7256,7 +7256,7 @@ contAr2:
             End If
         End If
         p = 0
-        PP = 0
+        pp = 0
         IsNumberNew = True
         w2 = 0
         Do While dn <= dd
@@ -7276,7 +7276,7 @@ contAr2:
             On Error Resume Next
             If p < -v1& Then
                 IsNumberNew = False
-                    MyErMacro a$, "index too low for array " & v$ & ")", "αρνητικός δείκτης στο πίνακα " & v$ & ")"
+                    MyErMacro a$, "index too low for array " & v$ & ")", "χαμηλός δείκτης στο πίνακα " & v$ & ")"
                     Exit Function
                 End If
                 If Not pppp.PushOffset(w2, dn, CLng(Fix(p))) Then
@@ -7570,8 +7570,8 @@ syntax1:
                                         If SG < 0 Then R = -R
                                     End If
                                 End If
-                                If .Status = 4 Then MyErMacro a$, "Buffer locked, wrong use of pointer", "Η Διάρθρωση κλειδώθηκε, κακή χρήση δείκτη"
-                                IsNumberNew = FastSymbol(a$, ")") And .Status = 0
+                                If .status = 4 Then MyErMacro a$, "Buffer locked, wrong use of pointer", "Η Διάρθρωση κλειδώθηκε, κακή χρήση δείκτη"
+                                IsNumberNew = FastSymbol(a$, ")") And .status = 0
                             End With
                             Exit Function
                         ElseIf pppp.GroupRef.t1 = 3 Then
@@ -7868,7 +7868,11 @@ contreadprop:
                     R = 0
                     Exit Function
                 Else
-                    R = pppp.GroupRef.Value
+                    Set useProp = pppp.GroupRef
+                    R = useProp.Value
+                    Set bstack.lastobj = useProp.lastobj
+                    
+                    
                     If Not MyIsNumeric(R) Then
                         If VarType(R) = 8 Then
                             If Len(R) = 0 Then R = 0 Else R = val(R)
@@ -7880,6 +7884,11 @@ finishnum:
                     If SG < 0 Then R = -R
                 End If
                 IsNumberNew = FastSymbol(a$, ")")
+               
+                If FastSymbol(a$, "#") Then GoTo comehere
+                
+                
+               
                 End If
                 Exit Function
             Else
@@ -10490,7 +10499,7 @@ Dim W As Long
 End Sub
 Function IsStr1(bstackstr As basetask, a$, R$) As Boolean
 Dim nbstack As basetask
-Dim p As Variant, PP As Variant, pppp As mArray, mS As mStiva2, useHandler As mHandler
+Dim p As Variant, pp As Variant, pppp As mArray, mS As mStiva2, useHandler As mHandler
 Dim q$, W As Long, w1&, w2 As Long, s$, par As Boolean, usebackup As Boolean
 Dim q1$, q2$, w3 As Long, dn As Long, dd As Long, bs As basetask, sg1 As Boolean
 Dim anything As Object, gr As Boolean
@@ -10677,7 +10686,7 @@ If bstackstr.soros.Total = 0 Then
 
     ElseIf bstackstr.soros.StackItemTypeObjectType(1) = "*[mArray]" Then
         Set bstackstr.lastobj = bstackstr.soros.PopObj
-    GoTo final
+    GoTo Final
 
         Exit Function
     Else
@@ -10809,6 +10818,7 @@ cont1002001:
                             Set useHandler.objref = pppp.item(W)
                                 
                             IsStr1 = Matrix(bstackstr, a$, useHandler, p)
+jump1:
                             If Left$(a$, 1) = "." And Not bstackstr.lastobj Is Nothing Then
                             If TypeOf bstackstr.lastobj Is Group Then
                             GoTo cont1002001
@@ -10819,6 +10829,22 @@ cont1002001:
                         Else
                             Set bstackstr.lastobj = pppp.item(4)
                             IsStr1 = True
+                        End If
+                        ElseIf Typename(pppp.GroupRef) = "PropReference" Then
+                 
+                        
+                        p = pppp.GroupRef.Value
+                        Set bstackstr.lastobj = pppp.GroupRef.lastobj
+                        If FastSymbol(a$, "#") Then
+                        If TypeOf bstackstr.lastobj Is mHandler Then
+                        Set useHandler = bstackstr.lastobj
+                        Set bstackstr.lastobj = Nothing
+                            IsStr1 = Matrix(bstackstr, a$, useHandler, p)
+                            GoTo jump1
+                        End If
+                        ElseIf bstackstr.lastobj Is Nothing Then
+                            R$ = ""
+                            Exit Function
                         End If
                         Else
                             IsStr1 = False
@@ -10892,7 +10918,7 @@ groupstrvalue:
                     Set nbstack = Nothing
                     SwapStrings R$, s$
                     s$ = vbNullString
-                    GoTo final
+                    GoTo Final
                     Else
                     IsStr1 = False
                 End If
@@ -10910,31 +10936,31 @@ groupstrvalue:
             Exit Function
 F1: ' "STACKITEM(", "ΤΙΜΗΣΩΡΟΥ("
             IsStr1 = StackItem(bstackstr, a$, 1, p)
-            GoTo final
+            GoTo Final
 f2: ' "ARRAY(", "ΠΙΝΑΚΑΣ("
             IsStr1 = IsArrayFun(bstackstr, a$, p, 1)
-            GoTo final
+            GoTo Final
 f3: ' "CONS(", "ΕΝΩΣΗ("
             IsStr1 = IsCons(bstackstr, a$, p, 1)
-            GoTo final
+            GoTo Final
 f4: ' "CAR(", "ΠΡΩΤΟ("
             IsStr1 = IsCar(bstackstr, a$, p)
-            GoTo final
+            GoTo Final
 f5: ' "CDR(", "ΕΠΟΜΕΝΑ("
             IsStr1 = IsCdr(bstackstr, a$, p)
-            GoTo final
+            GoTo Final
 f6: ' "VAL(", "ΤΙΜΗ(", "ΑΞΙΑ("
             IsStr1 = IsVal(bstackstr, a$, p, 1, Left$(q$, 1) = "V")
-            GoTo final
+            GoTo Final
 f7: ' "EVAL(", "ΕΚΦΡ(", "ΕΚΦΡΑΣΗ("
             IsStr1 = IsEval(q$, bstackstr, a$, p, 1)
 
-final:
+Final:
            If FastSymbol(a$, "#") Then
                 p = vbNullString
-                Set PP = bstackstr.lastobj
+                Set pp = bstackstr.lastobj
                 Set bstackstr.lastobj = Nothing
-            IsStr1 = Matrix(bstackstr, a$, PP, p)
+            IsStr1 = Matrix(bstackstr, a$, pp, p)
             SwapString2Variant R$, p
 
             Exit Function
@@ -11310,12 +11336,12 @@ foundprivate:
                                     IsStr1 = True
                                         If FastSymbol(a$, "#") Then
                                 p = vbNullString
-                                Set PP = bstackstr.lastobj
-                                If TypeOf PP Is mArray Then
+                                Set pp = bstackstr.lastobj
+                                If TypeOf pp Is mArray Then
                                 ' make it mhandler
                                 End If
                                 Set bstackstr.lastobj = Nothing
-                            IsStr1 = Matrix(bstackstr, a$, PP, p)
+                            IsStr1 = Matrix(bstackstr, a$, pp, p)
                             SwapString2Variant R$, p
                             Exit Function
                         End If
@@ -11364,7 +11390,13 @@ there12001:
                         On Error GoTo 0
                     End If
                 Else
+                If IsNull(var(W)) Then
+                VarNull
+                IsStr1 = False
+                      Exit Function
+                Else
                     R$ = var(W)
+                    End If
                 End If
                 IsStr1 = True
                 
@@ -11546,19 +11578,19 @@ fstr2: '"EVAL$(", "ΕΚΦΡ$(", "ΕΚΦΡΑΣΗ$("
                 Set bstackstr.lastobj = Nothing
                 If FastSymbol(a$, ",") Then
                     If IsExp(bstackstr, a$, p, , True) Then
-                    PP = p
+                    pp = p
                     
                         If FastSymbol(a$, "!") Then
                         
                          If FastPureLabel(a$, s$, , True) Then
                             If .objref.UseStruct Then
                                 If .objref.structref.Find(s$) Then
-                                PP = .objref.structref.sValue
+                                pp = .objref.structref.sValue
                                     w2 = cUlng(uintnew(.objref.GetPtr(p)) + .objref.structref.Value)
                                     If FastSymbol(a$, "!") Then
                                      If IsExp(bstackstr, a$, p, , True) Then
                                       ' w2 = w2 + Int(p) * PP
-                                     w2 = cUlng(uintnew(w2) + MyRound(p) * Abs(PP))
+                                     w2 = cUlng(uintnew(w2) + MyRound(p) * Abs(pp))
                                      End If
                                     End If
                                 Else
@@ -11582,7 +11614,7 @@ fstr2: '"EVAL$(", "ΕΚΦΡ$(", "ΕΚΦΡΑΣΗ$("
                         
                             w2 = .objref.GetPtr(p)
                         End If
-                        If .objref.Status = 4 Then MyErMacroStr a$, "Buffer locked, wrong use of pointer", "Η Διάρθρωση κλειδώθηκε, κακή χρήση δείκτη": Exit Function
+                        If .objref.status = 4 Then MyErMacroStr a$, "Buffer locked, wrong use of pointer", "Η Διάρθρωση κλειδώθηκε, κακή χρήση δείκτη": Exit Function
                         dd = 2 + (AscW(q$) < 128)
                         If FastSymbol(a$, ",") Then
                             If IsExp(bstackstr, a$, p, , True) Then
@@ -11636,7 +11668,7 @@ fstr2: '"EVAL$(", "ΕΚΦΡ$(", "ΕΚΦΡΑΣΗ$("
                                 End If
                             R$ = Convert3(Convert2(GetBStrFromPtr(w3, True), LCID_DEF), CLng(Fix(p)))
                         Else
-                            R$ = Convert3(Convert2(GetBStrFromPtr(w3, True), LCID_DEF), clid)
+                            R$ = Convert3(Convert2(GetBStrFromPtr(w3, True), LCID_DEF), Clid)
                             End If
                         Else
                             MyEr "Invalid Pointer for BSTR at Buffer", "Μη έγκυρος δείκτης για BSTR στη Διάθρωση"
@@ -11647,7 +11679,7 @@ fstr2: '"EVAL$(", "ΕΚΦΡ$(", "ΕΚΦΡΑΣΗ$("
                         
                         Else
                         '
-                        If .objref.WhatIsBasicItem = vbString Or PP < 0 Then
+                        If .objref.WhatIsBasicItem = vbString Or pp < 0 Then
                         
                             CopyBytes 4, VarPtr(w3), w2
                              dd = .objref.GetStringFromOffset(w2, R$)
@@ -11670,16 +11702,16 @@ fstr2: '"EVAL$(", "ΕΚΦΡ$(", "ΕΚΦΡΑΣΗ$("
                          
                             End If
                         Else
-                                    p = .objref.SizeByte - PP * 2
+                                    p = .objref.SizeByte - pp * 2
                                     If .objref.SizeByte Mod 2 = 1 Then
-                                    R$ = StrConv(String$(.objref.SizeByte - PP * 2, Chr(0)), vbFromUnicode)
+                                    R$ = StrConv(String$(.objref.SizeByte - pp * 2, Chr(0)), vbFromUnicode)
                                     Else
-                                     R$ = String$((.objref.SizeByte - PP * 2 + 1) \ 2, Chr(0))
+                                     R$ = String$((.objref.SizeByte - pp * 2 + 1) \ 2, Chr(0))
                                      End If
                                     CopyBytes CLng(p), StrPtr(R$), w2
                         End If
                         End If
-                        IsStr1 = FastSymbol(a$, ")") And .objref.Status = 0
+                        IsStr1 = FastSymbol(a$, ")") And .objref.status = 0
                         Exit Function
                     Else
                         MissPar
@@ -11688,7 +11720,7 @@ fstr2: '"EVAL$(", "ΕΚΦΡ$(", "ΕΚΦΡΑΣΗ$("
                     End If
                     
                 Else  ' elval$(alfa)  'copy entire block to r$
-                    If .objref.SizeByte > 0 And .objref.Status = 0 Then
+                    If .objref.SizeByte > 0 And .objref.status = 0 Then
                         'r$ = String$((.objref.SizeByte + 1) \ 2, Chr(0))
                         R$ = StrConv(String$(.objref.SizeByte, Chr(32)), vbFromUnicode)
                         CopyBytes .objref.SizeByte, StrPtr(R$), .objref.GetPtr(0)
@@ -12200,17 +12232,17 @@ fstr15: ' "INPUT$(", "ΕΙΣΑΓΩΓΗ$("
     If IsExp(bstackstr, a$, p, , True) Then
     p = CLng(MyMod(Abs(p), 512))
      If FKIND(p) = FnoUse Or FKIND(p) = Foutput Or FKIND(p) = Frandom Then MyEr "Wrong File Handler", "Λάθος Χειριστής Αρχείου": IsStr1 = False: Exit Function
-    PP = FLEN(p)
-    If uni(p) And PP = 1 Then PP = 2
+    pp = FLEN(p)
+    If uni(p) And pp = 1 Then pp = 2
     
     If FastSymbol(a$, ",") Then
-    If Not IsExp(bstackstr, a$, PP, , True) Then
+    If Not IsExp(bstackstr, a$, pp, , True) Then
     MyErMacroStr a$, "missing parameter for length in chars", "λείπει παράμετρος για μήκος σε χαρακτήρες"
     IsStr1 = False: Exit Function
     End If
     End If
     
-    R$ = space$(PP)
+    R$ = space$(pp)
     On Error Resume Next
     If uni(p) Then
         getUniString CLng(p), R$
@@ -12711,8 +12743,8 @@ fstr32: ' "PARAGRAPH$(", "ΠΑΡΑΓΡΑΦΟΣ$("
                         If Typename(var(w1)) = doc Then
                         R$ = var(w1).TextParagraphOrder(CLng(Fix(p)))
                         If FastSymbol(a$, ",") Then
-                            If Not IsExp(bstackstr, a$, PP, , True) Then MissNumExpr: Exit Function
-                            If PP < 0 Then
+                            If Not IsExp(bstackstr, a$, pp, , True) Then MissNumExpr: Exit Function
+                            If pp < 0 Then
                                 If dd = 1 Then
                                         dd = var(w3)
                                         p = dd
@@ -12745,10 +12777,10 @@ fstr32: ' "PARAGRAPH$(", "ΠΑΡΑΓΡΑΦΟΣ$("
                                             var(w3) = var(w1).Advance(dd)
                                             End If
                                             
-                                                R$ = Mid$(var(w1).TextParagraph(CLng(p)), CLng(PP))
+                                                R$ = Mid$(var(w1).TextParagraph(CLng(p)), CLng(pp))
                                     Else
                                 
-                                R$ = Mid$(var(w1).TextParagraphOrder(CLng(Fix(p))), CLng(PP))
+                                R$ = Mid$(var(w1).TextParagraphOrder(CLng(Fix(p))), CLng(pp))
                                 End If
                             End If
                         Else
@@ -12806,8 +12838,8 @@ fstr32: ' "PARAGRAPH$(", "ΠΑΡΑΓΡΑΦΟΣ$("
                     End If
                         If Typename(pppp.item(w2)) = doc Then
                          If FastSymbol(a$, ",") Then
-                            If Not IsExp(bstackstr, a$, PP, , True) Then MissNumExpr: Exit Function
-                                If PP < 0 Then
+                            If Not IsExp(bstackstr, a$, pp, , True) Then MissNumExpr: Exit Function
+                                If pp < 0 Then
                                         If dd = 1 Then
                                                 dd = var(w3)
                                                 p = dd
@@ -12837,9 +12869,9 @@ fstr32: ' "PARAGRAPH$(", "ΠΑΡΑΓΡΑΦΟΣ$("
                                             Else
                                             var(w3) = pppp.item(w2).Advance(dd)
                                             End If
-                                        R$ = Mid$(pppp.item(w2).TextParagraph(CLng(p)), CLng(PP))
+                                        R$ = Mid$(pppp.item(w2).TextParagraph(CLng(p)), CLng(pp))
                                     Else
-                                R$ = Mid$(pppp.item(w2).TextParagraphOrder(CLng(Fix(p))), CLng(PP))
+                                R$ = Mid$(pppp.item(w2).TextParagraphOrder(CLng(Fix(p))), CLng(pp))
                                 End If
                                 End If
                             Else
@@ -13040,12 +13072,12 @@ fstr40: '"REPLACE$(", "ΑΛΛΑΓΗ$("
       If FastSymbol(a$, ",") And IsExp(bstackstr, a$, p, , True) Then
             p = Int(p)
             If p < 0 Then p = 1
-        If FastSymbol(a$, ",") And IsExp(bstackstr, a$, PP, , True) Then
-        PP = Abs(Int(PP))
+        If FastSymbol(a$, ",") And IsExp(bstackstr, a$, pp, , True) Then
+        pp = Abs(Int(pp))
         If p > 1 Then
-        R$ = Left$(q2$, p - 1) + Replace$(q2$, q$, q1$, p, PP)
+        R$ = Left$(q2$, p - 1) + Replace$(q2$, q$, q1$, p, pp)
         Else
-        R$ = Replace$(q2$, q$, q1$, p, PP)
+        R$ = Replace$(q2$, q$, q1$, p, pp)
         End If
         Else
         If p = 1 Then
@@ -13086,7 +13118,7 @@ fstr42: '"UCASE$(", "ΚΕΦ$("
             End If
             R$ = kUpper(Convert3(R$, CLng(Fix(p))), Fix(p))
             Else
-            R$ = kUpper(Convert3(R$, CLng(clid)), CDbl(clid))
+            R$ = kUpper(Convert3(R$, CLng(Clid)), CDbl(Clid))
             End If
       Else
       myUcase2 R$
@@ -13105,7 +13137,7 @@ fstr43: '"LCASE$(", "ΠΕΖ$("
         End If
       R$ = klower(Convert3(R$, CLng(Fix(p))), Fix(p))
       Else
-      R$ = klower(Convert3(R$, CLng(clid)), CDbl(clid))
+      R$ = klower(Convert3(R$, CLng(Clid)), CDbl(Clid))
       End If
       Else
       myLcase2 R$
@@ -13311,17 +13343,17 @@ fstr45: ' "MID$(", "ΜΕΣ$("
         Exit Function
     Else
       If FastSymbol(a$, ",") Then
-          If IsExp(bstackstr, a$, PP, , True) Then
-                PP = Abs(PP)
+          If IsExp(bstackstr, a$, pp, , True) Then
+                pp = Abs(pp)
                 If IsLabelSymbolNew(a$, "ΩΣ", "AS", dd, , , , False) Then
                     If IsLabelSymbolNew(a$, "ΨΗΦΙΟ", "BYTE", dd, , , , False) Then
-                        R$ = MidB$(q$, p, PP)
+                        R$ = MidB$(q$, p, pp)
                     Else
                         SyntaxError
                         Exit Function
                     End If
                 Else
-                    R$ = Mid$(q$, p, PP)
+                    R$ = Mid$(q$, p, pp)
                 End If
             Else
                 MissParam a$
@@ -13646,18 +13678,18 @@ fstr57: '"DRW$(", "ΣΧΔ$("
 fstr58: '"TIME$(", "ΧΡΟΝΟΣ$("
     If IsExp(bstackstr, a$, p, , True) Then
         If FastSymbol(a$, ",") Then
-            If Not IsExp(bstackstr, a$, PP, , True) Then
-                PP = clid
+            If Not IsExp(bstackstr, a$, pp, , True) Then
+                pp = Clid
             End If
             If FastSymbol(a$, ",") Then
                 If IsStrExp(bstackstr, a$, s$) Then
                     If UCase(s$) = "SHORT TIME" Then
-                        s$ = GetlocaleString2(&H5D, PP)
+                        s$ = GetlocaleString2(&H5D, pp)
                     ElseIf UCase(s$) = "LONG TIME" Then
-                        s$ = GetlocaleString2(&H79, PP)
+                        s$ = GetlocaleString2(&H79, pp)
                     End If
                     IsStr1 = True
-                    R$ = FormatTimeWithLocale(s$, CDate(p), PP)
+                    R$ = FormatTimeWithLocale(s$, CDate(p), pp)
                 Else
                     MissParam a$
                     IsStr1 = False
@@ -13665,7 +13697,7 @@ fstr58: '"TIME$(", "ΧΡΟΝΟΣ$("
                 End If
             Else
                 IsStr1 = True
-                R$ = FormatTimeWithLocale(GetlocaleString2(&H5D, PP), CDate(p), PP)
+                R$ = FormatTimeWithLocale(GetlocaleString2(&H5D, pp), CDate(p), pp)
             End If
        Else
             R$ = Format(p, "SHORT TIME")
@@ -13681,24 +13713,24 @@ fstr59: ' "DATE$(", "ΗΜΕΡΑ$("
     IsStr1 = True
     If IsExp(bstackstr, a$, p, , True) Then
         If FastSymbol(a$, ",") Then
-        If Not IsExp(bstackstr, a$, PP, , True) Then
-            PP = clid
+        If Not IsExp(bstackstr, a$, pp, , True) Then
+            pp = Clid
         End If
         If FastSymbol(a$, ",") Then
         If IsStrExp(bstackstr, a$, s$) Then
         If UCase(s$) = "SHORT DATE" Then
-        s$ = GetlocaleString2(&H1F, PP)
+        s$ = GetlocaleString2(&H1F, pp)
         ElseIf UCase(s$) = "LONG DATE" Then
-        s$ = GetlocaleString2(&H20, PP)
+        s$ = GetlocaleString2(&H20, pp)
         End If
-            R$ = FormatDateWithLocale(s$, CDate(p), PP)
+            R$ = FormatDateWithLocale(s$, CDate(p), pp)
         Else
         MissParam a$
         IsStr1 = False
         Exit Function
         End If
         Else
-        R$ = FormatDateWithLocale(GetlocaleString2(&H1F, clid), CDate(p), clid)
+        R$ = FormatDateWithLocale(GetlocaleString2(&H1F, Clid), CDate(p), Clid)
         End If
         Else
         R$ = Format(CDbl(CDate(p)), "SHORT DATE")
@@ -13727,19 +13759,19 @@ fstr60: '"STR$(", "ΓΡΑΦΗ$("
         End If
         End If
         If FastSymbol(a$, ",") Then
-            If IsExp(bstackstr, a$, PP, , True) Then
-            If PP = 0 Then
+            If IsExp(bstackstr, a$, pp, , True) Then
+            If pp = 0 Then
                 If VarType(p) = vbBoolean Then
                     R$ = Format$(p, DefBooleanString)
                 Else
                     R$ = CStr(p)
                 End If
             Else
-                q$ = GetlocaleString2(14, PP)
+                q$ = GetlocaleString2(14, pp)
                 If VarType(p) = vbBoolean Then
-                    If PP = 1032 Then
+                    If pp = 1032 Then
                         R$ = Format$(p, ";\Α\λ\η\θ\ή\ς;\Ψ\ε\υ\δ\ή\ς")
-                    ElseIf PP = 1033 Then
+                    ElseIf pp = 1033 Then
                         R$ = Format$(p, ";\T\r\u\e;\F\a\l\s\e")
                     Else
                         R$ = Format$(p, DefBooleanString)
@@ -13778,11 +13810,11 @@ fstr60: '"STR$(", "ΓΡΑΦΗ$("
                     End If
 contstrhere:
             If FastSymbol(a$, ",") Then
-            If IsExp(bstackstr, a$, PP, , True) Then
-            If PP > 0 Then
-            R$ = Left$(R$ + space$(PP), PP)
+            If IsExp(bstackstr, a$, pp, , True) Then
+            If pp > 0 Then
+            R$ = Left$(R$ + space$(pp), pp)
             Else
-            R$ = Right$(space$(Abs(PP)) + R$, Abs(PP))
+            R$ = Right$(space$(Abs(pp)) + R$, Abs(pp))
             End If
             Else
             IsStr1 = False
@@ -13790,12 +13822,12 @@ contstrhere:
             End If
             End If
             
-            ElseIf IsExp(bstackstr, a$, PP, , True) Then
+            ElseIf IsExp(bstackstr, a$, pp, , True) Then
             
-            If PP > 0 Then
-            R$ = Left$(Trim$(Str(p)) + space$(PP), PP)
+            If pp > 0 Then
+            R$ = Left$(Trim$(Str(p)) + space$(pp), pp)
             Else
-            R$ = Right$(space$(Abs(PP)) + Trim$(Str(p)), Abs(PP))
+            R$ = Right$(space$(Abs(pp)) + Trim$(Str(p)), Abs(pp))
             End If
             Else
             IsStr1 = False
@@ -13816,12 +13848,12 @@ contstrhere:
         If FastSymbol(a$, ",") Then
             If IsStrExp(bstackstr, a$, q$) Then
                 R$ = Format(R$, q$)
-            ElseIf IsExp(bstackstr, a$, PP, , True) Then
-                If Fix(PP) = 0 Then
-                    R$ = Convert2(R$, clid)
+            ElseIf IsExp(bstackstr, a$, pp, , True) Then
+                If Fix(pp) = 0 Then
+                    R$ = Convert2(R$, Clid)
                 Else
-                    If GetCodePage(CLng(Fix(PP))) <> 0 Then
-                        R$ = Convert2(R$, CLng(Fix(PP)))
+                    If GetCodePage(CLng(Fix(pp))) <> 0 Then
+                        R$ = Convert2(R$, CLng(Fix(pp)))
                     Else
                         IsStr1 = False
                         NoValidLocale
@@ -13833,7 +13865,7 @@ contstrhere:
                 Exit Function
             End If
         Else
-        R$ = StrConv(R$, vbFromUnicode, clid)
+        R$ = StrConv(R$, vbFromUnicode, Clid)
         End If
             If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
     IsStr1 = True
@@ -13861,23 +13893,23 @@ fstr61: '"CHRCODE$(", "ΧΑΡΚΩΔ$("
 fstr62: ' "CHR$(", "ΧΑΡ$("
     If IsExp(bstackstr, a$, p, , True) Then
         If FastSymbol(a$, ",") Then
-                If IsExp(bstackstr, a$, PP, , True) Then
-                If PP = 0 Then
-                    PP = LCID_DEF
+                If IsExp(bstackstr, a$, pp, , True) Then
+                If pp = 0 Then
+                    pp = LCID_DEF
                 Else
-                    If GetCodePage(CLng(Fix(PP))) = 0 Then
+                    If GetCodePage(CLng(Fix(pp))) = 0 Then
                         NoValidLocale
                         Exit Function
                     End If
                 End If
                 
-                     R$ = ChrW$(AscW(StrConv(ChrW$(p Mod 256), 64, CLng(Fix(PP)))))
+                     R$ = ChrW$(AscW(StrConv(ChrW$(p Mod 256), 64, CLng(Fix(pp)))))
                 Else
                         IsStr1 = False: Exit Function
                 End If
         Else
 
-                 R$ = ChrW$(AscW(StrConv(ChrW$(Fix(p) Mod 256), 64, clid)))
+                 R$ = ChrW$(AscW(StrConv(ChrW$(Fix(p) Mod 256), 64, Clid)))
 
         End If
         If InStr(R$, ChrW(&HFFFFF8FB)) > 0 Then R$ = Replace(R$, ChrW(&HFFFFF8FB), ChrW(&H2007))
@@ -13886,18 +13918,24 @@ fstr62: ' "CHR$(", "ΧΑΡ$("
     Exit Function
     ElseIf IsStrExp(bstackstr, a$, q$) Then 'CONVERT TO ASCII
             If FastSymbol(a$, ",") Then
-                If IsExp(bstackstr, a$, PP, , True) Then
-                If Fix(PP) = 0 Then
+                If IsExp(bstackstr, a$, pp, , True) Then
+                If Fix(pp) = 0 Then
                    R$ = Convert3(q$, LCID_DEF)
                 ElseIf LCID_DEF = 1032 Then
-                     R$ = Convert3(q$, CLng(Fix(PP)))
-                Else
-                    If GetCodePage(CLng(Fix(PP))) = 0 Then
+                    If GetCodePage(CLng(Fix(pp))) = 0 Then
                         NoValidLocale
                         Exit Function
                     End If
                 
-                  R$ = Convert3(Convert2(q$, LCID_DEF), CLng(Fix(PP)))
+                
+                     R$ = Convert3(q$, CLng(Fix(pp)))
+                Else
+                    If GetCodePage(CLng(Fix(pp))) = 0 Then
+                        NoValidLocale
+                        Exit Function
+                    End If
+                
+                  R$ = Convert3(Convert2(q$, LCID_DEF), CLng(Fix(pp)))
      
                    
                      End If
@@ -13905,7 +13943,7 @@ fstr62: ' "CHR$(", "ΧΑΡ$("
                         IsStr1 = False: Exit Function
                 End If
         Else
-        R$ = StrConv(q$, vbUnicode, clid)
+        R$ = StrConv(q$, vbUnicode, Clid)
         End If
     If Not FastSymbol(a$, ")") Then IsStr1 = False: Exit Function
     IsStr1 = True
@@ -14045,7 +14083,7 @@ contStrArr:
             End If
             End If
             p = 0
-            PP = 0
+            pp = 0
         IsStr1 = True
         w2 = 0
         Do While dn <= dd
@@ -14062,7 +14100,7 @@ contStrArr:
             If Not FastSymbol(a$, ")") Then MissSymbol ")": IsStr1 = False: Exit Function
         End If
               If p < -w1& Then
-                 MyErMacroStr a$, "index too low for array " & q & ")", "αρνητικός δείκτης στο πίνακα " & q$ & ")": Exit Function
+                 MyErMacroStr a$, "index too low for array " & q & ")", "χαμηλός δείκτης στο πίνακα " & q$ & ")": Exit Function
     
                 End If
             On Error Resume Next
@@ -14596,7 +14634,7 @@ End If
 End If
 End Function
 '
-Function Fast2NoSpace(a$, c$, cl As Long, d$, dl As Long, ahead&) As Boolean
+Function Fast2NoSpace(a$, c$, cl As Long, D$, dl As Long, ahead&) As Boolean
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
 If j = 0 Then Exit Function
@@ -14606,12 +14644,12 @@ a$ = Mid$(a$, MyTrimLi(a$, cl + 1))
 Fast2NoSpace = True
 Exit Function
 End If
-If d$ = Left$(Pad$, dl) Then
+If D$ = Left$(Pad$, dl) Then
 a$ = Mid$(a$, MyTrimLi(a$, dl + 1))
 Fast2NoSpace = True
 End If
 End Function
-Function Fast3NoSpaceCheck(Pos As Long, a$, c$, cl As Long, d$, dl As Long, e$, el As Long, ahead&) As Boolean
+Function Fast3NoSpaceCheck(Pos As Long, a$, c$, cl As Long, D$, dl As Long, e$, el As Long, ahead&) As Boolean
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
 If j = 0 Then Exit Function
@@ -14621,7 +14659,7 @@ If c$ = Left$(Pad$, cl) Then
     Fast3NoSpaceCheck = True
 Exit Function
 End If
-If d$ = Left$(Pad$, dl) Then
+If D$ = Left$(Pad$, dl) Then
 Pos = Pos + dl
 Fast3NoSpaceCheck = True
 Exit Function
@@ -14632,7 +14670,7 @@ Fast3NoSpaceCheck = True
 End If
 
 End Function
-Function Fast3NoSpace(a$, c$, cl As Long, d$, dl As Long, e$, el As Long, ahead&) As Boolean
+Function Fast3NoSpace(a$, c$, cl As Long, D$, dl As Long, e$, el As Long, ahead&) As Boolean
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
 If j = 0 Then Exit Function
@@ -14642,7 +14680,7 @@ a$ = Mid$(a$, MyTrimLi(a$, cl + 1))
 Fast3NoSpace = True
 Exit Function
 End If
-If d$ = Left$(Pad$, dl) Then
+If D$ = Left$(Pad$, dl) Then
 a$ = Mid$(a$, MyTrimLi(a$, dl + 1))
 Fast3NoSpace = True
 Exit Function
@@ -14653,7 +14691,7 @@ Fast3NoSpace = True
 End If
 
 End Function
-Function Fast3Label(a$, c$, cl As Long, d$, dl As Long, e$, el As Long, ahead&) As Boolean
+Function Fast3Label(a$, c$, cl As Long, D$, dl As Long, e$, el As Long, ahead&) As Boolean
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
 If j = 0 Then Exit Function
@@ -14670,7 +14708,7 @@ Exit Function
 End If
 End If
 If j - i >= dl - 1 Then
-If InStr(d$, Left$(Pad$, dl)) > 0 Then
+If InStr(D$, Left$(Pad$, dl)) > 0 Then
 If Mid$(Pad$, dl + 1, 1) Like "[0-9+.\( @-]" Then
 a$ = Mid$(a$, MyTrimLi(a$, i + dl))
 Fast3Label = True
@@ -14687,7 +14725,7 @@ End If
 End If
 End If
 End Function
-Function Fast2VarNoTrim(a$, c$, cl As Long, d$, dl As Long, ahead&, Pos As Long) As Boolean
+Function Fast2VarNoTrim(a$, c$, cl As Long, D$, dl As Long, ahead&, Pos As Long) As Boolean
 ' need space
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
@@ -14707,7 +14745,7 @@ End If
 End If
 If dl = 0 Then Exit Function
 If j - i >= dl - 1 Then
-If InStr(d$, Left$(Pad$, dl)) > 0 Then
+If InStr(D$, Left$(Pad$, dl)) > 0 Then
 If Mid$(Pad$, dl + 1, 1) = " " Then
 Mid$(a$, i) = space$(dl)
 Pos = 2
@@ -14716,7 +14754,7 @@ End If
 End If
 End If
 End Function
-Function Fast2Varl(a$, c$, cl As Long, d$, dl As Long, ahead&, ByVal F As Long) As Boolean
+Function Fast2Varl(a$, c$, cl As Long, D$, dl As Long, ahead&, ByVal F As Long) As Boolean
 ' use F if dl>0
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
@@ -14735,13 +14773,13 @@ End If
 If dl = 0 Or F = 1 Then Exit Function
 there:
 If j - i >= dl - 1 Then
-If Left$(Pad$, dl) = d$ Then
+If Left$(Pad$, dl) = D$ Then
 a$ = Mid$(a$, MyTrimLi(a$, i + dl))
 Fast2Varl = True
 End If
 End If
 End Function
-Function Fast2VarSpace(a$, c$, cl As Long, d$, dl As Long, ahead&) As Boolean
+Function Fast2VarSpace(a$, c$, cl As Long, D$, dl As Long, ahead&) As Boolean
 ' need always space
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
@@ -14760,7 +14798,7 @@ End If
 End If
 If dl = 0 Then Exit Function
 If j - i >= dl - 1 Then
-If Left$(Pad$, dl) = d$ Then
+If Left$(Pad$, dl) = D$ Then
 If Mid$(Pad$, dl + 1, 1) = " " Then
 a$ = Mid$(a$, MyTrimLi(a$, i + dl))
 Fast2VarSpace = True
@@ -14768,7 +14806,7 @@ End If
 End If
 End If
 End Function
-Function Fast3Varl(a$, c$, cl As Long, d$, dl As Long, e$, el As Long, ahead&) As Boolean
+Function Fast3Varl(a$, c$, cl As Long, D$, dl As Long, e$, el As Long, ahead&) As Boolean
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
 If j = 0 Then Exit Function
@@ -14784,7 +14822,7 @@ End If
 End If
 If dl = 0 Then Exit Function
 If j - i >= dl - 1 Then
-If Left$(Pad$, dl) = d$ Then
+If Left$(Pad$, dl) = D$ Then
 a$ = Mid$(a$, MyTrimLi(a$, i + dl))
 Fast3Varl = True
 End If
@@ -15789,9 +15827,9 @@ dothesame:
                     Set bstack.Process.Process = Nothing
                     b$ = vbNullString ' get lost now
                 ElseIf IsLabelSymbolNewExp(b$, "ΚΡΑΤΑ", "HOLD", Lang, Us$) Then
-                    bstack.Process.busy = True
+                    bstack.Process.Busy = True
                 ElseIf IsLabelSymbolNewExp(b$, "ΞΕΚΙΝΑ", "RESTART", Lang, Us$) Then
-                    bstack.Process.busy = False
+                    bstack.Process.Busy = False
                     b$ = vbNullString
                 ElseIf IsLabelSymbolNewExp(b$, "ΚΑΘΕ", "INTERVAL", Lang, Us$) Then
                     If IsExp(bstack, b$, p, , True) Then
@@ -19128,7 +19166,7 @@ GoTo again4
 
 End Function
 
-Function GoFunc(mystack As basetask, what$, rest$, vl As Variant, Optional recursive As Long, Optional ByVal choosethis As Long = -1, Optional ByVal strg As Boolean = False, Optional ByVal usesamestack As Boolean = False) As Boolean
+Function GoFunc(mystack As basetask, what$, rest$, vl As Variant, Optional Recursive As Long, Optional ByVal choosethis As Long = -1, Optional ByVal strg As Boolean = False, Optional ByVal usesamestack As Boolean = False) As Boolean
 Dim p As Variant, i As Long, F As Long, it As Long, pa$, OC As Long
 Dim x1 As Long, frm$, par As Boolean, ohere$, W$, bb$, loopthis As Boolean, S3 As Long, ec$
 Dim Vars As Long, Vname As Long, subs As Long, snames As Long, once As Boolean, RetStackSize As Long, subspoint As Boolean, subsfc As FastCollection
@@ -19169,16 +19207,16 @@ If choosethis >= 0 Then
     x1 = choosethis
     If what$ = vbNullString Then
         If SecureNames Then
-            If Left$(here$, 1) <> "_" Then If basestack.IamThread Then here$ = "_" + LTrim$(Str$(basestack.Process.Id)) + here$
+            If Left$(here$, 1) <> "_" Then If basestack.IamThread Then here$ = "_" + LTrim$(Str$(basestack.Process.id)) + here$
             here$ = RVAL33(here$, x1)
         Else
             here$ = RVAL(here$, 1) + mystack.originalname
         End If
-    ElseIf recursive Then
+    ElseIf Recursive Then
         here$ = RVAL(here$, 1) & "." & Trim$(what$)
-        If SecureNames Then If basestack.IamThread Then If Left$(here$, 1) <> "_" Then here$ = "_" + LTrim$(basestack.Process.Id) + here$: basestack.StaticInUse = LTrim$(basestack.Process.Id)
+        If SecureNames Then If basestack.IamThread Then If Left$(here$, 1) <> "_" Then here$ = "_" + LTrim$(basestack.Process.id) + here$: basestack.StaticInUse = LTrim$(basestack.Process.id)
     Else
-        If SecureNames Then If basestack.IamThread Then If basestack.StaticInUse = vbNullString Then basestack.StaticInUse = LTrim$(basestack.Process.Id)
+        If SecureNames Then If basestack.IamThread Then If basestack.StaticInUse = vbNullString Then basestack.StaticInUse = LTrim$(basestack.Process.id)
     End If
 Else
     If InStr(what$, "(") > 0 Then
@@ -19187,7 +19225,7 @@ Else
                 If ohere$ = vbNullString Then here$ = what$
             Else
                 here$ = RVAL(here$, 1) & "." & Trim$(what$)
-                If SecureNames Then If basestack.IamThread Then If Left$(here$, 1) <> "_" Then here$ = "_" + LTrim$(basestack.Process.Id) + here$: basestack.StaticInUse = LTrim$(basestack.Process.Id)
+                If SecureNames Then If basestack.IamThread Then If Left$(here$, 1) <> "_" Then here$ = "_" + LTrim$(basestack.Process.id) + here$: basestack.StaticInUse = LTrim$(basestack.Process.id)
             End If
         ElseIf GetSub2(basestack, what$, x1) Then
             If here$ = vbNullString Then
@@ -19205,9 +19243,9 @@ Else
             here$ = RVAL(here$, 1)
         ElseIf GetSub(what$, x1) Then
             here$ = RVAL(here$, 1)
-        ElseIf recursive > 0 Then
+        ElseIf Recursive > 0 Then
             here$ = RVAL(here$, 1)
-            x1 = recursive
+            x1 = Recursive
         End If
     End If
 End If
@@ -22635,7 +22673,7 @@ End If
 End Function
 
 
-Function logical(basestack As basetask, s$, d As Variant, Optional par As Long = 0, Optional flatobject As Boolean = False, Optional ByPass As Boolean = False) As Boolean
+Function logical(basestack As basetask, s$, D As Variant, Optional par As Long = 0, Optional flatobject As Boolean = False, Optional ByPass As Boolean = False) As Boolean
 Dim b$, s2$, S3$ ' , OSTAC$
 Dim ah As String
 again11:
@@ -22647,14 +22685,14 @@ End If
 If InStr(ah, "l") = 0 Then
 If InStr(ah, "N") > 0 Then
 
-If Not IsNumber(basestack, s$, d, flatobject) Then
+If Not IsNumber(basestack, s$, D, flatobject) Then
     Set basestack.lastobj = Nothing
 Else
     logical = True
 End If
 Else
 If par > 0 Then
-If Not GetArr(basestack, s$, d, s2$, 0) Then
+If Not GetArr(basestack, s$, D, s2$, 0) Then
     Set basestack.lastobj = Nothing
 Else
     If Len(s$) > 0 Then
@@ -22693,7 +22731,7 @@ If FastSymbol(s$, "=") Then
     logical = False
     If IsStrExp(basestack, s$, s2$) Then
     logical = True
-    d = b$ = s2$
+    D = b$ = s2$
     Exit Function
     Else
     If LastErNum = -2 Then logical = True
@@ -22709,11 +22747,11 @@ ElseIf FastSymbol(s$, "<") Then
                 logical = True
                 Select Case b$
                 Case Is < s2$
-                    d = -1
+                    D = -1
                 Case Is = s2$
-                    d = 0
+                    D = 0
                 Case Else
-                    d = 1
+                    D = 1
                 End Select
                 Exit Function
             Else
@@ -22723,7 +22761,7 @@ ElseIf FastSymbol(s$, "<") Then
         Else
             If IsStrExp(basestack, s$, s2$) Then
                 logical = True
-                d = b$ <= s2$
+                D = b$ <= s2$
                 Exit Function
             Else
                 If LastErNum = -2 Then logical = True
@@ -22734,7 +22772,7 @@ ElseIf FastSymbol(s$, "<") Then
         Mid$(s$, 1, 1) = " "
         If IsStrExp(basestack, s$, s2$) Then
             logical = True
-            d = b$ <> s2$
+            D = b$ <> s2$
             Exit Function
         Else
             If LastErNum = -2 Then logical = True
@@ -22742,7 +22780,7 @@ ElseIf FastSymbol(s$, "<") Then
         End If
     ElseIf IsStrExp(basestack, s$, s2$) Then
     logical = True
-    d = b$ < s2$
+    D = b$ < s2$
     Exit Function
             Else
     If LastErNum = -2 Then logical = True
@@ -22754,7 +22792,7 @@ ElseIf FastSymbol(s$, ">") Then
         Mid$(s$, 1, 1) = " "
         If IsStrExp(basestack, s$, s2$) Then
             logical = True
-            d = b$ >= s2$
+            D = b$ >= s2$
             Exit Function
         Else
             If LastErNum = -2 Then logical = True
@@ -22762,7 +22800,7 @@ ElseIf FastSymbol(s$, ">") Then
         End If
     ElseIf IsStrExp(basestack, s$, s2$) Then
     logical = True
-    d = b$ > s2$
+    D = b$ > s2$
     Exit Function
             Else
     If LastErNum = -2 Then logical = True
@@ -22772,7 +22810,7 @@ ElseIf FastSymbol(s$, "~") Then
     logical = False
     If IsStrExp(basestack, s$, s2$) Then
     logical = True
-    d = b$ Like s2$
+    D = b$ Like s2$
     Exit Function
             Else
     If LastErNum = -2 Then logical = True
@@ -22784,7 +22822,7 @@ If FastSymbol(s$, "=") Then
     logical = False
     If IsStrExp(basestack, s$, s2$) Then
     logical = True
-    d = CompareStr2(b$, s2$) = 0
+    D = CompareStr2(b$, s2$) = 0
     Exit Function
     Else
     If LastErNum = -2 Then logical = True
@@ -22798,7 +22836,7 @@ ElseIf FastSymbol(s$, "<") Then
             Mid$(s$, 2, 1) = " "
             If IsStrExp(basestack, s$, s2$) Then
                 logical = True
-                d = CompareStr2(b$, s2$)
+                D = CompareStr2(b$, s2$)
                 Exit Function
             Else
                 If LastErNum = -2 Then logical = True
@@ -22806,7 +22844,7 @@ ElseIf FastSymbol(s$, "<") Then
             End If
         ElseIf IsStrExp(basestack, s$, s2$) Then
             logical = True
-            d = CompareStr2(b$, s2$) < 1
+            D = CompareStr2(b$, s2$) < 1
             Exit Function
         Else
             If LastErNum = -2 Then logical = True
@@ -22816,7 +22854,7 @@ ElseIf FastSymbol(s$, "<") Then
         Mid$(s$, 1, 1) = " "
         If IsStrExp(basestack, s$, s2$) Then
             logical = True
-            d = CompareStr2(b$, s2$) <> 0
+            D = CompareStr2(b$, s2$) <> 0
             Exit Function
         Else
             If LastErNum = -2 Then logical = True
@@ -22824,7 +22862,7 @@ ElseIf FastSymbol(s$, "<") Then
         End If
     ElseIf IsStrExp(basestack, s$, s2$) Then
         logical = True
-        d = CompareStr2(b$, s2$) = -1
+        D = CompareStr2(b$, s2$) = -1
         Exit Function
     Else
         If LastErNum = -2 Then logical = True
@@ -22836,7 +22874,7 @@ ElseIf FastSymbol(s$, ">") Then
         Mid$(s$, 1, 1) = " "
         If IsStrExp(basestack, s$, s2$) Then
             logical = True
-            d = CompareStr2(b$, s2$) > -1
+            D = CompareStr2(b$, s2$) > -1
             Exit Function
         Else
             If LastErNum = -2 Then logical = True
@@ -22844,7 +22882,7 @@ ElseIf FastSymbol(s$, ">") Then
         End If
     ElseIf IsStrExp(basestack, s$, s2$) Then
         logical = True
-        d = CompareStr2(b$, s2$) = 1
+        D = CompareStr2(b$, s2$) = 1
         Exit Function
     Else
         If LastErNum = -2 Then logical = True
@@ -22854,7 +22892,7 @@ ElseIf FastSymbol(s$, "~") Then
     logical = False
     If IsStrExp(basestack, s$, s2$) Then
     logical = True
-    d = b$ Like s2$
+    D = b$ Like s2$
     Exit Function
             Else
     If LastErNum = -2 Then logical = True
@@ -22868,7 +22906,7 @@ Else
 'If s$ <> s2$ Then Stop
 's$ = s2$
 cont145:
-If IsNumber(basestack, s$, d, flatobject) Then
+If IsNumber(basestack, s$, D, flatobject) Then
 logical = True
 End If
 End If
@@ -23361,13 +23399,13 @@ End Sub
 
 Sub RTarget(ddd As Object, tar As target)
 ' RENDER TARGET
-Dim xl&, yl&, b As Long, F As Long, Tag$, Id&
+Dim xl&, yl&, b As Long, F As Long, Tag$, id&
 Dim x&, y&, ox&, oy&
-Dim prive As basket, d As Object
-Set d = ddd.Owner
-prive = players(GetCode(d))
+Dim prive As basket, D As Object
+Set D = ddd.Owner
+prive = players(GetCode(D))
 With tar
-Id& = .Id
+id& = .id
 Tag$ = .Tag
 x& = .Lx
 y& = .ly
@@ -23385,7 +23423,7 @@ Set dd = Form1
 ElseIf .layer > 0 And .layer < 33 Then
 Set dd = Form1.dSprite(.layer)
 Else
-Set dd = d
+Set dd = D
 End If
 
 prive.Xt = .Xt
@@ -23399,12 +23437,12 @@ dd.FontSize = prive.SZ
 LCTbasket dd, prive, y&, x&
 If F <> &H81000000 Then BoxBigNew dd, prive, xl& - 1, yl&, F
 If b <> &H81000000 Then BoxColorNew dd, prive, xl& - 1, yl&, b
-If Id& < 100 Then
+If id& < 100 Then
 
     Tag$ = Left$(Tag$, xl& - x&)
     If Tag$ <> "" Then
     '1
-    Select Case Id& Mod 10
+    Select Case id& Mod 10
     Case 4, 5, 6
     y& = (yl& + y&) \ 2
     Case 7, 8, 9
@@ -23412,7 +23450,7 @@ If Id& < 100 Then
     Case Else
     End Select
     
-    Select Case Id& Mod 10
+    Select Case id& Mod 10
     Case 2, 5, 8
    
     x& = (xl& + x& - Len(Tag$)) \ 2
@@ -23421,7 +23459,7 @@ If Id& < 100 Then
     
     Case Else
     End Select
-    If (Id& Mod 10) > 0 Then
+    If (id& Mod 10) > 0 Then
     LCTbasket dd, prive, y&, x&
     dd.FontTransparent = True
     dd.forecolor = mycolor(prive.mypen)
@@ -23430,8 +23468,8 @@ If Id& < 100 Then
     End If
 Else
         If Tag$ <> "" Then
-    Id& = Id& Mod 100
-    Select Case Id& Mod 10
+    id& = id& Mod 100
+    Select Case id& Mod 10
     Case 4, 5, 6
     y& = (yl& + y&) \ 2
     Case 7, 8, 9
@@ -23439,7 +23477,7 @@ Else
     Case Else
     End Select
     F = 3
-    Select Case Id& Mod 10
+    Select Case id& Mod 10
     Case 2, 5, 8
     F = 2
     Case 3, 6, 9
@@ -23447,7 +23485,7 @@ Else
     Case Else
     End Select
     
-    If (Id& Mod 10) > 0 Then
+    If (id& Mod 10) > 0 Then
     LCTbasket dd, prive, y&, x&
     dd.FontTransparent = True
     dd.currentX = dd.currentX - dv15 * 2
@@ -23488,28 +23526,28 @@ End If
 End If
 End Function
 
-Function NeoGetArrayItem(PP As mArray, bstack As basetask, v$, offset As Long, rst$, Optional noObject As Boolean = False, Optional closepar As Boolean = True, Optional fromstr As Boolean, Optional rightexpr As Boolean = False) As Boolean
-If PP Is Nothing Then
+Function NeoGetArrayItem(pp As mArray, bstack As basetask, v$, Offset As Long, rst$, Optional noObject As Boolean = False, Optional closepar As Boolean = True, Optional fromstr As Boolean, Optional rightexpr As Boolean = False) As Boolean
+If pp Is Nothing Then
     MyEr "Internal Error: NeoGetArrayItem", "εσωτερικό λάθος: NeoGetArrayItem": Exit Function
 End If
-If noObject And PP.IHaveClass Then Exit Function
+If noObject And pp.IHaveClass Then Exit Function
 Dim dn As Long, dd As Long, w3 As Long, sp$, lim As Long
 Dim p As Variant
 If Len(v$) > 0 Then sp$ = ")"
 again123:
 dd = 0
 dn = 0
-If Not PP.Arr Then
+If Not pp.Arr Then
     Dim ppp$
-    If TypeOf PP.GroupRef Is mHandler Then
-        If PP.GroupRef.t1 <> 1 Then Expected "Inventory", "Κατάσταση": Exit Function
-        If TypeOf PP.GroupRef.objref Is mHandler Then
-        With PP.GroupRef
+    If TypeOf pp.GroupRef Is mHandler Then
+        If pp.GroupRef.t1 <> 1 Then Expected "Inventory", "Κατάσταση": Exit Function
+        If TypeOf pp.GroupRef.objref Is mHandler Then
+        With pp.GroupRef
         Set .objref = .objref.objref
         End With
         End If
             If IsExp(bstack, rst$, p) Then
-                With PP.GroupRef.objref
+                With pp.GroupRef.objref
                     If Not FastSymbol(rst$, "!") Then ppp$ = CStr(p): GoTo contlabel1
                     p = MyRound(p)
                     If Abs(p) < .count Then
@@ -23519,7 +23557,7 @@ If Not PP.Arr Then
                             .Index = Int(p)
                         End If
                         .Index = p
-                        offset = -.Index - 100
+                        Offset = -.Index - 100
                         .Done = True
                     Else
                         MyEr "Index out of limits", "Δείκτης εκτός ορίων"
@@ -23527,13 +23565,13 @@ If Not PP.Arr Then
                 End With
             ElseIf IsStrExp(bstack, rst$, ppp$) Then
 contlabel1:
-                With PP.GroupRef.objref
+                With pp.GroupRef.objref
                     If Not .Find(ppp$) Then
                         MyEr "Key not exist", "Δεν υπαρχει το κλειδί"
                         NeoGetArrayItem = False
                         Exit Function
                     Else
-                        offset = -.Index - 100
+                        Offset = -.Index - 100
                         
                     End If
                     If Typename(.ValueObj) = "Group" Then
@@ -23547,11 +23585,11 @@ contlabel1:
                     End If
                 End With
             End If
-        ElseIf TypeOf PP.GroupRef Is Group Then
+        ElseIf TypeOf pp.GroupRef Is Group Then
             If Not fromstr Then
             If rightexpr Then
-            ElseIf PP.GroupRef.HasParameters Then
-                    If Not PP.GroupRef.HasStrValue Then
+            ElseIf pp.GroupRef.HasParameters Then
+                    If Not pp.GroupRef.HasStrValue Then
                         If Len(rst$) > 0 Then
                             bstack.tmpstr = v$ + Left$(rst$, 1)
                             ppp$ = Left$(rst$, 1)
@@ -23559,13 +23597,13 @@ contlabel1:
                             If IsNumber(bstack, rst$, p) Then
                                 If Not bstack.lastpointer Is Nothing Then
                                     If bstack.lastpointer.IamApointer Then
-                                        Set PP.GroupRef = bstack.lastpointer
+                                        Set pp.GroupRef = bstack.lastpointer
                                     Else
-                                        Set PP.GroupRef = bstack.lastobj
+                                        Set pp.GroupRef = bstack.lastobj
                                     End If
                                 ElseIf Not bstack.lastobj Is Nothing Then
-                                    If TypeOf PP.GroupRef Is Group Then
-                                        Set PP.GroupRef = bstack.lastobj
+                                    If TypeOf pp.GroupRef Is Group Then
+                                        Set pp.GroupRef = bstack.lastobj
                                     End If
                                 End If
                                 Set bstack.lastobj = Nothing
@@ -23577,13 +23615,13 @@ contlabel1:
                     End If
                 End If
             End If
-            offset = -2
+            Offset = -2
             NeoGetArrayItem = True
             Exit Function
         Else
 contprop:
             Dim aprop As PropReference
-            Set aprop = PP.GroupRef
+            Set aprop = pp.GroupRef
             If IsExp(bstack, rst$, p) Then
                 aprop.Index = p
             ElseIf IsStrExp(bstack, rst$, ppp$) Then
@@ -23595,12 +23633,12 @@ contprop:
 conthere:
         If closepar Then If Not FastSymbol(rst$, ")") Then MyEr "missing )", "λείπει )": Exit Function
         NeoGetArrayItem = True
-    ElseIf PP.SerialItem((0), dd, 5) Then
+    ElseIf pp.SerialItem((0), dd, 5) Then
         dd = dd - 1
-        offset = 0
-        If dd < 0 Then If Typename(PP.GroupRef) = "PropReference" Then GoTo contprop
+        Offset = 0
+        If dd < 0 Then If Typename(pp.GroupRef) = "PropReference" Then GoTo contprop
         Do While dn <= dd
-            PP.GetDnum dn, w3, lim
+            pp.GetDnum dn, w3, lim
             If IsExp(bstack, rst$, p, , True) Then
                 If dn < dd Then
                     If Not FastSymbol(rst$, ",") Then MyEr "need index for " & v$ & sp$, "χρειάζομαι δείκτη για το πίνακα " & v$ & sp$: Exit Function
@@ -23610,9 +23648,9 @@ conthere:
                 End If
                 On Error Resume Next
                 If p < -lim Then
-                    MyEr "index too low for array " & v$ & sp$, "αρνητικός δείκτης στο πίνακα " & v$ & sp$: Exit Function
+                    MyEr "index too low for array " & v$ & sp$, "χαμηλός δείκτης στο πίνακα " & v$ & sp$: Exit Function
                 End If
-                If PP.PushOffset(offset, dn, CLng(p)) Then
+                If pp.PushOffset(Offset, dn, CLng(p)) Then
                     NeoGetArrayItem = True
                 Else
                     MyEr "index too high for array " & v$ & sp$, "δείκτης υψηλός για το πίνακα " & v$ & sp$: Exit Function
@@ -23628,31 +23666,31 @@ conthere:
     End If
     If lookOne(rst, "(") Then
 CheckThis:
-        ppp$ = Typename(PP.item(offset))
+        ppp$ = Typename(pp.item(Offset))
         If ppp$ = myArray Then
             FastSymbol rst$, "("
-            Set PP = PP.item(offset)
+            Set pp = pp.item(Offset)
             NeoGetArrayItem = False
             GoTo again123
         ElseIf ppp$ = "mHandler" Then
             FastSymbol rst$, "("
-            Set p = PP.item(offset)
+            Set p = pp.item(Offset)
 againhandler:
             If p.t1 = 3 Then
                 If Typename(p.objref) = "mArray" Then
-                Set PP = p.objref
+                Set pp = p.objref
             Else
                 Exit Function
             End If
         Else
-            Set PP = New mArray
-            PP.Arr = False
-            Set PP.GroupRef = p
+            Set pp = New mArray
+            pp.Arr = False
+            Set pp.GroupRef = p
         End If
         p = vbEmpty
-        NeoGetArrayItem = PP.Arr
+        NeoGetArrayItem = pp.Arr
         GoTo again123
-    ElseIf Typename(PP.item(offset)) = "Group" Then
+    ElseIf Typename(pp.item(Offset)) = "Group" Then
         NeoGetArrayItem = True
     End If
 End If
@@ -23944,11 +23982,11 @@ End Function
 
 
 
-Sub mywait(bstack As basetask, PP As Variant, Optional SLEEPSHORT As Boolean = False)
+Sub mywait(bstack As basetask, pp As Variant, Optional SLEEPSHORT As Boolean = False)
 Dim p As Boolean, e As Boolean
 On Error Resume Next
 If bstack Is Nothing Then
-If PP = 0 Then Exit Sub
+If pp = 0 Then Exit Sub
 End If
 If bstack.Process Is Nothing Then
 ''If extreme Then MyDoEvents1 Form1
@@ -23965,7 +24003,7 @@ End If
 End If
 End If
 
-PP = PP + CDbl(timeGetTime)
+pp = pp + CDbl(timeGetTime)
 If TaskMaster Is Nothing Then Set TaskMaster = New TaskMaster
 Do
 
@@ -23992,7 +24030,7 @@ Exit Do
 End If
 End If
 End If
-Loop Until PP <= CDbl(timeGetTime) Or NOEXECUTION
+Loop Until pp <= CDbl(timeGetTime) Or NOEXECUTION
 
                        If exWnd <> 0 Then
                 MyTitle$ bstack
@@ -24219,9 +24257,9 @@ Sub MakeitPropReference(var As Variant)
 Dim aa As New PropReference
 Set var = aa
 End Sub
-Sub CreateFormObject(var As Variant, Id As Long)
+Sub CreateFormObject(var As Variant, id As Long)
 Dim aa As Object
-Select Case Id
+Select Case id
 Case 1
 Set aa = New GuiM2000
 
@@ -24261,12 +24299,12 @@ Set aa = CreateObject(THISOjBECT, CStr(cc))
 End If
 Set var = aa
 End Sub
-Function CheckVarGroup(basestack As basetask, var As Variant, s As String, Optional final As Boolean = False) As Long
-Dim d As Document, c As Constant
+Function CheckVarGroup(basestack As basetask, var As Variant, s As String, Optional Final As Boolean = False) As Long
+Dim D As Document, c As Constant
                 
 If Typename(var) = doc Then
-Set d = var
-d.FasttextDoc = s
+Set D = var
+D.FasttextDoc = s
 
 ElseIf Typename(var) = "lambda" Then
 If Not basestack.lastobj Is Nothing Then
@@ -24285,7 +24323,7 @@ Else
 MoveStringToVariant s, var
 End If
 
-If final Then
+If Final Then
     Set c = New Constant
     c.DefineOnce var
     Set var = c
@@ -24383,7 +24421,7 @@ End Sub
 
 Function ExecuteGroupStruct(bstack As basetask, ohere$, vvv As Long, rest$, ByVal addlen As Long, Lang As Long, Optional glob As Boolean = False, Optional alocal As Boolean = False) As Long
 Dim W$, w1$, p As Variant, v As Long, s$, ss$, b$, i As Long, lcl As Boolean, j As Long, nm$, x1 As Long, y1 As Long, frm$, skip As Boolean
-Dim uni As Boolean, prv As Boolean, stripstack1 As New basetask, hlp As String, vl As String, NoRec As Boolean, final As Boolean
+Dim uni As Boolean, prv As Boolean, stripstack1 As New basetask, hlp As String, vl As String, NoRec As Boolean, Final As Boolean
 Dim highpriority As Boolean, ThisGroup As Group, RightAssociative As Boolean, removebypass As Boolean, c As Constant
 Dim useHandler As mHandler, it As Long, classfun As Boolean
 
@@ -24432,7 +24470,7 @@ there12345:
         If prv Then
         W$ = ChrW(&HFFBF) + W$
         End If
-        If v <> 0 Then final = True: GoTo VarOnly
+        If v <> 0 Then Final = True: GoTo VarOnly
         v = i
         W$ = ss$
         i = 0
@@ -24631,8 +24669,23 @@ there12345:
             ExecuteGroupStruct = 0
             Exit Function
         End If
+    Case "DECLARE", "ΟΡΙΣΕ"  'OBJECT
+        bstack.priveflag = prv
+        bstack.uniflag = uni
+        bstack.finalFlag = Final
+        If Not MyDeclare(bstack, rest$, Lang, True) Then   ' stripstack1
+            bstack.priveflag = False
+            bstack.uniflag = False
+            bstack.finalFlag = False
+            ExecuteGroupStruct = 0
+            Exit Function
+        End If
+            stripstack1.priveflag = False
+            stripstack1.uniflag = False
+            stripstack1.finalFlag = False
+         '   LogGroup bstack, vvv, ohere$, OvarnameLen, lcl, NoRec, False 'uni
     Case "SET", "ΘΕΣΕ"
-        final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟ", "FINAL", Lang)
+        Final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟ", "FINAL", Lang)
         If FastSymbol(rest$, "(") Then
             If varhash.Find(here$ + "." + Left$(ThisGroup.GroupName, Len(ThisGroup.GroupName) - 1) + "(", i) Then
                 MyEr "Array with same name", "Πίνακας με ίδιο όνομα"
@@ -24657,8 +24710,8 @@ there12345:
         W$ = "&"
         GoTo funcoperator
     Case "VALUE", "ΑΞΙΑ"
-        final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΗ", "FINAL", Lang)
-        If final Then
+        Final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΗ", "FINAL", Lang)
+        If Final Then
             If FastSymbol(rest$, "(") Then GoTo contthere1
             GoTo contthere22
         End If
@@ -24700,7 +24753,7 @@ contthere22:
         x1 = 1
         W$ = vbNullString
         F$ = ChrW(&H1FFF) + "_%"
-        final = True
+        Final = True
         removebypass = True
         highpriority = False
         ThisGroup.HasRemove = True
@@ -24711,7 +24764,7 @@ contthere22:
             ExecuteGroupStruct = 0
             Exit Function
         End If
-        final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟΣ", "FINAL", Lang)
+        Final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟΣ", "FINAL", Lang)
         x1 = 1
         If Not ISSTRINGA(rest$, F$) Then
             If IsLabelSymbolNew(rest$, "ΥΨΗΛΟΣ", "HIGH", Lang) Then
@@ -24917,7 +24970,7 @@ checkagainsub:
             ExecuteGroupStruct = 0
             Exit Function
         End If
-        final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΗ", "FINAL", Lang)
+        Final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΗ", "FINAL", Lang)
 classcontclass:
         x1 = Abs(IsLabelF(rest$, F$))
         If prv Then F$ = ChrW(&HFFBF) + F$
@@ -24950,7 +25003,7 @@ funcoperator:
                                 End If
                                 Set sbf(i).subs = Nothing
                             End If
-                            sbf(i).locked = final
+                            sbf(i).locked = Final
                             GoTo continuehere22
                         End If
                         MyEr "group struct error1", "προβλημα στη δομή1"
@@ -25047,9 +25100,9 @@ BYPASS3:
         ExecuteGroupStruct = Abs(IdentifierGroup(bstack, W$, rest$, Lang, alocal, addlen))
         If ExecuteGroupStruct = 0 Then Exit Function
         If GetSub(bstack.GroupName + F$ + "()", i) Then
-            If sbf(i).locked Then final = True
-            If final Then sbf(i).locked = True
-            If final Then
+            If sbf(i).locked Then Final = True
+            If Final Then sbf(i).locked = True
+            If Final Then
                 If removebypass Or Not NoRec Then
                     If Not lcl Then
                         ThisGroup.FuncList = Chr$(1) + Chr$(2) + F$ + "() -" + CStr(i) + Chr$(1) + ThisGroup.FuncList
@@ -25095,7 +25148,7 @@ MyEr "GLOBAL can't be used in a Group", "Η συνάρτηση στην ομάδα δεν μπορεί να εί
 ExecuteGroupStruct = 0
 Exit Function
 End If
-final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟ", "FINAL", Lang)
+Final = IsLabelSymbolNew(rest$, "ΤΕΛΙΚΟ", "FINAL", Lang)
 x1 = Abs(IsLabelF(rest$, F$))
     If prv Then F$ = ChrW(&HFFBF) + F$
 If x1 <> 0 Then
@@ -25255,11 +25308,11 @@ Else
 BYPASS4:
  ExecuteGroupStruct = Abs(IdentifierGroup(bstack, W$, rest$, Lang, alocal Or glob, addlen))
   If GetSub(bstack.GroupName + F$, i) Then
-  If sbf(i).locked Then final = True
-  If final Then sbf(i).locked = True
+  If sbf(i).locked Then Final = True
+  If Final Then sbf(i).locked = True
   
 If Not NoRec Then
-If final Then
+If Final Then
  If Not lcl Then
  ThisGroup.FuncList = Chr$(1) + Chr$(3) + F$ + " -" + CStr(i) + Chr$(1) + ThisGroup.FuncList
  Else
@@ -25288,7 +25341,7 @@ End If
 Case "STRUCTURE", "ΔΟΜΗ"
 bstack.priveflag = prv
 bstack.uniflag = uni
-bstack.finalFlag = final
+bstack.finalFlag = Final
  If Not makestruct(bstack, rest$, Lang, glob Or here$ = "", alocal) Then ExecuteGroupStruct = 0: Exit Function
    bstack.priveflag = False
   bstack.uniflag = False
@@ -25316,7 +25369,7 @@ GoTo there100
 Else
 bstack.priveflag = prv
 bstack.uniflag = uni
-bstack.finalFlag = final
+bstack.finalFlag = Final
    ExecuteGroupStruct = Abs(IdentifierGroup(bstack, W$, rest$, Lang, alocal, addlen))
   bstack.priveflag = False
   bstack.uniflag = False
@@ -25327,7 +25380,7 @@ Case "DIM", "ΠΙΝΑΚΑΣ", "ΠΙΝΑΚΕΣ"
 contVar:
 bstack.priveflag = prv
 bstack.uniflag = uni
-bstack.finalFlag = final
+bstack.finalFlag = Final
 
 ExecuteGroupStruct = Abs(MyDim(bstack, rest$, Lang, glob Or alocal))
 
@@ -25336,7 +25389,7 @@ ExecuteGroupStruct = Abs(MyDim(bstack, rest$, Lang, glob Or alocal))
   bstack.finalFlag = False
      If ExecuteGroupStruct = 0 Then Exit Function
 Case "GROUP", "ΟΜΑΔΑ"
-If final Then
+If Final Then
             NoObjectAssign
             ExecuteGroupStruct = 0
             Exit Function
@@ -25666,7 +25719,7 @@ Case 1
         
         If Not GetlocalVar(W$, v) Then v = globalvar(W$, p)  ': GetlocalVar W$, v
         End If
-        If final Then
+        If Final Then
         If MyIsObject(var(v)) Then
         If Not TypeOf var(v) Is Constant Then MyEr "No Constant, it is an object", "Δεν έχω σταθερή, αλλά αντικείμενο": Exit Function
         Else
@@ -25701,7 +25754,7 @@ Case 1
                        it = GlobalSub(here$ + "." + W$ + "()", "", here$ + "." + bstack.GroupName, , v)
                        sbf(it).tpointer = bstack.tpointer
                     End If
-                    If final Then
+                    If Final Then
                     Set c = New Constant
                     c.DefineOnce var(v)
                     Set var(v) = c
@@ -25710,7 +25763,7 @@ Case 1
 conthere0001:
                     OvarnameLen = varhash.count + 1
                 ElseIf TypeOf stripstack1.lastobj Is Group Then
-                            If final Then
+                            If Final Then
                             NoObjectAssign
                             ExecuteGroupStruct = 0
                             Exit Function
@@ -25805,7 +25858,7 @@ againgroup:
                     bstack.CopyStrip stripstack1
                     GoTo continuehere
                 ElseIf Typename$(stripstack1.lastobj) = myArray Then
-                        If final Then
+                        If Final Then
                         NoObjectAssign
                         ExecuteGroupStruct = 0
                         Exit Function
@@ -25815,7 +25868,7 @@ againgroup:
                     Set var(v).objref = stripstack1.lastobj
                     Set stripstack1.lastobj = Nothing
                 Else
-                        If final Then
+                        If Final Then
                         NoObjectAssign
                         ExecuteGroupStruct = 0
                         Exit Function
@@ -25848,7 +25901,7 @@ againgroup:
                         var(v).DefineOnce p
                     End If
                 Else
-                If final Then
+                If Final Then
                     Set var(v) = New Constant
                     var(v).DefineOnce p
                 Else
@@ -25911,7 +25964,7 @@ If ss$ <> "" Then
             If glob Then
            If IsStrExp(stripstack1, rest$, ss$) Then
               v = globalvarEmpty(W$)
-          If CheckVarGroup(stripstack1, var(v), ss$, final) = 1 Then
+          If CheckVarGroup(stripstack1, var(v), ss$, Final) = 1 Then
           GlobalSub W$ + "()", "", bstack.GroupName, , v
         
           End If
@@ -25924,7 +25977,7 @@ If ss$ <> "" Then
             
                 If IsStrExp(stripstack1, rest$, ss$) Then CheckVarGroup stripstack1, var(v), ss$
                 
-                If final Then
+                If Final Then
                     Set var(v) = New Constant
                     var(v).DefineOnce ss$
                 End If
@@ -25949,7 +26002,7 @@ contstr1:
                                          Else
                                          v = globalvarEmpty(here$ + "." + W$)
                                          End If
-                                CheckVarGroup stripstack1, var(v), ss$, final
+                                CheckVarGroup stripstack1, var(v), ss$, Final
                                 '         v = globalvar(w$, Empty)
                                 'Set var(v) = stripstack1.lastobj
                               '  Set stripstack1.lastobj = Nothing
@@ -26034,7 +26087,7 @@ againgroupstr:
                Else
                 
                 v = globalvar(W$, ss$)
-                If final Then
+                If Final Then
                 Set var(v) = New Constant
                 var(v).DefineOnce ss$
                 End If
@@ -26046,7 +26099,7 @@ Else
 ' NO VALUE IS OK
 If Not GetlocalVar(W$, v) Then
                 v = globalvar(W$, ss$)
-                        If final Then
+                        If Final Then
         If MyIsObject(var(v)) Then
         If Not TypeOf var(v) Is Constant Then MyEr "No Constant, it is an object", "Δεν έχω σταθερή, αλλά αντικείμενο": Exit Function
         Else
@@ -26063,7 +26116,7 @@ Case 4
     p = 0#
 If glob Then
      v = globalvar(W$, Round(p, 0), , True)
-     If final Then
+     If Final Then
                     
                     Set var(v) = New Constant
                     var(v).DefineOnce Round(p, 0)
@@ -26077,7 +26130,7 @@ If alocal Then
 Else
 If Not GetlocalVar(W$, v) Then v = globalvar(W$, p) '': GetlocalVar W$, v
 End If
-        If final Then
+        If Final Then
         If MyIsObject(var(v)) Then
         If Not TypeOf var(v) Is Constant Then MyEr "No Constant, it is an object", "Δεν έχω σταθερή, αλλά αντικείμενο": Exit Function
         Else
@@ -26132,7 +26185,7 @@ ss$ = vbNullString
 End If
 GoTo continuehere
 Case 5
-If final Then
+If Final Then
 rest$ = Mid$(W$, Len(ohere$) + 2) + rest$
 W$ = "DIM"
 GoTo contVar
@@ -26169,7 +26222,7 @@ JUMPHERE:
     End If
 GoTo continuehere
 Case 6
-If final Then
+If Final Then
 rest$ = Mid$(W$, Len(ohere$) + 2) + rest$
 W$ = "DIM"
 GoTo contVar
@@ -26182,7 +26235,7 @@ Else
 ExecuteGroupStruct = 0:   Exit Function
 End If
 Case 7
-If final Then
+If Final Then
 rest$ = Mid$(W$, Len(ohere$) + 2) + rest$
 W$ = "DIM"
 GoTo contVar
@@ -26229,13 +26282,14 @@ ExecuteGroupStruct = 1
 Exit Do
 End If
 If Not FastSymbol(rest$, ",") Then
-final = False
+Final = False
 SetNextLine rest$
 lcl = False
 End If
 ExecuteGroupStruct = 1
 Loop Until Trim$(rest$) = vbNullString
 End Function
+
 
 Public Function CleanStr(sStr As String, noValidcharList As String) As String
 Dim a$, i As Long '', ddt As Boolean
@@ -26254,8 +26308,8 @@ End If
 CleanStr = a$
 End Function
 Private Sub CallByObject(bstack As basetask, i As Long, ret As Boolean)
-Dim that As stdCallFunction, Up As Long, getparam As Boolean, PP As Long
-Dim k As Long, p As Variant, final(0 To 63) As Variant
+Dim that As stdCallFunction, Up As Long, getparam As Boolean, pp As Long
+Dim k As Long, p As Variant, Final(0 To 63) As Variant
 Dim x1 As Long, what$, curtype As Long, s$, link$, rtype As Variant
 Dim thisref(0 To 63) As Long
 
@@ -26282,9 +26336,9 @@ For k = 1 To Up
                                     
                                     Else
                                         If that.ReadType(k - 1) = 2 Then
-                                         final(k - 1) = CLng(VarPtr(var(x1)) + 8)
+                                         Final(k - 1) = CLng(VarPtr(var(x1)) + 8)
                                         Else
-                                             final(k - 1) = var(x1)
+                                             Final(k - 1) = var(x1)
                                             End If
                                              ' so if this is a long we place a variant long
                                            ' thisref(k - 1) = x1
@@ -26307,43 +26361,43 @@ For k = 1 To Up
                    If Not bstack.IsInStackNumber(p) Then
                    
                     If Not bstack.IsInStackLong(ii) Then Exit For
-                    final(k - 1) = ii
+                    Final(k - 1) = ii
                     Else
-                    final(k - 1) = CLng(p)
+                    Final(k - 1) = CLng(p)
                    End If
                     
                 Case 1, 5
                         If Not bstack.IsInStackNumber(p) Then
                    
                     If Not bstack.IsInStackLong(ii) Then Exit For
-                    final(k - 1) = ii
+                    Final(k - 1) = ii
                     Else
-                    final(k - 1) = p
+                    Final(k - 1) = p
                     End If
                 Case 4, 7
                       If Not bstack.IsInStackNumber(p) Then
                    
                     If Not bstack.IsInStackLong(ii) Then Exit For
-                    final(k - 1) = ii
+                    Final(k - 1) = ii
                     Else
-                    final(k - 1) = MyRound(p)
+                    Final(k - 1) = MyRound(p)
                     End If
                 Case Else
                     If Not bstack.IsInStackString(s$) Then Exit For
-                    final(k - 1) = s$
+                    Final(k - 1) = s$
                 End Select
         End If
 Next k
 If getparam Then
 Do
-If bstack.IsInStackLong(PP) Then
-final(k - 1) = PP
+If bstack.IsInStackLong(pp) Then
+Final(k - 1) = pp
 k = k + 1
 ElseIf bstack.IsInStackNumber(p) Then
-final(k - 1) = p
+Final(k - 1) = p
 k = k + 1
 ElseIf bstack.IsInStackString(s$) Then
- final(k - 1) = s$
+ Final(k - 1) = s$
 k = k + 1
 Else
 Exit Do
@@ -26362,9 +26416,9 @@ Else
 rtype = that.RetType
 End If
 If that.CallType = 0 Then
-x1 = stdCallW(that.LIB, that.func, rtype, final(), Up)
+x1 = stdCallW(that.LIB, that.func, rtype, Final(), Up)
 Else
-x1 = cdeclCallW(that.LIB, that.func, rtype, final(), Up)
+x1 = cdeclCallW(that.LIB, that.func, rtype, Final(), Up)
 End If
 If ret Then
 If that.RetType = 0 Then
@@ -26383,7 +26437,7 @@ For k = 1 To that.count
 If that.IsByRef(k - 1) Then
 ' RESTORE VALUES...
     If that.ReadType(k - 1) < 5 Then
-    If that.ReadType(k - 1) <> 2 Then var(thisref(k - 1)) = final(k - 1)
+    If that.ReadType(k - 1) <> 2 Then var(thisref(k - 1)) = Final(k - 1)
     
     End If
 End If
@@ -26498,6 +26552,7 @@ ElseIf IsStrExp(bstack, rest$, s$) Then
 End If
 ElseIf IsLabelSymbolNew(rest$, "ΩΣ", "AS", language) Then
 ' WE MAKE A NEW OBJECT
+JUMPHERE:
 If TypeOf var(vIndex) Is GuiM2000 Then If UCase(FN$) = "VISIBLE" Then FN$ = "TrueVisible"
                                                     
 If FN$ = vbNullString Then
@@ -26514,6 +26569,7 @@ If l <> -1 Then
 y1 = IsLabelSymbolNew(rest$, "ΓΕΝΙΚΟ", "GLOBAL", language)
 
 If Not y1 Then y2 = IsLabelSymbolNew(rest$, "ΝΕΟ", "NEW", language) Else y2 = False
+
 x1 = Abs(IsLabel(bstack, rest$, s$))
 
 If x1 < 5 Then
@@ -26655,6 +26711,7 @@ ElseIf IsLabelSymbolNew(rest$, "ΘΕΣΕ", "SET", language) Then
 y1 = IsLabelSymbolNew(rest$, "ΓΕΝΙΚΟ", "GLOBAL", language)
 ' we make a new reference to that property
 ' make a read now
+If IsLabelSymbolNew(rest$, "ΩΣ", "AS", language) Then GoTo JUMPHERE
 l = FindDISPID(vv, FN$)
 FN$ = UCase(FN$)
 If l <> -1 Then
@@ -27051,17 +27108,14 @@ End If
 er$ = vbNullString
 RETVAR = Empty
 ReadProp = ReadOneParameter(o, propIndex, er$, RETVAR)
-If Not IsObject(RETVAR) Then
 
-'    If IsNumeric(RETVAR) Then RETVAR = CDbl(RETVAR)
-End If
 If er$ <> "" Then
 there:
 BadGetProp
 End If
 End Function
-Function ReadPropIndex(fromIndex As Long, ByVal propIndex As Long, myIndex As Variant) As Variant
-Dim o As Object, er$
+Function ReadPropIndex(fromIndex As Long, ByVal propIndex As Long, myIndex As Variant, Optional maybeObject As Boolean, Optional retObj) As Variant
+Dim o As Object, er$, check As Boolean
 On Error GoTo there
 Set o = var(fromIndex)
 If TypeOf o Is mHandler Then
@@ -27069,7 +27123,17 @@ propIndex = -propIndex
 Set o = o.objref
 End If
 er$ = vbNullString
-ReadPropIndex = ReadOneIndexParameter(o, propIndex, er$, myIndex)
+check = True
+If TypeOf o Is PropReference Then
+Set o = o.Value
+End If
+ReadPropIndex = ReadOneIndexParameter(o, propIndex, er$, myIndex, , check)
+
+If Not check Then
+    maybeObject = True
+    ReadPropIndex = 0
+    Set retObj = o
+End If
 If er$ <> "" Then
 there:
 BadGetProp
@@ -27672,15 +27736,15 @@ While Right$(what$, 1) = "."
 Wend
 If Len(what$) = 0 Then Exit Sub
 Dim ps As mStiva2, v As Long, s$, frm$, vvl As Variant, x1 As Long, ss$, frmarr$, sss$, j As Long
-Dim grtype As Variant, ps2push As String, uni As Boolean, uni1 As Boolean, Other As Group
+Dim grtype As Variant, ps2push As String, uni As Boolean, uni1 As Boolean, other As Group
 Dim UnhidePrivate As Boolean
 
 If bstack.tpointer <> 0 Then
 If Typename(var(bstack.tpointer)) = "Group" Then
-Set Other = myobject
+Set other = myobject
 Set ThisGroup = var(bstack.tpointer)
-UnhidePrivate = Other.MatchTypes(ThisGroup.mytypes)
-Set Other = Nothing
+UnhidePrivate = other.MatchTypes(ThisGroup.mytypes)
+Set other = Nothing
 End If
 End If
 Set var(i) = New Group
@@ -27783,17 +27847,17 @@ ThisGroup.HasRemove = .HasRemove
                     GoTo conthere1
                 Else  ' is not array so...
                     If frm$ = "Group" Then
-                        Set Other = vvl
+                        Set other = vvl
                         Dim spare As Object
                         If Left$(s$, 1) = "*" Then
                             v = globalvarGroup(ThisGroup.Patch + "." + Mid$(s$, 2), 0, , True)
                             If AscW(Mid$(s$, 2, 1)) = -65 And UnhidePrivate Then
                                 globalvarGroup ThisGroup.Patch + "." + Mid$(s$, 3), v, True, True
                             End If
-                            If Other.IamApointer Then
+                            If other.IamApointer Then
                                 If ThisGroup.ToDelete Then
                                    myobject.PokeItem x1 + 1, 0
-                                   Other.ToDelete = True
+                                   other.ToDelete = True
                                 End If
                                 Set var(v) = vvl
                             Else
@@ -27801,7 +27865,7 @@ ThisGroup.HasRemove = .HasRemove
                                 here$ = ThisGroup.Patch
                                 ' check this too
                                 
-                                    Other.ToDelete = ThisGroup.ToDelete
+                                    other.ToDelete = ThisGroup.ToDelete
                                 
                                 If AscW(Mid$(s$, 2, 1)) = -65 And UnhidePrivate Then
                                     UnFloatGroup bstack, Mid$(s$, 3), v, spare, glob, Temp, MakeNew
@@ -27809,7 +27873,7 @@ ThisGroup.HasRemove = .HasRemove
                                     UnFloatGroup bstack, Mid$(s$, 2), v, spare, glob, Temp, MakeNew
                                 End If
                                 here$ = ohere$
-                                Set Other = Nothing
+                                Set other = Nothing
                                 
     
                                 Set spare = Nothing
@@ -28305,7 +28369,7 @@ End Sub
 Function ChangedFunctionList(ByVal s$) As Boolean
 ChangedFunctionList = True
 Exit Function
-Dim c$, k$(), final As Long
+Dim c$, k$(), Final As Long
 Do While s$ <> "" And Not ChangedFunctionList
 If ISSTRINGA(s$, c$) Then ChangedFunctionList = sbf(Abs(val(Split(c$, " ")(1)))).Changed
 Loop
@@ -28314,32 +28378,32 @@ End Function
 
 
 Function GetFunctionList(ByVal s$) As String
-Dim c$, F$, k$(), qq$, final As Long, tmp$, oldl As Long, mtrim As Long
+Dim c$, F$, k$(), qq$, Final As Long, tmp$, oldl As Long, mtrim As Long
 Dim final2 As Long
 While s$ <> ""
 If ISSTRINGA(s$, c$) Then
 k$() = Split(c$, " ")
-final = val(k$(1))
-If Not Right$(sbf(Abs(final)).sb, 2) = vbCrLf Then
+Final = val(k$(1))
+If Not Right$(sbf(Abs(Final)).sb, 2) = vbCrLf Then
 qq$ = vbCrLf
 End If
-final2 = final < 0
+final2 = Final < 0
 If Right$(k$(0), 1) = ")" Then
 If UBound(k$) = 2 Then
-F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "}" + ChrW(&H1FFD) + ChrW(&H1FFD) + F$
+F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(Final)).sb + qq$ + "}" + ChrW(&H1FFD) + ChrW(&H1FFD) + F$
 
 Else
 If final2 Then
-F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "}" + ChrW(&H1FFD) + F$
+F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(Final)).sb + qq$ + "}" + ChrW(&H1FFD) + F$
 Else
-F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(final)).sb + qq$ + "}" + F$
+F$ = "Function " + Mid$(k$(0), 2, Len(k$(0)) - 3) + " {" + sbf(Abs(Final)).sb + qq$ + "}" + F$
 End If
 End If
 Else
 If final2 Then
-F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(final)).sb + qq$ + "}" + ChrW(&H1FFD) + F$
+F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(Final)).sb + qq$ + "}" + ChrW(&H1FFD) + F$
 Else
-F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(final)).sb + qq$ + "}" + F$
+F$ = "Module " + Mid$(k$(0), 2, Len(k$(0)) - 1) + " {" + sbf(Abs(Final)).sb + qq$ + "}" + F$
 End If
 End If
 End If
@@ -28348,12 +28412,12 @@ Wend
 GetFunctionList = F$
 End Function
 Sub ResetFunctionList(s$)
-Dim c$, k$(), final As Long
+Dim c$, k$(), Final As Long
 While s$ <> ""
 If ISSTRINGA(s$, c$) Then
 k$() = Split(c$, " ")
-final = val(k$(1))
-With sbf(Abs(final))
+Final = val(k$(1))
+With sbf(Abs(Final))
 .sb = vbNullString
 .sbc = 0
 
@@ -28455,16 +28519,16 @@ GlobalEVENT = ProcEvent(basestack, rest$, Lang, i)
 End Function
 
 Function dimString(typo$) As String
-Dim pppp As mArray, PP, i As Long, p, lim As Long
+Dim pppp As mArray, pp, i As Long, p, lim As Long
 Dim b$(), vl$
 b$() = Split(typo$, " ")
 
 Set pppp = var(val(b$(1)))
-      pppp.SerialItem PP, CLng(p), 5
+      pppp.SerialItem pp, CLng(p), 5
          Dim a$()
-         If PP < 1 Then dimString$ = b$(0) + ")": Exit Function
-         ReDim a$(PP - 1)
-      For i = 0 To PP - 1
+         If pp < 1 Then dimString$ = b$(0) + ")": Exit Function
+         ReDim a$(pp - 1)
+      For i = 0 To pp - 1
       pppp.GetDnum i, p, lim
       'pppp.SerialItem p, i, 6
       a$(i) = Trim$(Str$(-lim)) + " TO " + Trim$(Str$(p - lim - 1))
@@ -28479,7 +28543,7 @@ Set pppp = var(val(b$(1)))
        vl$ = "=0 "
       End If
       End If
-      If PP > 1 Then
+      If pp > 1 Then
       dimString = b$(0) + Join(a$(), ",") + ")" + vl$
       Else
       dimString = b$(0) + a$(0) + ")" + vl$
@@ -29170,152 +29234,6 @@ Exit Function
 
 End Function
 
-Function ProcPrinter(basestack As basetask, rest$) As Boolean
-Dim xp As Printer, i As Long, p As Variant, x1 As Long, y1 As Long, x As Double, y As Double
-Dim s$, ss$, F As Long, pa$, sX As Double, it As Long, ya As Long, AddTwipsTopL As Long, nd&
-Dim Scr As Object
-ProcPrinter = True
-Set Scr = basestack.Owner
-If basestack.toprinter Then Exit Function
- If ThereIsAPrinter = False Then Exit Function
-If FastSymbol(rest$, "!") Then
-olamazi
-If ThereIsAPrinter Then
-For Each xp In Printers
-If xp.DeviceName = pname Then
-Set Printer = xp
-Exit For
-End If
-Next xp
-
-If ShowProperties(Form1, Printer.DeviceName, MyDM()) Then
-MyDoEvents
-PrinterDim pw, ph, psw, psh, pwox, phoy
-End If
-End If
-Exit Function
-End If
-If FastSymbol(rest$, "+") Then
-Form1.List1.Clear
-For Each xp In Printers
-Form1.List1.additemFast xp.DeviceName & " (" & xp.port & ")"
-Next xp
-For i = 0 To Form1.List1.listcount - 1
-If pname & " (" & port & ")" = Form1.List1.list(i) Then Form1.List1.ListIndex = i
-Next i
-Exit Function
-ElseIf FastSymbol(rest$, "?") Then
-Form1.List1.Clear
-For Each xp In Printers
-Form1.List1.additemFast xp.DeviceName & " (" & xp.port & ")"
-Next xp
-For i = 0 To Form1.List1.listcount - 1
-If pname & " (" & port & ")" = Form1.List1.list(i) Then Form1.List1.ListIndex = i
-Next i
-Execute basestack, "menu !", True
-If CDbl(Form1.List1.ListIndex + 1) > 0 Then
-i = InStr(Form1.List1.ListValue, " (")
-pname = Left$(Form1.List1.ListValue, i - 1)
-port = Mid$(Form1.List1.ListValue, i + 2, InStr(i + 2, Form1.List1.ListValue, ")") - i - 2)
-End If
-For Each xp In Printers
-If xp.DeviceName = pname And xp.port = port Then Set Printer = xp
-Next xp
-ReDim MyDM(1 To 1) As Byte
-Exit Function
-End If
-getfirstpage
-If Not IsExp(basestack, rest$, p) Then p = players(-2).SZ / szFactor
-
-If FastSymbol(rest$, ",") Then
-If IsStrExp(basestack, rest$, s$) Then
-For Each xp In Printers
-If xp.DeviceName & " (" & xp.port & ")" = s$ Then
-pname = xp.DeviceName
-port = xp.port
-Set Printer = xp
-ReDim MyDM(1 To 1) As Byte
-If FastSymbol(rest$, ",") Then
-If IsStrExp(basestack, rest$, ss$) Then
-If ss$ <> "" Then
-LoadArray MyDM(), ss$
-End If
-End If
-Exit For
-End If
-End If
-Next xp
-
-Exit Function
-End If
-End If
-If lookOne(rest$, "{") Then
-
-
- If ThereIsAPrinter = False Then Exit Function
-If pname = vbNullString Then Exit Function
-For Each xp In Printers
-If xp.DeviceName = pname And xp.port = port Then Set Printer = xp
-Next xp
-getfirstpage
-
-If players(-2).Xt = 0 Then
-
-players(-2) = players(0)  'COPY dis
-With players(-2)
-players(-2).curpos = 0
-players(-2).currow = 0
-If p = 0 Then p = .SZ
-szFactor = mydpi * dv15 / 1440#
-.SZ = CSng(p * szFactor)
-End With
-PlaceBasket Form1.PrinterDocument1, players(-2)
-SetText Form1.PrinterDocument1
-
-Else
-SetTextSZ Form1.PrinterDocument1, CSng(p * mydpi * dv15 / 1440)
-
-LCTbasket Form1.PrinterDocument1, players(-2), 0, 0
-'realfactor = CSng(players(-2).SZ) / prFactor / p
-End If
-
-With Printer   ' for no specific reason..I have to think it again
-.currentX = 0
-.currentY = 0
-End With
-basestack.toprinter = True
-nd& = basestack.addlen
-it = Execute(basestack, rest$, False, True, , True)
-basestack.addlen = nd&
-            If it = 2 Then
-                        If rest$ = "" Then
-                            rest$ = ": Break": If trace Then WaitShow = 2: TestShowSub = vbNullString
-                        Else
-                        rest$ = ": Goto " + rest$
-                         If trace Then WaitShow = 2: TestShowSub = rest$
-                        End If
-                        it = 1
-                        End If
-
-If Not basestack.toprinter Then
-pnum = 0
-oprinter.ClearUp
-Form1.PrinterDocument1.Picture = LoadPicture("")
-Else
-getenddoc
-End If
-basestack.toprinter = False
-Set Scr = basestack.Owner
-If it = 0 Then
-ProcPrinter = False
-End If
-
-Else
-PlainBaSket Scr, players(GetCode(Scr)), pname & " (" & port & ")"
-crNew basestack, players(GetCode(Scr))
-End If
-Exit Function
-End Function
 Function ExecuteEmfBlock(basestack As basetask, rest$, it As Long, ww, hh) As Object
 Dim mDC As New MetaDc, Scr As Object, prive As basket
 Dim oldprintFlag As Boolean, bNo&, nd&, OldGDILines As Boolean, once As Boolean
@@ -32076,7 +31994,7 @@ If Left$(s$, 1) = "S" Then
                 Exit Function
             End If
           Dim oldclid As Long
-          oldclid = clid
+          oldclid = Clid
             If CFname(s$) <> "" Then
             s$ = CFname(s$)
              frm$ = ReadUnicodeOrANSI(s$, True, x1)
@@ -32141,7 +32059,7 @@ If Left$(s$, 1) = "S" Then
             End If
         End If
         Set Scr = Nothing
-        clid = oldclid
+        Clid = oldclid
         Exit Function
     Else
     Set Scr = Nothing
@@ -32164,7 +32082,7 @@ x1 = Abs(IsLabel(basestack, rest$, s$))
         End If
         MakeThisSub basestack, s$  'NO GOOD..
         If GetSub(s$, x1) Then
-JUMP1:
+jump1:
             If x1 < lckfrm And lckfrm <> 0 Then
             MyEr s$ & " is locked", s$ & " είναι κλειδωμένο"
             rest$ = vbNullString
@@ -32217,7 +32135,7 @@ JUMP1:
         frm$ = s$
         s$ = GetStrUntil(".", frm$)
         If GetSub(s$, x1) Then
-        GoTo JUMP1
+        GoTo jump1
         End If
         End If
             If FastSymbol(rest$, ",") Then
@@ -32323,7 +32241,7 @@ With bs
 End With
 If SecureNames Then
     If basestack.IamThread Then
-        here$ = Str$(basestack.Process.Id) + here$
+        here$ = Str$(basestack.Process.id) + here$
         Mid$(here$, 1, 1) = "_"
     End If
 End If
@@ -32862,7 +32780,7 @@ Dim p As Variant, s$
              Set ps = Nothing
 End Sub
 
-Function searchsub(ByVal where As Long, W$, final As Long, site As Long) As Boolean
+Function searchsub(ByVal where As Long, W$, Final As Long, site As Long) As Boolean
 Dim ww$()
 ww$() = Split(W$)
 If where = 0 Then
@@ -32880,7 +32798,7 @@ If where < 0 Then
         End If
         If .subs.ExistKey(UCase(W$)) Then
         ww$ = Split(CStr(.subs.Value))
-        final = val(ww$(0))
+        Final = val(ww$(0))
         If UBound(ww$()) = 0 Then
         
         Else
@@ -32906,7 +32824,7 @@ Else
         End If
         If .subs.ExistKey(UCase(W$)) Then
         ww$ = Split(CStr(.subs.Value))
-        final = val(ww$(0))
+        Final = val(ww$(0))
         If UBound(ww$()) = 0 Then
         
         Else
@@ -32925,7 +32843,7 @@ End If
 
 Dim len1 As Long, there1 As Long, a$
 Dim aCopy As Document, there As Long, Curs As Long, Curs2 As Long
-Dim a1 As Long, b As Long, c As Long, d As Long
+Dim a1 As Long, b As Long, c As Long, D As Long
 Dim ss$, DUMP$
 If where > 0 Then
 a$ = sbf(where).sb
@@ -32944,9 +32862,9 @@ ww$(1) = ww$(1) + ":"
 Do While .FindIdentifier(ww$(1), False, there, Curs)
 If NLtrim$(Left$(.TextParagraph(there), Curs - 1)) = vbNullString Then
 ' we find it
-                               final = -1
-                               .FindPos .FirstParagraphLine(there) + 2, 1, final, a1, b, c, d
-                               final = final + 1 ' because mid$ starts from 1
+                               Final = -1
+                               .FindPos .FirstParagraphLine(there) + 2, 1, Final, a1, b, c, D
+                               Final = Final + 1 ' because mid$ starts from 1
                                W$ = vbNullString
                                 searchsub = True
                                 GoTo register
@@ -32955,8 +32873,8 @@ End If
 Loop
 End With
 Else
-final = PosLabel(ww$(1), a$)
-If final <> 1 Then
+Final = PosLabel(ww$(1), a$)
+If Final <> 1 Then
 W$ = vbNullString
 searchsub = True
 GoTo register
@@ -32986,12 +32904,12 @@ IsNumberLabel ss$, DUMP$
                                     If there1 <> there Then
                                            Curs = 0
                                     Else
-                                                final = -1  ' this is the mode for search charpos ...in findpos
+                                                Final = -1  ' this is the mode for search charpos ...in findpos
                                                 ' FROM 1,0, BUT  PARAGRAPH LINES ARE FROM 0
                                                 ' SO PLUS ONE PLU ONE MORE FOR NEXT LINE
                                                 '
-                                                .FindPos .FirstParagraphLine(there1) + 2, 1, final, a1, b, c, d
-                                                       final = final + 1 ' because mid$ starts from 1
+                                                .FindPos .FirstParagraphLine(there1) + 2, 1, Final, a1, b, c, D
+                                                       Final = Final + 1 ' because mid$ starts from 1
                                                        
                                                        
                                                         W$ = BlockParam(Trim(Mid$(.TextParagraph(there), Curs2 + Len(ww(1)))))
@@ -33022,19 +32940,19 @@ register:
 If searchsub Then
 If site > 0 Then
 If sbf(site).subs Is Nothing Then Set sbf(site).subs = New FastCollection
-sbf(site).subs.AddKey UCase(ww$(1)), Trim$(Str$(final) + Str$(where))
+sbf(site).subs.AddKey UCase(ww$(1)), Trim$(Str$(Final) + Str$(where))
 If W$ <> "" Then
 'If InStr(w$, "=") > 0 Then w$ = "? " + w$
 sbf(site).subs.AddKey UCase(ww$(1)) + ")", W$
 End If
 ElseIf site < 0 Then
 If var(-site).subs Is Nothing Then Set var(-site).subs = New FastCollection
-var(-site).subs.AddKey UCase(ww$(1)), Trim$(Str$(final) + " " + Str$(where))
+var(-site).subs.AddKey UCase(ww$(1)), Trim$(Str$(Final) + " " + Str$(where))
 If W$ <> "" Then var(-site).subs.AddKey UCase(ww$(1)) + ")", W$
 ElseIf where > 0 Then
 site = where
 If sbf(site).subs Is Nothing Then Set sbf(site).subs = New FastCollection
-sbf(site).subs.AddKey UCase(ww$(1)), Trim$(Str$(final) + Str$(where))
+sbf(site).subs.AddKey UCase(ww$(1)), Trim$(Str$(Final) + Str$(where))
 If W$ <> "" Then sbf(site).subs.AddKey UCase(ww$(1)) + ")", W$
 End If
 site = where
@@ -33042,9 +32960,9 @@ End If
 
 
 End Function
-Function search2KIND(a$, W$, final As Long, Optional Anypos As Boolean = False) As Boolean
+Function search2KIND(a$, W$, Final As Long, Optional Anypos As Boolean = False) As Boolean
 Dim aCopy As Document, there As Long, Curs As Long, Curs2 As Long
-Dim a1 As Long, b As Long, c As Long, d As Long
+Dim a1 As Long, b As Long, c As Long, D As Long
 Dim ww$(), there1 As Long
 Dim ss$, DUMP$
 ww$() = Split(W$)
@@ -33072,9 +32990,9 @@ End If
                                     If there1 <> there Then
                                            Curs = 0
                                     Else
-                                                final = -1  '
+                                                Final = -1  '
                                                 If Not Anypos Then Curs2 = 1 Else Curs2 = Curs2 + 1
-                                                .FindPos .FirstParagraphLine(there1) + 1, Curs2, final, a1, b, c, d
+                                                .FindPos .FirstParagraphLine(there1) + 1, Curs2, Final, a1, b, c, D
 
                                                        search2KIND = True
                                                         Exit Do
@@ -34415,7 +34333,7 @@ End Function
 
 Static Function MyRound(a As Variant, Optional ByVal i As Integer = 0)
 Dim c As Variant, j As VbVarType
-Dim n(1 To 28) As Single, d(1 To 28) As Double, cur(1 To 28) As Currency, dec(1 To 28) As Variant
+Dim n(1 To 28) As Single, D(1 To 28) As Double, cur(1 To 28) As Currency, dec(1 To 28) As Variant
 Dim SG(-1 To 1) As Single, sg4(-1 To 1) As Double, sg8(-1 To 1) As Currency
 j = VarType(a)
 If j < vbSingle Then MyRound = a: Exit Function
@@ -34436,12 +34354,12 @@ If n(1) = 0 Then
         n(c) = CSng(10 ^ 5)
         n(10) = CSng(10 ^ 5)
     For c = 1& To 13&
-        d(c) = CDbl(10 ^ c)
+        D(c) = CDbl(10 ^ c)
     Next c
     For c = 14& To 27&
-        d(c) = CDbl(-1)
+        D(c) = CDbl(-1)
     Next c
-    d(c) = CDbl(10 ^ 13)
+    D(c) = CDbl(10 ^ 13)
     
     For c = 1& To 3&
         cur(c) = CCur(10 ^ c)
@@ -34470,8 +34388,8 @@ End If
         Case vbDouble
             c = sg4(Sgn(a))
  
-            If d(i) > 0 Then
-                MyRound = Fix(a * d(i) + c) / d(i)
+            If D(i) > 0 Then
+                MyRound = Fix(a * D(i) + c) / D(i)
             Else
                 MyRound = a
             End If
@@ -35557,7 +35475,7 @@ reenter2:
                     bs.tpointer = sbf(x1).tpointer
                      If Left$(what$, 1) <> "_" Then
                         If SecureNames And basestack.IamThread Then
-                            what$ = "_" + what$ + LTrim$(basestack.Process.Id)
+                            what$ = "_" + what$ + LTrim$(basestack.Process.id)
                         End If
                     End If
                     bs.StaticInUse = what$
@@ -35859,7 +35777,7 @@ Else
 End If
 End Function
 Function makestruct(basestack As basetask, rest$, Lang As Long, glob As Boolean, alocal As Boolean) As Boolean
-Dim what$, offset As Long, offset1 As Long, offsetlist As FastCollection, i As Long, s$, b$, p As Variant, w2 As Long
+Dim what$, Offset As Long, offset1 As Long, offsetlist As FastCollection, i As Long, s$, b$, p As Variant, w2 As Long
 ' struct is an inventory of offsets
 If Abs(IsLabel(basestack, rest$, what$)) = 1 Then  ' WE HAVE A NAME
 If basestack.priveflag Then what$ = ChrW(&HFFBF) + what$
@@ -35878,9 +35796,9 @@ makeitnow:
 Set offsetlist = var(i).objref
 ' so now we have the inventory
 If FastSymbol(rest$, "{") Then
-    If StructPage(basestack, rest$, Lang, 0, offset, offsetlist, "") Then
+    If StructPage(basestack, rest$, Lang, 0, Offset, offsetlist, "") Then
     If offsetlist Is Nothing Then Exit Function
-    offsetlist.StructLen = offset
+    offsetlist.StructLen = Offset
     var(i).ReadOnly = True
     makestruct = True
     End If
@@ -35895,7 +35813,7 @@ Else
 Between = (a >= b And a <= c) And Not a = exclude
 End If
 End Function
-Function StructPage(basestack As basetask, rest$, Lang As Long, ByVal offset, ByRef offset2, offsetlist As FastCollection, ByVal lasthead$) As Boolean
+Function StructPage(basestack As basetask, rest$, Lang As Long, ByVal Offset, ByRef offset2, offsetlist As FastCollection, ByVal lasthead$) As Boolean
 Dim what$, offset1 As Long, i As Long, s$, b$, p As Variant, w2 As Long, maxoffset As Long, probeoffset As Long
 Dim itissingle As Boolean
     b$ = NLtrim$(block(rest$))
@@ -35920,7 +35838,7 @@ again1:
     ElseIf FastSymbol(b$, "{") Then
     ' IS A NEW PAGE
     probeoffset = 0
-    If StructPage(basestack, b$, Lang, offset, probeoffset, offsetlist, lasthead$) Then
+    If StructPage(basestack, b$, Lang, Offset, probeoffset, offsetlist, lasthead$) Then
         If probeoffset > maxoffset Then maxoffset = probeoffset
         ' leave offset as is
     GoTo again
@@ -35941,13 +35859,13 @@ again1:
         Exit Function
         End If
 
-        If StructPage(basestack, b$, Lang, offset, probeoffset, offsetlist, lasthead$ + what$ + ".") Then
+        If StructPage(basestack, b$, Lang, Offset, probeoffset, offsetlist, lasthead$ + what$ + ".") Then
             If probeoffset > maxoffset Then maxoffset = probeoffset
             ' leave offset as is
     
-            offsetlist.AddKey myUcase(lasthead$ + what$, True), CVar(offset)
+            offsetlist.AddKey myUcase(lasthead$ + what$, True), CVar(Offset)
             If offsetlist.Done Then
-            offsetlist.sValue = probeoffset - offset
+            offsetlist.sValue = probeoffset - Offset
             ' keytype not used for strucrures except for single values
             ' so Eval() can read single from 4 bytes
             If itissingle Then offsetlist.KeyTypeValue = CInt(vbSingle): itissingle = False
@@ -36023,7 +35941,7 @@ comehere:
         Exit Function
     Else
     p = MyRound(p)
-    If p * Abs(offset1) + offset > &H1FFFFFFF Then  ' half gigabyte for struct (is very big too)
+    If p * Abs(offset1) + Offset > &H1FFFFFFF Then  ' half gigabyte for struct (is very big too)
         MyEr "Too big number for struct", "Μεγάλο νούμερο για δομή"
         Exit Function
     ElseIf p < 0 Then
@@ -36041,26 +35959,26 @@ comehere:
     Exit Function
     End If
     
-    offsetlist.AddKey myUcase(lasthead$ + what$, True), CVar(offset)
+    offsetlist.AddKey myUcase(lasthead$ + what$, True), CVar(Offset)
     If offsetlist.Done Then offsetlist.sValue = w2
     If itissingle Then offsetlist.KeyTypeValue = CInt(vbSingle): itissingle = False
-    offset = offset + Abs(offset1)
+    Offset = Offset + Abs(offset1)
     SetNextLineNL b$
     Do
         While FastSymbol(b$, vbCrLf, , 2)
         Wend
     Loop Until Not NocharsInLine(b$) Or b$ = vbNullString
     Loop Until Not Between(FastPureLabel(b$, what$), 1, 3, 2)
-        If maxoffset < offset Then
-    offset2 = offset
+        If maxoffset < Offset Then
+    offset2 = Offset
     Else
     offset2 = maxoffset
     End If
     StructPage = True
     GoTo again1
    End If
-    If maxoffset < offset Then
-    offset2 = offset
+    If maxoffset < Offset Then
+    offset2 = Offset
     Else
     offset2 = maxoffset
     End If
@@ -39848,7 +39766,7 @@ End If
 
 End Function
 Function MyInput(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim i As Long, p As Variant, PP As Variant, s$, ss$, what$, F As Long, x1 As Long, y As Double, x As Double
+Dim i As Long, p As Variant, pp As Variant, s$, ss$, what$, F As Long, x1 As Long, y As Double, x As Double
 Dim frm$, par As Boolean, pppp As mArray, prive As Long, it As Long, W$, mystack As mStiva
 If IsLabelSymbolNew(rest$, "ΜΕ", "WITH", Lang) Then
     If IsStrExp(bstack, rest$, s$) Then
@@ -40269,11 +40187,11 @@ Do
                                     s$ = s$ + "%"
                                 End Select
                                 If par Then
-                                If Not IsNumberCheck(s$, PP, inpcsvDec$) Then PP = p
+                                If Not IsNumberCheck(s$, pp, inpcsvDec$) Then pp = p
                                 Else
-                                If Not IsNumberCheck(s$, PP) Then PP = p
+                                If Not IsNumberCheck(s$, pp) Then pp = p
                                 End If
-                                bstack.soros.PushVal PP
+                                bstack.soros.PushVal pp
                                 Set bstack.lastobj = Nothing
                                 NeoCall2 bstack, what$ + "." + ChrW(&H1FFF) + ":=()", MyInput
                                 Set bstack.Sorosref = mystack
@@ -40300,18 +40218,18 @@ Do
                                     s$ = s$ + "%"
                                 End Select
                                 If par Then
-                                    If Not IsNumberCheck(s$, PP, inpcsvDec$) Then PP = p
+                                    If Not IsNumberCheck(s$, pp, inpcsvDec$) Then pp = p
                                 Else
-                                    If Not IsNumberCheck(s$, PP) Then PP = p
+                                    If Not IsNumberCheck(s$, pp) Then pp = p
                                 End If
-                        var(i) = PP
+                        var(i) = pp
                         End If
                 Else
                 
                     
                     If i = -1 Then
-                    bstack.ReadVar what$, PP
-                                Select Case Typename(PP)
+                    bstack.ReadVar what$, pp
+                                Select Case Typename(pp)
                                 Case "Long"
                                     s$ = s$ + "&"
                                 Case "Currency"
@@ -40323,7 +40241,7 @@ Do
                                 Case "Integer"
                                     s$ = s$ + "%"
                                 End Select
-                                If IsNumberCheck(s$, p) Then bstack.SetVar what$, PP
+                                If IsNumberCheck(s$, p) Then bstack.SetVar what$, pp
                     Else
                         Select Case Typename(p)
                                 Case "Long"
@@ -40338,11 +40256,11 @@ Do
                                     s$ = s$ + "%"
                                 End Select
                                 If par Then
-                                    If Not IsNumberCheck(s$, PP, inpcsvDec$) Then PP = p
+                                    If Not IsNumberCheck(s$, pp, inpcsvDec$) Then pp = p
                                 Else
-                                    If Not IsNumberCheck(s$, PP) Then PP = p
+                                    If Not IsNumberCheck(s$, pp) Then pp = p
                                 End If
-                        globalvar what$, PP
+                        globalvar what$, pp
                     End If
                 End If
                  MyInput = True
@@ -40435,15 +40353,15 @@ Do
                                     s$ = s$ + "%"
                                 End Select
                                 If par Then
-                                    If Not IsNumberCheck(s$, PP, inpcsvDec$) Then PP = p
+                                    If Not IsNumberCheck(s$, pp, inpcsvDec$) Then pp = p
                                 Else
-                                    If Not IsNumberCheck(s$, PP) Then PP = p
+                                    If Not IsNumberCheck(s$, pp) Then pp = p
                                 End If
-                        var(i) = MyRound(PP)
+                        var(i) = MyRound(pp)
                 Else
                         If i = -1 Then
-                        bstack.ReadVar what$, PP
-                        Select Case Typename(PP)
+                        bstack.ReadVar what$, pp
+                        Select Case Typename(pp)
                         Case "Long"
                             s$ = s$ + "&"
                         Case "Currency"
@@ -40455,8 +40373,8 @@ Do
                         Case "Integer"
                             s$ = s$ + "%"
                         End Select
-                        If IsNumberCheck(s$, p) Then bstack.SetVar what$, PP
-                        bstack.SetVar what$, MyRound(PP)
+                        If IsNumberCheck(s$, p) Then bstack.SetVar what$, pp
+                        bstack.SetVar what$, MyRound(pp)
                         Else
                                 Select Case Typename(p)
                                 Case "Long"
@@ -40471,14 +40389,14 @@ Do
                                     s$ = s$ + "%"
                                 End Select
                                 If par Then
-                                    If Not IsNumberCheck(s$, PP, inpcsvDec$) Then PP = p
+                                    If Not IsNumberCheck(s$, pp, inpcsvDec$) Then pp = p
                                 Else
-                                    If Not IsNumberCheck(s$, PP) Then PP = p
+                                    If Not IsNumberCheck(s$, pp) Then pp = p
                                 End If
-                            If Typename(p) <> Typename(PP) Then
+                            If Typename(p) <> Typename(pp) Then
                             Overflow
                             Else
-                        globalvar what$, MyRound(PP)
+                        globalvar what$, MyRound(pp)
                         End If
                         End If
                 End If
@@ -40525,11 +40443,11 @@ Do
                         s$ = s$ + "%"
                     End Select
                     If par Then
-                        If Not IsNumberCheck(s$, PP, inpcsvDec$) Then PP = p
+                        If Not IsNumberCheck(s$, pp, inpcsvDec$) Then pp = p
                     Else
-                        If Not IsNumberCheck(s$, PP) Then PP = p
+                        If Not IsNumberCheck(s$, pp) Then pp = p
                     End If
-                        pppp.item(it) = PP
+                        pppp.item(it) = pp
                         
                  MyInput = True
     Case 6
@@ -40624,11 +40542,11 @@ Do
                         s$ = s$ + "%"
                     End Select
                     If par Then
-                        If Not IsNumberCheck(s$, PP, inpcsvDec$) Then PP = p
+                        If Not IsNumberCheck(s$, pp, inpcsvDec$) Then pp = p
                     Else
-                        If Not IsNumberCheck(s$, PP) Then PP = p
+                        If Not IsNumberCheck(s$, pp) Then pp = p
                     End If
-                pppp.item(it) = MyRound(PP)
+                pppp.item(it) = MyRound(pp)
                 MyInput = True
     End Select
     
@@ -41011,11 +40929,11 @@ missdef:
                 x1 = ModuleSub(here$ & "." & bstack.GroupName & what$, "")
                 End If
                 End If
-                GoTo JUMP1
+                GoTo jump1
                 
                         ElseIf here$ = vbNullString And subHash.Find(what$, x1) And Not MakeNew Then
                         
-JUMP1:
+jump1:
                                 If x1 >= lckfrm And lckfrm <> 0 Then   ' when we load a scrabled program..we have locked functions/modules
                                             MyEr what$ & " is locked", what$ & " είναι κλειδωμένο"
                                             rest$ = vbNullString
@@ -41321,7 +41239,7 @@ End If
 End Function
 Function ProcBuffer(bstack As basetask, rest$, Lang As Long, Optional alocal As Boolean) As Boolean
 ProcBuffer = True
-Dim s$, what$, i As Long, p As Variant, PP As Long, par As Long, what2$, Runnable As Boolean, itissingle As Boolean
+Dim s$, what$, i As Long, p As Variant, pp As Long, par As Long, what2$, Runnable As Boolean, itissingle As Boolean
 Dim useHandler As mHandler, useBuffer As MemBlock
 If IsLabelSymbolNew(rest$, "ΚΩΔΙΚΑ", "CODE", Lang) Then Runnable = True
 If IsLabelSymbolNew(rest$, "ΚΕΝΗ", "CLEAR", Lang) Then par = &H8
@@ -41351,22 +41269,22 @@ contok:
                     Set useBuffer = useHandler.objref
                     ' GET TYPE OF  BUFFER
                     ' Char (1 byte) String (2 bytes)  Long (4 Bytes)
-                    PP = 1
+                    pp = 1
                     If IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang) Then
                         If IsLabelSymbolNew(rest$, "ΨΗΦΙΟ", "BYTE", Lang, , , , False) Then
-                            PP = 1
+                            pp = 1
                         ElseIf IsLabelSymbolNew(rest$, "ΑΚΕΡΑΙΟΣ", "INTEGER", Lang, , , , False) Then
-                            PP = 2
+                            pp = 2
                         ElseIf IsLabelSymbolNew(rest$, "ΜΑΚΡΥΣ", "LONG", Lang, , , , False) Then
-                            PP = 4
+                            pp = 4
                         ElseIf IsLabelSymbolNew(rest$, "ΑΠΛΟΣ", "SINGLE", Lang, , , , False) Then
                             itissingle = True
-                            PP = 4
+                            pp = 4
                         ElseIf IsLabelSymbolNew(rest$, "ΓΡΑΜΜΑ", "STRING", Lang, , , , False) Then
                             
-                            PP = -4
+                            pp = -4
                         ElseIf IsLabelSymbolNew(rest$, "ΔΙΠΛΟΣ", "DOUBLE", Lang, , , , False) Then
-                            PP = 8
+                            pp = 8
                         ElseIf Abs(IsLabel(bstack, rest$, what2$)) = 1 Then
                         If GetVar3(bstack, bstack.GroupName + what2$, i) Then
                         
@@ -41375,7 +41293,7 @@ contok:
                                 If Not TypeOf bstack.lastobj Is mHandler Then GoTo comehere
                                 If Not TypeOf bstack.lastobj.objref Is FastCollection Then GoTo comehere
                                 If bstack.lastobj.objref.StructLen = 0 Then GoTo comehere
-                               PP = bstack.lastobj.objref.StructLen
+                               pp = bstack.lastobj.objref.StructLen
                                Set useBuffer.structref = bstack.lastobj.objref
                                useBuffer.UseStruct = True
                                Set bstack.lastobj = Nothing
@@ -41387,7 +41305,7 @@ contok:
                                 If Not TypeOf bstack.lastobj Is mHandler Then GoTo comehere
                                 If Not TypeOf bstack.lastobj.objref Is FastCollection Then GoTo comehere
                                 If bstack.lastobj.objref.StructLen = 0 Then GoTo comehere
-                               PP = bstack.lastobj.objref.StructLen
+                               pp = bstack.lastobj.objref.StructLen
                                Set useBuffer.structref = bstack.lastobj.objref
                                useBuffer.UseStruct = True
                                Set bstack.lastobj = Nothing
@@ -41410,14 +41328,14 @@ comehere:
                         Else
                          '' MAKE IT
                     If useBuffer.ItemSize <> 0 Then
-                    If useBuffer.ItemSize = Abs(PP) Then
+                    If useBuffer.ItemSize = Abs(pp) Then
                     useBuffer.ResizeItems CLng(p), par
                     End If
                     Else
                         If itissingle Then
-                            useBuffer.Construct PP, CLng(p), par, Runnable, vbSingle
+                            useBuffer.Construct pp, CLng(p), par, Runnable, vbSingle
                         Else
-                            useBuffer.Construct PP, CLng(p), par, Runnable
+                            useBuffer.Construct pp, CLng(p), par, Runnable
                         End If
                         End If
                         End If
@@ -41428,11 +41346,11 @@ comehere:
                         End If
                         
                     Else
-                    If useBuffer.Status = 0 Then
+                    If useBuffer.status = 0 Then
                         If itissingle Then
-                            useBuffer.Construct PP, 1, par, Runnable, vbSingle
+                            useBuffer.Construct pp, 1, par, Runnable, vbSingle
                         Else
-                            useBuffer.Construct PP, 1, par, Runnable
+                            useBuffer.Construct pp, 1, par, Runnable
                         End If
                         End If
                     End If
@@ -43292,7 +43210,7 @@ ProcHold = True
 End Function
 Function ProcGet(basestack As basetask, rest$) As Boolean
 Dim pppp As mArray, it As Long, what$, p As Variant, F As Long, par As Boolean, i As Long, s$, Arr As Boolean
-Dim flag As Boolean, myobject As mHandler, PP As Variant
+Dim flag As Boolean, myobject As mHandler, pp As Variant
 IsSymbol3 rest$, "#"
 
 If IsExp(basestack, rest$, p) Then
@@ -43302,7 +43220,7 @@ If IsExp(basestack, rest$, p) Then
     Select Case IsLabel(basestack, rest$, what$)
     Case 1  ' check to see if is a handler
     If GetVar(basestack, what$, it) Then
-     PP = 0
+     pp = 0
      If Typename(var(it)) = "mHandler" Then
     
         If var(it).ReadOnly Then
@@ -43318,8 +43236,8 @@ If IsExp(basestack, rest$, p) Then
     Case 5  'check for handler
     what$ = Left$(what$, Len(what$) - 1)
     If GetVar(basestack, what$, it) Then
-    PP = 0
-    If IsExp(basestack, rest$, PP) Then
+    pp = 0
+    If IsExp(basestack, rest$, pp) Then
     ' nothing here
     Arr = True
     End If
@@ -43367,11 +43285,11 @@ If FastSymbol(rest$, ",") Then
 If IsExp(basestack, rest$, p) Then
 p = Int(Abs(p))
 If FastSymbol(rest$, ",") Then
-If IsExp(basestack, rest$, PP) Then
-PP = Int(Abs(PP))
-If PP = 0 Then GoTo wrong
-If .ValidArea(p, CLng(PP)) Then
-    .GetData F, p, CLng(PP)
+If IsExp(basestack, rest$, pp) Then
+pp = Int(Abs(pp))
+If pp = 0 Then GoTo wrong
+If .ValidArea(p, CLng(pp)) Then
+    .GetData F, p, CLng(pp)
 Else
 GoTo wrong
 End If
@@ -43408,8 +43326,8 @@ If Arr Then
     End If
     p = Int(Abs(p))
     If p = 0 Then GoTo wrong
-        If .ValidArea2(PP, FLEN(F) * p) Then
-            .GetData F, .GetPtr(PP), FLEN(F) * p
+        If .ValidArea2(pp, FLEN(F) * p) Then
+            .GetData F, .GetPtr(pp), FLEN(F) * p
         Else
 wrong:
             MyEr "Wrong size-position for loading the buffer", "Λάθος μέγεθος-θέση για να φορτωθεί η Διάρθρωση"
@@ -43739,13 +43657,13 @@ Locale:
                         NoValidLocale
                         Exit Function
                     End If
-    clid = CLng(p)
+    Clid = CLng(p)
     
             Else
-            clid = OsInfo.LangNonUnicodeCode
+            Clid = OsInfo.LangNonUnicodeCode
                     End If
     
-    If clid = 1032 Then
+    If Clid = 1032 Then
     DefBooleanString = ";Αληθές;Ψευδές"
     Else
     DefBooleanString = ";\T\r\u\e;\F\a\l\s\e"
@@ -44164,7 +44082,7 @@ bypass1:
                     x1 = GlobalSub(what$, "", , what$)
                     Else
                     x1 = GlobalSub(here$ + "." + what$, "", , what$)
-                    GoTo JUMP1
+                    GoTo jump1
                     End If
                 End If
                 GoTo JUMP0
@@ -44196,7 +44114,7 @@ JUMP0:
                         End If
                         Exit Function
                 ElseIf GetlocalSub(basestack.GroupName & what$, x1) And Not MakeNew Then
-JUMP1:
+jump1:
                  If FastSymbol(rest$, "(") Then
                                 frm$ = BlockParam(rest$)
                                 If Len(frm$) = 0 Then
@@ -44372,7 +44290,7 @@ End If
 End If
 End Function
 Function MyPut(basestack As basetask, rest$) As Boolean
-Dim s$, F As Long, p As Variant, i As Long, PP As Variant, it As Long, flag As Boolean, Arr As Boolean
+Dim s$, F As Long, p As Variant, i As Long, pp As Variant, it As Long, flag As Boolean, Arr As Boolean
 Dim myobject As mHandler, what$
 MyPut = False
  IsSymbol3 rest$, "#"
@@ -44386,7 +44304,7 @@ If Not FastSymbol(rest$, ",") Then Exit Function
 Select Case IsLabel(basestack, rest$, what$)
     Case 1  ' check to see if is a handler
     If GetVar(basestack, what$, it) Then
-     PP = 0
+     pp = 0
      If Typename(var(it)) = "mHandler" Then
     
         If var(it).ReadOnly Then
@@ -44402,8 +44320,8 @@ Select Case IsLabel(basestack, rest$, what$)
     Case 5  'check for handler
     what$ = Left$(what$, Len(what$) - 1)
     If GetVar(basestack, what$, it) Then
-    PP = 0
-    If IsExp(basestack, rest$, PP, , True) Then
+    pp = 0
+    If IsExp(basestack, rest$, pp, , True) Then
     ' nothing here
     Arr = True
     End If
@@ -44446,10 +44364,10 @@ If FastSymbol(rest$, ",") Then
 If IsExp(basestack, rest$, p, , True) Then
 p = Int(Abs(p))
 If FastSymbol(rest$, ",") Then
-If IsExp(basestack, rest$, PP, , True) Then
-PP = Int(Abs(PP))
-If .ValidArea(p, CLng(PP)) Then
-    .putData F, p, CLng(PP)
+If IsExp(basestack, rest$, pp, , True) Then
+pp = Int(Abs(pp))
+If .ValidArea(p, CLng(pp)) Then
+    .putData F, p, CLng(pp)
 Else
 GoTo wrong
 End If
@@ -44482,8 +44400,8 @@ Else
     End If
     p = Int(Abs(p))
     If p = 0 Then GoTo wrong
-        If .ValidArea2(PP, FLEN(F) * p) Then
-            .putData F, .GetPtr(PP), FLEN(F) * p
+        If .ValidArea2(pp, FLEN(F) * p) Then
+            .putData F, .GetPtr(pp), FLEN(F) * p
         Else
 wrong:
             MyEr "Wrong size-position for loading the buffer", "Λάθος μέγεθος-θέση για να φορτωθεί η Διάρθρωση"
@@ -45858,9 +45776,9 @@ ArrBase = usethisbase
     GoTo ex1
     End If
     If Not pppp Is Nothing Then
-    If basestack.finalFlag Then pppp.final = True
+    If basestack.finalFlag Then pppp.Final = True
     ElseIf F > 0 Then
-    var(F).final = basestack.finalFlag
+    var(F).Final = basestack.finalFlag
     End If
 Loop Until Not FastSymbol(rest$, ",")
 ex1:
@@ -46744,9 +46662,9 @@ End If
 conthere:
     If bstack.IamThread Then
   If pagio$ = "GREEK" Then
-  Form2.Label1prompt(0) = "ΝΗΜΑ(" + CStr(bstack.Process.Id) + "): "
+  Form2.Label1prompt(0) = "ΝΗΜΑ(" + CStr(bstack.Process.id) + "): "
   Else
-  Form2.Label1prompt(0) = "THREAD(" + CStr(bstack.Process.Id) + "): "
+  Form2.Label1prompt(0) = "THREAD(" + CStr(bstack.Process.id) + "): "
   End If
   
     Else
@@ -46801,7 +46719,7 @@ On Error GoTo comperr
 If UserCodePage = DefCodePage Then
 CompareStr2 = StrComp(a$, b$, vbTextCompare)
 Else
-CompareStr2 = -2 + CompareString(clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$))
+CompareStr2 = -2 + CompareString(Clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$))
 End If
 Exit Function
 comperr:
@@ -46815,7 +46733,7 @@ CompareStr3 = StrComp(a, b)
 ElseIf UserCodePage = DefCodePage Then
 CompareStr3 = StrComp(a, b, vbTextCompare)
 Else
-CompareStr3 = -2 + CompareString(clid, &H1000, StrPtr(a), Len(a), StrPtr(b), Len(b))
+CompareStr3 = -2 + CompareString(Clid, &H1000, StrPtr(a), Len(a), StrPtr(b), Len(b))
 End If
 Exit Function
 comperr:
@@ -47262,7 +47180,7 @@ End If
 End Function
 Private Function compareStr4(a$, b$) As Long   ' here is not byval as in fastcollection
 Dim i As Long, j As Long, a1$, b1$, p1 As Variant, p2 As Variant, n$, k As Long, k1 As Long
-If CompareString(clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$)) = 2 Then Exit Function
+If CompareString(Clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$)) = 2 Then Exit Function
 n$ = "[-0-9.]"
 k = Sgn(Len(a$) - Len(b$))
 k1 = k
@@ -47303,7 +47221,7 @@ For i = 1 To j
        
           If Len(a$) > 0 Then
        
-            Select Case CompareString(clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$))
+            Select Case CompareString(Clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$))
                 Case 1, 3
                 compareStr4 = -1
                 Case 2
@@ -47324,7 +47242,7 @@ For i = 1 To j
     IsNumberD2 b$, p1
     If Len(b$) > 0 Then
        
-            Select Case CompareString(clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$))
+            Select Case CompareString(Clid, &H1000, StrPtr(a$), Len(a$), StrPtr(b$), Len(b$))
                 Case 3
                 compareStr4 = 1
                 Case 1, 2
@@ -47341,7 +47259,7 @@ For i = 1 To j
         End If
         Exit Function
     End If
-    compareStr4 = -2 + CompareString(clid, 0, StrPtr(a$) + i * 2 - 2, 1, StrPtr(b$) + i * 2 - 2, 1)
+    compareStr4 = -2 + CompareString(Clid, 0, StrPtr(a$) + i * 2 - 2, 1, StrPtr(b$) + i * 2 - 2, 1)
     If compareStr4 <> 0 Then
     Exit Function
     End If
@@ -47352,7 +47270,7 @@ End Function
 
 
 Private Sub checkbreak(bstack As basetask, b$, once As Boolean)
-Static busy As Boolean
+Static Busy As Boolean
 If timestamp < 0 Then
 If lckfrm > 0 Then Exit Sub
 timestamp = timeGetTime + 1000
@@ -47360,19 +47278,19 @@ End If
 If Abs(timestamp - timeGetTime) < 1000 Then Exit Sub
 timestamp = timeGetTime + 1000
 If Forms.count > 5 Then Exit Sub
-If busy Then Exit Sub
+If Busy Then Exit Sub
 If Not bstack.IamAnEvent Then
 If bstack.TaskMain Then Exit Sub
 If KeyPressed2(&H11, &H43) Then
-busy = True
+Busy = True
 Form1.EXECSTOP
 timestamp = timeGetTime + 1000
-busy = False
+Busy = False
 Exit Sub
 ElseIf KeyPressedLong(&H13) = 0 Then
 Exit Sub
 End If
-busy = True
+Busy = True
 ResetBreak
 If Form1.mybreak1() Then
     
@@ -47394,7 +47312,7 @@ If Form1.mybreak1() Then
 End If
 ResetBreak
 timestamp = timeGetTime + 1000
-busy = False
+Busy = False
 End Sub
 Public Sub ClearStr(a$)
 Dim i As Long, j As Long
@@ -47432,8 +47350,8 @@ ElseIf IsExp(bstack, a$, R, , True) Then
         Dim p As Variant
         If Not IsExp(bstack, a$, p, , True) Then IsRandom = False: Exit Function
         p = MyRound(p)
-        Dim PP As Variant
-        If p > R Then PP = p: p = R: R = PP
+        Dim pp As Variant
+        If p > R Then pp = p: p = R: R = pp
         Else
         p = 0
         
@@ -47577,7 +47495,7 @@ checkIterator:
     End If
 End Function
 Private Function IsDimension(bstack As basetask, a$, R As Variant, SG As Variant) As Boolean
-Dim s$, pppp As mArray, w1 As Long, p As Variant, anything As Object, PP As Variant
+Dim s$, pppp As mArray, w1 As Long, p As Variant, anything As Object, pp As Variant
 Dim k As Long
 k = Abs(IsLabel(bstack, a$, s$))
 Set bstack.lastobj = Nothing
@@ -47628,13 +47546,13 @@ End If
         If IsExp(bstack, a$, p, , True) Then
             If p < 1 Then
                 If Not FastSymbol(a$, ",") Then
-                    pppp.GetDnum (0), PP, R
+                    pppp.GetDnum (0), pp, R
                     R = SG * -R
                 ElseIf IsExp(bstack, a$, R, , True) Then
                     R = CLng(R) - 1
-                    pppp.SerialItem PP, (R), 5
-                    If R >= 0 And R < PP Then
-                        pppp.GetDnum (R), PP, R
+                    pppp.SerialItem pp, (R), 5
+                    If R >= 0 And R < pp Then
+                        pppp.GetDnum (R), pp, R
                         R = SG * -R
                     Else
                         CantReadDimension a$, s$
@@ -47646,22 +47564,22 @@ End If
                 End If
             Else
                 'pppp.SerialItem PP, CLng(Fix(p) - 1), 6
-                pppp.SerialItem PP, (R), 5
+                pppp.SerialItem pp, (R), 5
                 p = p - 1
-                If p >= 0 And p < PP Then
+                If p >= 0 And p < pp Then
                     If FastSymbol(a$, ",") Then
                         If IsExp(bstack, a$, R, , True) Then
                             If R = 0 Then
-                                pppp.GetDnum CLng(Fix(p)), PP, R
+                                pppp.GetDnum CLng(Fix(p)), pp, R
                                 R = SG * -R
                             Else
-                                pppp.GetDnum CLng(Fix(p)), PP, R
-                                R = PP - R - 1
+                                pppp.GetDnum CLng(Fix(p)), pp, R
+                                R = pp - R - 1
                             End If
                         End If
                     Else
-                        pppp.GetDnum CLng(Fix(p)), PP, R
-                        R = SG * PP
+                        pppp.GetDnum CLng(Fix(p)), pp, R
+                        R = SG * pp
                     End If
                 Else
                     CantReadDimension a$, s$
@@ -47676,8 +47594,8 @@ End If
         
       Else ' dimensions
       p = 0
-      pppp.SerialItem PP, CLng(Fix(p)), 5
-         R = SG * PP
+      pppp.SerialItem pp, CLng(Fix(p)), 5
+         R = SG * pp
               
               IsDimension = FastSymbol(a$, ")", True)
       End If
@@ -47720,8 +47638,8 @@ If IsStrExp(bstack, a$, s$) Then
                 R = SG * -pppp.myarrbase
             Else
                 p = Fix(p)
-                pppp.SerialItem PP, CLng(p - 1), 6
-                R = SG * PP
+                pppp.SerialItem pp, CLng(p - 1), 6
+                R = SG * pp
             End If
             
             IsDimension = FastSymbol(a$, ")", True)
@@ -47730,8 +47648,8 @@ If IsStrExp(bstack, a$, s$) Then
             End If
         Else ' dimensions
             p = 0
-            pppp.SerialItem PP, CLng(p), 5
-            R = SG * PP
+            pppp.SerialItem pp, CLng(p), 5
+            R = SG * pp
             
             IsDimension = FastSymbol(a$, ")", True)
         End If
@@ -47872,7 +47790,7 @@ Else
 End If
 End Function
 Private Function IsCeil(bstack As basetask, a$, R As Variant, SG As Variant) As Boolean
-Dim PP As Variant
+Dim pp As Variant
     If IsExp(bstack, a$, R, , True) Then
     ''On Error Resume Next
     If FastSymbol(a$, ")") Then
@@ -47886,7 +47804,7 @@ Dim PP As Variant
  
  End Function
 Private Function IsFloor(bstack As basetask, a$, R As Variant, SG As Variant) As Boolean
-Dim PP As Variant
+Dim pp As Variant
     If IsExp(bstack, a$, R, , True) Then
     ''On Error Resume Next
     If FastSymbol(a$, ")") Then
@@ -47900,7 +47818,7 @@ Dim PP As Variant
  
  End Function
 Private Function IsRound(bstack As basetask, a$, R As Variant, SG As Variant) As Boolean
-Dim PP As Variant, i As Integer
+Dim pp As Variant, i As Integer
     If IsExp(bstack, a$, R, , True) Then
     On Error Resume Next
     If FastSymbol(a$, ")") Then
@@ -47909,9 +47827,9 @@ Dim PP As Variant, i As Integer
            If SG < 0 Then R = -R
             IsRound = True
     ElseIf FastSymbol(a$, ",", True) Then
-        If IsExp(bstack, a$, PP) Then
+        If IsExp(bstack, a$, pp) Then
         
-          R = MyRound(R, PP)
+          R = MyRound(R, pp)
          If SG < 0 Then R = -R
           If Err.Number > 0 Then Err.Clear
      IsRound = FastSymbol(a$, ")", True)
@@ -48684,7 +48602,7 @@ Dim s$, w1 As Long, w2 As Long, s1$, dd As Long, w3 As Long, pppp As mArray, ppp
 
 End Function
 Private Function IsEval(v$, bstack As basetask, a$, R As Variant, SG As Variant) As Boolean
-Dim p As Variant, anything As Object, w3 As Long, w2 As Long, w1 As Long, PP As Variant, rB As Byte, ri As Integer, dn As Long, s$, ss$
+Dim p As Variant, anything As Object, w3 As Long, w2 As Long, w1 As Long, pp As Variant, rB As Byte, ri As Integer, dn As Long, s$, ss$
 Dim db As Double, pppp As mArray, IsGroupOnly As Group, ReadAsSingle As Boolean, ds As Single
 Dim ThisGroup As Group, t$
 w1 = 1
@@ -48791,7 +48709,16 @@ handlehandlers:
         If bstack.lastobj.IamEnum Then
         R = bstack.lastobj.index_cursor
         If SG < 0 Then R = -R
-        Set bstack.lastobj = Nothing
+        If bstack.lastobj.t1 = 0 Then
+        If IsObject(bstack.lastobj.objref) Then
+        Set bstack.lastobj = bstack.lastobj.objref
+        Else
+         Set bstack.lastobj = Nothing
+        End If
+        Else
+         Set bstack.lastobj = Nothing
+        End If
+       
          IsEval = FastSymbol(a$, ")", True)
         Exit Function
         ElseIf Not CheckLastHandlerOrIterator(anything, w3) Then
@@ -48802,8 +48729,8 @@ handlehandlers:
             With anything
                 If .t1 = 1 Then
                         If FastSymbol(a$, ",") Then
-                        If IsExp(bstack, a$, PP, , True) Then
-                            w3 = CLng(Int(PP))
+                        If IsExp(bstack, a$, pp, , True) Then
+                            w3 = CLng(Int(pp))
                             If w3 < 0 Or w3 >= .objref.count Then
                             indexout a$
                             Exit Function
@@ -48852,15 +48779,15 @@ there12:
                             w1 = Abs(Asc(v$) < 128)
                             If IsLabelSymbolNew(a$, "ΩΣ", "AS", w1, , , , False) Then
                                 If IsLabelSymbolNew(a$, "ΨΗΦΙΟ", "BYTE", w1, , , , False) Then
-                                    PP = 1
+                                    pp = 1
                                 ElseIf IsLabelSymbolNew(a$, "ΑΚΕΡΑΙΟΣ", "INTEGER", w1, , , , False) Then
-                                    PP = 2
+                                    pp = 2
                                 ElseIf IsLabelSymbolNew(a$, "ΜΑΚΡΥΣ", "LONG", w1, , , , False) Then
-                                    PP = 4
+                                    pp = 4
                                 ElseIf IsLabelSymbolNew(a$, "ΔΙΠΛΟΣ", "DOUBLE", w1, , , , False) Then
-                                    PP = 8
+                                    pp = 8
                                 ElseIf IsLabelSymbolNew(a$, "ΑΠΛΟΣ", "SINGLE", w1, , , , False) Then
-                                    PP = 4
+                                    pp = 4
                                     ReadAsSingle = True
                                 Else
                                     SyntaxError
@@ -48871,9 +48798,9 @@ there12:
                                 ' p is byte offset
                                 w2 = .objref.GetBytePtr(p)
 absolute:
-                                If .objref.ValidArea(w2, PP) Then
-                                PP = Abs(PP)
-                                    Select Case PP
+                                If .objref.ValidArea(w2, pp) Then
+                                pp = Abs(pp)
+                                    Select Case pp
                                     Case 1
                                         GetMem1 w2, rB
                                         R = SG * CDbl(rB)
@@ -48909,7 +48836,7 @@ firstpram:
                                 Set anything = .objref
                                 With anything
          
-                                 PP = .ItemSize
+                                 pp = .ItemSize
                                  ReadAsSingle = .WhatIsBasicItem = vbSingle
                                  If FastSymbol(a$, "!") Then
                                      If FastPureLabel(a$, s$) Then
@@ -48919,8 +48846,8 @@ firstpram:
                                                 Exit Function
                                                 End If
                                                 If .structref.Find(myUcase(s$, True)) Then
-                                                       PP = Abs(.structref.sValue)
-                                                       If PP = 4 Then
+                                                       pp = Abs(.structref.sValue)
+                                                       If pp = 4 Then
                                                        If .structref.KeyTypeValue = vbSingle Then
                                                         ReadAsSingle = True
                                                        End If
@@ -48930,7 +48857,7 @@ firstpram:
                                                                     GoTo errortext1
                                                            ElseIf R >= 0 Then
                                                            
-                                                                    w2 = cUlng(uintnew(.GetPtr(p)) + .structref.Value + Int(R) * PP)
+                                                                    w2 = cUlng(uintnew(.GetPtr(p)) + .structref.Value + Int(R) * pp)
                                                                     GoTo absolute
                                                            Else
                                                                     NegativeIindex a$
@@ -48946,7 +48873,7 @@ firstpram:
                                                  End If
                                     End If
                                 End If
-                                Select Case PP
+                                Select Case pp
                                 Case 1
                                     If .ValidArea2(p, 1) Then
                                         GetMem1 .GetPtr(p), rB
@@ -49254,7 +49181,7 @@ End If
 
 End Function
 Private Function IsVal(bstack As basetask, a$, R As Variant, SG As Variant, Eng As Boolean) As Boolean
-Dim s$, ex$, dd As Long, PP As Variant, Lang As Long
+Dim s$, ex$, dd As Long, pp As Variant, Lang As Long
     If Eng Then Lang = 1
    If IsStrExp(bstack, a$, s$) Then
     On Error Resume Next
@@ -49270,9 +49197,9 @@ Dim s$, ex$, dd As Long, PP As Variant, Lang As Long
         End If
         s$ = Replace(s$, ChrW(dd), ".", 1, 1)
         dd = 46
-    ElseIf IsExp(bstack, a$, PP, , True) Then
-        PP = Fix(PP)
-        dd = AscW(GetlocaleString2(14, CLng(PP)))
+    ElseIf IsExp(bstack, a$, pp, , True) Then
+        pp = Fix(pp)
+        dd = AscW(GetlocaleString2(14, CLng(pp)))
         If InStr(s$, ".") > 0 And dd <> 46 Then
         s$ = Replace(s$, ".", "*", 1, 1)
         End If
@@ -49292,7 +49219,7 @@ Dim s$, ex$, dd As Long, PP As Variant, Lang As Long
     dd = AscW(GetDeflocaleString(14))
     End If
     If MaybeIsSymbol(s$, "ΑαΨψTtFf") Then
-    If CDbl(PP) = 0 Then
+    If CDbl(pp) = 0 Then
     If Fast3NoSpace(s$, "ΑΛΗΘΕΣ", 6, "ΑΛΗΘΗΣ", 6, "TRUE", 4, 6) Then
         R = CBool(True)
         If SG < 0 Then R = -R
@@ -49303,7 +49230,7 @@ Dim s$, ex$, dd As Long, PP As Variant, Lang As Long
     R = 0
    End If
     Else
-        If PP = 1032 Then
+        If pp = 1032 Then
                  If Fast3NoSpace(s$, "ΑΛΗΘΕΣ", 6, "ΑΛΗΘΗΣ", 6, vbNullString, 0, 6) Then
                      R = CBool(True)
                      If SG < 0 Then R = -R
@@ -49734,7 +49661,7 @@ End If
 End If
 End Function
 Private Function IsParagr(bstack As basetask, a$, R As Variant, SG As Variant) As Boolean
-Dim s$, PP As Variant, dn As Long, w1 As Long, w2 As Long, pppp As mArray
+Dim s$, pp As Variant, dn As Long, w1 As Long, w2 As Long, pppp As mArray
     w1 = Abs(IsLabel(bstack, a$, s$))
                   
         If w1 = 3 Then
@@ -49742,8 +49669,8 @@ Dim s$, PP As Variant, dn As Long, w1 As Long, w2 As Long, pppp As mArray
                 If Typename(var(w1)) = doc Then
                         If Not FastSymbol(a$, ",") Then: MissParam a$: Exit Function
         
-                       If IsExp(bstack, a$, PP, , True) Then
-                                dn = CLng(Fix(PP))
+                       If IsExp(bstack, a$, pp, , True) Then
+                                dn = CLng(Fix(pp))
                               R = SG * var(w1).ParagraphFromOrder(dn)           ''
                                  
                             
@@ -49771,8 +49698,8 @@ Dim s$, PP As Variant, dn As Long, w1 As Long, w2 As Long, pppp As mArray
                 If neoGetArray(bstack, s$, pppp) Then
                  If Not NeoGetArrayItem(pppp, bstack, s$, w2, a$) Then Exit Function
                                 If Not FastSymbol(a$, ",") Then: MissParam a$: Exit Function
-                            If IsExp(bstack, s$, PP, , True) Then
-                                dn = CLng(Fix(PP))
+                            If IsExp(bstack, s$, pp, , True) Then
+                                dn = CLng(Fix(pp))
                                  R = SG * pppp.item(w2).ParagraphFromOrder(dn)
                                  Else
                                         MissNumExpr
@@ -50493,7 +50420,7 @@ Dim s$
     R = -1
     Else
     'cLid
-    R = SG * Asc(StrConv(StrConv(s$, vbFromUnicode, clid), vbUnicode))
+    R = SG * Asc(StrConv(StrConv(s$, vbFromUnicode, Clid), vbUnicode))
     End If
         IsAsc = FastSymbol(a$, ")", True)
     Else
@@ -50935,7 +50862,12 @@ checkobject:
                             ElseIf TypeOf myobject Is mHandler Then
                                 
                                 If myobject.indirect > -1 Then
+                                If MyIsObject(var(myobject.indirect)) Then
                                      Set var(v) = var(myobject.indirect)
+                                     Else
+                                     BadObjectDecl
+                                     Exec1 = 0: ExecuteVar = 8: Exit Function
+                                     End If
                                 Else
                                     Set var(v) = myobject
                                     If myobject.t1 = 4 Then
@@ -50968,6 +50900,8 @@ checkobject:
                             Set var(v) = myobject
                             CopyEvent var(v), bstack
                             Set var(v) = bstack.lastobj
+                            ElseIf VarType(var(v)) = vbEmpty Then
+                            Set var(v) = myobject
                             Else
                                 Set myobject = Nothing
                                 Set bstack.lastobj = Nothing
@@ -51284,10 +51218,25 @@ contwrong1:
                             Set bstack.lastobj = Nothing
                             End If
                         Else
-                            MissNumExpr
+misnum:                            MissNumExpr
                             Exec1 = 0: ExecuteVar = 8
                             Exit Function
                         End If
+                    ElseIf MyIsObject(var(v)) Then
+                    If IsExp(bstack, b$, p) Then
+                    Set p = bstack.lastobj
+                    If Typename(p) = Typename(var(v)) Then
+                    Set var(v) = p
+                    Else
+                    WrongObject
+                           Exec1 = 0: ExecuteVar = 8
+                            Exit Function
+                    
+                    End If
+                    Else
+                        GoTo misnum
+                    End If
+        
                     Else
                         GoTo somethingelse
                     End If
@@ -52692,14 +52641,14 @@ If FastSymbol(b$, "=") Then
             If TypeOf bstack.lastobj Is mArray Then
                     Set pppp1 = bstack.lastobj
                      pppp1.CopyArray pppp
-                     pppp.final = False
+                     pppp.Final = False
              Else
                         NotArray
              End If
         Else
         Set pppp1 = bstack.lastobj
          pppp1.CopyArray pppp
-          pppp.final = False
+          pppp.Final = False
          
         End If
             Set bstack.lastobj = Nothing
@@ -52743,7 +52692,7 @@ End If
 If MaybeIsSymbol(b$, ":+-*/~|") Or v = -2 Then
 here66678:
 With pppp
-If pppp.final Then CantAssignValue: Exec1 = 0: ExecuteVar = 8: Exit Function
+If pppp.Final Then CantAssignValue: Exec1 = 0: ExecuteVar = 8: Exit Function
 
 If MyIsObject(.item(v)) Then
 
@@ -53318,12 +53267,12 @@ ElseIf FastSymbol(b$, ")") Then
                     If TypeOf bstack.lastobj Is mHandler Then
             
                         bstack.lastobj.objref.CopyArray pppp
-                        pppp.final = False
+                        pppp.Final = False
                    
                     Else
           
                         bstack.lastobj.CopyArray pppp
-                        pppp.final = False
+                        pppp.Final = False
      
                     End If
                     Set bstack.lastobj = Nothing
@@ -53339,7 +53288,7 @@ ElseIf FastSymbol(b$, ")") Then
          End If
         If TypeOf bstack.lastobj Is mArray Then
          bstack.lastobj.CopyArray pppp
-         pppp.final = False
+         pppp.Final = False
          Else
          NotArray
          End If
@@ -54131,7 +54080,7 @@ Dim o As Long, w3 As Long, x1 As Long, y1 As Long, x As Double, ColOffset As Lon
 Dim work As Boolean, work2 As Long, skiplast As Boolean, ss$, ls As Long, myobject As Object, counter As Long, Counterend As Long, countDir As Long
 Dim bck$, clearline As Boolean, ihavecoma As Boolean, isboolean As Boolean
 Set Scr = basestack.Owner
-Dim rest$, where As Long, final As Boolean
+Dim rest$, where As Long, Final As Boolean
 
 w3 = -1
 Dim basketcode As Long, prive As basket
@@ -54382,7 +54331,7 @@ End If
 
 
 Do
-             If final Then
+             If Final Then
              If myobject Is Nothing Then GoTo there1
             End If
    If FastSymbol(rest$, "~(", , 2) Then ' means combine
@@ -54859,7 +54808,7 @@ work = True
   opn& = 0
   rest$ = NLtrim$(rest$)
    '  final = True   ERROR - WHEN myobject is an array/inventory to iterate
-    final = myobject Is Nothing
+    Final = myobject Is Nothing
     Else
 If par Then
 ihavecoma = True ' 'rest$ = "," & rest$
@@ -56131,15 +56080,15 @@ ContGoto:
               End If
 End Function
 
-Function GetArrayReference(bstack As basetask, a$, v$, PP, Result As mArray, Index As Long) As Boolean
+Function GetArrayReference(bstack As basetask, a$, v$, pp, Result As mArray, Index As Long) As Boolean
 Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
-If PP Is Nothing Then Exit Function
-If Not TypeOf PP Is mArray Then
-If TypeOf PP Is mHandler Then If PP.t1 = 3 Then If Not PP.objref Is Nothing Then If TypeOf PP.objref Is mArray Then Set PP = PP.objref: GoTo cont
+If pp Is Nothing Then Exit Function
+If Not TypeOf pp Is mArray Then
+If TypeOf pp Is mHandler Then If pp.t1 = 3 Then If Not pp.objref Is Nothing Then If TypeOf pp.objref Is mArray Then Set pp = pp.objref: GoTo cont
 Exit Function
 End If
 cont:
-Set pppp = PP
+Set pppp = pp
 
 If pppp.Arr Then
 dn = 0
@@ -56176,7 +56125,7 @@ p = 0
                             On Error Resume Next
                             If p < -pppp.myarrbase Then
                             GetArrayReference = False
-                              MyErMacro a$, "index too low for array " & v$ & ")", "αρνητικός δείκτης στο πίνακα " & v$ & ")"
+                              MyErMacro a$, "index too low for array " & v$ & ")", "χαμηλός δείκτης στο πίνακα " & v$ & ")"
                             Exit Function
                             End If
                             
@@ -56206,10 +56155,10 @@ p = 0
     End If
 End Function
 
-Function ProcessArray(bstack As basetask, a$, v$, PP, Result) As Boolean
+Function ProcessArray(bstack As basetask, a$, v$, pp, Result) As Boolean
 Dim dn As Long, dd As Long, p, w3, w2 As Long, pppp As mArray
-If Not Typename$(PP) = "mArray" Then Exit Function
-Set pppp = PP
+If Not Typename$(pp) = "mArray" Then Exit Function
+Set pppp = pp
 
 If pppp.Arr Then
 dn = 0
@@ -56246,7 +56195,7 @@ p = 0
                             On Error Resume Next
                             If p < -pppp.myarrbase Then
                             ProcessArray = False
-                              MyErMacro a$, "index too low for array " & v$ & ")", "αρνητικός δείκτης στο πίνακα " & v$ & ")"
+                              MyErMacro a$, "index too low for array " & v$ & ")", "χαμηλός δείκτης στο πίνακα " & v$ & ")"
                             Exit Function
                             End If
                             

@@ -51,9 +51,9 @@ Private Declare Sub PutMem4 Lib "msvbvm60" (ByVal addr As Long, ByVal NewVal As 
 Private Declare Sub GetMem2 Lib "msvbvm60" (ByVal addr As Long, retval As Integer)
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal addr As Long, retval As Byte)
 Private Declare Function VarPtrArray Lib "msvbvm60.dll" Alias "VarPtr" (Ptr() As Any) As Long
-  Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" _
+  Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
-        Private Declare Sub CopyPart Lib "KERNEL32" Alias "RtlMoveMemory" _
+        Private Declare Sub CopyPart Lib "kernel32" Alias "RtlMoveMemory" _
       (hpvDest As Any, hpvSource As Any, ByVal cbCopy As Long)
 Private Declare Function SafeArrayGetDim Lib "OleAut32.dll" (ByVal pSA As Long) As Long
 Private Declare Function SafeArrayLock Lib "OleAut32.dll" (ByVal pSA As Long) As Long
@@ -73,11 +73,11 @@ Private Type SAFEARRAY1D
     lLBound As Long
 End Type
 ' no second sort allowed per array
-Private sortmult As Long, sortoff As Long, upart As Long, part As Long, col(), Piv, piv1()
-Public Index As Long, final As Boolean, refgroup As Object, grouperror As Boolean
+Private sortmult As Long, sortoff As Long, upart As Long, part As Long, Col(), Piv, piv1()
+Public Index As Long, Final As Boolean, refgroup As Object, grouperror As Boolean
 Public refArray As Variant
 Public Sub Compute0(p As Variant, ss$)
-If final Then CantAssignValue: Exit Sub
+If Final Then CantAssignValue: Exit Sub
 Dim v As Long, sp As Variant
 On Error Resume Next
 v = 0
@@ -160,12 +160,12 @@ Do While v <= Me.UpperMonoLimit
         If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
 conthere:
         v = v + 1
-        Err.clear
+        Err.Clear
 Loop
 
 End Sub
 Public Sub Compute(p As Double, ss$)
-If final Then CantAssignValue: Exit Sub
+If Final Then CantAssignValue: Exit Sub
 Dim v As Long
 On Error Resume Next
 v = 0
@@ -202,45 +202,45 @@ Do While v <= Me.UpperMonoLimit
     If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
 conthere:
     v = v + 1
-    Err.clear
+    Err.Clear
 Loop
 
 End Sub
-Public Function CompareItem(v As Long, p As Variant, ss$, ret As Boolean) As Boolean
-ret = False
+Public Function CompareItem(v As Long, p As Variant, ss$, Ret As Boolean) As Boolean
+Ret = False
 On Error GoTo there
 If MyIsNumeric(actualdata(v)) Then
 Select Case ss$
 Case ">"
-ret = actualdata(v) > p
+Ret = actualdata(v) > p
 Case ">="
-ret = actualdata(v) >= p
+Ret = actualdata(v) >= p
 Case "<"
-ret = actualdata(v) < p
+Ret = actualdata(v) < p
 Case "<="
-ret = actualdata(v) <= p
+Ret = actualdata(v) <= p
 Case "<>"
-ret = actualdata(v) <> p
+Ret = actualdata(v) <> p
 Case "="
-ret = actualdata(v) = p
+Ret = actualdata(v) = p
 End Select
 
 Else
 Select Case UCase(ss$)
 Case ">"
-ret = actualdata(v) > p
+Ret = actualdata(v) > p
 Case ">="
-ret = actualdata(v) >= p
+Ret = actualdata(v) >= p
 Case "<"
-ret = actualdata(v) < p
+Ret = actualdata(v) < p
 Case "<="
-ret = actualdata(v) <= p
+Ret = actualdata(v) <= p
 Case "<>"
-ret = actualdata(v) <> p
+Ret = actualdata(v) <> p
 Case "="
-ret = actualdata(v) = p
+Ret = actualdata(v) = p
 Case "LIKE"
-ret = actualdata(v) Like Replace$(CStr(p), "%", "*")
+Ret = actualdata(v) Like Replace$(CStr(p), "%", "*")
 
 End Select
 End If
@@ -248,7 +248,7 @@ CompareItem = True
 there:
 End Function
 Public Sub Compute2(p As Variant, ss$)
-If final Then CantAssignValue: Exit Sub
+If Final Then CantAssignValue: Exit Sub
 Dim v As Long, sp As Variant
 On Error Resume Next
 v = 0
@@ -308,12 +308,12 @@ Do While v <= Me.UpperMonoLimit
 conthere:
     If RoundDouble Then If VarType(actualdata(v)) = vbDouble Then actualdata(v) = MyRound(actualdata(v), 13)
     v = v + 1
-    Err.clear
+    Err.Clear
 Loop
 End Sub
 Public Sub Compute3(ss$)
 Dim v As Long
-    If final Then CantAssignValue: Exit Sub
+    If Final Then CantAssignValue: Exit Sub
     On Error Resume Next
     v = 0
     Do While v <= Me.UpperMonoLimit
@@ -330,7 +330,7 @@ Dim v As Long
         End Select
     End If
     v = v + 1
-    Err.clear
+    Err.Clear
 Loop
 
 End Sub
@@ -380,16 +380,43 @@ End If
 End If
 '
 End Sub
+Friend Sub LoadTuple(ar As Variant)
+Dim z As Long, i As Long
+actualdata = ar
+If count <> UBound(actualdata()) - LBound(actualdata) + 1 Then
+i = count
+maxitems1 = UBound(actualdata()) - LBound(actualdata)
+maxitems = maxitems1 + 1
+z = 1
+
+If dnum > 1 Then
+
+  z = i \ limit(dnum - 1)
+
+   If maxitems Mod z <> 0 Then
+  maxitems = maxitems + z - maxitems Mod z
+  maxitems1 = maxitems - 1
+  ReDim Preserve actualdata(maxitems1)
+  End If
+  limit(dnum - 1) = maxitems \ z
+Else
+dnum = 1
+limit(0) = maxitems
+End If
+End If
+'
+End Sub
+
 Friend Sub CopySerialize(mmm() As Variant)
 ' may we get an exception here
 Dim m_base As Long, first12 As Long
-Dim m_base_0 As Long, first12_0 As Long, r1 As Long, r2 As Long
+Dim m_base_0 As Long, first12_0 As Long, R1 As Long, r2 As Long
 
 GetMem4 VarPtrArray(mmm()), m_base
 GetMem4 VarPtrArray(actualdata()), m_base_0
-r1 = SafeArrayLock(m_base)
+R1 = SafeArrayLock(m_base)
 r2 = SafeArrayLock(m_base_0)
-r1 = SafeArrayAccessData(ByVal m_base, first12)
+R1 = SafeArrayAccessData(ByVal m_base, first12)
 r2 = SafeArrayAccessData(ByVal m_base_0, first12_0)
 
 'GetMem4 m_base + 12, first1
@@ -397,23 +424,23 @@ r2 = SafeArrayAccessData(ByVal m_base_0, first12_0)
 PutMem4 m_base + 12, first12_0
 PutMem4 m_base_0 + 12, first12
 r2 = SafeArrayUnaccessData(ByVal m_base_0)
-r1 = SafeArrayUnaccessData(ByVal m_base)
+R1 = SafeArrayUnaccessData(ByVal m_base)
 r2 = SafeArrayUnlock(m_base_0)
-r1 = SafeArrayUnlock(m_base)
+R1 = SafeArrayUnlock(m_base)
 
 End Sub
 Friend Sub CopyBackSerialize(mmm() As Variant)
 ' may we get an exception here
 Dim m_base As Long, first12 As Long
-Dim m_base_0 As Long, first12_0 As Long, r1 As Long, r2 As Long
+Dim m_base_0 As Long, first12_0 As Long, R1 As Long, r2 As Long
 If Not RevOrder Then Err.Raise vbObjectError + 12345, "CopyBack", "Failed. is not vb6"
 Dim backup()
 backup() = actualdata()
 GetMem4 VarPtrArray(mmm()), m_base
 GetMem4 VarPtrArray(backup()), m_base_0
-r1 = SafeArrayLock(m_base)
+R1 = SafeArrayLock(m_base)
 r2 = SafeArrayLock(m_base_0)
-r1 = SafeArrayAccessData(ByVal m_base, first12)
+R1 = SafeArrayAccessData(ByVal m_base, first12)
 r2 = SafeArrayAccessData(ByVal m_base_0, first12_0)
 
 'GetMem4 m_base + 12, first1
@@ -421,9 +448,9 @@ r2 = SafeArrayAccessData(ByVal m_base_0, first12_0)
 PutMem4 m_base + 12, first12_0
 PutMem4 m_base_0 + 12, first12
 r2 = SafeArrayUnaccessData(ByVal m_base_0)
-r1 = SafeArrayUnaccessData(ByVal m_base)
+R1 = SafeArrayUnaccessData(ByVal m_base)
 r2 = SafeArrayUnlock(m_base_0)
-r1 = SafeArrayUnlock(m_base)
+R1 = SafeArrayUnlock(m_base)
 End Sub
 Public Sub Car(m As Object)
 Dim k As New mArray
@@ -672,7 +699,7 @@ End If
 k.Arr = Me.Arr
 k.IHaveGui = Me.IHaveGui
 k.IHaveClass = Me.IHaveClass
-k.final = Me.final
+k.Final = Me.Final
 End Sub
 Public Sub CopyArrayRev(k As mArray)
 'copy this to k
@@ -747,7 +774,7 @@ End If
 k.Arr = Me.Arr
 k.IHaveGui = Me.IHaveGui
 k.IHaveClass = Me.IHaveClass
-k.final = Me.final
+k.Final = Me.Final
 End Sub
 Public Sub CopyArrayRevFast(k As mArray)
 'copy this to k
@@ -778,7 +805,7 @@ Next i
 k.Arr = Me.Arr
 k.IHaveGui = Me.IHaveGui
 k.IHaveClass = Me.IHaveClass
-k.final = Me.final
+k.Final = Me.Final
 End Sub
 Public Sub CopyArraySlice(k As mArray, fromS As Long, toS As Long)
 'copy this to k
@@ -851,7 +878,7 @@ End If
 k.Arr = Me.Arr
 k.IHaveGui = Me.IHaveGui
 k.IHaveClass = Me.IHaveClass
-k.final = Me.final
+k.Final = Me.Final
 End Sub
 Public Sub CopyArraySliceFast(k As mArray, fromS As Long, toS As Long)
 'copy this to k
@@ -880,7 +907,7 @@ Next i
 k.Arr = Me.Arr
 k.IHaveGui = Me.IHaveGui
 k.IHaveClass = Me.IHaveClass
-k.final = Me.final
+k.Final = Me.Final
 End Sub
 
 Public Function UpperMonoLimit()
@@ -1223,7 +1250,7 @@ If GroupRef.objref.Done Then
 End If
 
 End If
-ElseIf final Then
+ElseIf Final Then
 If Not MyIsObject(actualdata(curitem)) Then
 If VarType(actualdata(curitem)) = vbEmpty Then
 actualdata(curitem) = item
@@ -1271,7 +1298,7 @@ If GroupRef.objref.Done Then
 End If
 End If
 End If
-ElseIf final Then
+ElseIf Final Then
 If Not MyIsObject(actualdata(curitem)) Then
 If VarType(actualdata(curitem)) = vbEmpty Then
 MoveStringToVariant item, actualdata(curitem)
@@ -1294,7 +1321,7 @@ End If
 
 End Property
 Public Property Set item(curitem As Long, item As Variant)
-If final Then CantAssignValue: Exit Property
+If Final Then CantAssignValue: Exit Property
 On Error Resume Next
 If curitem < 0 Then
 If Not GroupRef Is Nothing Then
@@ -1607,37 +1634,37 @@ Dim M1 As Long, M2 As Long
   If LB < M2 Then QuickSortItemsRevWithSameKey LB, M2
   If M1 < UB Then QuickSortItemsRevWithSameKey M1, UB
 End Sub
-Public Sub SortTuple(Optional low As Long = -1, Optional high As Long = -1)
+Public Sub SortTuple(Optional Low As Long = -1, Optional high As Long = -1)
 Dim i As Long, n As Byte
 If dnum < 1 Then Exit Sub
 If count > 0 Then
 If high = -1 Then high = count - 1
 If high > count - 1 Then high = count - 1
-If low = -1 Then low = 0
-If low >= high Then Exit Sub
+If Low = -1 Then Low = 0
+If Low >= high Then Exit Sub
 
-For i = low To high
+For i = Low To high
 GetMem1 VarPtr(actualdata(i)), n
 If (n > 8 Or n < 2) And Not n = 14 Then Exit Sub
 Next i
-QuickSortItemsWithSameKey low, high
+QuickSortItemsWithSameKey Low, high
 
 End If
 End Sub
-Public Sub SortDesTuple(Optional low As Long = -1, Optional high As Long = -1)
+Public Sub SortDesTuple(Optional Low As Long = -1, Optional high As Long = -1)
 Dim i As Long, n As Byte
 If dnum < 1 Then Exit Sub
 If count > 0 Then
 If high = -1 Then high = count - 1
 If high > count - 1 Then high = count - 1
-If low = -1 Then low = 0
-If low >= high Then Exit Sub
+If Low = -1 Then Low = 0
+If Low >= high Then Exit Sub
 
-For i = low To high
+For i = Low To high
 GetMem1 VarPtr(actualdata(i)), n
 If (n > 8 Or n < 2) And Not n = 14 Then Exit Sub
 Next i
-QuickSortItemsRevWithSameKey low, high
+QuickSortItemsRevWithSameKey Low, high
 End If
 End Sub
 Private Sub InsertionSort10(ByVal iMin As Long, ByVal iMax As Long)
@@ -1660,15 +1687,15 @@ again:
         If part <= upart Then
         
         
-        j1 = j1 - sortoff + col(part - 1)
-        sortoff = col(part - 1)
+        j1 = j1 - sortoff + Col(part - 1)
+        sortoff = Col(part - 1)
         GoTo again
         End If
 ex1:
         Exit Do
         Else
         
-        If col(part) = 0 Then
+        If Col(part) = 0 Then
         If actualdata(j1) < actualdata(j1 - sortmult) Then
            ' Debug.Print "insertion swap"
             For k = j1 - sortoff To j1 - sortoff + sortmult - 1
@@ -1676,9 +1703,9 @@ ex1:
             Next k
             j = j - 1
             If part <> 3 Then
-                j1 = j1 - sortoff - sortmult + col(2)
+                j1 = j1 - sortoff - sortmult + Col(2)
                 part = 3
-                sortoff = col(2)
+                sortoff = Col(2)
             Else
                 j1 = j1 - sortmult
             End If
@@ -1693,9 +1720,9 @@ ex1:
             Next k
             j = j - 1
             If part <> 3 Then
-                j1 = j1 - sortoff - sortmult + col(2)
+                j1 = j1 - sortoff - sortmult + Col(2)
                 part = 3
-                sortoff = col(2)
+                sortoff = Col(2)
             Else
                 j1 = j1 - sortmult
             End If
@@ -1708,7 +1735,7 @@ ex1:
         Loop
         If part <> 3 Then
         part = 3
-        sortoff = col(2)
+        sortoff = Col(2)
         End If
         i = i + 1
         j0 = j0 + sortmult
@@ -1735,22 +1762,22 @@ Next k
 End Sub
 
 Private Function Compare10(ByVal a1) As Long
-Static k As Long, ret As Long
+Static k As Long, Ret As Long
 On Error Resume Next
 'Debug.Print "compare ", a1
 a1 = a1 * sortmult
 For k = 2 To upart - 1 Step 2
-ret = actualdata(a1 + col(k)) = piv1(col(k))
-If ret = 0 Then
-    If actualdata(a1 + col(k)) < piv1(col(k)) Then
-        If col(k + 1) Then
+Ret = actualdata(a1 + Col(k)) = piv1(Col(k))
+If Ret = 0 Then
+    If actualdata(a1 + Col(k)) < piv1(Col(k)) Then
+        If Col(k + 1) Then
             Compare10 = -1
         Else
             Compare10 = 1
         End If
         Exit Function
     Else
-        If col(k + 1) Then
+        If Col(k + 1) Then
             Compare10 = 1
         Else
             Compare10 = -1
@@ -1813,49 +1840,49 @@ End If
 End If
 
 End If
-col() = col0()
+Col() = col0()
 sortmult = dtable(0)
-If UBound(col()) < 1 Then
+If UBound(Col()) < 1 Then
 
-ReDim col(4)
-col(0) = 0
-col(1) = count \ sortmult - 1
-col(2) = 0
-col(3) = 0
-ElseIf UBound(col()) < 3 Then
+ReDim Col(4)
+Col(0) = 0
+Col(1) = count \ sortmult - 1
+Col(2) = 0
+Col(3) = 0
+ElseIf UBound(Col()) < 3 Then
 
-ReDim Preserve col(4)
-col(2) = -mbase2
-col(3) = 0
+ReDim Preserve Col(4)
+Col(2) = -mbase2
+Col(3) = 0
 GoTo there1
 
 Else
 For i = LBound(col0) To UBound(col0)
-col(i) = CLng(col0(i))
+Col(i) = CLng(col0(i))
 Next i
 there1:
-If col(1) = -1 Then col(1) = count \ sortmult - 1
+If Col(1) = -1 Then Col(1) = count \ sortmult - 1
 
-If col(1) > count \ sortmult - 1 Then col(1) = count \ sortmult - 1
-If col(0) < 0 Then col(0) = 0
-If col(0) >= col(1) Then Exit Sub
+If Col(1) > count \ sortmult - 1 Then Col(1) = count \ sortmult - 1
+If Col(0) < 0 Then Col(0) = 0
+If Col(0) >= Col(1) Then Exit Sub
 
-For i = LBound(col) + 2 To UBound(col) - 1 Step 2
-col(i) = col(i) + mbase2
-If col(i) < 0 Or col(i) >= sortmult Then Exit Sub
+For i = LBound(Col) + 2 To UBound(Col) - 1 Step 2
+Col(i) = Col(i) + mbase2
+If Col(i) < 0 Or Col(i) >= sortmult Then Exit Sub
 'If col(i + 1) <> 0 Then col(i + 1) = 1
 Next i
 
 End If
-sortoff = col(2)
-upart = UBound(col())
+sortoff = Col(2)
+upart = UBound(Col())
 part = 3
 
 ReDim piv1(sortmult)
 If Stable Then
-InsertionSort10 col(0), col(1)
+InsertionSort10 Col(0), Col(1)
 Else
-QuickSortItemsWithSameKey10 col(0), col(1)
+QuickSortItemsWithSameKey10 Col(0), Col(1)
 End If
 ReDim piv1(1)
 End Sub

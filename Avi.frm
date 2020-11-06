@@ -26,6 +26,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+Option Explicit
+Public getout As Boolean
 Dim doubleclick As Long
 Dim ERNUM As Long
 Private mInterval As Long
@@ -52,7 +54,7 @@ SetWindowPos Me.hWnd, HWND_TOPMOST, aviX / dv15, _
 End If
 End If
 ElseIf AVIRUN Then
-getout = True
+If Me.Height > 0 Then getout = True
 Else
 End If
 If getout Then
@@ -134,7 +136,7 @@ MediaPlayer1.openMovieWindow AVI.hWnd, "child"
 
 
 Else
-Me.move Left, top, ScaleX(c&, vbPixels, vbTwips), ScaleY(MediaPlayer1.Height, vbPixels, vbTwips)
+Me.move Left, top, ScaleX(MediaPlayer1.Width, vbPixels, vbTwips), ScaleY(MediaPlayer1.Height, vbPixels, vbTwips)
 
 MediaPlayer1.minimizeMovie
 MediaPlayer1.openMovie
@@ -206,7 +208,7 @@ End Sub
 
 Private Sub Timer1_Timer()
 If intTimes > 0 Then
-    intimes = intTimes - 1
+   intTimes = intTimes - 1
     Timer1.Interval = 32767#
 Else
     GETLOST
