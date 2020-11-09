@@ -236,7 +236,7 @@ Set aa = mstack.item(where)
 StackItemType = aa.Typename
 End Property
 Public Property Get StackItemTypeObjectType(where As Long) As String
-Dim aa As VarItem, bb As Object
+Dim aa As VarItem, bb As Object, mh As mHandler
 On Error Resume Next
 
 Set aa = mstack.item(where)
@@ -246,14 +246,18 @@ StackItemTypeObjectType = vbNullString
 Case "*"
 Set bb = aa.ObjectRef
 If TypeOf bb Is mHandler Then
-Set bb = bb.objref
+Set mh = bb
+Set bb = mh.objref
 CheckDeepAny bb
-If bb.t1 = 3 Then
-StackItemTypeObjectType = "*[" + Typename(bb) + "]"
-ElseIf bb.t1 = 1 Then
+Set mh = bb
+If mh.t1 = 3 Or mh.t1 = 0 Then
+StackItemTypeObjectType = "*[" + Typename(mh.objref) + "]"
+ElseIf mh.t1 = 1 Then
 StackItemTypeObjectType = "*[Inventory]"
-Else
+ElseIf mh.t1 = 2 Then
 StackItemTypeObjectType = "*[Buffer]"
+ElseIf mh.t1 = 4 Then
+StackItemTypeObjectType = "*[Enum]"
 End If
 Else
 StackItemTypeObjectType = Typename(bb)
@@ -869,19 +873,19 @@ If Index >= 0 And Index < mMany Then
 End If
 End Function
 Function IsEnum(p As Variant) As Boolean
-Dim aa As VarItem, obj As mHandler
+Dim aa As VarItem, usehandler As mHandler
 If Index >= 0 And Index < mMany Then
     Set aa = mstack.item(Index + 1)
     If aa.slot = 1 Then
     If Typename(aa.mItem) = "mHandler" Then
-        Set obj = aa.mItem
-        IsEnum = obj.t1 = 4
-        If IsEnum Then p = obj.index_cursor * obj.sign
+        Set usehandler = aa.mItem
+        IsEnum = usehandler.t1 = 4
+        If IsEnum Then p = usehandler.index_cursor * usehandler.sign
         End If
     End If
 End If
 End Function
-Sub SplitStackTop(fromstiva As Object, item As Long)
+Sub SplitStackTop(fromstiva As mHandler, item As Long)
 Dim aa As VarItem, i As Long
 Dim thisstiva As mStiva
 Set thisstiva = fromstiva.objref
@@ -896,7 +900,7 @@ For i = 1 To item
         Inc
 Next i
 End Sub
-Sub SplitStackBottom(fromstiva As Object, item As Long)
+Sub SplitStackBottom(fromstiva As mHandler, item As Long)
 Dim aa As VarItem, i As Long
 Dim thisstiva As mStiva
 Set thisstiva = fromstiva.objref

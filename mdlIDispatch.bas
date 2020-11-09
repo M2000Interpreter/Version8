@@ -50,7 +50,7 @@ Public Function FindDISPID(pobjTarget As Object, ByVal pstrProcName As Variant) 
     
  Set IDsp = pobjTarget
  If Not getone(Typename(pobjTarget) & "." & pstrProcName, dispid) Then
-      lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, clid, arrdispid(0))
+      lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, Clid, arrdispid(0))
      
       If lngRet = 0 Then dispid = arrdispid(0): PushOne Typename(pobjTarget) & "." & pstrProcName, dispid
       
@@ -116,7 +116,7 @@ Dim mmm As mArray
 If Not getone(Typename$(pobjTarget) & "." & pstrProcName, dispid) Then
             ReDim myptr(0 To 0)
             myptr(0) = StrPtr(pstrProcName)
-            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, clid, varDISPID(0))
+            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), 1&, Clid, varDISPID(0))
             
             If lngRet = 0 Then dispid = varDISPID(0): PushOne Typename$(pobjTarget) & "." & pstrProcName, dispid
             Else
@@ -129,7 +129,7 @@ Else
             myptr(lngLoop) = StrPtr(pargs2(lngLoop))
             Next lngLoop
                 ReDim varDISPID(0 To fixnamearg)
-            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), fixnamearg + 1, clid, varDISPID(0))
+            lngRet = IDsp.GetIDsOfNames(riid, myptr(0), fixnamearg + 1, Clid, varDISPID(0))
  dispid = varDISPID(0)
 End If
     If lngRet = 0 Then
@@ -182,7 +182,7 @@ passhere:
                 .rgPointerToDISPIDNamedArgs = 0
               End If
                 End With
-                If lngRet = -1 Then GoTo jumphere
+                If lngRet = -1 Then GoTo JUMPHERE
 Else
     With params
         .cArgs = 0
@@ -202,7 +202,7 @@ If lngRet <> 0 Then
         GoTo exithere
         Err.Raise Excep.wCode
     ElseIf Typename$(pobjTarget) = "GuiM2000" Then
-jumphere:
+JUMPHERE:
             On Error GoTo exithere
             lngRet = 0
             If UCase(pstrProcName) = "HIDE" Then
@@ -519,7 +519,7 @@ ReadOneParameter = Err = 0
   ''  If Err.Number <> 0 Then ReadOneParameter = varRet
 Err.Clear
 End Function
-Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR$, ThisIndex As Variant, Optional useset As Boolean = False, Optional bypass As Boolean) As Variant
+Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR$, ThisIndex As Variant, Optional useset As Boolean = False, Optional ByPass As Boolean) As Variant
     
     Dim CallType As cbnCallTypes
     
@@ -584,10 +584,10 @@ Else
 
     Set IDsp = Nothing
     If IsObject(VarRet) Then
-        If bypass Then
+        If ByPass Then
             Set pobjTarget = VarRet
             ReadOneIndexParameter = 0
-            bypass = False
+            ByPass = False
         Else
             Set ReadOneIndexParameter = VarRet
 

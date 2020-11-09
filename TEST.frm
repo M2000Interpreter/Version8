@@ -218,7 +218,7 @@ If mBtask Is Nothing Then
 Else
 Set MyBaseTask = New basetask
 mBtask.CopyStrip2 MyBaseTask
-run_in_basestack1 = mBtask Is basestack1
+run_in_basestack1 = mBtask Is Basestack1
 End If
 End Property
 
@@ -411,7 +411,7 @@ End If
 Label(1).Prompt = "Εντολή: "
 Label(2).Prompt = "Επόμενο: "
 oldindex = gList4.ListIndex
-gList4.clear
+gList4.Clear
 gList4.additemFast "Επόμενο Βήμα"
 gList4.additemFast "Αργή Ροή"
 gList4.additemFast "Διακοπή"
@@ -432,7 +432,7 @@ If Compute.Prompt = ">" Then
 Label(1).Prompt = "Id: "
 Label(2).Prompt = "Next: "
 oldindex = gList4.ListIndex
-gList4.clear
+gList4.Clear
 gList4.additemFast "Next Step"
 gList4.additemFast "Slow Flow"
 gList4.additemFast "Stop"
@@ -466,7 +466,7 @@ gList1.ShowMe2
 End Sub
 
 
-Private Sub gList1_MouseUp(X As Single, Y As Single)
+Private Sub gList1_MouseUp(x As Single, y As Single)
 Dim monitor As Long
 If Not Form4.Visible Then
 monitor = FindFormSScreen(Form1)
@@ -497,23 +497,23 @@ skip = True
 End If
 
 End Sub
-Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
-If gList2.DoubleClickCheck(Button, item, X, Y, 10 * lastfactor, 10 * lastfactor, 8 * lastfactor, -1) Then
+Private Sub gList2_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
+If gList2.DoubleClickCheck(Button, item, x, y, 10 * lastfactor, 10 * lastfactor, 8 * lastfactor, -1) Then
             Me.Visible = False
             Unload Me
 End If
 End Sub
 
-Public Property Let Label1prompt(ByVal index As Long, ByVal RHS As String)
-Label(index).Prompt = RHS
+Public Property Let Label1prompt(ByVal Index As Long, ByVal RHS As String)
+Label(Index).Prompt = RHS
 End Property
 
-Public Property Get label1(ByVal index As Long) As String
-label1 = Label(index)
+Public Property Get label1(ByVal Index As Long) As String
+label1 = Label(Index)
 End Property
 
-Public Property Let label1(ByVal index As Long, ByVal RHS As String)
-Label(index) = RHS
+Public Property Let label1(ByVal Index As Long, ByVal RHS As String)
+Label(Index) = RHS
 End Property
 Public Sub FillThereMyVersion(thathDC As Long, thatRect As Long, thatbgcolor As Long)
 Dim a As RECT, b As Long
@@ -556,26 +556,26 @@ doubleclick = 0
 
 End Sub
 
-Private Sub gList2_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub gList2_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 If Button <> 0 Then tracecounter = 100
 End Sub
 
-Private Sub gList2_MouseUp(X As Single, Y As Single)
+Private Sub gList2_MouseUp(x As Single, y As Single)
 tracecounter = 0
 End Sub
 
 
 
 
-Private Sub glist3_CheckGotFocus(index As Integer)
+Private Sub glist3_CheckGotFocus(Index As Integer)
 Dim s$, z$
 gList4.SetFocus
-If index < 2 Then
+If Index < 2 Then
 abt = False
 
 vH_title$ = vbNullString
-s$ = Label(index)
-If index = 1 Then
+s$ = Label(Index)
+If Index = 1 Then
    
         Dim i As Long
         If MyBaseTask.ExistVar2(s$) Then
@@ -612,7 +612,7 @@ If index = 1 Then
                 sHelp "Νέο Αναγνωριστικό", s$, vH_x, vH_y
             End If
             Else
-                GoTo jumphere
+                GoTo JUMPHERE
             End If
             
         ElseIf ismine(s$) Then
@@ -639,9 +639,9 @@ sHelp s$, MyBaseTask.Process.CodeData, vH_x, vH_y
 vHelp
 End If
 Else
-If index = 0 Then
+If Index = 0 Then
 i = MyBaseTask.OriginalCode
-jumphere:
+JUMPHERE:
 Dim aa As Long, aaa As String
 aa = i
 aaa = SBcode(aa)
@@ -674,7 +674,7 @@ Case "?", "!", " ", ".", ":", Is >= "A", Chr$(10), """"
 End Select
 End If
 End If
-ElseIf index = 2 Then
+ElseIf Index = 2 Then
 TestShowCode = Not TestShowCode
 If TestShowCode Then
 gList3(2).backcolor = &H606060
@@ -711,13 +711,13 @@ b.Right = gList4.WidthPixels
     Else
           
           
-    SetTextColor thisHDC, gList4.ForeColor
+    SetTextColor thisHDC, gList4.forecolor
     b.top = b.Bottom - 1
     FillBack thisHDC, b, 0
     End If
     If item = gList4.ListIndex Then
   a.Left = a.Left + 1 * lastfactor + gList4.PanPosPixels
-  gList4.ForeColor = rgb(128, 0, 128)
+  gList4.forecolor = rgb(128, 0, 128)
   End If
    
    
@@ -725,7 +725,7 @@ b.Right = gList4.WidthPixels
     skip = True
 End Sub
  
-Private Sub gList4_PanLeftRight(Direction As Boolean)
+Private Sub gList4_PanLeftRight(direction As Boolean)
 EXECUTED = True
 Action
 End Sub
@@ -772,44 +772,44 @@ gList4.ShowMe
 
 
 End Sub
- Private Sub PrintItem(mHdc As Long, c As String, r As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_CENTER Or DT_VCENTER)
-    DrawText mHdc, StrPtr(c), -1, r, way
+ Private Sub PrintItem(mHdc As Long, c As String, R As RECT, Optional way As Long = DT_SINGLELINE Or DT_NOPREFIX Or DT_NOCLIP Or DT_CENTER Or DT_VCENTER)
+    DrawText mHdc, StrPtr(c), -1, R, way
     End Sub
-Private Sub Form_MouseDown(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseDown(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If Button = 1 Then
     
     If lastfactor = 0 Then lastfactor = 1
 
     If bordertop < 150 Then
-    If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then
+    If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then
     dr = True
     tracecounter = 100
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     
     Else
-    If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then
+    If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then
     dr = True
     tracecounter = 100
     mousepointer = vbSizeNWSE
-    Lx = X
-    ly = Y
+    Lx = x
+    ly = y
     End If
     End If
 
 End If
 End Sub
-Private Sub Form_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim addX As Long, addy As Long, factor As Single, once As Boolean
 If once Then Exit Sub
 If Button = 0 Then dr = False: drmove = False
 If bordertop < 150 Then
-If (Y > Height - 150 And Y < Height) And (X > Width - 150 And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+If (y > Height - 150 And y < Height) And (x > Width - 150 And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
  Else
- If (Y > Height - bordertop And Y < Height) And (X > Width - borderleft And X < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
+ If (y > Height - bordertop And y < Height) And (x > Width - borderleft And x < Width) Then mousepointer = vbSizeNWSE Else If Not (dr Or drmove) Then mousepointer = 0
 End If
 If dr Then
 
@@ -817,12 +817,12 @@ If dr Then
 
 If bordertop < 150 Then
 
-        If Y < (Height - 150) Or Y > Height Then addy = (Y - ly)
-     If X < (Width - 150) Or X > Width Then addX = (X - Lx)
+        If y < (Height - 150) Or y > Height Then addy = (y - ly)
+     If x < (Width - 150) Or x > Width Then addX = (x - Lx)
      
 Else
-    If Y < (Height - bordertop) Or Y > Height Then addy = (Y - ly)
-        If X < (Width - borderleft) Or X > Width Then addX = (X - Lx)
+    If y < (Height - bordertop) Or y > Height Then addy = (y - ly)
+        If x < (Width - borderleft) Or x > Width Then addX = (x - Lx)
     End If
     
 
@@ -849,10 +849,10 @@ Else
 
         If addX = 0 Then
         If lastfactor <> factor Then ScaleDialog lastfactor, Width
-        Lx = X
+        Lx = x
         
         Else
-        Lx = X * lastfactor / factor
+        Lx = x * lastfactor / factor
          ScaleDialog lastfactor, (Width + addX) * lastfactor / factor
          End If
 
@@ -867,14 +867,14 @@ Else
         ly = ly * lastfactor / factor
         End If
         Else
-        Lx = X
-        ly = Y
+        Lx = x
+        ly = y
    
 End If
 once = False
 End Sub
 
-Private Sub Form_MouseUp(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseUp(Button As Integer, shift As Integer, x As Single, y As Single)
 
 If dr Then Me.mousepointer = 0
 tracecounter = 0
@@ -892,17 +892,17 @@ allheight = height1 * factor
 itemWidth = allwidth - 2 * borderleft
 itemwidth3 = itemWidth * 2 / 5
 itemwidth2 = itemWidth * 3 / 5 - borderleft
-Move Left, top, allwidth, allheight
+move Left, top, allwidth, allheight
 FontTransparent = False  ' clear background  or false to write over
-gList2.Move borderleft, bordertop, itemWidth, bordertop * 3
+gList2.move borderleft, bordertop, itemWidth, bordertop * 3
 gList2.FloatLimitTop = VirtualScreenHeight() - bordertop - bordertop * 3
 gList2.FloatLimitLeft = VirtualScreenWidth() - borderleft * 3
-gList3(0).Move borderleft, bordertop * 5, itemwidth2, bordertop * 4
-gList3(1).Move borderleft, bordertop * 9, itemwidth2, bordertop * 4
-gList3(2).Move borderleft, bordertop * 13, itemwidth2, bordertop * 4
-gList4.Move borderleft * 2 + itemwidth2, bordertop * 5, itemwidth3, bordertop * 12
-gList1.Move borderleft, bordertop * 18, itemWidth, bordertop * 12
-gList0.Move borderleft, bordertop * 31, itemWidth, bordertop * 3
+gList3(0).move borderleft, bordertop * 5, itemwidth2, bordertop * 4
+gList3(1).move borderleft, bordertop * 9, itemwidth2, bordertop * 4
+gList3(2).move borderleft, bordertop * 13, itemwidth2, bordertop * 4
+gList4.move borderleft * 2 + itemwidth2, bordertop * 5, itemwidth3, bordertop * 12
+gList1.move borderleft, bordertop * 18, itemWidth, bordertop * 12
+gList0.move borderleft, bordertop * 31, itemWidth, bordertop * 3
 End Sub
 Function ScaleDialogFix(ByVal factor As Single) As Single
 gList2.FontSize = 14.25 * factor * dv15 / 15

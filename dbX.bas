@@ -488,11 +488,11 @@ End If
 End If
 isdir = lookfirst
 End Function
-Public Sub fHelp(bstack As basetask, d$, Optional Eng As Boolean = False)
+Public Sub fHelp(bstack As basetask, D$, Optional Eng As Boolean = False)
 Static a As Long, aa As Long, where As Long, there As Long, no_par As Long, dum As Long
 Dim SQL$, b$, p$, c$, gp$, R As Double, bb As Long, i As Long
 Dim CD As String, doriginal$, monitor As Long, rr$
-d$ = Replace(d$, " ", ChrW(160))
+D$ = Replace(D$, " ", ChrW(160))
 On Error GoTo E5
 'ON ERROR GoTo 0
 If Not Form4.Visible Then
@@ -501,12 +501,12 @@ Else
 monitor = FindFormSScreen(Form4)
 End If
 If HelpLastWidth > ScrInfo(monitor).Width Then HelpLastWidth = -1
-doriginal$ = d$
-d$ = Replace(d$, "!", "")
-If d$ <> "" Then If Right$(d$, 1) = "(" Then d$ = d$ + ")"
-If d$ = vbNullString Or d$ = "F12" Then
-d$ = vbNullString
-If Right$(d$, 1) = "(" Then d$ = d$ + ")"
+doriginal$ = D$
+D$ = Replace(D$, "!", "")
+If D$ <> "" Then If Right$(D$, 1) = "(" Then D$ = D$ + ")"
+If D$ = vbNullString Or D$ = "F12" Then
+D$ = vbNullString
+If Right$(D$, 1) = "(" Then D$ = D$ + ")"
 p$ = subHash.Show
 
 While ISSTRINGA(p$, c$)
@@ -524,11 +524,11 @@ Else
 End If
 vHelp Not Form4.Visible
 Exit Sub
-ElseIf GetSub(d$, i) Then
+ElseIf GetSub(D$, i) Then
 GoTo conthere
-ElseIf GetlocalSubExtra(d$, i) Or d$ = here$ Then
+ElseIf GetlocalSubExtra(D$, i) Or D$ = here$ Then
 conthere:
-If d$ = here$ Then i = bstack.OriginalCode
+If D$ = here$ Then i = bstack.OriginalCode
 If vH_title$ <> "" Then
 b$ = "<| " & vH_title$ & vbCrLf & vbCrLf
 Else
@@ -538,7 +538,7 @@ Else
 b$ = "<| " & "Τμήματα/Συναρτήσεις Χρήστη [F12]" & vbCrLf & vbCrLf
 End If
 End If
-If Right$(d$, 1) = ")" Then
+If Right$(D$, 1) = ")" Then
 
 If Eng Then c$ = "[Function]" Else c$ = "[Συνάρτηση]"
 Else
@@ -553,7 +553,7 @@ Dim ss$
     Else
      ss$ = SBcode(i)
      End If
-        sHelp d$, c$ + "  " & b$ & ss$, (ScrInfo(monitor).Width - 1) * 3 / 5, (ScrInfo(monitor).Height - 1) * 4 / 7
+        sHelp D$, c$ + "  " & b$ & ss$, (ScrInfo(monitor).Width - 1) * 3 / 5, (ScrInfo(monitor).Height - 1) * 4 / 7
     
         vHelp Not Form4.Visible
 Exit Sub
@@ -572,19 +572,19 @@ Dim sec$
 
 p$ = Chr(34)
 c$ = ","
-d$ = doriginal$
-If Right$(d$, 2) = "()" Then d$ = Left$(d$, Len(d$) - 1)
-If Left$(d$, 1) = "#" Then
-If AscW(Mid$(d$, 2, 1) + " ") < 128 Then
-SQL$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
+D$ = doriginal$
+If Right$(D$, 2) = "()" Then D$ = Left$(D$, Len(D$) - 1)
+If Left$(D$, 1) = "#" Then
+If AscW(Mid$(D$, 2, 1) + " ") < 128 Then
+SQL$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(D$) & "'"
 Else
-SQL$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
+SQL$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(D$, True) & "'"
 End If
 Else
-If AscW(d$ + " ") < 128 Then
-SQL$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(d$) & "'"
+If AscW(D$ + " ") < 128 Then
+SQL$ = "SELECT * FROM [COMMANDS] WHERE ENGLISH >= '" & UCase(D$) & "'"
 Else
-SQL$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(d$, True) & "'"
+SQL$ = "SELECT * FROM [COMMANDS] WHERE DESCRIPTION >= '" & myUcase(D$, True) & "'"
 End If
 End If
 b$ = mylcasefILE(CD & "help2000")
@@ -657,19 +657,19 @@ If HelpFile.FindStr("\" + myUcase(doriginal$, True) + "!", where, there, dum) Th
 GoTo th111
 ElseIf HelpFile.FindStr("\" + myUcase(doriginal$, True), where, there, dum) Then
 th111:
-d$ = HelpFile.TextParagraph(there)
-Eng = InStr(d$, "- ") <> 0
-dum = InStr(d$, "!")
+D$ = HelpFile.TextParagraph(there)
+Eng = InStr(D$, "- ") <> 0
+dum = InStr(D$, "!")
 If Eng Then
-c$ = HelpFile.TextParagraph(1 + val(Mid$(d$, dum + 1)))
-p$ = Mid$(d$, 2, dum - 2)
-b$ = HelpFile.TextParagraph(2 + a + aa + val(Mid$(d$, InStr(d$, "- ") + 2)))
+c$ = HelpFile.TextParagraph(1 + val(Mid$(D$, dum + 1)))
+p$ = Mid$(D$, 2, dum - 2)
+b$ = HelpFile.TextParagraph(2 + a + aa + val(Mid$(D$, InStr(D$, "- ") + 2)))
 gp$ = Mid$(b$, 4, InStr(b$, "\") - 4)
 b$ = EscapeStrToString(Mid$(b$, InStr(b$, "\") + 4))
 Else
-c$ = HelpFile.TextParagraph(1 + val(Mid$(d$, dum + 1)))
+c$ = HelpFile.TextParagraph(1 + val(Mid$(D$, dum + 1)))
 'c$ = Mid$(c$, 1, InStr(c$, "," + Chr$(160)) - 1)
-gp$ = Mid$(d$, 2, dum - 2)
+gp$ = Mid$(D$, 2, dum - 2)
 b$ = HelpFile.TextParagraph(2 + a + 1 + there - no_par)
 p$ = Mid$(b$, 4, InStr(b$, "\") - 4)
 b$ = EscapeStrToString(Mid$(b$, InStr(b$, "\") + 4))
@@ -1397,11 +1397,11 @@ End If
 End If
 If Not ok Then Exit Function
 If Lang <> -1 Then If IsLabelSymbolNew(R$, "ΣΤΟ", "TO", Lang) Then If IsExp(bstackstr, R$, t) Then gindex = CLng(t) Else SyntaxError
-Dim Id$
+Dim id$
   If InStr(UCase(Trim$(table$)) + " ", "SELECT") = 1 Then
-Id$ = table$
+id$ = table$
 Else
-Id$ = "SELECT * FROM [" + table$ + "]"
+id$ = "SELECT * FROM [" + table$ + "]"
 End If
 
 
@@ -1459,7 +1459,7 @@ End If
           
            Set rec = CreateObject("ADODB.Recordset")
             Err.Clear
-           rec.open Id$, myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
+           rec.open id$, myBase, 3, 4 'adOpenStatic, adLockBatchOptimistic
 
  If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
@@ -1469,9 +1469,9 @@ RemoveOneConn base
  myBase.open = LL$
  PushOne base, myBase
  Err.Clear
-rec.open Id$, myBase, 3, 4
+rec.open id$, myBase, 3, 4
 If Err.Number Then
-MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
+MyEr Err.Description & " " & id$, Err.Description & " " & id$
 Exit Function
 End If
 End If
@@ -1780,16 +1780,16 @@ End If
 g05:
 Err.Clear
    On Error Resume Next
-Dim Id$
+Dim id$
    
       If first$ = vbNullString Then
 If InStr(UCase(Trim$(table$)) + " ", "SELECT") = 1 Then
-Id$ = table$
+id$ = table$
 Else
-Id$ = "SELECT * FROM [" + table$ + "]"
+id$ = "SELECT * FROM [" + table$ + "]"
   End If
    Else
-Id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
+id$ = "SELECT * FROM [" & table$ & "] WHERE [" & first$ & "] " & Second$
  End If
 
    If Not getone(base, myBase) Then
@@ -1871,7 +1871,7 @@ Dim LL$
  Err.Clear
  If myBase.mode = 0 Then myBase.open
  Err.Clear
-  rec.open Id$, myBase, 3, 4
+  rec.open id$, myBase, 3, 4
 If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
 Set myBase = Nothing
@@ -1880,9 +1880,9 @@ RemoveOneConn base
  myBase.open = LL$
  PushOne base, myBase
  Err.Clear
-rec.open Id$, myBase, 3, 4
+rec.open id$, myBase, 3, 4
 If Err.Number Then
-MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
+MyEr Err.Description & " " & id$, Err.Description & " " & id$
 Exit Sub
 End If
 End If
@@ -1912,13 +1912,13 @@ End If
     For i& = rec.fields.count - 1 To 0 Step -1
     On Error Resume Next
     Err.Clear
-    stat = rec.fields(i&).Status
+    stat = rec.fields(i&).status
     If Err Then
         Err.Clear
          
     ElseIf stat > 1 Then
         bstackstr.soros.PushUndefine
-        GoTo contnext
+        GoTo contNext
     End If
    Select Case rec.fields(i&).Type
 Case 1, 2, 3, 4, 5, 6
@@ -1926,7 +1926,7 @@ Case 1, 2, 3, 4, 5, 6
     If IsNull(rec.fields(i&)) Then
         bstackstr.soros.PushUndefine
     Else
-    stat = rec.fields(i&).Status
+    stat = rec.fields(i&).status
     If stat = 2 Then
     bstackstr.soros.PushUndefine
     Else
@@ -1956,7 +1956,7 @@ Case 11, 12 ' this is the binary field so we can save unicode there
 '
    bstackstr.soros.PushStr "?"
  End Select
-contnext:
+contNext:
    Next i&
    End If
    
@@ -2023,11 +2023,11 @@ Else
     If ExtractType(base) = vbNullString Then base = base & ".mdb"
     If Not CanKillFile(base) Then FilePathNotForUser: Exit Sub
 End If
-Dim Id$
+Dim id$
   If InStr(UCase(Trim$(table$)) + " ", "SELECT") = 1 Then
-Id$ = table$
+id$ = table$
 Else
-Id$ = "SELECT * FROM [" + table$ + "]"
+id$ = "SELECT * FROM [" + table$ + "]"
 End If
 
      If Not getone(base, myBase) Then
@@ -2093,7 +2093,7 @@ On Error GoTo g101
  Dim LL$
    Set rec = CreateObject("ADODB.Recordset")
     Err.Clear
-     rec.open Id$, myBase, 3, 4
+     rec.open id$, myBase, 3, 4
       If Err.Number <> 0 Then
 LL$ = myBase ' AS A STRING
 Set myBase = Nothing
@@ -2102,9 +2102,9 @@ RemoveOneConn base
  myBase.open = LL$
  PushOne base, myBase
  Err.Clear
-rec.open Id$, myBase, 3, 4
+rec.open id$, myBase, 3, 4
 If Err.Number Then
-MyEr Err.Description & " " & Id$, Err.Description & " " & Id$
+MyEr Err.Description & " " & id$, Err.Description & " " & id$
 Exit Sub
 End If
 End If
@@ -2764,27 +2764,31 @@ End If
 End Sub
 
 Public Function DELfields(bstackstr As basetask, R$) As Boolean
-Dim base$, table$, first$, Second$, ok As Boolean, p As Double, vv
+Dim base$, table$, first$, Second$, ok As Boolean, p As Double, vv, usehandler As mHandler
 ok = False
 If IsExp(bstackstr, R$, p) Then
 If bstackstr.lastobj Is Nothing Then
+GoTo ee1
+End If
+
+If Not TypeOf bstackstr.lastobj Is mHandler Then
+GoTo ee1
+Else
+Set usehandler = bstackstr.lastobj
+If Not usehandler.t1 = 1 Then
+ee1:
 MyEr "Expected Inventory", "Περίμενα Κατάσταση"
 Exit Function
 End If
-If Not TypeOf bstackstr.lastobj Is mHandler Then
-MyEr "Expected Inventory", "Περίμενα Κατάσταση"
-Exit Function
-ElseIf Not bstackstr.lastobj.t1 = 1 Then
-MyEr "Expected Inventory", "Περίμενα Κατάσταση"
-Exit Function
 End If
 Dim aa As FastCollection
-Set aa = bstackstr.lastobj.objref
+Set aa = usehandler.objref
 If aa.StructLen > 0 Then
 MyEr "Structure members are ReadOnly", "Τα μέλη της δομής είναι μόνο για ανάγνωση"
 Exit Function
 End If
 Set bstackstr.lastobj = Nothing
+Set usehandler = Nothing
 Do While FastSymbol(R$, ",")
 ok = False
 If IsExp(bstackstr, R$, p) Then

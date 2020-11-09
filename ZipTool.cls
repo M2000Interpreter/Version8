@@ -32,6 +32,13 @@ Public Function OpenZip(ByVal FileName$) As Boolean
     End If
     OpenZip = Zip.OpenArchive(FileName$)
 End Function
+Public Function OpenZipBuf(FileBuf() As Byte) As Boolean
+    If LockControl Then
+        MessErr
+        Exit Function
+    End If
+    OpenZipBuf = Zip.OpenArchive(CVar(FileBuf))
+End Function
 Public Sub CreateZipFile(ByVal FileName$)
     If LockControl Then
         MessErr
@@ -44,6 +51,19 @@ Public Sub CreateZipFile(ByVal FileName$)
     LockControl = False
     mLastCancel = False
 End Sub
+Public Function CreateZipBuffer() As mHandler
+    If LockControl Then
+        MessErr
+        Exit Function
+    End If
+    LockControl = True
+   
+    Dim ret As Boolean, bufmem() As Byte
+    
+    ret = Zip.CompressArchive(bufmem, , , vbTrue)
+    LockControl = False
+    mLastCancel = False
+End Function
 Public Function AddFromMemory(FileBuf() As Byte, Optional Name As String, Optional Comment As String, Optional Password As String, Optional EncrStrength As Long, Optional Level As Long = -1) As Boolean
     AddFromMemory = Zip.AddFile(CVar(FileBuf), Name, Comment, Password, EncrStrength, Level)
 End Function

@@ -274,13 +274,13 @@ Next i
 End If
 End Function
 
-Public Sub AddAFile(file$, Level As Integer)
+Public Sub AddAFile(File$, Level As Integer)
 If Not onetime Then onetime = True: once
 If InUseItems >= UBound(myfile$()) Then
 ReDim Preserve myfile$(UBound(myfile$()) * 2)
 ReDim Preserve myLevel(UBound(myLevel()) * 2) As Integer
 End If
- myfile$(InUseItems) = file
+ myfile$(InUseItems) = File
 myLevel(InUseItems) = Level  ' level must be not 0, mark = false
 InUseItems = InUseItems + 1
 
@@ -312,7 +312,7 @@ CheckFile = InStr(Filetypes2find, "|" & UCase(Mid$(expan$, InStrRev(expan$, ".")
 End If
 End Function
 
-Public Function Dir2(Optional ByVal ff As String = vbNullString, Optional FileType$ = vbNullString, Optional recursive As Boolean = True, Optional Append As Boolean = False) As String
+Public Function Dir2(Optional ByVal ff As String = vbNullString, Optional FileType$ = vbNullString, Optional Recursive As Boolean = True, Optional Append As Boolean = False) As String
 Dim i As Integer
 If LastPath <> "" And ff = vbNullString Then
 
@@ -337,7 +337,7 @@ End If
 
 End If
 Filetypes2find = "|" & UCase(FileType$) & "|"
-mrec = recursive
+mrec = Recursive
 Dim s As String
 
 
@@ -372,7 +372,7 @@ Else
 End If
 RaiseEvent DirFinished
 End Function
-Public Function FileAttr(a$, attr As Long) As Boolean
+Public Function FileAttr(a$, Attr As Long) As Boolean
 Dim wfd As WIN32_FIND_DATA
 On Error GoTo there1
 Dim fhandle As Long
@@ -380,7 +380,7 @@ Dim fhandle As Long
 fhandle = FindFirstFile(StrPtr(a$), wfd)
 
 If (fhandle > 0) Then
-attr = wfd.dwFileAttributes
+Attr = wfd.dwFileAttributes
 lastTimeStamp = FileTimeToDate(wfd.ftLastWriteTime)
 FileAttr = True
 FindClose fhandle
@@ -394,13 +394,13 @@ End If
 fhandle = FindFirstFile(StrPtr(b$), wfd)
 
 If (fhandle > 0) Then
-attr = wfd.dwFileAttributes
+Attr = wfd.dwFileAttributes
 lastTimeStamp = FileTimeToDate(wfd.ftLastWriteTime)
 FileAttr = True
 FindClose fhandle
 Else
 If GetLongName(a$) <> "" Then
-attr = CLng(GetAttr(a$))
+Attr = CLng(GetAttr(a$))
 lastTimeStamp = 0
 FileAttr = True
 End If
@@ -447,8 +447,8 @@ Public Function Dir1(ByVal ThisFile As String, curdir As String) As String
     If ExtractPath(ThisFile) = vbNullString Then ThisFile = curdir & ThisFile
     If ExistFile(ThisFile) Then Dir1 = ThisFile
 End Function
-Private Function look(ByVal Level As Integer, ByVal folder As String, Optional offset As Long = 0, Optional foldersincluded As Boolean = False, Optional foldersonly As Boolean = False) As Long
-Dim lookpath As String, GUARD As String, mf$(), maxf As Long, k As Long
+Private Function look(ByVal Level As Integer, ByVal folder As String, Optional Offset As Long = 0, Optional foldersincluded As Boolean = False, Optional foldersonly As Boolean = False) As Long
+Dim lookpath As String, guard As String, mf$(), maxf As Long, k As Long
 If LevelStop > 0 Then If Level > LevelStop Then Exit Function
 Dim fold$(), fff As Long, addthis As Long, mlen As Long
 Dim Filter As Long
@@ -602,10 +602,10 @@ End Select
 End If
 Select Case SortType
 Case 1, 2
-maxf = maxf + look(Level + 1, folder & "\" & fold$(i), maxf + offset, IncludedFolders, Nofiles)
+maxf = maxf + look(Level + 1, folder & "\" & fold$(i), maxf + Offset, IncludedFolders, Nofiles)
 
 Case Else
-maxf = maxf + look(Level + 1, folder & "\" & Mid$(fold$(i), 20), maxf + offset, IncludedFolders, Nofiles)
+maxf = maxf + look(Level + 1, folder & "\" & Mid$(fold$(i), 20), maxf + Offset, IncludedFolders, Nofiles)
 End Select
 If abort Then Exit For
 Next i
@@ -771,7 +771,7 @@ PointPos = j
 End If
 End Function
 Public Function ExtractType(F$, Optional JJ As Long = 0) As String
-Dim i As Long, j As Long, d$
+Dim i As Long, j As Long, D$
 If IsSymbol3(F$, """") Then F$ = GetStrUntil(Chr(34), F$)
 If F$ = vbNullString Then ExtractType = vbNullString: Exit Function
 If JJ > 0 Then
@@ -779,10 +779,10 @@ j = JJ
 Else
 j = PointPos(F$)
 End If
-d$ = F$ & " "
-If j < Len(d$) Then
-For i = j To Len(d$)
-Select Case Mid$(d$, i, 1)
+D$ = F$ & " "
+If j < Len(D$) Then
+For i = j To Len(D$)
+Select Case Mid$(D$, i, 1)
 Case "/", "|", "'", " ", Is = """"
 i = i + 1
 Exit For
@@ -791,7 +791,7 @@ Next i
 If (i - j - 2) < 1 Then
 ExtractType = vbNullString
 Else
-ExtractType = Mid$(d$, j + 1, i - j - 2)
+ExtractType = Mid$(D$, j + 1, i - j - 2)
 End If
 Else
 ExtractType = vbNullString
@@ -1155,12 +1155,12 @@ If compareStr444 = 0 Then compareStr444 = k1
 
 End Function
 
-Private Function IsNumberInFilename(a$, d As Double) As Boolean
+Private Function IsNumberInFilename(a$, D As Double) As Boolean
 Dim a1 As Long
 If a$ <> "" Then
 a1 = Len(a$)
 
-If IsNumberOnly(a$, 1, d, a1) Then
+If IsNumberOnly(a$, 1, D, a1) Then
 a$ = Mid$(a$, a1)
 IsNumberInFilename = True
 Else
@@ -1204,7 +1204,7 @@ End If
 End Function
 
 
-Public Function FindItemStartWidth(ByVal Key As String, NoCase As Boolean, ByVal offset) As Long
+Public Function FindItemStartWidth(ByVal Key As String, NoCase As Boolean, ByVal Offset) As Long
 Dim i As Long, j As Long, cp$
 
 j = Len(Key)
@@ -1212,13 +1212,13 @@ i = -1
 FindItemStartWidth = -1
 If j = 0 Then Exit Function
 If NoCase Then
-For i = offset To listcount - 1
+For i = Offset To listcount - 1
 cp$ = myfile(i)
 If Len(cp$) > 0 Then If AscW(cp$) = 2 Then cp$ = Mid$(cp$, rinstr(cp$, "\") + 1)
 If StrComp(Left$(cp$, j), Key, vbTextCompare) = 0 Then Exit For
 Next i
 Else
-For i = offset To listcount - 1
+For i = Offset To listcount - 1
 cp$ = myfile(i)
 If Len(cp$) > 0 Then If AscW(cp$) = 2 Then cp$ = Mid$(cp$, rinstr(cp$, "\") + 1)
 If StrComp(Left$(cp$, j), Key, vbBinaryCompare) = 0 Then Exit For

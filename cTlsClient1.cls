@@ -287,7 +287,7 @@ Public Function Connect( _
     ok = m_oSocket.Connect(HostAddress, HostPort)
     If ok Then
         Do
-            ProcTask2 basestack1
+            ProcTask2 Basestack1
             
         Loop Until OnConnect Or CloseOk Or ErrorOk Or tm.MARKTWO > m_lConnectTimeout
         ok = OnConnect
@@ -940,7 +940,7 @@ again:
             If Not ReceiveOk Then
             Debug.Print "Enter Loop for waiting ReceiveOk"
             Do
-                ProcTask2 basestack1
+                ProcTask2 Basestack1
                 If escok Then escnow = KeyPressed(&H1B)
             Loop Until ReceiveOk Or ErrorOk Or CloseOk Or escnow Or tm.MARKTWO > Timeout
             End If
@@ -974,7 +974,7 @@ again:
             If Not SendOk Then
             Debug.Print "Enter Loop for waiting SendOk"
             Do
-                ProcTask2 basestack1
+                ProcTask2 Basestack1
                 If escok Then escnow = KeyPressed(&H1B)
             Loop Until SendOk Or ErrorOk Or CloseOk Or escnow Or tm.MARKTWO > Timeout
             End If

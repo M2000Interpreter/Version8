@@ -262,36 +262,35 @@ Public Sub SetVarobJvalue(ByVal Name$, var As Variant)
 End Sub
 
 Function AlterVar(ByVal Name$, p As Variant, ss$, inttype As Boolean) As Boolean
-Dim sp As Variant
+Dim sp As Variant, usehandler As mHandler
 If Not StaticCollection.Find(Name$) Then Exit Function
 
   With StaticCollection
   If .IsObj Then
     If Typename(.ValueObj) = "mHandler" Then
-        If .ValueObj.t1 = 3 Then
-        Dim mm As mArray
-            Set mm = .ValueObj.objref
+    Set usehandler = .ValueObj
+        If usehandler.t1 = 3 Then
+            Dim mm As mArray
+            Set mm = usehandler.objref
             If mm.Arr Then
                 mm.Compute0 p, ss$
             End If
             Set mm = Nothing
-        ElseIf .ValueObj.t1 = 4 Then
-          Dim myobject As mHandler
-          Set myobject = .ValueObj
-        If ss$ = "++" Then
-                        If myobject.index_start < myobject.objref.count - 1 Then
-                            myobject.index_start = myobject.index_start + 1
-                            myobject.objref.Index = myobject.index_start
-                            myobject.index_cursor = myobject.objref.Value
+        ElseIf usehandler.t1 = 4 Then
+                If ss$ = "++" Then
+                        If usehandler.index_start < usehandler.objref.count - 1 Then
+                            usehandler.index_start = usehandler.index_start + 1
+                            usehandler.objref.Index = usehandler.index_start
+                            usehandler.index_cursor = usehandler.objref.Value
                         End If
         ElseIf ss$ = "--" Then
-                    If myobject.index_start > 0 Then
-                            myobject.index_start = myobject.index_start - 1
-                            myobject.objref.Index = myobject.index_start
-                            myobject.index_cursor = myobject.objref.Value
+                    If usehandler.index_start > 0 Then
+                            usehandler.index_start = usehandler.index_start - 1
+                            usehandler.objref.Index = usehandler.index_start
+                            usehandler.index_cursor = usehandler.objref.Value
                         End If
         ElseIf ss$ = "-!" Then
-                        myobject.sign = -myobject.sign
+                        usehandler.sign = -usehandler.sign
                         Else
                         NoOperatorForThatObject ss$
         
@@ -389,7 +388,7 @@ End If
 End Function
 Static Function MyRound(a As Variant, Optional ByVal i As Integer = 0)
 Dim c As Variant, j As VbVarType
-Dim n(1 To 28) As Single, d(1 To 28) As Double, cur(1 To 28) As Currency, dec(1 To 28) As Variant
+Dim n(1 To 28) As Single, D(1 To 28) As Double, cur(1 To 28) As Currency, dec(1 To 28) As Variant
 Dim SG(-1 To 1) As Single, sg4(-1 To 1) As Double, sg8(-1 To 1) As Currency
 j = VarType(a)
 If j < vbSingle Then MyRound = a: Exit Function
@@ -410,12 +409,12 @@ If n(1) = 0 Then
         n(c) = CSng(10 ^ 5)
         n(10) = CSng(10 ^ 5)
     For c = 1& To 13&
-        d(c) = CDbl(10 ^ c)
+        D(c) = CDbl(10 ^ c)
     Next c
     For c = 14& To 27&
-        d(c) = CDbl(-1)
+        D(c) = CDbl(-1)
     Next c
-    d(c) = CDbl(10 ^ 13)
+    D(c) = CDbl(10 ^ 13)
     
     For c = 1& To 3&
         cur(c) = CCur(10 ^ c)
@@ -444,8 +443,8 @@ End If
         Case vbDouble
             c = sg4(Sgn(a))
  
-            If d(i) > 0 Then
-                MyRound = Fix(a * d(i) + c) / d(i)
+            If D(i) > 0 Then
+                MyRound = Fix(a * D(i) + c) / D(i)
             Else
                 MyRound = a
             End If
@@ -785,7 +784,7 @@ Public Sub PushThread(Threadid As Long, threadvar As String)
 Dim aa As New mThreadref
 checkialive
 Set aa.thread = Nothing  ' no thread
-aa.Id = Threadid
+aa.id = Threadid
 aa.varname = threadvar
 If Not threadsnames.Find(Threadid) Then threadsnames.AddKey Threadid
 Set threadsnames.ValueObj = aa
@@ -843,7 +842,7 @@ Else
 a$ = a$ & "INTERNAL THREAD "
 End If
 Else
-a$ = a$ & aa.varname + Str$(aa.Id) & " "
+a$ = a$ & aa.varname + Str$(aa.id) & " "
 End If
 threadsnames.NextIndex
 Wend
@@ -885,16 +884,16 @@ If threadsnames.count > 0 Then
 threadsnames.ToStart
 While threadsnames.Done
 Set aa = threadsnames.ValueObj
-If idexclude <> aa.Id Then
+If idexclude <> aa.id Then
 If Not TaskMaster Is Nothing Then
-        If TaskMaster.ThrowOne(aa.Id) Then
-        ThrowOne aa.Id
+        If TaskMaster.ThrowOne(aa.id) Then
+        ThrowOne aa.id
         ElseIf Not IamThread Then
         threadsnames.RemoveWithNoFind
         GoTo cont
         End If
 Else
-ThrowOne aa.Id
+ThrowOne aa.id
 End If
 End If
 threadsnames.NextIndex
@@ -1068,16 +1067,18 @@ mIamAnEvent = vNewValue
 End Property
 
 Friend Function lastobjIndirect(var()) As Variant
+Dim usehandler As mHandler
 If lastobj Is Nothing Then
 ElseIf TypeOf lastobj Is mHandler Then
-With lastobj
+Set usehandler = lastobj
+With usehandler
 Select Case .indirect
     Case 0 To var2used
         On Error Resume Next
         Set lastobjIndirect = var(.indirect)
     Case Else
     
-       Set lastobjIndirect = lastobj.objref
+       Set lastobjIndirect = .objref
     End Select
 End With
 Else

@@ -868,7 +868,7 @@ Dim tSA2 As SAFEARRAY2D
         CopyMemory ByVal VarPtrArray(bDib2), 0&, 4
  End Function
 
-Public Sub CanvasSize(cDibbuffer0 As cDIBSection, ByVal wcm As Double, ByVal hcm As Double, Optional ByVal rep As Boolean = False, Optional max As Integer = 0, Optional yshift As Long = 0, Optional bcolor As Long = &HFFFFFF, Optional usepixel As Boolean = False, Optional ByVal Percent As Single = 85, Optional ByVal linewidth As Long = 4)
+Public Sub CanvasSize(cDibbuffer0 As cDIBSection, ByVal wcm As Double, ByVal hcm As Double, Optional ByVal rep As Boolean = False, Optional Max As Integer = 0, Optional yshift As Long = 0, Optional bcolor As Long = &HFFFFFF, Optional usepixel As Boolean = False, Optional ByVal Percent As Single = 85, Optional ByVal linewidth As Long = 4)
 ' top left align only
 Dim piw As Long, pih As Long, stx As Long, sty As Long, stOffx As Long, stOffy As Long, stBorderX As Long, stBorderY As Long, strx As Long, stry As Long, i As Long, j As Long
 
@@ -893,19 +893,19 @@ If cDIBbuffer1.create(piw, pih) Then
      stry = cDIBbuffer1.Height \ cDibbuffer0.Height
      stBorderX = stOffx \ (strx + 1)
      stBorderY = stOffy \ (stry + 1)
-                If max = 0 Then max = strx * stry
+                If Max = 0 Then Max = strx * stry
        sty = stBorderY
                 For j = 1 To stry
                 stx = stBorderX
                              For i = 1 To strx
                            
-                            If max = 0 Then Exit For
+                            If Max = 0 Then Exit For
                             cDibbuffer0.PaintPicture cDIBbuffer1.HDC1, stx, sty + yshift
-                            max = max - 1
+                            Max = Max - 1
                                stx = stx + cDibbuffer0.Width + stBorderX
                            
                             Next i
-                 If max = 0 Then Exit For
+                 If Max = 0 Then Exit For
                    sty = sty + cDibbuffer0.Height + stBorderY
                 Next j
                 cDIBbuffer1.FreeHDC
@@ -2795,7 +2795,7 @@ End Function
 Function Convert3(a$, localeid As Long) As String  ' to feed textboxes
 Dim b$, i&
 If a$ <> "" Then
-If localeid = 0 Then localeid = clid
+If localeid = 0 Then localeid = Clid
 For i& = 1 To Len(a$)
 b$ = b$ + Left$(StrConv(ChrW$(AscW(Left$(StrConv(Mid$(a$, i, 1) + Chr$(0), 128, 1033), 1))), 64, localeid), 1)
 
@@ -2951,8 +2951,8 @@ If Convert3(Convert2(a$, 1032), 1032) = a$ Then
     FoundLocaleId = 1032
 ElseIf Convert3(Convert2(a$, 1033), 1033) = a$ Then
     FoundLocaleId = 1033
-ElseIf Convert3(Convert2(a$, clid), clid) = a$ Then
- FoundLocaleId = clid
+ElseIf Convert3(Convert2(a$, Clid), Clid) = a$ Then
+ FoundLocaleId = Clid
 End If
 End Function
 Function FoundSpecificLocaleId(a$, this As Long) As Long
@@ -3263,7 +3263,7 @@ End Function
 
 
 
-Static Function ValidNum(a$, final As Boolean, Optional cutdecimals As Boolean = False, Optional checktype As Long = 0) As Boolean
+Static Function ValidNum(a$, Final As Boolean, Optional cutdecimals As Boolean = False, Optional checktype As Long = 0) As Boolean
 Dim R As Long
 Dim R1 As Long
 R1 = 1
@@ -3276,7 +3276,7 @@ R1 = 1
                             End If
               
 Dim v As Double, b$
-If final Then
+If Final Then
 R1 = IsNumberOnly(a$, R1, v, R, cutdecimals)
 
 R1 = (R1 And Len(a$) <= R) Or (a$ = vbNullString)
@@ -4652,7 +4652,7 @@ Sub Main()
 Dim m As New Callback
 
 m.Run "start"
-If m.Status = 0 Then
+If m.status = 0 Then
 m.Cli Form1.commandW, ">"
 m.Reset
 End If

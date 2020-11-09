@@ -30,11 +30,11 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-Private Declare Function GetLocaleInfo Lib "KERNEL32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
+Private Declare Function GetLocaleInfo Lib "kernel32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
 Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&)
 Private Const DWL_ANYTHREAD& = 0
 Const LOCALE_ILANGUAGE = 1
-Private Declare Function SetErrorMode Lib "KERNEL32" ( _
+Private Declare Function SetErrorMode Lib "kernel32" ( _
    ByVal wMode As Long) As Long
 
 Private Const SEM_NOGPFAULTERRORBOX = &H2&
@@ -48,7 +48,7 @@ Private Sub Form_Load()
 Set LastGlist = Nothing
 form5iamloaded = True
 If Not s_complete Then
-Me.Move -30000
+Me.move -30000
 If Form1.Visible Then Form1.Hide
 
 End If
@@ -66,24 +66,24 @@ MediaPlayer1.closeMovie
   DisableMidi
  If Not TaskMaster Is Nothing Then TaskMaster.Dispose
   Set TaskMaster = Nothing
-Set basestack1.Owner = Nothing
-Set basestack1 = Nothing
-Dim X As Form
+Set Basestack1.Owner = Nothing
+Set Basestack1 = Nothing
+Dim x As Form
 If IsWine Then
 Modalid = 0
 
-For Each X In Forms
-If X.Visible Then X.Visible = False
+For Each x In Forms
+If x.Visible Then x.Visible = False
 Next
-Set X = Nothing
+Set x = Nothing
 'Form1.helper1
 'MsgBox "quit"
 'Exit Sub
 Else
-For Each X In Forms
-If X.name <> Me.name Then Unload X
+For Each x In Forms
+If x.Name <> Me.Name Then Unload x
 Next
-Set X = Nothing
+Set x = Nothing
 End If
 
 If m_bInIDE Then Exit Sub
@@ -101,16 +101,16 @@ MediaPlayer1.closeMovie
  If Not TaskMaster Is Nothing Then TaskMaster.Dispose
   Set TaskMaster = Nothing
   
-Dim X As Form
+Dim x As Form
 Modalid = 0
 
-For Each X In Forms
-If X.name <> Me.name Then
-Set X.icon = LoadPicture("")
-If X.Visible Then X.Visible = False
+For Each x In Forms
+If x.Name <> Me.Name Then
+Set x.icon = LoadPicture("")
+If x.Visible Then x.Visible = False
 End If
 Next
-Set X = Nothing
+Set x = Nothing
 Form1.helper1
 
 End Sub
@@ -119,7 +119,7 @@ INK$ = INK$ & GetKeY(KeyAscii)
 End Sub
 Public Sub RestoreSizePos()
 ' calling from form1
-Me.Move Form1.Left, Form1.top, Form1.Width, Form1.Height
+Me.move Form1.Left, Form1.top, Form1.Width, Form1.Height
 End Sub
 Public Sub RestorePos()
 ' calling from form1
@@ -128,10 +128,10 @@ End Sub
  Function GetKeY(ascii As Integer) As String
     Dim Buffer As String, ret As Long
     Buffer = String$(514, 0)
-    Dim r&, k&
-      r = GetKeyboardLayout(DWL_ANYTHREAD) And &HFFFF
-      r = val("&H" & Right(Hex(r), 4))
-    ret = GetLocaleInfo(r, LOCALE_ILANGUAGE, StrPtr(Buffer), Len(Buffer))
+    Dim R&, k&
+      R = GetKeyboardLayout(DWL_ANYTHREAD) And &HFFFF
+      R = val("&H" & Right(Hex(R), 4))
+    ret = GetLocaleInfo(R, LOCALE_ILANGUAGE, StrPtr(Buffer), Len(Buffer))
     If ret > 0 Then
         GetKeY = ChrW$(AscW(StrConv(ChrW$(ascii Mod 256), 64, CLng(val("&h" + Left$(Buffer, ret - 1))))))
     Else

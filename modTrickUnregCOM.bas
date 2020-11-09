@@ -52,15 +52,15 @@ Private Declare Function GetMem4 Lib "msvbvm60" ( _
                          ByRef Dst As Any) As Long
 Private Declare Function SysFreeString Lib "oleaut32" ( _
                          ByVal lpbstr As Long) As Long
-Private Declare Function LoadLibrary Lib "KERNEL32" _
+Private Declare Function LoadLibrary Lib "kernel32" _
                          Alias "LoadLibraryW" ( _
                          ByVal lpLibFileName As Long) As Long
-Private Declare Function GetModuleHandle Lib "KERNEL32" _
+Private Declare Function GetModuleHandle Lib "kernel32" _
                          Alias "GetModuleHandleW" ( _
                          ByVal lpModuleName As Long) As Long
-Private Declare Function FreeLibrary Lib "KERNEL32" ( _
+Private Declare Function FreeLibrary Lib "kernel32" ( _
                          ByVal hLibModule As Long) As Long
-Private Declare Function GetProcAddress Lib "KERNEL32" ( _
+Private Declare Function GetProcAddress Lib "kernel32" ( _
                          ByVal hModule As Long, _
                          ByVal lpProcName As String) As Long
 Private Declare Function DispCallFunc Lib "oleaut32" ( _
@@ -76,7 +76,7 @@ Private Declare Function LoadTypeLibEx Lib "oleaut32" ( _
                          ByVal szFile As Long, _
                          ByVal regkind As Long, _
                          ByRef pptlib As IUnknown) As Long
-Private Declare Function memcpy Lib "KERNEL32" _
+Private Declare Function memcpy Lib "kernel32" _
                          Alias "RtlMoveMemory" ( _
                          ByRef Destination As Any, _
                          ByRef Source As Any, _
@@ -317,7 +317,7 @@ Public Function GetAllCoclasses( _
     Dim typeInf As IUnknown
     Dim ret     As Long
     Dim count   As Long
-    Dim index   As Long
+    Dim Index   As Long
     Dim pAttr   As Long
     Dim tKind   As Long
     
@@ -336,9 +336,9 @@ Public Function GetAllCoclasses( _
         ReDim listOfClsid(count - 1)
         ReDim listOfNames(count - 1)
         
-        For index = 0 To count - 1
+        For Index = 0 To count - 1
         
-            ret = ITypeLib_GetTypeInfo(typeLib, index, typeInf)
+            ret = ITypeLib_GetTypeInfo(typeLib, Index, typeInf)
                         
             If ret Then
                 Err.Raise ret
@@ -425,7 +425,7 @@ Public Function GetAllMembers(mList As FastCollection, obj As Object _
         
         ret = IDsp.GetTypeInfo(ByVal 0, ByVal 0, ppTInfo)
         If ppTInfo = 0 Or ret <> 0 Then
-        If Err Then Err.clear
+        If Err Then Err.Clear
         Exit Function
         
         End If
@@ -492,7 +492,7 @@ Public Function GetAllMembers(mList As FastCollection, obj As Object _
             End Select
             mList.ToEnd            ' move to last
 
-          ProcTask2 basestack1
+          ProcTask2 Basestack1
           hlp = fncdsc.cParams
             If hlp > 0 Then
                  cFncs = 0
@@ -748,7 +748,7 @@ Public Function CreateObjectEx( _
     
         hLib = LoadLibrary(StrPtr(Path))
         If hLib = 0 Then
-            Err.Raise 53, , error(53) & " " & Chr$(34) & Path & Chr$(34)
+            Err.Raise 53, , Error(53) & " " & Chr$(34) & Path & Chr$(34)
             Exit Function
         End If
         
@@ -916,7 +916,7 @@ End Function
 ' // Call "ITypeLib:GetTypeInfo" method.
 Public Function ITypeLib_GetTypeInfo( _
                  ByVal obj As IUnknown, _
-                 ByVal index As Long, _
+                 ByVal Index As Long, _
                  ByRef ppTInfo As IUnknown) As Long
     
     Dim params(1)   As Variant
@@ -926,7 +926,7 @@ Public Function ITypeLib_GetTypeInfo( _
     Dim pIndex      As Long
     Dim pReturn     As Variant
     
-    params(0) = index
+    params(0) = Index
     params(1) = VarPtr(ppTInfo)
     
     For pIndex = 0 To UBound(params)
@@ -977,7 +977,7 @@ End Function
 '' "ITypeInfo:GetTypeAttr"
 Public Sub ITypeInfo_GetVarDesc( _
             ByVal obj As IUnknown, _
-            ByVal index As Long, _
+            ByVal Index As Long, _
             ByRef ppVarAttr As Long)
     
     Dim resultCall  As Long
@@ -986,7 +986,7 @@ Public Sub ITypeInfo_GetVarDesc( _
     Dim types(1)    As Integer
     Dim list(1)     As Long
     Dim pIndex      As Long
-    params(0) = index
+    params(0) = Index
     params(1) = VarPtr(ppVarAttr)
    
        For pIndex = 0 To UBound(params)
@@ -1023,7 +1023,7 @@ Public Sub ITypeInfo_GetTypeAttr( _
 End Sub
 Public Sub ITypeInfo_GetRefTypeOfImplType( _
             ByVal obj As IUnknown, _
-            ByVal index As Long, _
+            ByVal Index As Long, _
             ByRef pRefType As Long)
     Dim resultCall  As Long
     Dim pReturn     As Variant
@@ -1031,7 +1031,7 @@ Public Sub ITypeInfo_GetRefTypeOfImplType( _
     Dim types(1)    As Integer
     Dim list(1)     As Long
         Dim pIndex      As Long
-     params(0) = index
+     params(0) = Index
     params(1) = VarPtr(pRefType)
    
        For pIndex = 0 To UBound(params)
@@ -1045,7 +1045,7 @@ End Sub
 
 Public Sub ITypeInfo_GetFuncDesc( _
             ByVal obj As IUnknown, _
-            ByVal index As Long, _
+            ByVal Index As Long, _
             ByRef ppFuncAttr As Long)
     
     Dim resultCall  As Long
@@ -1054,7 +1054,7 @@ Public Sub ITypeInfo_GetFuncDesc( _
     Dim types(1)    As Integer
     Dim list(1)     As Long
         Dim pIndex      As Long
-     params(0) = index
+     params(0) = Index
     params(1) = VarPtr(ppFuncAttr)
    
        For pIndex = 0 To UBound(params)
@@ -1220,7 +1220,7 @@ If Not ppTInfo = 0 Then
 Set pCustTypeInfo = ResolveObjPtrNoRef(ppTInfo)
 Set pCustTypeInfo = Nothing
 End If
-Err.clear: stringifyCustomType = "UnknownCustomType"
+Err.Clear: stringifyCustomType = "UnknownCustomType"
 
 
 Exit Function

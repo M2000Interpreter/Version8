@@ -1,14 +1,11 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 5 active-X
+Version 10 revision 6 active-X
 These are serious fixes
-1. Fix the Volume statement
-2. Adding an object with an xml parser to handle data
-3. Adding an object for ZIP files.
-4. Adding three new modules in info gsb:
-- jukebox for playing mp3
-- ZipWork demo for the ziptool
-- XML demo for preparing and using an xml structure
+1. fix the BASEG example, now work fine (problem introduced when change the way M2000 read properies on com objects, on retrurned objects with value auto property)
+2. fix the S1 example (problem introduced when // added as extra remark).
+3. Added some functionality to ZipTool (the compressor), so now we can zip to buffer, and unzip a file to buffer. Example Jukebox now has a smaller binary part (Base64), as a zip file in base64, so we get the image from that zip to an expanded one, without using disk operations.
+4. A lot of refactoring.
 
 
 George Karras, Kallithea Attikis, Greece.

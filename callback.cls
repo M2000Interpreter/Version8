@@ -377,11 +377,11 @@ ErrorEn = LastErName
 End Property
 
 
-Property Get Status() As Long
+Property Get status() As Long
 If elevatestatus Then
-Status = -elevatestatus
+status = -elevatestatus
 Else
-Status = LastErNum
+status = LastErNum
 End If
 End Property
 Public Sub Reset()

@@ -470,7 +470,7 @@ factor = gList1.FontSize / 14.25 / dv15 * 15
 ScaleDialogFix = factor
 End Function
 Sub ScaleDialog(ByVal factor As Single, Optional NewWidth As Long = -1)
-Dim h As Long, i As Long
+Dim H As Long, i As Long
 Helplastfactor = factor
 setupxy = 20 * factor
 bordertop = 10 * dv15 * factor

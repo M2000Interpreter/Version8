@@ -768,7 +768,7 @@ TEXT1.Render
 End Sub
 
 Public Sub rthissub(Optional anystr As Boolean = False)
-If TEXT1.mDoc.busy Then Exit Sub
+If TEXT1.mDoc.Busy Then Exit Sub
 Dim l As Long, W As Long, s$, TempLcid As Long, OldLcid As Long, noinp As Double
 Dim el As Long, eW As Long, safety As Long, TT$, w1 As Long, i1 As Long
 Dim neo$, mDoc10 As Document, addthat As Long, w2 As Long
@@ -1028,7 +1028,7 @@ If Button = 1 Then
 Dim sel&
     sel& = ScanTarget(q(), CLng(x), CLng(y), 0)
     If sel& >= 0 Then
-        Select Case q(sel&).Id Mod 100
+        Select Case q(sel&).id Mod 100
         Case Is < 10
         If TaskMaster Is Nothing Then
         
@@ -1075,7 +1075,7 @@ With players(p)
         sel& = ScanTarget(q(), CLng(x), CLng(y), Index)
             If sel& >= 0 Then
                 If Button = 1 Then
-                Select Case q(sel&).Id Mod 100
+                Select Case q(sel&).id Mod 100
                 Case Is < 10
                 If Not interpret(DisStack, "LAYER " & dSprite(Index).Tag + " {" + vbCrLf + q(sel&).Comm + vbCrLf & "}") Then Beep
                 Case Else
@@ -1630,7 +1630,7 @@ If sel& >= 0 Then
 If Button = 1 Then
 
 
-Select Case q(sel&).Id Mod 100
+Select Case q(sel&).id Mod 100
 Case Is < 10
 
 If Not interpret(MeStack, (q(sel&).Comm)) Then Beep

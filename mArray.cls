@@ -206,41 +206,41 @@ conthere:
 Loop
 
 End Sub
-Public Function CompareItem(v As Long, p As Variant, ss$, Ret As Boolean) As Boolean
-Ret = False
+Public Function CompareItem(v As Long, p As Variant, ss$, ret As Boolean) As Boolean
+ret = False
 On Error GoTo there
 If MyIsNumeric(actualdata(v)) Then
 Select Case ss$
 Case ">"
-Ret = actualdata(v) > p
+ret = actualdata(v) > p
 Case ">="
-Ret = actualdata(v) >= p
+ret = actualdata(v) >= p
 Case "<"
-Ret = actualdata(v) < p
+ret = actualdata(v) < p
 Case "<="
-Ret = actualdata(v) <= p
+ret = actualdata(v) <= p
 Case "<>"
-Ret = actualdata(v) <> p
+ret = actualdata(v) <> p
 Case "="
-Ret = actualdata(v) = p
+ret = actualdata(v) = p
 End Select
 
 Else
 Select Case UCase(ss$)
 Case ">"
-Ret = actualdata(v) > p
+ret = actualdata(v) > p
 Case ">="
-Ret = actualdata(v) >= p
+ret = actualdata(v) >= p
 Case "<"
-Ret = actualdata(v) < p
+ret = actualdata(v) < p
 Case "<="
-Ret = actualdata(v) <= p
+ret = actualdata(v) <= p
 Case "<>"
-Ret = actualdata(v) <> p
+ret = actualdata(v) <> p
 Case "="
-Ret = actualdata(v) = p
+ret = actualdata(v) = p
 Case "LIKE"
-Ret = actualdata(v) Like Replace$(CStr(p), "%", "*")
+ret = actualdata(v) Like Replace$(CStr(p), "%", "*")
 
 End Select
 End If
@@ -453,7 +453,7 @@ r2 = SafeArrayUnlock(m_base_0)
 R1 = SafeArrayUnlock(m_base)
 End Sub
 Public Sub Car(m As Object)
-Dim k As New mArray
+Dim k As New mArray, usehandler As mHandler
 Dim v As Variant, i As Long, obj As Object, obj2 As Object, spare As lambda
 If count > 0 Then
     k.PushDim 1
@@ -474,31 +474,25 @@ If count > 0 Then
     Set k.item(0) = spare
     Set spare = Nothing
     Case Else
-    If TypeOf Me.item(0) Is mHandler Then
-        If Me.item(0).t1 = 3 Then
-        'Set m = New mHandler
-        'm.t1 = 3
-        Set m = Me.item(0)
-       ' If Not CheckIsmArray(m, var()) Then
-        '    Set m = New mHandler
-         '   m.t1 = 3
-          '  Set m.objref = Me.item(0)
-        'End If
-        Set k = Nothing
-        Exit Sub
+        If TypeOf Me.item(0) Is mHandler Then
+            Set usehandler = Me.item(0)
+            If usehandler.t1 = 3 Then
+                Set m = usehandler
+                Set k = Nothing
+                Exit Sub
+            End If
+         ElseIf TypeOf Me.item(0) Is mArray Then
+            Set usehandler = New mHandler
+            usehandler.t1 = 3
+            Set usehandler.objref = Me.item(0)
+            Set m = usehandler
+            Set k = Nothing
+            Exit Sub
         End If
-     ElseIf TypeOf Me.item(0) Is mArray Then
-             Set m = New mHandler
-        m.t1 = 3
-        Set m.objref = Me.item(0)
-        Set k = Nothing
-        Exit Sub
-    End If
-    Set k.item(0) = Me.item(0)
-    
+        Set k.item(0) = Me.item(0)
     End Select
     Else
-    k.item(0) = Me.item(0)
+        k.item(0) = Me.item(0)
     End If
 End If
 k.Arr = True
@@ -1136,15 +1130,20 @@ Friend Sub SwapItem(curitem As Long, thisvariant)
 SwapVariant actualdata(curitem), thisvariant
 End Sub
 Friend Function IsStringItem(curitem As Long) As Variant
+Dim usehandler As mHandler
 If Arr Then
 IsStringItem = Typename(actualdata(curitem)) = "String"
 ElseIf curitem < 0 And curitem <> -2 Then
-If GroupRef.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
-If GroupRef.objref.Done Then
-    If GroupRef.objref.IsObj Then
+On Error Resume Next
+Set usehandler = GroupRef
+If Err.Number Then InternalError: Exit Function
+On Error GoTo 0
+If usehandler.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
+If usehandler.objref.Done Then
+    If usehandler.objref.IsObj Then
         
     Else
-        IsStringItem = Typename(GroupRef.objref.Value) = "String"
+        IsStringItem = Typename(usehandler.objref.Value) = "String"
     End If
 End If
 End If
@@ -1169,16 +1168,22 @@ Else
 If curitem = -2 Then
 Set item = GroupRef
 ElseIf curitem < 0 Then
-If GroupRef.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
-If GroupRef.objref.Done Then
-    If GroupRef.objref.IsObj Then
-        Set item = GroupRef.objref.ValueObj
-    Else
-        item = GroupRef.objref.Value
-    End If
-Else
-    Set item = GroupRef
+If Not TypeOf GroupRef Is mHandler Then GoTo e1245
+Dim usehandler As mHandler
+Set usehandler = GroupRef
+If usehandler.t1 <> 1 Then
+e1245:
+    Err.Raise 5010, , "Need an Inventory Object"
 End If
+    If usehandler.objref.Done Then
+        If usehandler.objref.IsObj Then
+            Set item = usehandler.objref.ValueObj
+        Else
+            item = usehandler.objref.Value
+        End If
+    Else
+        Set item = usehandler
+    End If
 
 End If
 'End If
@@ -1188,65 +1193,66 @@ there1:
 End Property
 Public Property Get itemnumeric(curitem As Long) As Variant
 On Error GoTo there1
+Dim usehandler As mHandler
 If Arr Then
-If maxitems1 >= curitem Then
-If IsObject(actualdata(curitem)) Then
-If Typename(actualdata(curitem)) = "PropReference" Then
-itemnumeric = actualdata(curitem).Value
-ElseIf Typename(actualdata(curitem)) = "mHandler" Then
-If actualdata(curitem).t1 = 4 Then
-If actualdata(curitem).sign = -1 Then
-itemnumeric = CDbl(-actualdata(curitem).index_cursor)
+    If maxitems1 >= curitem Then
+        If IsObject(actualdata(curitem)) Then
+            If Typename(actualdata(curitem)) = "PropReference" Then
+                itemnumeric = actualdata(curitem).Value
+            ElseIf Typename(actualdata(curitem)) = "mHandler" Then
+                Set usehandler = actualdata(curitem)
+                If usehandler.t1 = 4 Then
+                    If usehandler.sign = -1 Then
+                        itemnumeric = CDbl(-usehandler.index_cursor)
+                    Else
+                        itemnumeric = CDbl(usehandler.index_cursor)
+                    End If
+                Else
+                    itemnumeric = 0
+                End If
+            Else
+                itemnumeric = 0
+            End If
+        Else
+            If VarType(actualdata(curitem)) = 8 Then
+                itemnumeric = val(actualdata(curitem))
+            Else
+                itemnumeric = actualdata(curitem)
+            End If
+        End If
+        Exit Property
+    End If
 Else
-itemnumeric = CDbl(actualdata(curitem).index_cursor)
-End If
-
-Else
-itemnumeric = 0
-End If
-Else
-itemnumeric = 0
-End If
-Else
-If VarType(actualdata(curitem)) = 8 Then
-itemnumeric = val(actualdata(curitem))
-Else
-itemnumeric = actualdata(curitem)
-End If
-End If
-Exit Property
-Else
-''Stop
-End If
-Else
-If curitem = -2 Then
-ElseIf curitem < 0 Then
-If GroupRef.objref.Done Then
-If GroupRef.objref.IsObj Then
-itemnumeric = 0
-Else
-itemnumeric = GroupRef.objref.Value
-End If
-End If
-End If
+    If curitem = -2 Then
+    
+    ElseIf curitem < 0 Then
+        Set usehandler = GroupRef
+        If usehandler.objref.Done Then
+            If usehandler.objref.IsObj Then
+                itemnumeric = 0
+            Else
+                itemnumeric = usehandler.objref.Value
+            End If
+        End If
+    End If
 End If
 there1:
 
 End Property
 
 Public Property Let item(curitem As Long, item As Variant)
-
+Dim usehandler As mHandler
 On Error Resume Next
 If curitem < 0 Then
 If curitem <> -2 Then
-If GroupRef.objref.Done Then
-
+Set usehandler = GroupRef
+If usehandler.objref.Done Then
     If MyIsObject(item) Then
     
     Else
-        GroupRef.objref.Value = item
+        usehandler.objref.Value = item
     End If
-    GroupRef.objref.Done = False
+    usehandler.objref.Done = False
 End If
 
 End If
@@ -1269,7 +1275,9 @@ If Not MyIsObject(item) Then
     ElseIf TypeOf actualdata(curitem) Is VarItem Then
         actualdata(curitem) = item
     ElseIf TypeOf actualdata(curitem) Is mHandler Then
-        If actualdata(curitem).t1 = 4 Then
+        Set usehandler = actualdata(curitem)
+        If usehandler.t1 = 4 Then
+        ' just throw the enum variable and place the numeber.
             actualdata(curitem) = item
         End If
     Else
@@ -1277,23 +1285,24 @@ If Not MyIsObject(item) Then
         actualdata(curitem) = CLng(0)
     End If
 Else
-actualdata(curitem).Value = item
+    actualdata(curitem).Value = item
 End If
 End If
 
 End Property
 Public Property Let ItemStr(curitem As Long, item As String)
-
+Dim usehandler As mHandler
 On Error Resume Next
 If curitem < 0 Then
 If Not Arr Then
 If curitem <> -2 Then
-If GroupRef.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
-If GroupRef.objref.Done Then
-    If GroupRef.objref.IsObj Then
+Set usehandler = GroupRef
+If usehandler.t1 <> 1 Then Err.Raise 1010, , "Need an Inventory Object"
+If usehandler.objref.Done Then
+    If usehandler.objref.IsObj Then
         
     Else
-        GroupRef.objref.Value = item
+        usehandler.objref.Value = item
     End If
 End If
 End If
@@ -1326,10 +1335,12 @@ On Error Resume Next
 If curitem < 0 Then
 If Not GroupRef Is Nothing Then
     If TypeOf GroupRef Is mHandler Then
-        If GroupRef.t1 = 1 Then
-            GroupRef.objref.Index = Abs(curitem + 100)
-            GroupRef.objref.Done = True
-            Set GroupRef.objref.ValueObj = item
+        Dim usehandler As mHandler
+        Set usehandler = GroupRef
+        If usehandler.t1 = 1 Then
+            usehandler.objref.Index = Abs(curitem + 100)
+            usehandler.objref.Done = True
+            Set usehandler.objref.ValueObj = item
             Exit Property
            
         End If
@@ -1478,13 +1489,13 @@ End If
 End If
 End Function
 Function IsEnum(p As Variant) As Boolean
-Dim obj As mHandler
+Dim usehandler As mHandler
 If Index >= 0 And Index <= maxitems1 Then
 If IsObject(actualdata(Index)) Then
 If Typename(actualdata(Index)) = "mHandler" Then
-    Set obj = actualdata(Index)
-    IsEnum = obj.t1 = 4
-    If IsEnum Then p = obj.index_cursor * obj.sign
+    Set usehandler = actualdata(Index)
+    IsEnum = usehandler.t1 = 4
+    If IsEnum Then p = usehandler.index_cursor * usehandler.sign
 End If
 End If
 End If
@@ -1762,13 +1773,13 @@ Next k
 End Sub
 
 Private Function Compare10(ByVal a1) As Long
-Static k As Long, Ret As Long
+Static k As Long, ret As Long
 On Error Resume Next
 'Debug.Print "compare ", a1
 a1 = a1 * sortmult
 For k = 2 To upart - 1 Step 2
-Ret = actualdata(a1 + Col(k)) = piv1(Col(k))
-If Ret = 0 Then
+ret = actualdata(a1 + Col(k)) = piv1(Col(k))
+If ret = 0 Then
     If actualdata(a1 + Col(k)) < piv1(Col(k)) Then
         If Col(k + 1) Then
             Compare10 = -1
@@ -1821,6 +1832,7 @@ Dim M1 As Long, M2 As Long
 End Sub
 
 Public Sub SortColumns(ParamArray col0())
+Dim usehandler As mHandler
 If dnum <> 2 Then Exit Sub
 Dim mbase2 As Long
 
@@ -1828,15 +1840,17 @@ Dim i As Long, pppp As mArray
 GetDnum 1, i, mbase2
 If UBound(col0()) = 0 Then
 If Typename(col0(0)) = "Variant()" Then
-col0() = col0(0)
+    col0() = col0(0)
 ElseIf Typename(col0(0)) = "mHandler" Then
-If col0(0).t1 = 3 Then
-Set pppp = col0(0).objref
-pppp.ExportArrayNow
-col0() = pppp.refArray
-Else
-Exit Sub
-End If
+    Set usehandler = col0(0)
+    If usehandler.t1 = 3 Then
+        Set pppp = usehandler.objref
+        Set usehandler = Nothing
+        pppp.ExportArrayNow
+        col0() = pppp.refArray
+    Else
+        Exit Sub
+    End If
 End If
 
 End If

@@ -22,7 +22,7 @@ Event OnReceive()
 Event OnSend()
 Event OnError(ByVal ErrorCode As Long, ByVal EventMask As Long)
 Event OnMessagePending(Handled As Boolean)
-Private Declare Sub CopyMemory Lib "KERNEL32" Alias "RtlMoveMemory" ( _
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" ( _
     lpvDest As Any, lpvSource As Any, ByVal cbCopy As Long)
 Private m_hSocket               As Long
 Private Const STR_CHR1              As String = "" '--- CHAR(1)
@@ -176,7 +176,7 @@ Private Sub connection_not_sync()
 MyEr "Connection isn't synchronus", "Η σύνδεση δεν είναι σύγχρονη"
 End Sub
 
-Public Function Create( _
+Public Function create( _
             Optional ByVal SocketPort As Variant, _
             Optional ByVal SocketType As Variant, _
             Optional ByVal EventMask As Variant, _
@@ -188,7 +188,7 @@ Public Function Create( _
         If IsMissing(SocketAddress) Then iSocketAddress = vbNullString Else iSocketAddress = CVar(SocketAddress)
         If m_hSocket = 0 Then Set mySocket = New cAsyncSocket: m_hSocket = mySocket.SocketHandle
         SyncEnabled = False
-        Create = mySocket.Create(CLng(SocketPort), CLng(SocketType), CLng(EventMask), iSocketAddress)
+        create = mySocket.create(CLng(SocketPort), CLng(SocketType), CLng(EventMask), iSocketAddress)
         SocketAddress = iSocketAddress
 End Function
 Public Function GetPeerName(PeerAddress As Variant, PeerPort As Variant) As Variant
@@ -283,22 +283,22 @@ End Function
 ' for buffers change to pass buffer object
 ' BufPtr from 0 as a multiple of basic item length
 Public Function Receive( _
-            Buf, _
+            buf, _
             ByVal BufPtr, _
             ByVal BufLen, _
             Optional HostAddress, _
             Optional HostPort, _
             Optional ByVal Flags) As Variant
     Receive = 0&
-    If Not MyIsObject(Buf) Then
+    If Not MyIsObject(buf) Then
 100
         MyEr "need a Buffer", "χρειάζομαι μια διάρθρωση": Exit Function
-    ElseIf Not TypeOf Buf Is MemBlock Then
+    ElseIf Not TypeOf buf Is MemBlock Then
         GoTo 100
     End If
     If m_hSocket = 0 Then socket_not_init: Exit Function
     Dim b As MemBlock
-    Set b = Buf
+    Set b = buf
     Dim iBufPtr As Long, iBufLen As Long, iHostAddress As String, iHostPort As Long, iFlags As Long
     iBufPtr = b.GetPtr(BufPtr)
     If iBufPtr = 0 Then
@@ -335,22 +335,22 @@ Public Function SendText( _
 End Function
 'change to send from buffer
 Public Function Send( _
-            Buf, _
+            buf, _
             ByVal BufPtr, _
             ByVal BufLen, _
             Optional HostAddress, _
             Optional ByVal HostPort, _
             Optional ByVal Flags) As Variant
     Send = 0&
-    If Not MyIsObject(Buf) Then
+    If Not MyIsObject(buf) Then
 100
         MyEr "need a Buffer", "χρειάζομαι μια διάρθρωση": Exit Function
-    ElseIf Not TypeOf Buf Is MemBlock Then
+    ElseIf Not TypeOf buf Is MemBlock Then
         GoTo 100
     End If
     If m_hSocket = 0 Then socket_not_init: Exit Function
     Dim b As MemBlock
-    Set b = Buf
+    Set b = buf
      Dim iBufPtr As Long, iBufLen As Long, iHostAddress As String, iHostPort As Long, iFlags As Long
     iBufPtr = b.GetPtr(BufPtr)
     If iBufPtr = 0 Then
@@ -412,7 +412,7 @@ Dim iHostAddress As String, iHostPort As Long, iTimeout As Long
     ok = mySocket.Connect(iHostAddress, iHostPort)
     If ok Then
         Do
-            ProcTask2 basestack1
+            ProcTask2 Basestack1
             If escok Then escnow = KeyPressed(&H1B)
         Loop Until OnConnect Or ErrorOk Or CloseOk Or escnow Or tm.MARKTWO > iTimeout
         SyncConnect = OnConnect
@@ -498,7 +498,7 @@ Public Function SyncReceiveText( _
 again:
         If Not ReceiveOk Then
          Do
-            ProcTask2 basestack1
+            ProcTask2 Basestack1
             If escok Then escnow = KeyPressed(&H1B)
         Loop Until ReceiveOk Or ErrorOk Or CloseOk Or escnow Or tm.MARKTWO > iTimeout
         End If
@@ -541,7 +541,7 @@ Private Function SyncReceive( _
 again:
             If Not ReceiveOk Then
             Do
-                ProcTask2 basestack1
+                ProcTask2 Basestack1
                 If escok Then escnow = KeyPressed(&H1B)
             Loop Until ReceiveOk Or ErrorOk Or CloseOk Or escnow Or tm.MARKTWO > Timeout
             End If
@@ -615,7 +615,7 @@ again:
             If Not SendOk Then
             Debug.Print "Enter Loop for waiting SendOk"
             Do
-                ProcTask2 basestack1
+                ProcTask2 Basestack1
                 If escok Then escnow = KeyPressed(&H1B)
             Loop Until SendOk Or ErrorOk Or CloseOk Or escnow Or tm.MARKTWO > Timeout
             End If

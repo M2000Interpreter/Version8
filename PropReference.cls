@@ -61,10 +61,18 @@ If useobj Then
  Value = ReadPropIndexObj(hardlink, vtref, mIndex)
 Else
   Value = ReadPropIndex(ObjectRef, vtref, mIndex, check, RETVAR)
- If check Then
- Set mLastObj = RETVAR
+ If check And IsObject(RETVAR) Then
+    On Error Resume Next
+    Value = RETVAR.Value
+       If Err.Number <> 0 Then
+          Err.Clear
+          Set mLastObj = RETVAR
+       Else
+        Set mLastObj = Nothing
+    End If
+
  End If
- End If
+End If
 
 Else
 
@@ -94,6 +102,7 @@ Else
 ' ??????????
 
 End If
+'If Not IsObject(Value) Then Debug.Print Value
 End Property
 Public Property Let Value(vNewValue As Variant)
 If Init Then
