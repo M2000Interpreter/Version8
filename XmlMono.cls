@@ -64,6 +64,9 @@ Function PrepareNode(tagname As String, Optional val$, Optional cdata As Boolean
 
     Set PrepareNode = m
 End Function
+Function AlterProcessAttr(id, t$, NewValue As String, Optional OldValue As String) As Boolean
+    AlterProcessAttr = oXml.AlterProcessAttr(id, t$, NewValue, OldValue)
+End Function
 
 Sub PlaceAttribute(attrname$, attrvalue$, Optional usesingle As Boolean = False)
     oXml.PlaceAttribute attrname$, attrvalue$, usesingle
@@ -84,7 +87,11 @@ Sub AppendChild(xnode As XmlNode)
     xnode.getnode node
     oXml.AppendChild node
 End Sub
-
+Sub AppendChildObj(RHS As XmlMono)
+    Dim m As XmlMonoInternal
+    RHS.getTree m
+    oXml.AppendChildObj m
+End Sub
 Property Get FirstChild() As XmlMono
     Dim m As XmlMonoInternal
     Set m = oXml.FirstChild
@@ -133,11 +140,11 @@ End Function
 Property Get textFromChildDeep(Tag$) As String
     textFromChildDeep = oXml.textFromChildDeep(Tag$)
 End Property
-Function AttrFromTagDeep(Tag$, Attr$) As String
-    AttrFromTagDeep = oXml.AttrFromTagDeep(Tag$, Attr$)
+Function AttrFromTagDeep(Tag$, attr$) As String
+    AttrFromTagDeep = oXml.AttrFromTagDeep(Tag$, attr$)
 End Function
-Function AttrFromChild(Tag$, Attr$) As String
-    AttrFromChild = oXml.AttrFromChild(Tag$, Attr$)
+Function AttrFromChild(Tag$, attr$) As String
+    AttrFromChild = oXml.AttrFromChild(Tag$, attr$)
 End Function
 Property Get textFromChild(Tag$) As String
 textFromChild = oXml.textFromChild(Tag)
@@ -171,9 +178,9 @@ End Sub
 Property Get ChildCount() As Long
     ChildCount = oXml.ChildCount
 End Property
-Property Get node() As XmlNode
+Property Get node(Optional Remove As Boolean = False) As XmlNode
     Dim m As New XmlNode
-    m.putnode oXml.node
+    m.putnode oXml.node(Remove)
     Set node = m
 End Property
 Property Get Text() As String
@@ -200,15 +207,29 @@ End Property
 Property Get Xml() As String
     Xml = oXml.Xml(oXml)
 End Property
-
-Property Get Attr(t$)
-    Attr = oXml.Attr(t$)
+Property Let attr(t$, RHS As String)
+    oXml.attr(t$) = RHS
+End Property
+Property Get attr(t$) As String
+    attr = oXml.attr(t$)
 End Property
 Property Let Xml(t$)
 ' use original
-oXml.Xml(oXml) = t$
+    oXml.Xml(oXml) = t$
 End Property
-
-
-
+Sub RemoveChild()
+    oXml.RemoveChild
+End Sub
+Function AttrExist(t$, Optional attr As String) As Boolean
+    AttrExist = oXml.AttrExist(t$, attr)
+End Function
+Sub RemoveChildren()
+    oXml.RemoveChildren
+End Sub
+Sub RemoveAttributes()
+    oXml.RemoveAttributes
+End Sub
+Sub RemoveProcess()
+    oXml.RemoveProcess
+End Sub
 

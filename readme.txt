@@ -1,12 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 6 active-X
-These are serious fixes
-1. fix the BASEG example, now work fine (problem introduced when change the way M2000 read properies on com objects, on retrurned objects with value auto property)
-2. fix the S1 example (problem introduced when // added as extra remark).
-3. Added some functionality to ZipTool (the compressor), so now we can zip to buffer, and unzip a file to buffer. Example Jukebox now has a smaller binary part (Base64), as a zip file in base64, so we get the image from that zip to an expanded one, without using disk operations.
-4. A lot of refactoring.
-
+Version 10 revision 7 active-X
+Additions to xmlData object. A new example Xml2 added. Now we can delete nodes, change attributes values. Using a list we can export children to stack object, and then we can feed a list object using a pair key/value, where value is the object pointer. We make the sort and we delete the childrens and fast we attach the trees as childs (by using the pointer only for each). In XmlData we not use pointers from child to parent.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
@@ -23,13 +18,9 @@ From version 9.0 revision 50:
 there is a new ca.crt - install ca.crt as root certificate (optional)
 
 
-https://www.dropbox.com/s/30g5oduqt7tzfpm/ca.crt?dl=0
-
-https://www.dropbox.com/s/xt30bspw6q9pf5f/M2000language.exe?dl=0
-
 http://georgekarras.blogspot.gr/
 
-https://github.com/M2000Interpreter/Version9
+https://github.com/M2000Interpreter/Environment
 
 https://drive.google.com/open?id=0BwSrrDW66vvvdER4bzd0OENvWlU
 

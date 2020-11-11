@@ -80,7 +80,7 @@ End Sub
 Sub PlaceProcessingInstructions(node)
 If IsArray(node) Then
     If node(3) = True Or Not node(2) Is Nothing Then
-        MyEr "Not childs for processing insrtructions"
+        MyEr "Not childs for processing instructions", "Όχι παιδιά για κόμβους οδηγιών"
         Exit Sub
     End If
     If ProcessBag Is Nothing Then
@@ -90,7 +90,7 @@ If IsArray(node) Then
     ProcessBag.Add node, , , ProcessBag.count
     End If
 Else
-    MyEr "Not a valid node"
+    MyEr "Not a valid node", "Δεν υπάρχει κόμβος"
 End If
 End Sub
 Function PrepareNodeSimple(tagname As String)
@@ -101,7 +101,7 @@ Function PrepareNode(tagname As String, Optional val$, Optional cdata As Boolean
 End Function
 Sub PlaceAttribute(attrname$, attrvalue$, Optional usesingle As Boolean = False)
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 Else
 Dim c As Collection, p
 If root(1) Is Nothing Then
@@ -114,13 +114,13 @@ Else
     Set c = root(1)
     On Error Resume Next
     c.Add p, attrname$
-    If Err.Number <> 0 Then MyEr "Attribute exist"
+    If Err.Number <> 0 Then MyEr "Attribute exist", "Η ιδιότητα υπάρχει"
 End If
 End If
 End Sub
 Sub PlaceAttributeToNode(node, attrname$, attrvalue$, Optional usesingle As Boolean = False)
 If Not IsArray(node) Then
-    MyEr "This isn't a node"
+    MyEr "This isn't a node", "δεν έδωσες κόμβο"
 Else
 Dim c As Collection, p
 If node(1) Is Nothing Then
@@ -136,7 +136,7 @@ Else
     On Error Resume Next
     
     c.Add p, attrname$
-    If Err.Number <> 0 Then MyEr "Attribute exist": Exit Sub
+    If Err.Number <> 0 Then MyEr "Attribute exist", "Η ιδιότητα υπάρχει": Exit Sub
     node(5) = node(5) + attrname$ + " "
 End If
 End If
@@ -152,12 +152,12 @@ If Not IsArray(root) Then
         root = Array(node(0), node(1), node(2), node(3), packtext(t$), node(5))
     End If
 Else
-    MyEr "I have node"
+    MyEr "I have node", "έχω κόμβο"
 End If
 End Sub
 Sub AppendChild(node)
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (node(3) And &H1) Then
     Dim val
     Set val = root(2)
@@ -173,10 +173,10 @@ ElseIf (node(3) And &H1) Then
         c.Add p, , , c.count
     End If
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 End Sub
-Private Sub AppendChildObj(p As XmlMonoInternal)
+Public Sub AppendChildObj(p As XmlMonoInternal)
     root(3) = root(3) Or 1
     Dim val
     Set val = root(2)
@@ -192,29 +192,30 @@ Private Sub AppendChildObj(p As XmlMonoInternal)
 End Sub
 Property Get FirstChild() As XmlMonoInternal
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     Dim val, c As Collection
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
         Set FirstChild = c.item(1)
+        thelast = achild = c.count - 1
         achild = 0
     End If
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 End Property
 Property Get lastchild() As XmlMonoInternal
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     Dim val, c As Collection
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
         achild = c.count - 1
@@ -222,61 +223,62 @@ ElseIf (root(3) And 1) Then
         Set lastchild = c.item(achild + 1)
     End If
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 End Property
 Property Get Nextchild() As XmlMonoInternal
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     Dim val, c As Collection
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
+        
         achild = achild + 1
         If achild > c.count - 1 Then
-            MyEr "No more childs"
+            MyEr "No more childs", "Δεν υπάρχουν άλλα παιδιά"
         Else
             thelast = achild = c.count - 1
             Set Nextchild = c(achild + 1)
         End If
     End If
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 End Property
 Property Get Anychild(p As Long) As XmlMonoInternal
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     Dim val, c As Collection
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
 
         If p < 0 Or p > c.count - 1 Then
-            MyEr "index fault"
+            MyEr "index fault", "δείκτης εκτός ορίων"
         Else
             Set Anychild = c(p + 1)
         End If
     End If
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 End Property
 Function ScanForTag(Tag$, ok) As XmlMonoInternal
 ok = False
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     Dim val, c As Collection, aXml As XmlMonoInternal
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
         Dim i As Long
@@ -288,7 +290,7 @@ ElseIf (root(3) And 1) Then
 
     End If
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 Set ScanForTag = New XmlMonoInternal
 End Function
@@ -297,24 +299,24 @@ Dim tmp As XmlMonoInternal
 If ScanForTagDeep(Tag$, tmp) Then
     textFromChildDeep = tmp.Text
 Else
-    MyEr "Tag not exist"
+    MyEr "Tag not exist", "Δεν υπάρχει το στοιχείο"
 End If
 End Property
-Function AttrFromTagDeep(Tag$, Attr$) As String
+Function AttrFromTagDeep(Tag$, attr$) As String
 Dim tmp As XmlMonoInternal
 If ScanForTagDeep(Tag$, tmp) Then
-    AttrFromTagDeep = tmp.Attr(Attr$)
+    AttrFromTagDeep = tmp.attr(attr$)
 Else
-    MyEr "Tag not exist"
+    MyEr "Tag not exist", "Δεν υπάρχει το στοιχείο"
 End If
 End Function
-Function AttrFromChild(Tag$, Attr$) As String
+Function AttrFromChild(Tag$, attr$) As String
 Dim tmp As XmlMonoInternal, ok
 Set tmp = ScanForTag(Tag$, ok)
 If ok Then
     AttrFromChild = tmp.Text
 Else
-    MyEr "Tag not exist"
+    MyEr "Tag not exist", "Δεν υπάρχει το στοιχείο"
 End If
 
 End Function
@@ -324,13 +326,13 @@ Set tmp = ScanForTag(Tag$, ok)
 If ok Then
     textFromChild = tmp.Text
 Else
-    MyEr "Tag not exist"
+    MyEr "Tag not exist", "Δεν υπάρχει το στοιχείο"
 End If
 
 End Property
 Function ScanForTagDeep(Tag$, child As XmlMonoInternal) As Boolean
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     beautify = CLng(100000 * Rnd)
     If deep(Tag$, child, beautify = 0) Then
@@ -340,7 +342,7 @@ ElseIf (root(3) And 1) Then
     End If
     beautify = 0
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 Set child = New XmlMonoInternal
 End Function
@@ -348,7 +350,7 @@ Friend Function deep(Tag$, child As XmlMonoInternal, guard As Long) As Boolean
    Dim val, c As Collection, aXml As XmlMonoInternal
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
         Dim i As Long
@@ -370,7 +372,7 @@ Friend Sub adddeep(Tag$, bag As Collection, Optional many = -1)
    Dim val, c As Collection, aXml As XmlMonoInternal
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
         Dim i As Long
@@ -400,7 +402,7 @@ Friend Sub adddeepexport(Tag$, bag As Collection, Optional many = -1)
    Dim val, c As Collection, aXml As XmlMonoInternal, bXml As XmlMono
     Set val = root(2)
     If val Is Nothing Then
-        MyEr "I have't childs yet"
+        MyEr "I have't childs yet", "δεν έχω παιδιά ακόμα"
     Else
         Set c = val
         Dim i As Long
@@ -431,7 +433,7 @@ End Sub
 Function GetListByTag(Tag$, Optional many As Long = -1, Optional export As Boolean = False) As Collection
 Dim mList As New Collection
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     If export Then
         adddeepexport Tag$, mList, many
@@ -439,14 +441,14 @@ ElseIf (root(3) And 1) Then
         adddeep Tag$, mList, many
     End If
 Else
-  '  MyEr "No childs for this node, only attributes"
+  '  MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 Set GetListByTag = mList
 End Function
 
 Sub ResetChildPointer()
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 Else
 achild = -1
 If root(2) Is Nothing Then
@@ -459,7 +461,7 @@ End Sub
 
 Property Get ChildCount() As Long
 If Not IsArray(root) Then
-    MyEr "I have't node"
+    MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
     Dim val, c As Collection
     Set val = root(2)
@@ -472,19 +474,20 @@ ElseIf (root(3) And 1) Then
       
     End If
 Else
-    MyEr "No childs for this node, only attributes"
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
 End If
 End Property
-Property Get node() As Variant()
+Property Get node(Optional Remove As Boolean = False) As Variant()
     If Not IsArray(root) Then
-        MyEr "node not prepared"
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
     Else
         node = root
+        If Remove Then root = Empty
     End If
 End Property
 Property Get Text() As String
     If Not IsArray(root) Then
-        MyEr "node not prepared"
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
     Else
         If (root(3) And 2) = 2 Then
             Text = Mid$(root(4), 10, Len(root(4)) - 12)
@@ -495,7 +498,7 @@ Property Get Text() As String
 End Property
 Property Let Text(t$)
     If Not IsArray(root) Then
-        MyEr "node not prepared"
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
     Else
         If (root(3) And 2) = 2 Then
             root(4) = "<![CDATA[" + t$ + "]]>"
@@ -506,7 +509,7 @@ Property Let Text(t$)
 End Property
 Property Let cdata(t$)
     If Not IsArray(root) Then
-        MyEr "node not prepared"
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
     Else
         root(3) = root(3) Or 2
         root(4) = "<![CDATA[" + t$ + "]]>"
@@ -523,7 +526,7 @@ End If
 End Function
 Property Get Tag() As String
     If Not IsArray(root) Then
-        MyEr "node not prepared"
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
     Else
         Tag = root(0)
     End If
@@ -548,7 +551,7 @@ Else
     If Not skip And beautify = 0 Then skip = True
 End If
     If Not IsArray(root) Then
-        MyEr "root not prepared"
+     '   MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
     Else
         Dim i As Long, c As Collection, m(), p, j As Long, D As XmlMonoInternal, t$
         Dim id$
@@ -558,7 +561,11 @@ End If
         If Not ProcessBag Is Nothing Then
         For i = 1 To ProcessBag.count
         p = ProcessBag(i)
+        If p(1) Is Nothing And Left$(p(0), 1) = "!" Then
+        Xml = Xml + "<" + p(5)
+        Else
         Xml = Xml + "<?" + p(0) + AnyNodeAttr(p) + "?>"
+        End If
         If beautify Then Xml = Xml + vbCrLf + id$
         Next i
         End If
@@ -596,18 +603,63 @@ End If
         skip = False
 End Property
 
-Property Get Attr(t$)
+Property Get attr(t$) As String
     If Not IsArray(root) Then
-        MyEr "node not prepared"
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
     Else
         Dim c As Collection
-        If root(1) Is Nothing Then MyEr "No such attribute": Exit Property
+        If root(1) Is Nothing Then MyEr "No such attribute", "Δεν υπάρχει τέτοια ιδιότητα": Exit Property
         Set c = root(1)
         On Error Resume Next
-        Attr = unpackattrib(c.item(t$))
-        If Err.Number > 0 Then Err.Clear: MyEr "No such attribute"
+        attr = unpackattrib(c.item(t$))
+        If Err.Number > 0 Then Err.Clear: MyEr "No such attribute", "Δεν υπάρχει τέτοια ιδιότητα"
     End If
 End Property
+Property Let attr(t$, RHS As String)
+    If Not IsArray(root) Then
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
+    Else
+        Dim c As Collection
+        If root(1) Is Nothing Then MyEr "No such attribute", "Δεν υπάρχει τέτοια ιδιότητα": Exit Property
+        Set c = root(1)
+        On Error Resume Next
+        c.Remove t$
+        c.Add CVar(packattrib(RHS, InStr(RHS, "'") > 0)), t$
+        If Err.Number > 0 Then Err.Clear: MyEr "No such attribute", "Δεν υπάρχει τέτοια ιδιότητα"
+    End If
+End Property
+Function AttrExist(t$, Optional attr As String) As Boolean
+    If Not IsArray(root) Then
+        MyEr "node not inserted yet", "δεν έχει εισαχθεί κόμβος"
+    Else
+        Dim c As Collection
+        If root(1) Is Nothing Then MyEr "No such attribute", "Δεν υπάρχει τέτοια ιδιότητα": Exit Function
+        Set c = root(1)
+        On Error Resume Next
+        attr = unpackattrib(c.item(t$))
+        AttrExist = Err.Number = 0
+    End If
+End Function
+Function AlterProcessAttr(id, t$, NewValue As String, Optional OldValue As String) As Boolean
+If ProcessBag.count < id Or id < 1 Then MyEr "index fault", "δείκτης εκτός ορίων": Exit Function
+Dim node, i As Long, c As Collection
+node = ProcessBag.item(id)
+If Typename(node(1)) = "Nothing" Then
+    i = InStrRev(node(5), ">")
+    OldValue = Mid$(node(5), i - 1)
+    node(5) = NewValue + Mid$(node(5), i)
+Else
+On Error GoTo er1
+Set c = node(1)
+If c.count = 0 Then GoTo er1
+OldValue = c(t$)
+c.Remove t$
+c.Add CVar(NewValue), t$
+End If
+Exit Function
+er1:
+MyEr "No such attribute", "Δεν υπάρχει τέτοια ιδιότητα"
+End Function
 Property Get CountProcess() As Long
     If ProcessBag Is Nothing Then
         CountProcess = 0
@@ -617,14 +669,14 @@ Property Get CountProcess() As Long
 End Property
 Property Get ProcessInstruction(i As Long) As Variant()
 If ProcessBag Is Nothing Then
-    MyEr "there are no instructions in this node"
+    MyEr "there are no instructions in this node", "δεν υπάρχουν οδηγίες σε αυτόν το κόμβο"
 ElseIf i < 0 Or i >= ProcessBag.count Then
-    MyEr "index fault"
+    MyEr "index fault", "δείκτης εκτός ορίων"
 Else
     ProcessInstruction = ProcessBag.item(i)
 End If
 End Property
-Private Sub MyEr(a$)
+Private Sub MyEr1(a$, b$)
     status = a$
    
    ' Err.Raise 5000, , a$
@@ -700,7 +752,7 @@ End Function
 Private Function AdvanceSpace(t$, pc As Long, st As Long) As Boolean
 Dim c$
 c$ = Mid$(t$, pc, 1)
-Do While c$ = " "
+Do While AscW(c$) < 33
 pc = pc + 1
 If pc > st Then Exit Do
 c$ = Mid$(t$, pc, 1)
@@ -766,6 +818,60 @@ lookfortagagain:
     End If
 End If
 End Sub
+Private Sub CheckThis(t$, pc As Long, st As Long)
+Dim n1 As Long, n2 As Long, Tag$, node, val$
+'
+Dim n0 As Long
+n0 = pc
+n1 = pc
+pc = pc + 1
+If AdvanceAnySpaceorGT_NameSpace(t$, pc, st) Then
+    Tag$ = Mid$(t$, n1, pc - n1)
+    node = Me.PrepareNodeSimple(Tag$)
+    node(5) = "!"
+    If Mid$(t$, pc, 1) < "A" Then
+lookfortagagain:
+        If AdvanceSpace(t$, pc, st) Then
+            n1 = pc
+againtag:
+            If AdvanceAnySpaceorGT_NameSpace(t$, pc, st) Then
+                Tag$ = Mid$(t$, n1, pc - n1)
+                If Len(Tag$) > 0 Then
+                    If AdvanceSpace(t$, pc, st) Then
+                     n1 = pc
+                            
+                            If Mid$(t$, pc, 1) = Chr$(34) Then
+                                n2 = 34
+                            ElseIf Mid$(t$, pc, 1) = Chr$(39) Then
+                                n2 = 39
+                            Else
+                            GoTo againtag
+                            End If
+                            If n2 <> 0 Then
+                                pc = pc + 1
+                                n1 = pc
+                                If AdvanceScope(t$, pc, st, Chr$(n2)) Then
+                                 '   val$ = Mid$(t$, n1, pc - n1)
+                                  '  PlaceAttributeToNode node, Tag$, val$, n2 = 39
+                                    pc = pc + 2
+
+                                    GoTo lookfortagagain
+                                End If
+                            End If
+                        
+                    End If
+                End If
+            End If
+        End If
+        For n1 = n0 To pc - 1
+            If AscW(Mid$(t$, n1, 1)) > 31 Then val$ = val$ + Mid$(t$, n1, 1)
+        Next n1
+        node(5) = val$
+        PlaceProcessingInstructions node
+       ' If Mid$(t$, pc, 1) <> ">" Then pc = pc + 1
+    End If
+End If
+End Sub
 Friend Sub createfromtext(t$, pc As Long, st As Long)
 Dim n1 As Long, n2 As Long, Tag$, node, val$
 again:
@@ -780,7 +886,7 @@ If Advance2Lt(t$, pc, st) Then
         pc = pc + 3
         GoTo again
         Else
-        Stop
+         CheckThis t$, pc, st: GoTo again
     End If
     ElseIf AdvanceAnySpaceorGT_NameSpace(t$, pc, st) Then
         Tag$ = Mid$(t$, n1, pc - n1)
@@ -872,12 +978,12 @@ newentry:
                                                 Dim child As XmlMonoInternal
                                                 Set child = New XmlMonoInternal
                                                 child.createfromtext t$, pc, st
-                                                AppendChildObj child
+                                                If child.HasNode Then AppendChildObj child
                                                 While AdvanceAnySpaceorLT(t$, pc, st)
                                                     If Mid$(t$, pc + 1, 1) = "/" Then pc = pc + 1: GoTo here
                                                     Set child = New XmlMonoInternal
                                                     child.createfromtext t$, pc, st
-                                                    AppendChildObj child
+                                                    If child.HasNode Then AppendChildObj child
                                                 Wend
                                             End If
 here:
@@ -931,4 +1037,43 @@ End If
 End If
 End Property
 
+Sub RemoveChild()
+If Not IsArray(root) Then
+    MyEr "I have't node", "Δεν έχω κόμβο"
+ElseIf (root(3) And &H1) Then
+    Dim val
+    Set val = root(2)
+    Dim c As Collection
+    If val Is Nothing Then
+       MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
+    Else
+        Set c = root(2)
+        c.Remove achild + 1
+        If achild >= c.count Then achild = achild - 1
+        If c.count = 0 Then Set root(2) = Nothing: achild = -1
+    End If
+Else
+    MyEr "No childs for this node, only attributes", "όχι παιδιά για αυτόν τον κόμβο, μόνο ιδιότητες"
+End If
+End Sub
+Sub RemoveChildren()
+If Not IsArray(root) Then
+    MyEr "I have't node", "Δεν έχω κόμβο"
+Else  'If (root(3) And &H1) Then
+    Set root(2) = Nothing
+    achild = -1
+    thelast = True
+End If
+End Sub
 
+Sub RemoveAttributes()
+If Not IsArray(root) Then
+    MyEr "I have't node", "Δεν έχω κόμβο"
+Else
+    Set root(1) = Nothing
+    root(5) = vbNullString
+End If
+End Sub
+Sub RemoveProcess()
+    Set ProcessBag = Nothing
+End Sub

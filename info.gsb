@@ -5418,7 +5418,7 @@ Pen 0 {
 	Print
 	Normal
 	italic
-	Report " A collection of modules for tests version 25 for M2000 Interpreter version 10 and newer revisions/versions"
+	Report " A collection of modules for tests version 26 for M2000 Interpreter version 10 and newer revisions/versions"
 	italic
 	Pen 5{
 		cursor 0, row-1
@@ -20800,7 +20800,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<10 then Error "No proper M2000 version (must be >=9.9)"
-If Version=10 and revision<5 then Error "No proper M2000 revision for version 10"
+If Version=10 and revision<7 then Error "No proper M2000 revision for version 10"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -33390,11 +33390,137 @@ one=each(list_in_a_stack_object)
 with child1, "textFromChild" as child1.child.text$()
 while one
 	child1=stackitem(one)
-	nobel$=child.attr$("Nobel")
-	Print "Id="+child1.attr$("Id"),  if$(nobel$=""-> "","Nobel="+nobel$)
+	nobel$=""
+	Try{nobel$=child.attr$("Nobel")}
+	Print "Id="+child1.attr$("Id") ',  if$(nobel$=""-> "","Nobel="+nobel$)
 	Print "codename:"; child1.child.text$("codename"), "sold: ";child1.child.text$("sold")
 end while
 
 declare xml nothing
+}
+MODULE XML2 {pen 14
+Cls 5,0
+Print $(4),
+declare databank xmldata
+with databank, "xml" as doc$, "beautify" as beautify, "status" as status$
+doc$={<?xml?>
+<table id="1">
+<schema><schema:fields row="element">2</schema:fields>
+<schema:fieldname type="s">Country</schema:fieldname>
+<schema:fieldname  type="s">Continent</schema:fieldname>
+</schema><element><Country   >Greece</Country><Continent>Europe</Continent>
+</element><element><Country>Germany</Country><Continent>Europe</Continent>
+</element><element><Country>Australia</Country><Continent>Australia</Continent>
+</element><element><Country>India</Country><Continent>Asia</Continent>
+</element>
+</table>
+}
+
+beautify=-4
+Report 3, doc$
+With Databank, "Attr" as Attr$()
+Print status$
+Print
+
+// Show structure
+fieldnames=list
+rowlist=list
+Method databank, "GetListByTag", "schema:fields", 1 as Result
+If len(Result)=1 then
+	Stack Result {Read fieldsNo}
+	With fieldsNo, "Text" as No$, "Attr" as fieldsno.tag$()
+	elementname$=fieldsno.tag$("row")
+	Print "There are two fields: "; val(No$)
+	Print "Each row has this name: ";elementname$
+	Print "Scanning the schema:fieldname"
+	Method databank, "GetListByTag", "schema:fieldname" as Result
+	declare m xmldata
+	oldvalue=m
+	with m, "text" as m.value$, "attr" as m.attr$()
+	k=each(Result)
+	while k
+		m=stackitem(k)
+		Print k^+1,m.value$, "Type: ";m.attr$("type")
+		append fieldnames, m.value$:=m.attr$("type")
+	end while
+       Print "Press a key"; : Push Key$ : Drop: Print
+	// now we have the fields in a list, where key is the name of field, and value is the type
+	pen 11 {Print "Scanning the fieldnames list, produced from previous scanning"}
+	z=each(fieldnames)
+	while z
+		Print z^+1, eval$(z!), eval$(z)
+	end while
+	pen 11 {Print "Scanning all rows with tag: ";elementname$}
+	Method databank, "GetListByTag", elementname$ as Result
+	Print "Found ";Len(Result);" records or rows"
+	With m, "textFromChild" as child.value$(), "xml" as m.doc$
+	k=each(Result)
+	z=each(fieldnames)
+	while z
+		pen 13 {Print eval$(z!),}
+	end while
+	Print
+	while k
+		m=stackitem(k)
+		z=each(fieldnames)
+		while z
+			if z^=0 then append rowlist, child.value$(eval$(z!)):=m
+			if eval$(z)="s" then Print child.value$(eval$(z!)), 
+		end while
+		Print
+	end while
+	Print "Scanning sorted rows  (descening on country) from rowlist, prepared before"
+		sort descending rowlist
+		swap m, oldvalue
+		k=each(rowlist)
+		while k
+			m=eval(rowlist)
+			z=each(fieldnames)
+			while z
+				if eval$(z)="s" then Print child.value$(eval$(z!)), 
+			end while
+			Print
+		end while
+end if
+
+with databank, "lastchild" as last, "firstchild" as first, "nextchild" as nextchild
+pen 15  {Print "The xml not alter the children - yet"}
+pen 13 {
+	beautify=-4
+	Report 3, doc$
+}
+
+pen 11 {
+	Report "Now we rearrange the children. We remove all children and add them, the schema and the the elements from the list.  We handle the pointers, the object's pointers. So when we remove all childrens the actual xmlData (children) kept by pointers in other places."
+}
+Print
+Method databank, "GetListByTag", "schema", 1 as schema_stack
+Method databank, "RemoveChildren"
+stack schema_stack {Read the_schema}
+Method databank, "AppendChildObj", the_schema
+k=each(rowlist)
+while k
+	m=eval(rowlist)
+	Method databank, "AppendChildObj", m
+End While
+beautify=-4
+Report 3, doc$
+
+with databank, "lastchild" as last, "firstchild" as first, "nextchild" as nextchild
+pen 11 {
+	Report "Now we remove specific childs, we remove 2 childs from third, we start from first child, then we move two times to nextchild and perform two times RemoveChild method. Also we can change the value of id Attribute of table"
+}
+Attr$("id")="2"
+Print "New attribute value for id:";Attr$("id")
+
+dd=first
+//with dd, "xml" as dd.text$
+dd=nextchild
+dd=nextchild
+method databank, "RemoveChild"
+method databank, "RemoveChild"
+beautify=-4
+Report 3, doc$
+Print status$
 }
 UseThis : InfoBasic : Fkey : Pen 15 {Print "Press F3 now"}

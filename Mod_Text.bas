@@ -88,7 +88,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 6
+Global Const Revision = 7
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -5460,14 +5460,17 @@ If GetVar(bstack, v$, VR) Then
     n$ = v$
         v$ = Typename(var(VR))
         If v$ = "PropReference" Then
-            If MyIsObject(var(VR).Value) Then
-               Set bstack.lastobj = var(VR).Value
+        Set useProp = var(VR)
+        
+         R = useProp.Value
+        
+            If Not useProp.lastobj Is Nothing Then
+               Set bstack.lastobj = useProp.lastobjfinal
                 R = 0
             Else
-
-                R = var(VR).Value
                 If SG < 0 Then R = -R
             End If
+            Set useProp = Nothing
         ElseIf v$ = "Group" Then
             Set userGroup = var(VR)
             If userGroup.IamCleared Then
@@ -5646,7 +5649,7 @@ foundprivate:
             
             End If
         Else
-                Set bstack.lastobj = MakeitObjectGeneric(VR)
+                Set bstack.lastobj = var(VR) 'MakeitObjectGeneric(VR)
                 R = 0
         End If
     
@@ -5944,7 +5947,8 @@ ElseIf IsExp(bstack, a$, p) Then
     ElseIf TypeOf bstack.lastobj Is PropReference Then
         Set useProp = bstack.lastobj
         If useProp.IsObj Then
-            Set anything = useProp.Value
+            R = useProp.Value
+            Set anything = useProp.lastobjfinal
 contparamhere:
             Set usehandler = New mHandler
                 On Error Resume Next
@@ -10812,7 +10816,8 @@ jump1:
                  
                         
                         p = pppp.GroupRef.Value
-                        Set bstackstr.lastobj = pppp.GroupRef.lastobj
+                        Set bstackstr.lastobj = pppp.GroupRef.lastobjfinal
+                        If Not bstackstr.lastobj Is Nothing Then p = vbNullString
                         If FastSymbol(a$, "#") Then
                         If TypeOf bstackstr.lastobj Is mHandler Then
                         Set usehandler = bstackstr.lastobj
@@ -11271,6 +11276,7 @@ itisavar:
                     ElseIf TypeOf var(W) Is PropReference Then
                     On Error Resume Next
                         R$ = var(W).Value
+                        Set bstackstr.lastobj = var(W).lastobjfinal
                         If Err Then R$ = vbNullString
                     ElseIf TypeOf var(W) Is Group Then
 checkit:
@@ -14223,6 +14229,7 @@ contrightstrpar:
                     ElseIf TypeOf .ValueObj Is PropReference Then
                         .ValueObj.Index = p
                         R$ = .ValueObj.Value
+                        Set bstackstr.lastobj = .ValueObj.lastobjfinal
                         IsStr1 = IsStr1 And FastSymbol(a$, ")")
                     Else
                         MyErMacroStr a$, "This kind of object not supported", "Αυτού του είδους το αντικείμενο δεν υποστηρίζεται"
@@ -26440,8 +26447,8 @@ End If
  indirect = True
 End If
 If TypeOf vv Is PropReference Then
-
-If IsObject(vv.Value) Then Set vv = vv.Value Else MyEr "No Object found", "Δεν βρήκα αντικείμενο": Exit Sub
+myVar = vv.Value
+If IsObject(vv.lastobj) Then Set vv = vv.lastobjfinal Else MyEr "No Object found", "Δεν βρήκα αντικείμενο": Exit Sub
 End If
 Do
 ReDim var1(0 To 0)
@@ -27038,7 +27045,9 @@ End If
 Set usehandler = Nothing
 If vv Is Nothing Then Exit Sub
 If TypeOf vv Is PropReference Then
-If IsObject(vv.Value) Then Set vv = vv.Value Else ok = False: MyEr "No Object found", "Δεν βρήκα αντικείμενο": Exit Sub
+Result = vv.Value
+Result = Empty
+If IsObject(vv.lastobj) Then Set vv = vv.lastobjfinal Else ok = False: MyEr "No Object found", "Δεν βρήκα αντικείμενο": Exit Sub
 End If
 
 ReDim var1(0 To 0)
@@ -27349,7 +27358,9 @@ End If
 er$ = vbNullString
 check = True
 If TypeOf o Is PropReference Then
-Set o = o.Value
+Dim pp
+pp = o.Value
+Set o = o.lastobjfinal
 End If
 ReadPropIndex = ReadOneIndexParameter(o, propIndex, er$, myIndex, , check)
 
@@ -39682,12 +39693,11 @@ ElseIf y1 < 5 And y1 > 0 Then
        End If
        End If
        Else
-       If Typename$(var(i)) = "PropReference" Then
-       var(i) = Empty
-       Else
-         MissingGroup
-         MyClear = False
-         End If
+       'If Typename$(var(i)) = "PropReference" Then
+      ' var(i) = Empty
+      ' Else
+         var(i) = Empty
+       '  End If
        End If
         Else
         If VarType(var(i)) = vbLong Then
@@ -41779,67 +41789,7 @@ End If
 End If
 
 End Function
-Function ProcTune(bstack As basetask, rest$) As Boolean
-'' break async
-Dim p As Variant, s$
-If IsExp(bstack, rest$, p) Then
-    If Not FastSymbol(rest$, ",") Then
-        beeperBEAT = CLng(p)
-    ElseIf IsStrExp(bstack, rest$, s$) Then
-        beeperBEAT = CLng(p)
-        PlayTune (s$)
-    Else
-        MyEr "wrong parameter", "λάθος παράμετρος"
-        Exit Function
-    End If
-ElseIf IsStrExp(bstack, rest$, s$) Then
-' B C D E F G
-PlayTune (s$)
-End If
-ProcTune = True
-End Function
-Function ProcName(bstack As basetask, rest$, Lang As Long) As Boolean
-Dim s$, W$, x1 As Long, y1 As Long, ss$
-ProcName = True
 
-x1 = Abs(IsLabelFileName(bstack, rest$, s$, , W$))
-
-If x1 = 1 Then
-s$ = W$
- If Not IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang) Then ProcName = False: Exit Function
-
- y1 = Abs(IsLabelFileName(bstack, rest$, ss$, , W$))
-
- If y1 = 0 Then
-rest$ = W$ + rest$
-y1 = IsStrExp(bstack, rest$, ss$)
-ElseIf y1 = 1 Then
-ss$ = W$
-End If
-If y1 <> 0 Then
-If Not CanKillFile(CFname(s$)) Then FilePathNotForUser: ProcName = False: Exit Function
-If Not RenameFile(s$, ss$) Then NoRename
-
-Exit Function
-End If
-Else
-rest$ = s$ + rest$
-End If
-If IsStrExp(bstack, rest$, s$) Then
- If Not IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang) Then ProcName = False: Exit Function
-If IsStrExp(bstack, rest$, ss$) Then
-On Error Resume Next
-If Not RenameFile(s$, ss$) Then NoRename
-On Error GoTo 0
-Else
-ProcName = False
-Exit Function
-End If
-Else
-ProcName = False
-Exit Function
-End If
-End Function
 Function ProcOpen(bstack As basetask, rest$, Lang As Long) As Boolean
 Dim s$, what$, it As Long, p As Variant, x1 As Long, i As Long, skip As Boolean, excl As Boolean
 If IsStrExp(bstack, rest$, s$) Then
@@ -46041,12 +45991,9 @@ Dim v$
         Set bstack.lastobj = ob
         rValue = 0
     ElseIf v$ = "PropReference" Then
-   If IsObject(ob.Value) Then
-       Set bstack.lastobj = ob.Value
-        rValue = 0
-   Else
         rValue = ob.Value
-        End If
+        Set bstack.lastobj = ob.lastobjfinal
+        If Not bstack.lastobj Is Nothing Then rValue = 0
     ElseIf v$ = "Group" Then
         rValue = 0
         Set bstack.lastobj = ob
@@ -46065,7 +46012,7 @@ Dim v$
     Set bstack.lastobj = CopyArray(ob)
     rValue = 0
     Else
-    Set bstack.lastobj = Nothing
+    Set bstack.lastobj = ob
     rValue = 0
     End If
     
@@ -50960,8 +50907,10 @@ misnum:                            MissNumExpr
                     ElseIf MyIsObject(var(v)) Then
                     If IsExp(bstack, b$, p) Then
                     Set p = bstack.lastobj
+                    Set bstack.lastobj = Nothing
                     If Typename(p) = Typename(var(v)) Then
                     Set var(v) = p
+                    
                     Else
                     WrongObject
                            Exec1 = 0: ExecuteVar = 8
@@ -53245,6 +53194,8 @@ Else
         If v < 0 And v <> -2 Then
         NoAssignThere
         Else
+        
+        
         pppp.GroupRef.Value = ss$
         End If
         End If

@@ -529,7 +529,14 @@ contarr0:
                 Set usehandler = Nothing
             End Select
         ElseIf Typename(vv) = "PropReference" Then
-            R$ = Typename$(vv.Value)
+                p = vv.Value
+        
+            R$ = Typename$(vv.lastobjfinal)
+            If R$ = "Nothing" Then
+            If VarType(p) <> vbEmpty Then
+            R$ = Typename(p)
+            End If
+            End If
         ElseIf Typename(vv) = "mArray" Then
         
          If FastSymbol(a$, ",") Then
@@ -16962,6 +16969,8 @@ If Not usehandler.objref Is Nothing Then
     Else
     s$ = s$ + "*[" + Typename(usehandler.objref) + "]"
     End If
+ElseIf usehandler.indirect > 0 Then
+    s$ = s$ + "*[" + Typename(var(usehandler.indirect)) + "]"
 End If
 End Select
 Set usehandler = Nothing
@@ -25870,4 +25879,65 @@ mywait basestack, 0
 End If
 MyDelay = True
 
+End Function
+Function ProcTune(bstack As basetask, rest$) As Boolean
+'' break async
+Dim p As Variant, s$
+If IsExp(bstack, rest$, p) Then
+    If Not FastSymbol(rest$, ",") Then
+        beeperBEAT = CLng(p)
+    ElseIf IsStrExp(bstack, rest$, s$) Then
+        beeperBEAT = CLng(p)
+        PlayTune (s$)
+    Else
+        MyEr "wrong parameter", "λάθος παράμετρος"
+        Exit Function
+    End If
+ElseIf IsStrExp(bstack, rest$, s$) Then
+' B C D E F G
+PlayTune (s$)
+End If
+ProcTune = True
+End Function
+Function ProcName(bstack As basetask, rest$, Lang As Long) As Boolean
+Dim s$, W$, x1 As Long, y1 As Long, ss$
+ProcName = True
+
+x1 = Abs(IsLabelFileName(bstack, rest$, s$, , W$))
+
+If x1 = 1 Then
+s$ = W$
+ If Not IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang) Then ProcName = False: Exit Function
+
+ y1 = Abs(IsLabelFileName(bstack, rest$, ss$, , W$))
+
+ If y1 = 0 Then
+rest$ = W$ + rest$
+y1 = IsStrExp(bstack, rest$, ss$)
+ElseIf y1 = 1 Then
+ss$ = W$
+End If
+If y1 <> 0 Then
+If Not CanKillFile(CFname(s$)) Then FilePathNotForUser: ProcName = False: Exit Function
+If Not RenameFile(s$, ss$) Then NoRename
+
+Exit Function
+End If
+Else
+rest$ = s$ + rest$
+End If
+If IsStrExp(bstack, rest$, s$) Then
+ If Not IsLabelSymbolNew(rest$, "ΩΣ", "AS", Lang) Then ProcName = False: Exit Function
+If IsStrExp(bstack, rest$, ss$) Then
+On Error Resume Next
+If Not RenameFile(s$, ss$) Then NoRename
+On Error GoTo 0
+Else
+ProcName = False
+Exit Function
+End If
+Else
+ProcName = False
+Exit Function
+End If
 End Function

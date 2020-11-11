@@ -47,12 +47,17 @@ vtref = vtrefnumber
 End Sub
 Public Property Get lastobj() As Object
 Set lastobj = mLastObj
+End Property
+Public Property Get lastobjfinal() As Object
+Set lastobjfinal = mLastObj
 Set mLastObj = Nothing
 End Property
-
+Public Sub clearlastobject()
+Set mLastObj = Nothing
+End Sub
 Public Property Get Value() As Variant
 
-Dim RETVAR As Variant
+Dim RETVAR As Variant, retvar2, obj As Object
 Dim check As Boolean
 Set mLastObj = Nothing
 If Init Then
@@ -63,12 +68,11 @@ Else
   Value = ReadPropIndex(ObjectRef, vtref, mIndex, check, RETVAR)
  If check And IsObject(RETVAR) Then
     On Error Resume Next
-    Value = RETVAR.Value
-       If Err.Number <> 0 Then
-          Err.Clear
-          Set mLastObj = RETVAR
+    Set obj = RETVAR
+    If ReadOneParameter(obj, (0), vbNullString, retvar2) Then
+        Value = retvar2
        Else
-        Set mLastObj = Nothing
+          Set mLastObj = RETVAR
     End If
 
  End If
@@ -80,7 +84,9 @@ Else
 If useobj Then
 If ReadPropObj(hardlink, vtref, RETVAR) Then
 If IsObject(RETVAR) Then
-Set Value = RETVAR
+ Value = 0
+          Set mLastObj = RETVAR
+
 Else
 Value = RETVAR
 End If
@@ -88,10 +94,15 @@ End If
 Else
  If ReadProp(ObjectRef, vtref, RETVAR) Then
  If IsObject(RETVAR) Then
-Set Value = RETVAR
+         Value = 0
+          Set mLastObj = RETVAR
+
 Else
 On Error Resume Next
-If TypeOf RETVAR Is IUnknown Then Set Value = RETVAR: Exit Property
+If TypeOf RETVAR Is IUnknown Then
+Value = 0
+Set mLastObj = RETVAR: Exit Property
+End If
 Err.Clear
 Value = RETVAR
 End If
