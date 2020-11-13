@@ -28,7 +28,7 @@ Public maychange As Boolean
 Public Property Get GetCallBack() As Form
 Set GetCallBack = Callback
 End Property
-Public Sub Construct(there As Form, name$)
+Public Sub Construct(there As Form, Name$)
  mIndex = -1
  Set Callback = there
  On Error Resume Next
@@ -37,9 +37,9 @@ Public Sub Construct(there As Form, name$)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
-Public Sub ConstructArray(there As Form, name$, i As Long)
+Public Sub ConstructArray(there As Form, Name$, i As Long)
  Set Callback = there
  On Error Resume Next
  ctrlName = GetTag$
@@ -48,7 +48,7 @@ Public Sub ConstructArray(there As Form, name$, i As Long)
  there.AddGuiControl Me
  glistN.Dynamic
  there.Controls(ctrlName).TabStop = True
- mesCtrlName = name$
+ mesCtrlName = Name$
 End Sub
 Public Sub deconstruct()
 Set Point2Me = Nothing
@@ -56,13 +56,13 @@ If Not glistN Is Nothing Then glistN.Shutdown
 Set Callback = Nothing
 Set glistN = Nothing
 End Sub
-Public Sub Move(X, Y, Optional w, Optional h)
-If IsMissing(w) Then
-glistN.MoveTwips CLng(X), CLng(Y), 0, 0
-ElseIf IsMissing(h) Then
-glistN.MoveTwips CLng(X), CLng(Y), CLng(w), 0
+Public Sub move(x, y, Optional W, Optional H)
+If IsMissing(W) Then
+glistN.MoveTwips CLng(x), CLng(y), 0, 0
+ElseIf IsMissing(H) Then
+glistN.MoveTwips CLng(x), CLng(y), CLng(W), 0
 Else
-glistN.MoveTwips CLng(X), CLng(Y), CLng(w), CLng(h)
+glistN.MoveTwips CLng(x), CLng(y), CLng(W), CLng(H)
 End If
 End Sub
 
@@ -88,7 +88,7 @@ End If
 End Sub
 
 
-Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 
 
 
@@ -105,12 +105,12 @@ lastitem = item
 End If
 End Sub
 
-Private Sub glistN_OutPopUp(X As Single, Y As Single, myButton As Integer)
+Private Sub glistN_OutPopUp(x As Single, y As Single, myButton As Integer)
 If myButton And &H2 = 2 Then
 If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(X + Callback.Controls(ctrlName).Left) + "," + Str(Y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+   Callback.Callback mesCtrlName + ".PopUp(" + Str(mIndex) + "," + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
    Else
-      Callback.Callback mesCtrlName + ".PopUp(" + Str(X + Callback.Controls(ctrlName).Left) + "," + Str(Y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
+      Callback.Callback mesCtrlName + ".PopUp(" + Str(x + Callback.Controls(ctrlName).Left) + "," + Str(y + Callback.Controls(ctrlName).top) + "," + Str(myButton) + "," + Str(glistN.ListIndex + 1) + ")"
       End If
       End If
 End Sub
@@ -147,12 +147,12 @@ If Not locked Then
 If glistN.ListIndex < 0 And glistN.listcount > 0 Then glistN.ListindexPrivateUse = 0
 If Not trans Then
     If enabled Then
-    glistN.ForeColor = black
+    glistN.forecolor = black
     glistN.backcolor = white
     glistN.NoCaretShow = False:
     glistN.PanPos = 0
     Else
-    glistN.ForeColor = white
+    glistN.forecolor = white
     glistN.backcolor = dimm1
     glistN.NoCaretShow = True
     End If
@@ -163,7 +163,7 @@ End If
 End Sub
 Public Sub Retired()
 If Not trans Then
-glistN.ForeColor = white
+glistN.forecolor = white
 glistN.backcolor = dimm2
 glistN.NoCaretShow = True: glistN.PanPos = 0: glistN.ShowMe
 End If
@@ -177,7 +177,7 @@ Exit Sub
 End If
 If Not trans Then
 If glistN.BackStyle <> 1 Then
-glistN.ForeColor = white
+glistN.forecolor = white
 glistN.backcolor = dimm2
 End If
 glistN.PanPos = 0: glistN.PrepareToShow
@@ -190,14 +190,14 @@ On Error Resume Next
 glistN.SetFocus
 End Sub
 Public Sub SetUp()
-white = Callback.Controls(1).ForeColor
+white = Callback.Controls(1).forecolor
 black = 0
 dimm1 = rgb(100, 200, 160)
 dimm2 = rgb(200, 120, 60)
 
 Dim ff As New StdFont
 With Callback
-ff.name = .CtrlFontName
+ff.Name = .CtrlFontName
 ff.charset = Form1.DIS.Font.charset
 ff.Size = .CtrlFontSize
 ff.bold = .CtrlFontBold
@@ -213,7 +213,7 @@ With glistN
 .backcolor = dimm2
 
 Set .Font = ff
-.ForeColor = white
+.forecolor = white
 .dcolor = Callback.Controls(1).dcolor
 .NoCaretShow = False
 .enabled = True
@@ -226,18 +226,18 @@ Public Sub FontAttr(ThisFontName, Optional ThisMode = -1, Optional ThisBold = Tr
 Dim aa As New StdFont
 If ThisFontName <> "" Then
 
-aa.name = ThisFontName
+aa.Name = ThisFontName
 
 If ThisMode > 7 Then aa.Size = ThisMode Else aa = 7
 aa.bold = ThisBold
 Set glistN.Font = aa
 End If
 End Sub
-Public Property Get index() As Long
-index = mIndex
+Public Property Get Index() As Long
+Index = mIndex
 End Property
 
-Public Property Let index(ByVal RHS As Long)
+Public Property Let Index(ByVal RHS As Long)
 mIndex = RHS
 End Property
 Public Property Get locked() As Boolean
@@ -291,11 +291,11 @@ Exit Sub
 End If
 End Sub
 
-Private Sub glistN_PanLeftRight(Direction As Boolean)
+Private Sub glistN_PanLeftRight(direction As Boolean)
    If mIndex >= 0 Then
-   Callback.Callback mesCtrlName + ".DblClick(" + Str(mIndex) + "," + Str(glistN.ListIndex) + "," + Str(Direction) + ")"
+   Callback.Callback mesCtrlName + ".DblClick(" + Str(mIndex) + "," + Str(glistN.ListIndex) + "," + Str(direction) + ")"
    Else
-      Callback.Callback mesCtrlName + ".DblClick(" + Str(glistN.ListIndex) + "," + Str(Direction) + ")"
+      Callback.Callback mesCtrlName + ".DblClick(" + Str(glistN.ListIndex) + "," + Str(direction) + ")"
       End If
 End Sub
 
@@ -347,7 +347,7 @@ Private Sub glistN_ScrollMove(item As Long)
       End If
 End Sub
 
-Private Sub glistN_ScrollSelected(item As Long, Y As Long)
+Private Sub glistN_ScrollSelected(item As Long, y As Long)
    If mIndex >= 0 Then
    Callback.Callback mesCtrlName + ".Scroll(" + Str(mIndex) + "," + Str(item) + ")"
    Else
@@ -374,19 +374,19 @@ Private Sub glistN_Selected2(item As Long)
       End If
 End Sub
 
-Private Sub gListN_SpecialColor(rgbcolor As Long)
+Private Sub gListN_SpecialColor(RGBcolor As Long)
 
 If Not mEnabled Then Exit Sub
 Dim VR(1)
 
-VR(0) = -rgbcolor
+VR(0) = -RGBcolor
 
    If mIndex >= 0 Then
    Callback.CallbackNow mesCtrlName + ".Color(" + Str(mIndex) + ")", VR()
    Else
       Callback.CallbackNow mesCtrlName + ".Color(", VR()
       End If
-rgbcolor = mycolor(VR(0))
+RGBcolor = mycolor(VR(0))
 End Sub
 Function Control() As gList
     Set Control = glistN
@@ -423,32 +423,32 @@ glistN.CalcAndShowBar
 If glistN.Visible Then glistN.ShowMe2
 End Sub
 
-Public Property Get list(index) As Variant
+Public Property Get list(Index) As Variant
 On Error Resume Next
-list = glistN.list(CLng(index))
+list = glistN.list(CLng(Index))
 End Property
 
-Public Property Let list(index, ByVal vNewValue As Variant)
+Public Property Let list(Index, ByVal vNewValue As Variant)
 On Error Resume Next
-glistN.list(CLng(index)) = CStr(vNewValue)
+glistN.list(CLng(Index)) = CStr(vNewValue)
 glistN.PrepareToShow
 End Property
 Sub Add(content$)
 glistN.additem content$
 End Sub
-Sub AddFast(index As Long, content$)
+Sub AddFast(Index As Long, content$)
 glistN.additemFast content$
 End Sub
 Sub Insert(content$)
 glistN.additemAtListIndex content$
 End Sub
-Sub clear()
-glistN.clear
+Sub Clear()
+glistN.Clear
 If glistN.Visible Then glistN.ShowMe2
 End Sub
 
-Sub Delete(index As Long)
-glistN.Removeitem index
+Sub Delete(Index As Long)
+glistN.Removeitem Index
 End Sub
 
 Public Property Get ListIndex() As Variant
@@ -469,8 +469,8 @@ End Property
 Public Property Get listcount() As Variant
 listcount = glistN.listcount
 End Property
-Public Sub ShowThis(index As Long, Optional noselect)
-glistN.ShowThis index, CBool(noselect)
+Public Sub ShowThis(Index As Long, Optional noselect)
+glistN.ShowThis Index, CBool(noselect)
 End Sub
 
 Public Property Get Text() As Variant
@@ -591,7 +591,7 @@ End Property
 Public Property Let ShowAlways(ByVal vNewValue As Variant)
 mStayOpen = CBool(vNewValue)
 If mStayOpen Then
-glistN.ForeColor = rgb(0, 0, 0)
+glistN.forecolor = rgb(0, 0, 0)
 glistN.backcolor = rgb(255, 255, 255)
 End If
 End Property
@@ -636,3 +636,9 @@ End Property
 Public Property Let icon(RHS)
 glistN.icon = RHS
 End Property
+Public Sub SetBarStyle(bColor As Long, Optional bHatch As Long, Optional BHatchColor As Long)
+    glistN.BarColor = mycolor(bColor)
+    glistN.BarHatch = bHatch
+    glistN.BarHatchColor = BHatchColor
+End Sub
+

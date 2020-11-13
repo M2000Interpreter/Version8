@@ -1,7 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 7 active-X
-Additions to xmlData object. A new example Xml2 added. Now we can delete nodes, change attributes values. Using a list we can export children to stack object, and then we can feed a list object using a pair key/value, where value is the object pointer. We make the sort and we delete the childrens and fast we attach the trees as childs (by using the pointer only for each). In XmlData we not use pointers from child to parent.
+Version 10 revision 8 active-X
+1. Fix a bug in xmlData object. Now is perfect
+2. Additions in EditBox, ListBox, Combo, for changing colors/style of vertical scroll bar. See example in cs module.
+3. All lists including Editbox (text editor) now show  part of text line at the bottom if happen to exist (previous we got a white zone at that part)
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

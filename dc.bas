@@ -4,7 +4,6 @@ Public Declare Function midiOutClose Lib "winmm.dll" (ByVal hMidiOut As Long) As
 Public Declare Function midiOutOpen Lib "winmm.dll" (lphMidiOut As Long, ByVal uDeviceID As Long, ByVal dwCallback As Long, ByVal dwInstance As Long, ByVal dwFlags As Long) As Long
 Public Declare Function midiOutShortMsg Lib "winmm.dll" (ByVal hMidiOut As Long, ByVal dwMsg As Long) As Long
 
-
 Const RC_PALETTE As Long = &H100
 Const SIZEPALETTE As Long = 104
 Const RASTERCAPS As Long = 38
@@ -290,21 +289,21 @@ Function DriveSerial(ByVal Path$) As Long
 End Function
 
 Function WeCanWrite(ByVal Path$) As Boolean
-Dim SecondTry As Boolean, PP$
+Dim SecondTry As Boolean, pp$
 On Error GoTo wecant
-PP$ = ExtractPath(Path$, , True)
-PP$ = GetDosPath(PP$)
-If PP$ = vbNullString Then
+pp$ = ExtractPath(Path$, , True)
+pp$ = GetDosPath(pp$)
+If pp$ = vbNullString Then
 MyEr "Not writable device " & Path$, "Δεν μπορώ να γράψω στη συσκευή " & Path$
 Exit Function
 End If
-PP$ = PathStrip2root(Path$)
+pp$ = PathStrip2root(Path$)
 
 
-    Select Case GetDriveType(PP$)
+    Select Case GetDriveType(pp$)
 
         Case 2, 3, 4, 6
-          WeCanWrite = Not GetAttr(PP$) = vbReadOnly
+          WeCanWrite = Not GetAttr(pp$) = vbReadOnly
         Case 5
            WeCanWrite = False
     End Select
@@ -318,16 +317,16 @@ wecant:
                 End If
 
 End Function
-Public Function VoiceName(ByVal d As Double) As String
+Public Function VoiceName(ByVal D As Double) As String
 On Error Resume Next
 Dim o As Object
 If Typename(sapi) = "Nothing" Then Set sapi = CreateObject("sapi.spvoice")
 If Typename(sapi) = "Nothing" Then VoiceName = vbNullString: Exit Function
-d = Int(d)
-If sapi.getvoices().count >= d And d > 0 Then
+D = Int(D)
+If sapi.getvoices().count >= D And D > 0 Then
 For Each o In sapi.getvoices
-d = d - 1
-If d = 0 Then VoiceName = o.GetDescription: Exit For
+D = D - 1
+If D = 0 Then VoiceName = o.GetDescription: Exit For
 Next o
 End If
 End Function

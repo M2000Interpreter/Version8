@@ -334,8 +334,8 @@ Function ScanForTagDeep(Tag$, child As XmlMonoInternal) As Boolean
 If Not IsArray(root) Then
     MyEr "I have't node", "Δεν έχω κόμβο"
 ElseIf (root(3) And 1) Then
-    beautify = CLng(100000 * Rnd)
-    If deep(Tag$, child, beautify = 0) Then
+    beautify = CLng(100000 * Rnd) + 1
+    If deep(Tag$, child, beautify) Then
         beautify = 0
         ScanForTagDeep = True
         Exit Function

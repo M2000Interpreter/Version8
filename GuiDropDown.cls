@@ -100,14 +100,14 @@ End With
  mesCtrlName = Name$
 End Sub
 
-Public Sub move(X, Y, Optional w, Optional h)
+Public Sub move(x, y, Optional W, Optional H)
 With Textbox
-If IsMissing(w) Then
-.glistN.MoveTwips CLng(X), CLng(Y), 0, 0
-ElseIf IsMissing(h) Then
-.glistN.MoveTwips CLng(X), CLng(Y), CLng(w), 0
+If IsMissing(W) Then
+.glistN.MoveTwips CLng(x), CLng(y), 0, 0
+ElseIf IsMissing(H) Then
+.glistN.MoveTwips CLng(x), CLng(y), CLng(W), 0
 Else
-.glistN.MoveTwips CLng(X), CLng(Y), CLng(w), CLng(h)
+.glistN.MoveTwips CLng(x), CLng(y), CLng(W), CLng(H)
 End If
 Pad.move Pad.Left, Pad.top, .glistN.widthtwips, .glistN.HeightTwips * 5
 End With
@@ -162,7 +162,7 @@ End Property
 
 
 
-Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal X As Long, ByVal Y As Long)
+Private Sub glistN_ExposeItemMouseMove(Button As Integer, ByVal item As Long, ByVal x As Long, ByVal y As Long)
 If item = -1 Then
 
 Else
@@ -190,13 +190,13 @@ End Property
 Property Get menuEnabled(item As Long) As Boolean
 menuEnabled = Not glistN.ListSep(item)
 End Property
-Public Function GetMenuId(Id$, Pos As Long) As Boolean
+Public Function GetMenuId(id$, Pos As Long) As Boolean
 '
-GetMenuId = glistN.GetMenuId(Id$, Pos)
+GetMenuId = glistN.GetMenuId(id$, Pos)
 End Function
-Property Get Id(item As Long) As String
+Property Get id(item As Long) As String
 '
-Id = glistN.Id(item)
+id = glistN.id(item)
 End Property
 
 
@@ -301,7 +301,7 @@ Private Sub glistN_ScrollMove(item As Long)
       End If
 End Sub
 
-Private Sub glistN_ScrollSelected(item As Long, Y As Long)
+Private Sub glistN_ScrollSelected(item As Long, y As Long)
    If mIndex >= 0 Then
    Callback.Callback mesCtrlName + ".Scroll(" + Str(mIndex) + "," + Str(item) + ")"
    Else
@@ -350,34 +350,34 @@ End Sub
 Private Sub textbox_KeyDown(KeyCode As Integer, shift As Integer)
 'If Not glistN.enabled Then KeyCode = 0: shift = 0: Exit Sub
 Dim b$
-Dim gl As Long, X As Long, x1 As gList, XX As Boolean
+Dim gl As Long, x As Long, x1 As gList, XX As Boolean
 Iam = True
 If KeyCode = vbKeyRight And Len(MenuGroup) <> 0 Then
 Set x1 = Textbox.glistN
 Dim obj As gList
 With Callback
 .LastActive = vbNullString
-For X = 1 To .Controls.count - 1
+For x = 1 To .Controls.count - 1
 
-    If TypeOf .Controls(X) Is gList Then
+    If TypeOf .Controls(x) Is gList Then
     If XX Then
-        If .Controls(X).enabled And .Controls(X).TabStop Then
-            If .Controls(X).MenuGroup = x1.MenuGroup Then
+        If .Controls(x).enabled And .Controls(x).TabStop Then
+            If .Controls(x).MenuGroup = x1.MenuGroup Then
   
             Textbox.Retired
 
-            .Controls(X).ShowMenu: Exit For
+            .Controls(x).ShowMenu: Exit For
             
             End If
         End If
     Else
-    Set obj = .Controls(X)
+    Set obj = .Controls(x)
         If obj Is x1 Then XX = True
         Set obj = Nothing
     End If
     End If
     
-Next X
+Next x
 
 End With
 Set x1 = Nothing
@@ -385,24 +385,24 @@ ElseIf KeyCode = vbKeyLeft And Len(MenuGroup) <> 0 Then
 Set x1 = Textbox.glistN
 With Callback
 .LastActive = vbNullString
-For X = .Controls.count - 1 To 1 Step -1
-    If TypeOf .Controls(X) Is gList Then
+For x = .Controls.count - 1 To 1 Step -1
+    If TypeOf .Controls(x) Is gList Then
     If XX Then
-        If .Controls(X).enabled And .Controls(X).TabStop Then
-            If .Controls(X).MenuGroup = x1.MenuGroup Then
+        If .Controls(x).enabled And .Controls(x).TabStop Then
+            If .Controls(x).MenuGroup = x1.MenuGroup Then
          
                     Textbox.Retired
-                    .Controls(X).ShowMenu: Exit For
+                    .Controls(x).ShowMenu: Exit For
            End If
          
         End If
     Else
-     Set obj = .Controls(X)
+     Set obj = .Controls(x)
         If obj Is x1 Then XX = True
         Set obj = Nothing
     End If
     End If
-Next X
+Next x
 End With
 Set x1 = Nothing
 ElseIf KeyCode = vbKeyDown Or (KeyCode = vbKeyReturn And UseOnlyTheList) Then
@@ -580,7 +580,7 @@ End If
 End Sub
 
 
-Private Sub textbox_MouseMove(Button As Integer, shift As Integer, X As Single, Y As Single)
+Private Sub textbox_MouseMove(Button As Integer, shift As Integer, x As Single, y As Single)
 Dim gl As Long
 'If Not glistN.enabled Then Button = 0: shift = 0: Exit Sub
 If Textbox.glistN.DblClick Then
@@ -1059,10 +1059,10 @@ If mMenuStyle Then
 End If
 End Sub
 Sub Transparent()
-Dim X  As Long, Y As Long
+Dim x  As Long, y As Long
 Textbox.glistN.BackStyle = 1
-Textbox.glistN.GetLeftTop X, Y
-Textbox.glistN.RepaintFromOut Callback.Image, X, Y
+Textbox.glistN.GetLeftTop x, y
+Textbox.glistN.RepaintFromOut Callback.Image, x, y
 Callback.RefreshList = Callback.RefreshList + 1
 End Sub
 Public Property Get FadePartColor() As Variant
@@ -1080,4 +1080,18 @@ End Property
 Public Property Let icon(RHS)
 Textbox.glistN.icon = RHS
 End Property
+Public Sub SetBarStyle(bColor As Long, Optional bHatch As Long, Optional BHatchColor As Long)
+    glistN.BarColor = mycolor(bColor)
+    glistN.BarHatch = bHatch
+    glistN.BarHatchColor = BHatchColor
+End Sub
+Public Property Get Linespace() As Variant
+Linespace = dv15 * (glistN.addpixels) / 2
+End Property
 
+Public Property Let Linespace(ByVal vNewValue As Variant)
+    vNewValue = (vNewValue \ 30) * 60
+On Error Resume Next
+glistN.addpixels = CLng(vNewValue / dv15)
+If Err.Number > 0 Then Exit Property
+End Property

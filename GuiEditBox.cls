@@ -9304,7 +9304,7 @@ Function RealX1(mHdc As Long, ByVal ExtSelStart As Long, ByVal that$, Optional n
 If ExtSelStart <= 0 Then ExtSelStart = 1
 Dim ww$(), Col() As Long, items&, i, c As String
 Dim rleftacc As Long, original As Long, rx1 As Long, direction As Long
-Dim oldvalue As Long, orx1 As Long, j As Long, nrtl As Boolean
+Dim OldValue As Long, orx1 As Long, j As Long, nrtl As Boolean
 If Len(that$) = 0 Then
     nValue = 1: Exit Function
 End If
@@ -9939,3 +9939,10 @@ Public Property Let NoCenterLineEdit(ByVal RHS As Boolean)
 mNoCenterLineEdit = RHS
 glistN.OverrideShow = Not RHS
 End Property
+Public Sub SetBarStyle(bColor As Long, Optional bHatch As Long, Optional BHatchColor As Long)
+    glistN.BarColor = mycolor(bColor)
+    glistN.BarHatch = bHatch
+    glistN.BarHatchColor = mycolor(BHatchColor)
+End Sub
+
+

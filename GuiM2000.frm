@@ -45,9 +45,9 @@ Begin VB.Form GuiM2000
       TabStop         =   0   'False
       Top             =   0
       Width           =   9180
-      _ExtentX        =   16193
-      _ExtentY        =   873
-      Max             =   1
+      _extentx        =   16193
+      _extenty        =   873
+      max             =   1
       Vertical        =   -1  'True
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Arial"
@@ -71,9 +71,9 @@ Attribute VB_Exposed = False
 Option Explicit
 Private Declare Function CopyFromLParamToRect Lib "user32" Alias "CopyRect" (lpDestRect As RECT, ByVal lpSourceRect As Long) As Long
 Private Declare Function DestroyCaret Lib "user32" () As Long
-Private Declare Function DrawIconEx Lib "user32" (ByVal hDC As Long, ByVal xLeft As Long, ByVal yTop As Long, ByVal hIcon As Long, ByVal cxWidth As Long, ByVal cyWidth As Long, ByVal istepIfAniCur As Long, ByVal hbrFlickerFreeDraw As Long, ByVal diFlags As Long) As Long
+Private Declare Function DrawIconEx Lib "user32" (ByVal Hdc As Long, ByVal xLeft As Long, ByVal yTop As Long, ByVal hIcon As Long, ByVal cxWidth As Long, ByVal cyWidth As Long, ByVal istepIfAniCur As Long, ByVal hbrFlickerFreeDraw As Long, ByVal diFlags As Long) As Long
 Private Declare Function DrawState Lib "user32" Alias "DrawStateA" _
-        (ByVal hDC As Long, _
+        (ByVal Hdc As Long, _
         ByVal hBrush As Long, _
         ByVal lpDrawStateProc As Long, _
         ByVal lParam As Long, _
@@ -153,7 +153,7 @@ Public Sub DisAllTargets()
 DisableTargets q(), prive
 End Sub
 Public Sub RenderTarget(bstack As basetask, rest$, Lang As Long, tHandle As Variant)
-Dim p, w$, x
+Dim p, W$, x
 If tHandle \ 10000 <> prive Then
 MyEr "target not for this form", "ï óôü÷ïò äåí åßíáé ãéá áõôÞ ôç öüñìá"
 Exit Sub
@@ -164,7 +164,7 @@ If p >= 0 And p < UBound(q()) Then
               '
 While FastSymbol(rest$, ",")
 If IsLabelSymbolNew(rest$, "ÖÑÁÓÇ", "TEXT", Lang) Then
-If IsStrExp(bstack, rest$, w$) Then q(p).Tag = w$
+If IsStrExp(bstack, rest$, W$) Then q(p).Tag = W$
 ElseIf IsLabelSymbolNew(rest$, "ÐÅÍÁ", "PEN", Lang) Then
 If IsExp(bstack, rest$, x) Then q(p).pen = x
 ElseIf IsLabelSymbolNew(rest$, "ÖÏÍÔÏ", "BACK", Lang) Then
@@ -172,7 +172,7 @@ If IsExp(bstack, rest$, x) Then q(p).back = x
 ElseIf IsLabelSymbolNew(rest$, "ÐËÁÉÓÉÏ", "BORDER", Lang) Then
 If IsExp(bstack, rest$, x) Then q(p).fore = x
 ElseIf IsLabelSymbolNew(rest$, "ÏÄÇÃÉÁ", "COMMAND", Lang) Then
-If IsStrExp(bstack, rest$, w$) Then q(p).Comm = w$
+If IsStrExp(bstack, rest$, W$) Then q(p).Comm = W$
 End If
 
 Wend
@@ -301,22 +301,22 @@ If Len(mMyName$) = 0 Then Exit Property
 If mEnabled = False And RHS = True Then Me.enabled = True
 mEnabled = RHS
 
-Dim w As Object
+Dim W As Object
 If Controls.count > 0 Then
-For Each w In Me.Controls
-If w Is gList2 Then
+For Each W In Me.Controls
+If W Is gList2 Then
 gList2.enabled = RHS
 gList2.mousepointer = 0
-ElseIf w.Visible Then
-w.enabled = RHS
-If TypeOf w Is gList Then
-w.TabStop = w.TabStopSoft
-w.BypassKey = Not RHS
+ElseIf W.Visible Then
+W.enabled = RHS
+If TypeOf W Is gList Then
+W.TabStop = W.TabStopSoft
+W.BypassKey = Not RHS
 End If
-ElseIf TypeOf w Is gList Then
-w.BypassKey = Not RHS
+ElseIf TypeOf W Is gList Then
+W.BypassKey = Not RHS
 End If
-Next w
+Next W
 End If
 Me.enabled = RHS
 End Property
@@ -375,7 +375,7 @@ End Sub
 
 
 Public Sub ShowmeALL()
-Dim w As Object
+Dim W As Object
 If IamPopUp Then
     If EnableStandardInfo Then
         glistN.menuEnabled(2) = False
@@ -393,22 +393,22 @@ End If
 End If
 
 If Controls.count > 0 Then
-For Each w In Controls
-If w.enabled Then w.Visible = True
-Next w
+For Each W In Controls
+If W.enabled Then W.Visible = True
+Next W
 End If
 
 gList2.PrepareToShow
 
 End Sub
 Public Sub RefreshALL()
-Dim w As Object
+Dim W As Object
 If Controls.count > 0 Then
-For Each w In Controls
-If w.Visible Then
-If TypeOf w Is gList Then w.ShowMe2
+For Each W In Controls
+If W.Visible Then
+If TypeOf W Is gList Then W.ShowMe2
 End If
-Next w
+Next W
 End If
 Refresh
 End Sub
@@ -443,7 +443,7 @@ ResizeMark.Height = MarkSize * dv15
 ResizeMark.Left = Width - MarkSize * dv15
 ResizeMark.top = Height - MarkSize * dv15
 
-ResizeMark.backcolor = GetPixel(Me.hDC, 0, 0)
+ResizeMark.backcolor = GetPixel(Me.Hdc, 0, 0)
 ResizeMark.Visible = Sizable
 If Sizable Then ResizeMark.ZOrder 0
 If HOOKTEST <> 0 Then UnHook HOOKTEST
@@ -519,17 +519,17 @@ Private Sub Form_KeyPress(KeyAscii As Integer)
 On Error Resume Next
 If Me.Visible Then
 If ActiveControl Is Nothing Then
-Dim w As Object
+Dim W As Object
     If Controls.count > 0 Then
-    For Each w In Controls
-    If w.Visible Then
-    If TypeOf w Is gList Then
-    w.SetFocus
+    For Each W In Controls
+    If W.Visible Then
+    If TypeOf W Is gList Then
+    W.SetFocus
     Exit For
     End If
     End If
-    Next w
-    Set w = Nothing
+    Next W
+    Set W = Nothing
     End If
     Else
     
@@ -569,7 +569,7 @@ If Button > 0 And Targets Then
         If Button = 1 Then
 
             
-            Select Case q(sel&).Id Mod 100
+            Select Case q(sel&).id Mod 100
             Case Is < 10
                 SwapStrings here$, oldhere$
                 here$ = modulename
@@ -1077,11 +1077,11 @@ players(prive).MAXXGRAPH = 0
 prive = 0
 
 End If
-Dim w As Object
+Dim W As Object
 If GuiControls.count > 0 Then
-For Each w In GuiControls
-    w.deconstruct
-Next w
+For Each W In GuiControls
+    W.deconstruct
+Next W
 End If
 If ttl Then If Not MyForm3 Is Nothing Then Unload MyForm3
 If Not safeform Is Nothing Then
@@ -1322,18 +1322,18 @@ Public Property Let Index(ByVal RHS As Long)
 mIndex = RHS
 End Property
 Public Sub CloseNow()
-Dim w As Object
+Dim W As Object
     If mModalid = Modalid And Modalid <> 0 Then
         Modalid = 0
       If Visible Then Hide
     Else
     mModalid = 0
-    For Each w In GuiControls
-    If Left$(Typename(w), 3) = "Gui" Then
-    w.deconstruct
+    For Each W In GuiControls
+    If Left$(Typename(W), 3) = "Gui" Then
+    W.deconstruct
     End If
-Next w
-Set w = Nothing
+Next W
+Set W = Nothing
          If ttl And Not mNoTaskBar Then
                     Unload MyForm3
              End If
@@ -1354,7 +1354,7 @@ If Not Sizable Then
 If MY_BACK Is Nothing Then Set MY_BACK = New cDIBSection
 MY_BACK.ClearUp
 If MY_BACK.create(Width / DXP, Height / DYP) Then
-MY_BACK.LoadPictureBlt hDC
+MY_BACK.LoadPictureBlt Hdc
 If MY_BACK.bitsPerPixel <> 24 Then Conv24 MY_BACK
 End If
 End If
@@ -1362,7 +1362,7 @@ End Sub
 Public Sub Release()
 If Not Sizable Then
 If MY_BACK Is Nothing Then Exit Sub
-MY_BACK.PaintPicture hDC
+MY_BACK.PaintPicture Hdc
 End If
 End Sub
 

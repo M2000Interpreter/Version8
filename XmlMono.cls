@@ -155,7 +155,7 @@ Function ScanForTagDeep(Tag$, child As XmlMono) As Boolean
         If Not m Is Nothing Then
             Dim zz As New XmlMono
             zz.createTree m
-            Set Nextchild = zz
+            Set child = zz
             ScanForTagDeep = True
         End If
     End If

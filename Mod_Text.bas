@@ -88,7 +88,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 7
+Global Const Revision = 8
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -5778,8 +5778,12 @@ End If
 'Select Case v$
 
 findthird:
-On w1 GoTo fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8, fun9, fun10, fun11, fun12, fun13, fun14, fun15, fun16, fun17, fun18, fun19, fun20, fun21, fun22, fun23, fun24, fun25, fun26, fun27, fun28, fun29, fun30, fun31, fun32, fun33, fun34, fun35, fun36, fun37, fun38, fun39, fun40, fun41, fun42, fun43, fun44, fun45, fun46, fun47, fun48, fun49, fun50, fun51, fun52, fun53, fun54, fun55, fun56, fun57, fun58, fun59, fun60, fun61, fun62, fun63, fun64, fun65, fun66, fun67, fun68, fun69, fun70, fun71, fun72, fun73, fun74, fun75, fun76, fun77, fun78, fun79, fun80, fun81, fun82, fun83, fun84, fun85, fun86, fun87, fun88, fun89, fun90, fun91, fun92, fun93, fun94, fun95, fun96, fun97, fun98, fun99, fun100, fun101, fun102, fun103, fun104, fun105, fun106, fun107, fun108, fun109, fun110, fun111
+On w1 GoTo fun1, fun2, fun3, fun4, fun5, fun6, fun7, fun8, fun9, fun10, fun11, fun12, fun13, fun14, fun15, fun16, fun17, fun18, fun19, fun20, fun21, fun22, fun23, fun24, fun25, fun26, fun27, fun28, fun29, fun30, fun31, fun32, fun33, fun34, fun35, fun36, fun37, fun38, fun39, fun40, fun41, fun42, fun43, fun44, fun45, fun46, fun47, fun48, fun49, fun50, fun51, fun52, fun53, fun54, fun55, fun56, fun57, fun58, fun59, fun60, fun61, fun62, fun63, fun64, fun65, fun66, fun67, fun68, fun69, fun70, fun71, fun72, fun73, fun74, fun75, fun76, fun77, fun78, fun79, fun80, fun81, fun82, fun83, fun84, fun85, fun86, fun87, fun88, fun89, fun90, fun91, fun92, fun93, fun94, fun95, fun96, fun97, fun98, fun99, fun100, fun101, fun102, fun103, fun104, fun105, fun106, fun107, fun108, fun109, fun110, fun111, fun112
 IsNumberNew = False
+Exit Function
+fun112: ' "CREATEOBJ(", "амтийеилемо("
+    R = 0
+    IsNumberNew = createAnobject(bstack, a$)
 Exit Function
 fun111: ' "PLAYER(", "паийтгс("
 If IsExp(bstack, a$, p, , True) Then
@@ -24251,27 +24255,28 @@ Set aa = New GuiDropDown
 End Select
 Set var = aa
 End Sub
-Sub CreateFormOtherObject(var As Variant, ThisObject As Object)
-Set var = ThisObject
+Sub CreateFormOtherObject(var As Variant, THISOBJECT As Object)
+Set var = THISOBJECT
 End Sub
 
-Sub CreateitObject(var As Variant, THISOjBECT As String, Optional ByVal cc As Variant)
-Dim aa As Object, b As GUID
+Sub CreateitObject(var As Variant, THISOBJECT As String, Optional ByVal cc As Variant)
+Dim aa As Object
 If IsMissing(cc) Then
-If Left$(THISOjBECT, 1) = "{" Then
-    THISOjBECT = strProgIDfromSrting(THISOjBECT)
+If Left$(THISOBJECT, 1) = "{" Then
+    THISOBJECT = strProgIDfromSrting(THISOBJECT)
 End If
 On Error Resume Next
-Set aa = CreateObject(THISOjBECT)
+Set aa = CreateObject(THISOBJECT)
 If Err Then
 MyEr Err.Description, Err.Description
 End If
 
 Else
-Set aa = CreateObject(THISOjBECT, CStr(cc))
+Set aa = CreateObject(THISOBJECT, CStr(cc))
 End If
 Set var = aa
 End Sub
+
 Function CheckVarGroup(basestack As basetask, var As Variant, s As String, Optional Final As Boolean = False) As Long
 Dim D As Document, c As Constant
                 
@@ -42006,7 +42011,7 @@ ProcItalic = True
 End Function
 Function ProcEditDoc(bstack As basetask, rest$, Lang As Long) As Boolean
 Dim prive As Long, s$, sX As Double, i As Long, dum As Boolean, frm$
-Dim x1 As Long, y1 As Long, p As Variant, Col As Long, oldvalue As Boolean
+Dim x1 As Long, y1 As Long, p As Variant, Col As Long, OldValue As Boolean
 Dim pppp As mArray
 If Left$(Typename(bstack.Owner), 3) = "Gui" Then oxiforforms: Exit Function
 If TypeOf bstack.Owner Is MetaDc Then oxiforMetaFiles: Exit Function
@@ -42077,10 +42082,10 @@ conteditdoc2:
                                    Form1.TEXT1.Title = frm$ + " "
                                     Form1.TEXT1.TabWidth = 8 + 2 * dum
                                     Form1.TabControl = 8 + 2 * dum
-                                      oldvalue = Form1.nobypasscheck
+                                      OldValue = Form1.nobypasscheck
                                   Form1.nobypasscheck = False
                                   ScreenEditDOC bstack, var(i), 0, .mysplit, .mx - 1, .My - 1, x1, dum, Col
-                                  Form1.nobypasscheck = oldvalue
+                                  Form1.nobypasscheck = OldValue
                                     var(i).LastSelStart = x1
                                     var(i).ColorEvent = False
                                     ProcEditDoc = True
@@ -42104,10 +42109,10 @@ conteditdoc2:
                                     Form1.TEXT1.Title = frm$ + " "
                                     Form1.TEXT1.TabWidth = 8 + 2 * dum
                                     Form1.TabControl = 8 + 2 * dum
-                                    oldvalue = Form1.nobypasscheck
+                                    OldValue = Form1.nobypasscheck
                                   Form1.nobypasscheck = False
                                   ScreenEditDOC bstack, pppp.item(i), 0, .mysplit, .mx - 1, .My - 1, x1, dum, Col
-                                  Form1.nobypasscheck = oldvalue
+                                  Form1.nobypasscheck = OldValue
                                     pppp.item(i).LastSelStart = x1
                                      pppp.item(i).ColorEvent = False
                                     ProcEditDoc = True

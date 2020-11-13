@@ -391,7 +391,6 @@ Public Declare Function SetTextAlign Lib "gdi32" (ByVal Hdc As Long, ByVal wFlag
 Public Declare Function TabbedTextOut Lib "user32" Alias "TabbedTextOutW" (ByVal Hdc As Long, ByVal x As Long, ByVal y As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, ByRef lpnTabStopPositions As Long, ByVal nTabOrigin As Long) As Long
 Public Declare Function TextOut Lib "gdi32" Alias "TextOutW" (ByVal Hdc As Long, ByVal x As Long, ByVal y As Long, ByVal lpString As Long, ByVal nCount As Long) As Long
 Public Declare Function GetTabbedTextExtent Lib "user32" Alias "GetTabbedTextExtentW" (ByVal Hdc As Long, ByVal lpString As Long, ByVal nCount As Long, ByVal nTabPositions As Long, lpnTabStopPositions As Long) As Long
-
 Function CheckItemType(bstackstr As basetask, v As Variant, a$, R$, Optional ByVal wasarr As Boolean = False, Optional UseCase As Boolean) As Boolean
 Dim usehandler As mHandler, fastcol As FastCollection, pppp As mArray, w1 As Long, p As Variant, s$
 UseCase = False
@@ -18083,7 +18082,7 @@ End Function
 
 Function MyDeclare(bstack As basetask, rest$, Lang As Long, Optional groupok As Boolean) As Boolean
 Dim p As Variant, i As Long, s$, pa$
-Dim x1 As Long, y1 As Long, par As Boolean, ss$, W$, what$, Y3 As Boolean
+Dim x1 As Long, y1 As Long, par As Boolean, ss$, W$, what$, Y3 As Boolean, Y4 As Boolean
 Dim declobj As Object, ML As Long
 Dim dum As Boolean
 Dim pppp As mArray
@@ -18329,43 +18328,52 @@ goNothing:
         End If
 THEREnew:
 MyDeclare = False
-        If IsStrExp(bstack, rest$, s$) Then
+        Y4 = IsLabelSymbolNew(rest$, "паяе", "GET", Lang)
+        If Y4 And MaybeIsSymbol(rest$, ",") Then
+            FastSymbol rest$, ","
+            If IsStrExp(bstack, rest$, pa$) Then
+                GetitObject var(i), , CVar(pa$)
+            End If
+            GoTo jump1
+        ElseIf IsStrExp(bstack, rest$, s$) Then
             If FastSymbol(rest$, ",") Then
                 If IsStrExp(bstack, rest$, pa$) Then
-                    
-                If FastSymbol(rest$, ",") Then
+                    If Y4 Then
+                        On Error Resume Next
+                        GetitObject var(i), CVar(s$), CVar(pa$)
+                        If Err.Number > 0 Then Exit Function
+                    ElseIf FastSymbol(rest$, ",") Then
                         If IsStrExp(bstack, rest$, W$) Then
+                            Err.Clear
+                            On Error Resume Next
+                            If W$ = vbNullString Then
+                                Licenses.Add s$
+                            Else
+                                Licenses.Add s$, W$
+                            End If
+                            If Err.Number > 0 And Err.Number <> 732 Then
+                                MissLicense
+                                Err.Clear
+                            Else
+                                Err.Clear
+                                CreateitObject var(i), s$, CVar(pa$)
+                                If Err.Number > 0 Then
+                                    Err.Clear
+                                    MissLicense
+                                End If
+                            End If
+                            Licenses.Remove s$
+                        Else
+                            MissStringExpr
+                        End If
+                    Else
                         Err.Clear
                         On Error Resume Next
-                        If W$ = vbNullString Then
-                            Licenses.Add s$
-                        Else
-                            Licenses.Add s$, W$
-                        End If
-                        If Err.Number > 0 And Err.Number <> 732 Then
-                        MissLicense
-                        Err.Clear
-                        Else
-                        Err.Clear
-                        CreateitObject var(i), s$, CStr(pa$)
+                        CreateitObject var(i), s$, CVar(pa$)
+
                         If Err.Number > 0 Then
-                        Err.Clear
-                        MissLicense
-                        End If
-                        End If
-                        Licenses.Remove s$
-                        Else
-                        MissStringExpr
-                        End If
-                        
-                        
-                Else
-                      Err.Clear
-                        On Error Resume Next
-                CreateitObject var(i), s$, CStr(pa$)
-                     If Err.Number > 0 Then
-                        Err.Clear
-                        MissLicense
+                            Err.Clear
+                            MissLicense
                         End If
                     End If
                     
@@ -18399,16 +18407,15 @@ MyDeclare = False
                     MissStringExpr
                     End If
                 End If
-                
-                
-                
-                
-                
             Else
                Err.Clear
                         On Error Resume Next
-                CreateitObject var(i), s$
-                
+                        If Y4 Then
+                            GetitObject var(i), CVar(s$)
+                        Else
+                            CreateitObject var(i), s$
+                        End If
+jump1:
                  If Err.Number > 0 Then
                         Err.Clear
                         MissLicense
@@ -25939,5 +25946,67 @@ End If
 Else
 ProcName = False
 Exit Function
+End If
+End Function
+Sub GetitObject(var, Optional cc, Optional serverclass1)
+Dim aa As Object, b As GUID, serverclass As String
+If IsMissing(cc) Then
+If Left$(serverclass1, 1) = "{" Then
+    serverclass = serverclass1
+    serverclass = strProgIDfromSrting(serverclass)
+Else
+    serverclass = serverclass1
+End If
+If serverclass = "" Then Exit Sub
+On Error Resume Next
+Set aa = GetObject(, serverclass)
+If Err Then
+MyEr Err.Description, Err.Description
+End If
+ElseIf IsMissing(serverclass1) Then
+On Error Resume Next
+cc = GetDosPath((cc))
+If cc <> "" Then
+Set aa = GetObject(cc)
+Else
+MissFile
+End If
+If Err Then
+MyEr Err.Description, Err.Description
+End If
+Else
+On Error Resume Next
+cc = GetDosPath((cc))
+Set aa = GetObject(cc, serverclass1)
+If Err Then
+MyEr Err.Description, Err.Description
+End If
+End If
+Set var = aa
+End Sub
+Function createAnobject(bstack As basetask, b$)
+Dim s$, s1$, k As Integer, ob
+Set ob = Nothing
+If IsStrExp(bstack, b$, s$) Then
+k = 1
+End If
+If FastSymbol(b$, ",") Then
+    If IsStrExp(bstack, b$, s1$) Then
+    k = k + 10
+    End If
+End If
+If FastSymbol(b$, ")") Then
+    Select Case k
+    Case 1
+        GetitObject ob, s$
+    Case 10
+        GetitObject ob, , s1$
+    Case 11
+        GetitObject ob, s$, s1$
+    End Select
+    If Not ob Is Nothing Then
+        Set bstack.lastobj = ob
+        createAnobject = True
+    End If
 End If
 End Function

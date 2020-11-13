@@ -4758,6 +4758,11 @@ CurDir$=Dir$
 Title$="M2000 Pad"
 Title "", 0   ' hide the console - 0
 \\ Gui Elements
+oldlinespace=linespace
+linespace 60
+// using this way, setting linespace for console as ListBoxes and EditBoxes (and popup listboxe inside Combobox)
+// Also layer NotePad get the linespace from console, execpt we use Form statement or Linespace statement
+// inside a Layer NotePad { }. For the form there is no porperty named Linespace.  We use statement insided Layer. 
 Declare NotePad Form
 Declare Pad EditBox Form NotePad
 Declare HelpPad EditBox Form NotePad
@@ -4766,7 +4771,7 @@ Declare Edit1 Combobox Form NotePad
 Declare Run1 Combobox Form NotePad
 Declare Help1 Combobox Form NotePad
 Declare Inform1 Button Form NotePad
-
+linespace oldlinespace
 \\ we can display an icon (the M2000 by default)
 \\ Normal the icon is in the rright side, the control icon for close is in the left side. Here we do the oposite
 \\ Also we get the Quit property. Is a property which a Document read when do a busy work of loading to quit it.
@@ -5418,7 +5423,7 @@ Pen 0 {
 	Print
 	Normal
 	italic
-	Report " A collection of modules for tests version 26 for M2000 Interpreter version 10 and newer revisions/versions"
+	Report " A collection of modules for tests version 27 for M2000 Interpreter version 10, revision 8 and above"
 	italic
 	Pen 5{
 		cursor 0, row-1
@@ -17543,12 +17548,16 @@ function cs_choose{
 Function Dark(){  '  13619071
       With Pad, "ColorSet", 0, "linespace", 60, "SelectionColor", -#FF0000, "SelectionTextColor", -color(14), "HighLightColor", -Color(60,60,128)
        Method Pad, "Colors", -color(50,50,50),-color(14),,,-color(0)
+        Method Pad, "SetBarStyle", #DD9033, -1
       Method Pad, "Show"
+      
+      
 }
 Function Bright(){
       With Pad, "ColorSet", 1, "HighLightColor", -Color(225,255,255)
       Method  Pad, "UserColorSet",0,,,,,,,,-#FF0000
       With Pad, "ColorSet", -1
+      Method Pad, "SetBarStyle", color(50, 100,  200), 5, 15
       Method Pad, "ColorsReset"
       Method Pad, "ResetSelColors"
       Method Pad, "Show"
@@ -20800,7 +20809,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<10 then Error "No proper M2000 version (must be >=9.9)"
-If Version=10 and revision<7 then Error "No proper M2000 revision for version 10"
+If Version=10 and revision<8 then Error "No proper M2000 revision for version 10"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -25791,30 +25800,32 @@ MODULE POLYGONS {module drawPolygon {
       step d
 }
 module clearScreen {
-cls 5
-back {cls 5}
-window 12, 14000,10000;
-cursor 0,0
-gradient 6,1
-double
-path  {
-      report 2 , "POLYGON EXAMPLE"
-};    
-normal
-gradient 4,13,0
-\* RESET THE path
-move 0,0
-path {
-      polygon 0, x.twips, 0,0,y.twips,-x.twips,0,0,-y.twips
-};
-cursor 0,0
-double
-width 2 {
-color  {
-      report 2 , "POLYGON EXAMPLE"
-}
-}
-normal
+    cls 5
+    back {cls 5}
+    window 12, 14000,10000;
+    cursor 0,0
+    gradient 6,1
+    double
+    path  {
+          report 2 , "POLYGON EXAMPLE"
+    };    
+    normal
+    gradient 4,13,0
+    \* RESET THE path  (path and color is the same statement)
+    move 0,0
+    // old way:
+    //path {
+    //      polygon 0, x.twips, 0,0,y.twips,-x.twips,0,0,-y.twips
+    //};
+    path {};
+    cursor 0,0
+    double
+    width 2 {
+    color  {
+          report 2 , "POLYGON EXAMPLE"
+    }
+    }
+    normal
 }
 clearScreen
 show
