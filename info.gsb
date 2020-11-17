@@ -5018,11 +5018,11 @@ Function Notepad.Resize {
 	With NotePad, "Width" as NP.Width, "Height" as NP.Height, "TitleHeight" as tHeight
 	tHeight1=theight*2
 	if onetime then
-		Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
-		Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
-		Method Run1,"move",  twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
-		Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*80, tHeight
-		Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*160, tHeight
+		Method File1,"move", twipsX*3, tHeight,  twipsX*80, tHeight
+		Method Edit1,"move", twipsX*3+twipsX*80, tHeight,  twipsX*80, tHeight
+		Method Run1,"move",  twipsX*3+twipsX*160, tHeight,  twipsX*80, tHeight
+		Method Help1,"move", twipsX*3+twipsX*240, tHeight,  twipsX*80, tHeight
+		Method Inform1,"move", twipsX*3+twipsX*320, tHeight,  twipsX*160, tHeight
 		onetime=false
 	End if
 	local oldhelpshow=helpshow
@@ -5031,12 +5031,12 @@ Function Notepad.Resize {
 			local free=NP.Height-tHeight1-twipsX*3
 			local third=free/3
 			free=free-third-twipsX*3
-			Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, free
+			Method Pad,"move", twipsX*3, tHeight1,  NP.Width-twipsX*6, free
 			Method HelpPad,"move", twipsX*2, tHeight1+free+twipsX*3,  NP.Width-twipsX*5,third
 			helpshow=true
 		Else
 			helpshow=false
-			Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsX*3
+			Method Pad,"move", twipsX*3, tHeight1,  NP.Width-twipsX*6, NP.Height-tHeight1-twipsY*3
 		End If
 		With Pad, "NoWrap" as NoWrap
 		If  Not NoWrap or not FromHelp Then
@@ -5423,7 +5423,7 @@ Pen 0 {
 	Print
 	Normal
 	italic
-	Report " A collection of modules for tests version 27 for M2000 Interpreter version 10, revision 8 and above"
+	Report " A collection of modules for tests version 28 for M2000 Interpreter version 10, revision 9 and above"
 	italic
 	Pen 5{
 		cursor 0, row-1
@@ -5736,13 +5736,15 @@ MODULE FORM44 {Module TryIt {
 	            }
 	            .Butt()=Button1()
 	      }
-	     Layer Form1(i) {
-	            Cls 4, 0
-	            Gradient 1,4
-	            Cursor 0,3
-	            Report 2, "Hello There"
-	     }
-	      Method Form1(i), "Show"
+            With Form1(i), "TitleBarColor",#aaaa88, "TitleTextColor",14, "TitleIconColor",#eeeeee
+            Method Form1(i), "TransparentTitle"
+            Layer Form1(i) {
+                Cls 4, 0
+                Gradient 1,4
+                Cursor 0,3
+                Report 2, "Hello There"
+            }
+            Method Form1(i), "Show"
 	}
 	\\ check this. After 6 second we can unload two forms
 	\\ Ttry to close anything. You can without a problem
@@ -5925,13 +5927,15 @@ Layer Simple {
       Linespace 60
       Font "Arial Black"
       Window 16, 8000,6000
-      Cls 7,0 
+      gradient 11, 1, 0
       Cursor 0, height div 2
       Report 2,"Hello World"
 }
 \\ now put a ListBox
 Declare Listbox1 Listbox Form Simple
 Method Listbox1, "move", 1000,1000,6000,4000
+//Method Listbox1, "SetBarStyle", 11
+Method Listbox1, "SetBarStyle", color(50, 100,  200), 3
 \\ and fill with some data
 With ListBox1,"Text",{London
                                     Paris
@@ -6005,7 +6009,7 @@ Function simple.click {
 Function Simple.Resize {
       Layer Simple {
             Mode 16
-            Cls 7,0
+	     gradient 11, 1, 0
             Cursor 0, height div 2
             Report 2,"Hello World"
             Method Listbox1,"Refresh"
@@ -6013,8 +6017,10 @@ Function Simple.Resize {
       \\ we put a refresh to console because
       \\ when this handler run, can't run thread k.
       Layer { Refresh}
+      Method Simple, "refreshALL"
 }
 \\ now we want to show (without modal showing)
+Method Simple, "TransparentTitle"
 Method Simple, "Show"
 \\ We can put a background task (a thread), triggering each 100 mSec
 Thread {
@@ -17461,7 +17467,7 @@ For This {
       With Help1, "MenuGroup","This"
       Method Help1, mi$, "About", True
       Method Help1, mi$,""
-      Method Help1, mi$,"Bright Themel",true
+      Method Help1, mi$,"Bright Theme",true
       Method Help1, mi$,"Dark Theme",true
 }
 
@@ -17482,13 +17488,13 @@ Function Notepad.Resize {
       Layer NotePad { Cls Color(255, 160, 0) ,0}
       With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
       tHeight1=theight*2
-      Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
-      Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
-      Method Run1,"move", twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
-      Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*160, tHeight
-      Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*240, tHeight
+      Method File1,"move", twipsX*3, tHeight,  twipsX*80, tHeight
+      Method Edit1,"move", twipsX*3+twipsX*80, tHeight,  twipsX*80, tHeight
+      Method Run1,"move", twipsX*3+twipsX*160, tHeight,  twipsX*80, tHeight
+      Method Help1,"move", twipsX*3+twipsX*240, tHeight,  twipsX*160, tHeight
+      Method Inform1,"move", twipsX*3+twipsX*320, tHeight,  twipsX*240, tHeight
       If NP.height>1000 Then {
-            Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
+            Method Pad,"move", twipsX*3, tHeight1,  NP.Width-twipsX*6, NP.Height-tHeight1-twipsY*3
             With Pad, "NoWrap" As NoWrap
             If Not NoWrap Then Method Pad,"Resize"
       }
@@ -17964,12 +17970,15 @@ first$={ΠΡΟΓΡΑΜΜΑ Κυκλική_Ουρά
 }
 Title$="Πρόχειρο Γλώσσας"
 Dir User
+oldlinespace=linespace
+linespace 60
 Declare NotePad Form
-
+linespace=oldlinespace
+//Method NotePad, "TransparentTitle"
 Declare Pad EditBox Form NotePad
 Declare Inform1 Button Form NotePad
 With Inform1, "Caption" as Informe$
-Method Inform1, "Colors", 15, #FFA000
+Method Inform1, "Colors", 15, #aaaaee  '#FFA000
 With Inform1, "Locked", True
 Declare File1 Combobox Form NotePad
 Declare Edit1 Combobox Form NotePad
@@ -18066,20 +18075,24 @@ Function Pad.Help {
       call local Help1.DblClick(if(lastword$=""->0,1))
 }
 Function Notepad.Resize {
-      Layer NotePad { Cls Color(255, 160, 0) ,0}
+      Layer NotePad {
+//      Cls #aaaaee ,0
+gradient  #aaaaee, 1
+      }
       With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
       
       tHeight1=theight*2
       local theight2=theight*.8, theight0=theight*1.2
-      Method File1,"move", twipsX*2, theight0,  twipsX*100, tHeight2
-      Method Edit1,"move", twipsX*2+twipsX*100, theight0,  twipsX*160, tHeight2
-      Method Help1,"move", twipsX*2+twipsX*260, theight0,  twipsX*120, tHeight2
-      Method Inform1,"move", twipsX*2+twipsX*360, theight0,  twipsX*120, tHeight2
+      Method File1,"move", twipsX*3, theight0,  twipsX*100, tHeight2
+      Method Edit1,"move", twipsX*3+twipsX*120, theight0,  twipsX*160, tHeight2
+      Method Help1,"move", twipsX*3+twipsX*300, theight0,  twipsX*120, tHeight2
+      Method Inform1,"move", twipsX*3+twipsX*420, theight0,  twipsX*120, tHeight2
       If NP.height>2000 Then {
-            Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
+            Method Pad,"move", twipsX*3, tHeight1,  NP.Width-twipsX*6, NP.Height-tHeight1-twipsY*3
             With Pad, "NoWrap" As NoWrap
             If Not NoWrap Then Method Pad,"Resize"
       }
+      Method NotePad, "refreshAll"
 }
 Function LessI(){
       Method Pad,"SetRowColumn", This_line, 0, true
@@ -18254,6 +18267,13 @@ Function Notepad.InfoClick {
 	If X=0 Then Call Local Help1.DblClick(0)  ' 0 for first menu item
 }
 Call Local Notepad.Resize()
+With NotePad, "TitleBarColor",#88aacc, "TitleTextColor",11, "TitleIconColor",#eeeeee
+Method NotePad, "transparentTitle"
+Method Pad, "SetBarStyle", #88aacc, -1
+Method File1, "transparent"
+Method Edit1, "transparent"
+Method Help1, "transparent"
+Method Inform1, "transparent"
 
 After 100 {Title "", 0}
 Method NotePad,"Show" , 1
@@ -18411,13 +18431,13 @@ Function Notepad.Resize {
       Layer NotePad { Cls Color(255, 160, 0) ,0}
       With NotePad, "Width" As NP.Width, "Height" As NP.Height, "TitleHeight" As tHeight
       tHeight1=theight*2
-      Method File1,"move", twipsX*2, tHeight,  twipsX*80, tHeight
-      Method Edit1,"move", twipsX*2+twipsX*80, tHeight,  twipsX*80, tHeight
-      Method Tools,"move", twipsX*2+twipsX*160, tHeight,  twipsX*80, tHeight
-      Method Help1,"move", twipsX*2+twipsX*240, tHeight,  twipsX*160, tHeight
-      Method Inform1,"move", twipsX*2+twipsX*320, tHeight,  twipsX*240, tHeight
+      Method File1,"move", twipsX*3, tHeight,  twipsX*80, tHeight
+      Method Edit1,"move", twipsX*3+twipsX*80, tHeight,  twipsX*80, tHeight
+      Method Tools,"move", twipsX*3+twipsX*160, tHeight,  twipsX*80, tHeight
+      Method Help1,"move", twipsX*3+twipsX*240, tHeight,  twipsX*160, tHeight
+      Method Inform1,"move", twipsX*3+twipsX*320, tHeight,  twipsX*240, tHeight
       If NP.height>1000 Then {
-            Method Pad,"move", twipsX*2, tHeight1,  NP.Width-twipsX*5, NP.Height-tHeight1-twipsx*3
+            Method Pad,"move", twipsX*3, tHeight1,  NP.Width-twipsX*6, NP.Height-tHeight1-twipsY*3
             With Pad, "NoWrap" As NoWrap
             If Not NoWrap Then Method Pad,"Resize"
       }
@@ -20809,7 +20829,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<10 then Error "No proper M2000 version (must be >=9.9)"
-If Version=10 and revision<8 then Error "No proper M2000 revision for version 10"
+If Version=10 and revision<9 then Error "No proper M2000 revision for version 10"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user
@@ -22379,6 +22399,8 @@ Layer Form1 {
 		}
 	} as mm interval 1000/24
 }
+With Form1, "TitleBarColor",#aaaa88, "TitleTextColor",14, "TitleIconColor",#eeeeee
+Method Form1, "TransparentTitle"
 Method Form1, "Show", 1
 Threads Erase
 Declare Form1 Nothing

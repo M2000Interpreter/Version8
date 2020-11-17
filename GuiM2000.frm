@@ -45,9 +45,9 @@ Begin VB.Form GuiM2000
       TabStop         =   0   'False
       Top             =   0
       Width           =   9180
-      _extentx        =   16193
-      _extenty        =   873
-      max             =   1
+      _ExtentX        =   16193
+      _ExtentY        =   873
+      Max             =   1
       Vertical        =   -1  'True
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Arial"
@@ -104,7 +104,7 @@ Dim onetime As Boolean, PopupOn As Boolean
 Dim alfa As New GuiButton
 Public modulename$
 Public prive As Long
-Private ByPassEvent As Boolean
+Private ByPassEvent As Boolean, mBarColor As Long, mIconColor As Long
 Private mIndex As Long
 Private mSizable As Boolean, mNoTaskBar As Boolean
 Public Relax As Boolean
@@ -443,7 +443,7 @@ ResizeMark.Height = MarkSize * dv15
 ResizeMark.Left = Width - MarkSize * dv15
 ResizeMark.top = Height - MarkSize * dv15
 
-ResizeMark.backcolor = GetPixel(Me.Hdc, 0, 0)
+ResizeMark.backcolor = GetPixel(Me.Hdc, Width - MarkSize * dv15, Height - MarkSize * dv15)
 ResizeMark.Visible = Sizable
 If Sizable Then ResizeMark.ZOrder 0
 If HOOKTEST <> 0 Then UnHook HOOKTEST
@@ -666,14 +666,16 @@ Private Sub Form_Resize()
 If Me.WindowState <> 0 Then WindowState = 0: Exit Sub
 gList2.MoveTwips 0, 0, Me.Width, gList2.HeightTwips
 ResizeMark.move Width - ResizeMark.Width, Height - ResizeMark.Height
+ResizeMark.backcolor = GetPixel(Me.Hdc, Width \ dv15 - 1, Height \ dv15 - 1)
 End Sub
 
 
 Private Sub gList2_BlinkNow(Face As Boolean)
+
 If mTimes > 0 Then
     mTimes = mTimes - 1
     If mTimes = 0 Then
-    gList2.BlinkON = False: gList2.CapColor = rgb(255, 160, 0)
+    gList2.BlinkON = False: gList2.CapColor = mBarColor
     If Stored Then RestoreBlibkStatus
     Else
         state Face
@@ -681,7 +683,6 @@ If mTimes > 0 Then
 Else
     state Face
 End If
-
 gList2.ShowMe
 If Stored Then Exit Sub
   If mIndex >= 0 Then
@@ -744,9 +745,9 @@ Private Sub gList2_ExposeRect(ByVal item As Long, ByVal thisrect As Long, ByVal 
 If item = -1 Then
 Dim m As Long
 m = gList2.CapColor
-FillThere thisHDC, thisrect, m
-FillThereMyVersion thisHDC, thisrect, m, UseReverse
-If mSizable And mShowMaximize Then FillThereMyVersion3 thisHDC, thisrect, m, 0, UseReverse Else minimPos = 0
+If gList2.BlinkON Or Not gList2.NoHeaderBackground Then FillThere thisHDC, thisrect, m
+FillThereMyVersionTrans thisHDC, thisrect, m, UseReverse
+If mSizable And mShowMaximize Then FillThereMyVersion3Trans thisHDC, thisrect, m, 0, UseReverse Else minimPos = 0
 If drawminimized Then FillThereMyVersion2 thisHDC, thisrect, minimPos, UseReverse
 If UseInfo Then FillThereMyVersion4 thisHDC, thisrect, infopos, UseReverse
 If mIcon Then
@@ -859,7 +860,7 @@ If mSizable And mShowMaximize Then
         Else
            Callback mMyName$ + ".Resize()"
         End If
-
+        ResizeMark.backcolor = GetPixel(Me.Hdc, Width \ dv15 - 1, Height \ dv15 - 1)
         If IhaveLastPos Then
                 
                 If mIndex > -1 Then
@@ -956,6 +957,7 @@ If mSizable And mShowMaximize Then
         Else
            Callback mMyName$ + ".Resize()"
         End If
+        ResizeMark.backcolor = GetPixel(Me.Hdc, Width \ dv15 - 1, Height \ dv15 - 1)
         If IhaveLastPos Then
                 If mIndex > -1 Then
                     Callback mMyName$ + ".Maximized(" + CStr(Index) + ")"
@@ -1037,7 +1039,9 @@ setupxy = 20
 gList2.FreeMouse = True
 gList2.Font.Size = 14.25 * dv15 / 15
 gList2.enabled = True
-gList2.CapColor = rgb(255, 160, 0)
+mIconColor = 0
+mBarColor = rgb(255, 160, 0)
+gList2.CapColor = mBarColor
 gList2.FloatList = True
 gList2.MoveParent = True
 gList2.HeadLine = vbNullString
@@ -1102,6 +1106,36 @@ CopyFromLParamToRect a, thatRect
 
 FillBack thathDC, a, thatbgcolor
 End Sub
+Private Sub FillThereMyVersionTrans(thathDC As Long, thatRect As Long, thatbgcolor As Long, Reverse As Boolean)
+Dim a As RECT, b As Long, aline As RECT
+b = 2 * lastfactor
+If b < 2 Then b = 2
+If setupxy - b < 0 Then b = setupxy \ 4 + 1
+CopyFromLParamToRect a, thatRect
+If Reverse Then
+    a.Left = a.Right - setupxy + b
+    a.Right = a.Right - b
+Else
+    a.Left = b
+    a.Right = setupxy - b
+End If
+a.top = b
+a.Bottom = setupxy - b
+If b < 1 Then b = 1 Else b = b * 2 - 1
+aline = a
+aline.Left = a.Right - b
+FillThere thathDC, VarPtr(aline), mIconColor
+aline = a
+aline.Right = a.Left + b
+FillThere thathDC, VarPtr(aline), mIconColor
+
+aline = a
+aline.Bottom = a.top + b
+FillThere thathDC, VarPtr(aline), mIconColor
+aline = a
+aline.top = a.Bottom - b
+FillThere thathDC, VarPtr(aline), mIconColor
+End Sub
 Private Sub FillThereMyVersion(thathDC As Long, thatRect As Long, thatbgcolor As Long, Reverse As Boolean)
 Dim a As RECT, b As Long
 b = 2 * lastfactor
@@ -1117,7 +1151,7 @@ Else
 End If
 a.top = b
 a.Bottom = setupxy - b
-FillThere thathDC, VarPtr(a), 0
+FillThere thathDC, VarPtr(a), mIconColor
 CopyFromLParamToRect a, thatRect
 b = 5 * lastfactor
 If Reverse Then
@@ -1154,7 +1188,40 @@ a.top = a.Bottom - 1
 Else
 a.top = setupxy - b
 End If
-FillThere thathDC, VarPtr(a), 0
+FillThere thathDC, VarPtr(a), mIconColor
+End Sub
+Private Sub FillThereMyVersion3Trans(thathDC As Long, thatRect As Long, thatbgcolor As Long, butPos As Long, Reverse As Boolean)
+Dim a As RECT, b As Long, c As Long
+b = 2 * lastfactor
+If b < 2 Then b = 2
+If setupxy - b < 0 Then b = setupxy \ 4 + 1
+c = setupxy * butPos
+CopyFromLParamToRect a, thatRect
+If Reverse Then
+    a.Left = a.Right - (c + setupxy * 2) + b
+    a.Right = a.Right - b - c - setupxy
+Else
+    a.Left = b + c + setupxy
+    a.Right = setupxy - 2 * b + a.Left
+End If
+a.top = 3 * b
+a.Bottom = setupxy - b
+Dim aline As RECT
+If b < 2 Then b = 2 Else b = b * 2 - 1
+aline = a
+aline.Left = a.Right - b
+FillThere thathDC, VarPtr(aline), mIconColor
+aline = a
+aline.Right = a.Left + b
+FillThere thathDC, VarPtr(aline), mIconColor
+
+aline = a
+aline.Bottom = a.top + b
+FillThere thathDC, VarPtr(aline), mIconColor
+aline = a
+aline.Bottom = a.Bottom - b * 2
+aline.top = a.Bottom - b
+FillThere thathDC, VarPtr(aline), mIconColor
 End Sub
 Private Sub FillThereMyVersion3(thathDC As Long, thatRect As Long, thatbgcolor As Long, butPos As Long, Reverse As Boolean)
 Dim a As RECT, b As Long, c As Long
@@ -1172,7 +1239,7 @@ Else
 End If
 a.top = 3 * b
 a.Bottom = setupxy - b
-FillThere thathDC, VarPtr(a), 0
+FillThere thathDC, VarPtr(a), mIconColor
 CopyFromLParamToRect a, thatRect
 b = 5 * lastfactor
 If b < 2 Then b = 2
@@ -1202,10 +1269,11 @@ End Sub
 Private Sub FillThereMyVersion4(thathDC As Long, thatRect As Long, butPos As Long, Reverse As Boolean)
 Dim a As RECT, b As Long, c As Long
 Dim color1 As Long
+color1 = mIconColor
 If Not moveMe And Not ByPassColor Then
 If Screen.ActiveForm Is Me Then
 If Screen.ActiveControl Is gList2 Then
-color1 = 16777215
+If mIconColor = 16777215 Then color1 = 32768 Else color1 = 16777215
 End If
 End If
 End If
@@ -1469,6 +1537,8 @@ If VirtualScreenWidth < movemeX Then movemeX = VirtualScreenWidth
                     Callback mMyName$ + ".Resize()"
                 End If
                 Form_Resize
+                
+
 End If
 KeyCode = 0
 Exit Sub
@@ -1676,6 +1746,7 @@ If Not Relax Then
                 Else
                     Callback mMyName$ + ".Resize()"
                 End If
+                ResizeMark.backcolor = GetPixel(Me.Hdc, Width \ dv15 - 1, Height \ dv15 - 1)
             End If
         End If
         Relax = False
@@ -1810,6 +1881,7 @@ Case 3
         Else
            Callback mMyName$ + ".Resize()"
         End If
+        ResizeMark.backcolor = GetPixel(Me.Hdc, Width \ dv15 - 1, Height \ dv15 - 1)
     MenuSet 2
     End If
 Case 4
@@ -1819,6 +1891,7 @@ Case 4
         Else
            Callback mMyName$ + ".Resize()"
         End If
+        
     MenuSet 3
     End If
 Case 5
@@ -2220,11 +2293,19 @@ gList2.PaintPicture1 picthis, gList2.WidthPixels - msize, 0, msize, msize
 End If
 Else
 If Not UseReverse Then
+If Not gList2.NoHeaderBackground Then
 DrawIconEx HDC1, gList2.WidthPixels - msize, 0, picthis, msize, msize, 0, my_brush, 1
+Else
+DrawIconEx HDC1, gList2.WidthPixels - msize, 0, picthis, msize, msize, 0, 0, &H3
+End If
 DrawIconEx HDC1, gList2.WidthPixels - msize, 0, picthis, msize, msize, 0, 0, &H3
 
 Else
+If Not gList2.NoHeaderBackground Then
 DrawIconEx HDC1, 0, 0, picthis, msize, msize, 0, my_brush, 1
+Else
+DrawIconEx HDC1, 0, 0, picthis, msize, msize, 0, 0, &H3
+End If
 DrawIconEx HDC1, 0, 0, picthis, msize, msize, 0, 0, &H3
 End If
 End If
@@ -2341,3 +2422,34 @@ End Property
 Property Get HookStatus() As Long
 HookStatus = HOOKTEST
 End Property
+Property Let TitleBarColor(RHS As Long)
+    mBarColor = mycolor(RHS)
+    gList2.CapColor = mBarColor
+End Property
+Property Let TitleTextColor(RHS As Long)
+    gList2.forecolor = mycolor(RHS)
+End Property
+Property Let TitleIconColor(RHS As Long)
+    mIconColor = mycolor(RHS)
+End Property
+
+Sub TransparentTitle()
+Dim x  As Long, y As Long
+gList2.NoHeaderBackground = True
+gList2.BackStyle = 1
+gList2.GetLeftTop x, y
+gList2.RepaintFromOut Me.Image, x, y
+gList2.ShowMe
+RefreshList = RefreshList + 1
+End Sub
+Sub OpaqueTtile()
+On Error Resume Next
+If Not glistN Is Nothing Then
+gList2.NoHeaderBackground = False
+gList2.BackStyle = 0
+gList2.backcolor = 0
+gList2.PanPos = 0
+gList2.ShowMe
+RefreshList = RefreshList - 1
+End If
+End Sub

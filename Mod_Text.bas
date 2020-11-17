@@ -88,7 +88,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 8
+Global Const Revision = 9
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -27354,6 +27354,7 @@ Function ReadPropIndex(fromIndex As Long, ByVal propIndex As Long, myIndex As Va
 Dim o As Object, er$, check As Boolean, usehandler As mHandler
 On Error GoTo there
 Set o = var(fromIndex)
+If o Is Nothing Then Exit Function
 If TypeOf o Is mHandler Then
 propIndex = -propIndex
 Set usehandler = o
@@ -27382,6 +27383,7 @@ End Function
 Sub WriteProp(fromIndex As Long, ByVal propIndex As Long, Anyval As Variant)
 Dim o As Object, er$, usehandler As mHandler
 Set o = var(fromIndex)
+If o Is Nothing Then Exit Sub
 If TypeOf o Is mHandler Then
 propIndex = -propIndex
 Set usehandler = o
@@ -27400,6 +27402,7 @@ End Sub
 Sub WritePropIndex(fromIndex As Long, ByVal propIndex As Long, Anyval As Variant, myIndex)
 Dim o As Object, er$, usehandler As mHandler
 Set o = var(fromIndex)
+If o Is Nothing Then Exit Sub
 If TypeOf o Is mHandler Then
 propIndex = -propIndex
 Set usehandler = o

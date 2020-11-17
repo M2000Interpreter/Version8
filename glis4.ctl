@@ -354,6 +354,7 @@ Public WordCharRightButIncluded As String
 Public WordCharLeftButIncluded As String
 Public DropEnabled As Boolean
 Public DragEnabled As Boolean
+Public NoHeaderBackground As Boolean
 Private Declare Function GetLocaleInfo Lib "kernel32" Alias "GetLocaleInfoW" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As Long, ByVal cchData As Long) As Long
 Private Declare Function GetKeyboardLayout& Lib "user32" (ByVal dwLayout&) ' not NT?
 Private Const DWL_ANYTHREAD& = 0
@@ -3060,7 +3061,7 @@ If mHeadlineHeight <> hnr.Bottom Then
 HeadlineHeight = hnr.Bottom
 nr.Bottom = mHeadlineHeight
 End If
-FillBack UserControl.Hdc, nr, CapColor
+If Not NoHeaderBackground Then FillBack UserControl.Hdc, nr, CapColor
 End If
 hnr.top = (nr.Bottom - hnr.Bottom) \ 2
 hnr.Bottom = nr.Bottom - hnr.top
@@ -3351,7 +3352,7 @@ If mHeadlineHeight <> hnr.Bottom Then
 HeadlineHeight = hnr.Bottom
 nr.Bottom = mHeadlineHeight
 End If
-FillBack UserControl.Hdc, nr, CapColor
+If Not NoHeaderBackground Then FillBack UserControl.Hdc, nr, CapColor
 End If
 hnr.top = (nr.Bottom - hnr.Bottom) \ 2
 hnr.Bottom = nr.Bottom - hnr.top

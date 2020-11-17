@@ -1,9 +1,9 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 8 active-X
-1. Fix a bug in xmlData object. Now is perfect
-2. Additions in EditBox, ListBox, Combo, for changing colors/style of vertical scroll bar. See example in cs module.
-3. All lists including Editbox (text editor) now show  part of text line at the bottom if happen to exist (previous we got a white zone at that part)
+Version 10 revision 9 active-X
+1. Change color/style for vertical scroll bar in M2000 user controls. Examples in Info to demostrate this cs, List33, ΓΛΩΣΣΑ
+2. Transparent header for forms. Examples in Info who changed for demostration: TextOnly, List33, ΓΛΩΣΣΑ, Form44
+
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
