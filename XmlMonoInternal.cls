@@ -872,6 +872,18 @@ againtag:
     End If
 End If
 End Sub
+Private Sub insertnode2(node)
+' tuple
+If Not IsArray(root) Then
+    If (node(3) And 2) = 2 Then
+        root = Array(node(0), node(1), node(2), node(3), "<![CDATA[" + node(4) + "]]>", node(5))
+    Else
+        root = Array(node(0), node(1), node(2), node(3), node(4), node(5))
+    End If
+Else
+    MyEr "I have node", "έχω κόμβο"
+End If
+End Sub
 Friend Sub createfromtext(t$, pc As Long, st As Long)
 Dim n1 As Long, n2 As Long, Tag$, node, val$
 again:
@@ -908,7 +920,7 @@ lookfortagagain:
                             If Mid$(t$, pc, 1) = "/" Then
 entry2:
                                 If Mid$(t$, pc + 1, Len(node(0)) + 1) = node(0) + ">" Then
-                                    insertnode node
+                                    insertnode2 node
                                     pc = pc + Len(node(0)) + 2
                                     Exit Sub
                                 End If
@@ -920,7 +932,7 @@ entry2:
                     Else
                     If Mid$(t$, pc, 2) = "/>" Then
                             node(3) = node(3) And &HFFFFFFFE  ' FALSE BIT 0
-                            insertnode node
+                            insertnode2 node
                             pc = pc + 1
                             
                         End If
@@ -948,7 +960,7 @@ entry2:
                                     If AdvanceAnySpaceorGT(t$, pc, st) Then
                                         If Mid$(t$, pc - 1, 1) = ">" Then
 newentry:
-                                            insertnode node
+                                            insertnode2 node
                                             ' check for <
                                             If AdvanceAnySpaceorLT(t$, pc, st) Then
                                                 If Mid$(t$, pc + 1, 1) = "/" Then pc = pc + 1: GoTo here
@@ -1003,7 +1015,7 @@ here:
                     ElseIf n2 <> 0 Or Tag$ = "" Then
                         If Mid$(t$, pc, 1) = ">" Then
                             node(3) = node(3) And &HFFFFFFFE
-                            insertnode node
+                            insertnode2 node
                             pc = pc + 1
                             End If
                         End If

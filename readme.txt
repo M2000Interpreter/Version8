@@ -1,8 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 9 active-X
-1. Change color/style for vertical scroll bar in M2000 user controls. Examples in Info to demostrate this cs, List33, ΓΛΩΣΣΑ
-2. Transparent header for forms. Examples in Info who changed for demostration: TextOnly, List33, ΓΛΩΣΣΑ, Form44
+Version 10 revision 10 active-X
+Fix xmldata object's parser
 
 
 George Karras, Kallithea Attikis, Greece.
