@@ -22,7 +22,8 @@ Dim hardlink As Object, useobj As Boolean
 Private mLastObj As Object
 Public Arr As Boolean
 Dim oEnum As IUnknown
-
+Private IndexList As mIndexes
+Private IndexNew As Boolean
 Function IsObj()
     IsObj = useobj
 End Function
@@ -56,17 +57,23 @@ Public Sub clearlastobject()
 Set mLastObj = Nothing
 End Sub
 Public Property Get Value() As Variant
-
+Dim v
 Dim RETVAR As Variant, retvar2, obj As Object
 Dim check As Boolean
 Set mLastObj = Nothing
 If Init Then
 If UseIndex Then
-If useobj Then
- Value = ReadPropIndexObj(hardlink, vtref, mIndex)
+If Not IndexNew Then
+ Value = 0
+Set mLastObj = Me
+Exit Property
+ElseIf useobj Then
+    IndexNew = False
+    Value = ReadPropIndexObj(hardlink, vtref, mIndex)
 Else
-  Value = ReadPropIndex(ObjectRef, vtref, mIndex, check, RETVAR)
- If check And IsObject(RETVAR) Then
+    IndexNew = False
+    Value = ReadPropIndex(ObjectRef, vtref, mIndex, check, RETVAR)
+    If check And IsObject(RETVAR) Then
     On Error Resume Next
     Set obj = RETVAR
     If ReadOneParameter(obj, (0), vbNullString, retvar2) Then
@@ -123,12 +130,15 @@ WritePropObj hardlink, vtref, vNewValue
 Else
 WriteProp ObjectRef, vtref, vNewValue
 End If
-Else
-If useobj Then
+ElseIf Not IndexNew Then
+    MyEr "Missing index", "Έχασα τον δείκτη"
+    Exit Property
+ElseIf useobj Then
+IndexNew = False
 WritePropIndexObj hardlink, vtref, vNewValue, mIndex
 Else
+IndexNew = False
 WritePropIndex ObjectRef, vtref, vNewValue, mIndex
-End If
 End If
 End If
 
@@ -140,18 +150,23 @@ SwapString2Variant s, vNewValue
 If Init Then
 If Not UseIndex Then
 If useobj Then
-WritePropObj hardlink, vtref, vNewValue
+    WritePropObj hardlink, vtref, vNewValue
 Else
-WriteProp ObjectRef, vtref, vNewValue
+    WriteProp ObjectRef, vtref, vNewValue
 End If
+ElseIf Not IndexNew Then
+' do nothing
+    MyEr "Missing index", "Έχασα τον δείκτη"
+    Exit Property
+ElseIf useobj Then
+    IndexNew = False
+    WritePropIndexObj hardlink, vtref, vNewValue, mIndex
 Else
-If useobj Then
-WritePropIndexObj hardlink, vtref, vNewValue, mIndex
-Else
-WritePropIndex ObjectRef, vtref, vNewValue, mIndex
+    IndexNew = False
+    WritePropIndex ObjectRef, vtref, vNewValue, mIndex
 End If
 End If
-End If
+
 
 End Property
 Public Property Get isMethod() As Boolean
@@ -165,11 +180,32 @@ End Property
 Private Sub Class_Terminate()
 Set hardlink = Nothing
 End Sub
+Public Sub IndexOpt()
+IndexNew = True
+mIndex = 0
+OptVariant mIndex
+End Sub
 Public Property Get Index() As Variant
 Index = mIndex
 End Property
+Public Sub ArrayIndex(ParamArray RHS())
+'IndexNew = True
+    mIndex = RHS
+End Sub
 
 Public Property Let Index(ByVal RHS As Variant)
+IndexNew = True
 mIndex = RHS
 End Property
-
+Friend Sub PushIndexes(idx As mIndexes)
+IndexNew = True
+UseIndex = True
+If IndexList Is Nothing Then
+    If idx.count = 1 Then
+       idx.Dump 0, mIndex
+    End If
+End If
+End Sub
+Sub IndexAgain()
+    IndexNew = True
+End Sub

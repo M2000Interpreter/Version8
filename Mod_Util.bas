@@ -3229,7 +3229,7 @@ basketcode = GetCode(D)
 
 Form1.IEUP ""
 Form1.KeyPreview = True
-Dim dummy As Boolean, rs As String, mPen As Long, ICO As Long, BAR As Long, bar2 As Long
+Dim Dummy As Boolean, rs As String, mPen As Long, ICO As Long, BAR As Long, bar2 As Long
 BAR = 1
 Form1.DIS.Visible = True
 GDILines = False  ' reset to normal ' use Smooth on to change this to true
@@ -3382,7 +3382,7 @@ End If
 If Not ASKINUSE Then Unload NeoMsgBox
 End If
 If Not skipthat Then
-    If Len(COM$) > 0 Then dummy = interpret(bstack, COM$)
+    If Len(COM$) > 0 Then Dummy = interpret(bstack, COM$)
 End If
 'cr bstack
 End Sub
@@ -7511,7 +7511,7 @@ Do
     End If
 Loop
 End Sub
-Public Function StringToEscapeStr(RHS As String, Optional json As Boolean = False) As String
+Public Function StringToEscapeStr(RHS As String, Optional Json As Boolean = False) As String
 Dim i As Long, cursor As Long, ch As String
 cursor = 0
 Dim del As String
@@ -7523,7 +7523,7 @@ For i = 1 To Len(RHS)
                     Case 92:        ch = "\\"
                    ' Case """":       ch = "\"""
                     Case 34
-                    If json Then
+                    If Json Then
                         ch = "\"""
                     Else
                         ch = "\u0022"
@@ -7536,7 +7536,7 @@ For i = 1 To Len(RHS)
                     Case 0 To 31, 127 To &H9F
                         ch = "\u" & Right$("000" & Hex$(AscW(ch)), 4)
                     Case Is > 255
-                       If json Then ch = "\u" & Right$("000" & Hex$(AscW(ch)), 4)
+                       If Json Then ch = "\u" & Right$("000" & Hex$(AscW(ch)), 4)
                 End Select
                 If cursor + Len(ch) > Len(StringToEscapeStr) Then StringToEscapeStr = StringToEscapeStr + space$(500)
                 Mid$(StringToEscapeStr, cursor, Len(ch)) = ch
@@ -10773,7 +10773,7 @@ Sub dset()
     End If
 ' NOW COPY
 ' for mcd
-Dim CD As String, dummy As Long, q$
+Dim CD As String, Dummy As Long, q$
 
 ''cd = App.Path
 ''AddDirSep cd
@@ -11892,7 +11892,7 @@ inside:
                         res = w3: Exit For
                         End If
                     Else
-                        If Typename(pppp.item(w3)) = "mHandler" Then
+                        If pppp.ItemType(w3) = "mHandler" Then
                             Set usehandler = pppp.item(w3)
                             If usehandler.t1 = 4 Then
                                 If usehandler.index_cursor * usehandler.sign = R Then res = w3: Exit For
@@ -11910,7 +11910,7 @@ inside:
                             If w3 < pppp.count Then
                                 If pppp.MyIsNumeric(pppp.item(w3)) Then
                                     If pppp.item(w3) <> sn(cur) Then w2 = -1
-                                ElseIf Typename(pppp.item(w3)) = "mHandler" Then
+                                ElseIf pppp.ItemType(w3) = "mHandler" Then
                                     Set usehandler = pppp.item(w3)
                                     If usehandler.t1 = 4 Then
                                         If usehandler.index_cursor * usehandler.sign <> sn(cur) Then w2 = -1
@@ -11939,7 +11939,7 @@ inside:
                                         If w4 < pppp.count Then
                                             If pppp.MyIsNumeric(pppp.itemnumeric(w4)) Then
                                                 If pppp.item(w4) <> sn(w2) Then res = -1: Exit For
-                                            ElseIf Typename(pppp.item(w4)) = "mHandler" Then
+                                            ElseIf pppp.ItemType(w4) = "mHandler" Then
                                                 Set usehandler = pppp.item(w4)
                                                 If usehandler.t1 = 4 Then
                                                     If usehandler.index_cursor * usehandler.sign <> sn(w2) Then res = -1
@@ -12567,7 +12567,7 @@ JUMPHERE:
         If Not pppp.Arr Then GoTo cont123
         If Not NeoGetArrayItem(pppp, bstack, Left$(actualvar, x1), w2, Mid$(actualvar, x1 + 1)) Then GoTo cont123
         If MyIsObject(var(LocalVar)) Then
-        If TypeOf pppp.item(w2) Is Group Then
+        If TypeOf pppp.itemObject(w2) Is Group Then
         If pppp.item(w2).IamApointer Then
             Set pppp.item(w2) = var(LocalVar)
         Else
@@ -12812,7 +12812,7 @@ Case 6
     W$ = "A" & CopyArrayItems(basestack, ss$) + Str(it) ''''''''''εδω για τον νεο πίνακα πρέπει να δώσω το mArray???
     s$ = frm$
     frm$ = pppp.item(it)
-    If Typename(pppp.item(it)) = doc Then
+    If pppp.ItemType(it) = doc Then
     Set pppp.item(it) = New Document
     Else
      pppp.item(it) = vbNullString
@@ -14035,25 +14035,26 @@ somethingelse:
                             Set bstack.lastobj = Nothing
                         End If
                     ElseIf TypeOf myobject Is mHandler Then
-                    If myobject.t1 = 4 Then
-                        If myobject.ReadOnly Then
+                    Set usehandler = myobject
+                    If usehandler.t1 = 4 Then
+                        If usehandler.ReadOnly Then
                                 ReadOnly
                              interpret = False
                                 GoTo there1
                         ElseIf ss$ = "++" Then
-                        If myobject.index_start < myobject.objref.count - 1 Then
-                            myobject.index_start = myobject.index_start + 1
-                            myobject.objref.Index = myobject.index_start
-                            myobject.index_cursor = myobject.objref.Value
+                        If usehandler.index_start < usehandler.objref.count - 1 Then
+                            usehandler.index_start = usehandler.index_start + 1
+                            usehandler.objref.Index = usehandler.index_start
+                            usehandler.index_cursor = usehandler.objref.Value
                         End If
                         ElseIf ss$ = "--" Then
-                    If myobject.index_start > 0 Then
-                            myobject.index_start = myobject.index_start - 1
-                            myobject.objref.Index = myobject.index_start
-                            myobject.index_cursor = myobject.objref.Value
+                    If usehandler.index_start > 0 Then
+                            usehandler.index_start = usehandler.index_start - 1
+                            usehandler.objref.Index = usehandler.index_start
+                            usehandler.index_cursor = usehandler.objref.Value
                         End If
                         ElseIf ss$ = "-!" Then
-                        myobject.sign = -myobject.sign
+                        usehandler.sign = -usehandler.sign
                         Else
                         NoOperatorForThatObject ss$
                          interpret = False
@@ -14067,6 +14068,8 @@ somethingelse:
                     End If
                 End If
             End If
+            Set usehandler = Nothing
+            Set myobject = Nothing
             GoTo loopcontinue1
             
 
@@ -14087,6 +14090,7 @@ checkobject1:
                             bstack.SetVar W$, p
                         End If
                         Set myobject = Nothing
+                        Set usehandler = Nothing
                         Set bstack.lastobj = Nothing
                         GoTo loopcontinue1
                     ElseIf IsStrExp(bstack, b$, ss$) Then
@@ -14834,13 +14838,13 @@ End If
 
 If IsOperator0(b$, ".") Then
 
-If Typename(pppp.item(v)) = "Group" Then
+If pppp.ItemType(v) = "Group" Then
 interpret = SpeedGroup(bstack, pppp, "", W$, b$, v)
 Set pppp = Nothing
 GoTo loopcontinue1
 End If
 ElseIf IsOperator(b$, "(") Then
-If Typename(pppp.item(v)) = myArray Then
+If pppp.ItemType(v) = myArray Then
 Set pppp = pppp.item(v)
 GoTo againarray22
 End If
@@ -14980,7 +14984,7 @@ If neoGetArray(bstack, W$, pppp) Then
 againstrarr22:
 If Not NeoGetArrayItem(pppp, bstack, W$, v, b$) Then interpret = False: here$ = ohere$: GoTo there1
 On Error Resume Next
-If Typename(pppp.item(v)) = myArray And pppp.Arr Then
+If pppp.ItemType(v) = myArray And pppp.Arr Then
 If FastSymbol(b$, "(") Then
 Set pppp = pppp.item(v)
 GoTo againstrarr22
@@ -15107,7 +15111,7 @@ If neoGetArray(bstack, W$, pppp) Then
 againintarr7:
 If Not NeoGetArrayItem(pppp, bstack, W$, v, b$) Then interpret = False: here$ = ohere$: GoTo there1
 On Error Resume Next
-If Typename(pppp.item(v)) = myArray And pppp.Arr Then
+If pppp.ItemType(v) = myArray And pppp.Arr Then
 If FastSymbol(b$, "(") Then
 Set pppp = pppp.item(v)
 GoTo againintarr7
@@ -16293,7 +16297,7 @@ If IsLabelSymbolNew(rest$, "ΣΤΟ", "TO", Lang) Then
             ElseIf x1 = 6 Then
                     If neoGetArray(basestack, what$, pppp) Then
                         If Not NeoGetArrayItem(pppp, basestack, what$, it, rest$) Then IdPara = False: Exit Function
-                        If Typename(pppp.item(it)) = doc Then
+                        If pppp.ItemType(it) = doc Then
                                     If Not FastSymbol(rest$, "=") Then
                                             MissSymbolMyEr "="
                                             IdPara = False
@@ -16443,7 +16447,7 @@ If IsLabelSymbolNew(rest$, "ΣΤΟ", "TO", Lang) Then
         
         If neoGetArray(basestack, what$, pppp) Then
                 If Not NeoGetArrayItem(pppp, basestack, what$, it, rest$) Then IdPara = False: Exit Function
-                If Typename(pppp.item(it)) = doc Then
+                If pppp.ItemType(it) = doc Then
                     If FastSymbol(rest$, "=") Then
                         If IsStrExp(basestack, rest$, s$) Then
                       If y = 0 Then
@@ -19055,7 +19059,32 @@ ElseIf IsLabelSymbolNew(rest$, "ΣΤΟΙΧΕΙΑXML", "XMLDATA", Lang) Then
         Next i
     End If
     Exit Function
-    
+ElseIf IsLabelSymbolNew(rest$, "ΠΙΝΑΚΑΣJSON", "JSONARRAY", Lang) Then
+    Y3 = False
+    If ar = 0 Then
+        Set var(i) = New JsonArray
+        
+    Else
+        Set pppp = var(ArrPos)
+        what$ = Left$(what$, Len(oName$))
+        For i = 0 To ar - 1
+            Set pppp.item(i) = New JsonArray
+        Next i
+    End If
+    Exit Function
+ElseIf IsLabelSymbolNew(rest$, "ΛΙΣΤΑJSON", "JSONOBJECT", Lang) Then
+    Y3 = False
+    If ar = 0 Then
+        Set var(i) = New JsonObject
+        
+    Else
+        Set pppp = var(ArrPos)
+        what$ = Left$(what$, Len(oName$))
+        For i = 0 To ar - 1
+            Set pppp.item(i) = New JsonObject
+        Next i
+    End If
+    Exit Function
 ElseIf IsLabelSymbolNew(rest$, "ΜΟΝΑΔΙΚΟ", "MUTEX", Lang) Then
     Y3 = False ' no withevents in declare
     If ar = 0 Then
@@ -19902,10 +19931,10 @@ useArray:
                  MissingArrayOrInventory
                  Exit Function
                  End If
-                 If TypeOf pppp.item(i) Is mHandler Then
+                 If TypeOf pppp.itemObject(i) Is mHandler Then
                     Set uHandler = pppp.item(i)
                     GoTo usehandler
-                 ElseIf TypeOf pppp.item(i) Is mArray Then
+                 ElseIf TypeOf pppp.itemObject(i) Is mArray Then
                     Set pppp = pppp.item(i)
                     GoTo useArray
                  End If
@@ -19930,10 +19959,10 @@ useArray:
                  MissingDocOrArrayOrInventory
                  Exit Function
                  End If
-                 If TypeOf pppp.item(i) Is mHandler Then
+                 If TypeOf pppp.itemObject(i) Is mHandler Then
                     Set uHandler = pppp.item(i)
                     GoTo usehandler
-                 ElseIf TypeOf pppp.item(i) Is mArray Then
+                 ElseIf TypeOf pppp.itemObject(i) Is mArray Then
                     Set pppp = pppp.item(i)
                     GoTo useArray
                  End If
@@ -19997,7 +20026,7 @@ sort3:
                    MissFuncParameterStringVar
             End If
         ElseIf y1 = 6 Then
-                    If Typename(pppp.item(i)) = doc Then
+                    If pppp.ItemType(i) = doc Then
                                 If desc Then
                                 pppp.item(i).SortDocDes ML, CLng(sX), x1
                                 Else
@@ -20123,7 +20152,7 @@ ElseIf x1 = 5 Or x1 = 6 Then
     If NeoGetArrayItem(pppp, bstack, s$, i, rest$) Then
       Do While FastSymbol(rest$, ",")
                     If IsStrExp(bstack, rest$, ss$) Then
-                    If TypeOf pppp.item(i) Is GuiM2000 Then
+                    If TypeOf pppp.itemObject(i) Is GuiM2000 Then
                       If UCase(ss$) = "VISIBLE" Then ss$ = "TrueVisible"
                       End If
                   ProcPropertyArray bstack, pppp, i, ss$, rest$, Lang, MyWith
@@ -22178,7 +22207,7 @@ Function GetWindowsDir() As String
     End If
 End Function
 Sub Portrait(bstack As basetask)
-Dim dummy As Object, try1 As Long
+Dim Dummy As Object, try1 As Long
 If UBound(MyDM) = 1 Then
 PrinterDim pw, ph, psw, psh, pwox, phoy
 End If
@@ -22198,7 +22227,7 @@ If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) > 1 Then
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         GoTo contnow
     Else
-        ChangeOrientation dummy, Printer.DeviceName, MyDM()
+        ChangeOrientation Dummy, Printer.DeviceName, MyDM()
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         Exit Sub
     End If
@@ -22246,7 +22275,7 @@ If bstack.toprinter Then
 End If
 End Sub
 Sub Landscape(bstack As basetask)
-Dim dummy As Object, try1 As Long
+Dim Dummy As Object, try1 As Long
 If UBound(MyDM) = 1 Then
 PrinterDim pw, ph, psw, psh, pwox, phoy
 End If
@@ -22265,7 +22294,7 @@ If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) < 1 Then
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         GoTo contnow
     Else
-        ChangeOrientation dummy, Printer.DeviceName, MyDM()
+        ChangeOrientation Dummy, Printer.DeviceName, MyDM()
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         Exit Sub
     End If
@@ -22691,7 +22720,7 @@ ProcFind = True
                     Exit Function
             End If
         ElseIf y1 = 6 Then
-                    If Typename(pppp.item(i)) = doc Then
+                    If pppp.ItemType(i) = doc Then
           
                         x1 = pppp.item(i).FindStr(ss$, x1, y1, Col)
                             If x1 > 0 Then
@@ -22744,7 +22773,7 @@ pass2:
                     If Not Typename(var(i)) = doc Then MissingDoc: Exit Function
                         Set doc1 = var(i)
                     ElseIf y1 = 6 Then
-                    If Not Typename(pppp.item(i)) = doc Then MissingDoc: Exit Function
+                    If Not pppp.ItemType(i) = doc Then MissingDoc: Exit Function
                         Set doc1 = pppp.item(i)
                     
                     End If       '
@@ -22832,7 +22861,7 @@ sdmess:
                     Exit Function
             End If
         ElseIf y1 = 6 Then
-                    If Typename(pppp.item(i)) = doc Then
+                    If pppp.ItemType(i) = doc Then
                     If x1 = -5 Then
                     If pppp.item(i).ListLoadedType <> 0 Then
                     x1 = pppp.item(i).ListLoadedType
@@ -23014,7 +23043,7 @@ ProcField = True
         End If
         Result = y1
         If par Then
-                If Typename(pppp.item(it)) = doc Then
+                If pppp.ItemType(it) = doc Then
             Set pppp.item(it) = New Document
             If s$ <> "" Then pppp.item(it).textDoc = s$
             Else
@@ -24004,7 +24033,7 @@ If FastSymbol(rest$, "#") Then
     Else
     getAnsiStringlINE F, s$
     End If
-    If Typename(pppp.item(it)) = doc Then
+    If pppp.ItemType(it) = doc Then
     Set pppp.item(it) = New Document
     If s$ <> "" Then pppp.item(it).textDoc = s$
     Else
@@ -24044,7 +24073,7 @@ If neoGetArray(bstack, what$, pppp) Then
                 End If
 QUERY bstack, frm$, s$, 1000, False
 
- If Typename(pppp.item(it)) = doc Then
+ If pppp.ItemType(it) = doc Then
                 Set pppp.item(it) = New Document
                         If s$ <> "" Then pppp.item(it).textDoc = s$
                 Else
@@ -24721,7 +24750,7 @@ cont1:
                 If neoGetArray(bstack, W$, pppp) Then
                     If Not NeoGetArrayItem(pppp, bstack, W$, W5, rest$) Then ProcImage = False: MissNumExpr: Exit Function
                     If MyIsObject(pppp.item(W5)) Then
-                        MyEr "can't copy image to " + Typename(pppp.item(W5)), "δεν μπορώ να αντιγράψω εικόνα σε " + Typename(pppp.item(W5))
+                        MyEr "can't copy image to " + pppp.ItemType(W5), "δεν μπορώ να αντιγράψω εικόνα σε " + pppp.ItemType(W5)
                         ProcImage = False
                         Exit Function
                     End If
@@ -24764,7 +24793,7 @@ cont1:
                     If photo.Width > 0 Then
                         Set photo = photo.Resample(y1, x1)
                         If MyIsObject(pppp.item(W5)) Then
-                            MyEr "can't copy image to " + Typename(pppp.item(W5)), "δεν μπορώ να αντιγράψω εικόνα σε " + Typename(pppp.item(W5))
+                            MyEr "can't copy image to " + pppp.ItemType(W5), "δεν μπορώ να αντιγράψω εικόνα σε " + pppp.ItemType(W5)
                             ProcImage = False
                         Else
                             pppp.item(W5) = DIBtoSTR(photo)
@@ -25659,7 +25688,7 @@ If entrypoint = 1 Then dum = True
                     
             End If
         ElseIf y1 = 6 Then
-                    If Typename(pppp.item(i)) = doc Then
+                    If pppp.ItemType(i) = doc Then
                                     x1 = 2
                 pppp.item(i).ReadUnicodeOrANSI ss$, dum, x1
                  pppp.item(i).ListLoadedType = x1
@@ -26009,4 +26038,23 @@ If FastSymbol(b$, ")") Then
         createAnobject = True
     End If
 End If
+End Function
+Function GetThisModuleName(R$) As Boolean
+GetThisModuleName = True
+R$ = GetName(here$)
+If Len(R$) = 0 Then Exit Function
+    If AscW(R$) = 8191 Then
+        If InStr(here$, R$) > 0 Then
+           R$ = GetName(Left$(here$, Len(here$) - Len(R$)))
+           R$ = Left$(R$, Len(R$) - 1)
+        Else
+            R$ = sbf(val(Mid$(here$, rinstr(here$, "[") + 1))).sbgroup
+            If Len(R$) > 0 Then
+                R$ = Mid$(R$, rinstr(R$, ".", 2) + 1)
+                R$ = Left$(R$, Len(R$) - 1)
+            End If
+        End If
+    End If
+    If InStr(R$, "[") > 0 Then R$ = GetName(R$)
+    If InStr(R$, ").") Then R$ = Mid$(R$, InStr(R$, ").") + 2)
 End Function

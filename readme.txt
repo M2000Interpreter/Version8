@@ -1,12 +1,11 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 10 active-X
-Fix xmldata object's parser
-
+Version 10 revision 11 active-X
+Some bug fixes.
+Added JsonArray and JsonObject objects.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
-
 
 The fist time you run the interpreter do this in M2000 console:
 dir appdir$

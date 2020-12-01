@@ -1148,22 +1148,76 @@ If usehandler.objref.Done Then
 End If
 End If
 End Function
+Public Property Get ItemIsObject(curitem) As Boolean
+On Error GoTo there1
+If Arr Then
+    If maxitems1 >= curitem Then
+        If MyIsObject(actualdata(curitem)) Then
+            ItemIsObject = Not actualdata(curitem) Is Nothing
+        End If
+    End If
+Else
+    ItemIsObject = Not GroupRef Is Nothing
+End If
+there1:
+
+End Property
+
+Public Property Get ItemType(curitem) As String
+On Error GoTo there1
+If Arr Then
+    If maxitems1 >= curitem Then
+        ItemType = Typename(actualdata(curitem))
+    End If
+Else
+If curitem = -2 Then
+ItemType = Typename(GroupRef)
+ElseIf curitem < 0 Then
+If Not TypeOf GroupRef Is mHandler Then GoTo e1245
+Dim usehandler As mHandler
+Set usehandler = GroupRef
+If usehandler.t1 <> 1 Then
+e1245:
+   ItemType = Typename(GroupRef)
+End If
+    If usehandler.objref.Done Then
+        If usehandler.objref.IsObj Then
+            ItemType = Typename(usehandler.objref.ValueObj)
+        Else
+            ItemType = Typename(usehandler.objref.Value)
+        End If
+    Else
+        ItemType = Typename(usehandler)
+    End If
+
+End If
+
+End If
+there1:
+
+End Property
+Friend Sub GetPorp(aprop As PropReference, curitem As Long)
+If Arr Then
+    Set aprop = actualdata(curitem)
+Else
+    Set aprop = GroupRef
+End If
+End Sub
 Public Property Get item(curitem As Long) As Variant
 On Error GoTo there1
 If Arr Then
-If maxitems1 >= curitem Then
-If IsObject(actualdata(curitem)) Then
-If Typename(actualdata(curitem)) = "PropReference" Then
-item = actualdata(curitem).Value
-Else
-Set item = actualdata(curitem)
-End If
-Else
-
-item = actualdata(curitem)
-End If
-Exit Property
-End If
+    If maxitems1 >= curitem Then
+        If IsObject(actualdata(curitem)) Then
+            If Typename(actualdata(curitem)) = "PropReference" Then
+                item = actualdata(curitem).Value
+            Else
+                Set item = actualdata(curitem)
+            End If
+        Else
+            item = actualdata(curitem)
+        End If
+        Exit Property
+    End If
 Else
 If curitem = -2 Then
 Set item = GroupRef
@@ -1191,6 +1245,34 @@ End If
 there1:
 
 End Property
+Friend Property Get itemObject(curitem As Long) As Variant
+On Error GoTo there1
+If Arr Then
+    Set itemObject = actualdata(curitem)
+Else
+    If curitem = -2 Then
+        Set itemObject = GroupRef
+    ElseIf curitem < 0 Then
+        If Not TypeOf GroupRef Is mHandler Then GoTo e1245
+        Dim usehandler As mHandler
+        Set usehandler = GroupRef
+        If usehandler.t1 <> 1 Then
+e1245:
+            Err.Raise 5010, , "Need an Inventory Object"
+        End If
+        If usehandler.objref.Done Then
+            If usehandler.objref.IsObj Then
+                Set itemObject = usehandler.objref.ValueObj
+            End If
+        Else
+            Set itemObject = usehandler
+        End If
+    End If
+End If
+there1:
+
+End Property
+
 Public Property Get itemnumeric(curitem As Long) As Variant
 On Error GoTo there1
 Dim usehandler As mHandler

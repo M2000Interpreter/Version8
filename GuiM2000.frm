@@ -153,7 +153,7 @@ Public Sub DisAllTargets()
 DisableTargets q(), prive
 End Sub
 Public Sub RenderTarget(bstack As basetask, rest$, Lang As Long, tHandle As Variant)
-Dim p, W$, x
+Dim p, w$, x
 If tHandle \ 10000 <> prive Then
 MyEr "target not for this form", "ï óôü÷ïò äåí åßíáé ãéá áõôÞ ôç öüñìá"
 Exit Sub
@@ -164,7 +164,7 @@ If p >= 0 And p < UBound(q()) Then
               '
 While FastSymbol(rest$, ",")
 If IsLabelSymbolNew(rest$, "ÖÑÁÓÇ", "TEXT", Lang) Then
-If IsStrExp(bstack, rest$, W$) Then q(p).Tag = W$
+If IsStrExp(bstack, rest$, w$) Then q(p).Tag = w$
 ElseIf IsLabelSymbolNew(rest$, "ÐÅÍÁ", "PEN", Lang) Then
 If IsExp(bstack, rest$, x) Then q(p).pen = x
 ElseIf IsLabelSymbolNew(rest$, "ÖÏÍÔÏ", "BACK", Lang) Then
@@ -172,7 +172,7 @@ If IsExp(bstack, rest$, x) Then q(p).back = x
 ElseIf IsLabelSymbolNew(rest$, "ÐËÁÉÓÉÏ", "BORDER", Lang) Then
 If IsExp(bstack, rest$, x) Then q(p).fore = x
 ElseIf IsLabelSymbolNew(rest$, "ÏÄÇÃÉÁ", "COMMAND", Lang) Then
-If IsStrExp(bstack, rest$, W$) Then q(p).Comm = W$
+If IsStrExp(bstack, rest$, w$) Then q(p).Comm = w$
 End If
 
 Wend
@@ -301,22 +301,22 @@ If Len(mMyName$) = 0 Then Exit Property
 If mEnabled = False And RHS = True Then Me.enabled = True
 mEnabled = RHS
 
-Dim W As Object
+Dim w As Object
 If Controls.count > 0 Then
-For Each W In Me.Controls
-If W Is gList2 Then
+For Each w In Me.Controls
+If w Is gList2 Then
 gList2.enabled = RHS
 gList2.mousepointer = 0
-ElseIf W.Visible Then
-W.enabled = RHS
-If TypeOf W Is gList Then
-W.TabStop = W.TabStopSoft
-W.BypassKey = Not RHS
+ElseIf w.Visible Then
+w.enabled = RHS
+If TypeOf w Is gList Then
+w.TabStop = w.TabStopSoft
+w.BypassKey = Not RHS
 End If
-ElseIf TypeOf W Is gList Then
-W.BypassKey = Not RHS
+ElseIf TypeOf w Is gList Then
+w.BypassKey = Not RHS
 End If
-Next W
+Next w
 End If
 Me.enabled = RHS
 End Property
@@ -375,7 +375,7 @@ End Sub
 
 
 Public Sub ShowmeALL()
-Dim W As Object
+Dim w As Object
 If IamPopUp Then
     If EnableStandardInfo Then
         glistN.menuEnabled(2) = False
@@ -393,22 +393,22 @@ End If
 End If
 
 If Controls.count > 0 Then
-For Each W In Controls
-If W.enabled Then W.Visible = True
-Next W
+For Each w In Controls
+If w.enabled Then w.Visible = True
+Next w
 End If
 
 gList2.PrepareToShow
 
 End Sub
 Public Sub RefreshALL()
-Dim W As Object
+Dim w As Object
 If Controls.count > 0 Then
-For Each W In Controls
-If W.Visible Then
-If TypeOf W Is gList Then W.ShowMe2
+For Each w In Controls
+If w.Visible Then
+If TypeOf w Is gList Then w.ShowMe2
 End If
-Next W
+Next w
 End If
 Refresh
 End Sub
@@ -442,8 +442,11 @@ ResizeMark.Width = MarkSize * dv15
 ResizeMark.Height = MarkSize * dv15
 ResizeMark.Left = Width - MarkSize * dv15
 ResizeMark.top = Height - MarkSize * dv15
-
-ResizeMark.backcolor = GetPixel(Me.Hdc, Width - MarkSize * dv15, Height - MarkSize * dv15)
+Dim xx As Long
+xx = GetPixel(Me.Hdc, Width - MarkSize * dv15, Height - MarkSize * dv15)
+If xx <> -1 Then
+ResizeMark.backcolor = xx
+End If
 ResizeMark.Visible = Sizable
 If Sizable Then ResizeMark.ZOrder 0
 If HOOKTEST <> 0 Then UnHook HOOKTEST
@@ -519,17 +522,17 @@ Private Sub Form_KeyPress(KeyAscii As Integer)
 On Error Resume Next
 If Me.Visible Then
 If ActiveControl Is Nothing Then
-Dim W As Object
+Dim w As Object
     If Controls.count > 0 Then
-    For Each W In Controls
-    If W.Visible Then
-    If TypeOf W Is gList Then
-    W.SetFocus
+    For Each w In Controls
+    If w.Visible Then
+    If TypeOf w Is gList Then
+    w.SetFocus
     Exit For
     End If
     End If
-    Next W
-    Set W = Nothing
+    Next w
+    Set w = Nothing
     End If
     Else
     
@@ -1081,11 +1084,11 @@ players(prive).MAXXGRAPH = 0
 prive = 0
 
 End If
-Dim W As Object
+Dim w As Object
 If GuiControls.count > 0 Then
-For Each W In GuiControls
-    W.deconstruct
-Next W
+For Each w In GuiControls
+    w.deconstruct
+Next w
 End If
 If ttl Then If Not MyForm3 Is Nothing Then Unload MyForm3
 If Not safeform Is Nothing Then
@@ -1390,18 +1393,18 @@ Public Property Let Index(ByVal RHS As Long)
 mIndex = RHS
 End Property
 Public Sub CloseNow()
-Dim W As Object
+Dim w As Object
     If mModalid = Modalid And Modalid <> 0 Then
         Modalid = 0
       If Visible Then Hide
     Else
     mModalid = 0
-    For Each W In GuiControls
-    If Left$(Typename(W), 3) = "Gui" Then
-    W.deconstruct
+    For Each w In GuiControls
+    If Left$(Typename(w), 3) = "Gui" Then
+    w.deconstruct
     End If
-Next W
-Set W = Nothing
+Next w
+Set w = Nothing
          If ttl And Not mNoTaskBar Then
                     Unload MyForm3
              End If

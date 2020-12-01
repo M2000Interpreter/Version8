@@ -1,6 +1,6 @@
 Attribute VB_Name = "Module9"
 Option Explicit
-Private Declare Function EnumDisplayMonitors Lib "user32" (ByVal hDC As Long, lprcClip As Any, ByVal lpfnEnum As Long, dwData As Any) As Long
+Private Declare Function EnumDisplayMonitors Lib "user32" (ByVal Hdc As Long, lprcClip As Any, ByVal lpfnEnum As Long, dwData As Any) As Long
 Public Declare Function MonitorFromPoint Lib "user32" (ByVal x As Long, ByVal y As Long, ByVal dwFlags As Long) As Long
 Private Declare Function MonitorFromWindow Lib "user32" (ByVal hWnd As Long, ByVal dwFlags As Long) As Long
 
@@ -34,7 +34,7 @@ Public Type Screens
     Height As Long
     Width As Long
     primary As Boolean
-    handler As Long
+    Handler As Long
 End Type
 Public ScrInfo() As Screens
 Public Console As Long
@@ -119,7 +119,7 @@ Private Function MonitorEnumProc(ByVal hmonitor As Long, ByVal hdcMonitor As Lon
     .Width = (mi.rcMonitor.Right - mi.rcMonitor.Left) * dv15
     
     .primary = CBool(mi.dwFlags = MONITORINFOF_PRIMARY)
-    .handler = hmonitor
+    .Handler = hmonitor
     End With
     UnionRect rcVS, rcVS, lprcMonitor 'merge all monitors together to get the virtual screen coordinates
     dwData = dwData + 1 'increase monitor count
@@ -162,7 +162,7 @@ Dim thismonitor As Long
 thismonitor = MonitorFromWindow(F.hWnd, MONITOR_DEFAULTTONEAREST)
 Dim i As Long
 For i = 0 To UBound(ScrInfo())
-If thismonitor = ScrInfo(i).handler Then FindFormSScreen = i:   Exit Function
+If thismonitor = ScrInfo(i).Handler Then FindFormSScreen = i:   Exit Function
 Next i
 End Function
 Function FindMonitorFromPixel(x, y) As Long
@@ -171,7 +171,7 @@ x1 = x \ dv15
 y1 = y \ dv15
 Dim i As Long
 For i = 0 To UBound(ScrInfo())
-If ScrInfo(i).handler = MonitorFromPoint(x1, y1, MONITOR_DEFAULTTONEAREST) Then FindMonitorFromPixel = i: Exit Function
+If ScrInfo(i).Handler = MonitorFromPoint(x1, y1, MONITOR_DEFAULTTONEAREST) Then FindMonitorFromPixel = i: Exit Function
 Next i
 
 End Function
@@ -184,7 +184,7 @@ x = tp.x
 y = tp.y
 Dim i As Long
 For i = 0 To UBound(ScrInfo())
-If ScrInfo(i).handler = MonitorFromPoint(x, y, MONITOR_DEFAULTTONEAREST) Then FindMonitorFromMouse = i: Exit Function
+If ScrInfo(i).Handler = MonitorFromPoint(x, y, MONITOR_DEFAULTTONEAREST) Then FindMonitorFromMouse = i: Exit Function
 Next i
 End Function
 Sub MoveFormToOtherMonitor(F As Form)
@@ -273,10 +273,7 @@ F.move nowX, nowY
 End Sub
 Sub MoveFormToOtherMonitorCenter(F As Form)
 Dim k As Long, z As Long
-'k = FindMonitorFromPixel(F.Left, F.Top)
 z = FindMonitorFromMouse
-'If k <> Z Then
-' center to z
 If F.Width > ScrInfo(z).Width Then
     If F.Height > ScrInfo(z).Height Then
         F.move ScrInfo(z).Left, ScrInfo(z).top
@@ -290,5 +287,4 @@ Else
  F.move ScrInfo(z).Left + (ScrInfo(z).Width - F.Width) / 2, ScrInfo(z).top + (ScrInfo(z).Height - F.Height) / 2
 
 End If
-'End If
 End Sub

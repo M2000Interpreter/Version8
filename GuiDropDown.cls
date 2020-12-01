@@ -100,14 +100,14 @@ End With
  mesCtrlName = Name$
 End Sub
 
-Public Sub move(x, y, Optional W, Optional H)
+Public Sub move(x, y, Optional w, Optional H)
 With Textbox
-If IsMissing(W) Then
+If IsMissing(w) Then
 .glistN.MoveTwips CLng(x), CLng(y), 0, 0
 ElseIf IsMissing(H) Then
-.glistN.MoveTwips CLng(x), CLng(y), CLng(W), 0
+.glistN.MoveTwips CLng(x), CLng(y), CLng(w), 0
 Else
-.glistN.MoveTwips CLng(x), CLng(y), CLng(W), CLng(H)
+.glistN.MoveTwips CLng(x), CLng(y), CLng(w), CLng(H)
 End If
 Pad.move Pad.Left, Pad.top, .glistN.widthtwips, .glistN.HeightTwips * 5
 End With
@@ -184,10 +184,12 @@ Private Sub glistN_MenuChecked(item As Long)
       End If
 End Sub
 Property Let menuEnabled(item As Long, ByVal RHS As Boolean)
+If glistN Is Nothing Then Exit Property
 glistN.menuEnabled(item) = RHS
 End Property
 
 Property Get menuEnabled(item As Long) As Boolean
+If glistN Is Nothing Then Exit Property
 menuEnabled = Not glistN.ListSep(item)
 End Property
 Public Function GetMenuId(id$, Pos As Long) As Boolean
@@ -350,7 +352,7 @@ End Sub
 Private Sub textbox_KeyDown(KeyCode As Integer, shift As Integer)
 'If Not glistN.enabled Then KeyCode = 0: shift = 0: Exit Sub
 Dim b$
-Dim gl As Long, x As Long, x1 As gList, XX As Boolean
+Dim gl As Long, x As Long, x1 As gList, xx As Boolean
 Iam = True
 If KeyCode = vbKeyRight And Len(MenuGroup) <> 0 Then
 Set x1 = Textbox.glistN
@@ -360,7 +362,7 @@ With Callback
 For x = 1 To .Controls.count - 1
 
     If TypeOf .Controls(x) Is gList Then
-    If XX Then
+    If xx Then
         If .Controls(x).enabled And .Controls(x).TabStop Then
             If .Controls(x).MenuGroup = x1.MenuGroup Then
   
@@ -372,7 +374,7 @@ For x = 1 To .Controls.count - 1
         End If
     Else
     Set obj = .Controls(x)
-        If obj Is x1 Then XX = True
+        If obj Is x1 Then xx = True
         Set obj = Nothing
     End If
     End If
@@ -387,7 +389,7 @@ With Callback
 .LastActive = vbNullString
 For x = .Controls.count - 1 To 1 Step -1
     If TypeOf .Controls(x) Is gList Then
-    If XX Then
+    If xx Then
         If .Controls(x).enabled And .Controls(x).TabStop Then
             If .Controls(x).MenuGroup = x1.MenuGroup Then
          
@@ -398,7 +400,7 @@ For x = .Controls.count - 1 To 1 Step -1
         End If
     Else
      Set obj = .Controls(x)
-        If obj Is x1 Then XX = True
+        If obj Is x1 Then xx = True
         Set obj = Nothing
     End If
     End If

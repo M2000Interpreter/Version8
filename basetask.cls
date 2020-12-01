@@ -233,7 +233,7 @@ Public Sub SetVarobJvalue(ByVal Name$, var As Variant)
     If Not StaticCollection.Find(Name$) Then
     StaticCollection.AddKey Name$
     End If
-    Dim myobject As Object
+    Dim myobject As Object, usehandler As mHandler
     
     If MyIsObject(var) Then
       Set StaticCollection.ValueObj = var
@@ -243,9 +243,10 @@ Public Sub SetVarobJvalue(ByVal Name$, var As Variant)
     If TypeOf myobject Is Group Then
         StaticCollection.Value = var
     ElseIf TypeOf myobject Is mHandler Then
-    If myobject.t1 = 4 Then
+    Set usehandler = myobject
+    If usehandler.t1 = 4 Then
         Dim ok As Boolean
-        Set var = myobject.objref.SearchValue(var, ok)
+        Set var = usehandler.objref.SearchValue(var, ok)
         If ok Then
             Set StaticCollection.ValueObj = var
         Else
@@ -820,7 +821,9 @@ If threadsnames.Find(Threadid) Then
     Set aa.thread = Nothing
 Else
     Err.Clear
+    If Not Me.Parent Is Nothing Then
     ThrowOne = Me.Parent.ThrowOne(Threadid)
+    End If
 End If
 Set aa = Nothing
 End Function
