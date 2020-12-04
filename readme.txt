@@ -1,8 +1,8 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 11 active-X
-Some bug fixes.
-Added JsonArray and JsonObject objects.
+Version 10 revision 12 active-X
+a bug removed, H1 module in info now can run perfect.
+
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
