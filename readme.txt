@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 12 active-X
-a bug removed, H1 module in info now can run perfect.
+Version 10 revision 13 active-X
+A bug in JsonArray object fixed.
 
 
 George Karras, Kallithea Attikis, Greece.

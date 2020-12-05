@@ -107,6 +107,6 @@ ZipTool = 286, 286, 899, 920,
 XmlMonoInternal = -14, 460, 793, 953, 
 XmlMono = 16, 56, 517, 596, 
 XmlNode = 208, 208, 709, 748, 
-JsonArray = 0, 0, 734, 172, C
+JsonArray = 0, 0, 734, 172, 
 JsonObject = 78, 78, 656, 573, 
 mIndexes = 52, 52, 691, 485, 

@@ -124,7 +124,7 @@ For i = 1 To Len(RHS)
                     Case Is > 255
                        ch = "\u" & Right$("000" & Hex$(AscW(ch)), 4)
                 End Select
-                If cursor + Len(ch) > Len(StringToEscapeStr) Then StringToEscapeStr = StringToEscapeStr + Space$(500)
+                If cursor + Len(ch) > Len(StringToEscapeStr) Then StringToEscapeStr = StringToEscapeStr + space$(500)
                 Mid$(StringToEscapeStr, cursor, Len(ch)) = ch
                 cursor = cursor + Len(ch) - 1
 Next
@@ -153,7 +153,7 @@ Dim i As Long, cursor As Long, ch As String
                     Case "u":      ch = ParseHexChar(RHS, cursor, Len(RHS))
                 End Select
         End Select
-                If i + Len(ch) > Len(EscapeStrToString) Then EscapeStrToString = EscapeStrToString + Space$(500)
+                If i + Len(ch) > Len(EscapeStrToString) Then EscapeStrToString = EscapeStrToString + space$(500)
                 Mid$(EscapeStrToString, i, Len(ch)) = ch
                 i = i + Len(ch) - 1
     Next
@@ -238,12 +238,13 @@ again:
 If n > UBound(part$) Then Exit Sub
 If TypeOf m Is JsonArray Then
     Set ma = m
-    w = Val(part$(n))
+    w = val(part$(n))
     If n = s Then
         ma.Assign w, RHS
     ElseIf n = 0 Then
         If Left$(part$(0), 1) = " " Then
-            If Not ValueIsArray(w) Then
+        
+            If Not ma.ValType(w) > 3 Then
                 If Left$(part$(1), 1) = " " Then
                     ma.Assign w, New JsonArray
                 Else
@@ -299,6 +300,7 @@ Else
     End If
 End If
 End Sub
+
 Function anArray(Index As Long, RHS) As JsonArray
     Dim m As New JsonArray
     If IsObject(RHS) Then
@@ -387,7 +389,7 @@ End Function
 Property Get Json(Optional sp As Long = 0, Optional w As Long = -1) As String
     Dim i As Long, hlp$, acc$, nl$
     sp = Abs(sp)
-    If sp Then nl$ = vbCrLf + Space$(sp): hlp$ = Space$(sp): If w = -1 Then w = sp
+    If sp Then nl$ = vbCrLf + space$(sp): hlp$ = space$(sp): If w = -1 Then w = sp
     For i = 0 To count - 1
         acc$ = acc$ + hlp$ + nl$ + ToString2(i, sp - w * (sp > 0), w)
         If i = 0 Then
@@ -401,7 +403,7 @@ Property Get Json(Optional sp As Long = 0, Optional w As Long = -1) As String
         If sp = 0 Then
     Json = "[" + acc$ + "]"
     Else
-    Json = "[" + acc$ + vbCrLf + Space(sp - w) + "]"
+    Json = "[" + acc$ + vbCrLf + space(sp - w) + "]"
     End If
 End Property
 Property Get item(Index As Long)
@@ -411,7 +413,7 @@ Case 0
 Case 4, 5
     Set item = ar(Index)
 Case 33
-    item = Val("" & ar(Index))
+    item = val("" & ar(Index))
 Case Else
     item = ar(Index)
 End Select
@@ -433,7 +435,7 @@ Set m = Me
 again:
 If n > UBound(part$) Then Exit Property
 If TypeOf m Is JsonArray Then
-    w = Val(part$(n))
+    w = val(part$(n))
     Select Case m.ValType(w)
     Case 0
     Case 4, 5
@@ -635,7 +637,7 @@ ElseIf ch Like "[+-0123456789.]" Then
             If InStr(ch$, ".") > 0 Then Mid$(ch$, InStr(ch$, ".")) = curdot$
             ma.Assign 0 + p(level), CDec(ch)
         Else
-            ma.Assign 0 + p(level), Val(ch)
+            ma.Assign 0 + p(level), val(ch)
         End If
     Else
         If Len(ch) > 28 Then
@@ -647,7 +649,7 @@ ElseIf ch Like "[+-0123456789.]" Then
             If InStr(ch$, ".") > 0 Then Mid$(ch$, InStr(ch$, ".")) = curdot$
             mo.Assign "" + p(level), CDec(ch)
         Else
-            mo.Assign "" + p(level), Val(ch)
+            mo.Assign "" + p(level), val(ch)
         End If
     End If
 End If
@@ -675,7 +677,7 @@ Dim b() As Byte
             BigNumber = CDec(ch)
         Else
             If InStr(ch$, curdot$) > 0 Then Mid$(ch$, InStr(ch$, curdot$)) = "."
-            BigNumber = Val(ch)
+            BigNumber = val(ch)
         End If
 End Function
 
