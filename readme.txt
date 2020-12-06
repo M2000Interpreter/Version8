@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 13 active-X
-A bug in JsonArray object fixed.
+Version 10 revision 14 active-X
+Another bug in JsonArray object fixed.
 
 
 George Karras, Kallithea Attikis, Greece.
