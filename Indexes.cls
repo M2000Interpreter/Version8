@@ -19,6 +19,10 @@ End Sub
 Friend Sub Dump(n As Long, RHS As Variant)
     SwapVariant ar(n), RHS
 End Sub
+Sub GetArr(that)
+    that = ar()
+    Erase ar()
+End Sub
 Property Get Value(n As Long) As Variant
 Attribute Value.VB_UserMemId = 0
     If n >= 0 And n < UBound(ar) Then

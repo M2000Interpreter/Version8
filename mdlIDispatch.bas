@@ -550,7 +550,7 @@ Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR
     If VarType(ThisIndex) = 8204 Then
                  ReDim varArr(0 To UBound(ThisIndex))
                  k = 0
-                 For i = UBound(ThisIndex) To 0
+                 For i = UBound(ThisIndex) - 1 To 0 Step -1
                     varArr(k) = ThisIndex(i)
                     k = k + 1
                  Next
@@ -558,7 +558,7 @@ Public Function ReadOneIndexParameter(pobjTarget As Object, dispid As Long, ERrR
                     .cArgs = k
                     .rgPointerToVariantArray = VarPtr(varArr(0))
                     
-                    .cNamedArgs = k
+                    .cNamedArgs = 0
                      .rgPointerToDISPIDNamedArgs = VarPtr(aa)
                End With
                
@@ -672,7 +672,7 @@ Public Sub ChangeOneParameter(pobjTarget As Object, dispid As Long, val1, ERrR$)
     
 End Sub
 Public Sub ChangeOneIndexParameter(pobjTarget As Object, dispid As Long, val1, ERrR$, ThisIndex As Variant)
-    
+' not only one;;;;
     Dim CallType As cbnCallTypes
     
     CallType = VbLet
@@ -694,19 +694,32 @@ Public Sub ChangeOneIndexParameter(pobjTarget As Object, dispid As Long, val1, E
     Set IDsp = pobjTarget
 
     ' WE HAVE DISPIP
-
-    If lngRet = 0 Then
+    Dim aa As Long, i As Integer, k As Integer
+    aa = DISPID_PROPERTYPUT
+        If VarType(ThisIndex) = 8204 Then
+                 ReDim varArr(0 To UBound(ThisIndex) + 1)
+                 k = 1
+                 For i = UBound(ThisIndex) - 1 To 0 Step -1
+                    varArr(k) = ThisIndex(i)
+                    k = k + 1
+                 Next
+                 varArr(0) = val1
+                With params
+                    .cArgs = k
+                    .rgPointerToVariantArray = VarPtr(varArr(0))
+                    .cNamedArgs = 1
+                     .rgPointerToDISPIDNamedArgs = VarPtr(aa)
+               End With
+    
        
-      
+      Else
                 ReDim varArr(0 To 1)
                 varArr(1) = ThisIndex
                 varArr(0) = val1
                 With params
                     .cArgs = 2
                     .rgPointerToVariantArray = VarPtr(varArr(0))
-                                    Dim aa As Long
-        
-                aa = DISPID_PROPERTYPUT
+                
                 .cNamedArgs = 1
                 .rgPointerToDISPIDNamedArgs = VarPtr(aa)
                 End With
@@ -732,66 +745,6 @@ Public Sub ChangeOneIndexParameter(pobjTarget As Object, dispid As Long, val1, E
     
 End Sub
 
-Public Sub ChangeOneIndexParameterOLD(pobjTarget As Object, dispid As Long, val1, ERrR$, ThisIndex As Variant)
-    
-    Dim CallType As cbnCallTypes
-    
-    CallType = VbLet
-    Dim IDsp        As IDispatch.IDispatchM2000
-    Dim riid        As IDispatch.IID
-    Dim params      As IDispatch.DISPPARAMS
-    Dim Excep       As IDispatch.EXCEPINFO
-    ' Do not remove TLB because those types
-    ' are also defined in stdole
-        Dim lngArgErr   As Long
-    Dim VarRet      As Variant
-    Dim varArr()    As Variant
-
-    Dim lngRet      As Long
-    Dim lngLoop     As Long
-    Dim lngMax      As Long
-
-    ' Get IDispatch from object
-    Set IDsp = pobjTarget
-
-    ' WE HAVE DISPIP
-
-    If lngRet = 0 Then
-       
-      
-                ReDim varArr(0 To 1)
-                varArr(1) = ThisIndex
-                varArr(0) = val1
-                With params
-                    .cArgs = 2
-                    .rgPointerToVariantArray = VarPtr(varArr(0))
-                                    Dim aa As Long
-        
-                aa = DISPID_PROPERTYPUT
-                .cNamedArgs = 1
-                .rgPointerToDISPIDNamedArgs = VarPtr(aa)
-                End With
-        End If
-
-        ' Invoke method/property
-        
-        lngRet = IDsp.Invoke(dispid, riid, 0, CallType, params, VarRet, Excep, lngArgErr)
-
-        If lngRet <> 0 Then
-            If lngRet = DISP_E_EXCEPTION Then
-             ERrR$ = Str$(Excep.wCode)
-            Else
-              ERrR$ = Str$(lngRet)
-            End If
-            Exit Sub
-        End If
-    
-    
-    
-
-    Set IDsp = Nothing
-    
-End Sub
 Private Sub PushOne(KnownPropName As String, ByVal v As Long)
 On Error Resume Next
 If Not KnownProp.Find(LCase(KnownPropName)) Then KnownProp.AddKey LCase$(KnownPropName)

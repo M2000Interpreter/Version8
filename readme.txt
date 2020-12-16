@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 14 active-X
-Another bug in JsonArray object fixed.
+Version 10 revision 15 active-X
+Update the subsystem for reading and changing properties for com objects with more than one index.
 
 
 George Karras, Kallithea Attikis, Greece.

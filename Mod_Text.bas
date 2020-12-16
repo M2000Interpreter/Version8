@@ -91,7 +91,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 14
+Global Const Revision = 15
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -7854,18 +7854,14 @@ contgrouppar:
                 Else
 contreadprop:
                     If TypeOf pppp.GroupRef Is PropReference Then
-                        Set useProp = pppp.GroupRef
 contreadprop2:
-                        If IsExp(bstack, a$, p, , True) Then
-                            useProp.Index = p
-                        ElseIf IsStrExp(bstack, a$, s$) Then
-                            useProp.Index = s$  '' this is for propreference class
+                        Set useProp = pppp.GroupRef
+                        If getindexes(bstack, useProp, a$) Then
+                            Set bstack.lastobj = pppp
                         Else
-                            useProp.IndexOpt
+                            R = useProp.Value
+                            Set bstack.lastobj = useProp.lastobjfinal
                         End If
-                        
-                        R = useProp.Value
-                        Set bstack.lastobj = useProp.lastobjfinal
                         If Not bstack.lastobj Is Nothing Then R = 0
                         GoTo finishnum
                     End If
@@ -14305,34 +14301,26 @@ contrightstrpar:
                     Exit Function
                 Else
 contreadprop:
-                    If IsExp(bstackstr, a$, p, , True) Then
-                        pppp.GroupRef.Index = p
-                        On Error Resume Next
-                        R$ = pppp.GroupRef.Value
-                        If Err.Number > 0 Then
-                            pppp.GroupRef.IndexAgain
-                            If Typename(pppp.GroupRef.Value) = "Null" Then
-                                R$ = ""
-                                Err.Clear
-                            Else
-                                InStr = False
-                                MyEr Err.Description, Err.Description
-                                Err.Clear
-                                Exit Function
-                            End If
-                        End If
-                    ElseIf IsStrExp(bstackstr, a$, R$) Then
-                        pppp.GroupRef.Index = R$
-                        R$ = pppp.GroupRef.Value
-                    ElseIf Typename(pppp.GroupRef) = mProp Then
-                        If FastSymbol(a$, "?") Then
-                        pppp.GroupRef.IndexOpt
-                        R$ = pppp.GroupRef.Value
-                        Else
-                            Set bstackstr.lastobj = pppp
-                            R$ = vbNullString
-                        End If
+           If Not getindexes(bstackstr, pppp.GroupRef, a$) Then
+            On Error Resume Next
+                R$ = pppp.GroupRef.Value
+                If Err.Number > 0 Then
+                    pppp.GroupRef.IndexAgain
+                    If Typename(pppp.GroupRef.Value) = "Null" Then
+                        R$ = ""
+                        Err.Clear
+                    Else
+                        InStr = False
+                        MyEr Err.Description, Err.Description
+                        Err.Clear
+                        Exit Function
                     End If
+                End If
+           Else
+                Set bstackstr.lastobj = pppp
+                R$ = vbNullString
+           End If
+                      
                 End If
                   IsStr1 = FastSymbol(a$, ")")
                 Exit Function
@@ -23612,20 +23600,24 @@ contlabel1:
             Exit Function
         Else
 contprop:
-            Dim aprop As PropReference
-            Set aprop = pp.GroupRef
+            Dim aProp As PropReference
+            Set aProp = pp.GroupRef
+            dn = 0
+
             If idx Is Nothing Then Set idx = New mIndexes
+againprop:
             If IsExp(bstack, rst$, p) Then
-                idx(0) = p
-                aprop.Index = p
+                idx(dn) = p
+                aProp.Index = p
             ElseIf IsStrExp(bstack, rst$, ppp$) Then
-                idx(0) = ppp$
-                aprop.Index = ppp$
+                idx(dn) = ppp$
+                aProp.Index = ppp$
             Else
-                idx.IndexOpt 0
-                aprop.IndexOpt
+                idx.IndexOpt dn
+                aProp.IndexOpt
             End If
-            Set aprop = Nothing
+            If FastSymbol(rst$, ",") Then dn = dn + 1: GoTo againprop
+            Set aProp = Nothing
         End If
 conthere:
         If closepar Then If Not FastSymbol(rst$, ")") Then MyEr "missing )", "λείπει )": Exit Function
@@ -48928,85 +48920,6 @@ conthere:
         MissParam a$
     End If
 End Function
-Private Function IsPoint(bstack As basetask, a$, R As Variant, SG As Variant) As Boolean
-Dim w1 As Long, s$, w2 As Long, pppp As mArray
-Dim r2 As Variant, r3 As Variant, r4 As Variant
-w1 = Abs(IsLabel(bstack, a$, s$))
-        If w1 = 3 Then
-            If GetVar(bstack, s$, w1) Then
-                If Typename(var(w1)) <> "String" Then MissString: Exit Function
-                    If Left$(var(w1), 4) = "cDIB" And Len(var(w1)) > 12 Then
-                    If FastSymbol(a$, ",") Then
-                        If Not IsExp(bstack, a$, r2, , True) Then: MissParam a$: Exit Function
-                        If FastSymbol(a$, ",") Then
-                            If Not IsExp(bstack, a$, r3, , True) Then: MissParam a$: Exit Function
-                            If FastSymbol(a$, ",") Then
-                                If Not IsExp(bstack, a$, r4, , True) Then: MissParam a$: Exit Function
-                                    R = SetDIBPixel(var(w1), r2, r3, mycolor(r4))
-                                Else
-                                    R = GetDIBPixel(var(w1), r2, r3)
-                                End If
-                                If SG < 0 Then R = -R
-                                IsPoint = FastSymbol(a$, ")", True)
-                            Else
-                                MissParam a$: Exit Function
-                            End If
-                        Else
-                            MissParam a$: Exit Function
-                        End If
-                    Else
-                    noImage a$
-                    Exit Function
-        End If
-            Else
-                    
-                    MissFuncParameterStringVarMacro a$
-                    
-            End If
-        ElseIf w1 = 6 Then
-            If neoGetArray(bstack, s$, pppp) Then
-                If Not NeoGetArrayItem(pppp, bstack, s$, w2, a$) Then Exit Function
-                If Not pppp.IsStringItem(w2) Then MissString: Exit Function
-                Dim sV As Variant
-                pppp.SwapItem w2, sV
-          
-                If Left$(sV, 4) = "cDIB" And Len(sV) > 12 Then
-                    If FastSymbol(a$, ",") Then
-                        If Not IsExp(bstack, a$, r2, , True) Then: MissParam a$: pppp.SwapItem w2, sV: Exit Function
-                        If FastSymbol(a$, ",") Then
-                            If Not IsExp(bstack, a$, r3, , True) Then: MissParam a$: pppp.SwapItem w2, sV: Exit Function
-                            If FastSymbol(a$, ",") Then
-                                If Not IsExp(bstack, a$, r4, , True) Then: MissParam a$: pppp.SwapItem w2, sV: Exit Function
-                                R = SetDIBPixel(sV, r2, r3, mycolor(r4))
-                            Else
-                                R = GetDIBPixel(sV, r2, r3)
-                            End If
-                            If SG < 0 Then R = -R
-                            pppp.SwapItem w2, sV
-                            IsPoint = FastSymbol(a$, ")", True)
-                        Else
-                            pppp.SwapItem w2, sV
-                            MissParam a$: Exit Function
-                        End If
-                    Else
-                        pppp.SwapItem w2, sV
-                        MissParam a$: Exit Function
-                    End If
-                Else
-                    pppp.SwapItem w2, sV
-                    noImage a$
-                End If
-    
-        Else
-            MissParam a$
-        End If
-End If
-
-
-
-
-
-End Function
 Private Function IsVal(bstack As basetask, a$, R As Variant, SG As Variant, Eng As Boolean) As Boolean
 Dim s$, ex$, dd As Long, pp As Variant, Lang As Long
     If Eng Then Lang = 1
@@ -56708,6 +56621,33 @@ JetPostfixUser = JetPostfixHelp
 ArrBase = 0
 End Sub
 
+Function getindexes(bstack As basetask, obj1 As Object, a$) As Boolean
+Dim s$, p, idx As New mIndexes, dn As Long, aProp As PropReference
+Set aProp = obj1
 
+Do
+        If IsExp(bstack, a$, p) Then
+        
+                idx(dn) = p
+                aProp.Index = p
+            ElseIf IsStrExp(bstack, a$, s$) Then
+                idx(dn) = s$
+                aProp.Index = s$
+            ElseIf FastSymbol(a$, "?") Then
+                idx.IndexOpt dn
+                aProp.IndexOpt
+            Else
+                If dn = 0 Then
+                If MaybeIsSymbol(a$, ")") Then
+                    getindexes = True
+                End If
+                End If
+                idx.IndexOpt dn
+                aProp.IndexOpt
+            End If
+            dn = dn + 1
+Loop Until Not FastSymbol(a$, ",")
+aProp.PushIndexes idx
+End Function
 
 

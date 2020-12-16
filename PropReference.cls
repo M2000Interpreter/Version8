@@ -198,11 +198,14 @@ IndexNew = True
 mIndex = RHS
 End Property
 Friend Sub PushIndexes(idx As mIndexes)
+If idx Is Nothing Then Exit Sub
 IndexNew = True
 UseIndex = True
 If IndexList Is Nothing Then
     If idx.count = 1 Then
        idx.Dump 0, mIndex
+    Else
+    idx.GetArr mIndex
     End If
 End If
 End Sub

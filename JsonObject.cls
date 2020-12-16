@@ -12,7 +12,7 @@ Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 ' George Karras, Kalithea, Greece
-' version 3
+' version 3.1
 ' GNU Lesser General Public License version 3
 
 Option Explicit
@@ -779,8 +779,6 @@ Attribute item.VB_UserMemId = 0
 If ExistKey(Key) Then
     Select Case ValType2()
     Case 0
-    Case 1
-    item = StringToEscapeStr(PriveSpace(Index).iValue)
     Case 4, 5
         Set item = PriveSpace(Index).iValue
     Case 33
@@ -815,7 +813,8 @@ If TypeOf m Is JsonArray Then
     Case 4, 5
         Set m = ma(w)
         n = n + 1
-        GoTo again
+        If n <= UBound(part$) Then GoTo again
+        Set ItemPath = m
     Case Else
         ItemPath = ma(w)
     End Select
@@ -826,7 +825,8 @@ Else
     Case 4, 5
         Set m = mo(part$(n))
         n = n + 1
-        GoTo again
+        If n <= UBound(part$) Then GoTo again
+        Set ItemPath = m
     Case Else
         ItemPath = mo(part$(n))
     End Select
@@ -1056,11 +1056,5 @@ Dim b() As Byte
             BigNumber = val(ch)
         End If
 End Function
-Property Let Dummy(a As Long, b As Long)
-Debug.Print a, b
-End Property
-Property Get Dummy(a As Long) As Long
-Debug.Print a
-Dummy = 2 * a
-End Property
+
 
