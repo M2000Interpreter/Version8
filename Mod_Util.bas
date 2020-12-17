@@ -3229,7 +3229,7 @@ basketcode = GetCode(D)
 
 Form1.IEUP ""
 Form1.KeyPreview = True
-Dim Dummy As Boolean, rs As String, mPen As Long, ICO As Long, BAR As Long, bar2 As Long
+Dim dummy As Boolean, rs As String, mPen As Long, ICO As Long, BAR As Long, bar2 As Long
 BAR = 1
 Form1.DIS.Visible = True
 GDILines = False  ' reset to normal ' use Smooth on to change this to true
@@ -3382,7 +3382,7 @@ End If
 If Not ASKINUSE Then Unload NeoMsgBox
 End If
 If Not skipthat Then
-    If Len(COM$) > 0 Then Dummy = interpret(bstack, COM$)
+    If Len(COM$) > 0 Then dummy = interpret(bstack, COM$)
 End If
 'cr bstack
 End Sub
@@ -10773,7 +10773,7 @@ Sub dset()
     End If
 ' NOW COPY
 ' for mcd
-Dim CD As String, Dummy As Long, q$
+Dim CD As String, dummy As Long, q$
 
 ''cd = App.Path
 ''AddDirSep cd
@@ -22207,7 +22207,7 @@ Function GetWindowsDir() As String
     End If
 End Function
 Sub Portrait(bstack As basetask)
-Dim Dummy As Object, try1 As Long
+Dim dummy As Object, try1 As Long
 If UBound(MyDM) = 1 Then
 PrinterDim pw, ph, psw, psh, pwox, phoy
 End If
@@ -22227,7 +22227,7 @@ If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) > 1 Then
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         GoTo contnow
     Else
-        ChangeOrientation Dummy, Printer.DeviceName, MyDM()
+        ChangeOrientation dummy, Printer.DeviceName, MyDM()
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         Exit Sub
     End If
@@ -22275,7 +22275,7 @@ If bstack.toprinter Then
 End If
 End Sub
 Sub Landscape(bstack As basetask)
-Dim Dummy As Object, try1 As Long
+Dim dummy As Object, try1 As Long
 If UBound(MyDM) = 1 Then
 PrinterDim pw, ph, psw, psh, pwox, phoy
 End If
@@ -22294,7 +22294,7 @@ If Int(psw / pwox * mydpi + 0.5) / Int(psh / phoy * mydpi + 0.5) < 1 Then
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         GoTo contnow
     Else
-        ChangeOrientation Dummy, Printer.DeviceName, MyDM()
+        ChangeOrientation dummy, Printer.DeviceName, MyDM()
         SwapPrinterDim pw, ph, psw, psh, pwox, phoy
         Exit Sub
     End If

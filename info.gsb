@@ -5423,7 +5423,7 @@ Pen 0 {
 	Print
 	Normal
 	italic
-	Report " A collection of modules for tests version 29 for M2000 Interpreter version 10, revision 11 and above"
+	Report " A collection of modules for tests version 29 for M2000 Interpreter version 10, revision 16 and above"
 	italic
 	Pen 5{
 		cursor 0, row-1
@@ -20836,7 +20836,7 @@ Bold 1
 PEN 14
 CLS,0
 If Version<10 then Error "No proper M2000 version (must be >=9.9)"
-If Version=10 and revision<11 then Error "No proper M2000 revision for version 10"
+If Version=10 and revision<16 then Error "No proper M2000 revision for version 10"
 Set Fast
 Title "Info",1   ' open a window in task bar with name info (If  you run Demo, at the exit you get no window in task bar, so we can restore it)
 dir user

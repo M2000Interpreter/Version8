@@ -1,8 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 15 active-X
-Update the subsystem for reading and changing properties for com objects with more than one index.
-
+Version 10 revision 16 active-X
+A very old bug removed (which sometimes break While struct using End While).
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
