@@ -303,8 +303,8 @@ mDoc.InsertDoc mDoc.MarkParagraphID, Charpos, (thisdoc)
 'ReColorBlock
 Render
 End Sub
-Private Function Myleft$(a As String, pos As Long)
-If pos < 1 Then Myleft$ = vbNullString Else Myleft$ = Mid$(a, 1, pos)
+Private Function Myleft$(a As String, Pos As Long)
+If Pos < 1 Then Myleft$ = vbNullString Else Myleft$ = Mid$(a, 1, Pos)
 End Function
 Private Function GetTextData(ByVal lFormatId As Long) As String
 Dim bData() As Byte, sr As String, sr1 As String
@@ -7181,26 +7181,26 @@ End Select
 End Select
 
 End Function
-Private Function aheadstatus2000(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
+Private Function aheadstatus2000(a$, Optional srink As Boolean = True, Optional Pos As Long = 1) As String 'ok
 Dim b$, part$, w$, pos2 As Long, word$
 
 If a$ = vbNullString Then Exit Function
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
 
-    w$ = Mid$(a$, pos, 1)
+    w$ = Mid$(a$, Pos, 1)
     If part$ = vbNullString And w$ = "0" Then
-        If pos + 2 <= Len(a$) Then
-            If LCase(Mid$(a$, pos, 2)) Like "0[x˜]" Then
+        If Pos + 2 <= Len(a$) Then
+            If LCase(Mid$(a$, Pos, 2)) Like "0[x˜]" Then
             'hexadecimal literal number....
-                pos = pos + 2
-                Do While pos <= Len(a$)
-                If Not Mid$(a$, pos, 1) Like "[0-9a-fA-F]" Then Exit Do
-                pos = pos + 1
+                Pos = Pos + 2
+                Do While Pos <= Len(a$)
+                If Not Mid$(a$, Pos, 1) Like "[0-9a-fA-F]" Then Exit Do
+                Pos = Pos + 1
                 Loop
                 b$ = b$ & "N"
-                If pos <= Len(a$) Then
-                    w$ = Mid$(a$, pos, 1)
+                If Pos <= Len(a$) Then
+                    w$ = Mid$(a$, Pos, 1)
                 Else
                     Exit Do
                 End If
@@ -7214,12 +7214,12 @@ Do While pos <= Len(a$)
         b$ = b$ & part$
         End If
         part$ = "S"
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = Chr(34) And Mid$(a$, pos - 1, 1) <> "`" Then Exit Do
-    If Asc(Mid$(a$, pos, 1)) < 32 Then Exit Do
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = Chr(34) And Mid$(a$, Pos - 1, 1) <> "`" Then Exit Do
+    If Asc(Mid$(a$, Pos, 1)) < 32 Then Exit Do
    
-        pos = pos + 1
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If part$ <> "" Then
@@ -7231,26 +7231,26 @@ Do While pos <= Len(a$)
             part$ = "N"
               
         End If
-      pos = pos + 1
-        If Not BlockParam2(a$, pos) Then Exit Do
+      Pos = Pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
         
-       If Mid$(a$, pos + 1, 1) <> "." Then b$ = b$ & part$
+       If Mid$(a$, Pos + 1, 1) <> "." Then b$ = b$ & part$
         part$ = vbNullString
         
     ElseIf w$ = "{" Then
 If word$ <> "" Then
   Select Case myUcase(word$, True)
   Case "THEN", "ELSE", "‘œ‘≈"
-  pos = pos - 4
+  Pos = Pos - 4
   Exit Do
   Case "ELSE.IF"
-  pos = pos - 7
+  Pos = Pos - 7
   Exit Do
   Case "¡ÀÀ…Ÿ”"
-  pos = pos - 6
+  Pos = Pos - 6
   Exit Do
   Case "¡ÀÀ…Ÿ”.¡Õ"
-  pos = pos - 9
+  Pos = Pos - 9
   Exit Do
   End Select
   End If
@@ -7262,14 +7262,14 @@ If word$ <> "" Then
         Exit Do
         End If
  
-        blockStringAhead a$, pos
-        pos = pos + 1
+        blockStringAhead a$, Pos
+        Pos = Pos + 1
         part$ = "S"
         
 
-            If pos <= Len(a$) Then
-        If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = pos - 1
+            If Pos <= Len(a$) Then
+        If Not blockStringAhead(a$, Pos) Then Exit Do
+        Pos = Pos - 1
         End If
 ''Exit Do
 
@@ -7306,7 +7306,7 @@ If word$ <> "" Then
                 part$ = "o"
                 End If
         Case "/"
-            If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+            If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
             If part$ <> "o" Then
             b$ = b$ & part$
             End If
@@ -7320,16 +7320,16 @@ If word$ <> "" Then
           If word$ <> "" Then
   Select Case myUcase(word$, True)
   Case "THEN", "ELSE", "‘œ‘≈"
-  pos = pos - 4
+  Pos = Pos - 4
   Exit Do
   Case "ELSE.IF"
-  pos = pos - 7
+  Pos = Pos - 7
   Exit Do
   Case "¡ÀÀ…Ÿ”"
-  pos = pos - 6
+  Pos = Pos - 6
   Exit Do
   Case "¡ÀÀ…Ÿ”.¡Õ"
-  pos = pos - 9
+  Pos = Pos - 9
   Exit Do
   End Select
   End If
@@ -7343,9 +7343,9 @@ JUMPHERE:
             End If
         Case "0" To "9", "."
             If part$ = "N" Then
-            If Len(a$) < pos Then
-            If Mid$(a$, pos + 1, 1) Like "[&@#%~]" Then
-            pos = pos + 1
+            If Len(a$) < Pos Then
+            If Mid$(a$, Pos + 1, 1) Like "[&@#%~]" Then
+            Pos = Pos + 1
             End If
             End If
             ElseIf part$ = "S" Then
@@ -7377,31 +7377,40 @@ JUMPHERE:
           Case "~"
         GoTo there1
         Case ">", "<"
-            If Len(a$) >= pos + 1 Then
-            If Mid$(a$, pos + 1, 1) = "=" Then
-                b$ = b$ & part$
+            If Len(a$) > Pos Then
+                If Mid$(a$, Pos + 1, 1) = "=" Then
+                     b$ = b$ & part$
+                     If Len(b$) > 1 Then
+                        part$ = "o"
+                        If Mid$(a$, Pos, 3) = "<=>" Then
+                            Pos = Pos + 2
+                        Else
+                            Pos = Pos + 1
+                        End If
+                    End If
+                ElseIf Mid$(a$, Pos, 2) = "<>" Then
+                    b$ = b$ & part$
                     If Len(b$) > 1 Then
-                    part$ = "o"
-                    pos = pos + 1
+                        part$ = "o"
+                        Pos = Pos + 1
                     End If
-                ElseIf w$ = ">" And pos > 1 Then
-                    If Mid$(a$, pos - 1, 2) = "->" Then ' "->"
-                   If Right$(b$, 1) = "S" Then
-                    b$ = b$ + part$
-                    part$ = "N"
-                    Else
-                      '  part$ = vbNullString
-                    End If
-                        
+                ElseIf w$ = ">" And Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "->" Then ' "->"
+                        If Right$(b$, 1) = "S" Then
+                            b$ = b$ + part$
+                            part$ = "N"
+                        End If
                     End If
                 End If
             End If
             GoTo there1
         Case "="
-            If Mid$(a$, pos + 1, 1) = ">" Then
-                pos = pos + 2
-                GoTo conthere
+            If Len(a$) > Pos Then
+                If InStr(">=", Mid$(a$, Pos + 1, 1)) > 0 Then
+                    Pos = Pos + 2
+                    GoTo conthere
                 End If
+            End If
 there1:
                 If b$ & part$ <> "" Then
                 w$ = Replace(b$ & part$, "a", "")
@@ -7454,7 +7463,7 @@ there1:
         End Select
         End If
         
-    pos = pos + 1
+    Pos = Pos + 1
 conthere:
 Loop
 
@@ -7492,25 +7501,25 @@ End If
 
 End Function
 
-Private Function aheadstatus(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
+Private Function aheadstatus(a$, Optional srink As Boolean = True, Optional Pos As Long = 1) As String 'ok
 Dim b$, part$, w$, pos2 As Long, word$
 
 If a$ = vbNullString Then Exit Function
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     If part$ = vbNullString And w$ = "0" Then
-        If pos + 2 <= Len(a$) Then
-            If LCase(Mid$(a$, pos, 2)) Like "0[x˜]" Then
+        If Pos + 2 <= Len(a$) Then
+            If LCase(Mid$(a$, Pos, 2)) Like "0[x˜]" Then
             'hexadecimal literal number....
-                pos = pos + 2
-                Do While pos <= Len(a$)
-                If Not Mid$(a$, pos, 1) Like "[0-9a-fA-F]" Then Exit Do
-                pos = pos + 1
+                Pos = Pos + 2
+                Do While Pos <= Len(a$)
+                If Not Mid$(a$, Pos, 1) Like "[0-9a-fA-F]" Then Exit Do
+                Pos = Pos + 1
                 Loop
                 b$ = b$ & "N"
-                If pos <= Len(a$) Then
-                    w$ = Mid$(a$, pos, 1)
+                If Pos <= Len(a$) Then
+                    w$ = Mid$(a$, Pos, 1)
                 Else
                     Exit Do
                 End If
@@ -7528,49 +7537,49 @@ Do While pos <= Len(a$)
                 End If
                 If Not (part$ = vbNullString Or part$ = "o") Then Exit Do
                 part$ = "S"
-                pos = pos + 1
-                Do While pos <= Len(a$)
-                    If pos > 1 Then
-                    If Mid$(a$, pos - 1, 2) = "\" + Right$(stringsep2, 1) Then GoTo cont001
+                Pos = Pos + 1
+                Do While Pos <= Len(a$)
+                    If Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "\" + Right$(stringsep2, 1) Then GoTo cont001
                     
                     End If
-                    If Mid$(a$, pos, 1) = Right$(stringsep2, 1) Then Exit Do
-                    If Asc(Mid$(a$, pos, 1)) < 32 Then Exit Do
+                    If Mid$(a$, Pos, 1) = Right$(stringsep2, 1) Then Exit Do
+                    If Asc(Mid$(a$, Pos, 1)) < 32 Then Exit Do
 cont001:
-                    pos = pos + 1
+                    Pos = Pos + 1
                     
                 Loop
-            If pos > Len(a$) Then pos = Len(a$)
+            If Pos > Len(a$) Then Pos = Len(a$)
             End If
             If Len(OpenTag) = 0 Then If Not (part$ = vbNullString Or part$ = "o") Then Exit Do
             part$ = "S"
-            pos = pos + 1
-            Do While pos <= Len(a$)
-                     If pos > 1 Then
-                    If Mid$(a$, pos - 1, 2) = "\" + Right$(StringSep, 1) Then GoTo cont002
+            Pos = Pos + 1
+            Do While Pos <= Len(a$)
+                     If Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "\" + Right$(StringSep, 1) Then GoTo cont002
                     
                     End If
                 
 
-                If Mid$(a$, pos, 1) = StringSep Then Exit Do
-                If Asc(Mid$(a$, pos, 1)) < 32 Then Exit Do
+                If Mid$(a$, Pos, 1) = StringSep Then Exit Do
+                If Asc(Mid$(a$, Pos, 1)) < 32 Then Exit Do
 cont002:
-                pos = pos + 1
+                Pos = Pos + 1
             Loop
-            If pos > Len(a$) Then pos = Len(a$)
+            If Pos > Len(a$) Then Pos = Len(a$)
         ElseIf w$ = Myleft$(stringsep2, 1) Then
             If part$ <> "" Then
                 b$ = b$ & part$
             End If
             If Len(OpenTag) = 0 Then If Not (part$ = vbNullString Or part$ = "o") Then Exit Do
             part$ = "S"
-            pos = pos + 1
-            Do While pos <= Len(a$)
-                If Mid$(a$, pos, 1) = Right$(stringsep2, 1) Then Exit Do
-                If Asc(Mid$(a$, pos, 1)) < 32 Then Exit Do
-                pos = pos + 1
+            Pos = Pos + 1
+            Do While Pos <= Len(a$)
+                If Mid$(a$, Pos, 1) = Right$(stringsep2, 1) Then Exit Do
+                If Asc(Mid$(a$, Pos, 1)) < 32 Then Exit Do
+                Pos = Pos + 1
             Loop
-            If pos > Len(a$) Then pos = Len(a$)
+            If Pos > Len(a$) Then Pos = Len(a$)
            
         
         ElseIf w$ = "(" Or w$ = "[" Then
@@ -7584,12 +7593,12 @@ cont002:
             part$ = "N"
               
         End If
-      pos = pos + 1
-        If Not BlockParam4(a$, pos, Asc(w$)) Then pos = Len(a$) + 1: Exit Do
-       If Mid$(a$, pos + 1, 1) <> "." Then
+      Pos = Pos + 1
+        If Not BlockParam4(a$, Pos, Asc(w$)) Then Pos = Len(a$) + 1: Exit Do
+       If Mid$(a$, Pos + 1, 1) <> "." Then
        b$ = b$ & part$
         Else
-        pos = pos - 1
+        Pos = Pos - 1
         End If
         part$ = vbNullString
    Else
@@ -7625,14 +7634,14 @@ cont002:
                 part$ = "o"
                 End If
         Case "/", "^"
-            If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
-            If Mid$(a$, pos + 1, 1) = "/*" Then Exit Do
+            If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
+            If Mid$(a$, Pos + 1, 1) = "/*" Then Exit Do
             If part$ <> "o" Then
             b$ = b$ & part$
             End If
             part$ = "o"
         Case "^"
-            If Mid$(a$, pos + 1, 1) = "^" Then Exit Do
+            If Mid$(a$, Pos + 1, 1) = "^" Then Exit Do
             If part$ <> "o" Then
             b$ = b$ & part$
             End If
@@ -7678,7 +7687,7 @@ cont002:
             End If
         Case "=", ">", "<", "~"
          If b$ & part$ = "" And InStr(StartSymbols + Chr$(0), w$) > 0 Then
-         pos = pos + 1
+         Pos = Pos + 1
          b$ = "N"
          
          Exit Do
@@ -7722,8 +7731,8 @@ cont002:
                 End If
         Case ")", "]"
         
-        If Mid$(a$, pos + 1, 1) = "." Then
-        pos = pos + 1
+        If Mid$(a$, Pos + 1, 1) = "." Then
+        Pos = Pos + 1
                    If part$ <> "" Then
             b$ = b$ & part$
             part$ = vbNullString
@@ -7750,7 +7759,7 @@ cont002:
          'If Len(DropSym) > 0 Then If InStr(DropSym, w$) > 0 Then Exit Do
         End If
      End If
-    pos = pos + 1
+    Pos = Pos + 1
  Loop
 
     w$ = Replace(b$ & part$, "a", "")
@@ -9130,7 +9139,7 @@ End Property
 Public Property Let BracketsForArrays(ByVal RHS As Boolean)
 Brackets = RHS
 End Property
-Function BlockParam4(s$, pos As Long, what As Long) As Boolean
+Function BlockParam4(s$, Pos As Long, what As Long) As Boolean
 ' need to be open
 Dim i As Long, j As Long, ii As Long
 If what = 91 Then
@@ -9138,7 +9147,7 @@ j = 1000
 Else
 j = 1
 End If
-For i = pos To Len(s$)
+For i = Pos To Len(s$)
 Select Case AscW(Mid$(s$, i, 1))
 Case 0
 Exit For
@@ -9174,7 +9183,7 @@ End If
 If i = 0 Then Exit Function
 End Select
 Next i
-If j = 0 Then pos = i: BlockParam4 = True
+If j = 0 Then Pos = i: BlockParam4 = True
 End Function
 Public Property Let SplitExpr(ByVal RHS As String)
 If RHS = "" Then

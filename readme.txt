@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 16 active-X
-A very old bug removed (which sometimes break While struct using End While).
+Version 10 revision 17 active-X
+Continue from revision 16, for the same bug, now handle all situations.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

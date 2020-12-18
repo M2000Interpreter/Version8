@@ -91,7 +91,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 16
+Global Const Revision = 17
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -14610,23 +14610,23 @@ a$ = Mid$(a$, MyTrimLi(a$, dl + 1))
 Fast2NoSpace = True
 End If
 End Function
-Function Fast3NoSpaceCheck(pos As Long, a$, c$, cl As Long, D$, dl As Long, e$, el As Long, ahead&) As Boolean
+Function Fast3NoSpaceCheck(Pos As Long, a$, c$, cl As Long, D$, dl As Long, e$, el As Long, ahead&) As Boolean
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
 If j = 0 Then Exit Function
-Pad$ = myUcase(Mid$(a$, pos, ahead&))
+Pad$ = myUcase(Mid$(a$, Pos, ahead&))
 If c$ = Left$(Pad$, cl) Then
-    pos = pos + cl
+    Pos = Pos + cl
     Fast3NoSpaceCheck = True
 Exit Function
 End If
 If D$ = Left$(Pad$, dl) Then
-pos = pos + dl
+Pos = Pos + dl
 Fast3NoSpaceCheck = True
 Exit Function
 End If
 If e$ = Left$(Pad$, el) Then
-pos = pos + el
+Pos = Pos + el
 Fast3NoSpaceCheck = True
 End If
 
@@ -14686,7 +14686,7 @@ End If
 End If
 End If
 End Function
-Function Fast2VarNoTrim(a$, c$, cl As Long, D$, dl As Long, ahead&, pos As Long) As Boolean
+Function Fast2VarNoTrim(a$, c$, cl As Long, D$, dl As Long, ahead&, Pos As Long) As Boolean
 ' need space
 Dim i As Long, Pad$, j As Long
 j = Len(a$)
@@ -14698,7 +14698,7 @@ If j - i >= cl - 1 Then
 If InStr(c$, Left$(Pad$, cl)) > 0 Then
 If Mid$(Pad$, cl + 1, 1) = " " Then
 Mid$(a$, i) = space$(cl)
-pos = 1
+Pos = 1
 Fast2VarNoTrim = True
 Exit Function
 End If
@@ -14709,7 +14709,7 @@ If j - i >= dl - 1 Then
 If InStr(D$, Left$(Pad$, dl)) > 0 Then
 If Mid$(Pad$, dl + 1, 1) = " " Then
 Mid$(a$, i) = space$(dl)
-pos = 2
+Pos = 2
 Fast2VarNoTrim = True
 End If
 End If
@@ -23064,14 +23064,14 @@ End If
 
 End Function
 
-Function blockLen2(s$, pos) As Long
+Function blockLen2(s$, Pos) As Long
 Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
 Dim jump As Boolean
 If Trim$(s$) = vbNullString Then Exit Function
 c = Len(s$)
 a1 = True
-i = pos
+i = Pos
 Do
 Select Case AscW(Mid$(s$, i, 1))
 Case 32
@@ -23133,11 +23133,11 @@ End If
 
 
 End Function
-Function BlockParam2(s$, pos As Long) As Boolean
+Function BlockParam2(s$, Pos As Long) As Boolean
 ' need to be open
 Dim i As Long, j As Long, ii As Long
 j = 1
-For i = pos To Len(s$)
+For i = Pos To Len(s$)
 Select Case AscW(Mid$(s$, i, 1))
 Case 0
 Exit For
@@ -23162,15 +23162,15 @@ End If
 If i = 0 Then Exit Function
 End Select
 Next i
-If j = 0 Then pos = i: BlockParam2 = True
+If j = 0 Then Pos = i: BlockParam2 = True
 End Function
 
-Function blockStringPOS(s$, pos As Long) As Boolean
+Function blockStringPOS(s$, Pos As Long) As Boolean
 Dim i As Long, j As Long, c As Long
 Dim a1 As Boolean
 c = Len(s$)
 a1 = True
-i = pos
+i = Pos
 If i > Len(s$) Then Exit Function
 Do
 Select Case AscW(Mid$(s$, i, 1))
@@ -23188,9 +23188,9 @@ i = i + 1
 Loop Until i > c
 If j = 1 Then
 blockStringPOS = True
-pos = i
+Pos = i
 Else
-pos = Len(s$)
+Pos = Len(s$)
 End If
 
 End Function
@@ -29852,37 +29852,37 @@ Else
 End If
 Set Scr = Nothing
 End Function
-Public Function aheadstatus(a$, Optional srink As Boolean = True, Optional pos As Long = 1) As String 'ok
+Public Function aheadstatus(a$, Optional srink As Boolean = True, Optional Pos As Long = 1) As String 'ok
 Dim b$, part$, w$, pos2 As Long
 
 If a$ = vbNullString Then Exit Function
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If v1 = 2 Then
         If part$ <> "" Then
         b$ = b$ & part$
         End If
         part$ = "S"
-        pos = pos + CLng("&H" & Mid$(a$, pos + 1, 8)) + 8
+        Pos = Pos + CLng("&H" & Mid$(a$, Pos + 1, 8)) + 8
         w$ = """"
    
     
     ElseIf Abs(v1) > 8 Then
     If part$ = vbNullString And w$ = "0" Then
-        If pos + 2 <= Len(a$) Then
-            If LCase(Mid$(a$, pos, 2)) Like "0[xВ]" Then
+        If Pos + 2 <= Len(a$) Then
+            If LCase(Mid$(a$, Pos, 2)) Like "0[xВ]" Then
             'hexadecimal literal number....
-                pos = pos + 2
-                Do While pos <= Len(a$)
-                If Not Mid$(a$, pos, 1) Like "[0-9a-fA-F]" Then Exit Do
-                pos = pos + 1
+                Pos = Pos + 2
+                Do While Pos <= Len(a$)
+                If Not Mid$(a$, Pos, 1) Like "[0-9a-fA-F]" Then Exit Do
+                Pos = Pos + 1
                 Loop
                 b$ = b$ & "N"
-                If pos <= Len(a$) Then
-                    w$ = Mid$(a$, pos, 1)
+                If Pos <= Len(a$) Then
+                    w$ = Mid$(a$, Pos, 1)
                 Else
                     Exit Do
                 End If
@@ -29895,12 +29895,12 @@ Do While pos <= Len(a$)
         b$ = b$ & part$
         End If
         part$ = "S"
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-    If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+    If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
    
-        pos = pos + 1
+        Pos = Pos + 1
         Loop
 
     ElseIf w$ = "(" Then
@@ -29909,7 +29909,7 @@ again:
             ' after
             If part$ = "S" Then
             '
-             If Mid$(a$, pos + 1, 1) = ")" Then pos = pos + 2: GoTo conthere
+             If Mid$(a$, Pos + 1, 1) = ")" Then Pos = Pos + 2: GoTo conthere
              
             End If
             ElseIf Right$(b$, 1) = "a" Then
@@ -29920,18 +29920,18 @@ again:
               
         End If
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
         'b$ = vbNullString
         part$ = ""
-        pos = pos + 2
+        Pos = Pos + 2
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
-       If Mid$(a$, pos + 1, 1) <> "." And Mid$(a$, pos + 1, 2) <> "=>" Then
+       If Mid$(a$, Pos + 1, 1) <> "." And Mid$(a$, Pos + 1, 2) <> "=>" Then
        b$ = b$ & part$
        End If
         part$ = vbNullString
@@ -29961,12 +29961,12 @@ Select Case Left$(Right$(b$, 2), 1)
         End If
         part$ = "S"
         
-If pos <= Len(a$) Then
-            pos2 = pos
-        If Not blockStringAhead(a$, pos) Then Exit Do
+If Pos <= Len(a$) Then
+            pos2 = Pos
+        If Not blockStringAhead(a$, Pos) Then Exit Do
         If Right$(b$, 1) = "N" Then
-        If Not MaybeIsSymbol3lot(a$, "+<>=~", (pos + 1)) Then
-        pos = pos2
+        If Not MaybeIsSymbol3lot(a$, "+<>=~", (Pos + 1)) Then
+        Pos = pos2
         Exit Do
         End If
         End If
@@ -29992,7 +29992,7 @@ If pos <= Len(a$) Then
                 End If
             ElseIf part$ = "N" Then
                     b$ = b$ & "Sa"
-                    If Mid$(a$, pos + 1, 1) = "." Then pos = pos + 1
+                    If Mid$(a$, Pos + 1, 1) = "." Then Pos = Pos + 1
                     part$ = vbNullString
             End If
         Case "+", "-", "|"
@@ -30003,7 +30003,7 @@ If pos <= Len(a$) Then
                 part$ = "o"
                 End If
          Case "/"
-            If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+            If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
             If part$ <> "o" Then
             b$ = b$ & part$
             End If
@@ -30023,8 +30023,8 @@ If pos <= Len(a$) Then
         
         Case "0" To "9", "."
             If part$ = "N" Then
-            If Len(a$) < pos Then
-                If Mid$(a$, pos + 1, 1) Like "[&@#%~]" Then pos = pos + 1
+            If Len(a$) < Pos Then
+                If Mid$(a$, Pos + 1, 1) Like "[&@#%~]" Then Pos = Pos + 1
             End If
             
             ElseIf part$ = "S" Then
@@ -30057,31 +30057,42 @@ If pos <= Len(a$) Then
          Case "~"
             GoTo there1
          Case ">", "<"
-            If Len(a$) >= pos + 1 Then
-            If Mid$(a$, pos + 1, 1) = "=" Then
-                b$ = b$ & part$
-                 If Len(b$) > 1 Then
-                    part$ = "o"
-                    pos = pos + 1
+            If Len(a$) > Pos Then
+                If Mid$(a$, Pos + 1, 1) = "=" Then
+                    b$ = b$ & part$
+                     If Len(b$) > 1 Then
+                        part$ = "o"
+                        If Mid$(a$, Pos, 3) = "<=>" Then
+                            Pos = Pos + 2
+                        Else
+                            Pos = Pos + 1
+                        End If
                     End If
-                ElseIf w$ = ">" And pos > 1 Then
-                    If Mid$(a$, pos - 1, 2) = "->" Then ' "->"
-                   If Right$(b$, 1) = "S" Then
-                    b$ = b$ + part$
-                    part$ = "N"
-                    Else
-                      '  part$ = vbNullString
+                ElseIf Mid$(a$, Pos, 2) = "<>" Then
+                    b$ = b$ & part$
+                    If Len(b$) > 1 Then
+                        part$ = "o"
+                        Pos = Pos + 1
                     End If
-                        
+                ElseIf w$ = ">" And Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "->" Then ' "->"
+                        If Right$(b$, 1) = "S" Then
+                            b$ = b$ + part$
+                            part$ = "N"
+                        End If
                     End If
                 End If
+                
             End If
             GoTo there1
          Case "="
-            If Mid$(a$, pos + 1, 1) = ">" Then
-                pos = pos + 2
-                GoTo conthere
+            If Len(a$) > Pos Then
+                If InStr(">=", Mid$(a$, Pos + 1, 1)) > 0 Then
+                    Pos = Pos + 2
+                    GoTo conthere
                 End If
+            End If
+            
 there1:
                 If b$ & part$ <> "" Then
                
@@ -30133,7 +30144,7 @@ there1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
 conthere:
   
@@ -30167,12 +30178,12 @@ End If
 
 End Function
 Public Function aheadstatusStr(a$) As Long 'ok
-Dim w$, pos2 As Long, pos As Long
+Dim w$, pos2 As Long, Pos As Long
 If a$ = vbNullString Then Exit Function
 Dim v1 As Integer
- pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+ Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     
     If v1 = 2 Then
@@ -30188,16 +30199,16 @@ Do While pos <= Len(a$)
     ElseIf w$ = "(" Then
         
 again22:
-        pos = pos + 1
+        Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
-       If Mid$(a$, pos + 1, 1) <> "." And Mid$(a$, pos + 1, 2) <> "=>" Then
+       If Mid$(a$, Pos + 1, 1) <> "." And Mid$(a$, Pos + 1, 2) <> "=>" Then
        
        End If
        
@@ -30211,16 +30222,16 @@ again22:
         Case " ", ChrW(160), vbTab
         If pos2 > 0 Then Exit Function
         Case "%"
-            If Not Mid$(a$, pos + 1, 1) = "(" Then Exit Function
+            If Not Mid$(a$, Pos + 1, 1) = "(" Then Exit Function
         Case "$"
             aheadstatusStr = True
             Exit Function
         Case "="
-            If Not Mid$(a$, pos + 1, 1) = ">" Then Exit Function
-            pos = pos + 1
+            If Not Mid$(a$, Pos + 1, 1) = ">" Then Exit Function
+            Pos = Pos + 1
         Case "-"
-            If Not Mid$(a$, pos + 1, 1) = ">" Then Exit Function
-            pos = pos + 1
+            If Not Mid$(a$, Pos + 1, 1) = ">" Then Exit Function
+            Pos = Pos + 1
         Case "."
          pos2 = pos2 + 1
         Case "0" To "9"
@@ -30236,7 +30247,7 @@ again22:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
 conthere:
   
@@ -30246,36 +30257,36 @@ Loop
 
 End Function
 Public Function aheadstatusFast(a$) As String 'ok
-Dim b$, part$, w$, pos2 As Long, pos As Long
+Dim b$, part$, w$, pos2 As Long, Pos As Long
 
 If a$ = vbNullString Then Exit Function
 Dim v1 As Integer
-pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If v1 = 2 Then
         If part$ <> "" Then
         b$ = b$ & part$
         End If
         part$ = "S"
-        pos = pos + CLng("&H" & Mid$(a$, pos + 1, 8)) + 8
+        Pos = Pos + CLng("&H" & Mid$(a$, Pos + 1, 8)) + 8
         w$ = """"
    
     
     ElseIf Abs(v1) > 8 Then
     If part$ = vbNullString And w$ = "0" Then
-        If pos + 2 <= Len(a$) Then
-            If LCase(Mid$(a$, pos, 2)) Like "0[xВ]" Then
+        If Pos + 2 <= Len(a$) Then
+            If LCase(Mid$(a$, Pos, 2)) Like "0[xВ]" Then
             'hexadecimal literal number....
-                pos = pos + 2
-                Do While pos <= Len(a$)
-                If Not Mid$(a$, pos, 1) Like "[0-9a-fA-F]" Then Exit Do
-                pos = pos + 1
+                Pos = Pos + 2
+                Do While Pos <= Len(a$)
+                If Not Mid$(a$, Pos, 1) Like "[0-9a-fA-F]" Then Exit Do
+                Pos = Pos + 1
                 Loop
                 b$ = b$ & "N"
-                If pos <= Len(a$) Then
-                    w$ = Mid$(a$, pos, 1)
+                If Pos <= Len(a$) Then
+                    w$ = Mid$(a$, Pos, 1)
                 Else
                     Exit Do
                 End If
@@ -30288,12 +30299,12 @@ Do While pos <= Len(a$)
         b$ = b$ & part$
         End If
         part$ = "S"
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-    If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+    If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
    
-        pos = pos + 1
+        Pos = Pos + 1
         Loop
 
     ElseIf w$ = "(" Then
@@ -30302,7 +30313,7 @@ again:
             ' after
             If part$ = "S" Then
             '
-             If Mid$(a$, pos + 1, 1) = ")" Then pos = pos + 2: GoTo conthere
+             If Mid$(a$, Pos + 1, 1) = ")" Then Pos = Pos + 2: GoTo conthere
              
             End If
             ElseIf Right$(b$, 1) = "a" Then
@@ -30313,18 +30324,18 @@ again:
               
         End If
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
         'b$ = vbNullString
         'part$ = "N"
-        pos = pos + 2
+        Pos = Pos + 2
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
-       If Mid$(a$, pos + 1, 1) <> "." And Mid$(a$, pos + 1, 2) <> "=>" Then
+       If Mid$(a$, Pos + 1, 1) <> "." And Mid$(a$, Pos + 1, 2) <> "=>" Then
        b$ = b$ & part$
        End If
         part$ = vbNullString
@@ -30354,12 +30365,12 @@ Select Case Left$(Right$(b$, 2), 1)
         End If
         part$ = "S"
         
-If pos <= Len(a$) Then
-            pos2 = pos
-        If Not blockStringAhead(a$, pos) Then Exit Do
+If Pos <= Len(a$) Then
+            pos2 = Pos
+        If Not blockStringAhead(a$, Pos) Then Exit Do
         If Right$(b$, 1) = "N" Then
-        If Not MaybeIsSymbol3lot(a$, "+<>=~", (pos + 1)) Then
-        pos = pos2
+        If Not MaybeIsSymbol3lot(a$, "+<>=~", (Pos + 1)) Then
+        Pos = pos2
         Exit Do
         End If
         End If
@@ -30385,7 +30396,7 @@ If pos <= Len(a$) Then
                 End If
             ElseIf part$ = "N" Then
                     b$ = b$ & "Sa"
-                    If Mid$(a$, pos + 1, 1) = "." Then pos = pos + 1
+                    If Mid$(a$, Pos + 1, 1) = "." Then Pos = Pos + 1
                     part$ = vbNullString
             End If
         Case "+", "-", "|"
@@ -30396,7 +30407,7 @@ If pos <= Len(a$) Then
                 part$ = "o"
                 End If
          Case "/"
-            If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+            If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
             If part$ <> "o" Then
             b$ = b$ & part$
             End If
@@ -30416,8 +30427,8 @@ If pos <= Len(a$) Then
         
         Case "0" To "9", "."
             If part$ = "N" Then
-            If Len(a$) < pos Then
-                If Mid$(a$, pos + 1, 1) Like "[&@#%~]" Then pos = pos + 1
+            If Len(a$) < Pos Then
+                If Mid$(a$, Pos + 1, 1) Like "[&@#%~]" Then Pos = Pos + 1
             End If
             
             ElseIf part$ = "S" Then
@@ -30450,31 +30461,40 @@ If pos <= Len(a$) Then
         Case "~"
         GoTo there1
          Case ">", "<"
-            If Len(a$) >= pos + 1 Then
-            If Mid$(a$, pos + 1, 1) = "=" Then
-                b$ = b$ & part$
+            If Len(a$) > Pos Then
+                If Mid$(a$, Pos + 1, 1) = "=" Then
+                    b$ = b$ & part$
+                     If Len(b$) > 1 Then
+                        part$ = "o"
+                        If Mid$(a$, Pos, 3) = "<=>" Then
+                            Pos = Pos + 2
+                        Else
+                            Pos = Pos + 1
+                        End If
+                    End If
+                ElseIf Mid$(a$, Pos, 2) = "<>" Then
+                    b$ = b$ & part$
                     If Len(b$) > 1 Then
-                    part$ = "o"
-                    pos = pos + 1
+                        part$ = "o"
+                        Pos = Pos + 1
                     End If
-                ElseIf w$ = ">" And pos > 1 Then
-                    If Mid$(a$, pos - 1, 2) = "->" Then ' "->"
-                   If Right$(b$, 1) = "S" Then
-                    b$ = b$ + part$
-                    part$ = "N"
-                    Else
-                      '  part$ = vbNullString
-                    End If
-                        
+                ElseIf w$ = ">" And Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "->" Then ' "->"
+                        If Right$(b$, 1) = "S" Then
+                            b$ = b$ + part$
+                            part$ = "N"
+                        End If
                     End If
                 End If
             End If
             GoTo there1
          Case "="
-            If Mid$(a$, pos + 1, 1) = ">" Then
-                pos = pos + 2
-                GoTo conthere
+            If Len(a$) > Pos Then
+                If InStr(">=", Mid$(a$, Pos + 1, 1)) > 0 Then
+                    Pos = Pos + 2
+                    GoTo conthere
                 End If
+            End If
 there1:
                 If b$ & part$ <> "" Then
                
@@ -30501,7 +30521,7 @@ there1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
 conthere:
   
@@ -30509,28 +30529,28 @@ Loop
 aheadstatusFast = b$ & part$
 End Function
 '
-Public Sub aheadstatusNew(a$, pos As Long, flag As Boolean)
+Public Sub aheadstatusNew(a$, Pos As Long, flag As Boolean)
 Dim b$, part$, w$, pos2 As Long
 flag = False
 If a$ = vbNullString Then Exit Sub
 
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     If part$ = vbNullString And w$ = "0" Then
-        If pos + 2 <= Len(a$) Then
-            If LCase(Mid$(a$, pos, 2)) Like "0[xВ]" Then
-                pos = pos + 2
-                Do While pos <= Len(a$)
-                If Not Mid$(a$, pos, 1) Like "[0-9a-fA-F]" Then Exit Do
-                pos = pos + 1
+        If Pos + 2 <= Len(a$) Then
+            If LCase(Mid$(a$, Pos, 2)) Like "0[xВ]" Then
+                Pos = Pos + 2
+                Do While Pos <= Len(a$)
+                If Not Mid$(a$, Pos, 1) Like "[0-9a-fA-F]" Then Exit Do
+                Pos = Pos + 1
                 Loop
                 b$ = b$ & "N"
-                If pos <= Len(a$) Then
-                    w$ = Mid$(a$, pos, 1)
+                If Pos <= Len(a$) Then
+                    w$ = Mid$(a$, Pos, 1)
                 Else
                     Exit Do
                 End If
@@ -30543,12 +30563,12 @@ Do While pos <= Len(a$)
         b$ = b$ & part$
         End If
         part$ = "S"
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-    If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+    If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
    
-        pos = pos + 1
+        Pos = Pos + 1
         Loop
 
     ElseIf w$ = "(" Then
@@ -30557,7 +30577,7 @@ again:
             ' after
             If part$ = "S" Then
             '
-             If Mid$(a$, pos + 1, 1) = ")" Then pos = pos + 2: GoTo conthere
+             If Mid$(a$, Pos + 1, 1) = ")" Then Pos = Pos + 2: GoTo conthere
              
             End If
             ElseIf Right$(b$, 1) = "a" Then
@@ -30568,18 +30588,18 @@ again:
               
         End If
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
         b$ = vbNullString
         part$ = "N"
-        pos = pos + 1
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
-       If Mid$(a$, pos + 1, 1) <> "." And Mid$(a$, pos + 1, 2) <> "=>" Then
+       If Mid$(a$, Pos + 1, 1) <> "." And Mid$(a$, Pos + 1, 2) <> "=>" Then
        b$ = b$ & part$
        End If
         part$ = vbNullString
@@ -30610,12 +30630,12 @@ Select Case Left$(Right$(b$, 2), 1)
         part$ = "S"
         
         
-            If pos <= Len(a$) Then
-            pos2 = pos
-        If Not blockStringAhead(a$, pos) Then Exit Do
+            If Pos <= Len(a$) Then
+            pos2 = Pos
+        If Not blockStringAhead(a$, Pos) Then Exit Do
         If Right$(b$, 1) = "N" Then
-        If Not MaybeIsSymbol3lot(a$, "+<>=~", (pos + 1)) Then
-        pos = pos2
+        If Not MaybeIsSymbol3lot(a$, "+<>=~", (Pos + 1)) Then
+        Pos = pos2
         Exit Do
         End If
         End If
@@ -30643,7 +30663,7 @@ Select Case Left$(Right$(b$, 2), 1)
                 End If
             ElseIf part$ = "N" Then
                     b$ = b$ & "Sa"
-                    If Mid$(a$, pos + 1, 1) = "." Then pos = pos + 1
+                    If Mid$(a$, Pos + 1, 1) = "." Then Pos = Pos + 1
                     part$ = vbNullString
             End If
         Case "+", "-", "|"
@@ -30665,19 +30685,19 @@ Select Case Left$(Right$(b$, 2), 1)
             Else
             'skip
             End If
-        pos = pos + 1
+        Pos = Pos + 1
         Do
-        pos2 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos2 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos2 > pos
-        pos = pos - 1
+        Loop Until pos2 > Pos
+        Pos = Pos - 1
         Case "0" To "9", "."
             If part$ = "N" Then
-            If Len(a$) < pos Then
-                If Mid$(a$, pos + 1, 1) Like "[&@#%~]" Then pos = pos + 1
+            If Len(a$) < Pos Then
+                If Mid$(a$, Pos + 1, 1) Like "[&@#%~]" Then Pos = Pos + 1
             End If
             
             ElseIf part$ = "S" Then
@@ -30710,31 +30730,40 @@ Select Case Left$(Right$(b$, 2), 1)
              Case "~"
         GoTo there1
          Case ">", "<"
-            If Len(a$) >= pos + 1 Then
-            If Mid$(a$, pos + 1, 1) = "=" Then
-                b$ = b$ & part$
+            If Len(a$) > Pos Then
+                If Mid$(a$, Pos + 1, 1) = "=" Then
+                    b$ = b$ & part$
                     If Len(b$) > 1 Then
-                    part$ = "o"
-                    pos = pos + 1
+                        part$ = "o"
+                        If Mid$(a$, Pos, 3) = "<=>" Then
+                            Pos = Pos + 2
+                        Else
+                            Pos = Pos + 1
+                        End If
                     End If
-                ElseIf w$ = ">" And pos > 1 Then
-                    If Mid$(a$, pos - 1, 2) = "->" Then ' "->"
-                   If Right$(b$, 1) = "S" Then
-                    b$ = b$ + part$
-                    part$ = "N"
-                    Else
-                      '  part$ = vbNullString
+                ElseIf Mid$(a$, Pos, 2) = "<>" Then
+                    b$ = b$ & part$
+                    If Len(b$) > 1 Then
+                        part$ = "o"
+                        Pos = Pos + 1
                     End If
-                        
+                ElseIf w$ = ">" And Pos > 1 Then
+                    If Mid$(a$, Pos - 1, 2) = "->" Then ' "->"
+                        If Right$(b$, 1) = "S" Then
+                            b$ = b$ + part$
+                            part$ = "N"
+                        End If
                     End If
                 End If
             End If
             GoTo there1
          Case "="
-            If Mid$(a$, pos + 1, 1) = ">" Then
-                pos = pos + 2
-                GoTo conthere
+            If Len(a$) > Pos Then
+                If InStr(">=", Mid$(a$, Pos + 1, 1)) > 0 Then
+                    Pos = Pos + 2
+                    GoTo conthere
                 End If
+            End If
 there1:
                 If b$ & part$ <> "" Then
                
@@ -30760,7 +30789,7 @@ there1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
 conthere:
   
@@ -30774,7 +30803,7 @@ Loop
 
 End Sub
 
-Public Sub aheadstatusDO(a$, pos As Long, Lang As Long, flag As Boolean)
+Public Sub aheadstatusDO(a$, Pos As Long, Lang As Long, flag As Boolean)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer
 Const second1$ = "епамекабе", len1 = 9
 Const second11$ = "епамакабе", len11 = 9
@@ -30783,39 +30812,39 @@ Const second22$ = "REPEAT", len22 = 6
 flag = False
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
+If Pos = 0 Then Pos = 1
 lenA = Len(a$)
-Do While pos <= lenA
-    w$ = Mid$(a$, pos, 1)
+Do While Pos <= lenA
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= lenA
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= lenA
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= lenA Then
+       If Pos <= lenA Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-                pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = lenA: Exit Do
+                Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -30830,24 +30859,24 @@ again22:
                         If what$ = "левяи" Or what$ = "памта" Then
                                 
                                 If level2 = 0 Then
-                                    pos = pos - v1
+                                    Pos = Pos - v1
                                     flag = True
                                     Exit Sub
                                 Else
-                                    If Left$(what$, 1) = "л" Then aheadstatusSkipParam a$, pos
+                                    If Left$(what$, 1) = "л" Then aheadstatusSkipParam a$, Pos
                                     level2 = level2 - 1
                                 End If
                         ElseIf what$ = second1$ Or what$ = second11$ Then
-                            If MaybeIsSymbol3(a$, "{", pos) Then
-                                aheadstatusSTRUCT a$, pos
+                            If MaybeIsSymbol3(a$, "{", Pos) Then
+                                aheadstatusSTRUCT a$, Pos
                             Else
                                 level2 = level2 + 1
                             End If
                         Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                         End If
                     Else
-                        aheadstatusSkipParam a$, pos
+                        aheadstatusSkipParam a$, Pos
                     End If
                 Else
                     v1 = Len(what$)
@@ -30855,51 +30884,51 @@ again22:
                         what$ = UCase(what$)
                         If what$ = "UNTIL" Or what$ = "ALWAYS" Then
                             If level2 = 0 Then
-                                pos = pos - v1
+                                Pos = Pos - v1
                                 flag = True
                                 Exit Sub
                             Else
-                                If Left$(what$, 1) = "U" Then aheadstatusSkipParam a$, pos
+                                If Left$(what$, 1) = "U" Then aheadstatusSkipParam a$, Pos
                                 level2 = level2 - 1
                             End If
                         ElseIf what$ = second2$ Or what$ = second22$ Then
-                            If MaybeIsSymbol3(a$, "{", pos) Then
-                                aheadstatusSTRUCT a$, pos
+                            If MaybeIsSymbol3(a$, "{", Pos) Then
+                                aheadstatusSTRUCT a$, Pos
                           Else
                                 level2 = level2 + 1
                             End If
                         Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                         End If
                     Else
-                        aheadstatusSkipParam a$, pos
+                        aheadstatusSkipParam a$, Pos
                     End If
                 End If
           Else
-          If Len(what$) > 0 Then aheadstatusSkipParam a$, pos
+          If Len(what$) > 0 Then aheadstatusSkipParam a$, Pos
           End If
-                  pos = pos + 1
+                  Pos = Pos + 1
         Do
-        pos2 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos2 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbCr, vbLf, vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos2 > pos
-        pos = pos - 1
+        Loop Until pos2 > Pos
+        Pos = Pos - 1
 
                 what$ = vbNullString
         Case "/"
-            If Mid$(a$, pos, 2) = "//" Then
+            If Mid$(a$, Pos, 2) = "//" Then
                GoTo skip1
             End If
         Case "'", "\"
 skip1:
             If Len(what$) > 0 Then what$ = vbNullString
         Do
-        pos = pos + 1
+        Pos = Pos + 1
         
-        Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+        Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
         
         Case ")", "}", Is < " " ', "'", "\"
         
@@ -30913,7 +30942,7 @@ skip1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -30924,60 +30953,60 @@ If Len(what$) > 0 Then
 If level2 = 0 Then
     what$ = UCase(what$)
     If what$ = "ALWAYS" Then
-        pos = pos - Len(what$)
+        Pos = Pos - Len(what$)
         flag = True
         Exit Sub
     End If
 End If
 End If
 End If
-pos = lenA + 2
+Pos = lenA + 2
 
 End Sub
-Public Sub aheadstatusSTRUCT(a$, pos As Long)
+Public Sub aheadstatusSTRUCT(a$, Pos As Long)
 Dim pos2 As Long, w$, lenA As Long
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
 lenA = Len(a$)
-If pos = 0 Then pos = 1
-Do While pos <= lenA
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= lenA
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     If w$ = """" Then
-        pos = pos + 1
-        Do While pos <= lenA
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= lenA
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
 again22:
-      pos = pos + 1
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+      Pos = Pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
-       If pos <= lenA Then
+       If Pos <= lenA Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = lenA: Exit Do
-        If MaybeIsSymbol3(a$, ":", pos) Then pos = pos + 1: Exit Do
+        Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = lenA: Exit Do
+        If MaybeIsSymbol3(a$, ":", Pos) Then Pos = Pos + 1: Exit Do
         End If
     Else
         Select Case w$
         Case "/"
-        If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -30985,41 +31014,41 @@ conthere:
 Loop
 ' skip line
     Do
-        pos = pos + 1
+        Pos = Pos + 1
         
-        Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+        Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
 
 End Sub
-Public Sub aheadstatusIFthen(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusIFthen(a$, Pos As Long, Lang As Long, w$)
 Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     Else
         Select Case w$
@@ -31033,25 +31062,25 @@ again22:
                         what$ = myUcase(what$)
                         If Lang = 0 Then
                              If what$ = "тоте" Or what$ = "аккиыс" Then
-                             pos2 = pos
+                             pos2 = Pos
                                     If MaybeIsSymbol3lot(a$, b123, pos2) Then
                                        
                                         w$ = what$
                                         Exit Sub
                                     Else
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     End If
                                     Exit Do
                             End If
                         Else
                             If what$ = "THEN" Or what$ = "ELSE" Then
-                                    pos2 = pos
+                                    pos2 = Pos
                                     If MaybeIsSymbol3lot(a$, b123, pos2) Then
                                        
                                         w$ = what$
                                         Exit Sub
                                     Else
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     End If
                                     Exit Do
                             End If
@@ -31061,23 +31090,23 @@ again22:
                     If w$ = vbCr Then Exit Do
                     what$ = vbNullString
             If w$ = "{" Then
-                     If pos <= Len(a$) Then
-                    pos = blockLen2(a$, pos + 1)
-                    If pos = 0 Then pos = Len(a$): Exit Do
+                     If Pos <= Len(a$) Then
+                    Pos = blockLen2(a$, Pos + 1)
+                    If Pos = 0 Then Pos = Len(a$): Exit Do
                     End If
             Else
-            pos = pos + 1
+            Pos = Pos + 1
         Do
-        pos2 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos2 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos2 > pos
-        pos = pos - 1
+        Loop Until pos2 > Pos
+        Pos = Pos - 1
         End If
         Case "/"
-        If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         Case Else
@@ -31088,7 +31117,7 @@ again22:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -31108,36 +31137,36 @@ If Len(what$) > 0 Then
 End If
 End Sub
 
-Public Sub aheadstatusIF(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusIF(a$, Pos As Long, Lang As Long, w$)
 Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     Else
         Select Case w$
@@ -31164,23 +31193,23 @@ again22:
                     End If
                     what$ = vbNullString
                     If w$ = "{" Then
-                     If pos <= Len(a$) Then
-                    pos = blockLen2(a$, pos + 1)
-                    If pos = 0 Then pos = Len(a$): Exit Do
+                     If Pos <= Len(a$) Then
+                    Pos = blockLen2(a$, Pos + 1)
+                    If Pos = 0 Then Pos = Len(a$): Exit Do
                     End If
                     Else
-                 pos = pos + 1
+                 Pos = Pos + 1
         Do
-        pos2 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos2 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos2 > pos
-        pos = pos - 1
+        Loop Until pos2 > Pos
+        Pos = Pos - 1
         End If
         Case "/"
-        If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         Case Else
@@ -31191,7 +31220,7 @@ again22:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -31210,36 +31239,36 @@ If Len(what$) > 0 Then
         
 End If
 End Sub
-Public Sub aheadstatusELSE(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusELSE(a$, Pos As Long, Lang As Long, w$)
 Dim pos2 As Long, what$
 ' in a line like if true then ?"ok" else ?"else"
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     Else
         Select Case w$
@@ -31265,23 +31294,23 @@ again22:
                     what$ = vbNullString
        
                  If w$ = "{" Then
-                     If pos <= Len(a$) Then
-                    pos = blockLen2(a$, pos + 1)
-                    If pos = 0 Then pos = Len(a$): Exit Do
+                     If Pos <= Len(a$) Then
+                    Pos = blockLen2(a$, Pos + 1)
+                    If Pos = 0 Then Pos = Len(a$): Exit Do
                     End If
                  Else
-                pos = pos + 1
+                Pos = Pos + 1
         Do
-        pos2 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos2 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos2 > pos
-        pos = pos - 1
+        Loop Until pos2 > Pos
+        Pos = Pos - 1
         End If
         Case "/"
-        If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         Case Else
@@ -31294,7 +31323,7 @@ again22:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -31319,43 +31348,43 @@ End If
 End Sub
 
 
-Public Sub aheadstatusThen(a$, pos As Long, Lang As Long, w$)
+Public Sub aheadstatusThen(a$, Pos As Long, Lang As Long, w$)
 Dim pos2 As Long, what$
 
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= Len(a$) Then
+       If Pos <= Len(a$) Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = Len(a$): Exit Do
+        Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
@@ -31379,17 +31408,17 @@ again22:
                     End If
                     End If
                     what$ = vbNullString
-                 pos = pos + 1
+                 Pos = Pos + 1
         Do
-        pos2 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos2 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos2 > pos
-        pos = pos - 1
+        Loop Until pos2 > Pos
+        Pos = Pos - 1
         Case "/"
-        If Mid$(a$, pos + 1, 1) = "/" Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "/" Then Exit Do
         Case ")", "}", Is < " ", "'", "\"
         Exit Do
         Case Else
@@ -31400,7 +31429,7 @@ again22:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -31423,46 +31452,46 @@ If Len(what$) > 1 Then
         
 End If
 End Sub
-Public Sub aheadstatusSkipParam2(a$, pos As Long)
+Public Sub aheadstatusSkipParam2(a$, Pos As Long)
 ' no block  ' for for next
 Dim pos2 As Long, w$
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     If w$ = """" Then
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
 again22:
-      pos = pos + 1
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+      Pos = Pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     Else
         Select Case w$
         Case "/"
-            If Mid$(a$, pos + 1, 1) = "/" Then GoTo jump1
+            If Mid$(a$, Pos + 1, 1) = "/" Then GoTo jump1
         Case "'", "\"
-        If pos > 1 Then pos = pos - 1
+        If Pos > 1 Then Pos = Pos - 1
         Exit Do
         Case ":", ")", "{", "}", Is < " ", vbLf
         Exit Do
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -31470,57 +31499,57 @@ conthere:
 Loop
 Exit Sub
 jump1:
-If pos > 1 Then pos = pos - 1
+If Pos > 1 Then Pos = Pos - 1
 End Sub
 
-Public Sub aheadstatusSkipParam(a$, pos As Long)
+Public Sub aheadstatusSkipParam(a$, Pos As Long)
 Dim pos2 As Long, w$
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    w$ = Mid$(a$, pos, 1)
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     If w$ = """" Then
-        pos = pos + 1
-        Do While pos <= Len(a$)
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
 again22:
-      pos = pos + 1
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+      Pos = Pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
-       If pos <= Len(a$) Then
+       If Pos <= Len(a$) Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = Len(a$): Exit Do
+        Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = Len(a$): Exit Do
         End If
     Else
         Select Case w$
         Case "/"
-        If Mid$(a$, pos + 1, 1) = "/" Then
-        If pos > 1 Then pos = pos - 1
+        If Mid$(a$, Pos + 1, 1) = "/" Then
+        If Pos > 1 Then Pos = Pos - 1
         Exit Do
         End If
         Case "'", "\"
-        If pos > 1 Then pos = pos - 1
+        If Pos > 1 Then Pos = Pos - 1
         Exit Do
         Case ":", ")", "}", Is < " ", vbLf
         Exit Do
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
@@ -31530,7 +31559,7 @@ Loop
 End Sub
 
 
-Public Sub aheadstatusNext(a$, pos As Long, Lang As Long, flag As Boolean)
+Public Sub aheadstatusNext(a$, Pos As Long, Lang As Long, flag As Boolean)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer, CM As Integer
 CM = 1
 Const second1$ = "циа", len1 = 3
@@ -31538,39 +31567,39 @@ Const second2$ = "FOR", len2 = 3
 flag = False
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
+If Pos = 0 Then Pos = 1
 lenA = Len(a$)
-Do While pos <= lenA
-    w$ = Mid$(a$, pos, 1)
+Do While Pos <= lenA
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= lenA
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= lenA
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= lenA Then
+       If Pos <= lenA Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = lenA: Exit Do
+        Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = lenA: Exit Do
         End If
     Else
     
@@ -31587,7 +31616,7 @@ again:
                     If Len(what$) = 7 Or Len(what$) = len1 Then
                         what$ = myUcase(what$)
                         If what$ = "еполемо" Then
-                               If MyTrim$(w$) = "" Then aheadstatusSkipParam a$, pos
+                               If MyTrim$(w$) = "" Then aheadstatusSkipParam a$, Pos
                                 If level2 = 0 Then
                                     flag = True
                                     Exit Sub
@@ -31595,24 +31624,24 @@ again:
                                     level2 = level2 - 1
                                 End If
                         ElseIf what$ = second1$ Then
-                            aheadstatusSkipParam2 a$, pos
-                            If MaybeIsSymbol3(a$, "{", pos) Then
-                                pos = blockLen2(a$, pos + 1)
-                                If pos = 0 Then pos = Len(a$): Exit Sub
-                            ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
+                            aheadstatusSkipParam2 a$, Pos
+                            If MaybeIsSymbol3(a$, "{", Pos) Then
+                                Pos = blockLen2(a$, Pos + 1)
+                                If Pos = 0 Then Pos = Len(a$): Exit Sub
+                            ElseIf MaybeIsSymbol3lot(a$, b1234, Pos) Then
                                 level2 = level2 + 1
                             End If
                         Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                         End If
                     Else
-                        aheadstatusSkipParam a$, pos
+                        aheadstatusSkipParam a$, Pos
                     End If
                 Else
                     If Len(what$) = 4 Or Len(what$) = len2 Then
                         what$ = myUcase(what$)
                         If what$ = "NEXT" Then
-                            If MyTrim$(w$) = "" Then aheadstatusSkipParam a$, pos
+                            If MyTrim$(w$) = "" Then aheadstatusSkipParam a$, Pos
                             If level2 = 0 Then
                                 flag = True
                                 Exit Sub
@@ -31620,47 +31649,47 @@ again:
                                 level2 = level2 - 1
                             End If
                         ElseIf what$ = second2$ Then
-                            aheadstatusSkipParam2 a$, pos
-                            If MaybeIsSymbol3(a$, "{", pos) Then
-                                pos = blockLen2(a$, pos + 1)
-                                If pos = 0 Then pos = Len(a$): Exit Sub
-                            ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
+                            aheadstatusSkipParam2 a$, Pos
+                            If MaybeIsSymbol3(a$, "{", Pos) Then
+                                Pos = blockLen2(a$, Pos + 1)
+                                If Pos = 0 Then Pos = Len(a$): Exit Sub
+                            ElseIf MaybeIsSymbol3lot(a$, b1234, Pos) Then
                                 level2 = level2 + 1
             
                               
                             End If
                         Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                         End If
                     Else
-                        aheadstatusSkipParam a$, pos
+                        aheadstatusSkipParam a$, Pos
                     End If
                 End If
           Else
-          If Len(what$) > 0 Then aheadstatusSkipParam a$, pos
+          If Len(what$) > 0 Then aheadstatusSkipParam a$, Pos
           End If
                 what$ = vbNullString
                 
-        pos = pos + 1
+        Pos = Pos + 1
         Do
-        pos2 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos2 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos2 > pos
-        pos = pos - 1
+        Loop Until pos2 > Pos
+        Pos = Pos - 1
         Case "/"
-            If CM = 0 Or Mid$(a$, pos, 2) = "//" Then
+            If CM = 0 Or Mid$(a$, Pos, 2) = "//" Then
                GoTo skip1
             End If
         Case "'", "\"
 skip1:
             If Len(what$) > 0 Then what$ = vbNullString
         Do
-        pos = pos + 1
+        Pos = Pos + 1
         
-        Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+        Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
         CM = 0
         Case ")", "}", Is < " "
         
@@ -31674,19 +31703,19 @@ skip1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
   
 Loop
 If Len(what$) > 2 Then GoTo again
-pos = lenA + 2
+Pos = lenA + 2
 
 End Sub
 
 
-Public Sub aheadstatusELSEIF(a$, pos As Long, Lang As Long, jump As Boolean, IFCTRL As Long, flag As Boolean)
+Public Sub aheadstatusELSEIF(a$, Pos As Long, Lang As Long, jump As Boolean, IFCTRL As Long, flag As Boolean)
 Dim what$, w$, lenA As Long, level2 As Integer, CM As Integer, pos3 As Long
 CM = 1
 Const second1$ = "ам", len1 = 2
@@ -31694,39 +31723,39 @@ Const second2$ = "IF", len2 = 2
 flag = True
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
+If Pos = 0 Then Pos = 1
 lenA = Len(a$)
-Do While pos <= lenA
-    w$ = Mid$(a$, pos, 1)
+Do While Pos <= lenA
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= lenA
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= lenA
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= lenA Then
+       If Pos <= lenA Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = lenA: Exit Do
+        Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -31744,44 +31773,44 @@ again22:
                             what$ = myUcase(what$)
                             If what$ = "аккиыс" Then
                                                                     
-                                pos3 = pos
+                                pos3 = Pos
                                 If MaybeIsSymbol3lot(a$, b123, pos3) Then
-                                    If level2 = 0 Then pos = pos - 6: Exit Sub
+                                    If level2 = 0 Then Pos = Pos - 6: Exit Sub
                                 Else
-                                    aheadstatusSkipParam a$, pos
+                                    aheadstatusSkipParam a$, Pos
                                 End If
                             ElseIf what$ = "текос" Then
                                     
-                                If FastSymbolAt(pos, a$, second1$, len1) Then
+                                If FastSymbolAt(Pos, a$, second1$, len1) Then
                                     If level2 = 0 Then IFCTRL = 0: Exit Sub
                                     level2 = level2 - 1
                                 Else
-                                    aheadstatusSkipParam a$, pos
+                                    aheadstatusSkipParam a$, Pos
                                 End If
                             ElseIf what$ = "аккиыс.ам" Then
                                     If (Not jump) Or IFCTRL = 2 Then
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     Else
                                     
                                     If level2 = 0 Then
-                                    pos = pos - 9: Exit Sub
+                                    Pos = Pos - 9: Exit Sub
                                     Else
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     End If
                                     End If
                             ElseIf what$ = second1$ Then  ' skip any nested IF
-                                aheadstatusThen a$, pos, 0, what$
+                                aheadstatusThen a$, Pos, 0, what$
                                 If what$ <> vbNullString Then
-                                    If MaybeIsSymbol3(a$, "{", pos) Then
-                                    aheadstatusSTRUCT a$, pos
+                                    If MaybeIsSymbol3(a$, "{", Pos) Then
+                                    aheadstatusSTRUCT a$, Pos
                                     
-                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, Pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
-                                        pos = pos + 1
+                                        Pos = Pos + 1
         
-                                    Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+                                    Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
                                     End If
                                 Else
                                 flag = False
@@ -31789,50 +31818,50 @@ again22:
                                 Exit Sub
                                 End If
                             Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                             End If
                           
                         Else
                                 what$ = UCase(what$)
                                 If what$ = "ELSE" Then
-                                    pos3 = pos
+                                    pos3 = Pos
                                     If MaybeIsSymbol3lot(a$, b123, pos3) Then
-                                        If level2 = 0 Then pos = pos - 4: Exit Sub
+                                        If level2 = 0 Then Pos = Pos - 4: Exit Sub
                                     Else
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     End If
                                 ElseIf what$ = "END" Then
                             
-                                    If FastSymbolAt(pos, a$, second2$, len2) Then
+                                    If FastSymbolAt(Pos, a$, second2$, len2) Then
                                         If level2 = 0 Then IFCTRL = 0: Exit Sub
                                         level2 = level2 - 1
                                     Else
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     End If
                                 ElseIf what$ = "ELSE.IF" Then
                                     If (Not jump) Or IFCTRL = 2 Then
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     Else
                                     
                                     If level2 = 0 Then
-                                    pos = pos - 7: Exit Sub
+                                    Pos = Pos - 7: Exit Sub
                                     Else
-                                        aheadstatusSkipParam a$, pos
+                                        aheadstatusSkipParam a$, Pos
                                     End If
                                     End If
                                 ElseIf what$ = second2$ Then
-                                aheadstatusThen a$, pos, 1, what$
+                                aheadstatusThen a$, Pos, 1, what$
                                 If what$ <> vbNullString Then
-                                    If MaybeIsSymbol3(a$, "{", pos) Then
-                                    aheadstatusSTRUCT a$, pos
+                                    If MaybeIsSymbol3(a$, "{", Pos) Then
+                                    aheadstatusSTRUCT a$, Pos
                                     
-                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, Pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
-                                        pos = pos + 1
+                                        Pos = Pos + 1
         
-                                    Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+                                    Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
                                     End If
                                 Else
                                 flag = False
@@ -31841,33 +31870,33 @@ again22:
                                 End If
                                 
                                 Else
-                                aheadstatusSkipParam a$, pos
+                                aheadstatusSkipParam a$, Pos
                                 End If
                             
                         End If
                     End If
                     what$ = vbNullString
-                            pos = pos + 1
+                            Pos = Pos + 1
         Do
-        pos3 = pos + 1
-        Select Case Mid$(a$, pos, 1)
+        pos3 = Pos + 1
+        Select Case Mid$(a$, Pos, 1)
         Case " ", Chr$(160), vbCr, vbLf, vbTab
-            pos = pos + 1
+            Pos = Pos + 1
         End Select
-        Loop Until pos3 > pos
-        pos = pos - 1
+        Loop Until pos3 > Pos
+        Pos = Pos - 1
 
         Case "/"
-            If CM = 0 Or Mid$(a$, pos, 2) = "//" Then
+            If CM = 0 Or Mid$(a$, Pos, 2) = "//" Then
                GoTo skip1
             End If
         Case "'", "\"
 skip1:
             If Len(what$) > 0 Then what$ = vbNullString
         Do
-        pos = pos + 1
+        Pos = Pos + 1
         
-        Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+        Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
         CM = 0
         Case ")", "}", Is < " "
         
@@ -31882,17 +31911,17 @@ skip1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
   
 Loop
-pos = lenA + 2
+Pos = lenA + 2
 
 End Sub
 '
-Public Sub aheadstatusENDIF(a$, pos As Long, Lang As Long, flag As Boolean)
+Public Sub aheadstatusENDIF(a$, Pos As Long, Lang As Long, flag As Boolean)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer, CM As Integer
 CM = 1
 Const second1$ = "ам", len1 = 2
@@ -31900,39 +31929,39 @@ Const second2$ = "IF", len2 = 2
 flag = True
 If a$ = vbNullString Then Exit Sub
 Dim v1 As Long
-If pos = 0 Then pos = 1
+If Pos = 0 Then Pos = 1
 lenA = Len(a$)
-Do While pos <= lenA
-    w$ = Mid$(a$, pos, 1)
+Do While Pos <= lenA
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= lenA
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= lenA
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= lenA Then
+       If Pos <= lenA Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = lenA: Exit Do
+        Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -31949,25 +31978,25 @@ again22:
                             what$ = myUcase(what$)
                             If what$ = "текос" Then
                                     
-                                If FastSymbolAt(pos, a$, second1$, len1) Then
+                                If FastSymbolAt(Pos, a$, second1$, len1) Then
                                 If level2 = 0 Then Exit Sub
                                 level2 = level2 - 1
                                 Else
-                                aheadstatusSkipParam a$, pos
+                                aheadstatusSkipParam a$, Pos
                                 End If
                             ElseIf what$ = second1$ Then
-                                aheadstatusThen a$, pos, 0, what$
+                                aheadstatusThen a$, Pos, 0, what$
                                 If what$ <> vbNullString Then
-                                  If MaybeIsSymbol3(a$, "{", pos) Then
-                                    aheadstatusSTRUCT a$, pos
+                                  If MaybeIsSymbol3(a$, "{", Pos) Then
+                                    aheadstatusSTRUCT a$, Pos
                                     
-                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, Pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
-                                        pos = pos + 1
+                                        Pos = Pos + 1
         
-                                    Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+                                    Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
                                     End If
                                 Else
                                 flag = False
@@ -31975,10 +32004,10 @@ again22:
                                 Exit Sub
                                 End If
                             Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                             End If
                             Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                             End If
                           
                         Else
@@ -31986,25 +32015,25 @@ again22:
                                 what$ = UCase(what$)
                                 If what$ = "END" Then
                             
-                                If FastSymbolAt(pos, a$, second2$, len2) Then
+                                If FastSymbolAt(Pos, a$, second2$, len2) Then
                                     If level2 = 0 Then Exit Sub
                                     level2 = level2 - 1
                                  Else
-                                 aheadstatusSkipParam a$, pos
+                                 aheadstatusSkipParam a$, Pos
                                 End If
                                 ElseIf what$ = second2$ Then
-                                aheadstatusThen a$, pos, 1, what$
+                                aheadstatusThen a$, Pos, 1, what$
                                 If what$ <> vbNullString Then
-                                    If MaybeIsSymbol3(a$, "{", pos) Then
-                                    aheadstatusSTRUCT a$, pos
+                                    If MaybeIsSymbol3(a$, "{", Pos) Then
+                                    aheadstatusSTRUCT a$, Pos
                                     
-                                    ElseIf MaybeIsSymbol3lot(a$, b123, pos) Then
+                                    ElseIf MaybeIsSymbol3lot(a$, b123, Pos) Then
                                     level2 = level2 + 1
                                     Else 'skip line
                                     Do
-                                        pos = pos + 1
+                                        Pos = Pos + 1
         
-                                    Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+                                    Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
                                     End If
                                 Else
                                 flag = False
@@ -32013,37 +32042,37 @@ again22:
                                 End If
                                 
                                 Else
-                                aheadstatusSkipParam a$, pos
+                                aheadstatusSkipParam a$, Pos
                                 End If
                             Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                             
                             End If
                             
                         End If
                     End If
                     what$ = vbNullString
-                        pos = pos + 1
+                        Pos = Pos + 1
                         Do
-                        pos2 = pos + 1
-                        Select Case Mid$(a$, pos, 1)
+                        pos2 = Pos + 1
+                        Select Case Mid$(a$, Pos, 1)
                         Case " ", Chr$(160), vbTab
-                            pos = pos + 1
+                            Pos = Pos + 1
                         End Select
-                        Loop Until pos2 > pos
-                        pos = pos - 1
+                        Loop Until pos2 > Pos
+                        Pos = Pos - 1
 
         Case "/"
-            If CM = 0 Or Mid$(a$, pos, 2) = "//" Then
+            If CM = 0 Or Mid$(a$, Pos, 2) = "//" Then
                GoTo skip1
             End If
         Case "'", "\"
 skip1:
             If Len(what$) > 0 Then what$ = vbNullString
         Do
-        pos = pos + 1
+        Pos = Pos + 1
         
-        Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+        Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
         CM = 0
         Case ")", "}", Is < " "
         
@@ -32058,53 +32087,53 @@ skip1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
   
 Loop
-pos = lenA + 2
+Pos = lenA + 2
 
 End Sub
-Public Sub aheadstatusEND(a$, pos As Long, Lang As Long, second1$, len1 As Long, second2$, len2 As Long, flag As Boolean, v1 As Long)
+Public Sub aheadstatusEND(a$, Pos As Long, Lang As Long, second1$, len1 As Long, second2$, len2 As Long, flag As Boolean, v1 As Long)
 Dim pos2 As Long, what$, w$, lenA As Long, level2 As Integer, CM As Integer
 flag = False
 CM = 1
 If a$ = vbNullString Then Exit Sub
-If pos = 0 Then pos = 1
+If Pos = 0 Then Pos = 1
 lenA = Len(a$)
-Do While pos <= lenA
-    w$ = Mid$(a$, pos, 1)
+Do While Pos <= lenA
+    w$ = Mid$(a$, Pos, 1)
     v1 = AscW(w$)
     If Abs(v1) > 8 Then
     
     If w$ = """" Then
             If Len(what$) > 0 Then what$ = vbNullString
-        pos = pos + 1
-        Do While pos <= lenA
-        If Mid$(a$, pos, 1) = """" Then Exit Do
-        If Abs(AscW(Mid$(a$, pos, 1))) < 31 Then Exit Do
-        pos = pos + 1
+        Pos = Pos + 1
+        Do While Pos <= lenA
+        If Mid$(a$, Pos, 1) = """" Then Exit Do
+        If Abs(AscW(Mid$(a$, Pos, 1))) < 31 Then Exit Do
+        Pos = Pos + 1
         Loop
     ElseIf w$ = "(" Then
         If Len(what$) > 0 Then what$ = vbNullString
 again22:
-      pos = pos + 1
+      Pos = Pos + 1
 
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-        pos = pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+        Pos = Pos + 1
         GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-        pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+        Pos = Pos + 1: GoTo again22
         End If
     ElseIf w$ = "{" Then
        If Len(what$) > 0 Then what$ = vbNullString
-       If pos <= lenA Then
+       If Pos <= lenA Then
         'If Not blockStringAhead(a$, pos) Then Exit Do
-        pos = blockLen2(a$, pos + 1)
-        If pos = 0 Then pos = lenA: Exit Do
+        Pos = blockLen2(a$, Pos + 1)
+        If Pos = 0 Then Pos = lenA: Exit Do
         End If
     Else
         Select Case w$
@@ -32120,64 +32149,64 @@ again22:
                         If Len(what$) = 5 Or Len(what$) = len1 Then
                             what$ = myUcase(what$)
                             If what$ = "текос" Then
-                                v1 = pos - 5
-                                If FastSymbolAt(pos, a$, second1$, len1) Then
+                                v1 = Pos - 5
+                                If FastSymbolAt(Pos, a$, second1$, len1) Then
                                 If level2 = 0 Then flag = True: Exit Sub
                                 level2 = level2 - 1
                                 Else
-                                aheadstatusSkipParam a$, pos
+                                aheadstatusSkipParam a$, Pos
                                 End If
                             ElseIf what$ = second1$ Then
-                                pos = pos - 1
+                                Pos = Pos - 1
                                 Do
-                                    pos = pos + 1
-                                    pos2 = pos
-                                    aheadstatusNew a$, pos, flag
-                                Loop While flag And MaybeIsSymbol3(a$, ",", pos)
-                                If MaybeIsSymbol3(a$, "{", pos) Then
-                                    aheadstatusSTRUCT a$, pos
-                                ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
+                                    Pos = Pos + 1
+                                    pos2 = Pos
+                                    aheadstatusNew a$, Pos, flag
+                                Loop While flag And MaybeIsSymbol3(a$, ",", Pos)
+                                If MaybeIsSymbol3(a$, "{", Pos) Then
+                                    aheadstatusSTRUCT a$, Pos
+                                ElseIf MaybeIsSymbol3lot(a$, b1234, Pos) Then
                                     level2 = level2 + 1
-                                    pos = pos + 1
+                                    Pos = Pos + 1
                                 End If
                             
                             Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                             End If
                             Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                             End If
                           
                         Else
                             If Len(what$) = 3 Or Len(what$) = len2 Then
                                 what$ = UCase(what$)
                                 If what$ = "END" Then
-                                v1 = pos - 3
-                                If FastSymbolAt(pos, a$, second2$, len2) Then
+                                v1 = Pos - 3
+                                If FastSymbolAt(Pos, a$, second2$, len2) Then
                                     If level2 = 0 Then flag = True: Exit Sub
                                     level2 = level2 - 1
                                  Else
-                                 aheadstatusSkipParam a$, pos
+                                 aheadstatusSkipParam a$, Pos
                                 End If
                                 ElseIf what$ = second2$ Then
-                                    pos = pos - 1
+                                    Pos = Pos - 1
                                     Do
-                                        pos = pos + 1
-                                        pos2 = pos
-                                        aheadstatusNew a$, pos, flag
-                                    Loop While flag And MaybeIsSymbol3(a$, ",", pos)
+                                        Pos = Pos + 1
+                                        pos2 = Pos
+                                        aheadstatusNew a$, Pos, flag
+                                    Loop While flag And MaybeIsSymbol3(a$, ",", Pos)
                                     
-                                    If MaybeIsSymbol3(a$, "{", pos) Then
-                                        aheadstatusSTRUCT a$, pos
-                                    ElseIf MaybeIsSymbol3lot(a$, b1234, pos) Then
+                                    If MaybeIsSymbol3(a$, "{", Pos) Then
+                                        aheadstatusSTRUCT a$, Pos
+                                    ElseIf MaybeIsSymbol3lot(a$, b1234, Pos) Then
                                         level2 = level2 + 1
-                                        pos = pos + 1
+                                        Pos = Pos + 1
                                     End If
                                 Else
-                                aheadstatusSkipParam a$, pos
+                                aheadstatusSkipParam a$, Pos
                                 End If
                             Else
-                            aheadstatusSkipParam a$, pos
+                            aheadstatusSkipParam a$, Pos
                             
                             End If
                             
@@ -32185,26 +32214,26 @@ again22:
                     
                     End If
                     what$ = vbNullString
-                            pos = pos + 1
+                            Pos = Pos + 1
                             Do
-                            pos2 = pos + 1
-                            Select Case Mid$(a$, pos, 1)
+                            pos2 = Pos + 1
+                            Select Case Mid$(a$, Pos, 1)
                             Case " ", Chr$(160), vbTab
-                                pos = pos + 1
+                                Pos = Pos + 1
                             End Select
-                            Loop Until pos2 > pos
-                            pos = pos - 1
+                            Loop Until pos2 > Pos
+                            Pos = Pos - 1
         Case "/"
-            If CM = 0 Or Mid$(a$, pos, 2) = "//" Then
+            If CM = 0 Or Mid$(a$, Pos, 2) = "//" Then
                GoTo skip1
             End If
         Case "'", "\"
 skip1:
             If Len(what$) > 0 Then what$ = vbNullString
         Do
-        pos = pos + 1
+        Pos = Pos + 1
         
-        Loop While pos < lenA And Not Mid$(a$, pos, 1) = vbLf
+        Loop While Pos < lenA And Not Mid$(a$, Pos, 1) = vbLf
         CM = 0
         Case ")", "}", Is < " "
         
@@ -32219,13 +32248,13 @@ skip1:
         End Select
         End If
 End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
   
 Loop
-pos = lenA + 2
+Pos = lenA + 2
 
 End Sub
 
@@ -53455,15 +53484,15 @@ PutMem4 VarPtr(a$), j
 PutMem4 VarPtr(b$), i
 End Sub
 
-Function FastPureLabel(b$, a$, Optional pos As Long = 1, Optional convert As Boolean, Optional retdot As Boolean, Optional countdot As Long, Optional trimit As Boolean = True, Optional gr As Boolean) As Long
+Function FastPureLabel(b$, a$, Optional Pos As Long = 1, Optional convert As Boolean, Optional retdot As Boolean, Optional countdot As Long, Optional trimit As Boolean = True, Optional gr As Boolean) As Long
 Dim i&, l As Long, one As Boolean, convat As Boolean, nospace As Boolean, pres As Long
 Dim p2 As Long, p1 As Integer, p4 As Long, counter As Long
     a$ = vbNullString
     countdot = 0
     gr = False
     l = Len(b$): If l = 0 Then Exit Function
-    If pos > l Then Exit Function
-    p2 = StrPtr(b$) + pos * 2 - 2: l = l - 1
+    If Pos > l Then Exit Function
+    p2 = StrPtr(b$) + Pos * 2 - 2: l = l - 1
     p4 = p2 + l * 2
     For i = p2 To p4 Step 2
     GetMem2 i, p1
@@ -53471,31 +53500,31 @@ Dim p2 As Long, p1 As Integer, p4 As Long, counter As Long
       Case 32, 160, 7, 9
         If nospace Then pres = 0: GoTo exithere
         If counter = 0 Then
-            pos = pos + 1
+            Pos = Pos + 1
         Else
             Exit Function
         End If
       Case Else
       Select Case p1
         Case 38
-            pos = pos + 1
+            Pos = Pos + 1
             FastPureLabel = 2
              GoTo exithere
         Case 46
             pres = 0
             countdot = countdot + 1
             If retdot Then counter = counter + 1
-            If Not retdot Then pos = pos + 1
+            If Not retdot Then Pos = Pos + 1
             nospace = True
 
         Case 64
             FastPureLabel = 0
             If retdot Then
-            pres = pos + 1
+            pres = Pos + 1
             counter = counter + 1
             Else
             If countdot > 0 Then pres = 1
-             pos = pos + 1
+             Pos = Pos + 1
             End If
             convat = True
             nospace = True
@@ -53510,7 +53539,7 @@ Dim p2 As Long, p1 As Integer, p4 As Long, counter As Long
         End Select
     End Select
     Next i
-    pos = Len(b$) + 1
+    Pos = Len(b$) + 1
     Exit Function
 TrimThis:
     'If pres = 0 Then
@@ -53518,7 +53547,7 @@ TrimThis:
         
         a$ = String$(countdot, ".")
     ElseIf pres = 1 Then
-        pos = pos - 1
+        Pos = Pos - 1
     End If
     GoTo exithere
 aName:
@@ -53594,63 +53623,63 @@ conthere:
     If convat Then
         If convert Then
             If gr Then
-                a$ = myUcase(Replace$(Mid$(b$, pos, counter), "@", "."), gr)
+                a$ = myUcase(Replace$(Mid$(b$, Pos, counter), "@", "."), gr)
             Else
-                a$ = UCase(Replace$(Mid$(b$, pos, counter), "@", "."))
+                a$ = UCase(Replace$(Mid$(b$, Pos, counter), "@", "."))
             End If
         Else
-            a$ = Replace$(Mid$(b$, pos, counter), "@", ".")
+            a$ = Replace$(Mid$(b$, Pos, counter), "@", ".")
         End If
     ElseIf convert Then
         If gr Then
-            a$ = myUcase(Mid$(b$, pos, counter), gr)
+            a$ = myUcase(Mid$(b$, Pos, counter), gr)
         Else
-            a$ = UCase(Mid$(b$, pos, counter))
+            a$ = UCase(Mid$(b$, Pos, counter))
         End If
     Else
-        a$ = Mid$(b$, pos, counter)
+        a$ = Mid$(b$, Pos, counter)
     End If
-    If retdot Then If pres > 0 Then Mid$(a$, pres - pos, 1) = "@"
+    If retdot Then If pres > 0 Then Mid$(a$, pres - Pos, 1) = "@"
     pres = 0
 exithere:
     If trimit Then
-        b$ = Mid$(b$, pos + counter)
+        b$ = Mid$(b$, Pos + counter)
         If pres > 0 Then Mid$(b$, 1, 1) = "."
-        pos = 1
+        Pos = 1
     Else
-        pos = pos + counter
+        Pos = Pos + counter
     End If
 End Function
-Public Sub aheadstatusANY(a$, pos As Long)
+Public Sub aheadstatusANY(a$, Pos As Long)
 Dim pos2 As Long
 If Len(a$) = 0 Then Exit Sub
 Dim v1 As Integer
-If pos = 0 Then pos = 1
-Do While pos <= Len(a$)
-    v1 = AscW(Mid$(a$, pos, 1))
+If Pos = 0 Then Pos = 1
+Do While Pos <= Len(a$)
+    v1 = AscW(Mid$(a$, Pos, 1))
     If Not (v1 > 0 And v1 < 32) Then
     If v1 = 34 Then
-        pos = pos + 1
-        Do While pos <= Len(a$)
-            v1 = AscW(Mid$(a$, pos, 1))
+        Pos = Pos + 1
+        Do While Pos <= Len(a$)
+            v1 = AscW(Mid$(a$, Pos, 1))
             If v1 = 34 Then Exit Do
             If v1 > 0 And v1 < 32 And Not v1 = 9 Then Exit Do
-            pos = pos + 1
+            Pos = Pos + 1
         Loop
     ElseIf v1 = 40 Then
 again22:
-      pos = pos + 1
-        If Not BlockParam2(a$, pos) Then Exit Do
-        If Mid$(a$, pos + 1, 1) = "#" Then
-            pos = pos + 1
+      Pos = Pos + 1
+        If Not BlockParam2(a$, Pos) Then Exit Do
+        If Mid$(a$, Pos + 1, 1) = "#" Then
+            Pos = Pos + 1
             GoTo conthere
-        ElseIf Mid$(a$, pos + 1, 1) = "(" Then
-            pos = pos + 1: GoTo again22
+        ElseIf Mid$(a$, Pos + 1, 1) = "(" Then
+            Pos = Pos + 1: GoTo again22
         End If
     ElseIf v1 = 123 Then
-        If pos <= Len(a$) Then
-            pos = blockLen2(a$, pos + 1)
-            If pos = 0 Then pos = Len(a$): Exit Do
+        If Pos <= Len(a$) Then
+            Pos = blockLen2(a$, Pos + 1)
+            If Pos = 0 Then Pos = Len(a$): Exit Do
         End If
     Else
         Select Case v1
@@ -53662,7 +53691,7 @@ again22:
     Else
         If v1 <> 8 And v1 <> 9 Then Exit Do
     End If
-        pos = pos + 1
+        Pos = Pos + 1
         
   
 conthere:
