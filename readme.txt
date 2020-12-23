@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 17 active-X
-Continue from revision 16, for the same bug, now handle all situations.
+Version 10 revision 18 active-X
+A bug removed which convert a logic type to string in some cases.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

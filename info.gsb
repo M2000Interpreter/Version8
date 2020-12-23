@@ -33589,7 +33589,7 @@ with json, "itempath" as json.path(), "itempath" as json.path$()
 
 Report json.format$(4)
 Print json$("description")
-Print json$("type")`
+Print json$("type")
 Print json.path$("properties.name.type")
 Print json.path$("properties|age|type", "|")  ' define different seperator
 Print json.path("properties.age.maximum")

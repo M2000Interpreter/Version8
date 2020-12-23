@@ -1196,11 +1196,11 @@ End If
 there1:
 
 End Property
-Friend Sub GetPorp(aprop As PropReference, curitem As Long)
+Friend Sub GetPorp(aProp As PropReference, curitem As Long)
 If Arr Then
-    Set aprop = actualdata(curitem)
+    Set aProp = actualdata(curitem)
 Else
-    Set aprop = GroupRef
+    Set aProp = GroupRef
 End If
 End Sub
 Public Property Get item(curitem As Long) As Variant
@@ -1614,7 +1614,8 @@ Function MyIsNumeric(v As Variant) As Boolean
 Dim n As Byte
 GetMem1 VarPtr(v), n
 If n < 2 Then Exit Function
-MyIsNumeric = n < 8 Or n = 14
+If n < 8 Then MyIsNumeric = True: Exit Function
+MyIsNumeric = (n = 11) Or (n = 17) Or (n = 14)
 End Function
 Function MyIsObject(v As Variant) As Boolean
 Dim n As Byte

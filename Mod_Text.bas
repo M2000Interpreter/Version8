@@ -91,7 +91,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 17
+Global Const Revision = 18
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -46432,12 +46432,14 @@ End Function
 Function MyIsNumericPointer(v As Variant) As Boolean
 Dim n As Byte
 GetMem1 VarPtr(v), n
-MyIsNumericPointer = (n < 8) Or (n = 11) Or (n = 17) Or (n = 14)
+If n < 8 Then MyIsNumericPointer = True: Exit Function
+MyIsNumericPointer = (n = 11) Or (n = 17) Or (n = 14)
 End Function
 Function MyIsNumeric(v As Variant) As Boolean
 Dim n As Byte
 GetMem1 VarPtr(v), n
-MyIsNumeric = (n < 8) Or (n = 11) Or (n = 17) Or (n = 14)
+If n < 8 Then MyIsNumeric = True: Exit Function
+MyIsNumeric = (n = 11) Or (n = 17) Or (n = 14)
 End Function
 Function MyIsObject(v As Variant) As Boolean
 Dim n As Byte
