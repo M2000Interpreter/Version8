@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 18 active-X
-A bug removed which convert a logic type to string in some cases.
+Version 10 revision 19 active-X
+An Overflow error happen at the refresh control system - after 24.85 days. This normally never happen, if we start/stop computer each day. But for some unkown reason today Windows 10 start like they have 621 hours of continue running time. So I fix the M2000 Environment, but the problem exist for Windows 10.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

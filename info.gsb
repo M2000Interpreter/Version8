@@ -5423,7 +5423,7 @@ Pen 0 {
 	Print
 	Normal
 	italic
-	Report " A collection of modules for tests version 29 for M2000 Interpreter version 10, revision 16 and above"
+	Report " A collection of modules for tests version 30 for M2000 Interpreter version 10, revision 19 and above"
 	italic
 	Pen 5{
 		cursor 0, row-1
@@ -5453,13 +5453,12 @@ Report {
 Pen 11 {List}
 title("Stack")
 Report {
-	You can see the stack of values, If has any value
-	Use statement Flush to empty the stack
+	You can see the stack of values, If has any value. 	Use statement Flush to empty the stack
 	}
 Pen 11 {Stack}
 title("Useful Statements")
 Report {
-	Help All, Help Print, Help  |	Monitor  (to see switches), shitches  (some staments can be used from a module using the Set statement)
+	Help All, Help Print, Help  |   Monitor  (to see switches), shitches  (some staments can be used from a module using the Set statement)
 	(Set Monitor - because Monitor is known to Console Interpreter)
 	Edit info  (press esc to exit editor) | Edit "disk_file.gsb"  (to edit from disk - saved at exit)
 	Edit  (no argument) open command editor (we pick in console line using up/down arrows)

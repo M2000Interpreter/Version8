@@ -91,7 +91,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 18
+Global Const Revision = 19
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -106,8 +106,8 @@ Public TaskMain As Boolean
 ' Directory separator character
 Public HelpStack As New basetask ' from 6.5.1
 
-Public REFRESHRATE As Double
-Public RRCOUNTER As Double
+Public REFRESHRATE As Currency
+Public RRCOUNTER As Currency
 Public BLOCKkey As Boolean
 Public Const novalidstr = "+-/*!?_()[]&$#@;" & """"
 
@@ -15228,7 +15228,7 @@ Dim pppp As mArray, bb$, ec$, i As Long, jump As Boolean, slct As Long, sp As Va
 'If linebyline Then
 If loopthis Or linebyline And Not noblock Then IFCTRL = bstack.IFCTRL: jump = bstack.jump
 Dim w$, LLL As Long, sss As Long, v As Long, p As Variant, ss$, lbl As Boolean, st As Variant, bs As basetask
-Dim y As Double, sX As Double, VarStat As Boolean, NewStat As Boolean
+Dim sX, VarStat As Boolean, NewStat As Boolean
 Dim x1 As Long, y1 As Long, x2 As Long, y2 As Long, SBB$, nd&, Lang As Long, kolpo As Boolean, iscom As Boolean
 Dim temphere$, one As Boolean
 
@@ -15700,7 +15700,7 @@ ContScan:
                         NoAction = False
                         nomore = True
                         If IsExp(bstack, b$, p, , True) Then
-                        y = Timer + p
+                        sX = Timer + p
                         x1 = Form1.lockme
                         If x1 Then UnHook Form1.hWnd
                             Form1.lockme = False
@@ -15717,7 +15717,7 @@ ContScan:
                                         Exit Do
                                     End If
                                 End If
-                            Loop Until NoAction Or Timer > y Or myexit(bstack) Or bstack.IamThread
+                            Loop Until NoAction Or Timer > sX Or myexit(bstack) Or bstack.IamThread
                             Form1.lockme = x1
                             If x1 And GetForegroundWindow = Form1.hWnd Then Form1.hookme Form1.TEXT1.glistN
                         Else

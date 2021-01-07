@@ -59,8 +59,8 @@ Public Enum Ftypes
 End Enum
 Public FLEN(512) As Long, FKIND(512) As Ftypes
 Public Type Counters
-    k1 As Long
-    RRCOUNTER As Long
+    k1 As Currency
+    RRCOUNTER As Currency
 End Type
 Public Type basket
     used As Long
