@@ -91,7 +91,7 @@ Public TestShowBypass As Boolean
 Public feedback$, FeedbackExec$, feednow$ ' for about$
 Global Const VerMajor = 10
 Global Const VerMinor = 0
-Global Const Revision = 19
+Global Const Revision = 20
 Private Const doc = "Document"
 Public UserCodePage As Long, DefCodePage As Long
 Public cLine As String  ' it was public in form1
@@ -12227,7 +12227,7 @@ fstr15: ' "INPUT$(", "еисацыцг$("
      Exit Function
 fstr16: '"MEMBER.TYPE$(", "лекоус.тупос$("
      If Abs(IsLabel(bstackstr, a$, s$)) = 1 Then
-            If GetVar(bstackstr, s$, w1) Then
+            If getvar2(bstackstr, s$, w1) Then
                 If Typename(var(w1)) = mgroup Then
                 If FastSymbol(a$, ",") Then
                 If IsExp(bstackstr, a$, p, , True) Then
@@ -49340,7 +49340,7 @@ Private Function IsGroupCount(bstack As basetask, a$, R As Variant, SG As Varian
 Dim s$, w2 As Long, pppp As mArray
 Select Case Abs(IsLabelBig(bstack, a$, s$))
 Case 1
-    If GetVar(bstack, s$, w2) Then
+    If getvar2(bstack, s$, w2) Then
         If Typename(var(w2)) = mgroup Then
             If var(w2).IamApointer Then
             
@@ -49363,6 +49363,11 @@ Case 5
     If pppp.Arr Then
         If pppp.ItemType(w2) = mgroup Then
             R = 0
+            If pppp.item(w2).IamApointer Then
+            Else
+                R = pppp.item(w2).PrepareSoros(var(), "").Total
+                If SG < 0 Then R = -R
+            End If
         Else
             MissingGroup
             Exit Function

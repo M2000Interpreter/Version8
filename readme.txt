@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 19 active-X
-An Overflow error happen at the refresh control system - after 24.85 days. This normally never happen, if we start/stop computer each day. But for some unkown reason today Windows 10 start like they have 621 hours of continue running time. So I fix the M2000 Environment, but the problem exist for Windows 10.
+Version 10 revision 20 active-X
+Errors removed from Group.Count() and Member.Type$().
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com
