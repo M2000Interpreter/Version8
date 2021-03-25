@@ -1,7 +1,7 @@
 M2000 Interpreter and Environment
 
-Version 10 revision 20 active-X
-Errors removed from Group.Count() and Member.Type$().
+Version 10 revision 21 active-X
+A fix for file dialog, for [ or ] characters in filenames.
 
 George Karras, Kallithea Attikis, Greece.
 fotodigitallab@gmail.com

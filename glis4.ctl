@@ -228,7 +228,7 @@ Event PureListOff()
 Event HaveMark(Yes As Boolean)
 Event GroupUndo()
 Event MarkCut(ThatData As String)
-Event Markin()
+Event markin()
 Event MarkOut()
 Event MarkDestroyAny()
 Event MarkDestroy()
@@ -1851,7 +1851,7 @@ ElseIf dr Then
        
                 ElseIf MarkNext = 0 Then
                 MarkNext = 1
-                RaiseEvent Markin
+                RaiseEvent markin
                 End If
      End If
 If (SELECTEDITEM <> (topitem + YYT + 1)) And SELECTEDITEM >= 0 And Button <> 0 Then secreset = False
@@ -1942,7 +1942,7 @@ If (cX > Scalewidth / 4 And cX < Scalewidth * 3 / 4) And scrollme = 0 Then x = l
  If MultiLineEditBox And (Button = 1) Then
                 If shift = 1 And MarkNext = 0 Then
                 MarkNext = 1
-                RaiseEvent Markin
+                RaiseEvent markin
                 ElseIf shift = 1 And MarkNext = 1 Then
                 
                 RaiseEvent MarkOut
@@ -1978,7 +1978,7 @@ If (cX > Scalewidth / 4 And cX < Scalewidth * 3 / 4) And scrollme = 0 Then x = l
               If MultiLineEditBox And (Button = 1) Then
                   If shift = 1 And MarkNext = 0 Then
                       MarkNext = 1
-                      RaiseEvent Markin
+                      RaiseEvent markin
                             ElseIf shift = 1 And MarkNext = 1 Then
                                 RaiseEvent MarkOut
                 End If
@@ -2775,10 +2775,15 @@ End If
 End Property
 Public Sub moveto(ByVal Key As String)
 Dim i As Long
+Key = Replace(Key, "]", "?")
+Key = Replace(Key, "[", "[[]")
+Key = Replace(Key, "?", "[]]")
 RaiseEvent PureListOn
+On Error GoTo 123
 For i = 0 To listcount - 1
 If list(i) Like Key Then Exit For
 Next i
+123
 RaiseEvent PureListOff
 If i < listcount Then
 ListIndex = i
@@ -2806,13 +2811,18 @@ End Function
 Public Function Find(ByVal Key As String) As Long
 Dim i As Long, skipme As Boolean
 i = -1
+Key = Replace(Key, "]", "?")
+Key = Replace(Key, "[", "[[]")
+Key = Replace(Key, "?", "[]]")
 RaiseEvent Find(Key, i, skipme)
 If skipme Then Find = i: Exit Function
 Find = -1
 RaiseEvent PureListOn
+On Error GoTo 123
 For i = 0 To listcount - 1
 If list(i) Like Key Then Exit For
 Next i
+123
 RaiseEvent PureListOff
 If i < listcount Then
 Find = i
@@ -4597,7 +4607,7 @@ Public Property Get HeightPixels() As Long
 HeightPixels = UserControl.Height / scrTwips
 End Property
 Public Sub REALCUR(where As Long, ByVal probeX As Single, realpos As Long, usedCharLength As Long)
-Dim n As Long, st As Long, st1 As Long, st0 As Long, W As Integer, mark1 As Long, mark2 As Long
+Dim n As Long, st As Long, st1 As Long, st0 As Long, w As Integer, mark1 As Long, mark2 As Long
 Dim Pad$, addlength As Long, s$
 s$ = list(where)
 RaiseEvent RealCurReplace(s$)
@@ -4643,8 +4653,8 @@ st1 = st + 1
 st0 = 1
 While st > st0 + 1
 st1 = (st + st0) \ 2
-W = AscW(Mid$(s$, 1, st1))
-If W > -10241 And W < -9984 Then
+w = AscW(Mid$(s$, 1, st1))
+If w > -10241 And w < -9984 Then
 If probeX >= UserControlTextWidth2(s$, st1 + 2) Then
 st0 = st1
 Else
@@ -4682,13 +4692,13 @@ realpos = UserControlTextWidth2(s$, st1)
 RaiseEvent rtl(UserControl.Hdc, where, st1, mark1, mark2, addlength)
 
 Else
-W = UserControlTextWidth2(s$, mark2)
+w = UserControlTextWidth2(s$, mark2)
 Pad$ = Mid$(s$, mark1, mark2 - mark1 + 1)
 n = Len(Pad$)
 st1 = 0
 Do
 st1 = st1 + 1
-realpos = W - UserControlTextWidth2(Pad$, st1 + 1)
+realpos = w - UserControlTextWidth2(Pad$, st1 + 1)
 
 Loop While realpos >= probeX And st1 < n
 While st1 > 1 And st1 < mark2 And UserControlTextWidth2(Pad$, st1 + 1) - UserControlTextWidth2(Pad$, st1 + 2) > 0
@@ -5167,13 +5177,13 @@ If (Epos - Pos - 1) > 0 Then
     MarkNext = 0
     If (oldselstart - Pos - 1) > (Epos - oldselstart) Then
         SelStart = Pos + 1
-        RaiseEvent Markin
+        RaiseEvent markin
         MarkNext = 1
         SelStart = Epos
         RaiseEvent MarkOut
     Else
         SelStart = Epos
-        RaiseEvent Markin
+        RaiseEvent markin
         SelStart = Pos + 1
         MarkNext = 1
         RaiseEvent MarkOut
@@ -5190,7 +5200,7 @@ End Sub
 Public Sub MarkUp()
 MarkNext = 0
 RaiseEvent selected(ListIndex + 1)
-RaiseEvent Markin
+RaiseEvent markin
 MarkNext = 1
 SelStart = 1
 ListindexPrivateUse = 0
@@ -5202,7 +5212,7 @@ End Sub
 Public Sub MarkDown()
 MarkNext = 0
 RaiseEvent selected(ListIndex + 1)
-RaiseEvent Markin
+RaiseEvent markin
 MarkNext = 1
 ListindexPrivateUse = listcount - 1
 SelStart = Len(list(ListIndex)) + 1
@@ -5215,7 +5225,7 @@ MarkNext = 0
 ListindexPrivateUse = 0
 SelStart = 1
 RaiseEvent selected(ListIndex + 1)
-RaiseEvent Markin
+RaiseEvent markin
 MarkNext = 1
 ListindexPrivateUse = listcount - 1
 SelStart = Len(list(ListIndex)) + 1
